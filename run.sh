@@ -1,0 +1,1 @@
+for f in twiml-episodes/*.mp3 ; do whisper --language en --model base -o out -- $f; done

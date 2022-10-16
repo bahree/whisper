@@ -1,0 +1,1244 @@
+WEBVTT
+
+00:00.000 --> 00:10.880
+All right, everyone. Welcome to another episode of the Twomool AI podcast. I'm your host,
+
+00:10.880 --> 00:17.760
+Sam Charington. And today I am joined by Malika Paven, a research scientist at the Institute
+
+00:17.760 --> 00:24.800
+of Neuroinformatics at University of Zurich and ETH Zurich. Before we get into today's
+
+00:24.800 --> 00:29.080
+conversation, be sure to take a moment to head over to Apple Podcasts or your listening
+
+00:29.080 --> 00:35.320
+platform of choice. And if you enjoy the show, please leave us a five-star rating and review.
+
+00:35.320 --> 00:40.280
+Malika, welcome to the show. Thank you for having me here, Sam. It's a pleasure.
+
+00:40.280 --> 00:45.960
+It's my pleasure. And I'm really looking forward to digging into our conversation. We will be talking
+
+00:45.960 --> 00:53.400
+about your research, of course, and your keynote talk at Partware Aware, efficient training
+
+00:53.400 --> 00:59.000
+workshop at ICML this year. But before we dig into that, I'd love to have you share a little bit
+
+00:59.000 --> 01:05.880
+about your background and how you came to work in kind of this intersection of neuroinformatics
+
+01:05.880 --> 01:12.920
+and machine learning. Okay, thanks a lot. So hello, everyone. It's a pleasure to be here. So my
+
+01:12.920 --> 01:19.800
+background is electrical engineering. I did my PhD at the University of California in Santa Barbara.
+
+01:19.800 --> 01:26.520
+And during my PhD, I was basically focused on designing analog mixed-techno circuits.
+
+01:27.560 --> 01:36.280
+So I was basically a VLSI GIP designer. And I was interfacing silicon technology with novel
+
+01:36.280 --> 01:43.480
+emerging memory technologies. So these memory technologies are based on resistive switching.
+
+01:43.480 --> 01:51.560
+So how they work is that you can imagine you have a resistor that has a memory. And by applying
+
+01:51.560 --> 01:58.920
+an electric pulse to it, you change the state of the resistor in a non-lawful manner.
+
+01:59.560 --> 02:04.040
+But the cool thing about them is that they are very small, so they're a nanoscale,
+
+02:04.040 --> 02:09.560
+and they can be integrated in a third dimension on top of the silicon technology.
+
+02:09.560 --> 02:19.480
+And as it turns out, these can bring like significant advantage to AI accelerators and AI hardware.
+
+02:20.280 --> 02:29.880
+Because as you can imagine, the key component of an AI hardware is memory. So you need a lot of
+
+02:29.880 --> 02:37.160
+memory to store a lot of weights perimeters. And you also need to read from this memory. And actually
+
+02:37.160 --> 02:47.000
+most of the power in current hardware for training and inference goes into reading the memory.
+
+02:47.000 --> 02:54.360
+So current hardware has what is called the fun-knowement architecture. So all the CPUs and GPUs
+
+02:54.360 --> 03:00.920
+where the memory and the processing units are separated. So you would have to go fetch data
+
+03:00.920 --> 03:07.640
+from memory, come back to the processor, and do this all the time. And most of the energy actually
+
+03:07.640 --> 03:15.480
+goes into this shuttling of information between processing and memory units. So the idea is that
+
+03:15.480 --> 03:21.400
+you, we need to bring this memory and the processing units closer together. And these kind of memory
+
+03:21.400 --> 03:29.400
+technologies actually solve these two problems. So one is that they are small, so you can get a lot
+
+03:29.400 --> 03:35.000
+of memory, you can get a lot of density, memory density in a small area in the third dimension.
+
+03:36.440 --> 03:43.160
+And they also, they have a physical property that they can do computation inside the memory.
+
+03:43.720 --> 03:50.920
+So if you imagine, if you have a resistor and you map the weight of your neural network as a
+
+03:50.920 --> 03:57.400
+conductance to this resistor and you apply a voltage as an input, then through own law,
+
+03:57.400 --> 04:04.520
+you get the multiplication, right? So you get V times G, which is a multiplication. And if you
+
+04:04.520 --> 04:11.320
+have a bunch of them in parallel, then through Kirchhoff's law, you sum these current and you get
+
+04:12.040 --> 04:17.880
+a sum of the product of the input to the weight. Basically, you get this multiply and accumulate
+
+04:17.880 --> 04:26.600
+operation or MAC, which is the key or the essential computation in all of these neural networks.
+
+04:27.240 --> 04:34.840
+So basically, they bring the computation closer to the substrate, right? It's closer to the physics.
+
+04:35.480 --> 04:43.960
+And this, interestingly, is basically what the idea of neuromorphic engineering field is. So
+
+04:43.960 --> 04:52.600
+neuromorphic engineering is the field that is trying to understand how computation can rise from
+
+04:53.720 --> 04:59.640
+underlying substrate by getting more inspiration from how brain does this very exact thing, right?
+
+04:59.640 --> 05:07.480
+So in the brain, you don't have an operating system. The physics or the brain itself is the algorithm,
+
+05:07.480 --> 05:14.840
+is what is running the computation. And the institute where I currently am is one of the leading
+
+05:14.840 --> 05:22.280
+institutes in this field. And then after my PhD, I basically moved here. And my research has,
+
+05:22.280 --> 05:29.400
+therefore, been in the intersection of understanding neuroscience as basically an inspiration.
+
+05:30.280 --> 05:36.360
+And understanding machine learning as a guiding principle that kind of grounds this inspiration
+
+05:36.360 --> 05:43.480
+into math and something that we know would work. And bringing it more to circuits and physics to
+
+05:43.480 --> 05:52.600
+implement more efficient AI systems. And these kind of, let's say, neuromorphic technologies is
+
+05:52.600 --> 06:00.440
+what we call them. Have the potential to solve some of the current problems that we are seeing
+
+06:00.440 --> 06:08.760
+in AI, for example, that there is an exponential rise in the amount of data and in the amount of
+
+06:08.760 --> 06:19.800
+power that is required to process this data. And also basically that, you know, since increasingly
+
+06:19.800 --> 06:27.480
+AI is becoming part of our daily lives, privacy is becoming an issue adaptation of these devices to
+
+06:27.480 --> 06:36.360
+every, to a personalized user is becoming an issue. And therefore, we are working on, you know,
+
+06:36.360 --> 06:46.120
+online learning, which is the topic of my talk at ICML. Nice, nice. And your talk is called
+
+06:46.120 --> 06:52.200
+brain-inspired hardware and algorithm code design for low power online training at the edge,
+
+06:52.200 --> 06:59.240
+on the edge. Exactly. And thinking about the kind of memoryster technology that you're
+
+07:00.280 --> 07:08.360
+discussing, what makes that brain-inspired? Or is there some evidence that the brain has some
+
+07:08.360 --> 07:13.960
+similar type of architectures? I hope that's the right word for it. Right, right.
+
+07:13.960 --> 07:19.880
+Lecturers, I guess. Yeah, so I mean, it's kind of independent, but also related. So memory,
+
+07:19.880 --> 07:27.160
+it's a, remember, there's a memory technology. So it's in, in a way, it's very independent
+
+07:27.160 --> 07:32.200
+from the brain. But what it is interesting about it or what it makes it similar to the brain is,
+
+07:33.480 --> 07:39.000
+is two things. One is that in the brain, and like I said, the memory and the processor are
+
+07:39.000 --> 07:45.240
+co-located. So a neuron is really sitting next to its synapses, right? You have a soma,
+
+07:45.240 --> 07:50.520
+and then you have these dendrites and dendrites are taking the information, and these two are really
+
+07:50.520 --> 07:58.600
+co-located. They're not separated. And these members of devices are enabling these co-location,
+
+07:58.600 --> 08:06.440
+right? By being very small and being able to basically sit, let's say, on top of a silicon neuron.
+
+08:07.000 --> 08:12.600
+So basically, if you make a silicon neuron and you make the synapses with these members of
+
+08:12.600 --> 08:19.240
+devices, they are really co-located. Another thing is that a membership device, really kind of,
+
+08:19.960 --> 08:28.280
+I guess, in an abstraction level, works like a synapse. So a synapse, basically, you can think
+
+08:28.280 --> 08:35.880
+of it as a really like a conduct, like a conductance, right? So if the weight increases
+
+08:35.880 --> 08:43.160
+of a synapse, it is as if the path resistance goes down. So you can kind of model that,
+
+08:43.160 --> 08:52.520
+like a resistor that has memory that can change. And interestingly, the brain basically sends
+
+08:52.520 --> 08:57.880
+out information with what is called as action potentials or spikes, right? There are these short
+
+08:57.880 --> 09:08.040
+electrical pulses that the neurons receive, they integrate, and then once that integration passes
+
+09:08.040 --> 09:13.880
+a certain threshold, it sends out another spike. So that's basically the information processing
+
+09:13.880 --> 09:24.920
+pipeline in the brain. And a membership device basically could act like the conductance or
+
+09:24.920 --> 09:30.600
+or exactly like the synapse. And the way that we read and write from these devices are actually
+
+09:30.600 --> 09:39.160
+also through pulses. So in that way, they are very similar. Got it. Got it. And you mentioned online
+
+09:39.160 --> 09:46.280
+learning. Where does online learning come into the picture? So online learning come into the
+
+09:46.280 --> 09:55.000
+picture in a way that so basically this membership device can change its state, right? And because it
+
+09:55.000 --> 10:01.800
+can change its state, it's good for online learning because what we can do is that we can,
+
+10:02.520 --> 10:09.080
+when we talk about the edge, right? So we're talking about being at the close to the sensors.
+
+10:09.080 --> 10:15.960
+So these sensors are streaming information. Based on this sensory information that is arriving,
+
+10:15.960 --> 10:22.200
+we can adapt our system to these input. And to adapt this system, we have to change these
+
+10:22.200 --> 10:29.320
+resistances. And this device is capable of changing its resistance through pulsing in a non-violet
+
+10:29.320 --> 10:37.960
+highway. And that is why it kind of enables this online adaptation. You've referred to the device.
+
+10:37.960 --> 10:47.880
+Do you have devices in? Have you created examples? And what kinds of applications do you,
+
+10:47.880 --> 10:53.160
+like what's the application setting that you are thinking about when you're creating this?
+
+10:53.160 --> 11:02.120
+So the devices I don't create, I'm actually collaborating with a lab in France, it's called
+
+11:02.120 --> 11:11.080
+SEALETI. So they kind of have these devices in almost as an industrial setting. So they have a CMOS
+
+11:11.880 --> 11:18.520
+or a silicon foundry. And then between, so in the CMOS foundry, you kind of
+
+11:19.720 --> 11:27.240
+integrate a layer by layer, these layers that are required for creating a transistor and then
+
+11:27.240 --> 11:32.360
+putting metal layers on top to connect the other transistors. And between the fourth and the
+
+11:32.360 --> 11:37.800
+fifth metal layer, they integrate these membership devices. So I collaborate with them.
+
+11:38.760 --> 11:44.760
+And then we basically build circuits and architectures based on the data that we receive from them,
+
+11:45.880 --> 11:52.200
+the third characteristic of the device. We design circuits that can interface with these
+
+11:52.200 --> 12:01.480
+memory devices that can implement a brain-inspired algorithm. Now the applications that we're targeting
+
+12:01.480 --> 12:11.240
+are more in the real mode, let's say, biomedical signal processing for personalized medicine
+
+12:11.240 --> 12:17.400
+applications. For example, it matches really well for online learning because every patient is
+
+12:17.400 --> 12:28.200
+different. For example, if you want to monitor someone's heartbeat or muscle activity or
+
+12:29.240 --> 12:38.680
+brain activity or whatever it is, it is much better to adapt that device that you have, the
+
+12:38.680 --> 12:46.360
+wearable device that you have to each patient based on exactly the biomedical signal that each
+
+12:46.360 --> 12:53.320
+patient has. So biomedical signal processing, for example, for wearable devices is one big
+
+12:53.320 --> 13:01.640
+application. The other applications are any application scenario that requires always on
+
+13:02.600 --> 13:09.000
+monitoring, right? So also in an industrial application, people are thinking about, for example,
+
+13:09.000 --> 13:19.480
+monitoring engines. So anything that requires always on battery-operated monitoring of
+
+13:20.280 --> 13:25.800
+of real-world signals. They could also be, you know, temperature sensing, pressure sensing,
+
+13:28.040 --> 13:33.080
+has a lot of people are working on keywords for example, you know, for
+
+13:33.080 --> 13:43.960
+Alexa or Siri or any smart homes, right? So whatever you have, these devices have to be always
+
+13:43.960 --> 13:53.960
+on operating, waiting for you to give them a command. So that would, if this kind of monitoring
+
+13:53.960 --> 14:00.760
+has to continuously be on, it has to be very power efficient because then otherwise it's
+
+14:00.760 --> 14:07.800
+continuously joining your battery. Can you talk a little bit about the challenges of adapting
+
+14:07.800 --> 14:14.360
+online learning style algorithms to this hardware? Right. So online learning is a really difficult
+
+14:14.360 --> 14:22.200
+problem actually because, because you can imagine, so you don't have, so you don't have like stored
+
+14:22.200 --> 14:27.240
+data. It's not like you can, you know, normally when you want to go and train a neural network,
+
+14:27.240 --> 14:32.040
+you would just have a, you know, you just download this data set and just run it through your
+
+14:32.040 --> 14:37.160
+network. You don't have that, like your data is just, it's what it's called like batch size one,
+
+14:37.160 --> 14:44.040
+right? So it's just streaming as you go. This, for example, has the problem that you don't have
+
+14:44.040 --> 14:54.040
+access to the past and you don't have access to the future. So your algorithm has to be able to
+
+14:54.040 --> 15:00.920
+cope with temporal locality. So information has to be locally available in time. So that's, let's
+
+15:00.920 --> 15:07.400
+say, one challenge. And the other challenge is that, you know, for example, back propagation,
+
+15:07.400 --> 15:12.440
+back propagation, which is basically a workhorse of all training online networks.
+
+15:13.640 --> 15:19.720
+It requires information when you want to back propagate this area. It requires information from
+
+15:19.720 --> 15:27.320
+all the synapses. And if you want to build that in hardware, you're going to blow up this entire
+
+15:27.320 --> 15:33.480
+system with wires because you would have to, to update one synapse or one weight, you would have
+
+15:33.480 --> 15:39.880
+to take information from all the other synapses and kind of bringing it to this one synapse.
+
+15:39.880 --> 15:45.560
+Right. And basically connected problem. Exactly. So basically your whole architecture kind of
+
+15:45.560 --> 15:53.400
+blows up with with with wires. So this information has to be spatially locally available. So temporal
+
+15:53.400 --> 15:59.320
+locality because you don't have access to the past and future and spatial locality because
+
+15:59.320 --> 16:04.360
+information of the update of the synapse or weight has to be locally available to the synapse.
+
+16:04.360 --> 16:10.120
+So this is the second problem. The third problem is that also, you know, when you train your
+
+16:10.120 --> 16:17.000
+neural networks, you know, you have a luxury of using 32-bit, bit-float-to-point memory,
+
+16:17.000 --> 16:22.120
+right? Like on GPU, you can just use, you know, any variable with anything you want. But if you
+
+16:22.120 --> 16:28.440
+want to have that on a hardware that is small, you can't just put a lot of memory there, right? Like
+
+16:28.440 --> 16:35.000
+you want to reduce the precision of your memory because your device is tiny and has to kind of
+
+16:35.000 --> 16:40.760
+sit next to your sensor. So you cannot have a big device. And because of that, then you have
+
+16:40.760 --> 16:47.800
+low-bit precision. So your memory or the weight basically has a lower bit, has, like I say,
+
+16:47.800 --> 16:56.200
+four bits or it has eight bits. Therefore, your learning rate is high, right? So because every time
+
+16:56.200 --> 17:04.200
+you want to make a jump, your jump would be, you know, so you let's say if you have four levels,
+
+17:04.200 --> 17:11.480
+you have four bits, you have 16 levels. So every time you make a jump, you have your jumping
+
+17:11.480 --> 17:19.880
+once 16 of your entire memory range or your weight chain. So that's another difficulty, right?
+
+17:21.240 --> 17:28.120
+And another thing is that, so let's say you calculate your gradient and your gradient has to
+
+17:28.120 --> 17:34.680
+whatever it is, let's say, with whatever bit precision you do, you have to kind of map that into
+
+17:34.680 --> 17:41.560
+your low-bit precision memory. So that also becomes another problem. And in the talk, I'm kind of
+
+17:41.560 --> 17:50.760
+trying to say some of the potential solutions that we have worked on to tackle these three problems
+
+17:50.760 --> 18:01.160
+that I have just told you about. Okay. Before we jump into those solutions, just to clarify,
+
+18:02.200 --> 18:11.640
+the architecture that you're working with here, it's fully neuromorphic. It's not like you have
+
+18:11.640 --> 18:17.480
+this kind of memory bank that is you're swapping out the memory bank in a conventional
+
+18:17.480 --> 18:22.840
+von Neumann architecture with, you know, these fancy memoirsters. You're trying to do all your
+
+18:22.840 --> 18:33.240
+computations in this hardware. Exactly. So basically, we are, so the idea is that
+
+18:34.440 --> 18:40.440
+you're kind of replacing the hardware with an end-to-end neuromorphic hardware.
+
+18:40.440 --> 18:47.880
+It doesn't mean that, you know, it would completely replace the current hardware because the current
+
+18:47.880 --> 18:53.400
+hardware, of course, is great for offline learning. So basically, you know, whatever you have in
+
+18:53.400 --> 19:01.400
+the cloud is going to be a lot more powerful than what you have close to the sensor. So you
+
+19:01.400 --> 19:08.280
+can basically have a very power efficient, very low power edge device that is doing this always
+
+19:08.280 --> 19:15.960
+on monitoring. And when, let's say, it detects something that requires the more powerful processing,
+
+19:15.960 --> 19:22.280
+then it can maybe send a trigger to a more powerful machine, computing machine, that is,
+
+19:22.280 --> 19:27.800
+that is in the cloud, let's say. I guess I'm kind of struggling to think through,
+
+19:28.440 --> 19:33.160
+I guess I'm thinking of like a bootstrapping type of problem, you know, on this hardware like,
+
+19:33.160 --> 19:37.640
+you've got this hardware, you don't have any operating system, you don't have any like higher level
+
+19:37.640 --> 19:42.600
+things or lower level things. Like, how do you even start to work with it? Is it, you know,
+
+19:42.600 --> 19:47.480
+is it that you're interfacing with, you know, systems that you know how to control on the edges,
+
+19:47.480 --> 19:55.400
+and that's how you program it? So it's an end-to-end system. It's a very good question. It is
+
+19:55.400 --> 20:01.560
+difficult, it's actually not a solved problem. But basically, the idea is that it's an end-to-end system.
+
+20:01.560 --> 20:08.280
+So it goes from sensor to processor and to an actuator, or to something that gives you an output.
+
+20:08.280 --> 20:15.640
+Let's say, you know, I want to see, so I'm giving my input, is my heartbeat. I give it to this
+
+20:15.640 --> 20:20.840
+processor, which is this normalific processor, and then it kind of raises the flag and says,
+
+20:20.840 --> 20:26.600
+hey, you're going to have a heart attack, or, you know, or I detect that the keyword, or
+
+20:26.600 --> 20:34.520
+or your engine is about to blow up or something like that. So basically, it kind of, it's an
+
+20:34.520 --> 20:39.560
+end-to-end system. And so the control that you're exerting to get this thing to do what you want
+
+20:39.560 --> 20:46.120
+it to do is basically you're modulating the parameters of these members, or basically this network
+
+20:46.120 --> 20:52.520
+that's on the thing. Exactly. So your network basically sitting on the hardware. So your parameters
+
+20:52.520 --> 20:58.360
+of your neural network is basically sitting at the conductance of these devices physically.
+
+20:58.360 --> 21:05.000
+So you just map, you have to map your weights into the conductance, and you just give inputs,
+
+21:05.000 --> 21:11.160
+and then, yeah, so your network is basically your hardware.
+
+21:11.800 --> 21:18.120
+And so kind of jumping into this spatial locality challenge, how do you start to address that?
+
+21:18.120 --> 21:27.000
+Right. So basically, like I said, you have to have rate updates that are
+
+21:28.440 --> 21:36.760
+that are local to the synapse. So if you write down, if you write down gradient descent,
+
+21:36.760 --> 21:44.520
+so the derivative of the cost function with respect to the weights, you can basically write it down
+
+21:44.520 --> 21:54.120
+as the multiplication of three factors. So one becomes, let's say, the derivative of the cost
+
+21:54.120 --> 22:01.320
+function with respect to your error, with respect to your output, the derivative of your output
+
+22:01.320 --> 22:10.760
+with respect to hidden state, which is basically directly proportional to your weight.
+
+22:10.760 --> 22:16.680
+And then the derivative of that hidden state with respect to your, to your, to your weights.
+
+22:17.240 --> 22:25.480
+And this actually basically becomes an activity of your pre-synaptic neuron.
+
+22:26.600 --> 22:32.920
+So activity of your neuron, the previous layer, times the activity of the neuron in the,
+
+22:32.920 --> 22:39.640
+in the post synaptic neuron, so in the next layer, times an error.
+
+22:40.360 --> 22:48.600
+So basically, pre and the post are local because every synapse is sitting between a pre
+
+22:48.600 --> 22:54.520
+and a post synaptic neuron. So that is, that information is local to the synapse, times an error,
+
+22:55.320 --> 23:02.360
+which is, which can come globally. So basically, what you do is that you, you take the information
+
+23:02.360 --> 23:11.880
+it is local, and then you multiply it by a global signal that is, that, that, that is coming to you
+
+23:11.880 --> 23:16.280
+and you're, you're calculated, and then you calculate, you calculate the weight of the weight.
+
+23:17.160 --> 23:23.320
+And what, what we have done is that this actually was as a collaboration with
+
+23:23.320 --> 23:33.640
+the University of California in Irvine with, with Embranevgy and Muhammad Fudah. So we realized that we can encode the error into,
+
+23:34.920 --> 23:42.040
+into events. So basically, whenever the error is, let's say, hired in a certain threshold,
+
+23:42.680 --> 23:48.200
+we send an error event, and we say, now we have to update because the error,
+
+23:48.200 --> 23:53.080
+there's, there's, there's an error that is hired in certain threshold. And based on the information,
+
+23:54.120 --> 24:01.400
+of pre and the post, then we have a local update information to, to update the synapse. So that was,
+
+24:02.200 --> 24:09.560
+let's say, one way of going around this spatial locality. Otherwise, that people have tried,
+
+24:10.600 --> 24:17.960
+is, is basically that at each layer. So, so let's say you have, you have a deep network.
+
+24:17.960 --> 24:26.120
+So at each layer, you employ these kind of local classifiers. And these local classifiers at each
+
+24:26.120 --> 24:31.640
+layer are telling you what the output should be. And then based on that, then you calculate the error
+
+24:31.640 --> 24:38.200
+for that, for that layer. And that kind of generates the error for that layer for you in a local manner.
+
+24:38.200 --> 24:45.080
+Is one of the implications of the approaches you're describing, that this kind of neuromarfic
+
+24:45.080 --> 24:51.800
+computation is happening asynchronously across the compute layers, more like a distributed system,
+
+24:51.800 --> 24:58.040
+then you're just kind of rolling an error backwards across a, exactly. So I'm actually one of the,
+
+24:58.040 --> 25:06.040
+one of the key points is that we want temporal sparsity. Because like I said, you don't want a system
+
+25:06.040 --> 25:11.320
+to be continuously running, right? So you want this to only run when something happens. That's
+
+25:11.320 --> 25:18.360
+something is basically an event, right? So you're encoding your signal into,
+
+25:20.680 --> 25:30.840
+into a train of events. So, and that is actually how, for example, the Redna encodes, encodes
+
+25:30.840 --> 25:36.600
+information. So when I'm, when I'm looking at this computer right now, it's not like my brain is
+
+25:36.600 --> 25:43.560
+taking frame by frame information. It just basically looks at what is changing and, and just encodes
+
+25:43.560 --> 25:50.920
+the, the change in time. And the same way, you can use the same kind of encoding mechanism to
+
+25:52.200 --> 25:57.880
+take a signal. And then if, if it's nothing is happening, then you just don't, don't encode
+
+25:57.880 --> 26:02.680
+anything. You don't send any input. Your, your processor is just sleeping. And then as soon as
+
+26:02.680 --> 26:08.920
+something is happening, depending on the rate of change of your input, you just, you, you,
+
+26:08.920 --> 26:17.800
+you, you send this pulse density coding scheme. And you send, you send information basically
+
+26:17.800 --> 26:23.480
+asynchronously to the system. And the same thing can happen for, for, for, for learning. So your,
+
+26:23.480 --> 26:29.800
+your streaming data, your, your, your system starts to kind of have an error, or it does have an
+
+26:29.800 --> 26:37.960
+error based on whatever the, the person is experiencing or the device under test is experiencing.
+
+26:39.320 --> 26:44.120
+And then whenever that's error is high, you say, you have to learn. This is the time to learn.
+
+26:44.120 --> 26:49.480
+And then based on the local information of the pre and the post-synaptic spike, post-synaptic
+
+26:49.480 --> 26:56.040
+activity, then you, you do an update and you, you change the, the resistance of these members
+
+26:56.040 --> 27:03.160
+of devices sitting on the fly. I don't think you mentioned this previously, but are, is this,
+
+27:03.160 --> 27:09.320
+are the, the use cases that you're describing are these fundamentally supervised problems where
+
+27:09.320 --> 27:15.080
+you've got some target. And that's how you create your error and, and kind of propagate that
+
+27:15.080 --> 27:19.880
+through. Or is it more of an unsupervised scenario? So we have actually worked on both.
+
+27:19.880 --> 27:26.520
+So the field of, it's actually interesting that you say. So, you know, this field of neuromorphic
+
+27:26.520 --> 27:33.160
+engineering is kind of, let's say linked to the spiking neural network field, right? Because,
+
+27:33.880 --> 27:39.160
+because information is going into this chips in the format of spikes or events, and then coming
+
+27:39.160 --> 27:45.560
+out of it. So it's like an end-to-end event-based system. And spiking neural networks for a long time,
+
+27:45.560 --> 27:52.280
+we have not had a good learning algorithm that can, that can learn them. That's something a,
+
+27:52.280 --> 27:59.400
+a lot of people complain about. So for a long time, the field was kind of working with Hibian
+
+27:59.400 --> 28:06.760
+plasticity. So basically, kind of working with correlation-based learning. So you change the
+
+28:06.760 --> 28:15.640
+weight just because of the correlation between the pre and the post-enaptic activity. And so basically
+
+28:15.640 --> 28:21.880
+correlation-based learning without, without any error, without any guide. And if you're doing
+
+28:21.880 --> 28:27.320
+good or you're doing bad. And then the problem with, with Hibian learning is that it's also an
+
+28:27.320 --> 28:36.840
+egregious algorithm, right? So you, you know, if things are correlated, your weight starts to go high. But then,
+
+28:36.840 --> 28:44.840
+because this weight is now high, whenever an input comes, let's say the neuron that has the highest
+
+28:44.840 --> 28:50.360
+weight is always going to be the one that will have the highest activity. And then its weight
+
+28:50.360 --> 28:55.400
+kind of grow more. So basically, it's kind of like a positive feedback process. So you need
+
+28:55.400 --> 29:03.480
+a negative feedback to kind of keep things in check and in balance. So make sure that all the neurons
+
+29:03.480 --> 29:08.840
+that you have in the system are kind of being part of the computation. It's not like one,
+
+29:10.120 --> 29:15.960
+you just wonder greening neuron that happened to have, you know, initial good initial condition
+
+29:15.960 --> 29:21.800
+that kind of just responds to everything. So you need to kind of this negative feedback mechanism,
+
+29:21.800 --> 29:29.320
+which is kind of inspired also by the, by some of the findings in neuroscience in terms of
+
+29:29.320 --> 29:36.680
+homestatic plasticity. So homestatic plasticity apparently is a negative, negative feedback loop
+
+29:36.680 --> 29:43.880
+in neuron networks in the brain that tries to keep the activity of the neurons within a certain
+
+29:43.880 --> 29:52.600
+range. So it doesn't let neurons to be very underactive, so to be completely silent or to be
+
+29:52.600 --> 29:57.880
+really overactive. So it's just always tries to bring the neuron in a certain regime of operation.
+
+29:58.600 --> 30:05.240
+So we have kind of worked on kind of bringing this to hebe on learning and homestatic plasticity
+
+30:05.240 --> 30:12.360
+together as like an unsupervised learning mechanism, also for sequence learning. So we have also done
+
+30:12.360 --> 30:19.880
+that, but, but it helps to have air, I must say, it's now it helps to have, to have a guiding
+
+30:20.680 --> 30:30.280
+teacher and tells you where to go. So we talked about the spatial locality. Can you talk a little
+
+30:30.280 --> 30:35.640
+bit about how you've approached the temporal locality problem? Yeah, that's a good question. So,
+
+30:35.640 --> 30:47.080
+so basically for temporal locality, so you would want to, what problem does it, does it require
+
+30:47.080 --> 30:56.920
+temporal locality? For any input that requires, that has a temporal sequence. So if you don't have
+
+30:56.920 --> 31:03.160
+any temporal, if your data set has no temporal information, then you don't need this. But if it does,
+
+31:03.160 --> 31:13.960
+then you need to keep some information. And apparently in the brain, there is this kind of
+
+31:13.960 --> 31:22.280
+filtering mechanism, which is called the eligibility traces. So interestingly, you know, our neurons
+
+31:22.760 --> 31:32.200
+and synapses are kind of behave or acting in a timescale of the and the order of tens to hundreds
+
+31:32.200 --> 31:38.920
+of milliseconds. So they kind of keep just from the information and integration. So they then for
+
+31:38.920 --> 31:46.280
+about 10 to 100 milliseconds. But our, but we are behaving in the real world in the timescales
+
+31:46.280 --> 31:52.200
+of seconds or tens of seconds, right? And if we want to learn anything, then the question is,
+
+31:52.760 --> 31:58.360
+how, how is this temporal gap closed? How is it that, you know, my, my brain is processing
+
+31:58.360 --> 32:05.320
+something. Then I receive like saying, let's say a reward or a punishment or some surprise,
+
+32:05.320 --> 32:13.720
+some 10 seconds later. But then my brain knows which synapses to go and change. And so how is
+
+32:13.720 --> 32:18.840
+this temporal, what is what is closing this? So then apparently there is this kind of filtering
+
+32:18.840 --> 32:29.080
+mechanism called the eligibility traces, which are keeping the activity of the, let's say the
+
+32:29.080 --> 32:34.520
+correlation between the pre and the post-ynaptic neurons for tens of seconds. So it's kind of,
+
+32:34.520 --> 32:43.720
+you can think of it as an exponential decay filter, which it's, it's amplitude goes high,
+
+32:43.720 --> 32:50.920
+and then decays within, within tens of seconds. But it keeps this information basically
+
+32:51.640 --> 32:57.240
+for, for that amount of time. And if within this like filtering time, filtering time constant,
+
+32:57.240 --> 33:04.840
+it receives a reward, then a neuromodulation, neuromodulatory signal kind of reads this, let's say,
+
+33:04.840 --> 33:14.920
+eligibility trace and then changes the corresponding synapses. So, and then, so this is kind of like
+
+33:14.920 --> 33:25.160
+a neuroscience inspiration, let's say. But then some, some two years ago, a group in university of
+
+33:25.160 --> 33:34.440
+Graz in Guillaume-Belleck and and co-authors, basically they realized that you can write down
+
+33:35.160 --> 33:41.320
+the backpropagation through time algorithm as a multiplication of the learning signal
+
+33:41.320 --> 33:45.560
+and an eligibility trace. And with an approximation that you
+
+33:47.400 --> 33:53.480
+forget about the future terms, because backpropagation has, has, has terms in the future, right? Because,
+
+33:53.480 --> 33:59.800
+because we basically feed the information to, to the activations, we keep all the activations,
+
+33:59.800 --> 34:03.960
+and then we go back through time to see what activations were there and based on that we update.
+
+34:03.960 --> 34:10.440
+But we don't, we cannot do this. So, if you approximate to kind of eliminate those future terms,
+
+34:10.440 --> 34:17.320
+you can still get good accuracy on, on a certain task, so they've tried it also on reinforcement
+
+34:17.320 --> 34:24.200
+learning tasks. So, basically from, let's say this eligibility traces, their, their usefulness
+
+34:24.200 --> 34:31.160
+are kind of seen in neuroscience and they're kind of also backed by, by these experiments that
+
+34:31.160 --> 34:41.640
+they've disrupted. And we have implemented them in hardware using an interesting solution,
+
+34:41.640 --> 34:47.640
+because, so basically at the end, what you need to solve the poor locality is a filter
+
+34:48.600 --> 34:54.040
+that has a long time constant, okay? And this is now backed by neuroscience and backed by
+
+34:54.760 --> 35:03.720
+math. So, so capacitors into your, exactly. But, but capacitors are really expensive to have,
+
+35:03.720 --> 35:08.040
+because they take a lot of space, especially if you want to keep information for a long time,
+
+35:08.040 --> 35:13.400
+you need to have a big capacitor. And if you ever want to have a big capacitor, person apps,
+
+35:14.200 --> 35:20.600
+then, then your area kind of blows up. So, what we found was that there's the specific type
+
+35:20.600 --> 35:25.160
+of members of devices called face change memories. And these face change memories,
+
+35:25.160 --> 35:31.640
+basically how they work is that they change their state from a amorphous state to a crystalline
+
+35:31.640 --> 35:38.360
+state. And that's basically the on and off state, right? So, it's a amorphous state,
+
+35:38.360 --> 35:44.520
+and then you apply a current, the device literally melts, and then it becomes crystallized,
+
+35:44.520 --> 35:50.920
+and then it resistance drops. But, interestingly, when these devices are in this amorphous state,
+
+35:51.480 --> 35:59.160
+they are not happy. They are, they are, you know, they're not in a favorable glass state. So,
+
+35:59.160 --> 36:12.360
+they want to, they start to kind of drift to a higher resistance. So, and this drift actually
+
+36:12.360 --> 36:18.840
+happens within the time constant that we like. So, this drift time constant is really in the order
+
+36:18.840 --> 36:25.720
+of 10-0 seconds. So, then we realize that by one device that is in its amorphous state,
+
+36:25.720 --> 36:32.360
+we can implement these eligibility traces very efficiently. And, basically, that is, let's say,
+
+36:32.360 --> 36:38.200
+our our solution to this, to implement the implementation of this temporal locality problem.
+
+36:38.840 --> 36:45.080
+And so, the idea then is for the applications that require this kind of temporal locality,
+
+36:46.040 --> 36:52.600
+you, you can see kind of market difference in performance, you know, with and without kind of
+
+36:52.600 --> 36:59.800
+your implementation of the eligibility traces. Exactly. So, so basically, without the eligibility
+
+36:59.800 --> 37:06.760
+trace, well, you, you either need to have a lot of memory to keep information, you know, in the past.
+
+37:09.240 --> 37:16.680
+If you don't have it, then you're not saving any temporal sequence or any temporal information.
+
+37:16.680 --> 37:22.440
+And if you want to, yeah. So, then if you want to have a, let's say, efficient implementation
+
+37:22.440 --> 37:30.920
+with lower, with low area consumption, then this will be a potential solution to, to use kind of
+
+37:30.920 --> 37:37.400
+this drift of a piece, piece again, face change memory device in its amorphous state.
+
+37:38.360 --> 37:43.560
+And then the last challenge that you mentioned was dealing with the limited bit precision,
+
+37:43.560 --> 37:50.680
+and the kind of coarse grain nature that, that that imposes. How do you deal with that?
+
+37:50.680 --> 37:58.280
+Yeah. So, another, so these devices, these membership devices, basically another good thing about
+
+37:58.280 --> 38:03.400
+them is that they have multiple states. So, it's not like, it's not just an on and off state,
+
+38:03.400 --> 38:09.720
+so they can, they can have multiple resisted state. But there's not a analog. I mean, the hope
+
+38:09.720 --> 38:18.280
+or the dream is that they are analog, but they're not really. So, the reason why it cannot be
+
+38:18.280 --> 38:25.800
+analog is because of basically physics. So, when a device does resisted switching, what happens
+
+38:25.800 --> 38:32.040
+is that there, so you have two electrodes, and then you have a, let's say,
+
+38:32.040 --> 38:41.080
+a member's div layer in between. So, you have an oxide in between. For example, in the case of
+
+38:41.080 --> 38:48.040
+oxide based devices that has some oxygen deficiencies, and these deficiencies kind of respond to
+
+38:48.040 --> 38:54.840
+electric field. So, these deficiencies are charged, so they're, and they respond to electric
+
+38:54.840 --> 39:03.800
+field, and they create a filament. So, basically, these kind of ions, they, they create a filament
+
+39:03.800 --> 39:09.320
+from one electrode to another, and that's how the resistance kind of lowers, because then you,
+
+39:09.320 --> 39:15.000
+you're kind of creating a conductive path from a conductive filament or a path from one
+
+39:15.000 --> 39:21.640
+electrode to another, and then the resistor drops. And the resistance of this device then depends
+
+39:21.640 --> 39:27.960
+on the geometry of this filament. The thicker it is, then the lower the resistance, because then
+
+39:27.960 --> 39:36.840
+these two electrodes are very well connected, and the, the less the diameter of this filament,
+
+39:36.840 --> 39:45.000
+the resistance is higher. So, if you can kind of try to control this filament growth,
+
+39:45.000 --> 39:53.720
+you know, you can, you can kind of get the device to, to show it's good, it's, it's, you know,
+
+39:53.720 --> 39:58.360
+states. So, you can, you can kind of control the states of the device. So, that's what one thing we
+
+39:58.360 --> 40:05.560
+did. So, we, and the thickness of these paths, this is also non-ballot. Yes, exactly. So,
+
+40:05.560 --> 40:11.320
+basically, let's say the thick, and you, you program the device with a certain, let's say,
+
+40:11.320 --> 40:16.840
+geometry of the filament, and I, and I will say how we do that, and then it just states that way.
+
+40:17.400 --> 40:25.240
+So, it's non-ballot. So, the one way that you can control the, let's say, the geometry of this
+
+40:25.240 --> 40:30.280
+filament is by how much current you push to it when you're programming the device. So, when you
+
+40:30.280 --> 40:35.960
+want to change the state of the device, the more current you push, you push the, this filament
+
+40:35.960 --> 40:47.880
+kind of grows thicker. So, we realized that if we basically map the error of our system,
+
+40:47.880 --> 40:54.760
+at the error of the network to a current, then we can say, hey, if the error is high,
+
+40:55.480 --> 41:01.240
+that means that you, the device has to change more. So, its filament has to change more.
+
+41:01.240 --> 41:08.280
+And if the error is lower, then you, then you can have like, then you can push less current,
+
+41:08.280 --> 41:13.000
+because that means that the device has to change less. So, this is basically what we mean by
+
+41:13.000 --> 41:19.880
+co-design, because now you're really taking algorithm level concept, which is error of a network,
+
+41:19.880 --> 41:26.360
+and you're really bringing it into a current that is changing a device filament, you know, like,
+
+41:26.360 --> 41:33.240
+so just kind of telling, an error is really changing how the ions move in a physical system.
+
+41:33.800 --> 41:39.640
+Yeah, yeah, that's fascinating. But more over, I guess the impression I have is that
+
+41:40.600 --> 41:47.560
+in kind of normal operation, this, you would be applying the current in a programming phase up
+
+41:47.560 --> 41:54.040
+front. But this error, when you're trying, when you're using the technique that you're describing,
+
+41:54.040 --> 42:01.320
+are you applying the current, like, during the operation of the device, because we're talking
+
+42:01.320 --> 42:03.320
+about online learning. So, there's...
+
+42:03.320 --> 42:08.760
+Oh, right, right, yeah, that's a good question. So, this is something that is not solved yet.
+
+42:08.760 --> 42:13.720
+So, basically, while you're programming the device, you're missing input.
+
+42:14.360 --> 42:19.240
+So, basically, let's say your hard work kind of goes into learning mode, and for that,
+
+42:19.240 --> 42:25.240
+whatever microstackens that you were, because these devices actually changed their state very fast.
+
+42:25.720 --> 42:29.960
+So, you just have to apply a pulse that is in the order of maximum and microstacken.
+
+42:30.440 --> 42:38.360
+But in that microstacken, whatever input you're receiving is getting tossed away. You're not,
+
+42:38.360 --> 42:39.960
+you're not receiving it, right?
+
+42:39.960 --> 42:45.880
+Yeah, I was imagining something more like an e-prom where it was taking much longer time to program.
+
+42:45.880 --> 42:51.800
+No, no, no, these devices are very, very busy, the programming time, the access time and the
+
+42:51.800 --> 42:58.440
+programming time are very low. So, basically, you can even go to nanoseconds or hundreds of nanoseconds.
+
+42:58.440 --> 43:05.080
+Oh, wow, wow. And so, you introduced this by talking about this analog versus digital,
+
+43:05.080 --> 43:14.600
+like, you're wanting to get to full analog, but not really. How does that tie into this,
+
+43:16.040 --> 43:17.720
+the mechanism you're describing?
+
+43:17.720 --> 43:23.240
+So, basically, this whole competition is really analog, right? Because you are,
+
+43:24.600 --> 43:33.400
+so, let's say, just for doing multiplication and addition, it's not like you have digital gates
+
+43:33.400 --> 43:37.960
+that are doing the multiplication and you have an adder that is doing the adder. So, it's just really
+
+43:39.880 --> 43:44.680
+the physics of the devices doing this for you and that's kind of, that's basically analog computation.
+
+43:44.680 --> 43:49.560
+So, that's how you were saying that you wanted, you wanted it to be full analog, but you can't
+
+43:49.560 --> 43:55.320
+get it to be full analog or it's not full analog. Right. So, the computation is analog,
+
+43:56.280 --> 44:02.520
+and it's basically locally analog, but then when you want to communicate this information to other
+
+44:02.520 --> 44:10.360
+parts of the chip or to other neurons, then you go to events or spikes, which is then digital,
+
+44:10.360 --> 44:16.520
+and that's basically where the mixed signal design comes into place. So, your competition
+
+44:16.520 --> 44:24.280
+is really locally analog, but then it's digital communication through spikes. Because when you
+
+44:24.280 --> 44:28.840
+want to send out information, if you want to send out analog information, that's very difficult
+
+44:28.840 --> 44:39.080
+because if an analog signal has to go through a path or a distance, then this distance is kind of
+
+44:39.080 --> 44:46.760
+dissipating your analog signal. Right. So, you would have to put like drivers that is pushing
+
+44:46.760 --> 44:54.680
+enough current so that this analog precise analog value can stay wherever it is. And that
+
+44:54.680 --> 45:00.680
+that requires again a lot of power, a lot of space for these kind of buffers and amplifiers that
+
+45:00.680 --> 45:09.080
+you have to employ for doing this. And therefore, it's good that if you want to communicate a signal
+
+45:09.080 --> 45:13.880
+to go digital and then send out your information in a digital way to another neuron,
+
+45:15.320 --> 45:21.400
+as a voltage pulse, and this voltage pulse again goes through the members, there's becomes a
+
+45:21.400 --> 45:28.200
+current and then gets integrated in an analog fashion in the next neuron. So, so you go from
+
+45:28.200 --> 45:35.960
+analog to digital and back to analog. So, you've overcome these three key challenges that you
+
+45:35.960 --> 45:41.800
+mentioned in the beginning. Are there other pieces that are required or what other pieces are
+
+45:41.800 --> 45:47.240
+required to bring it all together so that you can actually do online learning? So, I think that's
+
+45:47.240 --> 45:58.840
+so currently what we're still missing is kind of scalability. So, scalability both in terms of
+
+45:58.840 --> 46:04.680
+algorithms to algorithms that can. So, all of these, let's say kind of hacks that I've mentioned
+
+46:04.680 --> 46:11.560
+to you, they work maybe for, you know, two, three layers. But if you want to kind of go deeper,
+
+46:11.560 --> 46:17.160
+then they don't work because there's a lot of approximation that is involved, which, you know,
+
+46:17.160 --> 46:22.600
+if you want to go to larger networks, they're not going to work. So, it's a basically, we need
+
+46:22.600 --> 46:27.960
+scalability in terms of algorithms and we need scalability in terms of hardware. So, these kind
+
+46:27.960 --> 46:36.200
+of devices are still kind of maturing, although they have kind of emerged really exponentially
+
+46:36.200 --> 46:42.840
+fast in the past, you know, five years. But they're still kind of emerging. There's a lot of,
+
+46:44.840 --> 46:51.960
+let's say problems in terms of noise, bit precision, devices, basically, these devices that you have,
+
+46:51.960 --> 46:59.400
+they have a lot of variability between them. So, they don't all work the same. They have also
+
+46:59.400 --> 47:06.360
+noise in time. So, every time you program the device, it doesn't. So, let's say if you set and
+
+47:06.360 --> 47:12.360
+reset the device like 100 times, it kind of sits on a Gaussian distribution in terms of the
+
+47:12.360 --> 47:20.200
+state it ends up in. So, it kind of, it's, it's noisy, which actually a lot of people even try to
+
+47:20.200 --> 47:27.400
+exploit, for example, for, for Bayesian computation, right? So, let's say, like it brings you like a
+
+47:27.400 --> 47:32.360
+search space in a way. So, every time you set and reset it, kind of you're kind of sampling from
+
+47:32.360 --> 47:40.040
+these distributions. So, I would say this is like basically scaling, I would say, is the main
+
+47:41.240 --> 47:51.000
+problem in terms of algorithm and hardware? How close are we from seeing this in kind of practical
+
+47:51.000 --> 47:58.040
+use? Are we, are we there already, you know, in some ways, or, you know, long way out? What's your
+
+47:58.040 --> 48:05.400
+take on that? So, actually, there's some startups. I would, even from, from the Institute of Narrow
+
+48:05.400 --> 48:10.360
+Romatics that are trying to take this to the market, but they're still working in the digital domain.
+
+48:11.800 --> 48:17.640
+If you want to go analog and a lot of people are doing in the, in the, in the world,
+
+48:17.640 --> 48:27.400
+so, I think it would be something, I would say, maybe five years plus, if we want, if you want to
+
+48:27.400 --> 48:33.400
+go to the market, because there, it's still really a research field. I'm trying to like, you know,
+
+48:33.400 --> 48:38.920
+bringing all of these concepts from five different fields together, while the technology is still
+
+48:38.920 --> 48:48.280
+emerging, I would say, it is, it still has time, it requires time. Awesome, awesome. Well, by the
+
+48:48.280 --> 48:54.440
+time folks here this, you will have a deliverger keynote at the workshop, which sure will be
+
+48:55.560 --> 49:01.880
+super interesting for folks, but best of luck. Thank you so much. Yeah, thanks a lot.
+
+49:01.880 --> 49:07.800
+Cool. I'm looking forward to, to the conference and seeing and chatting about these concepts with
+
+49:07.800 --> 49:37.640
+the years, and I hope your audience likes this concept also. Absolutely. Thanks so much, Malika. Thank you, Sam.
+

@@ -1,0 +1,2172 @@
+1
+00:00:00,000 --> 00:00:11,720
+All right, everyone. Welcome to another episode of the Twemal AI podcast. I am, of course,
+
+2
+00:00:11,720 --> 00:00:18,040
+your host, Sam Charrington. And today I'm joined by Adrian Gaden, head of machine learning
+
+3
+00:00:18,040 --> 00:00:24,260
+research at TRI, the Toyota Research Institute. Before we get going, be sure to take a moment
+
+4
+00:00:24,260 --> 00:00:29,700
+to hit that subscribe button wherever you're listening to today's show. Adrian, welcome
+
+5
+00:00:29,700 --> 00:00:38,020
+back to the podcast. We last spoke in May of 2019, believe it or not. And we had a great
+
+6
+00:00:38,020 --> 00:00:43,940
+conversation. I encourage everyone listening now to check back to episode 269 where we discussed
+
+7
+00:00:43,940 --> 00:00:49,500
+advancing autonomous vehicle development using distributed deep learning, a lot of what
+
+8
+00:00:49,500 --> 00:00:55,300
+you were doing around MLOPS and kind of productionalizing these large scale models. It was a great
+
+9
+00:00:55,300 --> 00:01:00,260
+conversation, and I'm super excited to have you back on the show. Sam, it's really my pleasure,
+
+10
+00:01:00,260 --> 00:01:04,420
+and it's been too long, so I'm really glad we get to chat. We're going to spend some time talking
+
+11
+00:01:04,420 --> 00:01:10,980
+about among other things, data-centric AI and some of the things you're doing from a synthetic
+
+12
+00:01:10,980 --> 00:01:17,940
+data perspective. But to get us started, why don't you introduce yourself, reintroduce yourself
+
+13
+00:01:17,940 --> 00:01:24,980
+to our audience, and we can spend a bit of time talking about what's new since May 2019 for you.
+
+14
+00:01:24,980 --> 00:01:31,780
+Yeah, okay, sounds good. Thanks, Sam. Yes, so hey everyone. My name is Adrian Guedon, but you can say
+
+15
+00:01:31,780 --> 00:01:36,260
+it in the American way, Adrian Guedon. So I'm French, obviously, but I've been living in the Bay
+
+16
+00:01:36,260 --> 00:01:41,780
+area for five years now. I've been working in computer vision and machine learning for almost
+
+17
+00:01:41,780 --> 00:01:48,180
+14 years. Ten years in industry and five years at TRI as leading the machine learning research
+
+18
+00:01:48,180 --> 00:01:54,420
+team there. One of the things that characterized my research is a lot about going beyond supervised
+
+19
+00:01:54,420 --> 00:02:00,020
+learning. I have labeled data myself back in the day, a few people that know the Pascal VOC
+
+20
+00:02:00,020 --> 00:02:05,780
+challenge, which kind of predated image nets. We're going to Oxford, a famous visual geometry group,
+
+21
+00:02:05,780 --> 00:02:11,860
+and clicking on pixels, and then my hate for labeling started around that time, and so that guided
+
+22
+00:02:11,860 --> 00:02:18,580
+a lot of my research, because I think clicking on pixels is not the way to AI. And so treating
+
+23
+00:02:19,140 --> 00:02:23,860
+machine learning as a problem of really finding ways that machines can learn in a more
+
+24
+00:02:23,860 --> 00:02:29,860
+efficient way without supervision. And so I did a lot of research on using synthetic data. I'm
+
+25
+00:02:29,860 --> 00:02:34,340
+sure we're going to get to talk about today, but also self-supervised learning. Probably one of
+
+26
+00:02:34,340 --> 00:02:38,260
+the things that we've been most well known for, especially in the autonomous driving space,
+
+27
+00:02:38,260 --> 00:02:42,420
+is we've been doing a lot of self-supervised learning and monocular depth estimation,
+
+28
+00:02:43,140 --> 00:02:48,500
+which has been actually deployed in production and is used in various applications, not just
+
+29
+00:02:48,500 --> 00:02:53,300
+autonomy, but something that is near and dear to my heart, which is saving lives. As you know,
+
+30
+00:02:53,300 --> 00:03:00,020
+there's 1.3 million fatalities on the road every year. And so that's something that keeps me up
+
+31
+00:03:00,660 --> 00:03:06,020
+and motivated to work on this very important problem, in addition to deep learning and everything
+
+32
+00:03:06,020 --> 00:03:12,900
+being super, super cool. So yeah, so basically that's who I am as a scientist and as a person,
+
+33
+00:03:13,860 --> 00:03:20,180
+I love climbing my family and stuff like that. And with COVID, I got to spend a lot of time with
+
+34
+00:03:20,180 --> 00:03:24,500
+my daughter and actually learn some things about how humans learn, which we're sure we could get
+
+35
+00:03:24,500 --> 00:03:29,300
+to talk about that too. So yeah, happy to be here. Awesome, awesome. Let's maybe talk a little bit
+
+36
+00:03:29,300 --> 00:03:35,860
+about your focus as a researcher at TRI and some of the main things that you think about. Yeah, for
+
+37
+00:03:35,860 --> 00:03:41,780
+sure. So as I mentioned, going beyond supervised learning has been a big area of research for us,
+
+38
+00:03:41,780 --> 00:03:49,620
+and it's always been a very interesting challenging position to work as a researcher in industry,
+
+39
+00:03:49,620 --> 00:03:54,740
+because you have to focus on science, this big breakthroughs, have an impact and
+
+40
+00:03:54,740 --> 00:03:59,940
+but at the same time, it needs to be useful. So we call this, you know, the pastor Quadrant,
+
+41
+00:03:59,940 --> 00:04:04,100
+you know, it's like you have the curiosity-driven research, you have the problem solving kind of
+
+42
+00:04:04,100 --> 00:04:09,700
+research, and then you have where we are at TRI, which is really nice, which is where use inspired.
+
+43
+00:04:09,700 --> 00:04:14,020
+So we're not necessarily solving the problem that's right now for the next six months,
+
+44
+00:04:14,020 --> 00:04:18,180
+but we're listening to all the people that have all these problems and all these products that
+
+45
+00:04:18,180 --> 00:04:23,940
+they contribute to. And then we're trying to extrapolate a little bit beyond, in say like three
+
+46
+00:04:23,940 --> 00:04:29,700
+years or something like that, to say, what is actually the problem that if we hit it at the base,
+
+47
+00:04:29,700 --> 00:04:33,700
+if we work on the foundations, it's going to have a massive impact. You know, like you're talking
+
+48
+00:04:33,700 --> 00:04:38,100
+about platforms regularly and things like that. It's a bit the same thing, but except with
+
+49
+00:04:38,100 --> 00:04:42,900
+infrastructure, which, you know, was a topic of our podcast, and we talked about the platform
+
+50
+00:04:42,900 --> 00:04:48,820
+of tooling and infrastructure to enable people to do machine learning. Now it's a bit more of
+
+51
+00:04:48,820 --> 00:04:55,540
+the scientific foundations, the scientific platform. The ideas that are, again, going to be largely
+
+52
+00:04:55,540 --> 00:05:01,060
+beneficial to, you know, for robotics applications. One of the big things we want to do is we want to
+
+53
+00:05:01,060 --> 00:05:06,180
+make useful machines that amplify people, whether they be cars, whether they be robots, or whether
+
+54
+00:05:06,180 --> 00:05:11,860
+they be just programs, you know, and virtualize. Although a lot of the research we do is about
+
+55
+00:05:11,860 --> 00:05:16,900
+physical sensory motor machines. And that's something that is really exciting. I was writing in our
+
+56
+00:05:16,900 --> 00:05:22,260
+car recently, you know, and we have robots in the office that move stuff around. And there's no
+
+57
+00:05:22,900 --> 00:05:28,420
+avoiding gravity and reality and all the kind of problems. You know, your robot breaks or your
+
+58
+00:05:28,420 --> 00:05:33,300
+car does something bad. It's something real, you know, it's not something you can avoid. So all
+
+59
+00:05:33,300 --> 00:05:39,060
+these concepts of, you know, AI ethics, et cetera, they're rounding. Yeah, exactly grounding and
+
+60
+00:05:39,060 --> 00:05:43,940
+embodiment. It's not about a game, you know, nothing leaves the Natari for us. Everything is real
+
+61
+00:05:43,940 --> 00:05:48,500
+world. Everything is high stakes and safety critical. And we take things very seriously because
+
+62
+00:05:49,140 --> 00:05:55,860
+they obviously matter, because they are made of matter. So that's what we do. And so the research-wise
+
+63
+00:05:57,460 --> 00:06:02,020
+scale is kind of important, but we have a kind of a nuanced notion of scale. And maybe you can
+
+64
+00:06:02,020 --> 00:06:07,140
+talk about the data-centric AI there and our positioning there, which is a bit contrarian, I would say.
+
+65
+00:06:07,140 --> 00:06:11,300
+So we can talk about that a bit more tomorrow. Yeah, let's just jump right into that.
+
+66
+00:06:12,180 --> 00:06:18,580
+So I think, you know, in talking to folks about data-centric AI, my first few conversations I've
+
+67
+00:06:18,580 --> 00:06:26,260
+been asking folks to kind of define it. And I think everybody has similar definitions, mostly
+
+68
+00:06:26,260 --> 00:06:31,380
+around, you know, to be frank, kind of the way Andrew has framed it, Andrew.
+
+69
+00:06:31,380 --> 00:06:42,100
+Yeah. And, you know, when we spoke, as you alluded to, you of course, I think frame it in a similar
+
+70
+00:06:42,100 --> 00:06:46,980
+way, but you also have some kind of contrarian viewpoints around it. Let's kind of start there.
+
+71
+00:06:46,980 --> 00:06:50,820
+What's a contrarian viewpoint that you have around data-centric AI?
+
+72
+00:06:50,820 --> 00:06:56,420
+Yes. So as a French and a scientist, I love contrarian viewpoints. So let me start with an opening
+
+73
+00:06:56,420 --> 00:07:01,220
+counterintuitive hook, which is, I believe that in measuring, we had tremendous progress.
+
+74
+00:07:01,220 --> 00:07:05,620
+And that's why there's so much excitement and really excited about it. And I believe now we know
+
+75
+00:07:05,620 --> 00:07:11,780
+how machines learn, but we don't know how to teach them. And so I think that's what's kind of
+
+76
+00:07:11,780 --> 00:07:15,540
+a bit contrarian and kind of interesting. So let me explain a little bit. I think I have a contrarian
+
+77
+00:07:15,540 --> 00:07:20,100
+take that we don't actually know how machines learn. I will let you continue.
+
+78
+00:07:20,660 --> 00:07:24,900
+You're even more contrarian than me. You're a honorary French member now.
+
+79
+00:07:24,900 --> 00:07:32,820
+So what I mean by we know what machines learn is that the genius out of the bottle,
+
+80
+00:07:34,100 --> 00:07:42,020
+deep learning works so well. In 2012, I had done my PhD in video analysis and using very hard
+
+81
+00:07:42,020 --> 00:07:48,020
+core math, kernel methods and everything like that. And it had to become vex. It had to have
+
+82
+00:07:48,020 --> 00:07:54,100
+statistical learning guarantees. And then Kuzewski arrived and then the whole world turned upside
+
+83
+00:07:54,100 --> 00:08:01,300
+down and we entered the age of empiricism of things that we have good principles or hints
+
+84
+00:08:01,300 --> 00:08:06,660
+intuitions for why things work. And we managed to make things work even when we don't fully understand
+
+85
+00:08:06,660 --> 00:08:12,100
+or explain. But it does work and the evidence and empirical evidence is undeniable. And the benefits
+
+86
+00:08:12,100 --> 00:08:15,940
+we received in industry from it, right? Computer vision went from a very interesting
+
+87
+00:08:15,940 --> 00:08:19,540
+problem because it doesn't work to a very interesting problem because it works really well. And how
+
+88
+00:08:19,540 --> 00:08:24,260
+we go beyond and again, beyond and again, beyond. We know how machines learn. I agree it's kind of
+
+89
+00:08:24,260 --> 00:08:29,140
+a fairly bold statement, but there's very few people in machine learning right now that are
+
+90
+00:08:29,140 --> 00:08:35,540
+questioning fundamentally SGD and back propagation and deep learning. Again, because the evidence
+
+91
+00:08:35,540 --> 00:08:41,700
+is kind of overwhelming. So you want to make something work, you will use a overparatized model
+
+92
+00:08:41,700 --> 00:08:46,820
+that you will learn on as much data as you can get with, you know, stochastic gradient descent,
+
+93
+00:08:46,820 --> 00:08:52,020
+back propagation, all the tricks of the trade and this huge cookbook that we developed through
+
+94
+00:08:52,020 --> 00:08:57,140
+empiricism, right? Through a lot of experimental evidence that we collected over the year that is
+
+95
+00:08:57,700 --> 00:09:02,980
+open because it's open source that is reproducible. Many people, many different people from many
+
+96
+00:09:02,980 --> 00:09:07,380
+different areas have been building on top of that. So that's what I mean by we know how machines
+
+97
+00:09:07,380 --> 00:09:13,940
+learn. Maybe not the best way they can learn that for sure, but a way to make them learn we know.
+
+98
+00:09:13,940 --> 00:09:18,660
+But in the framework of data centric AI, what I mean by we don't know how to teach them is that
+
+99
+00:09:18,660 --> 00:09:25,780
+building data sets and efficiently building data sets and efficiently teaching machines is not
+
+100
+00:09:25,780 --> 00:09:31,620
+at all what everybody is doing right now. Everybody is just following a simple recipe, which is
+
+101
+00:09:31,620 --> 00:09:36,900
+under the name of the scaling hypothesis, which is bigger is better, right? And we know, I think
+
+102
+00:09:36,900 --> 00:09:44,260
+some people know at least that bigger is not always better. And there's obviously a trade-off,
+
+103
+00:09:44,260 --> 00:09:49,540
+a fundamental trade-off. I mean, it's a physical fundamental trade-off between scale and efficiency.
+
+104
+00:09:49,540 --> 00:09:55,780
+And so a question is really like how do we find this trade-off? So there is the scaling loss,
+
+105
+00:09:55,780 --> 00:09:59,940
+which are very interesting, right? It's very hard to estimate, you know, there's some kind of
+
+106
+00:09:59,940 --> 00:10:05,380
+the dpt scaling law versus the tinchila scaling law and did with people tune the hyper parameters
+
+107
+00:10:05,380 --> 00:10:10,660
+in the right way. No stuff we learn in a PhD, which is like make sure your experiments are clean,
+
+108
+00:10:10,660 --> 00:10:17,380
+you study all the extra parameters. But we have limited computation again. So there's a trade-off
+
+109
+00:10:17,380 --> 00:10:23,300
+between scale and efficiency. So you can't try all the combinatorial explosion, I have hyper parameters.
+
+110
+00:10:23,300 --> 00:10:26,980
+And then in the end you make assumptions and then you have different scaling laws that says,
+
+111
+00:10:26,980 --> 00:10:32,020
+oh, models are much more important. Increase your model size much more for a fixed data set.
+
+112
+00:10:32,020 --> 00:10:38,660
+Versus maybe data size and model size is equally important with all this foundation model research
+
+113
+00:10:38,660 --> 00:10:44,580
+that's going on. But when it takes tens of millions of dollars to do an experiment or train a model,
+
+114
+00:10:44,580 --> 00:10:48,980
+you have to work off of first principles. And I think this is one other thing that characterizes
+
+115
+00:10:48,980 --> 00:10:54,820
+our research is something that I like to call kind of like principle-centric AI versus it's a
+
+116
+00:10:54,820 --> 00:11:00,580
+bit of a different way than the data-centric AI. Because my definition of data-centric AI is a bit
+
+117
+00:11:00,580 --> 00:11:07,540
+more like focusing on increasing the data, which is, you know, I think what we've seen is not
+
+118
+00:11:07,540 --> 00:11:13,860
+necessarily the best principle. Yeah, I don't want to spend too much time getting contrarian
+
+119
+00:11:13,860 --> 00:11:24,820
+with your point. I don't know that data-centric AI necessarily implies increasing. I think a lot of
+
+120
+00:11:24,820 --> 00:11:36,500
+times the idea is spending more time and investing more effort with your data and often the implication
+
+121
+00:11:36,500 --> 00:11:43,060
+is that you're curating. You're making your increasing quality, you're reducing the size of the
+
+122
+00:11:43,060 --> 00:11:49,780
+data set as opposed to increasing it. Like fundamentally, I think the contrast is, hey,
+
+123
+00:11:49,780 --> 00:11:54,580
+traditional academic, you know, and Kaggle Machine Learning is like, hey, we want to solve this
+
+124
+00:11:54,580 --> 00:12:00,260
+problem, get more data, label it, and throw it at the model, and, you know, stochastic grade
+
+125
+00:12:00,260 --> 00:12:06,100
+into sense going to figure it out for us. And data-centric AI is kind of saying, well, yeah, maybe
+
+126
+00:12:06,100 --> 00:12:13,780
+spend more time on the data, and that could involve changing the way you label. It could involve
+
+127
+00:12:13,780 --> 00:12:18,900
+examples that are bad for your model. It could involve using machine learning to, you know,
+
+128
+00:12:18,900 --> 00:12:26,660
+decrease the size of your data set. You know, I think that there's, I think I'm intrigued by
+
+129
+00:12:26,660 --> 00:12:33,140
+principle-centric AI. Like I like, there's something compelling that the way we approach AI should
+
+130
+00:12:33,140 --> 00:12:39,060
+be based on principles, and one of those principles is actually data-centric. I'm like, we should be
+
+131
+00:12:39,060 --> 00:12:44,100
+thinking about our data. And so I'd love to hear you elaborate a little bit more about some of the
+
+132
+00:12:44,100 --> 00:12:49,860
+other principles that drive the way you think about this. Perfect. Okay, that's great. I mean,
+
+133
+00:12:49,860 --> 00:12:53,300
+you know really what you're talking about because we're getting to the subtle points. I love it.
+
+134
+00:12:53,300 --> 00:12:57,620
+So, okay, let me give you a little bit of, you know, a good story has some characters. So,
+
+135
+00:12:58,180 --> 00:13:03,380
+let me introduce some characters. So, what is not, like, I think, principles are, and it's
+
+136
+00:13:03,380 --> 00:13:07,380
+not the best way. So, there's a couple of different people in the field right now. There's
+
+137
+00:13:07,380 --> 00:13:13,140
+what I call the supervisors, okay? Okay. Big tech, you know, people that label a lot, you know,
+
+138
+00:13:13,140 --> 00:13:18,740
+like more data, more labels and etc. Which, honestly, is most of the really big successes, right,
+
+139
+00:13:18,740 --> 00:13:24,500
+in deep learning. So, let's call them the supervisors. Okay. So, they label as much as possible.
+
+140
+00:13:24,500 --> 00:13:31,460
+Again, my idea for that is that I've been labeling things, I've, and in the open world,
+
+141
+00:13:31,460 --> 00:13:37,220
+I think it's an endless pursuit, you know, you're going to label forever. And we want machines to
+
+142
+00:13:37,220 --> 00:13:42,180
+work for us, not us to work for machines. So, I don't think the supervisors are necessarily,
+
+143
+00:13:42,180 --> 00:13:46,260
+it's what it got us where we are now, but it's not what's going to get us to the next level.
+
+144
+00:13:46,900 --> 00:13:52,100
+So, I'm not one of the supervisors. Then you have another area, which actually is kind of
+
+145
+00:13:52,100 --> 00:13:56,500
+important for us in driving, which is called another type of characters, which are the Geofensers,
+
+146
+00:13:56,500 --> 00:14:01,780
+right? And you know, probably two of them, very well-known, you know, Waymo Cruz and like companies
+
+147
+00:14:01,780 --> 00:14:07,140
+that are doing amazing work in, you know, Robotaxi, right? So, that's what's they called, like,
+
+148
+00:14:07,140 --> 00:14:11,220
+a Geofence. I don't know if you've probably heard of this before, but it's basically your
+
+149
+00:14:11,220 --> 00:14:16,580
+designating an area and some conditions where your machine learning model, in this case, a robot,
+
+150
+00:14:16,580 --> 00:14:21,540
+right? It's going to design to operate. And you know how it's going to operate. And you have a safety
+
+151
+00:14:21,540 --> 00:14:27,060
+case around it. And so, in safety critical conditions, you build a fence and you describe inside
+
+152
+00:14:27,060 --> 00:14:32,740
+this fence, inside this playpen, my robot is safe, you know? So, it's like, what I do with my
+
+153
+00:14:32,740 --> 00:14:37,060
+daughter when I put her in a playpen, you know, it's a Geofence, it's safe, she can be autonomous
+
+154
+00:14:37,060 --> 00:14:42,820
+there. And so, again, I think the Geofensers, they're autonomous in the playpen. And it's great,
+
+155
+00:14:42,820 --> 00:14:47,140
+and the whole thing is making the world your playpen, but I think it's also a bit of a challenge
+
+156
+00:14:47,140 --> 00:14:51,940
+because you're trying to turn an open world into a closed world. So, it has a lot of challenges.
+
+157
+00:14:51,940 --> 00:14:56,100
+So, I'm also not a Geofenser because I want to work on autonomy. I want something that scales
+
+158
+00:14:56,100 --> 00:15:01,620
+that learns autonomously, that adapts, and that can be deployed in the world, right? Not just in
+
+159
+00:15:01,620 --> 00:15:06,580
+the playpen. So, you have the supervisors, you have the Geofensers, and you have the ones that are
+
+160
+00:15:06,580 --> 00:15:13,220
+pretty cool. I call them magicians, but you got to spell the AGI, an uppercase in magicians,
+
+161
+00:15:13,220 --> 00:15:20,020
+and AGI, itchians, right? And so, the magicians are obviously the people that believe in AGI,
+
+162
+00:15:20,020 --> 00:15:24,340
+and that believe that all roads lead to AGI. So, this is the open AIs, the deep minds, and a lot of
+
+163
+00:15:24,340 --> 00:15:28,580
+other folks. And especially now with foundation models, people get really excited about that,
+
+164
+00:15:28,580 --> 00:15:34,500
+because of the power of language, right? As an API for almost everything. And so, the magicians,
+
+165
+00:15:34,500 --> 00:15:39,540
+they believe in the scaling hypothesis. So, you're right that the story has multiple different
+
+166
+00:15:39,540 --> 00:15:44,180
+characters that have different interpretations of data-centric AI, et cetera. The magicians,
+
+167
+00:15:44,180 --> 00:15:48,740
+they really believe that scale is the way to go. And if I train on all of the internet,
+
+168
+00:15:49,220 --> 00:15:54,260
+I'm going to have AGI. And if I train a big enough model on a big enough data set,
+
+169
+00:15:54,260 --> 00:15:58,100
+and I have some safeguards in place, right? So, I'm not saying that people just do this
+
+170
+00:15:58,100 --> 00:16:04,500
+recklessly, because people now are more wise, then I'm going to get to AGI. I'm also not an AGI
+
+171
+00:16:04,500 --> 00:16:08,980
+person. I like autonomy more than intelligence, because I want robots to be useful. I don't want
+
+172
+00:16:08,980 --> 00:16:13,780
+to sleep robots to be smart. I believe that to be useful, they need to be smart. But I don't want
+
+173
+00:16:13,780 --> 00:16:17,940
+them to be smart for the sake of being smart. I want them to be useful, right? And to be useful,
+
+174
+00:16:17,940 --> 00:16:22,340
+they have to be autonomous. If I have to click on every pixel for every frame of a robot, for
+
+175
+00:16:22,340 --> 00:16:28,340
+all my life, for it to be able to help me with my chores at home, that's not very helpful.
+
+176
+00:16:29,540 --> 00:16:35,140
+I think that the principle-centric AI that we're thinking about is more inspired by a fourth
+
+177
+00:16:35,140 --> 00:16:38,740
+character, which is my daughter, Cassie. And there was something weird that happened during the
+
+178
+00:16:38,740 --> 00:16:43,380
+pandemic I can talk about, which is I taught my daughter seven years old now how to bike.
+
+179
+00:16:45,460 --> 00:16:51,380
+And I tried for a year before, and I tried it with reinforcement learning, basically,
+
+180
+00:16:51,380 --> 00:16:56,900
+which is basically put her on the bike, try it, and I catch you. I catch you when you're about
+
+181
+00:16:56,900 --> 00:17:03,060
+to do something, so that way she doesn't pay too bad of a negative reward. But encourage her when
+
+182
+00:17:03,060 --> 00:17:08,340
+she does well and all these kinds of things. Add some safety guardrails with the little training
+
+183
+00:17:08,340 --> 00:17:12,740
+wheels, etc. And I tried for one year to basically brute force the problem with reinforcement learning.
+
+184
+00:17:12,740 --> 00:17:16,660
+And as we know, reinforcement learning is not really good at simple efficiency, so at learning
+
+185
+00:17:16,660 --> 00:17:21,700
+efficiently. So after one year, not so much progress. And then I had a discussion with our CEO,
+
+186
+00:17:21,700 --> 00:17:27,380
+Gil Pratt, the famous roboticist, etc. And he said, oh, check out this method, which is a method
+
+187
+00:17:27,380 --> 00:17:33,460
+called pedal magic. You can find it online. And I'm not going to tell you details and stuff like
+
+188
+00:17:33,460 --> 00:17:38,180
+this. We could talk about it if you want. But basically, it had some principles about how you learn
+
+189
+00:17:38,180 --> 00:17:43,140
+how to bike some mechanical principles that actually relate to how Cheetahs take turns and use
+
+190
+00:17:43,140 --> 00:17:48,100
+their tails. It's a bit kind of a bit wacky mechanically speaking, but it has some principles
+
+191
+00:17:48,100 --> 00:17:53,140
+that are physically motivated, physically grounded. And it has an exercise that it derived from
+
+192
+00:17:53,140 --> 00:17:58,980
+these principles, which is basically just a mini environment and a mini training set. And I run
+
+193
+00:17:58,980 --> 00:18:05,620
+my few training samples with my daughter, five minutes in this small environment. And then
+
+194
+00:18:05,620 --> 00:18:13,540
+10 minutes later, she was biking. And I was like, wow, after spending a year trying so much,
+
+195
+00:18:13,540 --> 00:18:17,460
+like giving her so much data, so much guidance, so much supervision, I tried the supervisor's trick,
+
+196
+00:18:17,460 --> 00:18:21,460
+I tried the geofancer's trick, I tried the magician's trick, I tried everything. And then
+
+197
+00:18:22,020 --> 00:18:26,820
+something completely different that was not data centric AI, because I didn't give her examples
+
+198
+00:18:26,820 --> 00:18:31,540
+that related directly to the task of biking. It was not model centric AI, because I didn't change
+
+199
+00:18:31,540 --> 00:18:38,100
+the hardware, like you assume bike, same daughter, same dad, it was everything the same. And so
+
+200
+00:18:38,100 --> 00:18:42,500
+something happened that she learned really, really quickly. And two years later, after thinking
+
+201
+00:18:42,500 --> 00:18:45,780
+about it, basically the whole pandemic, and like, what happened? How do I make machine learning
+
+202
+00:18:45,780 --> 00:18:51,860
+as good as this, as fast at learning and as robust at lit, because she learned on the parking lot,
+
+203
+00:18:51,860 --> 00:18:55,620
+and then we've been biking everywhere. So she's been generalizing out of the main and all these
+
+204
+00:18:55,620 --> 00:18:59,700
+kind of things that we hope machine learning eventually gets to. And so this idea of principle
+
+205
+00:18:59,700 --> 00:19:04,580
+centric learning principle centric AI is kind of what emerged from there. And kind of explained
+
+206
+00:19:04,580 --> 00:19:08,820
+also some of the stuff, you know, some of the research we've done has worked spectacularly well,
+
+207
+00:19:08,820 --> 00:19:12,980
+like the same stuff, the self-supervised stuff. And eventually, you know, like, I mean, we made
+
+208
+00:19:12,980 --> 00:19:17,780
+60 papers, but half of those papers ended up in production, useful in production. And you're
+
+209
+00:19:17,780 --> 00:19:22,100
+wondering, why are the other ones used in production? What happened with these particular papers that
+
+210
+00:19:22,100 --> 00:19:27,540
+actually made the difference in our robust real world? And so you're trying to backward explain,
+
+211
+00:19:27,540 --> 00:19:34,100
+and I found some traces of the principles and how we use those principles to either design the
+
+212
+00:19:34,100 --> 00:19:40,260
+data sets or design the learning objective, and that enabled like really robust learning,
+
+213
+00:19:40,980 --> 00:19:45,300
+which includes in particular one thing, which is simple efficiency. I think like, like, you know,
+
+214
+00:19:45,300 --> 00:19:51,060
+finding the right way to use compute and minimize compute, but at the same time,
+
+215
+00:19:51,780 --> 00:19:56,100
+use enough compute to actually learn. So I'm not a, you know, an AI extremist, you know,
+
+216
+00:19:56,100 --> 00:19:59,860
+neither maximalist nor a minimalist, you know, it's not about the biggest data set, but it's also
+
+217
+00:19:59,860 --> 00:20:03,940
+not about, you know, short and sweet. There's a good trade-off between scale and efficiency and
+
+218
+00:20:03,940 --> 00:20:07,780
+with disgust. And I believe that principles is the way to find this trade-off.
+
+219
+00:20:07,780 --> 00:20:13,540
+That's such a great story. Is principle-centric AI the fourth character?
+
+220
+00:20:13,540 --> 00:20:16,740
+Exactly. Is that what you call it or is there another name for that fourth character?
+
+221
+00:20:16,740 --> 00:20:21,220
+Principle-centric AI is how I think about the research and what we're doing. If you want the name
+
+222
+00:20:21,220 --> 00:20:24,900
+on the characters, I would call us the educators, you know? It's like what we said is that we want
+
+223
+00:20:24,900 --> 00:20:29,460
+to find ways to teach machines, right? We know the mechanism by which, you know, we design
+
+224
+00:20:29,460 --> 00:20:35,060
+architectures, we learn with SGD, backprop, etc. But what we don't know is how to make a course.
+
+225
+00:20:35,780 --> 00:20:40,660
+It's interesting that you say educator and course because the thing that popped up for me was
+
+226
+00:20:41,300 --> 00:20:45,860
+an element of pre-training, yeah, as well as an element of curriculum learning.
+
+227
+00:20:45,860 --> 00:20:50,500
+Exactly. Yeah, yeah. And you know, these words, you know, they're used in teaching in schools,
+
+228
+00:20:50,500 --> 00:20:56,340
+you know, I started to teach at Stanford computer vision and I hadn't taught a course in a long time
+
+229
+00:20:56,340 --> 00:21:01,380
+and I co-teached this with Juan Carlos Nebles who's also a well-known computer vision guy in
+
+230
+00:21:01,380 --> 00:21:06,580
+Faye Faze Lab. And so we worked a lot on the course. He has a lot of experience and so I kind of
+
+231
+00:21:06,580 --> 00:21:11,060
+learned, relearned how to teach a course from him and we taught hundreds students and I taught
+
+232
+00:21:11,060 --> 00:21:15,700
+geometry, computer vision with geometry, which is also a lot of the things we had success in our
+
+233
+00:21:15,700 --> 00:21:21,300
+research for driving and robotics, which is self-supervised learning using geometric principles. And I
+
+234
+00:21:21,300 --> 00:21:25,700
+found that all these parallels between my daughter, between teaching at Stanford, and between
+
+235
+00:21:25,700 --> 00:21:31,540
+our research papers, and as kind of like was really kind of, wow, it kind of opened the new world
+
+236
+00:21:31,540 --> 00:21:36,020
+for me of like, oh, how do we be the educators that use principle-centric AI to efficiently
+
+237
+00:21:36,020 --> 00:21:40,820
+teach machines? This is super interesting. So when I think about these different characters,
+
+238
+00:21:40,820 --> 00:21:47,940
+the supervisors think implicitly that the path to AGI, let's say that that's the goal for
+
+239
+00:21:49,060 --> 00:21:57,940
+generalize. The path to AGI is through human labor. The geofensors think that the path to AGI
+
+240
+00:21:57,940 --> 00:22:04,260
+or whatever the goal is is constraints. Yeah, maybe Amari can drop it in my dock and I'll
+
+241
+00:22:04,260 --> 00:22:08,100
+remember the name of the episode, but I had a really interesting conversation or a couple recently
+
+242
+00:22:08,100 --> 00:22:15,780
+about the role that constraints play in ML. The magicians think that it's some nebulous notion
+
+243
+00:22:15,780 --> 00:22:22,820
+of scale, which is basically or another alternatively or complementarily self-supervision, maybe.
+
+244
+00:22:23,460 --> 00:22:28,660
+I think self-supervision can see one way to unlock scale. It's because you remove the bottleneck
+
+245
+00:22:28,660 --> 00:22:34,500
+to be able to train that scale. But it's really scale. It kind of emerges magically from all the
+
+246
+00:22:34,500 --> 00:22:41,460
+data that you're feeding it. That's what people get. I'm amazed by Dali. I'm amazed by GPD3
+
+247
+00:22:41,460 --> 00:22:46,180
+who isn't when you see the inferences. But that's the thing is that what I realize is why are we
+
+248
+00:22:46,180 --> 00:22:51,700
+amazed? We are amazed because we don't know how it emerged from the data. And if you like listen
+
+249
+00:22:51,700 --> 00:22:57,860
+to Ilya and all the smart people, that's the same. They're like it's working because we're feeding
+
+250
+00:22:57,860 --> 00:23:01,940
+it more data and also because I mean there's a lot of secrets also in feeding the data. So I'm not
+
+251
+00:23:01,940 --> 00:23:07,700
+saying like magicians magic doesn't exist. It's like people have these tricks, right? And so there's
+
+252
+00:23:07,700 --> 00:23:12,740
+a lot of tricks to make it work. But so the magicians is really about how to unlock the powers of
+
+253
+00:23:12,740 --> 00:23:17,860
+scale. That's what they're really really good at. I think that's where it's going. But I don't think
+
+254
+00:23:17,860 --> 00:23:24,820
+that's the that's the panacea. That's the end game either. I guess the question that I'm trying to
+
+255
+00:23:24,820 --> 00:23:33,380
+get to is like what is that kind of fundamental one word tool or currency of the educator? Like what
+
+256
+00:23:33,380 --> 00:23:41,460
+is it that they have you know perfected that is going to be that path? It's principles. It's
+
+257
+00:23:41,460 --> 00:23:46,340
+principles. And so basically okay there's two types of principles. Let's like answer your question
+
+258
+00:23:46,340 --> 00:23:50,820
+you said like be more precise about the principles. So there's two types of principles. There is
+
+259
+00:23:50,820 --> 00:23:55,860
+the principles you teach. And there's the principles you learn, right? So the principles you teach
+
+260
+00:23:55,860 --> 00:24:01,540
+are things you principles, right? So some people call this inductive biases or inductive priors
+
+261
+00:24:01,540 --> 00:24:07,380
+or you name it, right? But it's basically things you you know is true about the world. You know
+
+262
+00:24:07,380 --> 00:24:12,900
+Newton existed, F equals M A existed. Maybe we don't have to reinvent it. Maybe we can use that
+
+263
+00:24:12,900 --> 00:24:16,900
+prior knowledge, right? I think as some of the things that I've listened to and during talk about
+
+264
+00:24:16,900 --> 00:24:21,860
+in data centric AI is a lot on that also on like how do we use expert knowledge? But in a data-driven
+
+265
+00:24:21,860 --> 00:24:27,140
+way, right? So it's not like they're going back to expert systems, right? It's about like how do I
+
+266
+00:24:28,100 --> 00:24:32,740
+if I know some principles and it can be ethical principles, it can be legal principles if you have
+
+267
+00:24:32,740 --> 00:24:37,700
+compliance because you know there's the AI act and all these regulations that are coming in AI
+
+268
+00:24:37,700 --> 00:24:43,140
+and including in you know robotic space. And so if you have some principles that you want your
+
+269
+00:24:43,140 --> 00:24:48,420
+system to adhere to, right? Being compliance with or common sense, you know like when we talk about
+
+270
+00:24:48,420 --> 00:24:54,260
+embodiment and grounding, you know, that's what we mean. So how do we inject those principles into
+
+271
+00:24:54,260 --> 00:25:00,180
+data-driven learning processes? And then there's the principle we learn from the data. So that's where
+
+272
+00:25:00,180 --> 00:25:05,060
+we train on the data set and it's not just we're building autonomous prediction machines, right?
+
+273
+00:25:05,060 --> 00:25:09,380
+That are just there to automate the prediction at scale, basically because that's what machine
+
+274
+00:25:09,380 --> 00:25:15,540
+learning does, right? But maybe what we want to extract is not a bazillion number of predictions,
+
+275
+00:25:15,540 --> 00:25:21,540
+but we want to extract, we want to learn something from what the machine learned itself. And so there's
+
+276
+00:25:21,540 --> 00:25:25,780
+all this cool area of machine learning about machine learning for sciences, et cetera, you know, where
+
+277
+00:25:25,780 --> 00:25:31,540
+people are discovering new physical laws maybe or finding out understanding a bit better human
+
+278
+00:25:31,540 --> 00:25:36,500
+behavior because if you want to assist and amplify humans, it's not about automation, right?
+
+279
+00:25:36,500 --> 00:25:42,100
+Autonomous prediction machines are there to replace, but if you want to amplify, you got to understand.
+
+280
+00:25:42,100 --> 00:25:47,780
+And so this is the principles that you want to understand from data. So it's a two-way street
+
+281
+00:25:47,780 --> 00:25:52,420
+in a sense. And I can give you some examples of our research where actually this already is
+
+282
+00:25:52,420 --> 00:25:56,500
+happened, right? This is not just principle-centric AI, it's not just a cool expression, you know,
+
+283
+00:25:56,500 --> 00:26:01,860
+it's actually just a way that I use to kind of define a little bit our successes and what we're
+
+284
+00:26:01,860 --> 00:26:07,460
+actually building at TRI. Yeah, I do want to transition to that because I think while this
+
+285
+00:26:08,580 --> 00:26:14,100
+philosophical conversation is really interesting, I do want to kind of make it a bit more concrete
+
+286
+00:26:14,100 --> 00:26:19,540
+and talk about some of the things you're doing around self-supervised and synthetic. Before I do
+
+287
+00:26:19,540 --> 00:26:26,260
+that episode that I was thinking about was my conversation with David Ha, the benefit of bottlenecks
+
+288
+00:26:26,260 --> 00:26:33,060
+and evolving AI that was really almost entirely focused on this idea of constraints, not in a
+
+289
+00:26:33,060 --> 00:26:43,060
+geofencing sense, but in more broadly in AI in another context. So your research, where do you
+
+290
+00:26:43,060 --> 00:26:48,900
+want to start there, self-supervised? Yeah, self-supervised I think is great. So I think one of the things
+
+291
+00:26:48,900 --> 00:26:53,220
+that we know about the world really well, and especially what I'm teaching at Stanford,
+
+292
+00:26:53,220 --> 00:26:59,140
+is geometry, right? When we see the world, when we perceive the world, we have a lot of really good
+
+293
+00:26:59,140 --> 00:27:05,460
+equations. You know, actually some of the things dates back like 3,000 years, you know, back to,
+
+294
+00:27:05,460 --> 00:27:11,140
+you know, Chinese philosopher, I think Mudzi, people knowing about, you know, the pinnacle camera model
+
+295
+00:27:11,140 --> 00:27:18,980
+and all these kind of things. So there's a lot of knowledge we have about how the world works in
+
+296
+00:27:18,980 --> 00:27:23,620
+terms of let's say just physics of light, right? And so when you want to do computer vision,
+
+297
+00:27:24,340 --> 00:27:29,620
+how do you leverage that prior knowledge? And historically, it's been in the way of we hand
+
+298
+00:27:29,620 --> 00:27:35,780
+design algorithms, right? We write algorithms that solve the problem based only on our prior knowledge.
+
+299
+00:27:35,780 --> 00:27:39,860
+Now with machine learning, we want to be data driven. And so we've kind of like thrown the baby
+
+300
+00:27:39,860 --> 00:27:45,220
+with the bathwater and say, well, it's all in the data. And so one of the thing again, as I said,
+
+301
+00:27:45,220 --> 00:27:49,620
+we are always kind of in the moderate route, which is, of course, data is powerful, but of course,
+
+302
+00:27:49,620 --> 00:27:54,100
+prior knowledge is powerful too. So we want to combine both. So self-supervised learning is
+
+303
+00:27:54,100 --> 00:27:59,220
+actually a really good revolution that I'm really excited about because and that we've been doing
+
+304
+00:27:59,220 --> 00:28:04,420
+a lot of papers over the year. I think they're probably like 15, 20 papers at CPR, etc. I think we're
+
+305
+00:28:04,420 --> 00:28:12,100
+presenting four papers at Ikra in a couple of weeks and four papers at CPR and on related topics.
+
+306
+00:28:12,100 --> 00:28:19,060
+And so self-supervised learning is the way where we use these constraints or these knowledge is
+
+307
+00:28:19,060 --> 00:28:23,220
+prior knowledge about the world, let's say like, you know, the reproduction equations if you're
+
+308
+00:28:23,220 --> 00:28:29,380
+using the panel camera model, and we use that to as a learning objective. So in self-supervised
+
+309
+00:28:29,380 --> 00:28:32,980
+learning, you're not solving directly what you want, which is dog versus cat or, you know,
+
+310
+00:28:32,980 --> 00:28:37,540
+detecting a pedestrian or things like that. But what instead you're doing is you're providing a
+
+311
+00:28:37,540 --> 00:28:42,820
+pre-training objective. And so there's two big areas. One that I was mentioning now is geometry,
+
+312
+00:28:42,820 --> 00:28:48,260
+where actually it turns out we can solve the task, which for instance, it's a lot about predicting
+
+313
+00:28:48,260 --> 00:28:52,340
+depth how far objects are because we want to avoid collision with them or we want to grasp them
+
+314
+00:28:52,340 --> 00:28:57,060
+if it's a robot hand and things like that. So predicting the depth of a scene turns out you can do
+
+315
+00:28:57,060 --> 00:29:02,500
+that without ever having any supervision. And so this is self-supervised learning for monodef and
+
+316
+00:29:02,500 --> 00:29:07,780
+something that we have open source code. You can go to GitHub, you know, a TRI page, a repo called
+
+317
+00:29:07,780 --> 00:29:12,980
+Pactnet SFM, which has 1,000 GitHub stars. And so it's very popular. People use it for all kinds
+
+318
+00:29:12,980 --> 00:29:19,060
+of crazy things because you can train it only from video. So you can just feed it raw videos and
+
+319
+00:29:19,060 --> 00:29:24,180
+what it will learn. It will learn to output point clouds or death maps from there. And the way it's
+
+320
+00:29:24,180 --> 00:29:29,780
+trained is just by using reconstruction, but not just a black box reconstruction of critical
+
+321
+00:29:29,780 --> 00:29:34,020
+pixels. And I'll tell you if they look like the pixels you should predict. Instead, it's
+
+322
+00:29:34,020 --> 00:29:39,300
+predict me death map. And then if you're right, if your network weights are correct, and your death
+
+323
+00:29:39,300 --> 00:29:44,820
+map will be correct. And then knowing the equations of geometry, we can recreate a past frame
+
+324
+00:29:45,300 --> 00:29:52,020
+from the current frame by warping geometrically using an equation. And then if the warping
+
+325
+00:29:52,020 --> 00:29:57,060
+is correct, the pixels align. And if it's not correct, the pixels don't align. The colors are not
+
+326
+00:29:57,060 --> 00:30:02,820
+the same. And you're wrong, not because geometry is wrong, not because 3,000 years of history,
+
+327
+00:30:02,820 --> 00:30:07,860
+human history in science is wrong. But because your neural net weights are wrong. And then you can
+
+328
+00:30:07,860 --> 00:30:11,620
+do back propagation as you do. So this is going back to what I said earlier. We know how machines
+
+329
+00:30:11,620 --> 00:30:16,660
+learn. We don't know how to teach them. In this instance, we know how to teach them geometry. We
+
+330
+00:30:16,660 --> 00:30:22,500
+teach them by reconstruction using geometry as an equation in the middle to get the prediction.
+
+331
+00:30:22,500 --> 00:30:27,620
+And then we learn using SGD back prop and the way we do it. So we have a bunch of papers. We started
+
+332
+00:30:27,620 --> 00:30:32,980
+from stereo setup with two cameras, to just a singular camera, to now all the crazy sensor
+
+333
+00:30:32,980 --> 00:30:37,300
+suites. And actually, we can even, you know, because we've worked on the hardest problem first,
+
+334
+00:30:37,300 --> 00:30:42,180
+which is monocular camera, the reason we've done that is because the common denominator behind
+
+335
+00:30:42,180 --> 00:30:45,940
+almost any platform. You have it, you know, I have it in my phone. I actually have more than one
+
+336
+00:30:45,940 --> 00:30:50,820
+camera. Everybody has cameras. Cameras are everywhere. But if you solve the problem
+
+337
+00:30:50,820 --> 00:30:57,140
+well enough for a single camera to predict step, then you can use it to predict that for multiple
+
+338
+00:30:57,140 --> 00:31:02,100
+cameras for cameras that are stereo or not stereo for a LiDAR for any kind of sensor suites.
+
+339
+00:31:02,100 --> 00:31:05,620
+And that's what we've been doing. It's a very pragmatic approach. It's not to replace everything
+
+340
+00:31:05,620 --> 00:31:11,140
+with a single camera. Some applications might work with a single camera. Some definitely won't.
+
+341
+00:31:11,140 --> 00:31:15,860
+But it's to be solving the common denominator. Again, this idea of a platform that foundations
+
+342
+00:31:15,860 --> 00:31:21,380
+and building on top of it, right? So self-supervised learning using geometric principles to teach
+
+343
+00:31:21,380 --> 00:31:27,860
+geometry to deep nets is a big thing we've been doing. And I mentioned the second way that you can do
+
+344
+00:31:27,860 --> 00:31:31,780
+self-supervised learning, just for pre-training, it's contrastive learning. If probably, you know,
+
+345
+00:31:31,780 --> 00:31:36,420
+heard about this, had podcasts over this, it's very, very popular. One of the very cool things we've
+
+346
+00:31:36,420 --> 00:31:42,180
+done in collaboration with a really, really good machine learning professor at Stanford is called
+
+347
+00:31:42,180 --> 00:31:49,060
+Teng Yuma. We've had a couple of papers at Nurebs. We had iClear spotlights and a bunch of
+
+348
+00:31:49,060 --> 00:31:56,420
+papers with them on trying to make sense of self-supervised learning, especially contrastive learning.
+
+349
+00:31:56,420 --> 00:32:00,020
+Why does it work? Because there's all these bells and whistles and these tricks and these
+
+350
+00:32:00,020 --> 00:32:04,020
+cookbooks. And going back to the philosophical discussion about empiricism, you know, we've
+
+351
+00:32:04,020 --> 00:32:08,980
+built a lot of things that work. And obviously work, we show that it works, but we don't really
+
+352
+00:32:08,980 --> 00:32:15,220
+understand why. And so understanding why is really important because you have to convince people
+
+353
+00:32:15,220 --> 00:32:19,220
+that are not necessarily ML believers, crazy, woohoo, you know, let's use machine learning just because
+
+354
+00:32:19,220 --> 00:32:24,260
+it's cool, but actually people that need to invest real money and take real risks and, you know,
+
+355
+00:32:24,260 --> 00:32:29,460
+and putting, you know, say, if you want to save lives, you need to make sure that you have a
+
+356
+00:32:29,460 --> 00:32:35,060
+really good justification that your system will do so. And so understanding things a bit more
+
+357
+00:32:35,060 --> 00:32:40,740
+and the theory and garnering the principles out of the data driven is really important.
+
+358
+00:32:40,740 --> 00:32:45,860
+And one of the things that I'll highlight there briefly is one of the principles we found
+
+359
+00:32:45,860 --> 00:32:49,540
+from self-supervised learning, which is just learn, you know, contrastive learning. So you do
+
+360
+00:32:49,540 --> 00:32:54,260
+data augmentations because you know that if you change the color of things, it shouldn't change
+
+361
+00:32:54,260 --> 00:32:58,660
+your predictions. So you have all these kind of data augmentations that represent properties
+
+362
+00:32:58,660 --> 00:33:03,620
+like principles of invariance and equivalence that you know hold true. And you want your system to
+
+363
+00:33:03,620 --> 00:33:07,300
+just adhere to those constraints again, like in this idea of constraints you were talking about.
+
+364
+00:33:07,300 --> 00:33:11,540
+So you train by just saying when you're out of the constraints, when you're out,
+
+365
+00:33:11,540 --> 00:33:15,460
+when you're not grounded anymore, when you're making a very weird mistake, right?
+
+366
+00:33:15,460 --> 00:33:19,060
+But you're not telling it what's the solution, you're just telling stop making weird mistakes.
+
+367
+00:33:19,700 --> 00:33:22,900
+And if you see enough data, it will stop making weird mistakes and what's going to happen is
+
+368
+00:33:22,900 --> 00:33:26,660
+going to have something that's this pretty good initialization for it made, you know,
+
+369
+00:33:26,660 --> 00:33:31,380
+a few shot transfer and like small data kind of cases, maybe something that, you know,
+
+370
+00:33:31,380 --> 00:33:35,780
+in data centric AI, you get your experts to label just the right amount, but if you have good
+
+371
+00:33:35,780 --> 00:33:42,020
+pre-training, you don't need more than that. Necessary but sufficient. So what we found is why
+
+372
+00:33:42,020 --> 00:33:46,660
+does self-surprise learning and particularly contrastive learning works so well? And and
+
+373
+00:33:46,660 --> 00:33:51,700
+particular, a benefit that we found was very surprising is that it's robust because you would
+
+374
+00:33:51,700 --> 00:33:56,980
+think if you're in the supervisors mindset that's okay, Adrian is saying supervisors is bad,
+
+375
+00:33:56,980 --> 00:34:00,900
+but it's just a matter of cost. If you can pay the cost, you know, if you're return on investments,
+
+376
+00:34:00,900 --> 00:34:04,820
+justifies labeling forever, just label forever and it's the best thing to do, right?
+
+377
+00:34:05,780 --> 00:34:10,660
+Wrong. Because actually we know that if you just collect the, you know, data has bias,
+
+378
+00:34:10,660 --> 00:34:15,140
+natural data has biases, right? And if you just label more and label more and label more,
+
+379
+00:34:16,020 --> 00:34:20,180
+you're going to increase, you're going to create distortions, you're going to have human biases
+
+380
+00:34:20,180 --> 00:34:25,460
+injected in the labels, mistakes or, you know, you're going to label more the mode and all these kind
+
+381
+00:34:25,460 --> 00:34:32,180
+of things that yields issues. Yeah, particularly in your case in AV where you're collecting a lot of
+
+382
+00:34:32,180 --> 00:34:38,100
+data of the usual thing happening. The problem is all about the corner cases that don't happen
+
+383
+00:34:38,100 --> 00:34:43,860
+very frequently. Ding ding exactly right. Yep, absolutely. And so, and so self-surprise learning,
+
+384
+00:34:43,860 --> 00:34:49,140
+what we found surprisingly is more robust to the imbalance. So if you, if you collect data at
+
+385
+00:34:49,140 --> 00:34:52,820
+scale, it's very imbalance. You have this long tail of edge cases and rare conditions, rare
+
+386
+00:34:52,820 --> 00:34:57,540
+events, as you mentioned. And, and some of them are noise, but some of them are really bad. Like,
+
+387
+00:34:57,540 --> 00:35:03,220
+you really want to make sure they're very important for you to, to, to know and, and learn. And so,
+
+388
+00:35:03,220 --> 00:35:07,540
+but you can't tell from just the data itself, it's just rare events, right? And so what we found is
+
+389
+00:35:07,540 --> 00:35:14,500
+that self-supervised pre-training is actually better than training with labels because it's more robust
+
+390
+00:35:14,500 --> 00:35:20,100
+to the, to the long tail to the imbalance. And we were like, okay, cool. Another empirical fact
+
+391
+00:35:20,100 --> 00:35:24,500
+that self-supervised learning is a good idea, but why? And in this paper that we actually just
+
+392
+00:35:24,500 --> 00:35:29,140
+present that I clear as a spotlight, we found the explanation and the principle for why. And it's
+
+393
+00:35:29,140 --> 00:35:34,500
+a bit counterintuitive. So what we thought was that when you do self-supervised learning,
+
+394
+00:35:34,500 --> 00:35:39,220
+you learn more from the tail. You learn richer features, better features from the tail.
+
+395
+00:35:39,940 --> 00:35:45,220
+Because the label is not leading you astray. Take an example of driving, you drive mostly straight,
+
+396
+00:35:45,220 --> 00:35:49,300
+and then you have all this kind of weird maneuvers, evasions, etc. And so when you drive straight,
+
+397
+00:35:49,300 --> 00:35:53,860
+and you say, drive straight, drive straight, that's your label, basically, you're just, the model
+
+398
+00:35:53,860 --> 00:35:57,780
+might just collapse on the mode, right? And might just say, all right, just drive straight all the time,
+
+399
+00:35:57,780 --> 00:36:02,820
+that's enough to minimize my loss. The rest is just weird. There's no pattern, right? And so,
+
+400
+00:36:02,820 --> 00:36:06,740
+and so if you just do supervised learning, this is what would happen. But if you do self-supervised
+
+401
+00:36:06,740 --> 00:36:11,460
+learning, our assumption was it generalizes better, it's more robust because it's going to learn more,
+
+402
+00:36:11,460 --> 00:36:17,060
+it's going to have to try to explain or reduce the loss on the rare things too. And so it's going
+
+403
+00:36:17,060 --> 00:36:23,460
+to learn better features from the tail. But what we found out is that it's not true. It actually
+
+404
+00:36:23,460 --> 00:36:29,380
+learns better, more diverse, and more generalizable features from the mode. And let me give you an
+
+405
+00:36:29,380 --> 00:36:33,460
+example for, and so we have like very cool semi-synthetic experiments in the paper, a bit hard to
+
+406
+00:36:33,460 --> 00:36:38,580
+explain, but you can look at it. So where we basically just probe this and verify this, both with
+
+407
+00:36:38,580 --> 00:36:44,420
+theoretical explanation and with like controlled experiments to show that our principle,
+
+408
+00:36:44,420 --> 00:36:49,060
+our explanation is correct, not just that the performance is good, but that's also we know why.
+
+409
+00:36:49,060 --> 00:36:54,980
+But let me give you an example. If you want to do that, is the specific case you're referring to
+
+410
+00:36:58,100 --> 00:37:03,300
+self-supervised by you've got some geometric relationship and you're projecting through that,
+
+411
+00:37:03,300 --> 00:37:08,580
+or is it the data augmentation contrastive learning case? It's the contrastive case. So for this
+
+412
+00:37:08,580 --> 00:37:12,980
+particular paper, we found that it's the contrastive case. Because for the first, the other case,
+
+413
+00:37:12,980 --> 00:37:17,860
+we know the principle because we teach by principle, right? The contrastive one is more the other
+
+414
+00:37:17,860 --> 00:37:22,500
+way around. I mean, there's this principle of invariance, but we wanted to know why does it work
+
+415
+00:37:22,500 --> 00:37:26,900
+and get the principle out from the model after training and why it works, right? And so this
+
+416
+00:37:26,900 --> 00:37:33,140
+principle is it learns better features from the mode, because like the example is, if you learn to
+
+417
+00:37:33,140 --> 00:37:37,860
+drive straight, right, all the time, you say drive straight, you're basically ignoring things that
+
+418
+00:37:37,860 --> 00:37:42,980
+happen behind you. So I don't know if you've, when I came here, you know, in Europe, we used to
+
+419
+00:37:42,980 --> 00:37:46,820
+with J-walk, you know, it's like we cross the street whenever, you know, again, maybe the French,
+
+420
+00:37:46,820 --> 00:37:50,260
+maybe that's just me, you know, we cross the street from New York, we also J-walk.
+
+421
+00:37:50,260 --> 00:37:55,540
+There you go. But you typically don't J-walk right in front of a car, right? You typically wait
+
+422
+00:37:55,540 --> 00:38:00,900
+for the car to go and then you just cross, right? So the J-walkers are always behind the driver.
+
+423
+00:38:00,900 --> 00:38:04,740
+So when you're learning to drive, you're basically can safely ignore the pedestrian and the
+
+424
+00:38:04,740 --> 00:38:10,100
+back, it's not gonna affect your policy. So if you're very focused in the supervisor's way or
+
+425
+00:38:10,100 --> 00:38:14,340
+the geofancer's way, you're just saying, all right, just focus in front of you and just what
+
+426
+00:38:14,340 --> 00:38:18,420
+matters is avoid collision in front of you. But in a self-supervised way, you will say, oh,
+
+427
+00:38:19,060 --> 00:38:23,860
+something weird happened behind you. And I don't care about you learning the policy. I care about
+
+428
+00:38:23,860 --> 00:38:29,060
+you satisfying the contrastive learning objective. So you have to understand the world. You have
+
+429
+00:38:29,060 --> 00:38:34,500
+to explain what happened behind you. You have to verify your invariance and equivalence properties
+
+430
+00:38:34,500 --> 00:38:39,860
+also on what happened behind you if it's if it's part of your of your input signal, right? And so
+
+431
+00:38:39,860 --> 00:38:48,340
+then you will see basically J-walkers and you will have to learn features about these J-walkers
+
+432
+00:38:48,340 --> 00:38:53,700
+even though they don't relate to directly optimizing your angle, which is in this case would be
+
+433
+00:38:53,700 --> 00:38:58,900
+drive straight. And so now linking back to my daughter, Cassie, I tried to teach her biking by
+
+434
+00:38:58,900 --> 00:39:04,980
+teaching her to bike. But when I teach her taught her the principles about biking, right, about how
+
+435
+00:39:04,980 --> 00:39:10,420
+not to fall, basically, then she learned how to bike because she had internalized the principles.
+
+436
+00:39:10,420 --> 00:39:13,780
+And it's basically the same thing here is that it internalized the principle of you have to
+
+437
+00:39:13,780 --> 00:39:18,900
+explain what's happening around you because you might you never know someday that J-walkers that
+
+438
+00:39:18,900 --> 00:39:22,980
+you've seen behind you, they might actually cross in front of you and you need to be able to
+
+439
+00:39:22,980 --> 00:39:27,380
+represent them because if you don't represent them, if it's are not there in your feature representation,
+
+440
+00:39:27,380 --> 00:39:32,020
+you're going to you're not going to be able to react to them. And so that's what we found. This
+
+441
+00:39:32,020 --> 00:39:37,620
+counterintuous principle, which is it generalized better, self-supervised, contrastive learning,
+
+442
+00:39:37,620 --> 00:39:42,260
+generalized better, not because it captured better features from the tail, from the rare events,
+
+443
+00:39:42,260 --> 00:39:47,220
+but because it captured more diverse features from the mode. Because all kinds of things happen
+
+444
+00:39:47,220 --> 00:39:52,900
+around you all the time. And in the mode, you have equal diversity because you're still
+
+445
+00:39:52,900 --> 00:39:59,060
+experiencing the same crazy world is just that the long tail of actions, right, does not correspond
+
+446
+00:39:59,060 --> 00:40:05,540
+to the long tail of events of things that happen in the world. Did you find a way to control for
+
+447
+00:40:06,420 --> 00:40:13,860
+this idea that the reason why you had increased robustness isn't necessarily that the model was
+
+448
+00:40:14,740 --> 00:40:20,020
+you know, learning about the things in a raviou mirror, but rather just that you gave it multiple
+
+449
+00:40:20,020 --> 00:40:24,340
+things to do. And so in this, you know, based on kind of what we've learned about multitask,
+
+450
+00:40:24,340 --> 00:40:29,940
+like just having the model, doing multiple things independent of what those things are,
+
+451
+00:40:30,500 --> 00:40:35,140
+it creates some robustness. Yeah, I think I encourage people to have a look at the paper because
+
+452
+00:40:35,140 --> 00:40:39,620
+there's a very cool visual experiment to that validates. So there's some theory, right? And uh,
+
+453
+00:40:39,620 --> 00:40:44,660
+and I mean, of course with assumptions that not necessarily reflect all the practical applications
+
+454
+00:40:44,660 --> 00:40:49,540
+and successes as usual, but under some consideration, some constraints might offer this,
+
+455
+00:40:49,540 --> 00:40:54,180
+we know why and we can prove it. And then we have some visual experiments where we show that
+
+456
+00:40:54,180 --> 00:40:59,540
+basically what you do is you have an image where you have the left side that has the category
+
+457
+00:41:00,100 --> 00:41:05,780
+that you that corresponds to the label. And then the right side that has a confounder or even
+
+458
+00:41:05,780 --> 00:41:11,060
+just a black, you know, like a black image. And so then what you do is you train on that. So you
+
+459
+00:41:11,060 --> 00:41:15,620
+basically introduce the confounder and at a test time, you remove that confounder or you swap it.
+
+460
+00:41:15,620 --> 00:41:20,340
+And then what you want to see is you want to see, well, at training time, the supervised way,
+
+461
+00:41:20,340 --> 00:41:24,980
+it will have just focused on the half part of the image that corresponds to the labels because the
+
+462
+00:41:24,980 --> 00:41:29,620
+rest is noise. But the self-supervised part, it trained on both sides and it learned features from
+
+463
+00:41:29,620 --> 00:41:35,060
+both sides. And then when you apply it on the test time where you said, oh, now I changed the
+
+464
+00:41:35,060 --> 00:41:40,340
+environment and the relevant part is not on the left. It's on the right now. Then the self-supervised
+
+465
+00:41:40,340 --> 00:41:45,620
+feature says, no problem. It's still things I know how to represent. Whereas the supervised part is
+
+466
+00:41:45,620 --> 00:41:50,020
+now very causally confused, right? And causal confusion is just one example of like,
+
+467
+00:41:50,020 --> 00:41:57,460
+how spurious correlations affect very negatively supervised learning and the supervisor's way.
+
+468
+00:41:57,460 --> 00:42:01,460
+And that's why it's the same thing as the supervisors and the geofensors. You're just running after
+
+469
+00:42:02,420 --> 00:42:05,700
+a fact that the world, there's only one thing that's constant in the world is change.
+
+470
+00:42:05,700 --> 00:42:11,140
+Which is why you just label forever and then you're growing your operational domain and the
+
+471
+00:42:11,140 --> 00:42:16,980
+world changes and most likely your system has to change also. So this is why the self-supervised
+
+472
+00:42:16,980 --> 00:42:23,620
+learning is all about learning from diverse data in a diverse way. This is the whole, the
+
+473
+00:42:23,620 --> 00:42:27,860
+quality and diversity of data in the data centric realm, which is still a bit more art than
+
+474
+00:42:27,860 --> 00:42:32,260
+science. And that's where our research is. It's like, like you said, data centric is not
+
+475
+00:42:32,260 --> 00:42:38,740
+necessarily just about scale. It's about focusing on the data and being better about using the data,
+
+476
+00:42:38,740 --> 00:42:44,500
+designing data sets and etc. But as you know, it's still very much more an art than a science and
+
+477
+00:42:44,500 --> 00:42:50,500
+we're trying to make it more into a science by using principles. In the paper that you were describing
+
+478
+00:42:51,140 --> 00:42:56,180
+was did synthetic, was there a synthetic data component to that or is that separate research?
+
+479
+00:42:56,180 --> 00:43:02,500
+The synthetic data, it's a different set of research where the idea is there are certain sets of
+
+480
+00:43:02,500 --> 00:43:08,580
+principles. We don't exactly know how to, you know, include them in the machine learning pipeline,
+
+481
+00:43:08,580 --> 00:43:12,740
+right? Whether the data augmentation that I mentioned, like contrastive learning or whether
+
+482
+00:43:12,740 --> 00:43:18,500
+the self-supervised objective that I was mentioning. And the big one is that relates to grounding
+
+483
+00:43:18,500 --> 00:43:25,220
+and embodiment is physics, right? So we don't know how to have f equals m a into a deep net, right?
+
+484
+00:43:25,220 --> 00:43:28,660
+We don't know how to, like, how do you make the connections? Which way do you, like,
+
+485
+00:43:28,660 --> 00:43:32,660
+we don't know how to do that. But we know it's true. We know gravity and we want grounding
+
+486
+00:43:32,660 --> 00:43:39,060
+into these systems. And that's the whole embodied AI area. And so, but what we know how to do
+
+487
+00:43:39,060 --> 00:43:45,380
+is we know how to program it into simulators. And simulators are basically a huge opportunity
+
+488
+00:43:45,380 --> 00:43:52,340
+for data set generators, something what we call programmable data. You write a program and this
+
+489
+00:43:52,340 --> 00:43:57,220
+program generates you data sets. And these data sets are actually generated according to
+
+490
+00:43:57,220 --> 00:44:01,780
+principles because they're actually generated according to a program that is written by humans
+
+491
+00:44:01,780 --> 00:44:06,100
+that represents our prior knowledge. Again, f equals m a and all these kind of things.
+
+492
+00:44:06,100 --> 00:44:10,100
+So a lot of the things we've been doing, which originally came out of necessity because
+
+493
+00:44:10,100 --> 00:44:13,860
+sometimes you don't have the data, like for accidents or for things that are, you know,
+
+494
+00:44:13,860 --> 00:44:18,340
+like things you want to react to and you want to anticipate. But collecting that data would be
+
+495
+00:44:18,340 --> 00:44:24,340
+unethical or it's too rare or it's impossible. But yet, you want your system to be able to
+
+496
+00:44:24,340 --> 00:44:29,540
+handle those cases. So synthetic data is a great, great way to do that because you can program
+
+497
+00:44:29,540 --> 00:44:35,940
+those principles into the data set generator. And then you have basically built problem sets.
+
+498
+00:44:35,940 --> 00:44:41,940
+You've built a curriculum. You've built a set of exercises, right, for your machine learning
+
+499
+00:44:41,940 --> 00:44:47,940
+model to digest and internalize the principles in its own way, in its weights. So you program in human
+
+500
+00:44:47,940 --> 00:44:55,540
+language or human code, f equals m a, generate a lot of images and videos that then you feed
+
+501
+00:44:55,540 --> 00:45:01,700
+through the usual machinery. Again, we know how machines learn, SDD, backprop, etc. But this time,
+
+502
+00:45:01,700 --> 00:45:07,140
+we know how to teach. We teach through a simulator that is a data set generator, essentially.
+
+503
+00:45:07,140 --> 00:45:15,540
+Yeah. And a lot of ways this, there's kind of a unifying idea between that and the use of geometry
+
+504
+00:45:15,540 --> 00:45:21,460
+that we're referencing before. It's, you know, we've got some set of knowledge or heuristics about
+
+505
+00:45:21,460 --> 00:45:30,340
+the way the real world works. And we use that to generate data and then use SDD and the techniques
+
+506
+00:45:30,340 --> 00:45:36,420
+that we've proven out. It's kind of interesting kind of reflecting on the evolution of the industry.
+
+507
+00:45:36,420 --> 00:45:41,140
+And I've talked about this ad nauseam, folks who've listened to the show for a while, probably
+
+508
+00:45:41,140 --> 00:45:45,700
+no one I'm going to say. But like, you know, we started out, you referenced your early work
+
+509
+00:45:45,700 --> 00:45:52,180
+in computer vision. We had all of these, you know, ground up rules and, and, you know, equations
+
+510
+00:45:52,180 --> 00:45:57,700
+that, you know, we built everything around and it wasn't statistical at all. We kind of swung
+
+511
+00:45:57,700 --> 00:46:03,220
+the other end of the pendulum and everything we wanted to be statistical and, you know, throughout
+
+512
+00:46:03,220 --> 00:46:09,140
+the rules, we get enough data and the system will, you know, learn the rules on its own. And,
+
+513
+00:46:09,140 --> 00:46:15,140
+you know, in practice, you know, it doesn't really make sense to thought all the rules. And so
+
+514
+00:46:15,780 --> 00:46:21,780
+you've had, I think, you know, some attempts at like, how do we fuse a real world-based model
+
+515
+00:46:21,780 --> 00:46:28,820
+with a statistical model. But I think what, what, what in, in this conversation, both in terms of
+
+516
+00:46:28,820 --> 00:46:36,020
+the use of geometry as well as the use of synthetic data, it's another approach, which is, well,
+
+517
+00:46:36,020 --> 00:46:42,820
+let's just use the rules to create data or labels and then use the statistical approaches.
+
+518
+00:46:43,460 --> 00:46:46,900
+Exactly. Yeah, I couldn't have put it that way. I mean, it's basically, we're in the age of
+
+519
+00:46:46,900 --> 00:46:50,420
+reason now, you know, it's like there's always the pendulum swings one way or the other, you know,
+
+520
+00:46:50,420 --> 00:46:56,020
+we know everything, we can program everything, logic, etc. Which, by the way, was doomed to fail,
+
+521
+00:46:56,020 --> 00:47:02,180
+we knew it from theory, from Kurt Goddell, right? But then, then there is the other swing of
+
+522
+00:47:02,180 --> 00:47:06,580
+the pendulum, like you said, it's like throw it all away, it's all in the data. And honestly,
+
+523
+00:47:06,580 --> 00:47:11,140
+the reason is also because it's easy. It's, I mean, I mean, it's hard to make large-scale systems
+
+524
+00:47:11,140 --> 00:47:16,340
+work, but conceptually, it's just scale things up, right? And now we're in this realm where
+
+525
+00:47:16,340 --> 00:47:20,740
+how do we get the best of both worlds? Because nothing is all good or all bad, right? It's always
+
+526
+00:47:20,740 --> 00:47:25,460
+these gray areas. And so finding the best of both worlds, as you said, which is how do we use our
+
+527
+00:47:25,460 --> 00:47:30,900
+knowledge, how do we use the data-driven approach, and how do we combine them together? And what I was
+
+528
+00:47:30,900 --> 00:47:35,620
+trying to explain is that there is the, using the rules to generate the data, as you said,
+
+529
+00:47:35,620 --> 00:47:39,780
+using the rules to generate the supervision. And of course, there's all this prior knowledge that
+
+530
+00:47:39,780 --> 00:47:44,900
+goes into the model architecture, although now we're kind of realizing that the model architecture,
+
+531
+00:47:44,900 --> 00:47:50,180
+we have powerful, generic model architectures. So I believe that the data centric and the self-supervision
+
+532
+00:47:50,180 --> 00:47:55,780
+side, I think those are, those are really where I'm excited the most about and most of our researches.
+
+533
+00:47:55,780 --> 00:48:01,620
+Awesome, awesome. Well, we've been digging deeper and deeper, and I feel like we're still at a
+
+534
+00:48:01,620 --> 00:48:06,900
+fairly high level, and there's so much more I'd love to talk through exactly how you're doing
+
+535
+00:48:07,940 --> 00:48:12,180
+synthetic data and just go into a lot more detail. We don't have time for that this time,
+
+536
+00:48:12,180 --> 00:48:18,580
+but maybe we'll be able to get you to Twilmokon, which would be in the fall, to share a lot more detail.
+
+537
+00:48:18,580 --> 00:48:28,660
+But until then, or we need to speak more frequently than every three years. But all that, not with
+
+538
+00:48:28,660 --> 00:48:33,300
+standing, it's been a pleasure having you on the show, Adrian and great chatting and learning
+
+539
+00:48:33,300 --> 00:48:37,700
+about what you've been up to. Likewise, and yeah, it was very high level, but we have, I think,
+
+540
+00:48:37,700 --> 00:48:43,700
+like 20 papers this year, and they're all on my website and etc. So people dig in, feel free to ping us,
+
+541
+00:48:43,700 --> 00:48:49,220
+come to ICRA, come CPR, conferences are a thing again, looking forward to Twilmokon and chatting
+
+542
+00:48:49,220 --> 00:48:53,700
+with people live. And yeah, looking forward to talking again, hopefully not in three years.
+
+543
+00:48:53,700 --> 00:49:21,700
+Yeah, awesome. Thank you, Adrian. Thank you, Tom.
+

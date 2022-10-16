@@ -1,0 +1,680 @@
+WEBVTT
+
+00:00.000 --> 00:19.000
+All right, everyone. I am here with Amir Habibian. Amir is a senior staff engineer manager at Qualcomm.
+
+00:19.000 --> 00:22.000
+Amir, welcome to the Twoma AI podcast.
+
+00:22.000 --> 00:25.000
+Yeah, thank you. Good to be here.
+
+00:25.000 --> 00:32.000
+So we were just chatting. You were up right and early this morning delivering your CVPR presentation,
+
+00:32.000 --> 00:37.000
+which we'll be talking about in this interview, but how did it go?
+
+00:37.000 --> 00:44.000
+Yeah, yeah, it was actually interesting. So it was the presentation about starting 4 AM.
+
+00:44.000 --> 00:51.000
+And then my earliest presentation in my life, but it was actually quite nice, very active.
+
+00:51.000 --> 00:57.000
+I was happy that there were a lot of interesting discussions, a lot of, you know, interest and insight from people.
+
+00:57.000 --> 01:01.000
+So it was a very interesting discussion actually, but that's awesome, that's awesome.
+
+01:01.000 --> 01:08.000
+Before we get too far in, I'd love to have you share a little bit about your background and how you came into the field of AI.
+
+01:08.000 --> 01:12.000
+Sure, sure. My background is in computer science.
+
+01:12.000 --> 01:26.000
+And actually I did a bachelor in computer engineering. And in the first or second year of my bachelor study, I participated in an online competition for sort of solving a chest like game.
+
+01:26.000 --> 01:40.000
+And I found it very interesting because, you know, you could interact with the problem and make an algorithm, let it run and change it, improve it and sort of, you know, interacting with some intelligence agent, which I really liked it.
+
+01:40.000 --> 01:52.000
+I thought, yeah, maybe it's, I have to pursue a carrier in AI. And then I did a master and a PhD in an artificial intelligence on computer vision and to be more precise.
+
+01:52.000 --> 02:08.000
+And I, in 2011, I started my PhD, I joined a university on Serdam where they have a very good team on computer vision, always a top performer in public benchmarks like ImageNet, like Pascal VOC,
+
+02:08.000 --> 02:20.000
+track with all the kind of online competitions. So they had a very strong team and made some instrumental contributions to Bagel Ward, which was by then the state of the art visual recovery pipeline.
+
+02:20.000 --> 02:32.000
+They basically developed selective search algorithm and color-seafed Fisher vector, a lot of instrumental contributions into the Bagel Ward representation.
+
+02:32.000 --> 02:42.000
+And I joined the team and started a PhD on, on video understanding and on recognizing complex activities in video.
+
+02:42.000 --> 03:00.000
+And my core contribution was on self-learning, self-supervised video representations, basically, where given a bunch of videos and sort of their associated text, like YouTube captions, for example, or closed captions, subtitles, and whatever sort of lose the,
+
+03:00.000 --> 03:20.000
+connected text, associated text, I wanted to, I actually worked on learning some sort of representation. And the challenge there was sort of extracting some sort of underlying structure, how these texts and video and vision are kind of connected to each others.
+
+03:20.000 --> 03:32.000
+And by finding this underlying structure and data, you basically could learn a representation, which would be helpful for a downstream tasks, like recognition, localization, and understanding the videos, basically.
+
+03:32.000 --> 03:48.000
+And there, basically, it turned out to be quite effective way to learning representations participated in some benchmarking online competitions and was quite in the top performers and wrote some good papers,
+
+03:48.000 --> 03:56.000
+which was one best paper award in AC Multimedia, which was a kind of top tier conference in the community by then.
+
+03:56.000 --> 04:02.000
+And then, yeah, then move back after graduation, just move back to Qualcomm, basically.
+
+04:02.000 --> 04:04.000
+Nice, nice.
+
+04:04.000 --> 04:13.000
+So tell us a little bit about the focus of your work at Qualcomm. Do you work predominantly on video perception there?
+
+04:13.000 --> 04:25.000
+Yes, actually, when I joined, I started on some perception task, namely object detection and tracking in video, and post estimation, for a while.
+
+04:25.000 --> 04:35.000
+Then, I think in 2018, with my colleague, we started a new project on compressed, like a video compression, compressing videos with generative models.
+
+04:35.000 --> 04:48.000
+And their idea is that since the degenerative models are getting better and better in generating images and even videos, so why not just to use them as a replacement for the compression algorithm and just compressive videos?
+
+04:48.000 --> 04:52.000
+Because in a way, video compression is way of conditional generation of the video.
+
+04:52.000 --> 04:59.000
+Are you generalized, your generator, some sort of representation of the video, basically.
+
+04:59.000 --> 05:09.000
+So we started a project there, and I worked on it for two years, and then started a new project on efficient video processing.
+
+05:09.000 --> 05:22.000
+This is what I'm actually now working, and so I started a new effort, and now I'm leading a team working on developing methods for efficient processing of the video streams, basically.
+
+05:22.000 --> 05:34.000
+Got it, and we talk about efficient video processing, are we talking about computational efficiency, and what kind of processing are you mostly focused on?
+
+05:34.000 --> 05:47.000
+Yes, we mainly talk about focused on computational efficiency, like just doing less computation or using less memory and less energy, basically, to processing the video.
+
+05:47.000 --> 06:03.000
+And we actually, so this is a lot of different tasks, which can benefit from it, speaking like a semantic segmentation or object detection or pose estimation, even video to video models like denoising super resolution.
+
+06:03.000 --> 06:21.000
+So all of these networks usually in many tasks have to run as a sequence of frames, coming from cameras, like from the car or from the visual reality headset, you usually deal with a sequence of images, which are highly correlated, and they are coming from the scene.
+
+06:21.000 --> 06:32.000
+And many of them are getting pretty high spatial resolution, also high frame rate, which makes them very expensive to compute, and at that resolution and at that frame rate.
+
+06:32.000 --> 06:43.000
+So it's a very common use case in many applications you often deal with videos, and the highly correlated data, which are expensive.
+
+06:43.000 --> 06:47.000
+But the good news is that there are a lot of redundancies into data.
+
+06:47.000 --> 06:55.000
+So the higher the resolution of the image becomes, and also the higher the frame rate becomes, the data also becomes more and more redundant.
+
+06:55.000 --> 07:08.000
+And basically the rate of information, the rate of input data linearly grows with your frame rate and with your special resolution, but the amount of information which exists in your data is actually pretty sublinear.
+
+07:08.000 --> 07:32.000
+For example, in audio signal there is depending on the frame rate, but usually there are like 512 kilopits per second, every second of the audio. But looking at the speech, which are much less information, you can just summarize the whole 10 seconds of video with a sure amount of text, so the amount of information is much less.
+
+07:32.000 --> 07:44.000
+And so processing also, I believe, shouldn't grow linearly with your amount of data. So you have to somehow adjust your computation to the amount of information being received by your sensor.
+
+07:44.000 --> 08:13.000
+And these are all kind of main motivation and main intuition to start a track on that, how can you create some building blocks of a neural network processor, where you can leverage this inherited redundancy in your data, somehow factorize it, and just don't compute the same thing over and over, maybe sort of prevent computing singular things and reuse what has been processed for any task in general.
+
+08:13.000 --> 08:26.000
+Got it. And so are there. Can you kind of talk through the different ways that you approach making video models run more performantly?
+
+08:26.000 --> 08:49.000
+Yeah, sure. In general, I think there has been a lot of work on video compression done, and where they also want to sort of factor out the redundancy in the data by a lot of ways, for example, by computing the residuals, learning the motion and compensating the motion, quantizing the residual entropy coding.
+
+08:49.000 --> 09:02.000
+So in many ways, which has been very well explored over the decades, how you can compress the amount of data to represent the video basically to reconstruct it well from the less amount of beat, which is actually great.
+
+09:02.000 --> 09:14.000
+A lot of techniques are there, but these techniques are usually comes with an extra processing cost. So you have to spend more and more compute to do this compression.
+
+09:14.000 --> 09:32.000
+So many of those techniques cannot, doesn't really speed up the performance. So, or main focus was, how can we sort of make reuse without introducing more computation to that model without increasing computation, just sort of leverage this redundancy to reduce the compute.
+
+09:32.000 --> 09:52.000
+And many of the existing networks just run frame by frame. So they get one frame, they pass it to the layer, process all the, you know, run, activate all the neurons of that frame, then go to the next layer, run all the neurons again, and this is how they just process like layer by layer and every layer, they process the whole frame.
+
+09:52.000 --> 10:12.000
+And I believe this is quite a wasteful and this is not a way to go. Also, if you look at your brain, the human brain, this is not how it works. If you look at the activations in the neurons of a human brain, you observe that they activate very sparsely, actually, they don't activate all at the fixed rate, and they are very sparse basically.
+
+10:12.000 --> 10:32.000
+And they usually show neurons, usually fires once, there is enough of the stimulus, like there is enough of changes in their input, they accumulate the amount of changes and amount of information coming to every neuron and activate once there is a sufficient amount of activation, sufficient amount of stimulus in the neurons input.
+
+10:32.000 --> 10:46.000
+So I think this, maybe this is the reason why human brain is way more efficient in terms of power consumption. It's like a six watt versus normal GPUs run, like a 25, 250 watts basically.
+
+10:46.000 --> 11:14.000
+And this is also how has been inspired a lot of effort on, for example, artificial spiking neural networks, they try to mimic the same concept, they want to sort of create some neurons which have some sort of potential, and they just gather it and fire once there is enough of that, and they don't run like a synchronously, they don't run synchronizedly at every layer.
+
+11:14.000 --> 11:29.000
+And, but that also hasn't turned out to be very successful in practice, because this sparse activations and basically bookkeeping up all these activations is very memory intensive, and consumes lots of energy.
+
+11:29.000 --> 11:40.000
+And also some of these operations, which happens in the, in the spiking neurons, like this exponential decay of the potentials are not efficient to implement in the silicon hardware.
+
+11:40.000 --> 11:51.000
+And, for example, if you have an analog system, like you can model this exponential decay with, with the current of a capacitor, so if you have a capacitor, it's a current decays or time.
+
+11:51.000 --> 12:08.000
+But if you want to program it in a digital computer, like what we have nowadays, it requires a lot of multiplication and a lot of memory access, which is even more expensive than normal feed forward neural networks, which we have decayed today.
+
+12:08.000 --> 12:16.000
+So, so far this mimicking this spiking neural network hasn't been so successful in the digital computers.
+
+12:16.000 --> 12:32.000
+And so I think maybe we need to, we should still inspire and mimic the type of behaviors, but not very precisely, like a way by way, because you have to bring, you know, just adopt the idea based on what you have.
+
+12:32.000 --> 12:50.000
+This is also how, what has happened to a human when it wants to fly, basically, right? Initially we wanted to look at the birds and see how the, you know, how the wing moves, which was not successful because the human, like the birds are made of, you know, bones, feathers, different things.
+
+12:50.000 --> 13:05.000
+Because when you want to create a plane, an aircraft, it's metal is very different. So we got, you know, we could successfully fly once we adopted those concepts to the material which we had, basically.
+
+13:05.000 --> 13:15.000
+And the argument for all neural nets, it's not, you know, exactly how the brain works, but it's somewhat inspired by how neurons and the brain work.
+
+13:15.000 --> 13:26.000
+Exactly. I mentioned this example because, you know, there is a, there has been a trend in neural network called the new morphic computing where we wanted to build spiking neural networks.
+
+13:26.000 --> 13:36.000
+And they didn't turn up to be so very successful compared to existing, existing, a lot of video actually processing has been followed in that direction.
+
+13:36.000 --> 13:45.000
+And I still believe that this is a right direction to go, but we need to adopt the concepts, basically. And this is what we try to do within or CVPR paper.
+
+13:45.000 --> 14:04.000
+And for example, based on, we try to implement the concept of, of residuals and triggering the neurons at every location based on that, but adopt these concepts to be more friendly to them, to the fit for our neural networks, basically, in, in skip convolution.
+
+14:04.000 --> 14:31.000
+Let me pause here just to kind of recap what I'm hearing. It sounds like the basic premise is that much of the prior work in terms of video processing treats a video like a stream of static images and processes them a frame at a time.
+
+14:31.000 --> 14:52.000
+And what you're suggesting here is that your work is looking at a sequence of images and treating that sequence as if these frames aren't like IID sets of data, but rather they have correlations between them and you're taking advantage of that.
+
+14:52.000 --> 15:13.000
+It's a little surprising to hear because when I think back to, you know, basic DSP class that I took in grad school, like the foundation of compression was looking at these relationships between the frames and it's surprising me to me that, you know, we haven't been doing that all along.
+
+15:13.000 --> 15:15.000
+Can you talk a little bit about that?
+
+15:15.000 --> 15:23.000
+Sure, yes, exactly. So there has been a lot of work on how to represent the video based on the differences, basically.
+
+15:23.000 --> 15:43.000
+Like this is the core concept in the compression, like in HEBC, in all the codecs, where you have the concept of, you know, iframes, like where you treat it as an image, but all the consecutive frames coming are represented as sort of with respect to the reference point in terms of how every block or pixel has moved.
+
+15:43.000 --> 15:55.000
+What needs to be added as a residual to that, and this is the core concept, but in terms of existing neural networks, they are not so friendly to those type of operations.
+
+15:55.000 --> 16:05.000
+So if you want to implement those concepts for processing, it usually comes an extra cost. You need some sort of optical flow network to learn how to warp it, which hasn't cost.
+
+16:05.000 --> 16:15.000
+And also, computation on the residuals hasn't been much process, much studied for efficiency, for the purpose of efficiency.
+
+16:15.000 --> 16:29.000
+So going back to the existing pipelines, most of them still run frame by frame, and if they want to run more efficiently, they mostly rely to remove the redundancy in their ways.
+
+16:29.000 --> 16:47.000
+For example, there are so many ways to just get rid of the redundancies in your ways, like by tensor composition, like compressing your layers, or by pruning the redundant channels or off channels, or neural architecture search to find smaller and more expressive units.
+
+16:47.000 --> 17:16.000
+In video, a lot of work on decomposing their special type, like a two-dimensional canals into two-dimensional, like a one-by-one temporal canals, or temporal shift module. A lot of work has been done to speed up the video processing, but they mostly rely on factoring out the redundancy in the way in the canals, while what we think should be done, and is complementary to all these efforts, is get rid of the redundancy in activations, basically.
+
+17:16.000 --> 17:26.000
+In the input signal, and also in the feature maps, which are also redundant, because of the redundancy inherent redundancy in your data, basically.
+
+17:26.000 --> 17:40.000
+And I believe studying this kind of activation redundancy is underexplored and can be much further processed, especially from the compute efficiency perspective.
+
+17:40.000 --> 17:51.000
+The paper that we've been referring to is one of your papers, a CVPR, skip convolutions for efficient video processing.
+
+17:51.000 --> 18:04.000
+This idea of skip convolutions, this is the mechanism that accomplishes what you're describing. Can you tell us a little bit more about it and how it works?
+
+18:04.000 --> 18:19.000
+Sure, sure. Basically, the key idea is what we just discussed, so it's pretty simple, that for every frame, let's bring the core concept of iframe and residual into the convent perspective.
+
+18:19.000 --> 18:32.000
+That for every frame, let's, in a set of computing, the whole feature maps on this frame, let's represent this frame by the difference, by the residuals versus some reference frame, which usually is the previous frame, basically.
+
+18:32.000 --> 18:48.000
+Since the convolution is a linear operator, the output feature map is exactly the same as if you apply your convolutional kernel on this difference, basically, on the residual differences, and just sum up the output with the previous features, which you already have computed, you have it in the past, basically.
+
+18:48.000 --> 19:14.000
+And the nice thing about it is that now you have to, you need to apply the convolutions on the residual frame, which is an sparse object, basically, especially of a sparse object, because all the constant and stationary part of the image have a very small or even zero residuals, which is zero input to the convolution, which means you don't need to apply, compute the kernel computation, the multiplication on those regions, basically.
+
+19:14.000 --> 19:23.000
+And what we observe is that, but although there are a lot of them are very small, but there are few, which are exactly zero.
+
+19:23.000 --> 19:35.000
+And so you need to decide, and you have to sort of further sparsify, so if you want to gain more and more compute, the more sparsify these residuals, you will gain more compute gain.
+
+19:35.000 --> 19:50.000
+And so you start on different ways to how you can enforce more sparsity into your feature maps, basically. The easiest thing which you can do is just by decide based on the significance or the magnitude of the motion, magnitude of the residuals.
+
+19:50.000 --> 20:18.000
+If the residuals are small enough, you can just assume they are zero and they just skip those locations, which works with good extent, especially if you basically consider the weights also into account, because we know that the norm of the convolution is upper bounded by the norm of the input and the norm of the weights, basically based on young inequality.
+
+20:18.000 --> 20:27.000
+So you can make a better approximation of your output by considering the weight norm, the norm of your output, but also considering the norm of the norm of your weight.
+
+20:27.000 --> 20:32.000
+And we tried that, and so it works well, better.
+
+20:32.000 --> 20:50.000
+And the nice thing about it is that you don't even need to train it, because you can just get a network, train for images, as it is, and just sort of apply some thresholds, some cut off on the residuals and just safety compute. So it can work for off the show for any net worth trade, and you don't need to any training.
+
+20:50.000 --> 21:14.000
+But the problem with this is that sometimes there are some significant motions, but not important ones. For example, in background, if you want to do human pose estimation, there might be some moves in your background, which generates some significant motions, like the residuals norm or magnitude of residuals are significant, but they shouldn't matter for the human pose estimation.
+
+21:14.000 --> 21:25.000
+Because human pose estimation is well-bodied, and not about the background. And you need to have more smart way to decide where to compute and where not.
+
+21:25.000 --> 21:35.000
+This is where we basically train a very small neural network, next to every convolution, in practice, this is an additional output channel to the convolution.
+
+21:35.000 --> 21:50.000
+So it has a fraction of the extra overhead for every layer, and those layers basically look at the input, and they make a binary decision based on the current input, whether we need to process it or not.
+
+21:50.000 --> 22:08.000
+So they can much better capture how to skip and sparsify unimportant, but big residuals basically, which brings it to the next level of the performance, and it makes it more robust to the changes, which actually happens in practice.
+
+22:08.000 --> 22:24.000
+So in many use cases, the background is not data static, or the camera moves, and all these movements make some residuals. So you need to be sort of have some ways to suppress the unimportant versus important residuals.
+
+22:24.000 --> 22:38.000
+Is there a relationship between what you're doing with this output channel and the saliency map that it's creating and other forms of attention that folks apply in images and video?
+
+22:38.000 --> 22:54.000
+Sure. If they are actually very relevant, because we have, for example, in a spatial excitement or attention, you also predict sort of attention maps to modulate the important regions, in a way, this is a similar concept.
+
+22:54.000 --> 23:12.000
+But there is a one main difference is that these saliency maps here are binary, because normally when you have an attention, you have non-zero weights, small or large, but they are non-zero. So if it is even a very small value, you still have to do the computation, but then wait it.
+
+23:12.000 --> 23:35.000
+But here we want to be exactly zero or one. We want to have a binary mask, because we want to decide whether to skip or whether to process. And so in a way, you can consider it as a hard attention, where you have a binary decisions, which make it actually a non-differentiable problem, because then you have a, now you have a discrete variable, which is not very well, you know, doesn't have a gradient.
+
+23:35.000 --> 23:47.000
+So you have to use some sort of approximation, and you have to use sort of bias, using a straight estimator, and to approximate the gradient in a backward path, basically.
+
+23:47.000 --> 24:05.000
+And by adding gombal noise, so this is a lot of work around how you can this day's train, discrete variables, and to and between neural networks. So in this case, we use some gombal reparamatization trick to be able to optimize such a non-differentiable function.
+
+24:05.000 --> 24:19.000
+Got it, got it. And so that's one of the papers that you presented at CVPR. There's a second paper, the frame makes it paper. Can you tell us a little bit about that one?
+
+24:19.000 --> 24:35.000
+Sure, this is another work, which is in a way similar to the first one, because there also we want to see what we can skip and not process, but in this work at the frame level, rather than on a special location base.
+
+24:35.000 --> 25:00.000
+In the skip convolution, we make these decisions at an every pixel level, every output pixel level, but here we want to decide what frames we can entirely skip, basically, and what frames we can process. And that paper is about video classification, and in video classification, a typical pipeline is you extract some frames from from the whole video, usually at the fixed rate, like one frame every second or every half a second.
+
+25:00.000 --> 25:09.000
+And then you start processing these sample frames from the beginning to the end to basically make an understanding about what is happening in the video.
+
+25:09.000 --> 25:32.000
+And or motivation was that in some cases, for some video, you really don't need to look at all the frames and you can make this decision, summer after seeing a couple of frames. And while for some other videos, you may need to process more frames, this decision, there are more complex and more diverse, you're not sure you need to see more and more of the video.
+
+25:32.000 --> 25:42.000
+And to be clear, we're talking about classifying the entire video or segment as opposed to classifying what's happening in a particular frame.
+
+25:42.000 --> 26:03.000
+Exactly, exactly. So you have a short or long video and there, but you want to assign a label for the whole clip or whole video basically. So it's like holistic classification of the video. And so the premise is at some point, you've got enough information that continuing to process the rest of the video isn't going to change your decision.
+
+26:03.000 --> 26:16.000
+Exactly, exactly, but this is input specific, right? You cannot make this decision a prior because some of the examples, this is simply specific for some video, this is a simple and wild sports, another one, this is hard.
+
+26:16.000 --> 26:23.000
+So you need some sort of conditional compute mechanism, which based on the given example, decides how much of compute do you need to spend on it?
+
+26:23.000 --> 26:36.000
+There are already some works about selecting the frames, what frames to select in the literature. But what they usually do, they phrase the problem as a search problem.
+
+26:36.000 --> 26:44.000
+And where the problem is finding one by one, what frames to process, go from this frame and then from this frame, go to the next frame, process the next frame.
+
+26:44.000 --> 26:59.000
+And so they define it as a sort of sequential decision making problem, sequential search problem, and so with usually with reinforcement learning, there you have an oral agent, which look at the different frames, make a decision about your next move, your what needs to refer.
+
+26:59.000 --> 27:12.000
+And then in the end, you make a final classification and this oral agent and classifier are trained together, which are usually hard to train when you have this reinforcement learning agent and the training is quite difficult.
+
+27:12.000 --> 27:25.000
+And it's also, you look at this model, they are pretty complex models actually. And here, instead of phrasing it as a search problem, we make a very simple actually criteria.
+
+27:25.000 --> 27:36.000
+So we fix, you know, we don't care about how you go from frame to another frame, you can just go sequentially or actually what we do, we just do some sort of binary search.
+
+27:36.000 --> 27:48.000
+For example, if you look at the first, if you want to look at three frames of a video, we look at the beginning, middle and end, and if you want to do more, we also start to look at the middles of the half.
+
+27:48.000 --> 28:02.000
+So we do a binary search over the frames, so we have a very simple deterministic search algorithm, no need for learning, but what we learn is some sort of decision maker, we decide whether we are ready to make the decision for not basically.
+
+28:02.000 --> 28:16.000
+We learn a binary classifier, binary gate, basically, to decide. And basically, we formulate the problem as an early exiting, which is an common trend for conditional compute and has been explore for images.
+
+28:16.000 --> 28:25.000
+And what they do normally, they, if you have a deep neural network, you add some sort of intermediate classifiers throughout the depth of the network.
+
+28:25.000 --> 28:35.000
+So once each of these intermediate classifiers or kind of early exits are confident about the classifier, you don't, you skip the rest of the network, basically.
+
+28:35.000 --> 28:46.000
+We got adopt the same concept and applied on video, and here in a set of exiting over, so we have a fixed steps network, but what we exit is the input of the video, basically, input of the whole network.
+
+28:46.000 --> 29:12.000
+So we have a sequentially learning looking at the frames, and we have a gate in the end of the network, basically, by looking at the representation of the current frame and accumulated representation, which we have been so far, sort of global state, which you have seen so far, by comparing between these two and looking at the confidence, it realized that, okay, now we are confident enough to skip.
+
+29:12.000 --> 29:24.000
+If you are not confident, the representation is not getting better, I'm unconfident, but my confidence is not changing, so there is not much, not much of updates is happening into the representation.
+
+29:24.000 --> 29:32.000
+So I'm not sure, but let's skip, you know, is there's not, yeah, let's, let's cut it, cut processing, basically.
+
+29:32.000 --> 29:49.000
+So, yeah, so some sorts of gates are added to the network, and they are trained together, and what we observe is that if you just, you know, leave it training, these gates have the tendency to postpone the decisions, because the most accurate prediction is when you actually see all the frames.
+
+29:49.000 --> 30:07.000
+So we sort of regularize these gates to be, you know, to enforce them to exit earlier, and train the whole framework, and turn out quite effective for many different architectures to the 3D architectures, and for multiple data sets and tasks.
+
+30:07.000 --> 30:33.000
+And so this assumes or presumes some kind of linearity or monotonicity in terms of the confidence of the decision, do you run into samples where the network is very confident that it doesn't need to continue until the very end, but the last few frames totally change the meaning of the video and the label that it would have been classified.
+
+30:33.000 --> 30:59.000
+That's quite, yeah, that's, that may happen, because, but, yes, so if, but normally if you look at the normal examples and the majority of the examples in the data sets, if they are, if you, you know, they are usually especially for short clips, where there is not much of changes happening, they usually happens less, but that's actually quite possible if, if, yeah, this type of, but these are quite rare.
+
+30:59.000 --> 31:09.000
+In particular, typical data sets. Is there a particular benchmark dataset that you use to, to test us?
+
+31:09.000 --> 31:25.000
+Sure, we use on, on activity net, where it has a long videos, we use mini kinetics, which has a shorter, like a 10 seconds clips, and we also tested on holistic video understanding is a new benchmark for beyond action.
+
+31:25.000 --> 31:37.000
+It has objects, scenes, actions, and so it's about in a kind of mixture of different categories, like a new benchmark. That's what we use for, for, yeah, for evaluating.
+
+31:37.000 --> 31:42.000
+And what other approaches did you compare against?
+
+31:42.000 --> 31:57.000
+Compared with some, some of these existing ways to sample the frames, like this reinforcement learning agents, sample selections, also some, there are some methods which use on audio and other modalities to look, to localize very to process.
+
+31:57.000 --> 32:06.000
+They just look at, like listen to look in some other paper, which use the audio information to, to localize or some sort of sampler network, like as a sampler.
+
+32:06.000 --> 32:30.000
+So a wide range of French selection methods, that's where we, they were the direct competitors. And also we compared on different benchmark, because different backgrounds, because you can process videos with 2D convolutions, with 3D convolution, like X3D, and the Dresnet efficient, that so it all comes at different backgrounds, basically, so we, we compare against those.
+
+32:30.000 --> 32:39.000
+And is there an opportunity to combine the skip convolutions and the frame exit approach for classification applications?
+
+32:39.000 --> 32:44.000
+Yes, I think they actually treat the problem from different angles, so they are complimentary.
+
+32:44.000 --> 33:01.000
+You can decide to reduce your frames, and even with a reduced set of frames, there are a spatial redundancy. Some of them might be, the background might be still not have changed a lot, and there are spatial redundancy, very skip convolutions can factor out.
+
+33:01.000 --> 33:05.000
+So I believe they are complimentary, basically, so you could combine them.
+
+33:05.000 --> 33:08.000
+Doesn't sound like it's something that you've tried in the live yet though.
+
+33:08.000 --> 33:11.000
+No, not definitely.
+
+33:11.000 --> 33:28.000
+So maybe let's take a step back and have you contextualize all this into the broader direction of your research, and how you see it applying at Qualcomm.
+
+33:28.000 --> 33:51.000
+Yeah, sure. I think we are, I think in general, this efficient, like looking at leveraging a way to leverage this redundancy is a promising direction, and coming up with some sort of better representation, which reflects the continuity of a video in a space on time, rather than just discrete sampling.
+
+33:51.000 --> 34:17.000
+In general, I think it's something which needs to be further explored, and maybe some new ways, new mathematics to, to convolutions can be helpful, like something like ordinary differential equations, for example, or looking into a spike in neural networks, some sort of a spike in some sort of more continuous or dynamic systems, some sort of a waste.
+
+34:17.000 --> 34:23.000
+This kind of tools can be helpful to develop more continuous representations.
+
+34:23.000 --> 34:37.000
+And another angle I think is the conditional compute is because the video is a highly conditional signal, every frame basically depends on the previous frame, and what to process depends on what you have processed.
+
+34:37.000 --> 34:49.000
+So I think there are a lot of problems where you can use conditional compute methods and develop conditional compute methods for video.
+
+34:49.000 --> 34:59.000
+And also looking at like a connecting or reducing the gap between video compression and video processing, I think is something which we should do more.
+
+34:59.000 --> 35:09.000
+They are now quite separated, but I think there are many ways like quantizing the residuals or using motion estimation inside the network.
+
+35:09.000 --> 35:17.000
+So these are techniques which they can be used for also increasing the efficiency of the processing.
+
+35:17.000 --> 35:31.000
+And I think these are all very relevant to welcome because we have a lot of applications like for XR, for autonomous driving, in a lot of applications, we are dealing with high frame rate video data.
+
+35:31.000 --> 35:43.000
+And this is a camera use cases, and this is where we can use to reduce the power and the computation.
+
+35:43.000 --> 36:01.000
+Another aspect is that a lot of these video processing algorithms may need to change the hardware architecture because, for example, they need a different memory demands like video networks, we know that they are memory demanding to input is bigger.
+
+36:01.000 --> 36:13.000
+And also to model the dependencies across time, either with recurrent neural network or with 3D convolutions, you need to sort of cache and maintain information from the previous time steps.
+
+36:13.000 --> 36:25.000
+And these are all imposed extra and different requirements for hardware design. You may need an increased your DMA requirement, it may different way of caching, maybe even different structure in your processing units.
+
+36:25.000 --> 36:41.000
+These are all, may need to change in hardware architectures. And I think Qualcomm is one of the few players which basically is very well positioned to co-design the hardware with the new algorithms and with the new ways to process the video.
+
+36:41.000 --> 36:45.000
+So I think it's quite well positioned to study this area.
+
+36:45.000 --> 37:10.000
+Awesome, awesome. What else is Qualcomm up to at CVPR? Yeah, actually, there are a lot happening. And we have a colleague of mine actually has a paper, interesting paper, actually an oral paper on sort of a loss function, an structured loss function, which is quite effective for dense prediction task, dense prediction.
+
+37:10.000 --> 37:18.000
+I mean, the networks like semantic segmentation, depth estimation, edge detection, where there is a lot of structure in your output.
+
+37:18.000 --> 37:38.000
+And what happens, the typical loss function is there is still the pixel wise, like pixel cross entropy or the pixel wise minus squared error, which compare your ground truth and your prediction pixel by pixel, which is not very effective in evaluating how well the structure is predicted by the network basically.
+
+37:38.000 --> 37:56.000
+For example, if you have two images, which are very pair of images, which are very similar, actually they're identical, but has been translated or transformed or rotated a little bit, which basically is not a subtle error, but looking at this pixel wise errors, they can penalize it quite harshly.
+
+37:56.000 --> 38:18.000
+I get a very high error, and of course, if you have a bad estimation of the error, you can't learn it very well. So, and this paper basically wants to solve this problem, and they propose a loss function, which is more preserves more the structural similarity in the predictions.
+
+38:18.000 --> 38:37.000
+And basically this and writing down a loss function, like a closed form formulation for structural losses is not easy. So, it's probably a very complex mathematical object, so we basically design a neural network, which learns to predict such a translation.
+
+38:37.000 --> 38:54.000
+If this network is trained on a pair of images, with a known transformation, we already know how these two images are related. For example, we use a homography to translate, to transform one to another, and we let the networks to predict the transformation basically.
+
+38:54.000 --> 39:10.000
+For example, by 3x3, you know, homography transformation, a bit of a take with freedom, and once you train this network, you can use it to assess how structurally are a pair of images, with respect to each other.
+
+39:10.000 --> 39:20.000
+For example, we want this transformation to be as close as possible to identity, because if it is identity, then you know that this is a perfect match, it's a perfect prediction.
+
+39:20.000 --> 39:33.000
+But that you can just rely on the completion distance between your prediction with an identity, which works pretty well for simple transformation, like translation or scaling.
+
+39:33.000 --> 40:00.000
+And we also realize that Joe D6ness is more powerful, has some properties, which is more powerful to more complex transformation, like perspective or rotations. So basically what we do, we train this network, and after training, we just plug into a network, like a dense prediction network, and add it to the pixel voice loss function, and it's consistently improved the results.
+
+40:00.000 --> 40:20.000
+In both in single task and multitask perspective problems, like, segmentation, edge detection, depth estimation, multiple data sets, without actually increasing any compute, theory, inference, the only changes that you just add another training loss during the training, and just, yeah, at no cost at inference time.
+
+40:20.000 --> 40:30.000
+Are these aren't these translations that you're describing, what convolutions are meant to address in CNNs?
+
+40:30.000 --> 40:45.000
+Yes, but here we're talking about the loss function, basically, yeah, the convolutions are learned to be translation invariant, but in the end, they have made a prediction and how to make this final predictions also translation invariant.
+
+40:45.000 --> 40:58.000
+This is where is missing, because we just rely on pixel voice difference, we simply can't do it. So we need to sort of use, you know, extra knowledge to do that.
+
+40:58.000 --> 41:14.000
+The idea is that once you have the prediction as opposed to doing another round of compute or prediction, if you have a translation invariant prediction, then you can apply it more, you can apply it across translations.
+
+41:14.000 --> 41:28.000
+Yes, I think that's, yeah, more or less the same thing. Got it. And so how, what is the benchmark for this paper, like, what are you comparing it against?
+
+41:28.000 --> 41:48.000
+For segmentation, we do it on the city of skype, and they're actually it's in the leaderboards, it's a very well known, you know, benchmark and many submissions, I think, like more than 220 to 150 submissions are there, and it's ranked among the top three based on what metric to look at.
+
+41:48.000 --> 42:06.000
+So it's very performing very well. We also look into Pascal contacts into NYU data sets. So multiple data set, both for segmentation and also multitask learning, where you have a detection and like a normal surface predictions and depth estimation.
+
+42:06.000 --> 42:26.000
+So at multiple set up and consistently improve with respect to the other networks without inverse, yeah, the last function. Got it. And your group usually shows several different demonstrations and does workshops and things like that as CVPR, are you involved in any of those as well?
+
+42:26.000 --> 42:46.000
+Sure, yeah, we have an actually a couple of interesting demos this year, and my favorite is the is a neural video decoder, and this is the, yeah, it's about replacing the whole video compression pipeline, which actually are very well engineered over decades.
+
+42:46.000 --> 43:00.000
+Like you can look at HVC look at impact for the JV at the new codex, they have been, you know, incredible amount of engineering highly optimized and to great and they actually work extremely well.
+
+43:00.000 --> 43:23.000
+But here we had some other promises to go for to see whether you can replace the whole whole machinery with some big neural network basically. And so it has some benefits actually. And the first benefit is that looking at the standard codex, they are hardly baked into the hardware.
+
+43:23.000 --> 43:33.000
+The new standard comes, they usually you need and some dedicated hardware in many platforms that exist some dedicated hardware just to decoding over compression of the videos.
+
+43:33.000 --> 43:47.000
+And then when a next generation of the hardware comes, a next generation of the codex comes, they need further some like some a new hardware dedicated process basically, which makes the deployment difficult, more difficult.
+
+43:47.000 --> 43:56.000
+This is why you don't see that often a new compression algorithm, it takes, you know, years to switch to the new generation hardware.
+
+43:56.000 --> 44:12.000
+But the neural network basically if you can replace the whole compression with a neural network, which runs on some generic general purpose a accelerator going to the next generation of codex is just downloading a new set of parameters and run it the same.
+
+44:12.000 --> 44:22.000
+And it's basically you can go to the next generation of the compression algorithm every day or every minute, you just download the new set of baits and then, okay, you are the next standard.
+
+44:22.000 --> 44:31.000
+So it has a more generic and drawn and can leverage all the parallelism in the neural processors.
+
+44:31.000 --> 44:41.000
+And another aspect is that so there are a lot of, you know, because they are learned, so they involve much less engineering for upgrading this, this new codex.
+
+44:41.000 --> 44:53.000
+For example, if you have a new set of data like point clouds, or if you have the stereo images, or you have some even on certain type of data likes on medical images or on some of server lengths, so which are very specific domains.
+
+44:53.000 --> 45:03.000
+All you need is just to retrain them on your data. You don't need to come up with a new engineering, come up with a new compression algorithms, a new components, you just retrain your model.
+
+45:03.000 --> 45:11.000
+So they are way easier to adopt to new data. And if you can just adopt them to the data at hand, they can to an extremely well job actually.
+
+45:11.000 --> 45:19.000
+They can, you know, just learn to how greatly compress this certain type of images, but this certain type of data basically, which is also another thing is that.
+
+45:19.000 --> 45:26.000
+So they are based on generative models, so they can hallucinate information, even if they are not there.
+
+45:26.000 --> 45:34.000
+For example, if you just, you know, center with a compression normal compression algorithm, if the data is missing, you know, you cannot reconstruct the signal.
+
+45:34.000 --> 45:47.000
+But here, you can hallucinate like a signal. So if the data is missing, you can just, if the like the face is missing, you can come up with some face, which is similar, or you can at least replace it with something.
+
+45:47.000 --> 45:54.000
+And for example, in background, you really don't care much about how the, you know, the tree looks like.
+
+45:54.000 --> 46:02.000
+If you can generate some good tree, even if it's not exactly that tree, doesn't affect much the perceptual quality of the video.
+
+46:02.000 --> 46:11.000
+So basically these gender models are way better, can be way better in perceptual quality of the videos.
+
+46:11.000 --> 46:18.000
+And so many actually promises, which makes this neural video codex very promising direction.
+
+46:18.000 --> 46:23.000
+And we have been studying in Koko, this type of works for while.
+
+46:23.000 --> 46:35.000
+And what we are showing in this CVPR is the first time in industry where we are doing on device real time decoding of the HD videos, basically.
+
+46:35.000 --> 46:43.000
+Which is quite expensive, because these neural networks are expensive and the giant models and also involve entropy decoding, a lot of computation are needed.
+
+46:43.000 --> 46:54.000
+And we managed to basically do this on a stack of one eight eight eight, a real time plus 30 frames per second.
+
+46:54.000 --> 47:08.000
+And the secret source is basically, you know, hand engineered them, sort of engineered a well efficient decoder, which can run. So we started from more state of the art method, which we have done over the years at Koko.
+
+47:08.000 --> 47:10.000
+And we optimize it.
+
+47:10.000 --> 47:25.000
+The architecture to be as light as possible and quantize it so that it can run on or on or a fixed point processors and also use an sort of parallel entropy code, which runs on CPU while the rest of the network is running on GPU.
+
+47:25.000 --> 47:37.000
+So we sort of distribute the compute on the platform and manage to get an online real time decoding.
+
+47:37.000 --> 47:47.000
+That's pretty interesting demo in my opinion. And we also showing and real time semantic segmentation demo on device on the full HD video actually.
+
+47:47.000 --> 47:54.000
+And for segmentation is a pretty expensive operation because your output have a lot of details.
+
+47:54.000 --> 48:06.000
+You are predicting a mask, so it's you need to preserve the boundaries and all the details in segmentation mask. And what often happens is that these networks usually cannot, you cannot actually down sample. It's not like classification.
+
+48:06.000 --> 48:18.000
+So you need to preserve sort of high resolution images, the data in your in your network. Usually people do multi scale processing or hierarchical feature maps, but in different ways.
+
+48:18.000 --> 48:26.000
+But you still need to maintain a higher resolution representation, which makes both processing and memory expensive.
+
+48:26.000 --> 48:36.000
+And what we did in this demo basically, we managed to run a full HD semantic segmentation map at real time on a subject platform.
+
+48:36.000 --> 48:52.000
+And there are multiple speeds of an optimization happen at network, both at an architectural level and quantization layer and also at the level at also at the reusing of time basically feedback or network to reuse some information already process.
+
+48:52.000 --> 49:06.000
+So they come at the extra cost at a zero cost because they haven't already processed value. So you don't need to recompute them. You just feed them into the network and makes the networks better basically.
+
+49:06.000 --> 49:22.000
+We managed to reduce the original network by by four times in terms of number operations and bronze like a three times faster in terms of latency compared to the base architecture.
+
+49:22.000 --> 49:38.000
+And yeah, of course, other demos, we have this group equivalent demo, other around a new way for quantizations and also present at different workshops that's a lot of going on. I encourage you to look it up and check it.
+
+49:38.000 --> 49:55.000
+And it will be including a link to the blog post that your team published on the various papers and activities at CVPR. And of course, links to the papers that we discussed here in the interview.
+
+49:55.000 --> 50:18.000
+But I'm here. Thanks so much for taking the time to chat with us about what you're up to. Sure, sure, glad to talk to you, but just mention beyond these links, you're also sharing the code for all of our CVPR papers and also an unclear paper. So we're open sourcing it and these are all in the quake email research GitHub page and will be become available soon within the coming week or so.
+
+50:18.000 --> 50:31.000
+And so yeah, great and very happy to talk to you. Nice, that's awesome. We'll also be including a link to that GitHub. So folks can check out the code for these various projects. Great. Thanks very.
+

@@ -1,0 +1,873 @@
+Welcome to the Twimal AI Podcast.
+I'm your host, Sam Charrington.
+Hey, what's up everyone?
+Happy Memorial Day to those of you in the States.
+Although we might not be able to celebrate holidays like we once would, I encourage
+you to find a way to enjoy yourself this weekend, connect with family and friends and enjoy
+some good food and fun as best as you can.
+I am super excited to be hosting tomorrow's live panel discussion on advancing your data
+science career during the pandemic.
+This is going to be a great one featuring an amazing lineup and I encourage you to join
+us.
+You can check out twimalai.com slash DS careers for more information and to register.
+I also want to give you a heads up regarding my upcoming webinar with Algorithmia CTO
+Kenny Daniel.
+The hot topic at last year's TwimalCon on conference was a discussion on whether you
+should build or buy an ML or data science platform.
+Well, we'll be tackling this topic head on in our upcoming session.
+We'll discuss what goes into building a machine learning management platform, how to make
+the business case for ML ops at your company and how to evaluate off the shelf machine
+learning management solutions.
+Be sure to mark your calendar for 10 a.m. Pacific on June 9th and visit twimalai.com slash
+Algorithmia to register.
+That's twimalai.com slash ALGORITHMIA.
+All right, enjoy the show and enjoy the holiday.
+All right, everyone.
+I am on the line with Joey Gonzalez.
+Joey is an assistant professor at UC Berkeley in the EECS department.
+Joey, welcome to the Twimalai podcast.
+Thank you for having me.
+I'm really looking forward to diving into this conversation.
+And in particular, talking about ML systems and your recent paper on train large then
+compress, but before we do that, please share a little bit about your background and how
+you came to work in ML and AI.
+Yeah, excellent.
+So my story's a bit funny.
+I started my PhD at Carnegie Mellon with an interest in actually flipping helicopters
+because that was a trendy thing to do back in 2006, a while back.
+Flipping helicopters.
+Flipping helicopters.
+Flipping helicopters.
+Flipping helicopters.
+Flipping helicopters.
+Flipping helicopters.
+Flipping helicopters.
+Flipping helicopters.
+Colleague of mine, Peter Beale, now at Berkeley, when he was finishing up his thesis work,
+he was looking at how to do interesting control for helicopters.
+I thought that was really cool.
+And at CMU, I went to my thesis advice and you've worked on control as well.
+I'm kind of interested in flipping helicopters.
+I think that's really neat research and you know, I didn't know that was the thing.
+Well, it was.
+And it actually was some of the pioneering work to what we see today in reinforcement
+learning.
+But what's kind of cool about the story is my advisor at that time being a real machine
+learning researcher.
+I was like, you know what, flipping helicopters, that's exciting, but there's something
+more important, like we can actually help the world with sensors.
+We can build sensor networks to monitor fires and we can use kind of principled machine
+learning techniques.
+I should add that when I was looking at the flipping helicopters, like, you know what,
+we should flip them with neural networks.
+And the other thing my advisor said, which was good advice at the time, was neural networks
+aren't really serious research.
+We use more statistical methods, graphical models, things that have formal foundations
+that we can reason about and write kind of detailed analysis and understand what our models
+are doing.
+And that was good advice.
+And so I went down this path of how to build Gaussian processes, Bayesian on parametric
+methods to reason about link quality and sensor networks.
+And in that process of doing that, I kind of stumbled into a problem.
+I was writing a lot of MATLAB code to compute big matrix inverses and then approximations
+to that to make it run faster.
+And one of the things I enjoyed doing in the process of, you know, exploring these more
+efficient MATLAB programs was trying to make them more parallel.
+And I think my advisor included is a good advisor is like, you know what, maybe you enjoy
+that more.
+So maybe instead of focusing on the non-permetrics and the sensor networks, let's start
+to think about how to make machine learning more efficient.
+And in particular, at that point in time, Hadoop was taking off and said, you know what,
+MapReduce, that's going to change machine learning.
+And we were thinking, well, we're working on graphs and they just don't fit the MapReduce
+pattern.
+And the kinds of computation we were doing just, it wasn't, it didn't actually fit the
+technology that people were building.
+So we started to explore a different design of systems.
+So design of systems for computation on graphs, which took us down the design of graph processing
+systems.
+System that I ended up writing is kind of the end of my thesis was a graph lab for doing
+very large analysis of graphs.
+And so by the time I finished my PhD, I was actually writing systems papers, not machine
+learning papers.
+And the field was changing very, very rapidly too.
+This around 2012, if anyone's been following the history of machine learning around 2012,
+everyone started to realize maybe actually the neural nets were a good idea.
+The deep learning, these ideas actually really dated back the 1980s.
+They're actually really starting to work.
+And they were changing the field of machine learning.
+And graphs were also taking off, so we built actually a company around the systems that
+I was developing as a graduate student, it was graph lab, that evolved into a company
+for building tools for data scientists to do interesting machine learning at scale.
+That was ultimately acquired by Apple.
+And around that time, I also joined the UC Berkeley Amplab as a postdoc.
+And there was, you know, a chance to come out to California and it was a really exciting
+opportunity to do research in a different system, a system called Spark, which eventually
+became Apache Spark.
+And there we started to develop the graph processing foundation for the Apache Spark
+system.
+And again, as I started to explore more and more into the field, I learned more about
+research in data systems and transaction processing and how those connect back to machine learning.
+And so after finishing my postdoc, I came to Berkeley.
+In fact, I chose not to follow the much more lucrative path of the startup.
+It was going to ask about that.
+Yeah, I made a terrible financial decision.
+But I'm happy because I have a chance to work with students.
+I'm a little less happy because I'm not as wealthy as one could have been.
+But now I am teaching students that do research at the intersection of machine learning and
+systems.
+And so we have a pretty broad agenda around how to build better technologies for delivering
+models to manage machine learning life cycle, not just training, but prediction, how to
+prioritize training experiments on the cloud to use serverless computing to make machine
+learning more cost effective and easier to deploy.
+We have a big agenda around autonomous driving, building the actual platform that supports
+autonomous driving, not necessarily the models, but how they are connected together to make
+a reliable car.
+And we have work in natural language processing and computer vision.
+And one of those papers, one that I'm hoping to talk a bit about today, which is our work
+on making a vert models easier to train.
+And it, too, has a kind of funny story how we came to actually a realization that what
+we were thinking was entirely wrong.
+And that's what that paper talks a bit about.
+Well, let's get to that funny story in a second.
+There's so much interesting stuff that you just mentioned.
+It's there, there are at least three or four interesting podcasts in here.
+I'd love to dig into some of the stuff you're doing with serverless at some point and how
+that intersects with ML and AI, something I've looked at a little bit as well.
+But before we jump into even more of that, I'm curious.
+Your co-founder at GraphLab and Tury Carlos Gastron was one of my very first guests on
+this show.
+Tumel talk number seven, in fact.
+And I'm curious how you came to know and found the company with Carlos.
+Yeah, Carlos is awesome.
+So he was my thesis author.
+Oh, okay.
+When I came to CMU, Carlos was the guy who said, let's not flip helicopters, let's do
+something that could make an impact in the world.
+He was a great advisor.
+He pushed me down the right path in my PhD, the thing that reflected what I was interested
+in.
+And he was one of the pioneers in the modern field of machine learning and systems.
+Yeah.
+So that's how I came to know.
+He did go to Apple.
+He did.
+He saw him recently at Nurebs, most recently in Vancouver.
+It seems to be really having a good time there.
+Yeah, he's had a chance to have a lot of impact doing really cool stuff.
+You kind of laid out this broad space of research.
+It sounds very broad, actually, tied together by systems.
+I'm curious how you kind of, you know, is it rationalized by, hey, you've got a bunch
+of, you know, students and you're letting them flip helicopters in the way that they want
+to flip helicopters more so than you were, you know, and so it's you or it's challenging
+as faculty to decide what is your research agenda.
+One likes to imagine you sit there and go, here are the three two things.
+I want to study, usually not one, because you have to have enough for a couple of students
+to build, you know, their thesis around.
+The reality is that students pull you and I actually, I think sort of like artists, it's
+hard to compel people to follow the research agenda that you ultimately want.
+My advisor did a great job.
+It's not about telling you what to do.
+It's about showing you the exciting opportunities you can explore.
+And so with my students, I've pushed them in directions to think about how we make models
+more efficient to not just train, but to serve, how we support new emerging applications
+of machine learning that might require innovation both in the system and the modeling techniques.
+And actually what's kind of neat about the field of systems and machine learning is, again,
+when I started, it wasn't really a thing.
+In fact, some of my colleagues at CMU were like, you're just hacking, you're not actually
+doing research, you're not proving anything fundamental about machine learning, you're
+writing software, a little bit of that was true.
+We were definitely writing a lot of software.
+We were trying to prove some stuff too, but I think the impact might have actually been
+more on the software side.
+And one of the funny things about the broader field of systems and machine learning is
+that it actually has been kind of the undercurrent of a lot of the recent progress in AI.
+When we look at this revolution in deep learning, we can go back to the 2012, the Alex Net paper.
+That's actually not the beginning, it goes way back to the 1980s.
+In fact, the techniques are from the 1980s, the architectures, the models, even the algorithms
+that we're using are from the 1980s.
+If you actually read the Alex Net paper, more than half the papers devoted to how they got
+it to run on a GPU, how they got it to run on a very large image data set, and some of
+the optimizations they made to the training process to make it run at scale.
+So it is the movement to scale that really helped launch the revolution that we are on
+today.
+Now there's the other factor, which I think people overlook, and it's sort of when I was
+doing my PhD, we were writing the foretran of machine learning, we were writing MATLAB
+code to implement algorithms and debugging gradient procedures, and that's absurd.
+Today, it's just too easy.
+So a graduate student can pick up PyTorch, TensorFlow, MX Net, one of these packages,
+and very easily architect a new model, and train it on TPUs, GPUs, how do they barely
+understand, and get it to run at scale on data sets that they don't have to collect.
+So that is an enormous jump forward.
+And if you look really carefully and a little bit depressingly, the models didn't change
+that radically.
+The algorithms didn't change that radically.
+What changed was it became a lot easier.
+We developed the languages, the tools to make machine learning practical, and it really
+boiled down to getting the right abstractions.
+And maybe if you roll all the way back when Alex Net came out, they didn't quite have
+that.
+Alex Net came out.
+Theanos started to really take off, cafe at Berkeley started to take off, and it became
+so much easier to build that next model and the next model, and so on.
+And today we're stuck into a flood of archive papers because basically anyone can download
+one of these packages and start building state-of-the-art machine learning models.
+There's some learning that you go into the process, but the fundamental principles are
+to find your objective, to find your decision process, and then tune your decision process
+optimize it for that objective.
+That's it, and the undercurrent that drive all of this has been a lot of the innovation
+in the systems front, not necessarily the machine learning.
+And so my research is trying to find those right abstractions, and especially as we look
+at new frontiers, not just training models, but how we deliver them, how we support them
+and autonomous driving, and how we adjust the architectures of the models themselves
+to make them more efficient in these new kinds of applications.
+At when I first started doing these interviews, one of my favorite questions was looking
+to explore the way folks came up with new models and trying to find the science behind
+it, and I think that the takeaways where a lot of it was, the answer was like graduate
+student descent.
+We would just throw a graduate student at this, and they tweak something that pre-existed,
+but there wasn't necessarily a hard science behind how to come up with a new model architecture.
+But so we've seen a lot of innovation like and around, you know, Bert and the kinds
+of transformer models that we're seeing here, you know, has that, has, you know, would
+your answer to that be kind of similar, has it, you know, it changed a lot, or how do
+you think of, you know, beyond kind of that high level process, you just laid out?
+How do you think of the process for coming up with these new types of architectures?
+Yeah, so that's been a struggle for me.
+So remember, I start with this religion, this Bayesian philosophy of model development,
+they have these principles of priors and likelihoods that gave us at least the basic foundations
+of what to think about when building a model.
+That's all, that's not gone, but that's, you know, effectively gone for a lot of the
+machine learning world.
+And so we're left with a lot of the new, though, actually, right?
+Like the concept of modeling is on the rise, I think.
+So I should say it's not gone, and it's very important to note that a lot of the world
+actually runs on these more traditional techniques. It's the research community where we're writing
+these new papers for language modeling or speech or driving where there's very specific
+cases that have been kind of dominated by deep learning techniques.
+But the Bayesian methods are still, you know, fully alive and medicine and even traditional
+advertising algorithms.
+But with that in mind, so when I start to look at the deep learning work, how do I find
+those principles?
+And actually, they actually exist. They're a little smaller.
+And sadly, we start to embody the model with personality, like the model is trying to
+do X, which is sad because that's not how we like to, you know, formally think of things.
+But these building blocks, convolution, recurrence, attention, each of these becomes tools that
+we can use to architect our models.
+When students go, how deep should we make it while we try to go a little deeper?
+They start to look at how it affects convergence rates, variation in batch size and its relation
+to batch form.
+So we have little rules of thumb.
+And unfortunately, there's no great, like, my PhD students like two or three years to get
+up to speed with the rules of thumb in the area that they're working in.
+And once they have that, I hope they teach the next PhD students and so on because it's
+hard to really grasp what those are. It's more like, it comes from experience working with
+these models and going, ah, right?
+So like the transformer, in this particular piece of work that we've been exploring, like
+how to make it more efficient, we're like, should we make it deeper, should we make it
+wider?
+Who knows?
+So we start to measure each of these things.
+And that's one of the jokes that we make is that machine learnings become more like
+a biological science.
+It's driven by laboratory experiments, ah, by using compute to understand better the
+models that we're building, ah, as opposed to the more, ah, principled approach we might
+have had in the past.
+We tried to, to frame it in some probabilistic architecture.
+You mentioned that there was a story behind the, the work that led to train large than
+compress.
+Yeah.
+So I'm happy to go into that story.
+Sure.
+Sure.
+Yeah.
+So the story behind that the train large and compress work, ah, it starts in the following.
+So, ah, we've been doing a lot of work in how to make, ah, computer vision models more
+efficient, ah, in particular, not for training, but for inference.
+Ah, and so we have these skip net architectures, ways of making things more dynamic.
+And some of my colleagues go, you know what, maybe we should start thinking about language
+models.
+They seem to be eating up a lot of cycles.
+The, the transformer, the BERT model that's become a kind of a foundation for reason about
+text and context.
+Well, so that, that model is pretty expensive to run.
+Ah, and so we said, all right, maybe we'll explore what we can do in, in the context of
+making these BERT models more efficient.
+Now, I should say a lot of people are starting to think about that because BERT is, you know,
+incredibly expensive to run, ah, on, on text feeds and text is a pretty large, ah, you
+know, body of data that we might want to process.
+Yeah, I'll mention that, ah, for folks that want to dig into that particular point, I
+did an interview with Emma Strubel, ah, who has, um, you know, in, in fair amount of
+detail, kind of characterized the, both the cost and kind of environmental impact of
+training some of these large scale NLP models.
+And it is crazy.
+It's, it's crazy, actually, the, the CO2, ah, as narrative was one of the things that
+got me, especially, like, I was, ah, maybe we don't touch language, that's, that's
+there's plenty of people thinking about it, and then I, I saw Emma's papers, like, wow,
+ah, I'm here trying to make autonomous cars so that, you know, a little bit more environmentally
+friendly when it comes to driving, when I could go fix a, you know, fundamental prime
+right in my field, ah, and so, yeah, so we look at these language models and go, how
+can we make these better, ah, and the first step to doing that is we got to understand
+them.
+So we need to run some experiments, ah, and, and my students go, well, we're going
+to need a lot of machines, like, I can't afford a lot of machines.
+So if I look at Google at Facebook, they can throw a lot of compute and trying to understand
+something, and that's actually one of their, their tools that, that we don't really have
+access to, ah, we've actually, ah, started a collaboration with Google so we could get access
+to TPUs.
+We can't do it at the scale that they're going to run their experiments.
+So we had to get lean.
+So how can we rapidly iterate on variations in our architectures, ah, we want to look
+at different types of, of attention, different architecture sizes, understand the effects
+of these hyper parameters, and so my students go, ah, here's what we'll do, we'll make the
+models really small and we run a training run every day with different configurations
+and we've got a good picture of what's going on, ah, and they did that and so they made
+the model really small because that would, in theory, make it really fast to train, ah,
+but they also run really small in terms of, ah, good parameters or, yeah, so they made
+the model smaller in terms of both the height, ah, the number of layers and the width, the
+number of these hidden, ah, hidden layers, hidden parameters inside of each of the attention
+heads.
+So basically they tried to make the model so it would, ah, it would train faster because
+it had less to compute, ah, less to, to update, ah, this is more of a classic way of thinking,
+how I would approach a problem too, if it's too big, make the problem smaller, ah, it
+should go faster, right, it's less to do, ah, so they did that and it was working, but
+one of them was like, well, what if we make it a little bigger just, you know, to get
+a point of comparison and they applied the point of comparison on top of the, you know,
+the, the smaller models they were training and, and the point of comparison seemed to go
+down pretty quickly and I say, well, let's put it in time and you put it in time and
+actually the bigger model, the point of comparison was actually getting to a better accuracy quicker
+than the smaller models that we were supposed to be running because they're faster to train,
+ah, and then we started to wonder, hm, maybe it's the other way around, maybe we had
+this backwards all along and if we want to go faster we have to make the problem bigger,
+ah, which is really counterintuitive, but it actually turns out to be a really neat intersection
+between, ah, how these models converge and how they can take advantage of parallel resources
+in the GPUs and TPUs, ah, to get good scaling as you make them bigger, ah, and that sort
+of forms the foundation of, of this work that sort of went against what we thought would
+be the case, ah, and actually presents a neat way to approach training, ah, these expensive
+models.
+It is the idea related to the, kind of the rate of change of, ah, of kind of accuracy
+for these models and, you know, taking advantage of the idea that the larger models learn
+quicker, ah, but the, you know, I guess the, the area under that learning curve is proportional
+to your compute cost and you cannot kind of optimize that.
+Yeah, so there's a bunch of trade-offs.
+Let me, I try to walk through them because they were counterintuitive to me at first
+too.
+So the first trade-off to think about is, ah, actually let's talk about compute.
+So as I make my model bigger, I'm going to compute more, so it's more work and it should
+run slower.
+But the neat thing is that when I make these models wider at least, ah, I actually expose
+more parallelism, and if we look at the execution of these models, it's a little surprising.
+We've optimized those, those GPUs and TPUs to have a substantial amount of compute, often
+for computer vision models, ah, and so now we have an opportunity when we run a transformer.
+If we don't crank the batch, batch size up incredibly high, we actually have a fair amount
+of leftover compute that we can use.
+So making the model bigger doesn't necessarily translate to a linear increase in runtime.
+So we can afford to make the models bigger without, ah, linearly increasing execution.
+Parallelism and runtime don't correlate to cost because you're just running more compute
+at the same time.
+Yeah.
+So, ah, this is looking at a single CPU.
+Or carbon for that matter.
+Yeah.
+So, all right.
+This is, you're getting to the interesting stuff.
+So, so first, let's, ah, in the paper, we actually tried to control for this, because
+I was like, ah, on a second, you're, you're just going to increase the cost of compute.
+So we looked at one GPU, and what happens is you're not using all the cores on one
+GPU when we were looking at the smaller models.
+So as we make the models bigger, ah, for a fixed batch size, ah, we can get, ah, an increase
+in the utilization of the GPU.
+Um, and right now it's not easy to turn off those cores, and you're also paying a fixed
+overhead to power the, the actual box that the cores are living in, plus cooling.
+So trying to power throttle individual cores on GPUs, generally not a great idea, ah, especially
+if we can get better utilization of the cores that we have, ah, now you could say I should,
+I should have more GPUs.
+We did.
+We're going to burn more resources as we turn on more GPUs, ah, but the hope is that
+we can get to a solution quicker.
+And if, and if those GPUs are already attached to our box, which they often are, there's
+usually some incentive to go ahead and try to use those as efficiently as possible.
+Um, and so that brings us to the second question, which is if I make my model bigger, is it
+really improving any efficiency, which is what we'd like to think of as the improvement
+in our, our perplexity, our reduction in perplexity as we, ah, train.
+And so we'd like to, to reduce our errors quickly as possible, um, in, in walk clock time
+because we have to pay for the power of the building and so on.
+Um, so we want to, to train as fast as possible in time, the simpler way to look at that
+first is how is it, ah, how is he perplexing or error decreasing as a function of the amount
+of data that we touch?
+Um, and so there are two knobs there.
+So now we're getting to the, the weeds, but there's the batch size, which determines how
+much data we look at per step of our algorithm, um, the more data we look at, the better of
+an estimate of the direction that minimizes the loss, uh, which in principle should give
+us faster convergence, um, it also increases GPU utilization.
+So we can use that as another mechanism to get better, uh, utilization out of each of
+our piece of hardware, um, but it also has diminishing returns.
+So as we increase the batch size, our, our speed at which we're able to converge as a function
+of samples we look at, um, doesn't necessarily increase linearly, uh, and one of the other
+sort of side effects of this, which if you work in computer vision, you're like, oh,
+no, there's a problem, um, that as we increase the batch size, there's some risk of overfitting.
+Um, and this is a fact that shows up more in computer vision models where, where it's somewhat
+data poor, where in, uh, NLP, it seems at this point, at least that we have opportunities
+to, uh, overfit more before we actually are properly overfitting.
+So, uh, there's this question of the generalization gap, the gap between how well your models
+fitting the training data and the test data.
+And in NLP tasks, we're not at a point where we're, that generalization gap is disappearing,
+which means that we can increase the batch size quite a bit more, um, without overfitting,
+but it also means we can increase the model size quite a bit more.
+And so what this paper then does is tries to play off, uh, compare this trade off between
+model size and batch size to find the best combination.
+And one of the neat results we find is it actually cranking up the model size and a batch
+size, uh, to a certain extent as well, kind of gives us the best outcome, uh, it gets
+us to a, a model that's more sample efficient, the more samples it sees, the faster it reduces
+the, the test air, uh, and it also lets us better utilize our hardware, so we're actually
+getting, uh, a gain from parallelism.
+And those two forces interact to give us a faster in terms of walk lock time, um, reduction
+in the test perplexity or the, the, the air metric that we care about.
+In terms of this, uh, generalization gap and the, the differences between it, what you
+see in computer vision and, uh, what you see in NLP tasks is that related to the way
+the problems are formulated in terms of, uh, supervised versus self-supervised semi-supervised
+and the kind of availability of data and labels and that kind of thing.
+Absolutely.
+So, uh, you're hitting a key point.
+So in computer vision, we are largely still focused on supervised tasks.
+We need labeled data sets, which, uh, are big, but they're not, uh, as big as we want
+them to be.
+Uh, whereas in NLP, we can go to really large, uh, unlabeled data sets, uh, cause we're
+essentially predicting missing words.
+So we've created this self-supervised task, um, and that means that we have so much more
+data, we can support bigger models and bigger batch sizes without having this, this generalization
+gap disappear.
+Uh, we're able to, uh, sorry, without, uh, eliminating, uh, or causing our, our training
+error to, um, go to zero and our test error to, to, you know, dominate, uh, so, so there
+is, uh, this, this opening created by this, uh, self-supervised training that, that we're
+able to take advantage of.
+Now, in our experiments, we test both the self-supervised training task as well as the
+downstream, uh, translation or, or classification tasks.
+It would be applied to actual language modeling, you know, supervised training tasks, but that's
+typically done as a small fine tuning step on top of, uh, this extensive pre-training,
+which is where all the, the CO2 is going, uh, to pre-training these models.
+Uh, and then in, in your description of the, the train large, it, it sounded a little
+bit like you're ultimately saying, uh, you know, fully utilized whatever box you're
+training on, but there's a lot more nuance there.
+I am, yeah, elaborate on, on that.
+So this has been a big question in data center design, generally, as a systems person,
+like, should I turn off my GPUs, should I turn off my CPUs, uh, or should I try to utilize
+them better?
+Um, and the general consensus when we think about data centers, uh, is that we really
+do want to try to maximize our utilization.
+Part because we bought the data center, it's expensive, we should use it, uh, we have
+to keep it cool, we have to staff it.
+There's a lot of other factors that go into play, uh, and so we want to be able to use
+that hardware as much as possible and as efficiently as possible.
+Um, and part of the reason we might want to use it as efficiently as possible, you think
+of things like serverless, uh, if I'm not using the hardware, I can put something else
+there, uh, and we're creating markets for filling in the excess capacity.
+So the idea that I would turn off a GPU is sort of silly, I should always have something
+running.
+Um, now the question is, can I make that thing running on the GPU as efficient as possible?
+Uh, and so in our work, we're focusing on trying to maximize that efficiency, uh, in
+my lab, for example, students are competing for the GPUs, we, the one GPU experiment is
+definitely easier to run because they're not fighting for the entire box.
+Um, and so the other GPUs are being used for other experiments, uh, and then when we
+go to, to, you know, a GPUs, we're going to again use the whole box.
+So the general consensus or at least the thought process today, when we think about the data
+centers to really maximize our utilization and not try to, uh, power throttle, um, or
+limit the performance of each of the, the course.
+So it could be in the future and new kinds of hardware might change that trade off, um,
+but the underlying economics would sort of suggest that if you bought the device, you should
+really try to find ways to maximize its usage.
+And given machine learning has an infinite supply of things that we'd like to train, um,
+it's not hard to imagine that I can always fill my excess capacity with more training.
+So is the paper fundamentally an economics paper in the sense of, you know, you're trying
+to maximize utilization and those kind of things, or do you also get to results that talk
+about performance given a set of constraints, like your traditional computer science,
+he kinds of papers?
+Yeah.
+So it's, it's funny.
+We hadn't gone down the economics route.
+So it's, it's a funny.
+I mean, very loosely.
+Yeah.
+Well, so we, we are actually very much thinking about the economics of computing.
+When we look at serverless, that is going to fundamentally change our economics computing
+in a way that I think will make things more efficient, more cost effective, um, and
+actually easier.
+So it's, it's a win for everyone and we actually have a, uh, upcoming paper, um, on
+this at a hot cloud about, you know, the economics of serverless are going to generally be favorable
+for everyone, um, assuming we get some of the systems problems, uh, you know, ironed
+out, uh, this paper was really our students as in, you know, a first effort to really make
+progress in the BERT-P training space to find mechanisms that we in academia can use to
+go fast.
+Uh, and part of that is finding better ways to be more efficient about training.
+Um, it allows us to run experiments more quickly and so we can now innovate on BERT.
+And one of the things we're actually looking at is, uh, trying to make these models more
+non-parametric so they can leverage other data sources.
+One of the side consequences of this paper is sort of, uh, you know, if you're out there
+thinking about, oh, I should, that's really cool.
+I want to play, uh, to play that, but hey, wait a second.
+You made the model four or five X bigger, six, seven X bigger.
+That's six.
+Bensive for inference.
+Uh, what am I going to do about that?
+Um, and in fact, when we got this result, that was like my first conclusion, yay, we went
+on the training front, but we just made inference, which is actually the more expensive
+problem, uh, worse by seven, 10 X, uh, and if you think about it, training should only
+be a small part of the use of these models, uh, inference is where it really the cost
+should be.
+And it is when you look at a practical application, we might train it, but we're going to
+run that model 24 seven at every single tweet, every single web page that we encounter.
+That's a lot of inference.
+Um, and if you 100, so you're doing what a thousand, uh, when batch, the optimized, a thousand
+sentences per second, uh, which sounds good.
+But then you think of the amount of text in the web, that's a lot of expensive GPU hardware.
+Um, so making the models smaller after training was one of the questions that we had to solve.
+And so this is the second half of this paper comes back and goes, wait a second, so even
+the model is bigger to train faster, but now we need a way to squeeze them down.
+And maybe actually the bigger insight, which is also maybe a little less counterintuitive,
+is that the bigger models, we could actually make smaller more efficiently and actually,
+uh, with, with less of a degradation in accuracy.
+So we make a, we train a really large model and then we chop it up.
+So we, we both explored weight pruning, so eliminating weights, making the model more
+sparse, uh, and quantization, reducing the bit precision of each of the, uh, the weights.
+And so we are able to take our much larger models and then apply these, these, uh, compression
+techniques to make them smaller.
+And the, the effect of that is we can make the model actually smaller than the small models,
+uh, while retaining higher accuracy.
+And so that's something that we're still.
+So were you able to use the compression techniques off the shelf, or did you have to adapt
+them to this kind of model or, um, the specifics of the way you train them?
+Yeah.
+So, uh, getting close to the deadline, realizing our models are now 10x bigger, we're like,
+right, so how do we quickly figure out a compressed these?
+Good news.
+One of the students, Shen, uh, who's, uh, working on this project had just finished
+to work on quantization, uh, and so we're like, right, Shen, can we use your quantization
+technique?
+I don't know, maybe.
+We started playing math and it turns out that, it worked really well, uh, and so we looked
+at the standard quantization and standard pruning.
+So we tried not to innovate extensively in each of these pieces, more of an exploration
+how they interact with this kind of counter intuitive hypothesis that bigger models might
+actually be better, both for training and it turns out for inference as well, if we compress
+it.
+Got it, got it.
+So not that you have any of these numbers like right at your fingertips, but can you give
+us a sense for when you say train large, like what large means in this case and how that
+compares to what a Google might do typically?
+Yeah.
+So I think we were looking at like six X seven X bigger than was normally, was normally
+published.
+Uh, I'm guessing Google actually goes much larger still and they might already be benefiting
+from these ideas.
+And what, what order of magnitude is that in terms of number of, you know, servers or
+CPUs or GPUs or so we were at eight, uh, GPUs, we actually also ran experiments on a
+GPU, uh, V three TPU as well, uh, I'm trying to remember the exact sizes, I have a paper
+in front of me if I can find it.
+Many tabs.
+Uh, yeah.
+So I think we were at, we were up to like 20 hidden layers or so, uh, our 24 went up
+24 layers, um, and we tried, uh, hidden sizes of, you know, like the order of, uh, 15,
+36, so 1,536 hidden units, uh, for each of the layers.
+So we, we tried a pretty reasonable space, um, we, we built off off the Roberto work,
+which is actually if people haven't looked at, it's kind of neat, uh, sort of revisiting
+what Bert did, uh, and in some ways, Bert really had the right answer, just this broader
+experimentation of the, the trade off space makes a big difference.
+Um, so we built off of that and tried different variations on the sizes described in that paper.
+Yeah.
+The kind of rough magnitudes that I remember reading about and I don't remember if this
+was, you know, Bert or Almore, some of the different variations or, or, but there was,
+you know, on the order of like 64, you know, tens of GPUs for, you know, yeah, or more.
+Yeah.
+No, so, so we went, uh, we used a TPU cluster for our big experiments.
+So we actually tried to reproduce the Roberta setup, uh, so our, our comparisons are compared
+to these standard baselines.
+Uh, so we had to use a TPU cluster for several weeks, it's expensive to run the full experiment
+for the baselines.
+Um, but what was needed is by making the model bigger, we could get comparable results
+quicker.
+Yeah.
+Mm-hmm.
+And, um, so we've, we've kind of characterized bigger, now characterized quicker.
+What did, what did that mean in practice?
+So, uh, we used them, uh, I guess at about a hundred thousand, uh, seconds, are we able
+to get fairly competitive accuracy?
+Um, you should see the, the final number.
+So it sort of depends also on, on which tasks we, we also accounted for the, uh, downstream
+fine tuning that you'd need to do as well.
+I don't actually remember I'll top my head, uh, uh, uh, well, we'll leave it as an exercise
+to the listener to pull up the paper.
+So you've increased the size of the model and the number of resources, the CPU resource,
+or GPU rather resources that the model is running on and in turn decrease the, the training
+time of the model and the aggregate compute cost, right?
+Did you need to do anything special to accomplish that or was, is the paper primarily observing
+the fact that, you know, the, you know, the, in aggregate, you get the, the preferable
+approaches to increase the, uh, the model size.
+So, uh, we did small changes to where we placed the batch normalization, uh, we did pre-normalization,
+but it's like negligible changes in the underlying architecture.
+Most of it is really exploring this, this trade-off space, uh, these different parameters.
+So, uh, in some sense, it's a first step towards a bigger agenda.
+It wasn't intended to be like a ground, uh, changing work, but what's kind of neat is it
+does really make us at least rethink how we approach training of these models.
+Well, it's, you know, it's important stuff like, I think a lot of people, uh, will think,
+well, you know, if Berkeley's worrying about the cost of training these models, what,
+what hope is there for, you know, my lab in, you know, um, a non-Berkeley institution,
+you know, that has such close ties to Silicon Valley and, and relatively, awash and resources.
+Uh, and so if you can figure out how to make training these models more efficient, then,
+um, that's potentially a huge impact for a lot of people.
+There's a, an important, uh, sub narrative here, which is that, uh, training, the pre-training
+isn't something that everyone needs to do, um, and so, uh, Google has done a great job
+of offering these pre-trained models.
+So this really expensive part isn't something that every, you know, group in the world has
+to address, uh, and that's a good thing.
+Um, but if we want to innovate on that pre-training process, if you want to do research in it,
+or we want to, in fact, the data suggests that adding more data, uh, that's specialized
+to your domain can improve the quality of the model.
+So if we want to be able to push pre-training research forward, we do need to find ways
+to make it more efficient, uh, and I should say we started out with thinking, oh, we're
+going to invent a new bird, um, and discovered in the process and maybe, we don't necessarily
+need a new bird yet, but maybe approaches to how we do the training, how we choose our
+hyper parameters can make a really big difference.
+Your comment just prompted a thought to what degree has the, uh, kind of the, uh, I don't
+know, theoretical trade-off space around pre-training versus fine-tuning been explored.
+So that, you know, if I know that I have a unique domain, you know, and some, you know,
+corpus, uh, of documents or data available to me, you know, is there a, is there any kind
+of concrete research I can look to to help me understand, you know, if I should be pre-training
+from scratch versus fine-tuning and, or do I just need to try everything and see what
+works?
+Uh, the try everything is, is not terrible advice, but here's what I would tell my students,
+uh, so pre-training is expensive.
+So maybe start with fine-tuning, understand what, what is your prediction task, and this
+is what, you know, the, the practical world will do, um, so take your, your, your, uh, your
+prediction task, whether or not a translation or sentiment tagging, or maybe it's like, which
+call center, which call person should this, this, you know, message be forwarded to, um,
+focus on, on fine-tuning for that task first, um, there's a little bit of art in choosing
+learning rights and stuff to get your fine-tuning to work, so go through that process, uh, understand
+how well you can do, uh, by fine-tuning to your, your domain.
+And then if you have, and you might, you know, billions of call records from the past,
+you think you could really better improve the underlying representation, um, you could
+then try to go back to this mass-language model, uh, training, the, the pre-training process,
+uh, and then the work that we've done and, and, you know, other work that's, it's, it's
+going on around us, um, can help to make that process more efficient so that you can, in
+a matter of, of weeks or a week, in our case, um, take your V100 box and really make substantial
+progress, uh, towards, uh, pre-trained model that's now pre-trained on, on your domain
+as well.
+Um, and so where do you see this line of research leading?
+Yeah.
+So I asked my students this every year, so as we said in this group, like, what's next,
+guys?
+So we figured the original goal was to, like, be able to develop a new bird.
+So now we have the tools to start testing pre-training.
+What should we do next?
+Um, one of the things that I'm kind of excited about, uh, is, uh, well, the realization
+that we're trying to cram a lot of knowledge in the weights of our model, uh, and making
+the models bigger certainly helps with that, uh, another way to deal with knowledge is to
+not put it in the model at all.
+I, I actually have to look up stuff most of the time when I want to remember facts and
+terrible remembering facts.
+So I use the internet, um, I have a neural net in my head.
+It doesn't have to memorize the internet because I have the internet.
+So having access to a knowledge base can make a big difference, uh, and how much we need
+to encode in our model, make our model perhaps smaller, um, the ability to, uh, synthesize,
+uh, decisions or to apply logic on top of knowledge base.
+It seems like a really big opportunity for language modeling for, uh, for NLP broadly.
+And maybe even for these, these basic representations like Bert.
+And so we've been looking at, and starting to look at, and some of their groups actually
+have got some early published work on how to bring in a non-parametric or semi-parametric
+lens on, on these models so that, uh, we can reference into a large knowledge base, uh,
+in, in the construction of our embeddings themselves.
+Uh, and that has, you know, the advantage of maybe being more efficient, uh, allowing
+us to grow the knowledge base without having to retrain the model, uh, we could get more
+data, our model just gets better without having to adjust the model itself.
+Um, and maybe even giving us some explainability.
+So when we go to make a prediction about, like, how we embedded the sentence or how we represent
+this, you know, this decision for, you know, which called a route to, we can now actually
+point back at historical data and say, here's the data we use in our embedding to reason
+about that.
+And you know, that's terrible data.
+I don't want that in my data set or, you know, that actually, that makes sense.
+And so that, that connection to the data could actually also help with the explainability.
+So that's sort of the vision that I, that, that my students and, and I are pretty excited
+about right now.
+Does that pull from or kind of lead you to like memory based networks or like information
+retrieval types of problems or?
+Yeah.
+Yeah.
+So memory nets, I are all of these, these kind of, I say, I are more classic memory nets
+that also increase any more classic.
+Um, so, so those are our tools.
+Uh, one of the things we're looking at right now is something as simple as like, can
+we use embeddings from other piece of text and simple text similarity to, to recall those
+embeddings?
+Um, and, and there's some other work exploring this now.
+Uh, ultimately things like, uh, memory nets or pointer, mechanisms to point into a knowledge
+base and attend to an entire corpus would be really exciting and, and we're just starting
+to explore this.
+Uh, so there, there's a lot more to do.
+Uh, it does push us in the direction of IR, uh, imagine a neural net that can Google
+stuff for you, uh, to answer questions.
+So it's certainly, there's a, a well studied area that, that we'll have to build on.
+You touched on explainability in there as a possible, uh, benefit here.
+Uh, I'm, I'm curious about, uh, you know, maybe you're elaborating on that a little bit
+more and then also you've been doing some work on explainability as applied to reinforcement
+learning.
+Um, um, maybe a little, if you can share a little bit about that work as well.
+Yeah, so I'm the co-director of the UC Berkeley RISE lab, which stands for real time working
+on that intelligent working on that secure.
+So we have an interesting agenda on security, which is another time, um, and then the E.
+And then for a long time, I'm like, what does the E really, what, what, what should it
+mean?
+Uh, we were initially thinking execution, we're going to execute things securely, but
+that, that's actually some bad connotations.
+So, uh, maybe there's another agenda, which actually came out of our, our exploration
+lineage, uh, how we, we track relationship between data and the model development process,
+explainable, uh, decisions would be a good thing to be able to support.
+Um, and so we had an agenda around how to do X, or we have actually on going agenda,
+I had to, uh, explainable machine learning by connecting our training process to our data.
+But what's actually pretty exciting is, is pulling in some of the recent work and explainable
+AI.
+Actually, my, this advisor, Carlos has an exciting work, uh, line, which provides a black
+box mechanism for explaining, uh, model's decisions.
+Uh, so my students have been also exploring, uh, tremendous staying power.
+This is, you know, one of the things we talked about three plus years ago, and that, uh,
+went that early twinal episode and Lyme comes up all the time still.
+Yeah.
+So I, I run the risk of a, of a, another tangent, but the, the world of explainability
+is, it's, it's kind of rich and it is created by this need to, to make sense of models
+that no longer make sense, uh, and so this idea that I can inspect my model and go,
+hey, I like how that makes decisions, uh, that's gone, or at least, you know, to a first
+approximation.
+So we're left with justify the decision you made.
+Let's go back and at least connect it to the data, to even the input.
+Uh, so, so my group had started looking at that, and one of the things that we started
+to ask is, why can't we have some interpretability?
+Uh, and so one of the agendas that, uh, I'm exploring that's actually not in the language
+domain, but more in the, the vision domain, um, is how to apply decision trees to connect
+decision trees back with our, our, our deep learning models so that we can get the accuracy
+we want, but we can also go and interrogate our model and go, well, it's going to call
+this a cat, but in order to do that, it has to first identify that it's an animal and
+it has to cluster it in animals with, with legs, uh, and then, you know, with fur and
+then it gets us to cat.
+Um, so there is an opportunity to actually understand what the model is going to do at
+the high level, each of these decisions is governed by a neural net, so understanding
+that is sort of off the table, uh, but at least we now have an idea of the decision process
+the model will go through to make a decision.
+So this is our recent work on neural back decision trees, uh, when we look at language, it's
+been an interesting question of what, what would an explanation look like in the language
+domain?
+So there are techniques like grad cam that have been pretty popular in vision that would
+give us, you know, highlighting parts of an image that say, you know, this is the part
+of the image you're attending to.
+We could do that in their explorations of that in the language domain, but one of the
+neat things going back to our very beginning narrative is, can I connect my decisions back
+to data?
+Um, in many cases, that is sort of the ideal explanations.
+Like here's the data that informed my decision about what you've given me now.
+Um, and so, so that explanation is what we're exploring.
+One of the hopes in doing that is you can not only connect it, but you can even fix
+it.
+Uh, so one of the kind of ideal outcomes of an explainable model is when it gets it
+wrong, you go, that's wrong.
+Here's what is wrong about it.
+And that extra signal could be way more valuable than just some more labeled data.
+Uh, and so that's our hope and maybe being able to correct our knowledge base if we are
+referencing data so that we don't use that reference data in the future.
+That would be one mechanism in the case of decision tree changing the path.
+So, you know, cats can't be attached to the thing that are, you know, they're under
+water.
+That doesn't make sense.
+So I want to move my cat class somewhere else in my tree.
+So the opportunity to intervene in a model is something that I'm excited about when
+we look at explanations at do you draw a hard line between explanations and interpretability
+just when you're speaking about them casually?
+I do a little bit because at least classically to me, I was again, background being more
+in the traditional machine learning, uh, we really cared a lot about interpretal models
+and that meant that I could look at the individual pieces of the model and start to reason
+about, uh, conditional probabilities, what they would say about the, the priors that I'm
+trying to impose on my data.
+Um, so interpretability to me means something that is sort of independent of the kind of
+intrinsically.
+Yeah.
+It's intrinsic to the model.
+Whereas an explanation could also be called a justification, sort of looks retroactively.
+Here's a decision I made, provide an explanation.
+If we look at humans, humans are not interpretable, you can't look at their brain well.
+Most people can't look at the brain and go, okay, yeah, I know what you're going to do.
+But they provide meaningful explanations and that's maybe all we can hope for and we learn
+to work with that.
+And I hope with the work and explainability that we're explain is to sort of provide a
+little bit more of the interpretability, uh, and I think that's important one because
+it, you know, if I'm going to deploy a model, I'd like to be able to, in general, understand
+how it's going to behave, uh, not just on, on a, you know, candidate piece of data.
+The other lens that we're bringing is, be able to adjust the model when I get it, when
+it gets it wrong, I wouldn't be able to, to correct it.
+So this work with the decision trees is the set up such that the decision tree is, uh,
+is an intrinsic part of, like, when you refer to the model there is the model, a superset
+that includes the decision tree or is the decision tree a kind of a surrogate model that's
+used when you're asking, uh, explainability kinds of questions.
+No, so the challenge here was to, to make the decision tree the model.
+Uh, and so what we're doing, uh, we don't do really crazy complicated things.
+So in this set up, we're taking a standard ResNet 101 to find an embedding of our, our
+input.
+And then we're using the decision tree as a, a decision tree on top of that embedding.
+Um, and so that's allowing us to route our decision process based on that embedding from
+ResNet 101.
+So there's a part of the model that I can make no sense of that there's no deep, uh, interpretable
+or even explainable component of that little piece.
+Um, but there is now structure in how decisions are made.
+Right.
+So the ResNet is basically, um, kind of learning this space of relationships between
+the things that it's seeing, at least in a computer vision sense.
+And then the decision tree is on top, making decisions about what is what based on the
+space that the ResNet has locked.
+Yeah.
+So it is a funny recipe.
+And a lot of vision now, it's take a ResNet like architecture as a backbone and it's
+role is to embodying the things, you know, it wants to, but it's role is to extract, um,
+pixel information to extract texture, shape, things, image attributes that would be then
+used to make a decision.
+And it places them in a fairly high dimensional space and then the, the decision tree is, is
+constructed in a way that tries to, uh, use that, that space to make decisions.
+Now, that actually alone doesn't work.
+So you need to take that decision tree and fine tune the neural net, the ResNet backbone
+so that it's, uh, compatible with the decision tree we build.
+Um, so it's a, you know, a small twist that's needed, but that small twist now allows us
+to get competitive accuracy to the original model, we're still using the model, uh, but
+now have an interpretable path where like, uh, one of the fun examples is, uh, if we
+give it a picture of a zebra, it's a class we've never seen before, it'll route it down
+to near the horse, but then it doesn't know what, you know, it'll classify something
+in that one of the horse categories.
+Um, and so it, it does try to extract some structure to the classes, uh, that is
+semantically meaningful, but also a picture, uh, uh, in the, in the image domain meaningful.
+So, uh, things that look similar, yeah.
+Can you provide a, uh, kind of a quick intuition for why a fix is needed in the neural network
+domain, um, as opposed to just throwing the existing decision tree against the existing
+embeddings and what the kind of intuition of that fix is?
+Yeah.
+So, uh, the simple answer is we tried, uh, throwing the simple embedding into the decision
+tree and it didn't work, uh, the, the deeper answer is that, uh, it's, the decision tree
+wasn't up, sorry, the, the neural that wasn't optimized to give features that have some,
+uh, coherent structure that we can build this, this class hierarchy on top of.
+And so adding this extra decision tree loss, we can actually force a decision tree to cluster
+things using semantically similar structure, like we want horses to be nearby dogs and
+farther, like share less common ancestors to fish.
+Um, so, so we can impose some structure in our tree, uh, and then we can force the neural
+nets and embeddings to reflect that structure.
+So that, that is why we need to adjust the neural net to deal, to compensate or to be
+able to work in the context of the tree.
+So in the, and you're changing your loss function and the decision tree to accentuate kind
+of like maybe, you know, I'm envisioning kind of spreading out the embedding space or
+something like that so that the decision tree can, so we're more meaningful for the
+semantics of the decision tree.
+Cool.
+Awesome.
+Well, Joey, uh, this has been wonderful, uh, learning a little bit about what you're
+up to there.
+We still never got very deep into serverless, so we're going to have to put a pin in
+that one for, uh, next time, but very cool stuff.
+And thanks for taking the time to, uh, share it with us.
+Thank you.
+It's been fun.
+Awesome.
+Thanks.
+All right, everyone, that's our show for today.
+For more information on today's show, visit twomolai.com slash shows.
+As always, thanks so much for listening and catch you next time.

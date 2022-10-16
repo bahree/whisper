@@ -1,0 +1,2380 @@
+1
+00:00:00,000 --> 00:00:16,320
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+
+2
+00:00:16,320 --> 00:00:21,480
+people, doing interesting things in machine learning and artificial intelligence.
+
+3
+00:00:21,480 --> 00:00:34,560
+I'm your host, Sam Charrington. In this episode of our Deep Learning and Daba series, we're
+
+4
+00:00:34,560 --> 00:00:39,760
+joined by Airman Kemper, lecturer in the Electrical and Electronics Engineering Department
+
+5
+00:00:39,760 --> 00:00:45,920
+at Stellan Bosch University in South Africa, and the co-organizer of the endaba.
+
+6
+00:00:45,920 --> 00:00:51,600
+Airman denied discuss his work on limited and zero resource speech recognition, how those
+
+7
+00:00:51,600 --> 00:00:56,480
+differ from regular speech recognition and the tension between linguistic and statistical
+
+8
+00:00:56,480 --> 00:01:02,320
+models in this space. We dive into the specifics of the methods being used and developed in Airman's
+
+9
+00:01:02,320 --> 00:01:11,040
+lab as well, including how phoneme data is used for segmenting and processing speech.
+
+10
+00:01:11,040 --> 00:01:15,400
+Before we jump in, I'd like to send a big shout out to our friends at Google AI, which
+
+11
+00:01:15,400 --> 00:01:20,520
+recently opened up applications for its 2019 residency program.
+
+12
+00:01:20,520 --> 00:01:25,320
+The Google AI Residency is a one year machine learning research training program with the
+
+13
+00:01:25,320 --> 00:01:29,840
+goal of helping individuals from all over the world and with a diverse set of educational
+
+14
+00:01:29,840 --> 00:01:35,280
+and professional backgrounds who come successful machine learning researchers. Find out more
+
+15
+00:01:35,280 --> 00:01:46,240
+about the program at g.co slash AI Residency. And now on to the show.
+
+16
+00:01:46,240 --> 00:01:51,320
+Alright everyone, I'm on the line with Airman Kemper. Airman is a lecturer in the Electrical
+
+17
+00:01:51,320 --> 00:01:57,320
+and Electronics Engineering Department at Stellan Bosch University in South Africa and one
+
+18
+00:01:57,320 --> 00:02:02,000
+of the organizers for the recent Deep Learning and Daba event. Airman, welcome to this week
+
+19
+00:02:02,000 --> 00:02:05,680
+in machine learning and AI. Oh, thanks a lot for having me.
+
+20
+00:02:05,680 --> 00:02:12,400
+I guess we should start with the endaba. The event just finished. I saw an incredible
+
+21
+00:02:12,400 --> 00:02:19,480
+flow of tweets from the event. It looked amazing from your perspective as an organizer. How
+
+22
+00:02:19,480 --> 00:02:20,480
+did it go?
+
+23
+00:02:20,480 --> 00:02:26,520
+I think it went pretty well. I think obviously as the organizers were a lot more aware of
+
+24
+00:02:26,520 --> 00:02:34,600
+the things that might break behind the scenes but overall it was really successful. I enjoyed
+
+25
+00:02:34,600 --> 00:02:39,520
+it a lot and from everything I've heard from all the people that was here, I think that's
+
+26
+00:02:39,520 --> 00:02:43,200
+where we got the biggest encouragement. Just people telling us how much they enjoyed
+
+27
+00:02:43,200 --> 00:02:46,920
+it and how much they got from the event. So I think it went well.
+
+28
+00:02:46,920 --> 00:02:49,840
+And the highlights from your perspective?
+
+29
+00:02:49,840 --> 00:02:56,480
+That's very difficult. I think maybe three things that really stood out for me. It was
+
+30
+00:02:56,480 --> 00:03:04,080
+two talks. The one was by King Yongchou. He led sessions on basically the fundamentals
+
+31
+00:03:04,080 --> 00:03:11,040
+of building natural language processing systems and to me was just amazing. The amount of
+
+32
+00:03:11,040 --> 00:03:16,400
+kind of dense content that he packed into a lecture but then also giving kind of his
+
+33
+00:03:16,400 --> 00:03:21,640
+high level overview of kind of where the field is going. That was one big thing. The talk
+
+34
+00:03:21,640 --> 00:03:29,760
+by Jeff Dean at the end, that was just amazing. And then the post decisions which was basically
+
+35
+00:03:29,760 --> 00:03:36,280
+students from across Africa presenting their work and I've been lucky to be at international
+
+36
+00:03:36,280 --> 00:03:41,320
+conferences. And this post decision at this African event was just amazing to see the
+
+37
+00:03:41,320 --> 00:03:46,320
+quality of the work and that the students here are doing.
+
+38
+00:03:46,320 --> 00:03:52,040
+That's fantastic. Before we dive into some of your research, why don't we have you introduce
+
+39
+00:03:52,040 --> 00:03:59,120
+yourself to the audience? You are relatively new on the faculty at Stellan Bosch. Tell us
+
+40
+00:03:59,120 --> 00:04:00,960
+a little bit about your background.
+
+41
+00:04:00,960 --> 00:04:07,360
+Yeah. So I'm actually a Stellan Bosch boy kind of born and bred. I grew up here. I did
+
+42
+00:04:07,360 --> 00:04:14,560
+my undergrad and a master's year. And then I also worked for a bit and then I went to
+
+43
+00:04:14,560 --> 00:04:19,840
+Edinburgh to do my PhD there in the School of Informatics. And that was really amazing in
+
+44
+00:04:19,840 --> 00:04:24,480
+Scotland. Really struggled with the weather there but other than that, it was an amazing
+
+45
+00:04:24,480 --> 00:04:33,360
+experience. And then I did a postdoc in Chicago for relatively short time for about a year
+
+46
+00:04:33,360 --> 00:04:41,840
+at Toyota Technological Institute. And I grew up here. So as soon as I left, I kind of
+
+47
+00:04:41,840 --> 00:04:47,200
+was campaigning already to come back. I really saw my kind of long-term goals to come back.
+
+48
+00:04:47,200 --> 00:04:52,560
+And yeah, while I was doing my postdoc, I was very happy to get the appointment here.
+
+49
+00:04:52,560 --> 00:04:57,680
+Actually, I have a question about TTI Chicago. Is that relatively new? Or is it affiliated
+
+50
+00:04:57,680 --> 00:05:01,680
+with another school? I lived in Chicago for many years and never heard of it.
+
+51
+00:05:01,680 --> 00:05:09,360
+Yeah, so it's fairly new. It's really like an institute. It's kind of a lab. It was
+
+52
+00:05:09,360 --> 00:05:16,560
+funded by Toyota initially, but now it's kind of on its own. And it's a lab that's affiliated
+
+53
+00:05:16,560 --> 00:05:23,600
+with the University of Chicago. And it's kind of a research-only institution. So you can do
+
+54
+00:05:24,080 --> 00:05:30,320
+PhD at TTI Chicago. And they do a bit of postgraduate teaching as well. It's actually an amazing
+
+55
+00:05:30,320 --> 00:05:35,920
+place for specifically machine learning. It's quite a small group, but it's very tight net.
+
+56
+00:05:35,920 --> 00:05:42,240
+So you have great people in kind of theoretical machine learning, theoretical learning theory,
+
+57
+00:05:42,240 --> 00:05:48,080
+and then also speech processing, natural language processing, and computer vision.
+
+58
+00:05:48,880 --> 00:05:56,640
+So Hermann, your research is focused on speech processing. In particular, you're concerned with
+
+59
+00:05:56,640 --> 00:06:02,320
+how to do speech processing when you don't have a lot of resources. Tell us a little bit more
+
+60
+00:06:02,320 --> 00:06:09,920
+about what that means. Yeah, so actually this already started while I was doing my masters.
+
+61
+00:06:11,360 --> 00:06:16,320
+When you want to do, when you want to build speech processing systems, which I think can really
+
+62
+00:06:16,320 --> 00:06:22,240
+improve people's lives, this works well for English and for German and for Spanish,
+
+63
+00:06:23,040 --> 00:06:27,760
+because big companies are invested in these languages. And what they do is they collect a lot
+
+64
+00:06:27,760 --> 00:06:34,560
+and a lot of annotated data. So they get people to say things and then they transcribe it as well.
+
+65
+00:06:34,560 --> 00:06:43,520
+They give labels to basically the input speech. But there's so many languages on earth that
+
+66
+00:06:43,520 --> 00:06:51,520
+it's basically impossible to do this for all the languages. So my research focus is really on
+
+67
+00:06:51,520 --> 00:06:58,800
+very low resource languages, languages for which you just don't have that much data and annotate
+
+68
+00:06:58,800 --> 00:07:04,880
+the data. So data with labels and actually languages for which you where it might actually be
+
+69
+00:07:04,880 --> 00:07:12,560
+impossible to get these type of annotated resources. So there's a large proportion of the languages
+
+70
+00:07:12,560 --> 00:07:16,960
+spoken on the earth that doesn't even have a written form. So you can't write them down.
+
+71
+00:07:16,960 --> 00:07:24,800
+And if we want to build speech systems for these type of languages, or if you want to maybe kind
+
+72
+00:07:24,800 --> 00:07:30,560
+of preserve or document these languages, a lot of these languages are dying out. And you want to
+
+73
+00:07:30,560 --> 00:07:36,320
+build kind of speech processing systems that's able to look at these data sets, then you're in
+
+74
+00:07:36,320 --> 00:07:41,360
+the setting where you basically don't have any labels at all. You just have a collection of speech
+
+75
+00:07:41,360 --> 00:07:47,120
+audio. And what you're trying to do is kind of find this structure in the raw audio and to do this
+
+76
+00:07:47,120 --> 00:07:53,600
+without any form of supervision, any signal. So we call this unsupervised learning. I think a lot
+
+77
+00:07:53,600 --> 00:07:59,760
+of the listeners might know this. And kind of try to find the raw structure in the audio without
+
+78
+00:08:00,400 --> 00:08:07,120
+without any guidance. And this really has application. It kind of has this double motivation.
+
+79
+00:08:07,120 --> 00:08:13,280
+The one motivation is that if we can crack this problem, we can build speech systems in settings
+
+80
+00:08:13,280 --> 00:08:18,960
+where it was just not possible before for languages that we just can't build systems for at the
+
+81
+00:08:18,960 --> 00:08:24,160
+moment. And then the second motivation is that a lot of the people that's interested in these
+
+82
+00:08:24,160 --> 00:08:29,760
+kind of unsupervised model are also interested in how humans learn language. Because human infants
+
+83
+00:08:29,760 --> 00:08:36,000
+in a sense, they never see any texts labels. They don't get any hard supervision. They're kind of
+
+84
+00:08:36,000 --> 00:08:42,160
+just bombarded with the stream of audio. And from that, it's kind of a miracle how they then
+
+85
+00:08:42,160 --> 00:08:47,920
+start to learn language kind of automatically from just this raw sensory input. So people,
+
+86
+00:08:47,920 --> 00:08:52,400
+they call it zero resource speech processing sometimes. And people that's interested in this
+
+87
+00:08:52,400 --> 00:08:58,400
+area normally as this double motivation of either building speech systems, practical systems,
+
+88
+00:08:58,400 --> 00:09:03,760
+or actually using these type of models to investigate language acquisition in humans.
+
+89
+00:09:03,760 --> 00:09:09,760
+When I think about the trajectory of speech recognition systems over the years, there was this
+
+90
+00:09:09,760 --> 00:09:16,640
+transition from kind of strongly linguistic based models to more statistical models.
+
+91
+00:09:18,400 --> 00:09:25,120
+Does the fact that we don't have labeled data kind of push us back towards linguistic
+
+92
+00:09:25,120 --> 00:09:31,360
+based models or are we still able to operate in the statistical domain? That is an extremely
+
+93
+00:09:31,360 --> 00:09:35,440
+interesting question. I think a very, very good question because it's something that I think
+
+94
+00:09:35,440 --> 00:09:40,720
+this unsupervised community, this unsupervised speech community is actually struggling with,
+
+95
+00:09:40,720 --> 00:09:47,040
+is this question. And I think, so I can kind of say from a practical viewpoint, a lot of the
+
+96
+00:09:47,040 --> 00:09:52,480
+systems are still very of the, how could it zero resource speech processing systems, although
+
+97
+00:09:52,480 --> 00:09:58,720
+I might not like the term, but a lot of these zero resource systems still operate in the statistical
+
+98
+00:09:58,720 --> 00:10:06,560
+domain. So you can think about that is if I give you a ton of data or a collection of data and I
+
+99
+00:10:06,560 --> 00:10:13,360
+ask you to describe it statistically, then that's basically what it boils down to. At the same time,
+
+100
+00:10:13,360 --> 00:10:19,600
+I think people in this field are becoming more and more interested in kind of what is the structures
+
+101
+00:10:19,600 --> 00:10:24,720
+or what is the small things that you need to build into these systems in order for it to actually
+
+102
+00:10:24,720 --> 00:10:31,520
+learn something. So you might have a statistical system, but you can put in specific cues
+
+103
+00:10:32,240 --> 00:10:38,080
+that it can, can pick up on. And I think the reason this question is so interesting is,
+
+104
+00:10:38,080 --> 00:10:43,280
+if we can figure out what type of cues, what type of extract structure, what type of biases
+
+105
+00:10:43,280 --> 00:10:49,040
+we need to build into our unsupervised models for it to actually learn language, if we can answer
+
+106
+00:10:49,040 --> 00:10:53,920
+those questions, what are kind of the minimal things that we need to put in, then that might tell
+
+107
+00:10:53,920 --> 00:11:01,680
+us something about how the type of cues that humans, human infants use to do this. And it's really
+
+108
+00:11:01,680 --> 00:11:07,120
+interesting because it's also the converse. So people actually are looking, people in this field,
+
+109
+00:11:07,120 --> 00:11:15,040
+keep a close eye on cognitive studies, cognitive psychologists, who actually try to answer these
+
+110
+00:11:15,040 --> 00:11:21,120
+questions on infants. So they, we try to read a lot of literature from that side, which tell us
+
+111
+00:11:21,120 --> 00:11:27,840
+what type of cues do humans use. And in the cognitive literature, there's a lot of studies that
+
+112
+00:11:27,840 --> 00:11:32,960
+look at what are the cues that infants use. And how can we use some of those ideas and build those
+
+113
+00:11:32,960 --> 00:11:39,680
+into our systems. I think really what this community is doing is actually seeking the answer to
+
+114
+00:11:39,680 --> 00:11:44,720
+that question. What are the things that we need to explicitly build in and what should we just
+
+115
+00:11:44,720 --> 00:11:53,280
+let the model learn? Right. I think it sounds like in, in this field, as in some other areas in
+
+116
+00:11:53,280 --> 00:11:58,640
+machine learning, there's kind of a pendulum that's swinging that, you know, we started with
+
+117
+00:11:58,640 --> 00:12:04,720
+these very strongly, you know, physics-based or model-based approaches. And then we kind of swung
+
+118
+00:12:04,720 --> 00:12:10,720
+hard to statistical-based approaches. And now folks that are kind of on the frontier or, or many,
+
+119
+00:12:10,720 --> 00:12:16,560
+folks, not all are trying to figure out ways to incorporate the models back into the statistical
+
+120
+00:12:16,560 --> 00:12:20,560
+approaches to kind of get the best of both worlds. And it sounds like that's what's happening
+
+121
+00:12:20,560 --> 00:12:28,160
+here as well. Yeah, I think that's right. There's actually a very interesting kind of avenue that
+
+122
+00:12:28,160 --> 00:12:32,960
+people are starting to explore in this area. And I'm also working on this a little bit.
+
+123
+00:12:34,080 --> 00:12:39,760
+So infants, they're not just bombarded with raw audio. Of course, infants also have a lot of
+
+124
+00:12:39,760 --> 00:12:47,280
+other senses, right? Touch and also vision. So there's a group of people, and we're also working
+
+125
+00:12:47,280 --> 00:12:53,280
+on this, that kind of look at if you have, for example, a speech signal, but it's paired with the
+
+126
+00:12:53,280 --> 00:13:00,960
+image. So you have a spoken signal. So it's not a written caption, it's a bit of speech, but it
+
+127
+00:13:00,960 --> 00:13:08,880
+describes an image. Does that image actually allow you to more easily kind of learn the words that
+
+128
+00:13:08,880 --> 00:13:13,680
+use them in the language? So you might have a picture of people skiing or something, and then
+
+129
+00:13:13,680 --> 00:13:19,360
+someone describing that image in speech. And then you can kind of use that image to ground the
+
+130
+00:13:19,360 --> 00:13:26,560
+things that you're discovering. So I think apart from thinking about kind of these linguistic
+
+131
+00:13:26,560 --> 00:13:32,880
+insights, there's also just this general question of how can we glue different medalities and
+
+132
+00:13:32,880 --> 00:13:38,080
+different signals together? And that very much operates in a statistical point of view. But again,
+
+133
+00:13:38,080 --> 00:13:42,960
+we need to figure out what are the specific things that we need to build into these models
+
+134
+00:13:42,960 --> 00:13:47,120
+for it to actually learn, because it's a very, very hard task if you don't have labels.
+
+135
+00:13:47,120 --> 00:13:52,160
+It is really interesting how this pendulum actually sues. And I think in the supervised case,
+
+136
+00:13:52,160 --> 00:13:59,440
+if you have a lot of labeled data, then following a kind of a very pureist, let's just learn from
+
+137
+00:13:59,440 --> 00:14:05,520
+the raw data approach and learn to predict these labels that we know are important. I think that
+
+138
+00:14:05,520 --> 00:14:10,800
+makes a lot of sense. But if we're kind of going to this low resource case and generally
+
+139
+00:14:10,800 --> 00:14:15,440
+machine learning actually, I think there's a lot of evidence that shows that if you don't have
+
+140
+00:14:15,440 --> 00:14:20,880
+so much labeled data, then building instructors actually helps you in the short term.
+
+141
+00:14:21,520 --> 00:14:28,880
+You mentioned that the zero resource speech recognition community follows closely what's
+
+142
+00:14:28,880 --> 00:14:35,040
+happening in the cognitive science community. Are there specific examples of insights from that
+
+143
+00:14:35,040 --> 00:14:43,920
+community that have advanced the state of the art in your community? That is also a very good
+
+144
+00:14:43,920 --> 00:14:51,520
+question. And I didn't say, we follow them. I said, we try to follow them. We should follow them
+
+145
+00:14:51,520 --> 00:15:00,240
+a lot more. Actually, Emmanuel Depou is a researcher in France. And he really is at this intersection
+
+146
+00:15:00,240 --> 00:15:06,080
+of these two communities. And my supervisor Sharon Goldwater in Edinburgh, she's also very close
+
+147
+00:15:06,080 --> 00:15:12,000
+to the intersection of these communities. So there's definitely an overlap. I'm trying to think
+
+148
+00:15:12,000 --> 00:15:23,600
+of concrete examples. I think from, I'll give two quick examples. So actually, and I might not
+
+149
+00:15:23,600 --> 00:15:29,760
+do it completely justice, but I'll try. There's a lot of evidence that shows that infants can actually
+
+150
+00:15:29,760 --> 00:15:37,280
+pick up things like syllables. Even before they understand a complete language, they are able to
+
+151
+00:15:37,280 --> 00:15:45,280
+figure out these puffs, these little bursts of energy, which are syllables. Actually, if you
+
+152
+00:15:45,280 --> 00:15:50,800
+listen to a language that you don't understand, you would probably, I don't know, maybe you speak
+
+153
+00:15:50,800 --> 00:15:57,920
+Japanese, but if you listen to Japanese or African, so Tetsonga, you would probably be pretty good
+
+154
+00:15:57,920 --> 00:16:04,480
+in figuring out where syllables start and end. And human infants are able to do this. So there's
+
+155
+00:16:04,480 --> 00:16:10,960
+a number of researchers which have tried to explicitly build these things into their models
+
+156
+00:16:10,960 --> 00:16:17,200
+to explicitly use syllables, or we can kind of use that to guide the systems. And that's one
+
+157
+00:16:17,200 --> 00:16:25,040
+example. In our own work, what we've been doing is, so there's actually also a lot of evidence
+
+158
+00:16:25,040 --> 00:16:31,520
+that even before infants can distinguish fine-grained phonemic categories, so this is like the
+
+159
+00:16:31,520 --> 00:16:37,760
+minimal sound units, you know, vowels and consonants and so on, before they can actually distinguish
+
+160
+00:16:37,760 --> 00:16:42,880
+these things, or while they're learning to distinguish these sound categories, they can already
+
+161
+00:16:42,880 --> 00:16:48,880
+identify reoccurring word patterns in speech. So if they keep on hearing specific words,
+
+162
+00:16:48,880 --> 00:16:58,480
+they can start to identify kind of larger spanning chunks that reoccur. And it's quite interesting
+
+163
+00:16:58,480 --> 00:17:03,840
+how psychologists test these things in the lab, so they would teach children essentially,
+
+164
+00:17:03,840 --> 00:17:08,960
+or human infants, like something like Klingon, which obviously the child hasn't heard before,
+
+165
+00:17:08,960 --> 00:17:14,400
+hopefully. And then they would use eye-tracking experiments to figure out whether the child
+
+166
+00:17:14,400 --> 00:17:19,600
+has actually learned a specific word. Now, we know from these lab experiments that children are
+
+167
+00:17:19,600 --> 00:17:25,760
+able to figure out longer spanning word segments. And what we've done in our own work is we've said,
+
+168
+00:17:25,760 --> 00:17:32,160
+well, okay, if a child can do this, can we actually build that into our model? So maybe you don't know
+
+169
+00:17:32,160 --> 00:17:36,720
+everything that's going on in the language, but maybe you can run a kind of unsupervised system
+
+170
+00:17:36,720 --> 00:17:42,880
+that identifies longer spanning words of phrases. You identify these and then you use these as a
+
+171
+00:17:42,880 --> 00:17:50,480
+signal downstream in building a statistical model or a neural network model to kind of use that
+
+172
+00:17:50,480 --> 00:17:58,880
+information. And that has proven to be very successful. So when you think about the approaches that
+
+173
+00:17:58,880 --> 00:18:08,240
+are required to do the zero resource speech recognition, can you walk us through the various
+
+174
+00:18:08,240 --> 00:18:15,280
+elements of it and how it differs from the way we might approach speech recognition traditionally?
+
+175
+00:18:15,920 --> 00:18:22,640
+Yeah, that's also a good question. So it's quite of kind of interesting, because this is a
+
+176
+00:18:22,640 --> 00:18:28,160
+fairly young community. When I started my PhD, there were maybe two groups working on this,
+
+177
+00:18:28,160 --> 00:18:33,040
+and now all of a sudden, there's like, I don't know, 10, which doesn't sound like a lot, but
+
+178
+00:18:33,040 --> 00:18:40,400
+in the speech community, that is actually a kind of a big growth. And it's kind of interesting.
+
+179
+00:18:41,040 --> 00:18:46,800
+I just came back from just before the end of our, we had inter-speech in India, and there
+
+180
+00:18:46,800 --> 00:18:53,040
+I went to a workshop, spoken language technologies for under-resourced languages. And it was kind of
+
+181
+00:18:53,040 --> 00:18:58,800
+interesting there, if you look at the type of techniques that the zero resource community is using,
+
+182
+00:18:58,800 --> 00:19:05,280
+it's a little bit all over the place. And I think it's because we're kind of trying to redefine
+
+183
+00:19:05,280 --> 00:19:10,320
+the stream that you need to follow, the type of techniques that you need to use, because we're
+
+184
+00:19:10,320 --> 00:19:15,520
+seeing that a lot of the standard supervised speech processing techniques are just not working.
+
+185
+00:19:16,480 --> 00:19:22,400
+If you don't have label data, then the trends we're seeing is very different from when you have
+
+186
+00:19:22,400 --> 00:19:28,480
+label data. To actually answer your question, you've asked just about kind of the little steps
+
+187
+00:19:28,480 --> 00:19:36,080
+that we take. I think at the moment, it kind of seems like we're converging to maybe two big
+
+188
+00:19:36,080 --> 00:19:42,480
+important problems that we need to crack first. If I just give you a corpus of audio and Yini's
+
+189
+00:19:42,480 --> 00:19:49,120
+kind of process there, then the first step you need to do is figure out good what we call features
+
+190
+00:19:49,120 --> 00:19:55,600
+at the fine grain level. So kind of standard supervised systems will always start in the same way.
+
+191
+00:19:55,600 --> 00:20:00,720
+They kind of break a speech stream up into these small windows and you hope that the signal
+
+192
+00:20:00,720 --> 00:20:08,080
+is stationary in that window. And in a supervised system, what we're seeing now is if you break the
+
+193
+00:20:08,080 --> 00:20:15,200
+speech stream up in this way, and then you feed this into a deep neural network and you tell it that
+
+194
+00:20:15,200 --> 00:20:21,200
+in this little window, this speech sound occurs, then what the system can do is it can kind of
+
+195
+00:20:21,200 --> 00:20:26,960
+learn what should it extract from this little chunk of speech to identify a particular sound.
+
+196
+00:20:27,760 --> 00:20:32,400
+And in the zero resource community, it's very similar. The first step is we need to break it up
+
+197
+00:20:32,400 --> 00:20:38,640
+into these little overlapping windows. But then our challenge is we need an unsupervised method
+
+198
+00:20:38,640 --> 00:20:44,240
+to kind of figure out what is it that makes these little speech sounds. And there people are
+
+199
+00:20:44,240 --> 00:20:49,200
+kind of either using kind of classical echolag Gaussian mixture model based approaches, which
+
+200
+00:20:49,200 --> 00:20:55,440
+kind of tries to identify these small acoustic units, these kind of sub word units. And then
+
+201
+00:20:55,440 --> 00:21:02,240
+another group of people are using unsupervised neural networks. And then once you've got features
+
+202
+00:21:02,240 --> 00:21:07,760
+at this kind of fine grain level, then you need a system on top of that to kind of try and
+
+203
+00:21:07,760 --> 00:21:16,320
+glue these features together to find structures corresponding to bigger units, things like syllables,
+
+204
+00:21:16,320 --> 00:21:23,760
+and then words, and then ultimately sentences. And for that, it's also mixed. Some people use
+
+205
+00:21:25,360 --> 00:21:30,960
+kind of more classical Gaussian mixture based models and unsupervised heat and mark of models.
+
+206
+00:21:30,960 --> 00:21:35,680
+And I think there's a big push to try and get these neural models, which are working so well
+
+207
+00:21:35,680 --> 00:21:40,480
+in the supervised case, to also kind of work very well in the zero resource case,
+
+208
+00:21:40,480 --> 00:21:46,080
+using neural models to discover these word units and sentences ultimately.
+
+209
+00:21:46,800 --> 00:21:54,480
+Okay, so let me try to recap that to see what I was able to capture. So you've got the speech signals,
+
+210
+00:21:55,360 --> 00:22:04,080
+and traditionally we'll like window those and try and within a given window, feed that into
+
+211
+00:22:04,080 --> 00:22:10,720
+a neural network, let's say, along with the label, and then essentially train that neural network
+
+212
+00:22:10,720 --> 00:22:17,120
+to match those labels to those little segments of speech. And that's more of this right. Yeah.
+
+213
+00:22:17,120 --> 00:22:25,840
+In this world, we don't have the labels. So we're kind of capturing these windows. And we're using
+
+214
+00:22:25,840 --> 00:22:33,120
+some number of techniques. Gaussian mixture models are one and the neural networks are another.
+
+215
+00:22:34,320 --> 00:22:39,120
+But we're trying to identify patterns within these windows, but are we?
+
+216
+00:22:39,840 --> 00:22:44,320
+So we're kind of comparing across windows in order to do this, is that right?
+
+217
+00:22:44,800 --> 00:22:50,800
+Yeah, that's right. And I think you're stating three things very carefully. I think that's good.
+
+218
+00:22:50,800 --> 00:22:55,840
+I think the ideal case what we want is in these kind of short windows,
+
+219
+00:22:56,480 --> 00:23:04,480
+we want to find a representation which captures something like phonemes, kind of or at least
+
+220
+00:23:04,480 --> 00:23:10,800
+the small set of units that's used in a particular language. So if I give you a big corpus of
+
+221
+00:23:10,800 --> 00:23:17,440
+audio, what you want to find is, can I find features that tells me this language uses R,
+
+222
+00:23:17,440 --> 00:23:24,640
+R, R, R, okay, and in some other language, they might not be the if distinction. And you want a
+
+223
+00:23:24,640 --> 00:23:29,760
+method to kind of automatically figure out what are the kind of these basic building blocks. So
+
+224
+00:23:29,760 --> 00:23:36,480
+if I take one window and I get I get a representation for that window and I get another window,
+
+225
+00:23:36,480 --> 00:23:41,680
+maybe later on and I get a representation for that window, then I want to know that kind of
+
+226
+00:23:41,680 --> 00:23:46,560
+the fine grain, the sub word unit used in these two windows, although the same or the not.
+
+227
+00:23:46,560 --> 00:23:50,960
+That's kind of what it boils down to and in the supervised case,
+
+228
+00:23:50,960 --> 00:23:56,320
+a neural network can kind of figure out exactly what should it look at in the speech stream
+
+229
+00:23:56,320 --> 00:24:00,880
+to identify the speech sound because I'm telling it what speech sound to look for.
+
+230
+00:24:00,880 --> 00:24:04,480
+But in the unsupervised case, how do you do this because you don't know?
+
+231
+00:24:04,480 --> 00:24:09,840
+So you need to start to think about unsupervised models that can do something like
+
+232
+00:24:09,840 --> 00:24:17,120
+clustering, so a Gaussian mixture model essentially. If I just give you a whole bunch of these
+
+233
+00:24:17,120 --> 00:24:24,560
+like little windows and I tell you group them according to what you think are phonemes or speech
+
+234
+00:24:24,560 --> 00:24:29,040
+sounds, then you can start to do that. You can train a Gaussian mixture model in an unsupervised way
+
+235
+00:24:29,040 --> 00:24:34,640
+and then find these clusters of these groupings of speech sounds that you think are the units
+
+236
+00:24:34,640 --> 00:24:42,080
+that used in the language. How do you even get the window sizing correct?
+
+237
+00:24:42,080 --> 00:24:51,120
+I'm imagining that phonemes have different lengths and phonemes over some sample of speech.
+
+238
+00:24:51,120 --> 00:24:57,040
+You know, maybe one of them is 2x the length of the other and so if you kind of choose a larger
+
+239
+00:24:57,040 --> 00:25:03,040
+window, you end up with multiple phonemes in the window or at least maybe the end of one in the
+
+240
+00:25:03,040 --> 00:25:09,680
+start of another. Is it kind of a sliding window approach and you're trying to maximize
+
+241
+00:25:09,680 --> 00:25:15,680
+something that tells you that you've got a single phonem or are there variable windows?
+
+242
+00:25:15,680 --> 00:25:20,160
+Like how does that that seems like pretty fundamental to this but also hard?
+
+243
+00:25:21,760 --> 00:25:28,880
+Yes, it is hard. So actually, supervised systems also have this question like how do you
+
+244
+00:25:28,880 --> 00:25:35,840
+choose a window? Because you need to, so just to answer your question, we always use a sliding
+
+245
+00:25:35,840 --> 00:25:41,200
+window. So you kind of have this window that, okay, you need to click a length and then you slide
+
+246
+00:25:41,200 --> 00:25:50,080
+it across the speech stream. And in the first, the first systems, you take a window and you take
+
+247
+00:25:50,080 --> 00:25:55,680
+a Fourier transform, which tells you about the spectral content of that window and you just
+
+248
+00:25:55,680 --> 00:26:00,080
+keep on doing this. So you just slide this across and you look at the spectral content and now
+
+249
+00:26:00,080 --> 00:26:05,360
+you've got this question of the straight off. If I make the window long, then I've got a lot of
+
+250
+00:26:05,360 --> 00:26:11,840
+data to kind of tell me what's going on in that window. If I make the window too short, okay,
+
+251
+00:26:11,840 --> 00:26:16,800
+then I, if I've got a very short window, then I know that it's only going to be one phonem or
+
+252
+00:26:16,800 --> 00:26:21,120
+part of a phonem, which is kind of fine. If I only get parts of phonemes that's also okay,
+
+253
+00:26:21,120 --> 00:26:28,000
+I just need to model that. So I might take a very small window, which means that I know that this
+
+254
+00:26:28,000 --> 00:26:32,880
+is only one speech sound in this window, but then you've got a lot less data to kind of figure
+
+255
+00:26:33,840 --> 00:26:38,240
+to kind of estimate the content of that window. And this straight off is something that you don't
+
+256
+00:26:38,240 --> 00:26:44,560
+just see in speech processing. You see it in any type of kind of signal processing task. And
+
+257
+00:26:44,560 --> 00:26:51,680
+luckily, people in the 80s really fiddled with this and tried to figure out how long should the
+
+258
+00:26:51,680 --> 00:26:57,440
+window be and how much should I move it. And I mean, I can just tell you the answer now because
+
+259
+00:26:57,440 --> 00:27:04,640
+people have been trying to do this for 30 years. And so I think the community has a whole,
+
+260
+00:27:04,640 --> 00:27:11,440
+including the supervised speech community has kind of settled on a relatively specific window
+
+261
+00:27:11,440 --> 00:27:17,920
+length and then a frame skip. And then so in the supervised community, you kind of you don't
+
+262
+00:27:17,920 --> 00:27:22,880
+care if it's if if you suite this window across and it's just predicting the same phonem for
+
+263
+00:27:22,880 --> 00:27:26,960
+multiple windows, then you kind of know that you're in a phoning and then you transition to the
+
+264
+00:27:26,960 --> 00:27:32,320
+next one. I kind of oversimplify that approach. So what they normally do is they take a window,
+
+265
+00:27:32,320 --> 00:27:36,880
+you predict the label, then you shift the window, you predict the label, shift the window,
+
+266
+00:27:36,880 --> 00:27:42,720
+predict the label. And now what you get is kind of the sequence of posteriors over labels.
+
+267
+00:27:42,720 --> 00:27:47,520
+And that actually goes into another system, a decoder or something that you can train jointly,
+
+268
+00:27:47,520 --> 00:27:53,680
+which kind of clues these things together and tells you I was in this phoning for this long,
+
+269
+00:27:54,880 --> 00:27:59,840
+phonemes teach together to form words in this way, words teach together to form sentences in
+
+270
+00:27:59,840 --> 00:28:04,400
+this way. And in the end, you get a speech recognizer. One question that that raises for me though,
+
+271
+00:28:04,400 --> 00:28:10,400
+that we've kind of arrived at this answer for the window length and the the stride,
+
+272
+00:28:10,400 --> 00:28:18,640
+essentially the the step length. But does that suffer from the same asymmetry in terms of
+
+273
+00:28:18,640 --> 00:28:24,240
+the language that the language is that it's optimized for as speech recognition in general,
+
+274
+00:28:24,240 --> 00:28:29,920
+like if you're trying to apply these techniques to a language that is under-resourced,
+
+275
+00:28:29,920 --> 00:28:34,880
+it could be that these values that are traditionally used don't work as well,
+
+276
+00:28:34,880 --> 00:28:38,560
+are they more properties of human speech than of a given language?
+
+277
+00:28:40,080 --> 00:28:46,080
+That's a super cool question. Because I think if you read the original papers in the like late
+
+278
+00:28:46,080 --> 00:28:53,520
+80s and early 90s describing these techniques, a lot of these things were inspired by the human
+
+279
+00:28:53,520 --> 00:29:00,000
+perceptual system. So they were kind of hand designed initially, they were hand designed to match what
+
+280
+00:29:00,000 --> 00:29:08,720
+they we know about the human perceptual system. So those papers say that these things are language
+
+281
+00:29:08,720 --> 00:29:14,560
+universal and I think that's not something that people question a lot. But it is interesting if you
+
+282
+00:29:14,560 --> 00:29:22,480
+look at supervised system performance on different languages, then if you use the same amount of
+
+283
+00:29:22,480 --> 00:29:26,960
+data and you compare a English system and you use the same amount of data and you compare that
+
+284
+00:29:26,960 --> 00:29:32,160
+to a Zulu system, the Zulu system will always perform worse even though it might be trained on
+
+285
+00:29:32,160 --> 00:29:38,960
+the same amount of data. Now there's a lot of other reasons for that. There can be a lot of other
+
+286
+00:29:38,960 --> 00:29:44,320
+reasons for that but it's a it's a very interesting question whether we should actually go back to
+
+287
+00:29:44,320 --> 00:29:51,760
+those first hand engineered question research because they were all evaluated on English,
+
+288
+00:29:51,760 --> 00:29:56,000
+although the claim was made at their language universe, so they were all evaluated on English
+
+289
+00:29:56,000 --> 00:30:05,120
+or at least well resource languages. And now we apply these things to Zulu and SOMGA and other languages
+
+290
+00:30:05,120 --> 00:30:09,600
+and we see that it's just very hard to get these systems to work as well as they do on English,
+
+291
+00:30:09,600 --> 00:30:16,640
+even if the experiment is controlled. So this was actually I spoke to someone from MIT,
+
+292
+00:30:16,640 --> 00:30:22,960
+I think it was Jennifer Drexler and she said, ask this question like, are these basic features,
+
+293
+00:30:22,960 --> 00:30:27,920
+this kind of fundamental questions? Are they overtailer to English because the people that
+
+294
+00:30:27,920 --> 00:30:33,680
+wrote the papers were English? And I think this euro resource community is starting to ask these
+
+295
+00:30:33,680 --> 00:30:39,040
+questions or bring that up again because our systems are even more sensitive to these
+
+296
+00:30:39,040 --> 00:30:48,080
+to these type of decisions. You mentioned that in the case of Zulu, which was the example,
+
+297
+00:30:48,080 --> 00:30:54,800
+I think you just picked randomly of systems underperforming when trying to recognize that language
+
+298
+00:30:54,800 --> 00:31:01,840
+that there are some lists of reasons why they do. What are those reasons? That's also difficult
+
+299
+00:31:01,840 --> 00:31:11,920
+to answer. So I picked Zulu, but I can give you a list of reasons. Very often, so for example,
+
+300
+00:31:11,920 --> 00:31:20,480
+Afrikans, I think it's SOMGA as well, and I'm not sure about Zulu, are basically languages
+
+301
+00:31:20,480 --> 00:31:26,000
+that were if we write them down, we often glue words together, they're kind of written as one,
+
+302
+00:31:26,000 --> 00:31:30,400
+right? So in English, if you have two concepts, then they're written as two separate words,
+
+303
+00:31:30,400 --> 00:31:36,080
+but in Afrikans, when it's one thing, even though it might be composed of multiple things,
+
+304
+00:31:36,080 --> 00:31:41,360
+then we write them as one word. Yeah, so it's something like narrow band speech processing,
+
+305
+00:31:41,360 --> 00:31:47,680
+right? I just said the sentence narrow band speech processing will have a word narrow band speech
+
+306
+00:31:47,680 --> 00:31:53,280
+processing, okay? But in Afrikans, or in German, you will just write it as one word. It will just
+
+307
+00:31:53,280 --> 00:31:58,320
+be like one word. And for speech systems, that's something that's very, very tricky to get
+
+308
+00:31:58,320 --> 00:32:03,280
+right, because you basically don't know when should I split a word and when should it be one.
+
+309
+00:32:03,280 --> 00:32:09,280
+So that's just one example of a case where it's kind of obvious why the system doesn't perform
+
+310
+00:32:09,280 --> 00:32:16,800
+as well. Another thing is, so in Sutu, for example, we have tones, which you also have in Mandarin,
+
+311
+00:32:16,800 --> 00:32:23,920
+and sometimes that's not marked. So you can't see that there's a specific tone being used when
+
+312
+00:32:23,920 --> 00:32:30,240
+you write something down. Speakers of the language know which tone to use based on the context,
+
+313
+00:32:31,440 --> 00:32:36,080
+but you can't see it. If you're a non-native speaker, you won't know which tone is being used,
+
+314
+00:32:36,800 --> 00:32:44,160
+and that might be one other reason why these systems don't perform as well as English. And this
+
+315
+00:32:44,160 --> 00:32:50,320
+is all apart from the kind of what features do we actually put in that to begin with. Those
+
+316
+00:32:50,320 --> 00:32:56,080
+were just two examples. Code switching is another big example, specifically in South Africa. So
+
+317
+00:32:56,720 --> 00:33:02,640
+a lot of the time what we do is we switch between languages in a single sentence. So very often,
+
+318
+00:33:02,640 --> 00:33:07,200
+you would switch between your native language and English and then switch back. So if you just
+
+319
+00:33:07,200 --> 00:33:13,040
+look at the output of your speech recognizer, it just got all those words wrong. And a lot of
+
+320
+00:33:13,040 --> 00:33:19,200
+corpora actually have this code switching in them. It just jumped out at me that even that code
+
+321
+00:33:19,200 --> 00:33:25,200
+switching alone sounds like an interesting research area for these types of systems. Are there
+
+322
+00:33:25,200 --> 00:33:30,720
+folks out there specializing in that? Yeah, there are. So actually in the lab downstairs,
+
+323
+00:33:30,720 --> 00:33:36,640
+there's a whole bunch of people working on this. And there was a special session I think at
+
+324
+00:33:36,640 --> 00:33:42,960
+Interspeech as well. And in here, just a while ago, focusing specifically on code switching,
+
+325
+00:33:42,960 --> 00:33:48,720
+because it's something that happens a lot in South Africa because we have a live and official
+
+326
+00:33:48,720 --> 00:33:55,200
+languages and they're kind of all spoken geographically in overlapping regions. But in other parts
+
+327
+00:33:55,200 --> 00:34:01,840
+of Africa, it also happens. And then also in a lot of Asian countries and India, this happens a
+
+328
+00:34:01,840 --> 00:34:06,960
+lot. So people are I think like over the last five years, maybe people have really started to work
+
+329
+00:34:06,960 --> 00:34:13,200
+on this. And it's not just even in spoken language, also in written language. People, for example,
+
+330
+00:34:13,200 --> 00:34:21,520
+in tweets would switch between different languages. And that really messes up these NLP systems,
+
+331
+00:34:21,520 --> 00:34:25,680
+which are kind of tailored for specific language or speech recognition. You kind of build a system
+
+332
+00:34:25,680 --> 00:34:31,520
+for language. And that really messes up the system. So there's a lot of interesting questions
+
+333
+00:34:32,480 --> 00:34:38,960
+about how you build these models to kind of handle arbitrary switches between language.
+
+334
+00:34:38,960 --> 00:34:45,280
+So I think I was trying to recap your representative flow for low resource speech processing.
+
+335
+00:34:45,280 --> 00:34:50,880
+And I think I got to like the beginning of the first step. Right.
+
+336
+00:34:52,480 --> 00:34:57,920
+So we talked about this windowing. We talked about this windowing thing and using Gaussian
+
+337
+00:34:57,920 --> 00:35:05,200
+mixture models to try to determine what phonemes are spoken or in the case of unsupervised,
+
+338
+00:35:05,200 --> 00:35:10,400
+you're trying to, well, I guess the same thing. You're trying to determine the, like the
+
+339
+00:35:10,400 --> 00:35:16,720
+universe of phonemes and which ones are represented in an individual sample. And if that's close to
+
+340
+00:35:16,720 --> 00:35:23,920
+correct, what's next? Yeah. Okay. So now let's say we figure that out. Now what I give you is,
+
+341
+00:35:23,920 --> 00:35:32,000
+now I can take a bit of speech and then I can kind of pause it through this feature representation
+
+342
+00:35:32,000 --> 00:35:37,200
+model. And that could just tell me this phonem is present, this phonem is present, this phonem,
+
+343
+00:35:37,200 --> 00:35:42,960
+and you don't know whether it's a phonem. So it's more like pseudo phonem, or maybe just cluster.
+
+344
+00:35:42,960 --> 00:35:48,960
+Okay. Now you've got the sequence of clusters or sequence of pseudo phonemes. And okay,
+
+345
+00:35:48,960 --> 00:35:53,840
+that's helpful. Okay. Maybe you can use that if you're, if you're a language documenting a
+
+346
+00:35:53,840 --> 00:36:00,080
+language, then that can maybe prove insightful. But if you actually want to build a speech processing
+
+347
+00:36:00,080 --> 00:36:07,680
+system, you need to go from that to words or some higher level unit. And that in itself is quite
+
+348
+00:36:07,680 --> 00:36:16,480
+tricky. And it's because of this reason that you already alluded to that one word can be three
+
+349
+00:36:16,480 --> 00:36:22,960
+phonemes long. Another word can be five phonemes long. Another word can be two phonemes long. So how
+
+350
+00:36:22,960 --> 00:36:30,480
+do you group these things according to words? And that's very, very difficult. So kind of the
+
+351
+00:36:30,480 --> 00:36:37,600
+classic approach to doing this is kind of a type of compression model. So what you try and do
+
+352
+00:36:37,600 --> 00:36:45,120
+is you try to say, okay, if I treat these three units, reoccurring units as a word, how much does
+
+353
+00:36:45,120 --> 00:36:52,720
+that allow me to kind of compress these sequences? And so you, that's just, that's just one approach.
+
+354
+00:36:52,720 --> 00:36:57,920
+So but essentially what you need to do is you now need to add a model on top of these unsupervised
+
+355
+00:36:57,920 --> 00:37:06,240
+discovered phonemes to tell you how you group these clusters together to form words. And there's
+
+356
+00:37:06,240 --> 00:37:13,120
+maybe I don't know a handful of techniques that you can use to do this. Should I talk through them?
+
+357
+00:37:13,120 --> 00:37:18,960
+Please. Okay. Yeah. So people at MIT actually, when they started doing this, Jackie Lee and
+
+358
+00:37:18,960 --> 00:37:26,640
+Jim Gloss, they had a hidden mark of model, which you can kind of train on top of these pseudo phonemes
+
+359
+00:37:26,640 --> 00:37:32,960
+sequences. And they actually broke down their model. The whole thing is trained in kind of one
+
+360
+00:37:32,960 --> 00:37:38,000
+go. So at the bottom, you've got a kind of a Gaussian mixture model, which you can interpret as
+
+361
+00:37:38,000 --> 00:37:44,080
+finding these phone-like units. And then on top of that, now you've got the sequence of phone-like
+
+362
+00:37:44,080 --> 00:37:49,440
+units. So you feed them into a hidden mark of model, which is kind of like a sequence Gaussian
+
+363
+00:37:49,440 --> 00:37:55,200
+mixture model. And you treat that hidden mark of model that they are on top of that as syllables.
+
+364
+00:37:55,760 --> 00:37:59,600
+And then on top of that, now you're getting out the sequence of syllables. And
+
+365
+00:38:01,200 --> 00:38:05,280
+using the sequence of syllables, now you can train another hidden mark of model. I haven't
+
+366
+00:38:05,280 --> 00:38:10,160
+had another hidden mark of model layer on top of these syllable layers to model words.
+
+367
+00:38:10,720 --> 00:38:16,320
+And the whole thing is kind of trained in as one big. They used, I think,
+
+368
+00:38:16,320 --> 00:38:20,640
+Gibbs sampling to train this whole thing from the bottom up to the top and so on.
+
+369
+00:38:21,360 --> 00:38:27,600
+And that's one approach. And that seemed to work pretty well if you have single speakers,
+
+370
+00:38:27,600 --> 00:38:33,040
+because that really messes things up. But if you go to multiple speakers, then that becomes
+
+371
+00:38:33,040 --> 00:38:37,680
+much harder. I can tell you about our approach if you're interested.
+
+372
+00:38:38,800 --> 00:38:41,920
+I am, but I guess it just occurred to me that there's...
+
+373
+00:38:42,960 --> 00:38:46,720
+So, right, we'd ask this question. There's like a fundamental thing missing for me,
+
+374
+00:38:46,720 --> 00:38:51,920
+and maybe I need to step back and ground out on the goal of this. We're talking about going
+
+375
+00:38:51,920 --> 00:38:59,120
+from speech to text. Is that correct or no? No. You're basic? Okay. Okay. You're awesome.
+
+376
+00:38:59,120 --> 00:39:02,880
+I was wondering where there's like a, you know, then the miracle occurs step in here,
+
+377
+00:39:02,880 --> 00:39:12,480
+and I'm not seeing it. So what you want is impossible, right? So what you want is you want to
+
+378
+00:39:12,480 --> 00:39:18,080
+ground this in some way. And if you don't have text, you just can't do this. You can't do it.
+
+379
+00:39:18,080 --> 00:39:23,920
+Okay. So why do you want to do this? I'll give you two reasons, and then I'll ask your question
+
+380
+00:39:23,920 --> 00:39:30,240
+of what even are we, do we want to do? Yeah. So what you want to do is if I give you a big
+
+381
+00:39:30,240 --> 00:39:37,520
+corpus of audio, then what I want is I want you to figure out where words start and end in the
+
+382
+00:39:37,520 --> 00:39:42,240
+speech stream. I want you to snap it up the speech into these things that look like words.
+
+383
+00:39:42,240 --> 00:39:48,400
+Okay. And then if I, if I tell you, okay, these are the word boundaries, okay, which you've predicted.
+
+384
+00:39:48,400 --> 00:39:55,600
+Then I want you to tell me this snippet. I don't know what word it is, but this snippet also reoccur
+
+385
+00:39:55,600 --> 00:40:01,280
+is here and here and here and here and here and here in my speech corpus. So it's this combination
+
+386
+00:40:01,280 --> 00:40:06,560
+of segmentation breaking it up into things that look like words. And then the second part,
+
+387
+00:40:06,560 --> 00:40:12,160
+which is clustering, grouping these words together. Now, okay. So that's what we want to do. You
+
+388
+00:40:12,160 --> 00:40:19,760
+want to know why this is useful? Sure. Okay. So I mean, I'm imagining that it's useful in that I
+
+389
+00:40:19,760 --> 00:40:26,000
+could take that data and have a prioritized list of words to get someone to transcribe for me and
+
+390
+00:40:26,000 --> 00:40:32,400
+then start to figure out texts. You know, if that's what I ultimately want, but why else would it be
+
+391
+00:40:32,400 --> 00:40:39,200
+useful? Exactly. Okay. So that's a great use case that you've just described there. But the years
+
+392
+00:40:39,200 --> 00:40:43,680
+to two more reasons. Okay. One, if you want, if you're interested in how infants do this,
+
+393
+00:40:43,680 --> 00:40:48,160
+then having a model that can do this is useful. So then you can fiddle around with the model,
+
+394
+00:40:48,160 --> 00:40:53,200
+check the type of mistakes that the model makes and see if then you can go and test in a lab if
+
+395
+00:40:53,200 --> 00:40:59,120
+infants use the same type of cues and whether they make the same type of mistakes. And in that way,
+
+396
+00:40:59,120 --> 00:41:06,080
+we can actually learn something about how humans learn language. Okay. I'm not a cognitive,
+
+397
+00:41:06,080 --> 00:41:13,360
+a cognitive modeling person, cognitive scientist. So I probably didn't describe that well, but that
+
+398
+00:41:13,360 --> 00:41:19,760
+is one motivation. A third motivation is, and this is actually a project that I'm working on
+
+399
+00:41:19,760 --> 00:41:28,400
+with some of the colleagues here, is the following setting where this project is in Uganda.
+
+400
+00:41:28,960 --> 00:41:34,480
+It's actually a project within United Nations. And they're really interested in
+
+401
+00:41:34,480 --> 00:41:40,720
+very, very specific keywords. They have these systems that collect broadcast news.
+
+402
+00:41:41,520 --> 00:41:48,480
+So it's basically servers that capture radio broadcasts. And then you've got the server full
+
+403
+00:41:48,480 --> 00:41:55,120
+of speech data, but you don't have a speech recognizer in Uganda, the language that's spoken
+
+404
+00:41:55,120 --> 00:42:00,000
+there. Okay. But now as the United Nations, you're really interested in figuring out what people
+
+405
+00:42:00,000 --> 00:42:06,240
+are talking about in these local radio broadcasts. So what you can do is you can get a small number
+
+406
+00:42:06,240 --> 00:42:10,880
+of people. And you can tell them, listen, I'm really interested in education. I'm really interested
+
+407
+00:42:10,880 --> 00:42:17,760
+in maybe specific diseases, maybe in specific disasters, things like that. And I can get a small
+
+408
+00:42:17,760 --> 00:42:23,520
+number of people to give me a bunch of keywords that I'm interested in. Okay. Now I've got my unsupervised
+
+409
+00:42:23,520 --> 00:42:28,720
+model. I can label these keywords that a small number of people have given me. And then what I can
+
+410
+00:42:28,720 --> 00:42:33,680
+do is I can go and search this big corpus of audio and find all the radio broadcasts that
+
+411
+00:42:33,680 --> 00:42:38,960
+contains those keywords. And then maybe I can pass only those broadcasts to an analyst and ask
+
+412
+00:42:38,960 --> 00:42:44,560
+them, please just translate these ones. I know they're important to me. And then we can, I don't know,
+
+413
+00:42:44,560 --> 00:42:48,880
+figure out what people are talking about in Uganda. I hope that makes sense. Yeah, no, that does,
+
+414
+00:42:48,880 --> 00:42:56,080
+that does make, that does make a lot of sense. And so you were about to describe the approach that
+
+415
+00:42:56,080 --> 00:43:07,680
+you use in your lab to go from the phoning data to the segmenting. Yeah. So I actually want to
+
+416
+00:43:07,680 --> 00:43:14,080
+answer another question first. Okay. Let me answer this question. And then I'll answer your other
+
+417
+00:43:14,080 --> 00:43:18,880
+question, which was about grounding. How do you actually know what people are talking about when
+
+418
+00:43:18,880 --> 00:43:23,760
+you don't have any labels? Okay. So I'll first answer the question about what we use. And this is
+
+419
+00:43:23,760 --> 00:43:31,440
+really a technique that I developed and my PhD of my supervisors. So we basically argued that
+
+420
+00:43:31,440 --> 00:43:38,960
+this idea of getting these fine grained units. And then, and then having a syllable layer on top
+
+421
+00:43:38,960 --> 00:43:44,080
+of that and then a word layer on top of that, that becomes quite here. The whole thing becomes
+
+422
+00:43:44,080 --> 00:43:50,880
+quite difficult. So what we've been doing is we've been thinking about this idea of something
+
+423
+00:43:50,880 --> 00:43:55,440
+called acoustic word embeddings. So I think a lot of people know what word embeddings are. It's
+
+424
+00:43:55,440 --> 00:44:02,160
+these kind of continuous vector representations of written words. And we wanted to take that same
+
+425
+00:44:02,160 --> 00:44:10,320
+idea to speech. So when you're building these language discovery systems, inevitably what happens
+
+426
+00:44:10,320 --> 00:44:16,480
+is you end up having to compare two snippets of speech with each other, but they're not of the
+
+427
+00:44:16,480 --> 00:44:22,640
+same length. Okay. Two words are never the same length. Even if I say Apple and use Sam says Apple
+
+428
+00:44:22,640 --> 00:44:30,000
+then these two apples will not have the same duration. So inevitably you end up comparing things
+
+429
+00:44:30,000 --> 00:44:36,800
+that's of different duration, a half a second, one to one second. So what we started to develop
+
+430
+00:44:36,800 --> 00:44:42,400
+was these acoustic word embeddings. And the idea behind these are basically you'd take a variable
+
+431
+00:44:42,400 --> 00:44:51,040
+duration segment of any duration and you train them, you have a model that just maps that sequence
+
+432
+00:44:51,040 --> 00:44:56,480
+that chunk of speech you map that to a single vector. Okay. Now if you could do this,
+
+433
+00:44:56,480 --> 00:45:02,560
+what you could do is you can just embed basically all the sequences in your language. You can
+
+434
+00:45:02,560 --> 00:45:08,160
+embed all of them, get vectors for each of them and now you can easily compare the different vectors.
+
+435
+00:45:08,160 --> 00:45:15,680
+And in very short what we, what I developed in my PhD is something that kind of does this jointly.
+
+436
+00:45:15,680 --> 00:45:22,480
+It starts by, it basically breaks the speech stream up into things that it thinks are words.
+
+437
+00:45:22,480 --> 00:45:28,640
+It's random, it doesn't know. It embeds all of these. It classes those things into things that
+
+438
+00:45:28,640 --> 00:45:34,640
+it now thinks are words and then it goes back and resegments and it has this kind of back and forth
+
+439
+00:45:34,640 --> 00:45:39,360
+thing. I don't know if that makes sense and there was a 30 second discussion about something
+
+440
+00:45:39,360 --> 00:45:50,160
+it took me four years to do. Are you kind of iteratively creating this embedding space and then
+
+441
+00:45:50,160 --> 00:45:56,640
+performing some operations on it to try to determine the segments and then updating the embedding
+
+442
+00:45:56,640 --> 00:46:03,120
+space and like kind of optimizing the embedding space or were you saying something else about this,
+
+443
+00:46:03,120 --> 00:46:08,400
+I kind of picked up on an iterative cycle in there but I'm not sure what the, the iterations are.
+
+444
+00:46:08,400 --> 00:46:12,640
+Yeah, you should have, you should have written the abstract for my thesis. So what you just said
+
+445
+00:46:12,640 --> 00:46:20,560
+is exactly right. So you start with like a random segmentation of your input corpus and then
+
+446
+00:46:20,560 --> 00:46:27,200
+on that random segmentation you build an embedding space. Now if I actually have an embedding space,
+
+447
+00:46:27,200 --> 00:46:32,160
+okay, initially it's, it's going to be pretty bad, okay, but I have an embedding space.
+
+448
+00:46:32,160 --> 00:46:38,720
+Then what you can do is you can say, given this embedding space, how should I split up my input
+
+449
+00:46:38,720 --> 00:46:45,280
+stream to kind of have a higher score if you want under this embedding space? Okay, so you go back,
+
+450
+00:46:45,840 --> 00:46:56,080
+you resegment. Let me pause you there. So yeah, you've got this embedding space and are you doing
+
+451
+00:46:56,080 --> 00:47:03,120
+some kind of clustering within the embedding space? Exactly right. So I actually use a Gaussian
+
+452
+00:47:03,120 --> 00:47:09,120
+mixture model. I also played a, a Bayesian Gaussian mixture model and I've also played around with
+
+453
+00:47:09,120 --> 00:47:14,720
+some non parametric like infinite Gaussian mixture models to do that. So the idea behind these
+
+454
+00:47:14,720 --> 00:47:21,760
+embeddings are that if you say Apple and I say Apple, then we're going to have two embeddings
+
+455
+00:47:21,760 --> 00:47:28,640
+and we want all the instances of specific words that are acoustically the same
+
+456
+00:47:28,640 --> 00:47:33,680
+to end up in similar regions in this embedding space. So that's really the goal.
+
+457
+00:47:33,680 --> 00:47:39,200
+But when you start out, you don't know where words, whether words start an end, so you kind of
+
+458
+00:47:39,200 --> 00:47:44,400
+start randomly. And then what you do is so you start randomly, you get all these embeddings
+
+459
+00:47:44,400 --> 00:47:49,680
+and now you group them, okay, and you cluster them, I usually Gaussian mixture model to do the clustering.
+
+460
+00:47:49,680 --> 00:47:57,040
+And the idea is that every cluster in the Gaussian mixture model should be hypothesized word.
+
+461
+00:47:57,040 --> 00:48:01,600
+It should be something that you think or the model at the moment think that this thing,
+
+462
+00:48:01,600 --> 00:48:07,200
+this group of embeddings, they all correspond to the same type of word, the same word, okay,
+
+463
+00:48:07,200 --> 00:48:10,480
+initially that's wrong, but that's what you kind of hope where the model ends up.
+
+464
+00:48:11,120 --> 00:48:17,040
+So you cluster, you start, you snap off your speech, you embed, you get this embedding space,
+
+465
+00:48:17,040 --> 00:48:21,200
+you cluster in that embedding space using a Gaussian mixture model.
+
+466
+00:48:21,200 --> 00:48:25,600
+Now, under this Gaussian mixture model, I can now say, go back to my inputs,
+
+467
+00:48:25,600 --> 00:48:30,800
+pretend I don't know where the words came from. And under this Gaussian mixture model, how should
+
+468
+00:48:30,800 --> 00:48:37,360
+I split up the speech stream so that I get a higher score under my current Gaussian mixture model
+
+469
+00:48:37,360 --> 00:48:42,160
+or the embeddings that I would get if I split it up, okay. So then you break it up and then you
+
+470
+00:48:42,160 --> 00:48:48,480
+re-embed and then you build your Gaussian mixture model again. Under that model, you go back and say,
+
+471
+00:48:48,480 --> 00:48:53,760
+even these groupings of words, how should I chunk up my speech to get a higher score? And you just
+
+472
+00:48:53,760 --> 00:48:58,640
+kind of iterate through this thing. Now, I describe it as this iterative process, but actually,
+
+473
+00:48:58,640 --> 00:49:04,480
+it's implemented this one, Gibbs sampler. So it's this one model that kind of does things in one go.
+
+474
+00:49:04,480 --> 00:49:14,560
+The projecting backwards step there where you are asking the question, given a set of groupings,
+
+475
+00:49:14,560 --> 00:49:22,320
+how could you change the segmentation to improve the groupings? Is that a difficult piece in this
+
+476
+00:49:22,320 --> 00:49:31,120
+or is that a pretty straightforward element? No, that is a difficult piece. So that's where I spend
+
+477
+00:49:31,120 --> 00:49:38,800
+a lot of my time. Okay, also, there's two answers. It is a difficult piece, but it is also something
+
+478
+00:49:38,800 --> 00:49:45,760
+that people have been looking at for a relatively long time. Meaning in the context of an embedding
+
+479
+00:49:45,760 --> 00:49:54,240
+space or in other contexts and it carries over? No, in other contexts, kind of in computer science
+
+480
+00:49:54,240 --> 00:50:04,720
+in general, but specifically in, actually, it came from the NLP literature. So it actually
+
+481
+00:50:04,720 --> 00:50:09,600
+comes from a different part of literature. So in Chinese, you have this problem that we don't know
+
+482
+00:50:09,600 --> 00:50:14,240
+where words start like Chinese than the way it's written. It's written with outward boundaries.
+
+483
+00:50:15,200 --> 00:50:21,520
+So in that literature, people have started to look at, if I kind of know the words in my language,
+
+484
+00:50:21,520 --> 00:50:26,240
+or I think I know the words in my language, how can I figure out where all the word boundaries
+
+485
+00:50:26,240 --> 00:50:32,960
+in Chinese? And using that silent type of ideas, that's exactly what we used here, except that now
+
+486
+00:50:32,960 --> 00:50:39,440
+we're doing it on this kind of continuous embedding space, but the mathematics for that is very,
+
+487
+00:50:39,440 --> 00:50:45,600
+very similar to this question of, if I give you an unsegmented Chinese corpus, how do you figure
+
+488
+00:50:45,600 --> 00:50:52,320
+out where there's words? So it ends up being like a dynamic programming procedure where you
+
+489
+00:50:52,320 --> 00:50:57,680
+basically ask, okay, I'm going to start at the end of my sentence, and then what I'm going to do
+
+490
+00:50:57,680 --> 00:51:02,560
+is I'm going to say, okay, words can be between 200 milliseconds and one second. Okay, so you're
+
+491
+00:51:02,560 --> 00:51:08,080
+built in that constraint. And then what you do is you basically say, okay, I'll start at the end
+
+492
+00:51:08,080 --> 00:51:13,440
+of my sentence. If the last word in my sentence is 200 milliseconds long, what's the score?
+
+493
+00:51:13,440 --> 00:51:19,200
+If it's 250 milliseconds long, what's my score? If it's 300 milliseconds long, what's my score? Okay,
+
+494
+00:51:19,200 --> 00:51:25,440
+and then you basically looking for all the possible word segmentations in this range,
+
+495
+00:51:25,440 --> 00:51:31,440
+and then you kind of get an overall score using a dynamic programming method for figuring out where
+
+496
+00:51:31,440 --> 00:51:38,960
+words started in the speech stream. And the score in this case is what? Yeah, so the score, if we're
+
+497
+00:51:38,960 --> 00:51:44,480
+just looking at a single question of should I put a word boundary year or not, then the score is
+
+498
+00:51:44,480 --> 00:51:52,720
+basically, if I chunked up this chunk of speech and I treated that as a word, how likely will that
+
+499
+00:51:52,720 --> 00:51:59,840
+be? How close would that be to a cluster mean under my current plus string? Does that make sense?
+
+500
+00:51:59,840 --> 00:52:05,280
+You're trying to set your segments up so that as many of the segments as possible are words
+
+501
+00:52:05,280 --> 00:52:10,640
+basically? That's right. You can think about that. It's not really as many as possible. It's kind of like
+
+502
+00:52:10,640 --> 00:52:17,840
+if I gave you, if I gave you an utterance, a whole sentence, and I told you big places that you
+
+503
+00:52:17,840 --> 00:52:23,600
+want to put boundaries, big places that you want to put boundaries, that if I look at the overall
+
+504
+00:52:24,000 --> 00:52:28,880
+okay, so now you put boundaries, now you have a whole bunch of different embeddings, right?
+
+505
+00:52:28,880 --> 00:52:33,600
+And you want to look at the overall score for that utterance. Each of the embeddings gets a score
+
+506
+00:52:33,600 --> 00:52:37,920
+and what you want to maximize is kind of the overall score for that specific utterance.
+
+507
+00:52:38,720 --> 00:52:46,720
+One last piece you mentioned that as opposed to the multiple phases, you do everything in kind of
+
+508
+00:52:46,720 --> 00:52:52,560
+one pass with Gibbs sampling. Can you give us kind of the high level overview of Gibbs sampling and
+
+509
+00:52:52,560 --> 00:52:57,680
+how you apply it here? Yeah. Okay, so Gibbs sampling is this very cool technique where
+
+510
+00:52:57,680 --> 00:53:05,920
+you basically try to get samples from a distribution and in general that's tricky, especially if your
+
+511
+00:53:05,920 --> 00:53:11,360
+model is quite complicated. So what Gibbs sampling does is it basically keeps everything fixed
+
+512
+00:53:12,000 --> 00:53:17,680
+and you want to know, you want to get a sample for a latent variable. So in our case, the latent
+
+513
+00:53:17,680 --> 00:53:23,760
+variable might be something like which clause does this embedding get assigned to? Okay, so
+
+514
+00:53:23,760 --> 00:53:31,360
+so in Gibbs sampling, how it works is you pick a specific latent variable and you keep all your
+
+515
+00:53:31,360 --> 00:53:36,640
+other latent variables, you keep that fixed at previous samples. Okay, and then what you say is
+
+516
+00:53:36,640 --> 00:53:41,360
+given that all the others are fixed, sample this thing from my distribution, this one that I'm
+
+517
+00:53:41,360 --> 00:53:46,320
+interested in. Okay, after you sample that one, now you keep this guy fixed and you go to the next
+
+518
+00:53:46,320 --> 00:53:50,720
+latent variable. Okay, you keep all the others fixed and now you sample from this guy,
+
+519
+00:53:50,720 --> 00:53:57,280
+then you go on to the next latent variable and so forth. Does that make sense? Okay, so in our case,
+
+520
+00:53:57,280 --> 00:54:03,920
+what we do is we basically say given we've got this entire corpus, the whole corpus have been
+
+521
+00:54:03,920 --> 00:54:10,320
+segmented and they've been clustered already. Okay, everything is fixed and we pretend we know where
+
+522
+00:54:10,320 --> 00:54:15,520
+words start and end and we know we pretend we know which clusters they should belong to.
+
+523
+00:54:15,520 --> 00:54:22,800
+Okay, then what you do is you take one utterance in your dataset and you say now I'm going to
+
+524
+00:54:22,800 --> 00:54:27,680
+take this utterance and I'm going to remove that from my model and I'm going to pretend that
+
+525
+00:54:27,680 --> 00:54:31,680
+this is the only utterance that I don't know the segmentation and the clustering of.
+
+526
+00:54:31,680 --> 00:54:36,720
+So you remove that utterance and then you say given the model which is now defined by all the
+
+527
+00:54:36,720 --> 00:54:41,840
+rest of the utterances for which I know the word boundaries and the clusters, what is the best
+
+528
+00:54:41,840 --> 00:54:48,480
+segmentation for this utterance? Okay, and then what you do is you segment the utterance according to
+
+529
+00:54:49,360 --> 00:54:54,880
+all of the rest of the data that's been fixed and you clustered that utterance and then what you do
+
+530
+00:54:54,880 --> 00:54:58,880
+is you fix the segmentation and the clustering for that utterance and you go to the next utterance
+
+531
+00:54:59,440 --> 00:55:07,680
+and so basically your this utterance procedure that I kind of said was like segment cluster segment
+
+532
+00:55:07,680 --> 00:55:12,160
+cluster and I kind of described it at the corpus level, it's really happening at kind of a per utterance
+
+533
+00:55:12,160 --> 00:55:17,600
+level. Interesting. And I want to answer one question that you asked really early on or just a while
+
+534
+00:55:17,600 --> 00:55:22,880
+ago, you asked if you're just going to do this right, you're never going to get to text, you're
+
+535
+00:55:22,880 --> 00:55:29,200
+never going to figure out exactly what is the meaning in this utterance right, you're going to
+
+536
+00:55:29,200 --> 00:55:33,520
+segment that and that that's exactly what's going to happen. I don't know if you saw this movie
+
+537
+00:55:33,520 --> 00:55:41,440
+arrival. Yes. Yeah, some people loved it, some people hated it, I really liked it, but there's
+
+538
+00:55:41,440 --> 00:55:49,200
+the scene where they go to her and they ask her, I mean they play her the snippet of audio,
+
+539
+00:55:49,200 --> 00:55:56,160
+right? And she's a linguist, a linguist that documents languages, so they play her the snippet
+
+540
+00:55:56,160 --> 00:56:02,400
+of audio and then asks her, listen, what is being said in this language? And she looks at them and
+
+541
+00:56:02,400 --> 00:56:08,960
+tells them in a very, it's probably very unholy word, but tells them, I can't help you, right?
+
+542
+00:56:08,960 --> 00:56:14,080
+I have no idea what this snippet of audio means because I don't have any context, I haven't seen
+
+543
+00:56:14,080 --> 00:56:18,960
+the people that speak these things, I haven't seen when they use it, when they do not use it.
+
+544
+00:56:18,960 --> 00:56:25,840
+And a lot of the research into the zero processing models is exactly like that. We just want to see
+
+545
+00:56:25,840 --> 00:56:32,160
+how can you learn something from the raw audio and infants can do this to some extent and our
+
+546
+00:56:32,160 --> 00:56:37,760
+models can do this to some extent and then there are these good use cases for these models,
+
+547
+00:56:37,760 --> 00:56:43,280
+but ultimately you can never figure out what does this word actually mean. And this is why a lot
+
+548
+00:56:43,280 --> 00:56:47,760
+of people in this space are moving to the setting where you have other signals that goes with the
+
+549
+00:56:47,760 --> 00:56:54,720
+speech. So if you have a chunk of unlabeled speech but you have an image describing the context in
+
+550
+00:56:54,720 --> 00:57:00,080
+which the speech is used, because if you can do that then you can segment your words hopefully
+
+551
+00:57:00,080 --> 00:57:04,560
+and then figure out, okay, this word, I don't know what it is, but I can ground it because I have
+
+552
+00:57:04,560 --> 00:57:10,240
+an image and I can try and figure out what is it in the image that calls this word to being said.
+
+553
+00:57:10,240 --> 00:57:14,720
+So that's a very, very interesting avenue for feature work that a lot of people are looking at.
+
+554
+00:57:15,520 --> 00:57:20,960
+Well, I was going to ask you, if you had some words on where you see this going, but that sounds
+
+555
+00:57:20,960 --> 00:57:29,680
+like you anticipated that question there. Maybe final thoughts, again, circling back to
+
+556
+00:57:29,680 --> 00:57:37,360
+where we started all this on the endaba and you know what you see for that community and more
+
+557
+00:57:37,360 --> 00:57:46,080
+broadly machine learning and AI in Africa. Yeah, so this I think it's a super exciting time for
+
+558
+00:57:46,080 --> 00:57:53,280
+machine learning and AI in Africa and the endaba is one part of that and that has really started
+
+559
+00:57:53,280 --> 00:58:01,040
+I think to both communities and kind of bring people together and in Africa and kind of
+
+560
+00:58:01,840 --> 00:58:08,320
+helped people to see that the stuff we're doing here is very, very relevant also at the broader
+
+561
+00:58:08,320 --> 00:58:13,920
+scale. I was quite a broad question so I'll give a whole bunch of small answers.
+
+562
+00:58:15,920 --> 00:58:22,240
+One thing that I'm very excited about is that in Africa we have very unique challenges
+
+563
+00:58:22,240 --> 00:58:30,720
+and unique opportunities and so taking language as an example there's so many languages spoken
+
+564
+00:58:30,720 --> 00:58:37,120
+here in the same geographical area and that's very, very unique and I think what's going to happen
+
+565
+00:58:37,120 --> 00:58:42,240
+if we start to push this community forward and if people actually believe that they can do this
+
+566
+00:58:42,240 --> 00:58:48,400
+because we can then what I think is going to start to happen and I hope for this is that we're going
+
+567
+00:58:48,400 --> 00:58:58,560
+to start to develop unique solutions for our unique problems and I think if that happens it's
+
+568
+00:58:58,560 --> 00:59:06,080
+not just going to be like we are users of machine learning tools that's being developed in Europe
+
+569
+00:59:06,080 --> 00:59:10,560
+of course we need to be that as well we need to solve our problems using the tools that's being
+
+570
+00:59:10,560 --> 00:59:16,080
+developed in Europe and in the US but I think if we start to solve the problems here then we
+
+571
+00:59:16,080 --> 00:59:22,400
+are actually going to start to contribute to the global scene and we're going to start to say
+
+572
+00:59:22,400 --> 00:59:27,520
+this and this is a unique solution and actually you guys can also use this in some other problem
+
+573
+00:59:27,520 --> 00:59:32,720
+areas in machine learning so I think it's going to be a combination of developing exciting
+
+574
+00:59:32,720 --> 00:59:38,560
+applications but then also contributing to foundational research in machine learning and AI
+
+575
+00:59:39,600 --> 00:59:45,280
+and that's I think that's really what I hope will happen. Being Dava is growing a lot it's going
+
+576
+00:59:45,280 --> 00:59:52,320
+to Kenya next year which is super exciting and then in Dava has this kind of dual motivation the
+
+577
+00:59:52,320 --> 00:59:58,080
+one is to strengthen machine learning and AI in Africa but then also to fix the problems of
+
+578
+00:59:58,080 --> 01:00:04,160
+diversity in ML and I hope that that is something that Africa can also contribute to because
+
+579
+01:00:05,120 --> 01:00:09,920
+I mean Google can just start to hire a lot more African researchers right and from across the world
+
+580
+01:00:09,920 --> 01:00:14,720
+I think that would be very exciting. For me personally the thing that excites me most is actually
+
+581
+01:00:14,720 --> 01:00:21,680
+the in Dava spin-offs I'm very passionate about developing local communities because I think
+
+582
+01:00:22,560 --> 01:00:26,800
+so in the Cape area for example there's a lot of people working on ML and we can learn a lot
+
+583
+01:00:26,800 --> 01:00:32,560
+from each other but up until fairly recently a lot of people have worked in isolation so I'm very
+
+584
+01:00:32,560 --> 01:00:39,200
+very passionate about building local things at universities and in regions and the in Dava X is
+
+585
+01:00:39,200 --> 01:00:48,640
+a spin-off of the in Dava kind of funding these local regional little in Davas and I think that's
+
+586
+01:00:48,640 --> 01:00:53,680
+that's really where we're going to see some some interesting things happening people starting to
+
+587
+01:00:53,680 --> 01:00:59,280
+collaborate and and and working together and I'm very excited to see what will happen there.
+
+588
+01:00:59,920 --> 01:01:06,480
+Fantastic fantastic well Erman thank you so much for taking the time to chat with us this
+
+589
+01:01:06,480 --> 01:01:11,600
+morning it's really really interesting research you're doing and I enjoyed learning about it.
+
+590
+01:01:12,160 --> 01:01:13,840
+Cool thanks so much for having me.
+
+591
+01:01:17,120 --> 01:01:23,360
+All right everyone that's our show for today. For more information on Erman or any of the topics
+
+592
+01:01:23,360 --> 01:01:30,720
+covered in this show visit twimmelai.com slash talk slash 191. For more information on the deep
+
+593
+01:01:30,720 --> 01:01:38,560
+learning in Dava podcast series visit twimmelai.com slash in Dava 2018. Thanks again to Google
+
+594
+01:01:38,560 --> 01:01:45,200
+for their sponsorship of this series be sure to check out the 2019 AI residency program at g.co
+
+595
+01:01:45,200 --> 01:02:01,120
+slash AI residency as always thanks so much for listening and catch you next time.
+

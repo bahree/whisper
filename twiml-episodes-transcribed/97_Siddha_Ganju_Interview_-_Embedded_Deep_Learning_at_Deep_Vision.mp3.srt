@@ -1,0 +1,1564 @@
+1
+00:00:00,000 --> 00:00:15,920
+Hello and welcome to another episode of Twimble Talk, the podcast where I interview interesting
+
+2
+00:00:15,920 --> 00:00:20,880
+people doing interesting things in machine learning and artificial intelligence.
+
+3
+00:00:20,880 --> 00:00:23,880
+I'm your host Sam Charrington.
+
+4
+00:00:23,880 --> 00:00:28,080
+Just a couple of quick announcements today related to the Twimble Online Meetup.
+
+5
+00:00:28,080 --> 00:00:32,800
+First, the video from our December meetup has been posted and it's now available on our
+
+6
+00:00:32,800 --> 00:00:36,920
+YouTube channel and at twimbleai.com slash meetup.
+
+7
+00:00:36,920 --> 00:00:41,760
+It was a great meetup, so if you missed it, you'll definitely want to check it out.
+
+8
+00:00:41,760 --> 00:00:46,280
+But you definitely don't want to miss our next meetup either.
+
+9
+00:00:46,280 --> 00:00:52,080
+On Tuesday, January 16th at 3 o'clock Pacific, we'll be joined by Microsoft Research's
+
+10
+00:00:52,080 --> 00:00:57,240
+Timnett Gebru, who will be presenting her paper using deep learning and Google Street
+
+11
+00:00:57,240 --> 00:01:02,440
+View to estimate the demographic makeup of neighborhoods across the United States, which
+
+12
+00:01:02,440 --> 00:01:06,520
+has received national media attention for some of its findings.
+
+13
+00:01:06,520 --> 00:01:10,960
+Timnett will be digging into those results as well as the pipeline she used to identify
+
+14
+00:01:10,960 --> 00:01:15,760
+22 million cars and 50 million Google Street View images.
+
+15
+00:01:15,760 --> 00:01:20,920
+I'm anticipating a very lively discussion segment as well to kick off the session, so make
+
+16
+00:01:20,920 --> 00:01:25,920
+sure to bring your AI resolutions and predictions for 2018.
+
+17
+00:01:25,920 --> 00:01:32,280
+For links to the paper, or to join the Meetup group, visit twimbleai.com slash meetup.
+
+18
+00:01:32,280 --> 00:01:35,080
+Alright, now a bit about today's show.
+
+19
+00:01:35,080 --> 00:01:40,080
+In this episode, we hear from Siddha Gangesu, data scientist at computer vision startup
+
+20
+00:01:40,080 --> 00:01:41,560
+deep vision.
+
+21
+00:01:41,560 --> 00:01:45,720
+Siddha joined me at the AI conference a while back to chat about the challenges of developing
+
+22
+00:01:45,720 --> 00:01:49,000
+deep learning applications, quote unquote, at the edge.
+
+23
+00:01:49,000 --> 00:01:53,520
+In other words, those targeting compute and power constrained environments.
+
+24
+00:01:53,520 --> 00:01:58,200
+In our conversation, Siddha provides an overview of deep vision's embedded processor, which
+
+25
+00:01:58,200 --> 00:02:01,240
+is optimized for ultra low power requirements.
+
+26
+00:02:01,240 --> 00:02:05,480
+And we dig into the data processing pipeline and network architecture process that she
+
+27
+00:02:05,480 --> 00:02:09,800
+uses to support sophisticated models in embedded devices.
+
+28
+00:02:09,800 --> 00:02:13,680
+We dig into the specific hardware and software capabilities and restrictions, typical
+
+29
+00:02:13,680 --> 00:02:19,080
+of edge devices, and how she utilizes techniques like model pruning and compression to create
+
+30
+00:02:19,080 --> 00:02:25,440
+embedded models that deliver needed performance levels in those resource constrained environments.
+
+31
+00:02:25,440 --> 00:02:31,600
+We also discuss use cases such as facial recognition, scene description, and activity recognition.
+
+32
+00:02:31,600 --> 00:02:36,440
+Siddha's research interests also include natural language processing and visual question
+
+33
+00:02:36,440 --> 00:02:49,640
+answering, and we spend some time discussing those as well, and now on to the show.
+
+34
+00:02:49,640 --> 00:02:55,000
+Alright everyone, I am here at the Artificial Intelligence Conference in San Francisco,
+
+35
+00:02:55,000 --> 00:03:00,480
+and I'm with Siddha Gangesu, who is a data scientist at deep vision.
+
+36
+00:03:00,480 --> 00:03:03,080
+And Siddha, welcome to the show, it was a pleasure to have you.
+
+37
+00:03:03,080 --> 00:03:06,240
+Hi, thank you very much, thanks for having me.
+
+38
+00:03:06,240 --> 00:03:11,320
+Absolutely, absolutely, so why don't we start by having you tell us a little bit about
+
+39
+00:03:11,320 --> 00:03:16,320
+your background and how you got interested and started in machine learning.
+
+40
+00:03:16,320 --> 00:03:21,320
+So I think I got started in machine learning during my undergrad days.
+
+41
+00:03:21,320 --> 00:03:27,160
+So I had gone to a hackathon and I met this mentor there, his name is Anirth Kohl, and
+
+42
+00:03:27,160 --> 00:03:31,800
+we worked on a project there which was called orphan locator, which is basically trying
+
+43
+00:03:31,800 --> 00:03:38,520
+to locate missing children using the police databases, and we used a very simple image matching
+
+44
+00:03:38,520 --> 00:03:40,120
+algorithm there.
+
+45
+00:03:40,120 --> 00:03:44,960
+So I think that was my first introduction to machine learning, then after the hackathon
+
+46
+00:03:44,960 --> 00:03:49,520
+when I came back to college, I was like, I want to know more about it, so I think like
+
+47
+00:03:49,520 --> 00:03:53,200
+everybody else I started doing the Coursera course on machine learning.
+
+48
+00:03:53,200 --> 00:03:54,200
+The Enduring course?
+
+49
+00:03:54,200 --> 00:04:01,680
+Yeah, I guess after that I applied for a master's degree in data science, so I just graduated
+
+50
+00:04:01,680 --> 00:04:08,800
+this year from Carnegie Mellon with a master's in data science, and then at CMU I worked
+
+51
+00:04:08,800 --> 00:04:12,640
+on what is called visual question answering.
+
+52
+00:04:12,640 --> 00:04:19,880
+So that's an AI hard task which basically provides an image to a computer and a user
+
+53
+00:04:19,880 --> 00:04:24,440
+or a human is expected to ask a question about the image.
+
+54
+00:04:24,440 --> 00:04:30,240
+Now this question can be about any activity or the number of people or something related
+
+55
+00:04:30,240 --> 00:04:35,320
+to the image or the scene within the image, and the computer or the AI system is expected
+
+56
+00:04:35,320 --> 00:04:38,880
+to provide an accurate answer to that question.
+
+57
+00:04:38,880 --> 00:04:39,880
+Okay.
+
+58
+00:04:39,880 --> 00:04:43,640
+Now there are many uses of VQA of visual question answering.
+
+59
+00:04:43,640 --> 00:04:50,920
+One is obviously for the visually impaired, but another use is for people in situationally
+
+60
+00:04:50,920 --> 00:04:55,680
+impaired, for example, like if you're in a car and you're driving, so you don't want
+
+61
+00:04:55,680 --> 00:05:00,240
+to be looking at your phone, so your phone can basically give you a description of the
+
+62
+00:05:00,240 --> 00:05:05,680
+images that somebody just sent you, or if you're a security analyst then you don't have
+
+63
+00:05:05,680 --> 00:05:13,360
+to comb through hours of video footage, you can just query like what did the man take
+
+64
+00:05:13,360 --> 00:05:15,640
+from that shopping mall.
+
+65
+00:05:15,640 --> 00:05:21,680
+So you can just you know, you can just describe the situation sort of to a system and the
+
+66
+00:05:21,680 --> 00:05:26,840
+system can provide you those frames in which that happened.
+
+67
+00:05:26,840 --> 00:05:33,040
+So these are some of the examples of VQA, and our research was focused on how can we
+
+68
+00:05:33,040 --> 00:05:39,960
+use visual questions as a form of supervision for improving computer vision models, because
+
+69
+00:05:39,960 --> 00:05:45,400
+in the future it will become common for humans to ask visual questions to computers like
+
+70
+00:05:45,400 --> 00:05:49,440
+where did I leave my keys or what breed of dog is this.
+
+71
+00:05:49,440 --> 00:05:52,960
+Now if you look at this question, there is a lot of information already provided in
+
+72
+00:05:52,960 --> 00:05:59,600
+the question itself, like the object or the animal we're talking about is a dog, and
+
+73
+00:05:59,600 --> 00:06:00,600
+like, etc.
+
+74
+00:06:00,600 --> 00:06:04,760
+So that's primarily where the research was focused.
+
+75
+00:06:04,760 --> 00:06:05,760
+Okay.
+
+76
+00:06:05,760 --> 00:06:06,760
+Yeah.
+
+77
+00:06:06,760 --> 00:06:07,760
+Okay, interesting.
+
+78
+00:06:07,760 --> 00:06:13,680
+And here at the conference, you're you did a talk, or you're I forget you're doing
+
+79
+00:06:13,680 --> 00:06:16,800
+or you did it yesterday, right, right, right.
+
+80
+00:06:16,800 --> 00:06:18,760
+And but that talk wasn't on VQA, that talk.
+
+81
+00:06:18,760 --> 00:06:19,760
+Yeah.
+
+82
+00:06:19,760 --> 00:06:23,680
+That was actually on embedded deep learning, which is how you can take deep learning algorithms
+
+83
+00:06:23,680 --> 00:06:30,160
+which are compute intensive, and they are pretty, they are pretty big in size, and how you
+
+84
+00:06:30,160 --> 00:06:35,360
+can take them to embedded devices, because embedded devices have limited compute available
+
+85
+00:06:35,360 --> 00:06:37,000
+and they have limited storage.
+
+86
+00:06:37,000 --> 00:06:38,000
+Right.
+
+87
+00:06:38,000 --> 00:06:42,640
+So how can you run these algorithms at inference time on these devices?
+
+88
+00:06:42,640 --> 00:06:47,840
+So this is basically the work that I'm doing currently at my company deep vision.
+
+89
+00:06:47,840 --> 00:06:48,840
+Okay.
+
+90
+00:06:48,840 --> 00:06:52,840
+And is that the focus at deep vision, or is that just one of the many things that the
+
+91
+00:06:52,840 --> 00:06:54,480
+company is working on?
+
+92
+00:06:54,480 --> 00:07:00,040
+So that is the focus of deep vision, basically, to tell us a little bit about the company.
+
+93
+00:07:00,040 --> 00:07:01,040
+Yeah, sure.
+
+94
+00:07:01,040 --> 00:07:07,400
+So the company was founded by two Stanford PhD graduates, Rehan and Vajahad, and the
+
+95
+00:07:07,400 --> 00:07:14,320
+hardware or the processor that they developed was during their PhD itself at Stanford.
+
+96
+00:07:14,320 --> 00:07:20,840
+And this hardware is basically, it has high performance per watt.
+
+97
+00:07:20,840 --> 00:07:26,920
+At the same time, it is programmable enough so you can run a wide range of algorithms,
+
+98
+00:07:26,920 --> 00:07:32,280
+which includes both traditional computer vision algorithms and deep learning algorithms
+
+99
+00:07:32,280 --> 00:07:34,000
+on the same device itself.
+
+100
+00:07:34,000 --> 00:07:35,000
+Okay.
+
+101
+00:07:35,000 --> 00:07:42,400
+So if you look at most of the processor these days, if you want high performance, then
+
+102
+00:07:42,400 --> 00:07:48,400
+it's ideal to develop what is called a custom hardware or a fixed function hardware, which
+
+103
+00:07:48,400 --> 00:07:54,800
+is built basically for that one particular operation that you want.
+
+104
+00:07:54,800 --> 00:07:59,000
+And on the other hand, if you want a broad spectrum device, which is programmable, so
+
+105
+00:07:59,000 --> 00:08:06,560
+you can run a lot of things on it, it will be not as efficient as the fixed function hardware.
+
+106
+00:08:06,560 --> 00:08:12,880
+And an example of programmable devices are the GPUs of the graphical processing units,
+
+107
+00:08:12,880 --> 00:08:19,280
+but these have a high cost, so they're expensive.
+
+108
+00:08:19,280 --> 00:08:25,480
+And they're also really big, so you can't actually put them on embedded devices.
+
+109
+00:08:25,480 --> 00:08:32,880
+So they were able to figure out a way to bridge the gap between performance and programmability
+
+110
+00:08:32,880 --> 00:08:35,960
+through which they developed this processor.
+
+111
+00:08:35,960 --> 00:08:36,960
+Okay.
+
+112
+00:08:36,960 --> 00:08:37,960
+Interesting.
+
+113
+00:08:37,960 --> 00:08:45,400
+And so does the company compete with or play in the space, same space as the Intel Movidius?
+
+114
+00:08:45,400 --> 00:08:52,240
+It's actually a little different because we are building both the hardware and the software.
+
+115
+00:08:52,240 --> 00:08:53,240
+Okay.
+
+116
+00:08:53,240 --> 00:08:55,600
+And I don't think Movidius follows that plan.
+
+117
+00:08:55,600 --> 00:08:56,600
+Okay.
+
+118
+00:08:56,600 --> 00:08:57,600
+Yeah.
+
+119
+00:08:57,600 --> 00:08:58,600
+Okay.
+
+120
+00:08:58,600 --> 00:09:05,280
+So, but the hardware is specifically focused, I'm inferring from the name DeepVision on visual
+
+121
+00:09:05,280 --> 00:09:10,280
+types of problems and like CNNs, for example.
+
+122
+00:09:10,280 --> 00:09:15,840
+So we can run like CNNs, we can also run LSTMs on it, so it's not particularly just the
+
+123
+00:09:15,840 --> 00:09:16,840
+convolutions.
+
+124
+00:09:16,840 --> 00:09:17,840
+Okay.
+
+125
+00:09:17,840 --> 00:09:22,760
+So yeah, like a broad range of deep learning basic systems can be run on it.
+
+126
+00:09:22,760 --> 00:09:23,760
+Okay.
+
+127
+00:09:23,760 --> 00:09:28,760
+So why don't you walk us through your talk and the major points that you were trying to
+
+128
+00:09:28,760 --> 00:09:31,040
+convey to the audience there?
+
+129
+00:09:31,040 --> 00:09:32,040
+Sure.
+
+130
+00:09:32,040 --> 00:09:38,160
+As I already mentioned about the hardware innovation, which is bridging the gap between the
+
+131
+00:09:38,160 --> 00:09:41,000
+performance and the programmability.
+
+132
+00:09:41,000 --> 00:09:47,760
+So one of the basic ideas behind this is that the convolution operation that basically
+
+133
+00:09:47,760 --> 00:09:55,200
+belongs to one of the classes of those computations for which it's possible to build efficient hardware
+
+134
+00:09:55,200 --> 00:10:01,920
+when you build it in ASIC format or application specific integrated circuits.
+
+135
+00:10:01,920 --> 00:10:08,800
+So that's basically what they did and they were able to basically optimize this convolution.
+
+136
+00:10:08,800 --> 00:10:14,720
+Now if you look at traditional computer vision methods, most of them have like a overlapping
+
+137
+00:10:14,720 --> 00:10:20,800
+stencil or like a sliding window on which they run operations, which if you think about
+
+138
+00:10:20,800 --> 00:10:23,800
+it is similar to a convolution.
+
+139
+00:10:23,800 --> 00:10:29,800
+So and additionally, it's also similar in like MapReduce operations.
+
+140
+00:10:29,800 --> 00:10:33,520
+It's also like a window and you're repeating the method over and over again over different
+
+141
+00:10:33,520 --> 00:10:35,040
+windows.
+
+142
+00:10:35,040 --> 00:10:42,400
+So this is basically how they got the idea to optimize this one particular class of functions.
+
+143
+00:10:42,400 --> 00:10:49,280
+And it has wide applicability over traditional computer vision and deep learning algorithms.
+
+144
+00:10:49,280 --> 00:10:53,440
+And the other thing that I mentioned in the talk was that why are we focusing on embedded
+
+145
+00:10:53,440 --> 00:11:01,320
+devices or edge devices? And if you look at the data available for embedded devices, it's
+
+146
+00:11:01,320 --> 00:11:06,120
+approximately more than 150 zetabytes of video data.
+
+147
+00:11:06,120 --> 00:11:11,200
+So if you think about where this is coming from like airports, surveillance cameras, traffic
+
+148
+00:11:11,200 --> 00:11:16,400
+light cameras, basically all the cameras that you see anywhere, they have embedded devices
+
+149
+00:11:16,400 --> 00:11:23,920
+in them and they need someone to be looking at the videos right now.
+
+150
+00:11:23,920 --> 00:11:29,440
+But it is a hope that these can be automated eventually.
+
+151
+00:11:29,440 --> 00:11:35,080
+So that's where you will need these devices to be intelligent enough to perform real-time
+
+152
+00:11:35,080 --> 00:11:36,600
+analysis.
+
+153
+00:11:36,600 --> 00:11:44,300
+So the idea is that you've got tons and increasing amounts of surveillance data all over from
+
+154
+00:11:44,300 --> 00:11:52,240
+security devices, you know, home security, you know, down the home security and eventually
+
+155
+00:11:52,240 --> 00:11:55,480
+maybe our phone cameras will be always on right now.
+
+156
+00:11:55,480 --> 00:11:56,480
+I don't know.
+
+157
+00:11:56,480 --> 00:11:59,440
+You know, there's some people worried about scenarios like that.
+
+158
+00:11:59,440 --> 00:12:05,320
+But yeah, in any case, there's just tons and tons of video data all over the place.
+
+159
+00:12:05,320 --> 00:12:10,720
+And right now people are reviewing that manually and you would, the company is kind of building
+
+160
+00:12:10,720 --> 00:12:19,320
+towards a model where you're training models to, you know, identify various, you know, features
+
+161
+00:12:19,320 --> 00:12:23,920
+like, you know, objects or people or things like that and you would deploy those models
+
+162
+00:12:23,920 --> 00:12:30,840
+out to devices, inference engines that live at the edge and can basically raise flags when
+
+163
+00:12:30,840 --> 00:12:33,000
+different things are happening.
+
+164
+00:12:33,000 --> 00:12:36,880
+When more thing is that the models that you train like for home security, it will be
+
+165
+00:12:36,880 --> 00:12:43,560
+different than for example, airport security because in home systems, you need to recognize
+
+166
+00:12:43,560 --> 00:12:47,000
+like five or six people, not more than that.
+
+167
+00:12:47,000 --> 00:12:52,240
+But in airport, you need to recognize like thousands of people instantaneously.
+
+168
+00:12:52,240 --> 00:12:57,000
+So the way of training the models and developing the models in both these scenarios is completely
+
+169
+00:12:57,000 --> 00:12:58,160
+different.
+
+170
+00:12:58,160 --> 00:13:05,000
+So we're also looking into how to train each one and how to make each one dense enough
+
+171
+00:13:05,000 --> 00:13:10,920
+so that the model is extremely small so that we can fit it onto these embedded devices.
+
+172
+00:13:10,920 --> 00:13:17,320
+At the same time, they should be accurate enough that we are getting the correct results.
+
+173
+00:13:17,320 --> 00:13:22,320
+So is the, you mentioned the number of people that you're, that you're trying to identify.
+
+174
+00:13:22,320 --> 00:13:27,560
+So it sounds like one of the main use cases is, you know, in the security scenario, you
+
+175
+00:13:27,560 --> 00:13:33,960
+know, I see this person, you know, in this frame here, pull up other frames and videos
+
+176
+00:13:33,960 --> 00:13:40,400
+where that person appears, where you're, so the salient point being not just, you know,
+
+177
+00:13:40,400 --> 00:13:45,520
+identifying one there are people, but it's identifying specific people like maybe what
+
+178
+00:13:45,520 --> 00:13:53,640
+are the specific use cases or, you know, that tie to specific kind of model classes, I
+
+179
+00:13:53,640 --> 00:13:54,640
+guess.
+
+180
+00:13:54,640 --> 00:14:00,160
+So I think once the technology is in place, the possible use cases are endless, but right
+
+181
+00:14:00,160 --> 00:14:05,840
+now we're focusing on two main ones. And again, I talked about both of these yesterday.
+
+182
+00:14:05,840 --> 00:14:13,600
+So these are face recognition and scene description. So face recognition is basically finding out
+
+183
+00:14:13,600 --> 00:14:18,640
+the name of a particular person based on the image of that particular person.
+
+184
+00:14:18,640 --> 00:14:24,840
+And scene description is giving out a caption or a description for a scene, which is within
+
+185
+00:14:24,840 --> 00:14:32,280
+the image. Now scene description has uses in home security systems, because right now
+
+186
+00:14:32,280 --> 00:14:36,680
+the home security systems are such that they alert you that there is motion detected
+
+187
+00:14:36,680 --> 00:14:42,480
+outside your house or something is happening, but they don't tell you what is happening.
+
+188
+00:14:42,480 --> 00:14:46,080
+And sometimes for example, the UPS is here with the package.
+
+189
+00:14:46,080 --> 00:14:49,720
+Yeah. So like our system can say, okay, the UPS guy is here with the package and it's
+
+190
+00:14:49,720 --> 00:14:56,080
+dropped on your front door or like similar things like that. And again, face recognition
+
+191
+00:14:56,080 --> 00:15:02,520
+can say if like say you save your son or your daughter's face in your system, you know
+
+192
+00:15:02,520 --> 00:15:06,720
+that they're coming home. And so the system just tells you, okay, this person has reached
+
+193
+00:15:06,720 --> 00:15:07,720
+home.
+
+194
+00:15:07,720 --> 00:15:08,720
+Okay.
+
+195
+00:15:08,720 --> 00:15:09,720
+So that's another use case.
+
+196
+00:15:09,720 --> 00:15:10,720
+Okay.
+
+197
+00:15:10,720 --> 00:15:11,720
+Yeah.
+
+198
+00:15:11,720 --> 00:15:15,880
+It's interesting. I think at least for me as you were describing, you know, what you
+
+199
+00:15:15,880 --> 00:15:20,240
+were trying to do, it's easy to get carried away and imagine like tons of use cases, but
+
+200
+00:15:20,240 --> 00:15:25,760
+they're all when you think through like the kinds of models that they would require, they're
+
+201
+00:15:25,760 --> 00:15:31,960
+all really different. And so you have to really focus at least now on some very specific
+
+202
+00:15:31,960 --> 00:15:32,960
+use cases.
+
+203
+00:15:32,960 --> 00:15:39,840
+Yes, that's true. But another thing is that in order to develop, say even activity recognition,
+
+204
+00:15:39,840 --> 00:15:45,760
+you need to have some basic recognition capabilities. For example, you need to define
+
+205
+00:15:45,760 --> 00:15:53,080
+like what an arm is or any other body parts. So that recognition capability comes from
+
+206
+00:15:53,080 --> 00:16:00,560
+like what is possible again in face recognition? Okay. So what I'm saying is, yeah. So that's
+
+207
+00:16:00,560 --> 00:16:06,200
+basically like when you have one face recognition model in place, the only thing you have to
+
+208
+00:16:06,200 --> 00:16:13,520
+do is tweak it a little bit to make it into activity recognition. Like in place of images
+
+209
+00:16:13,520 --> 00:16:22,160
+in face recognition, you would need a time sequence or a frame sequence in activity recognition.
+
+210
+00:16:22,160 --> 00:16:27,640
+Are you talking here about transfer learning, meaning you've trained a model on on faces
+
+211
+00:16:27,640 --> 00:16:32,920
+and now you can use it to identify arms or are we talking more about sequence related
+
+212
+00:16:32,920 --> 00:16:37,280
+things or something totally different? I think it's something totally different. Yeah.
+
+213
+00:16:37,280 --> 00:16:43,360
+Great. So what I mean is that once you have the basic capability in place like being
+
+214
+00:16:43,360 --> 00:16:50,960
+able to recognize faces, it is just parts of this algorithm or parts of this model that
+
+215
+00:16:50,960 --> 00:16:57,560
+you would be reusing in other models like activity recognition. Now you won't be using
+
+216
+00:16:57,560 --> 00:17:01,400
+the exact same weights because that would be completely different and you would have
+
+217
+00:17:01,400 --> 00:17:08,800
+to retrain the or actually not retrain trained from scratch, the activity recognition model.
+
+218
+00:17:08,800 --> 00:17:13,160
+But that said, the basic elements in both of these are the same like the convolutions
+
+219
+00:17:13,160 --> 00:17:18,320
+or the LSTMs. Okay. So you're building up the model architecture
+
+220
+00:17:18,320 --> 00:17:23,160
+share a lot of common characteristics? Yeah. Something like that. Something like that
+
+221
+00:17:23,160 --> 00:17:26,120
+would not quite that. I didn't actually understand what you said.
+
+222
+00:17:26,120 --> 00:17:30,720
+So the model architecture share a lot of common characteristics, meaning you're using the
+
+223
+00:17:30,720 --> 00:17:36,920
+same general model architectures, you know, the different types of layers. Yeah, that's
+
+224
+00:17:36,920 --> 00:17:43,720
+a very easy way to explain it. Yeah. Okay. I should have said that. So interesting. So I
+
+225
+00:17:43,720 --> 00:17:51,880
+guess what I'm curious about is you develop models. I'm assuming that the the way that
+
+226
+00:17:51,880 --> 00:17:59,880
+you would go about this is you want to develop facial recognition models and you, you know,
+
+227
+00:17:59,880 --> 00:18:05,600
+survey the literature, figure out what are the best performing model architectures to do
+
+228
+00:18:05,600 --> 00:18:12,600
+that, you know, implement those, train those. And then you've got this this model that probably
+
+229
+00:18:12,600 --> 00:18:18,160
+doesn't fit on your embedded device. Yeah. And so there's a process that you go through
+
+230
+00:18:18,160 --> 00:18:24,520
+to go from that model to one that fits like walk us through, you know, how how much of that
+
+231
+00:18:24,520 --> 00:18:29,760
+is art and how much of that is science and walk us through like the thinking as you do that.
+
+232
+00:18:29,760 --> 00:18:36,200
+Yeah, sure. So this process is actually called pruning. So how you can go from like a big
+
+233
+00:18:36,200 --> 00:18:43,200
+model to something that is just 11, like reduced to 11 times its original size. So the way
+
+234
+00:18:43,200 --> 00:18:48,720
+to do this is so pruning basically has three different steps in it. Well, I think there
+
+235
+00:18:48,720 --> 00:18:55,080
+are three different steps. So first is you need to statistically analyze your model to
+
+236
+00:18:55,080 --> 00:19:01,560
+ensure that the weights follow a bell curve distribution, like a normal distribution.
+
+237
+00:19:01,560 --> 00:19:06,800
+I get that part. I think you're responding to me looking up like, okay, why is it important
+
+238
+00:19:06,800 --> 00:19:11,240
+that your weights are distributed in that way? Because when you're going to prune it,
+
+239
+00:19:11,240 --> 00:19:16,800
+you're going to use some thresholds. Now you calculate these thresholds using the standard
+
+240
+00:19:16,800 --> 00:19:22,920
+deviation. And the assumptions of standard deviation are that it needs to be a bell
+
+241
+00:19:22,920 --> 00:19:31,240
+curve. Right. And is it is it typical or common that your weights do follow the bell curve?
+
+242
+00:19:31,240 --> 00:19:35,760
+Yeah, for all the models that I've tried it with, they almost always fall into a bell
+
+243
+00:19:35,760 --> 00:19:40,720
+curve. Okay. Yeah. So once you know that it's a bell curve, you move on to the next step,
+
+244
+00:19:40,720 --> 00:19:45,920
+which is the actual pruning stage. So you calculate the standard deviation of the weight
+
+245
+00:19:45,920 --> 00:19:53,120
+matrices. Then you find the quartiles of each weight matrix. So that's basically standard
+
+246
+00:19:53,120 --> 00:20:00,040
+deviation multiplied by one, two, three, four, and so on. Now for each weight matrix,
+
+247
+00:20:00,040 --> 00:20:05,440
+for example, if you're using a scene description model, that will have an image model and a language
+
+248
+00:20:05,440 --> 00:20:14,680
+model. So for each of these, you will calculate their thresholds. Then you can remove all
+
+249
+00:20:14,680 --> 00:20:21,360
+the weights, which are less than that threshold. So like the first threshold you calculated
+
+250
+00:20:21,360 --> 00:20:29,760
+said was zero. So any number less than zero, you can remove it. Okay. So this is essentially
+
+251
+00:20:29,760 --> 00:20:38,720
+a technique to identify and rank the contribution of individual weights in your model. Yes. Yes.
+
+252
+00:20:38,720 --> 00:20:46,320
+Yeah. Okay. And so then you rank order these weights in terms of their contribution and
+
+253
+00:20:46,320 --> 00:20:50,480
+you have some cut off and you just remove the weights that are that fall beneath that cut
+
+254
+00:20:50,480 --> 00:20:55,840
+off it. Now it, I'm imagining when you do that, there are ripple effects in terms of
+
+255
+00:20:55,840 --> 00:21:00,480
+your. That's why you need to load these weights back into the model. Okay. And then retrain
+
+256
+00:21:00,480 --> 00:21:06,920
+it. Okay. Yeah. All right. And then so then you, was that your third step? Yes. Retraining
+
+257
+00:21:06,920 --> 00:21:11,920
+is the third step. Yeah. Yeah. And then you can basically repeat this entire process
+
+258
+00:21:11,920 --> 00:21:23,040
+until you reach the most dense model. Okay. And is there empirical work that shows that
+
+259
+00:21:23,040 --> 00:21:30,080
+pruning leads to optimal compact solutions relative to, you know, some other process
+
+260
+00:21:30,080 --> 00:21:36,080
+that, you know, maybe starts from a smaller, more compact model and trains those from scratch
+
+261
+00:21:36,080 --> 00:21:42,320
+or something. So there are actually different kinds of pruning strategies available. So I
+
+262
+00:21:42,320 --> 00:21:48,040
+remember there's, there are a couple of papers from Stanford that talk about this method
+
+263
+00:21:48,040 --> 00:21:54,480
+and there are a couple of papers from University of Washington and Allen Institute that talk
+
+264
+00:21:54,480 --> 00:22:02,160
+about just removing one complete branch. So zeroing out everything in one convolution.
+
+265
+00:22:02,160 --> 00:22:08,680
+Okay. And then retraining it. So it really depends on what kind of model you have and
+
+266
+00:22:08,680 --> 00:22:16,320
+what results you want to attain. Okay. Yeah. All right. Interesting. Can you give us a sense
+
+267
+00:22:16,320 --> 00:22:23,160
+for the kinds of results where you mentioned that your, your models after the pruning process
+
+268
+00:22:23,160 --> 00:22:29,240
+can be like 10% of the size of the original models. What, you know, in real numbers,
+
+269
+00:22:29,240 --> 00:22:35,440
+like what is that? Sure. So, so if you talk about the scene description model that we,
+
+270
+00:22:35,440 --> 00:22:41,600
+we worked on, it's average inference time. It came down from eight milliseconds to two
+
+271
+00:22:41,600 --> 00:22:47,800
+milliseconds. And the accuracy also increased. So for scene description, there are different
+
+272
+00:22:47,800 --> 00:22:53,560
+metrics like meteor blue, rouge and cider. So there was an increase of approximately five
+
+273
+00:22:53,560 --> 00:23:04,160
+steps on these metrics, blue, rouge, and cider. Yeah. CIDR. Yeah. And BLEU. So these are
+
+274
+00:23:04,160 --> 00:23:10,600
+some image captioning metrics. Okay. These are originally machine translation metrics,
+
+275
+00:23:10,600 --> 00:23:16,120
+but they have been adapted to image captioning metrics. There's also a new metric called
+
+276
+00:23:16,120 --> 00:23:23,960
+spice, which is used for image captioning. Okay. And so you're saying that you can train a model,
+
+277
+00:23:23,960 --> 00:23:30,360
+measure it against these metrics, prune the model, and then increase performance. Yeah,
+
+278
+00:23:30,360 --> 00:23:35,240
+because you will have a dense network. Like you can change some things in a network,
+
+279
+00:23:35,240 --> 00:23:42,560
+like change the image model to something smaller and retrain it. And because you're starting
+
+280
+00:23:42,560 --> 00:23:49,560
+from like trained weights, so you have a good initialization in your system when you retrain
+
+281
+00:23:49,560 --> 00:23:56,600
+it. So that basically helps in going above the previously attained accuracy level.
+
+282
+00:23:56,600 --> 00:24:00,480
+And just to make sure I'm understanding the previously attained accurately accuracy
+
+283
+00:24:00,480 --> 00:24:09,440
+level for an unconstrained by size model. Yeah. That is counterintuitive to me. I, the
+
+284
+00:24:09,440 --> 00:24:16,280
+way I envision this is that, you know, the best performance you're going to get is when
+
+285
+00:24:16,280 --> 00:24:21,280
+you've got a model that's not constrained by, you know, memory power, et cetera. And
+
+286
+00:24:21,280 --> 00:24:27,040
+then you prune it and you make some compromises and you get adequate performance, but with
+
+287
+00:24:27,040 --> 00:24:30,760
+a foot, a model with a footprint that can fit on your embedded device. And what I hear
+
+288
+00:24:30,760 --> 00:24:37,200
+you saying is that you can actually increase your performance and shrink your model down
+
+289
+00:24:37,200 --> 00:24:43,280
+at the same time. Is that what you're saying? Yes. As an example of, again, the same
+
+290
+00:24:43,280 --> 00:24:49,480
+description model. So if you start from something like neural talk, that has a VGG network
+
+291
+00:24:49,480 --> 00:24:55,360
+for its image model and a pretrained LSTM for its language model. Now, if you remove
+
+292
+00:24:55,360 --> 00:25:00,640
+this VGG network and replace it by something smaller, like GoogleNet, and GoogleNet and
+
+293
+00:25:00,640 --> 00:25:09,200
+VGGNet both lie within the same top 1% accuracy range. But if you use GoogleNet and the
+
+294
+00:25:09,200 --> 00:25:18,040
+same pretrained LSTM and retrain this entire system, you can actually get a higher accuracy.
+
+295
+00:25:18,040 --> 00:25:23,400
+And so for, you know, folks that are doing research in this area and are, you know, competing
+
+296
+00:25:23,400 --> 00:25:30,360
+on accuracy, why don't they all just add another step in their process of pruning to come
+
+297
+00:25:30,360 --> 00:25:36,280
+up with a better performing model or at least try that? Because I think that's not their
+
+298
+00:25:36,280 --> 00:25:42,120
+main aim. Like accuracy is their main aim, but pruning is not their main aim. Right,
+
+299
+00:25:42,120 --> 00:25:47,840
+but you're saying accuracy can improve, but it calls you prune. Yes, that's true. But
+
+300
+00:25:47,840 --> 00:25:52,440
+that's, I know that because I tried that out as an experiment. Okay. So I mean, if you're
+
+301
+00:25:52,440 --> 00:25:59,440
+a PhD student, I doubt you will have time to experiment with pruning just for fun. Okay.
+
+302
+00:25:59,440 --> 00:26:08,120
+Yeah. And so how, so that I'm not making assumptions here, are you are serving that? Yeah, maybe
+
+303
+00:26:08,120 --> 00:26:14,000
+I'm jumping to conclusions and you're not asserting that increased performance is or
+
+304
+00:26:14,000 --> 00:26:19,080
+accuracy is a general result as opposed to just having to see this. It's not a general.
+
+305
+00:26:19,080 --> 00:26:23,000
+Yeah, that's true. Yeah, I think that's general result. It's not going to happen all the
+
+306
+00:26:23,000 --> 00:26:28,720
+time. It's not going to happen all the time. But there are some cases like in this case,
+
+307
+00:26:28,720 --> 00:26:34,080
+because the accuracy of both image models lies in the same top one person range. That could
+
+308
+00:26:34,080 --> 00:26:39,880
+be one possible reason why we're seeing the increase in accuracy. But if I would use
+
+309
+00:26:39,880 --> 00:26:44,640
+some other image model, the same results might not be repeated and the accuracy might actually
+
+310
+00:26:44,640 --> 00:26:50,480
+decrease. Okay. Yeah. That makes more sense. Yeah. Okay. So were there other things that
+
+311
+00:26:50,480 --> 00:26:55,600
+you covered in your talk? So you went through your three steps. Yeah, that's pruning.
+
+312
+00:26:55,600 --> 00:27:02,960
+And I think that's about it. I mean, there were a lot of other things, but there's not much
+
+313
+00:27:02,960 --> 00:27:07,480
+related to what we're talking about right now. Okay. Yeah. What were the other things? So
+
+314
+00:27:07,480 --> 00:27:14,280
+like for the face recognition pipeline, that is mostly two steps like face detection and
+
+315
+00:27:14,280 --> 00:27:19,520
+the actual recognition part. Okay. So can you improve on each one of these individually?
+
+316
+00:27:19,520 --> 00:27:25,360
+Mm-hmm. So for face detection, if you use a standard library or a traditional computer
+
+317
+00:27:25,360 --> 00:27:32,800
+vision system as opposed to something trained on neural networks, can you improve the accuracy,
+
+318
+00:27:32,800 --> 00:27:39,920
+the inference time and the model size? So for face detection, we saw improvement on all these
+
+319
+00:27:39,920 --> 00:27:46,800
+three verticals. Okay. And on face recognition, we trained different models using somewhat similar
+
+320
+00:27:46,800 --> 00:27:53,520
+architecture. Mm-hmm. So Google had released a face net paper which describes the NN2
+
+321
+00:27:53,520 --> 00:27:59,840
+architecture. So we built several models around the NN2 architecture and trained it with different
+
+322
+00:27:59,840 --> 00:28:06,160
+input sizes and saw that, you know, there's different inference time, different accuracy that
+
+323
+00:28:06,160 --> 00:28:12,720
+it attains and different model sites that all of these three, oh, sorry, all of these two parameters
+
+324
+00:28:12,720 --> 00:28:18,960
+can change. So that's something that I also mentioned in the doc. Okay. So the takeaway there is
+
+325
+00:28:18,960 --> 00:28:26,720
+then that if you are developing a pipeline for something like facial recognition or some of these
+
+326
+00:28:26,720 --> 00:28:32,800
+other, you know, let's maybe generalize it to, if you're developing a pipeline, generally,
+
+327
+00:28:32,800 --> 00:28:40,640
+and you want to get that pipeline to run well in an embedded environment. Yeah. You want to be
+
+328
+00:28:40,640 --> 00:28:46,480
+optimizing like each portion of the pipeline individually. Right. Yeah. As opposed to just optimizing,
+
+329
+00:28:46,480 --> 00:28:52,640
+you know, being fixed on your, your, your end pipeline and optimizing that. But that said, it's
+
+330
+00:28:52,640 --> 00:28:58,720
+important to like after you're optimizing each little bit of it. Right. You need to go over,
+
+331
+00:28:59,760 --> 00:29:05,920
+over like a retraining step for the entire pipeline. Okay. That like this end step is,
+
+332
+00:29:05,920 --> 00:29:13,680
+I think, the most important step. Okay. Okay. So you don't want to skip optimizing the individual
+
+333
+00:29:13,680 --> 00:29:19,440
+pieces. Yeah. But you want to once you've done that. Yeah. Optimize the end piece. And
+
+334
+00:29:19,440 --> 00:29:24,960
+is the idea that you start your optimization of the end to end system with better initial weights
+
+335
+00:29:24,960 --> 00:29:30,720
+for the individual pieces. Yeah. That's what I understand. Yeah. Okay. Based on like all the experiments
+
+336
+00:29:30,720 --> 00:29:36,640
+that I've done. Okay. All right. Interesting. Interesting. Can you walk us through? We talked a
+
+337
+00:29:36,640 --> 00:29:41,680
+little bit about VQA. Can you walk us through? Is that something that you work on at deep vision as
+
+338
+00:29:41,680 --> 00:29:46,720
+well or is it? So I think VQA will come in eventually because like I said, a scene description
+
+339
+00:29:46,720 --> 00:29:52,000
+is something that we use right now. But eventually you would also want people to be asking questions
+
+340
+00:29:52,000 --> 00:29:57,440
+to the system so that the system can give you an answer. Okay. Yeah. And can you walk us through
+
+341
+00:29:58,160 --> 00:30:03,040
+kind of what the, what the current state of the art is with VQA? What are the approaches
+
+342
+00:30:03,040 --> 00:30:10,160
+the folks are using and kind of generally how they take on that problem? Sure. So I don't quite
+
+343
+00:30:10,160 --> 00:30:15,760
+remember what is the state of the art now. But generally the approaches that you take an image model
+
+344
+00:30:16,560 --> 00:30:21,760
+and you somehow interface or communicate it with a language model which takes the question
+
+345
+00:30:21,760 --> 00:30:29,520
+as input. And when you're interfacing these two matrices together, the result will be a single
+
+346
+00:30:29,520 --> 00:30:35,040
+vector which will be the answer to the question that you have. Okay. So you can replace the image
+
+347
+00:30:35,040 --> 00:30:43,280
+model with ResNet, Inception, GoogleNet or basically anything or like a combination of all of these.
+
+348
+00:30:43,280 --> 00:30:51,280
+And the language model usually is an LSTM or you can also have it as a bag of words vector
+
+349
+00:30:52,000 --> 00:30:58,000
+or any other representation of the text. Now most of the work from VQA is coming from
+
+350
+00:30:58,000 --> 00:31:05,920
+Devi Parikin through Batra's lab. Now they also started using reinforcement learning in this.
+
+351
+00:31:06,640 --> 00:31:12,640
+So they're just trying to give adversarial answers and questions and having the other computer
+
+352
+00:31:12,640 --> 00:31:19,520
+or the other agent within the same environment, trying to figure out which of these is incorrect
+
+353
+00:31:19,520 --> 00:31:27,600
+and which of these is correct. Okay. So that's sort of like a brief overview of what's happening
+
+354
+00:31:27,600 --> 00:31:34,640
+in VQA. Okay. Yeah. Interesting. Interesting. And there are some, I don't remember the,
+
+355
+00:31:34,640 --> 00:31:38,880
+maybe you can remind us the name of them. There are some popular datasets that folks are using
+
+356
+00:31:38,880 --> 00:31:44,160
+from VQA. For VQA? Yeah, it's called the MSCoco dataset. MSCoco? Yeah, it's released by Microsoft
+
+357
+00:31:44,160 --> 00:31:50,320
+and it's the common objects in context. Okay. Now the images in MSCoco are actually really different
+
+358
+00:31:50,320 --> 00:31:57,440
+from ImageNet because ImageNet focuses on one particular object in image and whatever the
+
+359
+00:31:57,440 --> 00:32:05,680
+object is in focus, it usually occupies most of the area within the image. But in the cocoa images,
+
+360
+00:32:05,680 --> 00:32:12,880
+they're like normal scenes, like say this room, for example, it doesn't have a specific object
+
+361
+00:32:13,680 --> 00:32:22,080
+or there's no specific person in focus. It's like random, not random, but scenes which have a lot
+
+362
+00:32:22,080 --> 00:32:28,960
+of information in them. And in fact, there's also a release of the second version of the MSCoco
+
+363
+00:32:28,960 --> 00:32:36,240
+dataset that happened this year. Okay. So that dataset actually fixes some of the errors in,
+
+364
+00:32:37,120 --> 00:32:42,080
+not the errors, but actually the biases in the first dataset. For example, in the first dataset,
+
+365
+00:32:42,080 --> 00:32:47,600
+if you had a number of questions like how many apples are on the table, most generally the answer
+
+366
+00:32:47,600 --> 00:32:54,080
+would be three, or if the question is what color is anything, most generally the answer would be red.
+
+367
+00:32:54,720 --> 00:33:00,720
+So if you train on this, you develop a model that overfits on three reasons. So they actually
+
+368
+00:33:00,720 --> 00:33:06,400
+trained like an image blind model, which never saw the images, only saw the questions and the answers.
+
+369
+00:33:07,120 --> 00:33:11,200
+So this kind of model would just learn that if this is the question, this is the most probable answer.
+
+370
+00:33:11,200 --> 00:33:19,600
+Okay. And even that performed considerably well. So that's why. Yes, exactly. Yeah. So that's
+
+371
+00:33:19,600 --> 00:33:27,360
+why they developed the MSCoco version two dataset. Yeah. Great. Great. Awesome. Well, thank you so
+
+372
+00:33:27,360 --> 00:33:32,080
+much for taking a few minutes to chat with me. I really appreciate it. Thank you for having me.
+
+373
+00:33:32,080 --> 00:33:36,400
+And I didn't mention this at the intro, but we initially got connected because you listened to the
+
+374
+00:33:36,400 --> 00:33:42,400
+podcast. Yeah. I had actually listened to Chelsea's podcast, Chelsea fans. Yeah. And that's how I
+
+375
+00:33:42,400 --> 00:33:50,560
+really got interested. And I listened to, there was an NLP podcast from someone. I don't remember her name,
+
+376
+00:33:51,520 --> 00:33:55,680
+but it was pretty recent around Chelsea's podcast. And I was like, wow, there's so many things that I
+
+377
+00:33:55,680 --> 00:34:00,880
+don't know. Okay. That was Ornita. Yeah. Maybe. Yeah. It was a difficult name for me to remember.
+
+378
+00:34:00,880 --> 00:34:08,000
+Yeah. Awesome. Awesome. Well, thanks so much for listening. And thanks very much for, you know,
+
+379
+00:34:08,000 --> 00:34:13,760
+spending some time. Yeah. Well, thank you for, for having this great idea. And thank you for
+
+380
+00:34:13,760 --> 00:34:23,520
+having me today. Awesome. Thank you. All right, everyone. That's our show for today.
+
+381
+00:34:23,520 --> 00:34:29,680
+Thanks so much for listening and for your continued feedback and support. Thanks to your support.
+
+382
+00:34:29,680 --> 00:34:35,040
+This podcast finished the year as a top 40 technology podcast on Apple podcast.
+
+383
+00:34:35,680 --> 00:34:41,200
+My producer says that one of his goals this year is to crack the top 10. And to do that,
+
+384
+00:34:41,200 --> 00:34:47,600
+we need you to head over to your podcast app, rate the show. Hopefully we've earned your five stars
+
+385
+00:34:47,600 --> 00:34:53,360
+and leave us a glowing review. And more importantly, share the podcast with your friends,
+
+386
+00:34:53,360 --> 00:35:00,480
+family, co-workers, the Starbucks barista, your Uber driver, everyone who might be interested. Every
+
+387
+00:35:00,480 --> 00:35:07,600
+review, rating, and share goes a long way. So thanks in advance. For more information on SIDA
+
+388
+00:35:07,600 --> 00:35:14,720
+or any of the topics covered in this episode, head on over to twimmelai.com slash talk slash 95.
+
+389
+00:35:15,760 --> 00:35:20,720
+Of course, we would love to hear from you. Either via a comment on the show notes page
+
+390
+00:35:20,720 --> 00:35:28,560
+or via Twitter to at Sam Charrington or at Twimmelaii or at Twimmelaii. Thanks once again
+
+391
+00:35:28,560 --> 00:35:58,400
+for listening and catch you next time.
+

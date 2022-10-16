@@ -1,0 +1,2093 @@
+WEBVTT
+
+00:00.000 --> 00:15.920
+Hello and welcome to another episode of Twimble Talk, the podcast where I interview interesting
+
+00:15.920 --> 00:20.880
+people doing interesting things in machine learning and artificial intelligence.
+
+00:20.880 --> 00:25.720
+I'm your host Sam Charrington, a bit about the show you're about to hear.
+
+00:25.720 --> 00:29.840
+This show is part of a series that I'm really excited about in part because I've been
+
+00:29.840 --> 00:32.880
+working to bring it to you for quite a while now.
+
+00:32.880 --> 00:37.040
+The focus of this series is a sampling of the really interesting work being done over
+
+00:37.040 --> 00:44.520
+at OpenAI, the independent AI research lab founded by Elon Musk, Sam Altman, and others.
+
+00:44.520 --> 00:48.000
+A few quick announcements before we dive into the show.
+
+00:48.000 --> 00:53.040
+In a few weeks we'll be holding our last Twimble online meetup of the year.
+
+00:53.040 --> 00:58.080
+On Wednesday, December 13th, please join us and bring your thoughts on the top machine
+
+00:58.080 --> 01:02.640
+learning and AI stories of 2017 for our discussion segment.
+
+01:02.640 --> 01:08.360
+For our main presentation, formal Twimble Talk guest, Bruno Gensalves, we'll be discussing
+
+01:08.360 --> 01:13.880
+the paper, understanding deep learning requires rethinking generalization, by Shi Juan
+
+01:13.880 --> 01:17.320
+Zhang from MIT and Google Brain and others.
+
+01:17.320 --> 01:22.120
+You can find more details and register at twimlai.com slash meetup.
+
+01:22.120 --> 01:27.480
+Also, we need to build out our 2018 presentation schedule for the meetup.
+
+01:27.480 --> 01:32.040
+So if you'd like to present your own work or your favorite third-party paper, please
+
+01:32.040 --> 01:40.080
+reach out to us via email at teamattwimlai.com or ping us on social media and let us know.
+
+01:40.080 --> 01:44.240
+If you receive my newsletter, you already know this, but Twimble is growing and we're
+
+01:44.240 --> 01:49.280
+looking for an energetic and passionate community manager to help managing grow programs
+
+01:49.280 --> 01:55.200
+like the podcast and meetup and some other exciting things we've got in store for 2018.
+
+01:55.200 --> 01:57.800
+This is a full-time role that can be done remotely.
+
+01:57.800 --> 02:02.400
+If you're interested in learning more, reach out to me for additional details.
+
+02:02.400 --> 02:06.520
+I should mention that if you don't already get my newsletter, you are really missing
+
+02:06.520 --> 02:11.480
+out and you should visit twimlai.com slash newsletter to sign up.
+
+02:11.480 --> 02:16.560
+In this episode, I'm joined by Greg Brockman, OpenAI co-founder and CTO.
+
+02:16.560 --> 02:19.200
+Greg and I touch on a bunch of topics in this show.
+
+02:19.200 --> 02:24.000
+We start with the founding and goals of OpenAI before diving into a discussion on artificial
+
+02:24.000 --> 02:29.600
+general intelligence, what it means to achieve it, and how we go about doing so safely and
+
+02:29.600 --> 02:31.480
+without bias.
+
+02:31.480 --> 02:36.080
+We also touch on how to massively scale neural networks in their training and the evolution
+
+02:36.080 --> 02:38.960
+of computational frameworks for AI.
+
+02:38.960 --> 02:43.440
+This conversation is not only informative and nerd alert-worthy, but we cover some very
+
+02:43.440 --> 02:48.800
+important topics, so please take it all in, enjoy, and send along your feedback.
+
+02:48.800 --> 02:53.840
+A quick note before we jump in, support for this OpenAI series is brought to you by our
+
+02:53.840 --> 02:59.520
+friends at NVIDIA, a company which is also a supporter of OpenAI itself.
+
+02:59.520 --> 03:03.440
+If you're listening to this podcast, you already know about NVIDIA and all the great things
+
+03:03.440 --> 03:07.360
+they're doing to support advancements in AI research and practice.
+
+03:07.360 --> 03:11.920
+What you may not know is that the company has a significant presence at the NIPPS conference
+
+03:11.920 --> 03:17.400
+going on next week in Long Beach, California, including four accepted papers.
+
+03:17.400 --> 03:23.560
+To learn more about the NVIDIA presence at NIPPS, head on over to twimlai.com slash NVIDIA
+
+03:23.560 --> 03:26.160
+and be sure to visit them at the conference.
+
+03:26.160 --> 03:30.640
+Of course, I'll be at NIPPS as well, and I'd love to meet you if you'll be there, so
+
+03:30.640 --> 03:33.120
+please reach out if you will.
+
+03:33.120 --> 03:36.120
+And now on to the show.
+
+03:36.120 --> 03:45.680
+Alright everyone, I am on the line with Greg Brockman.
+
+03:45.680 --> 03:49.640
+Greg is a co-founder and CTO of OpenAI.
+
+03:49.640 --> 03:52.640
+Greg, welcome to this week in Machine Learning and AI.
+
+03:52.640 --> 03:54.120
+Thank you for having me.
+
+03:54.120 --> 03:55.120
+Awesome.
+
+03:55.120 --> 03:59.800
+Hey, why don't we get started as is the tradition here on the podcast with you telling us a little
+
+03:59.800 --> 04:03.720
+bit about your background and how you got involved in AI?
+
+04:03.720 --> 04:04.720
+Sure thing.
+
+04:04.720 --> 04:09.480
+So, I got into programming relatively late, so after high school, I took a year off and
+
+04:09.480 --> 04:14.040
+went abroad, was working on the chemistry textbook, and I sent it off to one of my friends
+
+04:14.040 --> 04:17.760
+who had done something similar in math, and you were back saying there's only one problem
+
+04:17.760 --> 04:20.800
+with this, which is that you don't have a PhD, so no one's going to publish it, so you
+
+04:20.800 --> 04:25.720
+can either self publish, or you can make a website, try to promote things that way.
+
+04:25.720 --> 04:29.680
+I was like, well, I guess I'll figure out how to make a website, and so I went online
+
+04:29.680 --> 04:33.400
+and taught myself how to code and build a little sample table sorting widget, and thought
+
+04:33.400 --> 04:35.920
+that was cool, and I built something bigger and bigger and never really looked back
+
+04:35.920 --> 04:37.600
+at the chemistry.
+
+04:37.600 --> 04:43.160
+And one of the really things that really captivated me was the idea of being able to write code
+
+04:43.160 --> 04:48.480
+that could understand things that I could not, because the way that you write code that
+
+04:48.480 --> 04:52.600
+you build systems, you think hard about a problem, you understand it, you write it down
+
+04:52.600 --> 04:59.600
+in this very obscure way that we call a program, and suddenly anyone can get the benefit of
+
+04:59.600 --> 05:05.480
+what you just did, and if there was a way to amplify that and to have programs that could
+
+05:05.480 --> 05:09.200
+do things that I didn't have to even understand myself, then suddenly the set of problems
+
+05:09.200 --> 05:11.400
+you could solve, you're so much broader.
+
+05:11.400 --> 05:14.760
+And how'd you get from building a website to that?
+
+05:14.760 --> 05:15.760
+Yeah, yeah.
+
+05:15.760 --> 05:21.760
+So, I read Turing's 1950 paper, computer machinery and intelligence, and when you read it and
+
+05:21.760 --> 05:27.080
+it's talking about the Turing test, and that he has this picture of, by the year 2000, you'll
+
+05:27.080 --> 05:31.800
+be able to build this child machine that will learn just like a human child, and he will
+
+05:31.800 --> 05:33.440
+get full intelligence.
+
+05:33.440 --> 05:38.880
+And this was in 2009 that I was reading this paper, and it's like, where is that machine?
+
+05:38.880 --> 05:40.680
+Why is it anyone built it?
+
+05:40.680 --> 05:41.680
+Nice.
+
+05:41.680 --> 05:46.040
+And so, throughout college, so I ended up doing a bunch of different startups, and ended
+
+05:46.040 --> 05:49.840
+up transferring, so I started out Harvard and I was there for a year and a half for going
+
+05:49.840 --> 05:50.840
+to MIT.
+
+05:50.840 --> 05:54.240
+I was there for a semester and a half before leaving to go work on Stripe, where I was
+
+05:54.240 --> 05:59.280
+the CTO for five years, and built that from four people to 250 employees, it's now around
+
+05:59.280 --> 06:00.760
+a thousand or so.
+
+06:00.760 --> 06:04.600
+And kind of, for me, the goal has always been to work on AI.
+
+06:04.600 --> 06:07.800
+It was just a question of when and the right way of doing it.
+
+06:07.800 --> 06:12.800
+And while I was working in the startup world, if you read hacker news and you look at what's
+
+06:12.800 --> 06:17.680
+what's happening, you see all these articles and deep learning does X, deep learning for
+
+06:17.680 --> 06:23.440
+Y, and the thing that was very unclear to me from the outside was substance or hype.
+
+06:23.440 --> 06:28.240
+And I'd actually done some similar investigation on Bitcoin, from the outside, Bitcoin similarly
+
+06:28.240 --> 06:32.600
+is something where there's a lot of people talking about it as substance or hype and had
+
+06:32.600 --> 06:37.520
+really done a deep dive and kind of concluded that this was 2014 vid, that it was kind of
+
+06:37.520 --> 06:40.800
+people weren't really focused on the right things, that if people were focused on just
+
+06:40.800 --> 06:44.600
+kind of speculation, not about building products, delivering value, you know, still might
+
+06:44.600 --> 06:50.240
+be the case that Bitcoin will succeed, but I had a very different observation when
+
+06:50.240 --> 06:53.000
+it came to deep learning and AI and what was happening.
+
+06:53.000 --> 06:56.880
+And I realized that a lot of my smartest friends from college were now in the field and that
+
+06:56.880 --> 07:01.760
+things were starting to work in a very real way and solve tasks that you just couldn't
+
+07:01.760 --> 07:07.760
+have solved another way. So the fact that things are actually happening, you can actually
+
+07:07.760 --> 07:12.720
+build systems, the kind of real world application and that it's also still very much at the
+
+07:12.720 --> 07:19.760
+very beginning of the S curve. For me, it was very clear that the moment is now and I was
+
+07:19.760 --> 07:24.040
+talking to a bunch of people in the field, I was talking to Sam Altman and he put together
+
+07:24.040 --> 07:29.720
+this dinner with Elon Musk and Ilya Setskiver and some others and the focus of this dinner
+
+07:29.720 --> 07:35.320
+was clear that things are happening, things are moving very quickly. How can we best have
+
+07:35.320 --> 07:39.720
+a positive impact? How can we help ensure that this plays out in the best possible way?
+
+07:39.720 --> 07:45.000
+Because AI is just going to be the most transformative technology that humans ever create and just
+
+07:45.000 --> 07:49.160
+having some, you know, any kind of contribution to making that play out better is the most
+
+07:49.160 --> 07:55.560
+worthwhile thing that I can imagine. And the conclusion was that it seems like it's not
+
+07:55.560 --> 08:00.720
+too late. It's not impossible to build a lab with a lot of the strongest researchers in
+
+08:00.720 --> 08:06.520
+the field, especially if you focus it on this goal of this technology. It's not enough
+
+08:06.520 --> 08:09.800
+just to build it. You also need to think about how do you make sure it actually benefits
+
+08:09.800 --> 08:16.680
+everyone? And so we had that as our hypothesis and you know, I at the time had left striped
+
+08:16.680 --> 08:21.320
+a couple months earlier and said, well, I'm going to go full time on trying to make this happen.
+
+08:21.320 --> 08:28.320
+So we put together a team and in December of 2015, launch at NIPS announced that we existed
+
+08:28.320 --> 08:35.720
+and since then have been working on going from zero to pushing the envelope of what is
+
+08:35.720 --> 08:42.600
+possible in this field. Yeah, yeah. And for those who aren't familiar with OpenAI as an
+
+08:42.600 --> 08:46.840
+organization, you know, what does it look like today in terms of the number of researchers
+
+08:46.840 --> 08:54.640
+and what's the model? Like you see folks that are affiliated with OpenAI that are affiliated
+
+08:54.640 --> 08:59.120
+at other places as well? How things played out, you know, since then?
+
+08:59.120 --> 09:04.320
+Yeah, so we tend to think of ourselves as cherry picking the best parts of academia and
+
+09:04.320 --> 09:09.520
+the best parts of industry towards a very focused goal. And OpenAI at the end of the day
+
+09:09.520 --> 09:13.960
+is a serious play to build general intelligence and make sure that it plays out well for society
+
+09:13.960 --> 09:19.200
+plays out in a safe way. And to do that, we don't know how to build something like general
+
+09:19.200 --> 09:23.480
+intelligence today. So you need to do fundamental research, you need to push the elements of
+
+09:23.480 --> 09:27.280
+what's possible, but it's also the case that field has really transitioned from being
+
+09:27.280 --> 09:33.520
+an individual sport to being a team sport. Really just this year, and maybe in 2016, you
+
+09:33.520 --> 09:40.520
+were able to start using large clusters of machines much more productively in 2012. Google
+
+09:40.520 --> 09:45.320
+had the Katner on, which is 16,000 cores, but we're able to be surpassed by two grad
+
+09:45.320 --> 09:50.720
+students on the GPU and a 2GPUs. And today, that's a very different story where you have
+
+09:50.720 --> 09:55.920
+people training images of 10 minutes on 1024 GPUs. And so when you look at something like
+
+09:55.920 --> 10:00.240
+our Dota project, which we'll talk about in a bit, which really require this team of
+
+10:00.240 --> 10:04.000
+people with engineering backgrounds, with research backgrounds, all coming together towards
+
+10:04.000 --> 10:08.520
+a shared goal. And so the way that we structure ourselves is that we have a few different
+
+10:08.520 --> 10:11.800
+teams internally. So we have a robotics team, we have a Dota team, we have a few other
+
+10:11.800 --> 10:16.400
+teams. And people, we have the full mix of skill sets that are required to accomplish
+
+10:16.400 --> 10:21.720
+a goal within those teams. We also have infrastructure team that is more of a horizontal team that
+
+10:21.720 --> 10:26.120
+supports the work of all these different teams and accelerates the work of those teams.
+
+10:26.120 --> 10:29.680
+And one thing that we're increasingly seeing is collaborations amongst the teams, which
+
+10:29.680 --> 10:34.720
+ends up being a really powerful thing, where we can take code from Dota and use it for
+
+10:34.720 --> 10:39.520
+robotics. And it really accelerates what's possible there.
+
+10:39.520 --> 10:45.840
+And can you speak a little bit to the, you know, the open aspect of open AI? It's, you
+
+10:45.840 --> 10:51.480
+know, clearly something that was important to you in setting out on this journey. But
+
+10:51.480 --> 10:57.160
+at the same time, there's been some critique of the level of openness at open AI. And there's
+
+10:57.160 --> 11:02.040
+still some things that, you know, I think you're, you know, clearly publishing a lot of research,
+
+11:02.040 --> 11:06.040
+but folks have asked, you know, are you publishing, could you be doing more in terms of publishing
+
+11:06.040 --> 11:09.320
+data sets and things like that? You know, how do you think of that?
+
+11:09.320 --> 11:13.160
+I think that's a great question. And I think that that's one misconception that people
+
+11:13.160 --> 11:17.960
+have had since the beginning of open AI is I think people have put kind of a narrative
+
+11:17.960 --> 11:21.680
+that's very different from what we're trying to do. And I think it's, it's a really good
+
+11:21.680 --> 11:29.680
+thing to ask about. So the goal of open AI is to ensure that the world post general intelligence
+
+11:29.680 --> 11:36.000
+is good for humans. And along the way, it's really important as, as a organization that,
+
+11:36.000 --> 11:43.560
+that we both, like one thing that we think about a lot is what we can do to both accelerate
+
+11:43.560 --> 11:48.320
+our organization, but then also things that we can do to help accelerate the field and
+
+11:48.320 --> 11:53.080
+things that we can do to deliver value to the world generally. And the, the last one ends
+
+11:53.080 --> 11:57.640
+up playing out on multiple time scales. So there's very short time scale work that you
+
+11:57.640 --> 12:02.120
+can do. Like, for example, today we, we published, we released a few more algorithms in our
+
+12:02.120 --> 12:07.520
+baselines project where we have, we've done high quality implementations of all the standard
+
+12:07.520 --> 12:11.480
+reinforcement learning algorithms. So now, rather than people having to, and basically
+
+12:11.480 --> 12:15.440
+end up with a bad baseline, that then they say, oh, my new method is better than this one,
+
+12:15.440 --> 12:20.560
+you can just take the work that we've done to, to well tune all of these baselines and
+
+12:20.560 --> 12:25.560
+use that. And so that's a short timeline delivering a value. The thing that we really
+
+12:25.560 --> 12:30.160
+are trying to do is a much longer timeline, right? It's really about building an organization
+
+12:30.160 --> 12:34.640
+that can be at the forefront of this research and to actually be able to steer how it plays
+
+12:34.640 --> 12:41.480
+on society. And so to do that, it's not as simple as just take the work that you do in
+
+12:41.480 --> 12:45.440
+real time and toss it over the fence or you know, put it up on GitHub. I think it requires
+
+12:45.440 --> 12:49.600
+something much more thoughtful. And so I guess a lot of how we think about it is that
+
+12:49.600 --> 12:55.640
+opening I will be a success if you fast forward five, 10 years or two, whenever you're, whenever
+
+12:55.640 --> 12:59.600
+the, the appropriate checkpoint is, and you look back and you say that the amount of
+
+12:59.600 --> 13:06.080
+value that we delivered over the long timeframe was the max that we could have. And some
+
+13:06.080 --> 13:10.200
+of that I think is in the short run, it means that you don't necessarily publish or release
+
+13:10.200 --> 13:15.160
+code to the maximum extent that we possibly could. That is always made with the choice
+
+13:15.160 --> 13:19.300
+of because we think that we're going to be able to better deliver value over the long
+
+13:19.300 --> 13:26.320
+run. And specifically, meaning, you know, they're clearly publishing code has a cost
+
+13:26.320 --> 13:31.160
+to it, has resources that are associated with it, but even more so, you know, once you
+
+13:31.160 --> 13:36.120
+publish it, there's some, you know, rightly or wrongly expectation of maintaining that
+
+13:36.120 --> 13:41.760
+over time that also has a cost and all of that, those accumulated costs, you know, potentially
+
+13:41.760 --> 13:47.200
+slow the organization down or kind of, you know, require ongoing resources that specifically
+
+13:47.200 --> 13:52.080
+the, the thinking or is that just part of it? So that is, that is a real one for sure,
+
+13:52.080 --> 13:56.520
+right? And again, like one weird thing about this field is that the technologies that are
+
+13:56.520 --> 14:00.800
+being developed are ones that are very desired by big companies, right? Yeah. Look at the
+
+14:00.800 --> 14:04.600
+Googles and the Facebooks and therefore, massive amounts of resources in this. And so
+
+14:04.600 --> 14:10.240
+they actually have an impact as a nonprofit, which, you know, we're resourced, but it's
+
+14:10.240 --> 14:15.040
+very different from the level of resourcing that you would see at one of those companies
+
+14:15.040 --> 14:19.040
+that you really have to answer the question, what is it that I'm going to do that is the
+
+14:19.040 --> 14:23.480
+differential impact? How can I make the most, get the most bang for my buck, make sure
+
+14:23.480 --> 14:28.880
+that sort of the differential impact of this organization existing is as large as possible?
+
+14:28.880 --> 14:33.480
+And so that means that having a large open source project that lots of people are using
+
+14:33.480 --> 14:39.040
+is very, very valuable, but there are lots of other people who would do the same thing
+
+14:39.040 --> 14:43.080
+and where it's sort of, it's much more, you look at TensorFlow, right, that that's something
+
+14:43.080 --> 14:46.240
+that's great for Google because lots of people are using their tools, means that when
+
+14:46.240 --> 14:50.760
+they hire people that they're using the same platform. And so the incentive exists for
+
+14:50.760 --> 14:55.400
+the big companies to do that. And I think the thing that that we view as unique to us is
+
+14:55.400 --> 15:00.800
+really thinking about this AGI problem and thinking about how do you make sure that when
+
+15:00.800 --> 15:04.840
+it comes to, you know, there's kind of two problems that are really core to AGI. The
+
+15:04.840 --> 15:08.120
+first is, well, you're going to be building this really powerful system, right? You should
+
+15:08.120 --> 15:12.680
+imagine you basically are going to train like the goal, you know, general intelligence,
+
+15:12.680 --> 15:16.320
+like how should you even think about that? What even is it? It's going to be a system,
+
+15:16.320 --> 15:19.280
+I think, for the purposes of this conversation, we should define it as a system which can
+
+15:19.280 --> 15:24.600
+perform any economically valuable task as well as a human. And so if you can build that,
+
+15:24.600 --> 15:28.480
+first of all, to train it is going to require a lot more compute than to actually run it.
+
+15:28.480 --> 15:31.800
+You know, let's say that you're going to need a bunch of agents that each one of those
+
+15:31.800 --> 15:35.600
+agents is going to run much faster than real time in order to train. And so you should
+
+15:35.600 --> 15:38.880
+kind of think of whatever system you're going to build, well, there's going to be this massive
+
+15:38.880 --> 15:42.760
+data center. It's just going to be sitting idle while you're running your single AGI. And
+
+15:42.760 --> 15:46.880
+so really, you're going to have the ability to run lots of them from day one. And so you
+
+15:46.880 --> 15:51.840
+should kind of think of the thing you're going to build as this organization of the most
+
+15:51.840 --> 15:55.320
+competent person you've ever met that are all working together in concert towards a shared
+
+15:55.320 --> 15:59.600
+goal with no ego. And so, you know, it's going to be a pretty powerful system. And, you
+
+15:59.600 --> 16:04.640
+know, today we have lots of, we have lots of companies that are organizations of people
+
+16:04.640 --> 16:08.880
+and are able to accomplish pretty, pretty wild things. And I think if you can do build
+
+16:08.880 --> 16:13.160
+the kind of system, I just described that it's really hard to see what the limits of
+
+16:13.160 --> 16:17.000
+those of that's going to be. And so the first thing you have to ask is, is it going to
+
+16:17.000 --> 16:22.360
+do what we want at all? And this is what is referred to as, you know, technical safety
+
+16:22.360 --> 16:28.080
+and a problem that that we work on. So one one step towards the solving the technical
+
+16:28.080 --> 16:32.800
+safety side that we've done is this human future feedback project and collaboration
+
+16:32.800 --> 16:37.680
+of the mind. And the idea is that the core problem on technical safety is that you need
+
+16:37.680 --> 16:42.800
+to be able to specify goals. The AI somehow needs to listen to you. It needs to reflect
+
+16:42.800 --> 16:47.840
+human values. It needs to, you know, sort of do what humans want in some pretty deep way.
+
+16:47.840 --> 16:52.240
+So there needs to be humans in the training process somewhere. And the human feedback project
+
+16:52.240 --> 16:56.680
+that we worked on is this first step in this direction where a human labeler is shown
+
+16:56.680 --> 17:01.600
+two videos of a behavior. And they just click on which behavior is more like the one
+
+17:01.600 --> 17:05.720
+that they want. And we're able to show that with 500 bits of feedback that you're able
+
+17:05.720 --> 17:10.560
+to train an AI to view some back flips. So that's step one. This kind of work is something
+
+17:10.560 --> 17:13.920
+we think is really important. And it's a little bit taboo to talk about the field, right?
+
+17:13.920 --> 17:18.040
+The idea that, yeah, you could build these systems. They're going to do anything crazy.
+
+17:18.040 --> 17:22.160
+And I totally understand why, right? I think that there's several motivations for that.
+
+17:22.160 --> 17:25.480
+One is that the field has gone through these these hype cycles of booms and busts and
+
+17:25.480 --> 17:29.840
+winters and that to really think through the, well, what if this all succeeds? What
+
+17:29.840 --> 17:35.280
+if it works is something where if you're just going to go through another cycle of that,
+
+17:35.280 --> 17:38.480
+then there's really no point. And there's a second thing, which is that I think people
+
+17:38.480 --> 17:43.680
+really reason from what the computers that they can do, right? You take your Pascal GPU
+
+17:43.680 --> 17:48.480
+and sure you can train a great image classifier, but are you going to be able to train anything
+
+17:48.480 --> 17:52.680
+better than that? And the answer is, well, not really. But there's really two things
+
+17:52.680 --> 17:57.720
+that are changing that I think people don't see that are going to really accelerate the
+
+17:57.720 --> 18:01.280
+kinds of models that we can run. The first one of these I alluded to earlier, which
+
+18:01.280 --> 18:06.080
+is the fact that you can now use data center scale in order to get better performance.
+
+18:06.080 --> 18:12.640
+And again, this is 2012, basically two GPUs. You get severely diminishing returns beyond
+
+18:12.640 --> 18:17.960
+that. That's say, to the art 2014, you could do a GPU training and that seemed great.
+
+18:17.960 --> 18:24.120
+And just this year, Facebook did 256 GPUs, ImageNet one hour, and someone else just did 10,
+
+18:24.120 --> 18:29.200
+24 GPUs, ImageNet 15 minutes. And so you get this massive scaling of the kinds of models
+
+18:29.200 --> 18:35.040
+that we can run, the kinds of systems we can train. The second one, which is the acceleration
+
+18:35.040 --> 18:40.360
+of the neural net hardware. And if you look at everything up to 2016, it's actually very
+
+18:40.360 --> 18:44.200
+smoothly Moore's Law, even though it's not driven by the same factors as Moore's Law,
+
+18:44.200 --> 18:48.560
+which is pretty remarkable. So if you look, you can actually look in, there's this diagram
+
+18:48.560 --> 18:53.240
+from Ray Kurzweil's book where the data cuts off at 1998. And he just fits a double exponential
+
+18:53.240 --> 19:00.400
+to it and predicts exactly, basically, exactly correctly, the 2016 Pascal GPU is right on
+
+19:00.400 --> 19:04.760
+the curve that's predicted from this data just cutting off at 1998. And so very smooth
+
+19:04.760 --> 19:09.640
+Moore's Law all the way through. But this year's something weird happened. This year,
+
+19:09.640 --> 19:14.240
+we ended up with an order of magnitude increase in the number of flaps available for running
+
+19:14.240 --> 19:18.440
+neural nets. You know, these numbers are all public. So there's the Volta up at my head.
+
+19:18.440 --> 19:24.600
+So 2016 Pascal GPU is like 20 Teraflops. The Volta came out this year is more like 90
+
+19:24.600 --> 19:29.720
+Teraflops. And Google TPU 2.0 is more like 180 Teraflops. And so there's really this
+
+19:29.720 --> 19:36.600
+explosion this year. And the thing is, we really expect this kind of acceleration of the
+
+19:36.600 --> 19:41.400
+compute available for neural nets in a small compact package to continue to accelerate
+
+19:41.400 --> 19:46.480
+much faster than Moore's Law. And it's a very simple reason. The reason is that you
+
+19:46.480 --> 19:52.960
+can, the neural networks are very, very parallel. And just like the brain is this big network
+
+19:52.960 --> 19:56.480
+of, you know, just a bunch of tiny little cores, they're all talking to each other. And
+
+19:56.480 --> 20:01.920
+there's some learning rule and there's some propagation rule. And the way that we've
+
+20:01.920 --> 20:06.200
+always designed hardware is much more for serial execution. No one's really had this incentive
+
+20:06.200 --> 20:10.040
+to design this massively parallel hardware before. And so there's a lot of low hanging
+
+20:10.040 --> 20:14.320
+free. You don't need to invent any novel technology. You can just use, you don't have to rely
+
+20:14.320 --> 20:18.320
+on transistors getting smaller in order to get these speedups. And so if you combine these
+
+20:18.320 --> 20:22.680
+two things, data center scale with faster neural network accelerators, suddenly the compute
+
+20:22.680 --> 20:27.160
+available for any of our models is going to really skyrocket. And so that's kind of
+
+20:27.160 --> 20:32.840
+the perspective that we have is that things are going to be different as a result of the
+
+20:32.840 --> 20:37.800
+hardware coming online. Timelines are always tricky to predict exactly. But I think that
+
+20:37.800 --> 20:43.040
+we're going to see even just next year, I think if you just look at what we could do
+
+20:43.040 --> 20:47.440
+a year ago and what you can look at right now with respect to image generation with respect
+
+20:47.440 --> 20:52.600
+to voice generation, I think in 2018, as long as we continue to see the compute coming
+
+20:52.600 --> 20:57.840
+online and the way that we expect that we should be able to have perfect video generation,
+
+20:57.840 --> 21:02.600
+we should be able to have basically perfect speech synthesis as well. And this kind of
+
+21:02.600 --> 21:07.120
+this kind of acceleration in terms of the capabilities is going to be really tied to, well, we have
+
+21:07.120 --> 21:12.240
+all these ideas, these models, but we need the compute in order to run them. And as long
+
+21:12.240 --> 21:16.480
+as we get that compute that I expect to continue to see the capabilities increase and lock
+
+21:16.480 --> 21:21.080
+stuff, that's thing number one that's really important. Thing number two that is extremely
+
+21:21.080 --> 21:27.000
+important is the question of, okay, so let's say you build an AGI, it does what humans want
+
+21:27.000 --> 21:32.600
+to reflect humans values. So who's values, right? And who are the people who get to specify
+
+21:32.600 --> 21:36.920
+what this AI should want? And that's a much harder problem, right? The first one is a technical
+
+21:36.920 --> 21:40.920
+problem. That sounds like a thing where, you know, if it, you know, as these systems
+
+21:40.920 --> 21:44.720
+play out, we're very good at solving technical problems. If you can actually build this kind
+
+21:44.720 --> 21:48.360
+of very powerful system, like there's good reason to believe that we put in the effort
+
+21:48.360 --> 21:52.520
+you should also be able to make it safe and solve that technical side. It's not easy,
+
+21:52.520 --> 21:56.680
+but you have to really want it. You have to really try to solve that problem, but it seems
+
+21:56.680 --> 22:00.840
+like a thing that is solvable. The thing that's much harder is this non-technical problem
+
+22:00.840 --> 22:05.680
+of who owns it and who specifies the goals. And that that is something that is also very
+
+22:05.680 --> 22:10.480
+core to open AI and how we think about the value that we're delivering. And that we really
+
+22:10.480 --> 22:16.720
+want this technology to be something that is not just benefiting one corporation, one person,
+
+22:16.720 --> 22:21.280
+even one small subset of people. We really want this to be something that is benefiting
+
+22:21.280 --> 22:26.960
+the world. And we have ideas around the right way for that to play out. But I guess when
+
+22:26.960 --> 22:31.120
+it comes to how do we think about open, that's exactly how we think is solving those two
+
+22:31.120 --> 22:36.200
+problems. If we can do that, then that is the most important thing any of us could imagine
+
+22:36.200 --> 22:43.200
+doing. On that latter point in terms of whose values are those things that you have ideas
+
+22:43.200 --> 22:48.240
+about but haven't turned into projects that are you doing? Are there public projects that
+
+22:48.240 --> 22:51.760
+you've been working on that speak to that second item?
+
+22:51.760 --> 22:55.320
+Yeah, so it's something we spend a lot of time thinking about. I think that we haven't
+
+22:55.320 --> 23:00.240
+yet done public speaking about our thoughts there, but a lot of what we've been spending
+
+23:00.240 --> 23:04.480
+time doing has been building relationships with a lot of people in the field, a lot of
+
+23:04.480 --> 23:09.080
+people in governments, a lot of people just in various positions who I think will end
+
+23:09.080 --> 23:14.080
+up being influential with respect to how this technology plays out. And this kind of,
+
+23:14.080 --> 23:19.560
+I think it really is trying to lay the groundwork for where we hope things to go.
+
+23:19.560 --> 23:23.920
+One of the themes that kept coming up as you were speaking was this notion of like a timeline
+
+23:23.920 --> 23:32.840
+or time frame for AGI. Do you have one that you kind of manage to or is there general
+
+23:32.840 --> 23:39.160
+agreement within open AI and the community as to, you know, when we think AGI is going
+
+23:39.160 --> 23:44.360
+to happen or even the time scale and maybe has some context for this. I don't think I've
+
+23:44.360 --> 23:49.160
+told this story on the podcast before maybe I have, but relatively recently I was with
+
+23:49.160 --> 23:53.880
+some fellow entrepreneurs talking about we're just kind of catching up and someone pushed
+
+23:53.880 --> 23:59.360
+me on, hey, so, you know, on this AI safety issue, they didn't use those words, but like
+
+23:59.360 --> 24:04.680
+are you a Mark Zuckerberg or are you an Elon Musk? You know, and I tend to answer that
+
+24:04.680 --> 24:08.440
+question like, well, you know, it's kind of in the middle, I think, you know, there's
+
+24:08.440 --> 24:12.680
+a lot of sensationalism, but he kept pressing, pressing, pressing for me to answer. And
+
+24:12.680 --> 24:16.960
+one of the things that occurred for me in thinking about this was that, you know, if I think
+
+24:16.960 --> 24:23.360
+about who Elon Musk is, his time frame is probably way longer than mine, right? You know,
+
+24:23.360 --> 24:28.680
+the guys like building rocket ships, he's thinking long term, right? And I tend to answer
+
+24:28.680 --> 24:35.560
+that question in terms of, you know, I think people really over, over blow what, you know,
+
+24:35.560 --> 24:41.160
+is likely to happen in 10 years, right? And so I wonder, you know, with that as context,
+
+24:41.160 --> 24:47.680
+like how do you think about the world, you Greg and, and open AI more generally in terms
+
+24:47.680 --> 24:51.280
+of the time frame for worrying about and thinking about these kinds of issues?
+
+24:51.280 --> 24:56.120
+Yep. Timeline is a really interesting and hard question. It is the hardest question.
+
+24:56.120 --> 25:02.040
+I think this is true for any technology. If you look at the invention of flight, people,
+
+25:02.040 --> 25:05.440
+all the experts in the field right up until flight was created, we're saying flight is
+
+25:05.440 --> 25:09.120
+for the birds, the Newton had proved that everything air flight would never happen. And then
+
+25:09.120 --> 25:12.640
+you have the right brothers during their flight just a few months later. If you look at
+
+25:12.640 --> 25:17.920
+kind of any transformative technology, it is really the case that it's hard to distinguish
+
+25:17.920 --> 25:21.480
+exactly when it will happen. I think that there's something very inherent to this because
+
+25:21.480 --> 25:26.280
+if people knew, oh, okay, here's a timeline to it, then you would just focus more, work
+
+25:26.280 --> 25:30.240
+harder, and accelerate that timeline. And so they would turn out to be inaccurate. And
+
+25:30.240 --> 25:35.480
+I think this, yeah, the way that we really think about it. So I think, I think Elias Dukowski
+
+25:35.480 --> 25:40.040
+had a good blog post where he talked about something that he did and he was listening
+
+25:40.040 --> 25:44.280
+to a bunch of AI experts saying, AGI is very, very far away. And he went up and he asked
+
+25:44.280 --> 25:48.320
+people, okay, tell me, what is the least impressive accomplishment that you're very confident
+
+25:48.320 --> 25:52.840
+is not going to happen in the next two years. And people really didn't have a good answer.
+
+25:52.840 --> 25:57.240
+And how can it be that you both have thought very, very deeply about, okay, like it's going
+
+25:57.240 --> 26:00.120
+to take this long, it's going to take exactly this long. Here's where we're going to deliver
+
+26:00.120 --> 26:04.680
+it. And also don't have a, okay, here's something that I'm willing to bet. This is the least
+
+26:04.680 --> 26:08.400
+impressive thing that just we're not going to do this timeline. And I think what's really
+
+26:08.400 --> 26:13.400
+going on, I agree with the conclusion that he has there, is that people don't really have
+
+26:13.400 --> 26:18.560
+a good concept of it, right? People don't really have that in general, people end up picking
+
+26:18.560 --> 26:24.400
+with their gut rather than through having like really rational, here's exactly the factors
+
+26:24.400 --> 26:26.920
+that are going to enable it. And here's why we're not going to be able to do it in the
+
+26:26.920 --> 26:31.600
+near term. Besides the fact that, well, I look at what my, you know, I look at my, my
+
+26:31.600 --> 26:35.920
+dumb AI agent where I'm trying to get this thing to even be able to tell a cat from a dog
+
+26:35.920 --> 26:40.080
+and can you imagine trying to build something as smart as me, like, you know, it's just
+
+26:40.080 --> 26:45.520
+this disconnect. And so the way that we think about it is that we certainly know that
+
+26:45.520 --> 26:48.760
+some things are going to be changing. And I think that specifically the hardware is
+
+26:48.760 --> 26:53.080
+going to change in a way that people are not expecting right now. And it is faster
+
+26:53.080 --> 26:56.680
+than more so is not something that people price into there. They're internal sense of
+
+26:56.680 --> 27:01.720
+what's happening. And there's a question of how far does that take you on what timeline
+
+27:01.720 --> 27:05.160
+does it take you there? And the thing that's important to us as an organization is that
+
+27:05.160 --> 27:09.840
+regardless of what the timeline ends up being, that we are able to have the influence that
+
+27:09.840 --> 27:13.720
+we want, that we're able to ensure that this thing plays ends up playing out well. And
+
+27:13.720 --> 27:18.440
+the second part to that is that, well, you can also say, so you don't know when the super
+
+27:18.440 --> 27:22.160
+transformative stuff is going to happen. But you can say something about what is going
+
+27:22.160 --> 27:26.000
+to happen in the near term, what is going to happen over the next five years. And again,
+
+27:26.000 --> 27:31.280
+it's very clear we're going to be able to do synthesis of perfect videos. You know,
+
+27:31.280 --> 27:35.120
+you look at what's the 2020 presidential campaign going to look like when you're able
+
+27:35.120 --> 27:40.800
+to generate the kinds of videos that we already see we can, we're very, very close to being
+
+27:40.800 --> 27:47.640
+able to do. There are a bunch of technologies. Robotics is a perfect example where today
+
+27:47.640 --> 27:53.560
+there's been some, you know, there's been results of learning on robots. But that none of
+
+27:53.560 --> 27:57.680
+the roboticists are impressed because all of the tasks that people can accomplish are
+
+27:57.680 --> 28:01.640
+worse than what the roboticists can already do. And so if you talk to roboticists, they
+
+28:01.640 --> 28:06.040
+say, okay, you know, come back calmly, we need to do something I couldn't do in the 70s.
+
+28:06.040 --> 28:10.280
+And that's going to change. And the moment that you change that, the moment that you have
+
+28:10.280 --> 28:15.400
+your first learning based result that blows away what was possible without learning, I think
+
+28:15.400 --> 28:19.400
+there will be a sea change. Like we've seen this in the number of other disciplines we
+
+28:19.400 --> 28:24.360
+saw it with vision pre 2012. You go to the big vision conference and there's like one
+
+28:24.360 --> 28:29.120
+neural net paper for lucky. And now there's like, basically everything is neural net's
+
+28:29.120 --> 28:33.480
+vision. Like I don't think anyone even remembers that it was, it was different. And I think
+
+28:33.480 --> 28:37.680
+that on robotics that it's pretty clear that, you know, humans aren't any smarter. We're
+
+28:37.680 --> 28:41.960
+not getting any better at, I think, through these problems and being able to program all
+
+28:41.960 --> 28:46.360
+of the rules for exactly whatever about you do and how to react. And I would say that
+
+28:46.360 --> 28:50.840
+fact that you're going to have learning come in and really change what is capable, what
+
+28:50.840 --> 28:56.040
+robots are capable of. I think it's going to be massively impactful. And so that's how
+
+28:56.040 --> 29:03.160
+we think about it is that the big goal of AGI is something where you can't know, you certainly
+
+29:03.160 --> 29:07.360
+can't know that it's close, but I also don't know that you can know that it's super far.
+
+29:07.360 --> 29:10.880
+And that we also know that there's going to be transformative applications in the
+
+29:10.880 --> 29:15.640
+mere term. And so for us, the mandate for us, the way that we operate is stay on the
+
+29:15.640 --> 29:19.280
+cutting edge, make sure that we're pushing forward and always be asking, how can we ensure
+
+29:19.280 --> 29:24.960
+that our integral over time of value delivered is as large as possible?
+
+29:24.960 --> 29:31.320
+That was a non, I'm not giving a timeline answer. Very, very well stated. But so you
+
+29:31.320 --> 29:38.800
+did give two examples of applications where you think we'll see transformative short-term
+
+29:38.800 --> 29:44.120
+things happening. One is audio and video generation and the other is robotics. Are there specific
+
+29:44.120 --> 29:52.320
+examples of kind of leading indicators or examples that are leading indicators that kind
+
+29:52.320 --> 29:56.920
+of give you the confidence that those two specific things, for example, will change pretty
+
+29:56.920 --> 29:58.520
+dramatically, pretty quickly?
+
+29:58.520 --> 30:05.200
+Yeah, so I guess on the robotics front, so we worked on robotics. And this is our goal
+
+30:05.200 --> 30:12.560
+is to be able to change and to really unlock robotics through learning methods. And
+
+30:12.560 --> 30:15.480
+it's actually interesting because the way that we think about it, the way that we work
+
+30:15.480 --> 30:24.280
+on robotics is that we are geared towards trying to build general technologies rather than
+
+30:24.280 --> 30:29.760
+trying to maximize robotic capabilities and that that steers the set of projects that
+
+30:29.760 --> 30:32.560
+we're going to work on at once or are going to pick. But I think one thing that we're
+
+30:32.560 --> 30:39.000
+really excited about is if we succeed, we stay focused on AGI, but can also enable
+
+30:39.000 --> 30:41.800
+robotics to really kick off.
+
+30:41.800 --> 30:45.840
+What's an example of those two things in opposition to one another?
+
+30:45.840 --> 30:51.000
+One perfect example is that I think that there are so many really positive applications
+
+30:51.000 --> 30:55.320
+that we're going to see in robotics over upcoming years. Like, elderly care robots are
+
+30:55.320 --> 30:59.600
+perfect example, right? That's something that I think is going to deliver value to a lot
+
+30:59.600 --> 31:03.120
+of people. It's going to really be transformative to a number of people's lives, but it's also
+
+31:03.120 --> 31:07.080
+not necessarily something that we're going to work on ourselves. The kind of thing that
+
+31:07.080 --> 31:13.320
+we want to do is to build the underlying technology that will allow that application to happen,
+
+31:13.320 --> 31:18.200
+but stay focused on pushing forward on new applications rather than productizing.
+
+31:18.200 --> 31:24.240
+Got it. So is that different than where basic research as opposed to applied research
+
+31:24.240 --> 31:26.880
+shows that is there another nuance to that?
+
+31:26.880 --> 31:32.960
+Yeah, so I'd say that we're halfway in between because when I think basic research,
+
+31:32.960 --> 31:38.640
+and I guess it might depend per field, but when I hear basic research, I think of the
+
+31:38.640 --> 31:43.120
+individual sport type research, right, of people kind of off on their own, thinking
+
+31:43.120 --> 31:46.720
+deep thoughts and coming back when they have something that seems cool.
+
+31:46.720 --> 31:53.640
+And that for us, that we really try to take results and push them to the limits of scale.
+
+31:53.640 --> 31:58.800
+And with our Dota system, that's exactly what we did where rather than just show that,
+
+31:58.800 --> 32:03.280
+hey, here's some system that can kind of work on, you know, in some toy way, actually
+
+32:03.280 --> 32:07.680
+work on a really hard task. And that I think the distinguishes it from applied research
+
+32:07.680 --> 32:13.360
+is that we focus, so solving Dota is clearly not going to be something that is going to
+
+32:13.360 --> 32:18.080
+be transformative for many people's lives and transform it to a subset of people, but
+
+32:18.080 --> 32:24.120
+not in the kind of direct impact that one would have in a more applied setting.
+
+32:24.120 --> 32:29.240
+Yeah, one of the things that I saw recently that, you know, is it a bit of an example of
+
+32:29.240 --> 32:35.640
+what you're suggesting will happen to videos. The Nvidia recently published some work
+
+32:35.640 --> 32:40.520
+using GANs to generate these synthetic celebrity faces. Did you see that one?
+
+32:40.520 --> 32:43.640
+Yeah, absolutely. That was incredible. That was incredible. Yeah, I was going to bring
+
+32:43.640 --> 32:47.080
+that up as another leading indicator of this kind of thing.
+
+32:47.880 --> 32:52.280
+Yeah, and so and we've already seen like, there's some other research. I forget if it was related
+
+32:52.280 --> 32:59.240
+to GANs or another approach where you're able to, you know, given kind of static photographs,
+
+32:59.240 --> 33:04.040
+you're able to kind of create three-dimensional and, you know, change the expression on the
+
+33:04.040 --> 33:10.280
+photographs. All of these, like the pieces are all in place, or near in place to create these
+
+33:10.280 --> 33:15.000
+perfect synthetic videos, although the full end-to-end thing isn't quite there yet.
+
+33:15.000 --> 33:18.120
+Yeah, and you know, you need to get the full end-to-end thing in place.
+
+33:18.120 --> 33:24.920
+What's that? Compute. And that's it. Is that your, it's just compute?
+
+33:24.920 --> 33:29.240
+For that particular problem, I think that our ideas are really proving out,
+
+33:29.240 --> 33:32.600
+and if we were able to run at larger scale, that we'd have a really good time,
+
+33:32.600 --> 33:38.520
+and I think that it is, I think, really important to also drill into this story around compute,
+
+33:38.520 --> 33:43.320
+because it's not as simple as just you take the code that someone already wrote,
+
+33:43.320 --> 33:47.400
+and you just run it on more GPUs, and it's magically going to solve the problem.
+
+33:47.400 --> 33:54.680
+But it's much more that it's like compute in this field is just like particle accelerators in physics.
+
+33:54.680 --> 33:59.240
+If you don't have the particle accelerator, you're just not going to discover the secrets of the
+
+33:59.240 --> 34:03.000
+universe, right? You're not going to have the breakthrough. If you have the particle accelerator,
+
+34:03.000 --> 34:07.480
+it's not just that you just, you know, somehow like the physicist is not useful, and just,
+
+34:07.480 --> 34:13.160
+you know, just translating ideas into experiments. It's that you now have this tool that
+
+34:13.160 --> 34:19.160
+fundamentally allows you to achieve the result that you were looking for, and that's really where
+
+34:19.160 --> 34:24.680
+we are on video generation, is that we have ideas that are clearly like in the right space,
+
+34:24.680 --> 34:28.600
+and maybe we need some additional tricks, maybe we need to do some additional tuning,
+
+34:28.600 --> 34:33.160
+but if we're able to run at much larger scale than we are right now, then we can actually try
+
+34:33.160 --> 34:37.240
+out these ideas that we have. And I think that the converse is also true, that is that if,
+
+34:37.800 --> 34:42.200
+for whatever reason, we were to freeze the level of compute that is available for run these models,
+
+34:42.200 --> 34:50.040
+that progress would really slow down. Yeah, your earlier point about you kind of hinted at this
+
+34:50.040 --> 34:54.680
+a couple of times in the conversation, but you know, I think one of the things that contributes
+
+34:54.680 --> 35:02.440
+to our ability to, you know, predict, well, a couple of things, I think, contribute to our ability
+
+35:02.440 --> 35:08.600
+to, or the difficulty we have predicting when AGI happens is, I don't know that we've like
+
+35:08.600 --> 35:15.240
+clearly, maybe I should phrase this as a question, like how well defined do you think it even means
+
+35:15.240 --> 35:23.320
+to have achieved AGI? Like, is it absolute, or is there like a minimum viable AGI product
+
+35:23.320 --> 35:28.680
+that would suffice? Yeah, I think this is a good question. I kind of think of whatever I think of
+
+35:28.680 --> 35:33.240
+the question of how do you define AGI? What does AGI? What will AGI look like? I always think
+
+35:33.240 --> 35:38.840
+a little bit of, are you, have you heard of bike shedding as a term? Yep, absolutely. Yeah, so it
+
+35:38.840 --> 35:42.360
+always, you should explain it though. You should explain bike shedding. So the idea behind bike
+
+35:42.360 --> 35:46.200
+shedding is, so let's say that you're designing a nuclear reactor. So what you'll do is you'll
+
+35:46.200 --> 35:50.440
+bring in these, you know, experts and kind of, the experts will tell you things and honestly, like,
+
+35:50.440 --> 35:53.800
+if they tell you, like, you got to do it this way and like, this is really important,
+
+35:53.800 --> 35:57.480
+you'll probably trust them and say, okay, you do it, like, you've got a lot of experience in this,
+
+35:57.480 --> 36:01.400
+this is great, like, go off and run with it. So when it comes to, okay, we're also going to have
+
+36:01.400 --> 36:05.720
+this bike shed outside and what color should it be? Everyone's going to have an opinion, right?
+
+36:05.720 --> 36:10.520
+Everyone feels like they are an equally qualified expert to talk about bike shed colors. And I think
+
+36:10.520 --> 36:16.600
+that with intelligence, there's something similar here where we all have our own conception of
+
+36:16.600 --> 36:21.640
+intelligence, what it's like, what's hard, what it is that we do, what's going on in our heads.
+
+36:22.600 --> 36:28.920
+And so I think that the question of, okay, well, this system that you've built does this,
+
+36:28.920 --> 36:33.240
+but it doesn't do that. What is AGI going to look like? How hard is it? When is it going to arrive?
+
+36:33.240 --> 36:38.600
+I think these things end up being approached, kind of like the bike shed where everyone has their
+
+36:38.600 --> 36:44.360
+daily experience and kind of fit that to, you know, I think in one thing that is true is that
+
+36:44.360 --> 36:51.080
+no one is truly an expert in AGI, right? We haven't built it yet. And so anyone who is claiming that
+
+36:51.080 --> 36:56.200
+I've got this special knowledge, it's a little hard to take that at face value, right? You can't
+
+36:56.200 --> 37:03.240
+go to university and say like, well, I got my AGI undergraduate degree. And built five of them
+
+37:03.240 --> 37:07.720
+in the course of getting it. That's right. That's right. That's right. And so I think that, you know,
+
+37:07.720 --> 37:11.160
+the bike shedding term is like, I think kind of a negative one usually, but I view it in this
+
+37:11.160 --> 37:17.400
+almost positive way where we have such like intelligence is just so fundamental to us and who we are
+
+37:17.400 --> 37:21.320
+in this notion of what it even means to be human, that everyone has thought about this, you know,
+
+37:21.320 --> 37:27.160
+thousands of years ago people were speculating about what it would be to build a mind and what goes
+
+37:27.160 --> 37:31.960
+on inside of our own heads. And so I think it's actually kind of this marvelous thing that people
+
+37:31.960 --> 37:37.240
+care so much, but the flip side ends up being that you almost have this philosophical debate that
+
+37:37.240 --> 37:42.200
+becomes very irreducible. And so the way that I think about it is that to the extent we're just
+
+37:42.200 --> 37:46.440
+going to try to resolve philosophical questions that have been standing for 2,000 years,
+
+37:46.440 --> 37:51.880
+we are probably out of luck except to the extent that our technical progress informs us. And so,
+
+37:52.440 --> 37:58.200
+for example, we now have a much better sense of what it's going to be to build a mind than Aristotle
+
+37:58.200 --> 38:03.720
+would have. So it's not going to be some big rule-based system. It's not going to be most of the
+
+38:03.720 --> 38:07.480
+things that you might have expected. It's going to be a big statistical system. It's going to run
+
+38:07.480 --> 38:12.120
+this massive parallel fashion on a bunch of cores and, you know, you can kind of describe things
+
+38:12.120 --> 38:19.320
+like that. Is it going to be majors multiplies and taking gradients? Well, that's a different question,
+
+38:19.320 --> 38:25.240
+right? And we certainly have not resolved that yet. But I think that the question then of,
+
+38:25.240 --> 38:30.440
+okay, so what is an AGI? A lot of how I like to frame that conversation is to kind of sidestep
+
+38:30.440 --> 38:33.640
+the deep philosophical questions of do you need to have something that's conscious? Do you need to
+
+38:33.640 --> 38:37.960
+have something that kind of fulfills other notions of intelligence and really just focus on
+
+38:37.960 --> 38:45.000
+what can it do? Can you build a system that is able to accomplish any economically valuable
+
+38:45.000 --> 38:49.800
+tasks that you put in front of it? I think that is something where you can tell, right? I think
+
+38:49.800 --> 38:54.200
+that you can tell if another way of reason about this is if you took a human and you wanted to
+
+38:54.200 --> 38:58.920
+figure out is this person, again, real intelligence? Is that something that you think you could test?
+
+38:58.920 --> 39:03.400
+And this is, you know, we certainly spend a lot of time trying to assess various people's
+
+39:03.400 --> 39:07.880
+skills and capabilities on various different axes and, you know, you can almost think of it as
+
+39:07.880 --> 39:12.200
+deciding if you built an AGI as giving it a bunch of different job interviews and seeing if you
+
+39:12.200 --> 39:18.760
+want to hire it. And I think that there's that this kind of framing of there are deep philosophical
+
+39:18.760 --> 39:24.680
+questions. But at the end of the day, you can think about it instead in terms of
+
+39:25.640 --> 39:30.600
+very functional, what is the system capable of? And the latter is something we're able to do,
+
+39:30.600 --> 39:36.920
+the former is something that is fundamentally very hard. I also think that this framing really
+
+39:36.920 --> 39:43.480
+raises a second point, which is, well, is this, you know, it's a very utilitarian kind of view
+
+39:43.480 --> 39:47.240
+of the kind of system that we're talking about, the kind of things that we might might want to build.
+
+39:47.240 --> 39:53.080
+And why should we want to build something like that at all? You know, if like the really
+
+39:53.080 --> 39:56.680
+opens this Pandora's box of what does it mean to be human and what is the value of humans,
+
+39:56.680 --> 40:01.400
+how do we make sure that humans have have meaning and really a place in the resulting world?
+
+40:01.400 --> 40:06.920
+And that is, I think, the hardest problem. And that is something that is, you know, something
+
+40:06.920 --> 40:12.440
+that's very core to open AI and how we think about this technology is that it's pretty clear
+
+40:12.440 --> 40:17.080
+that, like I think, indisputable, that in a short term, that companies are pouring in tons and
+
+40:17.080 --> 40:22.920
+tons of resources in order to make advances in AI, which is different from AGI. I think that the
+
+40:22.920 --> 40:30.200
+amount of resources going to that is smaller, is more focused. But I think that as it feels closer
+
+40:30.200 --> 40:36.360
+to people, as people feel that while I look at all this progress in AI, it feels like, you know,
+
+40:36.360 --> 40:40.920
+kind of my internal neural net is telling me that this could actually happen. And then you start
+
+40:40.920 --> 40:44.760
+thinking through the economic value that would be delivered by that system and how important it
+
+40:44.760 --> 40:49.720
+could be for the next company or why company, I think that that will change. And then I think that
+
+40:49.720 --> 40:55.720
+the question is not so much about accelerating the timeline to AI, but it's really about ensuring
+
+40:55.720 --> 41:02.520
+that this technology plays out in a way that isn't just one company gets on the spoils. But
+
+41:02.520 --> 41:08.040
+it's really about humanity is ultimately the winner. Right. You know, it may turn out, we may
+
+41:08.040 --> 41:14.840
+get thrown a curveball here and it may turn out that the technologies and techniques that allow
+
+41:14.840 --> 41:21.720
+us to create AGI are totally orthogonal to the ones that, you know, we've created in the process
+
+41:21.720 --> 41:27.480
+of trying to create AI. But, you know, from where we sit now, it certainly seems like, you know,
+
+41:27.480 --> 41:32.680
+to the point of all the pieces that we discussed that go into creating these videos, like they're all
+
+41:32.680 --> 41:37.720
+kind of right in line with the kinds of problems we would expect to have to solve in order to get to
+
+41:37.720 --> 41:44.360
+an AGI. So all of that huge investment that is, you know, profit driven, if we can say, you know,
+
+41:44.360 --> 41:49.160
+on the part of the many of the companies, most of the companies that are investing in those technologies
+
+41:49.160 --> 41:55.640
+are, you know, maybe accidentally pushed us closer to this AGI. Yep. Yeah. And it's actually
+
+41:55.640 --> 42:00.920
+pretty interesting that there's this classic mantra in the field that as soon as you're able to do
+
+42:00.920 --> 42:06.840
+it, it isn't AI anymore. And people said this about chess. Right. The chess is the most important
+
+42:06.840 --> 42:11.240
+thing. And that only, you know, some people are solving the thing. Exactly. And it turned out,
+
+42:11.240 --> 42:15.720
+all of that stuff, once it happened, people are like, ah, that's not AI. I think that this is dead.
+
+42:15.720 --> 42:21.720
+I think that this way of people reacting to things we're able to do is now different. And you will
+
+42:21.720 --> 42:27.960
+get, AlphaGo, you will get Dota. And for these systems, there really is something going on in them
+
+42:27.960 --> 42:36.600
+that is very akin to intuition is much deeper than simply performing some big search. And being
+
+42:36.600 --> 42:43.960
+very dumb and making up for that dumbness with just having your massive brain. And you think about
+
+42:43.960 --> 42:49.640
+the image generation that came from NVIDIA. And that's something where humans can't even sit down
+
+42:49.640 --> 42:55.000
+and start to think about how you could write the rules for it. And so I think this is a very
+
+42:55.000 --> 42:59.320
+encouraging thing. And I think that there is a, there's, there's kind of this, this piece to it,
+
+42:59.320 --> 43:05.880
+which is what's really going on right now is that if you look at the problem of trying to recognize
+
+43:05.880 --> 43:11.000
+a cat or dog in an image, trying to recognize objects and images, that the space of image is
+
+43:11.000 --> 43:17.240
+the super complicated, very high dimensional space. This is a high dimensional manifold. It's,
+
+43:18.040 --> 43:22.760
+there's this fundamental complexity in that domain. And so for the human to write down all the
+
+43:22.760 --> 43:28.520
+rules for that would be a pretty massive undertaking. And so what we've built is that we have these
+
+43:28.520 --> 43:33.400
+systems which are able to absorb the complexity of the domain and able to kind of figure themselves
+
+43:33.400 --> 43:37.400
+around and that you've got this neural network that's got these millions of parameters. And that's
+
+43:37.400 --> 43:41.080
+just not something that exists in the natural world. It's not something that we're used to.
+
+43:41.080 --> 43:47.000
+And it's able to reconfigure itself and to, to really absorb all of the inherent,
+
+43:47.000 --> 43:55.960
+that inherent complexity. And I think that the, a building to do that is what really distinguishes
+
+43:55.960 --> 44:02.600
+this learning revolution from AI previously. And now it might turn out that there are limits to
+
+44:02.600 --> 44:06.680
+what we can do with our learning algorithm. But it's also kind of crazy that the learning algorithm
+
+44:06.680 --> 44:14.840
+we use backpropagation is developed in 1986. How can it be that this algorithm and really
+
+44:14.840 --> 44:20.120
+neural nets and some ways date back to even maybe the 60s, maybe the 40s depending on how you count
+
+44:20.120 --> 44:25.000
+that these very simple, very obvious ideas that you couldn't run on your, you know, your particle
+
+44:25.000 --> 44:28.840
+accelerators if you, if you will, you didn't have the parts of accelerators to run the experiments.
+
+44:28.840 --> 44:33.000
+But these simple ideas turned out to be so powerful. And I think there's something really
+
+44:33.000 --> 44:38.920
+fundamental there that I can't decide between two different explanations. One is that intelligence
+
+44:38.920 --> 44:44.280
+is fundamentally simple that there's a, you know, I can, I can kind of back explain some explanation
+
+44:44.280 --> 44:49.880
+of well, if you had something that was complicated, then it would have a very large prior. And so
+
+44:49.880 --> 44:53.880
+you're kind of making this prior. And so yeah, you shouldn't expect it to be very general. The more
+
+44:53.880 --> 44:58.280
+depressing version of this is that well, maybe we're just really bad at making anything complicated work.
+
+44:58.280 --> 45:05.080
+But if it's the first, and I think there's a lot of evidence that really indicates that it is the
+
+45:05.080 --> 45:10.280
+first, then I think that's very encouraging that the simple ideas, if you implement them correctly,
+
+45:10.280 --> 45:14.520
+the mathematics, if the mathematics works, right, if the math kind of points in the right direction,
+
+45:14.520 --> 45:18.520
+if you implement it correctly, you scale it up massively, then you're going to be able to get
+
+45:18.520 --> 45:23.800
+things that, these will happen that you weren't expecting. And one thing that's really weird to
+
+45:23.800 --> 45:30.520
+me about the kind of progress that I see is that I've seen on repeated occasions algorithms that
+
+45:30.520 --> 45:38.280
+work better at large scale than their designers expected, right? And so we've seen this with algorithms
+
+45:38.280 --> 45:42.840
+here where talk to the person who invented it and they say, oh, no, that's not going to work for
+
+45:42.840 --> 45:48.840
+XYZ reason. And then we scaled up really large and actually works really well. And I think that this
+
+45:48.840 --> 45:53.880
+is going to, this is, again, for me as an engineer is totally contrary to experience. For me as an
+
+45:53.880 --> 45:58.920
+engineer, it's, you really only get, if you're lucky, the kind of performance that the person was
+
+45:58.920 --> 46:04.360
+intending and as soon as your 10x scale, 100x scale, good luck. Everything starts to break, right?
+
+46:04.360 --> 46:11.640
+Totally. Totally broken. Is there more to that than just more data and more data, you know, fixing
+
+46:11.640 --> 46:18.520
+more problems in terms of, or more data basically covering for our lack of sophistication in the
+
+46:18.520 --> 46:22.680
+algorithms themselves? Yeah, so it's something like that. Though I would phrase it a little
+
+46:22.680 --> 46:28.760
+differently, which is that like I think that the algorithms that we have are fundamentally capable
+
+46:28.760 --> 46:35.240
+of absorbing all the compute and data you can throw at them. And the data question is also an
+
+46:35.240 --> 46:39.400
+interesting one because the thing that people are used to is supervised learning where you have this
+
+46:39.400 --> 46:44.520
+big static data set that encapsulates your world knowledge. But where things are really shifting
+
+46:44.520 --> 46:48.280
+is towards more of the reinforcement learning paradigm. And if you think about it, that's where you
+
+46:48.280 --> 46:52.280
+want to be, right? You want to have an environment that you're interacting with that you're able to
+
+46:52.280 --> 46:58.120
+change. You have this dynamic feedback loop going on. And there you suddenly have upgraded your
+
+46:58.120 --> 47:03.240
+environment. Like you can think of your big set of images as just a static environment. And now
+
+47:03.240 --> 47:08.600
+you've upgraded to this very dynamic world. And there suddenly you're, you sort of are able to get
+
+47:08.600 --> 47:12.920
+infinite data, or at least you can, you can spend a lot of compute to get a lot of data.
+
+47:12.920 --> 47:19.240
+If it's a video game like Dota, you can run this on many, many cores. If it's a robotic simulator,
+
+47:19.240 --> 47:24.760
+you again can spend a bunch of compute there. If it's a real world, you're in for a little bit
+
+47:24.760 --> 47:29.080
+of a harder time. And so maybe you do something like Google did with having a big arm farm.
+
+47:29.720 --> 47:34.520
+Maybe you do something else. And I think we really want to end up is that we want to end up
+
+47:34.520 --> 47:39.960
+in a place where the limiting factor is the amount of compute that we can throw at these models.
+
+47:39.960 --> 47:44.200
+And where we can have a massive generative models that have absorbed a lot of world knowledge
+
+47:44.200 --> 47:49.160
+that you're able to do things inside of that. And we can't run those models yet today. We're at the
+
+47:49.160 --> 47:54.680
+very, you know, sort of, we're at the very nascent edge of what I expect. We're going to be able to
+
+47:54.680 --> 48:00.040
+do with generative models and with this kind of approach. Model-based RL is kind of the
+
+48:00.040 --> 48:04.280
+the term, the term of art that a lot of people use. But I think that in upcoming years we will be
+
+48:04.280 --> 48:09.960
+able to see lots of progress based on these ideas of scale up, use algorithms that can absorb all
+
+48:09.960 --> 48:15.000
+the compute and that that can make up for lack of data, that can make up for lack of everything else.
+
+48:16.840 --> 48:21.560
+And what specifically does model-based RL refer to relative to just RL?
+
+48:21.560 --> 48:27.240
+Yeah. So the idea with model-based RL is that if you have a, it may be learned or maybe not
+
+48:27.240 --> 48:32.440
+learned in some way, model of the environment that you query and you can kind of explore with
+
+48:32.440 --> 48:36.680
+them. It's kind of like you as a human if you, you know, picture your house and picture walking
+
+48:36.680 --> 48:40.360
+around your house and you can kind of plan things out. You can see like, oh, if I, you know,
+
+48:40.360 --> 48:45.320
+do this, this thing will happen and then you don't actually have to go and spend the very expensive
+
+48:45.320 --> 48:49.960
+time of walking through your house. And that kind of thing, you can see it's very powerful to have
+
+48:49.960 --> 48:55.240
+this, this ability to plan and explore an imagination rather than the real environment. But again,
+
+48:55.240 --> 48:59.400
+it's all very nascent. It doesn't really work right now. And I think that it really cannot work
+
+48:59.400 --> 49:05.880
+until we have the faster computers online. One of the things you said at the very beginning of the
+
+49:05.880 --> 49:12.680
+interviews kind of stuck with me is, is interesting. And that is this idea that ultimately to train
+
+49:12.680 --> 49:19.960
+an AGI, it's going to require massive amounts of compute. But then once we train it, like the actual,
+
+49:19.960 --> 49:25.000
+you know, inference, letting that AGI, you know, be generally intelligent is going to require
+
+49:25.000 --> 49:29.880
+much less compute. And, you know, it strikes me that there are some interesting questions there.
+
+49:29.880 --> 49:34.120
+Like, what do we do with all that compute? You know, you address some of it in terms of,
+
+49:34.760 --> 49:40.200
+well, you kind of phrase it as, you know, maybe the thing that we are doing is we are running
+
+49:40.200 --> 49:47.240
+multiple instances of this AGI thing in parallel, right? So we're taking advantage of all that
+
+49:47.240 --> 49:52.920
+compute that we had to create to train it by, you know, running a bunch of these things in parallel.
+
+49:52.920 --> 50:00.360
+But it also kind of makes me wonder if maybe the AGI doesn't need to be all that general,
+
+50:00.360 --> 50:08.200
+if we're, you know, ultimately segmenting, you know, the problem space up in the end anyway.
+
+50:08.200 --> 50:11.800
+Does that question make sense? What is that? Do you see where I'm going with that?
+
+50:11.800 --> 50:17.960
+Not entirely. I guess there are two questions here. I guess one, you know, are there other
+
+50:17.960 --> 50:25.720
+implications of of this idea that you propose that, you know, we're going to have, we're going to
+
+50:25.720 --> 50:33.480
+have to build up this massive compute capability to train the AGI. And then, you know, once we've
+
+50:33.480 --> 50:37.880
+trained it, we need that compute capability less. Like, what are all the implications of that?
+
+50:37.880 --> 50:43.640
+That's one question. And then question number two is, you know, if ultimately, you know,
+
+50:43.640 --> 50:50.600
+what we end up doing is running a bunch of parallel intelligences, you know, do they all need
+
+50:50.600 --> 50:55.720
+to be general anyway? Can we have a bunch of a cluster of intelligences that, you know,
+
+50:55.720 --> 51:00.520
+are really good at thing X, a cluster of intelligence that are good at thing Y, you know, scale that out.
+
+51:00.520 --> 51:05.960
+And that is what we, that is what ultimately we start to think of as general intelligence.
+
+51:05.960 --> 51:09.560
+We just have a bunch of these less general intelligences.
+
+51:09.560 --> 51:14.680
+Yeah, it makes a lot of sense. So I said on the first one, well, so one, one thing that I think
+
+51:14.680 --> 51:21.320
+is worth thinking about is when you actually build a computer system that is autonomously generating
+
+51:21.320 --> 51:26.440
+huge amounts of revenue or value, there suddenly becomes this big incentive to make more such
+
+51:26.440 --> 51:31.800
+computer systems. Like today, if you have a big pile of money, you want to turn it into more money,
+
+51:31.800 --> 51:36.840
+well, you start a company or you invest in a company and you hire a bunch of people and those
+
+51:36.840 --> 51:41.960
+people produce economic value towards some goal and that it kind of continues the cycle. Whereas
+
+51:42.520 --> 51:48.120
+if you have a computer that is just as good as a human worker, well, then you have a big pile of
+
+51:48.120 --> 51:52.280
+money, you should build a big data center and there's going to be this big incentive to kind of
+
+51:52.280 --> 51:56.680
+dot the world with with data center. So I think that's one perspective on what happens on a
+
+51:56.680 --> 52:03.640
+computer front. I think it is possibly the case that you can take your big training data center
+
+52:03.640 --> 52:09.080
+and use all of that compute to run a single AI much faster. And so rather than imagine if you
+
+52:09.080 --> 52:16.520
+had a Einstein in Silicon that you're now able to run a thousand X real time or a million X real time,
+
+52:16.520 --> 52:20.280
+I mean, pretty good, right? You know, this person sitting around thinking about physics and
+
+52:20.280 --> 52:24.360
+thinking about you got someone in there thinking about medicine and how to cure diseases, you got
+
+52:24.360 --> 52:28.200
+someone in thinking about how should we build rockets to go to the stars and all sorts of things
+
+52:28.200 --> 52:32.680
+like that. Like that would be a pretty valuable, pretty good. It's not guaranteed that we'll be
+
+52:32.680 --> 52:39.800
+able to use all of that compute usefully in a single AI, but I think that at the very least being
+
+52:39.800 --> 52:44.280
+able to run parallel copies of these of these AI is something that we should expect. And then there's
+
+52:44.280 --> 52:49.640
+a question of, well, what would that be good for? And I guess when I think about these, I always
+
+52:49.640 --> 52:55.480
+try to make analogies to things that are in our experience today. And so in our experience today,
+
+52:55.480 --> 53:00.360
+why do we ever want to have a group of more than one human doing something? You know, it's like
+
+53:00.360 --> 53:04.360
+building companies and the tasks are hard and that you have different people that specialize in
+
+53:04.360 --> 53:09.000
+different skills and all of those things are things that we should expect would transfer to the
+
+53:09.000 --> 53:13.800
+systems of the future. And so I think it'll be very valuable. By the way, so the idea of
+
+53:13.800 --> 53:18.360
+a computer system that autonomously produces value where all the interesting stuff is done by
+
+53:18.360 --> 53:21.880
+the computers and the humans just kind of stick around and clean out the fans is something that
+
+53:21.880 --> 53:27.800
+exists today. Sounds pretty dystopic, but if you look at Bitcoin mines, that is exactly what they
+
+53:27.800 --> 53:32.360
+are. And there's a good article recently with a bunch of pictures from Chinese Bitcoin mines,
+
+53:32.360 --> 53:36.440
+which I recommend looking at if you want to think about kind of the more cyberpunk, this topic
+
+53:36.440 --> 53:42.200
+version of this stuff. And so again, there are a lot of hazards here with the technology that we're
+
+53:42.200 --> 53:48.040
+talking about building. And again, the weirdest thing for me is the fact that it's so that people
+
+53:48.040 --> 53:52.680
+don't talk about this in a serious way and that I think that the, for most technologies, when
+
+53:52.680 --> 53:57.400
+you're building them, you think about what happens if we really succeed. And I think that for
+
+53:57.400 --> 54:02.920
+partially historic reasons, partially for this, this reason that we all feel our own sense of
+
+54:02.920 --> 54:07.240
+how far off the AGI is and how hard it's going to be and how impossible this team and imagine
+
+54:07.240 --> 54:13.480
+building it that really seriously think me through what happens if it works is something that
+
+54:13.480 --> 54:19.880
+is a bit to do. So that's thing one. And then question two, can you remember your question two was?
+
+54:19.880 --> 54:27.880
+I think question two was, you know, ultimately, do we need AGI at all if the deployment model,
+
+54:27.880 --> 54:35.080
+if you will, ends up being to, or the scalability model ends up being to segment our workload into
+
+54:35.080 --> 54:42.440
+a bunch of separate things. You know, does a collection of, you know, more specialized intelligences,
+
+54:42.440 --> 54:48.280
+you know, become the thing that we initially come to see as a general intelligence?
+
+54:48.280 --> 54:53.960
+Yeah. So I think that's an open question or that's a possibility. The way that I think about it
+
+54:53.960 --> 54:59.480
+is, I guess, again, back to the idea of we have organizations of humans that can accomplish goals
+
+54:59.480 --> 55:05.320
+that humans individually cannot. And so it might well be that even though you want to put specialization,
+
+55:05.320 --> 55:11.240
+I would certainly expect that you'll end up with specialization towards specific tasks. I think
+
+55:11.240 --> 55:17.960
+that I would expect that a general AI would also have these very hyper-trained narrow AI modules
+
+55:17.960 --> 55:23.640
+within it. And you absolutely should do that. And you know, like one thing I think is kind of
+
+55:23.640 --> 55:28.040
+interesting about today's AI systems is if you look at something like the Neural Turing machine,
+
+55:28.040 --> 55:31.240
+you know, you basically spend, it was a big model, you spent a lot of compute, a lot of data,
+
+55:31.240 --> 55:35.800
+a lot of training time in order to learn how to do, how to do various tasks. For example,
+
+55:35.800 --> 55:41.720
+one of the tasks from the original paper is to learn to sort. And pretty cool, right? This system
+
+55:41.720 --> 55:46.760
+learns how to sort in, you know, it's kind of learned this program. But when you really think about it,
+
+55:46.760 --> 55:52.280
+it's like, I could do the same thing at Python on my core in like two seconds. And so at the end
+
+55:52.280 --> 55:57.160
+of the day, if you have a specific task you're trying to solve, you can hyper-optimize for that
+
+55:57.160 --> 56:02.280
+and do a lot better from a phase efficiency standpoint than this very general thing. I think
+
+56:02.280 --> 56:08.280
+something similar happens with humans where we have, like when you have to sit and think about
+
+56:08.280 --> 56:11.480
+something when you're not a master of it, and you're trying to really reason how it works
+
+56:11.480 --> 56:16.520
+versus when you've practiced a bunch and it's in your muscle memory, right? It's kind of like,
+
+56:16.520 --> 56:24.200
+this has gone to the much more efficient hot path. And I think that we'll certainly see analogs
+
+56:24.200 --> 56:31.000
+to this sort of behavior. Fair enough. We're at the top of the hour, we're beyond the top of the
+
+56:31.000 --> 56:36.120
+hour actually. And we haven't touched on the thing that I expected us to spend a bunch of time
+
+56:36.120 --> 56:42.600
+on, which is the Dota 2 project, but we covered a lot of really interesting ground in terms of
+
+56:42.600 --> 56:47.560
+AGI and what that means and what we should be thinking about. You know what I'm thinking we should
+
+56:47.560 --> 56:55.720
+do is maybe, you know, call this a part one and find some time to get together again to do part
+
+56:55.720 --> 57:01.080
+two where we dive into the work that you've done on Dota. Sounds good. All right. Perfect.
+
+57:01.080 --> 57:08.520
+Now this was a lot of fun. Really appreciate it. Yeah, same here. Greg, thank you so much.
+
+57:11.160 --> 57:17.640
+All right, everyone. That's our show for today. Thanks so much for listening and for your continued
+
+57:17.640 --> 57:23.800
+feedback and support. For more information on Greg or any of the topics covered in this episode,
+
+57:23.800 --> 57:31.800
+head on over to twimlai.com slash talk slash 74. To follow along with our open AI series,
+
+57:31.800 --> 57:38.760
+visit twimlai.com slash open AI. Of course, you can send along your feedback or questions via
+
+57:38.760 --> 57:45.320
+Twitter to add Twimlai or at Sam Charrington or leave a comment right on the show notes page.
+
+57:46.440 --> 57:51.640
+Thanks once again to Nvidia for their support of this series. To learn more about what they're
+
+57:51.640 --> 58:00.120
+doing at nips, visit twimlai.com slash Nvidia. And of course, thanks once again to you for listening
+
+58:00.120 --> 58:30.040
+and catch you next time.
+

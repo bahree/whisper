@@ -1,0 +1,2210 @@
+WEBVTT
+
+00:00.000 --> 00:16.320
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+
+00:16.320 --> 00:21.480
+people, doing interesting things in machine learning and artificial intelligence.
+
+00:21.480 --> 00:31.720
+I'm your host, Sam Charrington.
+
+00:31.720 --> 00:36.680
+In this, the final episode of our Strata Data Conference series, we're joined by Zachary
+
+00:36.680 --> 00:41.000
+Hanif, director of machine learning at Capital One.
+
+00:41.000 --> 00:45.440
+Zach led a session at Strata called Network Effects, working with modern graph analytical
+
+00:45.440 --> 00:50.160
+systems, which we had a great chat about back in New York.
+
+00:50.160 --> 00:53.680
+We start our discussion with a look at the role of graph analytics in the machine learning
+
+00:53.680 --> 00:58.600
+toolkit, including some important application areas for graph based systems.
+
+00:58.600 --> 01:02.640
+We continue with an overview of the different ways to implement graph analytics with a
+
+01:02.640 --> 01:07.960
+particular emphasis on the emerging role of what he calls graphical processing engines,
+
+01:07.960 --> 01:11.240
+which are systems that excel at handling large data sets.
+
+01:11.240 --> 01:15.560
+We also discussed the relationship between graph analytics and probabilistic graphical
+
+01:15.560 --> 01:22.960
+models, graphical embedding models, and graph convolutional neural networks in deep learning.
+
+01:22.960 --> 01:26.920
+Capital One is a long time supporter of my work in this podcast, and I'd like to spend
+
+01:26.920 --> 01:30.720
+a big shout out to them for sponsoring this series.
+
+01:30.720 --> 01:35.600
+At the NIPPS conference in Montreal this December, Capital One will be co-hosting a workshop
+
+01:35.600 --> 01:40.720
+focused on challenges and opportunities for AI and financial services and the impact
+
+01:40.720 --> 01:45.040
+of fairness, explainability, accuracy, and privacy.
+
+01:45.040 --> 01:48.840
+A call for papers is open now through October 25th.
+
+01:48.840 --> 01:54.400
+For more information on submissions, visit twimmolai.com slash C1 NIPPS.
+
+01:54.400 --> 01:57.680
+The letter C, the number one NIPPS.
+
+01:57.680 --> 02:02.480
+Also a huge thanks to our friends at Cloudera, who also sponsor this series.
+
+02:02.480 --> 02:06.840
+If you didn't catch my interview with Cloudera's Justin Norman earlier in this series, you'll
+
+02:06.840 --> 02:09.520
+definitely want to check it out.
+
+02:09.520 --> 02:14.080
+Cloudera's modern platform for machine learning and analytics, optimized for the cloud,
+
+02:14.080 --> 02:21.120
+that you build and deploy AI solutions at scale, efficiently and securely, anywhere you want.
+
+02:21.120 --> 02:26.600
+In addition, Cloudera Fast Forward Labs' expert guidance helps you realize your AI future
+
+02:26.600 --> 02:28.000
+faster.
+
+02:28.000 --> 02:33.360
+To learn more, visit Cloudera's machine learning resource center at Cloudera.com slash
+
+02:33.360 --> 02:34.880
+ML.
+
+02:34.880 --> 02:39.040
+If you're a fan of this show, please show some love to our sponsors and make sure to
+
+02:39.040 --> 02:46.600
+tell them that Twimmol sent you and now on to the show.
+
+02:46.600 --> 02:47.600
+All right, everyone.
+
+02:47.600 --> 02:52.400
+I am at Strata in New York City and I am here with Zachary Hanif.
+
+02:52.400 --> 02:57.280
+Zach is the director of machine learning at C4ML.
+
+02:57.280 --> 03:01.400
+That's the center for machine learning at Capital One.
+
+03:01.400 --> 03:03.680
+Zach, welcome to this week in machine learning and AI.
+
+03:03.680 --> 03:04.680
+Thank you for having me.
+
+03:04.680 --> 03:05.680
+It's pleasure to be here.
+
+03:05.680 --> 03:06.680
+Absolutely.
+
+03:06.680 --> 03:07.680
+Absolutely.
+
+03:07.680 --> 03:09.320
+I'm going to go back a little bit.
+
+03:09.320 --> 03:17.760
+He was a guest's presenter at the AI summit that I did in actually not even the AI summit.
+
+03:17.760 --> 03:19.760
+It was the future of data summit.
+
+03:19.760 --> 03:25.240
+It was a year and a half ago or something at this point.
+
+03:25.240 --> 03:30.640
+Why don't we start out by having you introduce yourself to the audience?
+
+03:30.640 --> 03:31.640
+Sure.
+
+03:31.640 --> 03:32.640
+No problem.
+
+03:32.640 --> 03:39.400
+As I've said, my name is Zach, I've spent probably about the last decade working inside
+
+03:39.400 --> 03:43.440
+of machine learning and large scale data analytics.
+
+03:43.440 --> 03:49.040
+The specific domain that I traditionally worked in has been in the area of security and
+
+03:49.040 --> 03:56.400
+kind of adversarial domains, so paying attention to cyber security, fraud, money laundering,
+
+03:56.400 --> 03:57.400
+all sorts of things like that.
+
+03:57.400 --> 04:02.800
+You kind of play a cat and mouse game with the entity behind your data to try and keep
+
+04:02.800 --> 04:05.000
+something safe and to keep it protected.
+
+04:05.000 --> 04:09.240
+I've been doing that for about 10 years in a variety of different contexts and for the
+
+04:09.240 --> 04:16.600
+last two, two and a half years now at Capital One, I've been a leader in Capital One Center
+
+04:16.600 --> 04:22.080
+for Machine Learning, helping Capital One kind of bring machine learning into every single
+
+04:22.080 --> 04:28.120
+corner, every little area of the business as a whole to kind of spread out the future,
+
+04:28.120 --> 04:29.120
+so to speak.
+
+04:29.120 --> 04:30.120
+Awesome.
+
+04:30.120 --> 04:31.120
+Awesome.
+
+04:31.120 --> 04:37.080
+And I interviewed Adam Wenzhel, who heads up that center not too long ago on the podcast,
+
+04:37.080 --> 04:42.360
+so for folks that want to learn more about the center and what the center is up to.
+
+04:42.360 --> 04:47.920
+We had a really great conversation about how an organization like Capital One particularly
+
+04:47.920 --> 04:53.080
+with all of the constraints that a financial services organization has, how an organization
+
+04:53.080 --> 04:58.360
+like that builds out a capability for data science and machine learning, and we'll link
+
+04:58.360 --> 05:04.960
+to that show in the show notes, but that you've got a presentation later today actually.
+
+05:04.960 --> 05:06.720
+What's the title of your presentation?
+
+05:06.720 --> 05:11.720
+So my presentation is about doing graph analytics over large data sets, and it's a survey at
+
+05:11.720 --> 05:18.480
+the end of the day of modern open source technologies and techniques for doing graph analytics
+
+05:18.480 --> 05:20.840
+and machine learning over graphs.
+
+05:20.840 --> 05:27.120
+I'll be perfectly honest, the title suddenly escapes me, Sam knows, I just got off the
+
+05:27.120 --> 05:32.120
+train coming up from the DC region, which is where I'm based out of, so my head's a little
+
+05:32.120 --> 05:33.760
+all over the place.
+
+05:33.760 --> 05:38.800
+But the talk's a whole is kind of an examination of how we use graph analytics and how I've
+
+05:38.800 --> 05:43.880
+used graph analytics in the past to solve a lot of very hairy problems, especially inside
+
+05:43.880 --> 05:48.320
+of security and cyber defense domains.
+
+05:48.320 --> 05:54.800
+Why don't we start by having you give us some examples to contextualize what motivated
+
+05:54.800 --> 05:56.680
+this look into graph analytics.
+
+05:56.680 --> 06:00.280
+What are some of the use cases where it's been helpful for you?
+
+06:00.280 --> 06:01.280
+Absolutely.
+
+06:01.280 --> 06:06.480
+So graphs are helpful really anywhere where the connectivity of your nodes, the connectivity
+
+06:06.480 --> 06:10.760
+of your data is relevant, the topology of the data is relevant.
+
+06:10.760 --> 06:17.560
+Many fields have data sets where individual records really aren't related to each other.
+
+06:17.560 --> 06:21.520
+There's a very well known trial data set, which pretty much any machine learning engineer
+
+06:21.520 --> 06:25.400
+probably deals with at least once when they're getting an understanding of how to do machine
+
+06:25.400 --> 06:27.000
+learning in a practical sense.
+
+06:27.000 --> 06:33.040
+And it's this data set of flowers, some researchers somewhere went out and collected the pedal lengths
+
+06:33.040 --> 06:38.360
+and widths and other as physical dimensions of flowers in a study in an attempt to determine
+
+06:38.360 --> 06:43.520
+whether or not machine learning could differentiate different types of flowers from each other.
+
+06:43.520 --> 06:47.720
+In data sets like that, those data sets don't really have, each element of data doesn't
+
+06:47.720 --> 06:52.920
+have a relationship with any other element outside of the class that that particular row
+
+06:52.920 --> 06:54.760
+represents.
+
+06:54.760 --> 07:00.480
+Graphs are useful in kind of the opposite area where every single, every single element that
+
+07:00.480 --> 07:06.000
+you have has a relationship or some kind of interconnectivity with other other elements
+
+07:06.000 --> 07:07.200
+in your data set.
+
+07:07.200 --> 07:11.800
+So where measurements of flowers aren't really interrelated in and of themselves, the
+
+07:11.800 --> 07:16.960
+relationships between people or the relationships between entities definitely have a great deal
+
+07:16.960 --> 07:23.160
+of contextual information embedded inside of their, the relationship itself, right?
+
+07:23.160 --> 07:29.000
+So to kind of put a fine point on it, you and I have a relationship, obviously as a result
+
+07:29.000 --> 07:33.640
+of our previous collaborations and as a result of this particular discussion here, now
+
+07:33.640 --> 07:38.200
+you and I both have individual elements of data associated just with ourselves, right?
+
+07:38.200 --> 07:43.800
+We're different people, obviously, but we are interconnected and that interconnection
+
+07:43.800 --> 07:48.560
+in and of itself contains valuable information that we can learn from, which we wouldn't
+
+07:48.560 --> 07:53.160
+be able to learn if we just simply looked at yourself or myself kind of in isolation.
+
+07:53.160 --> 07:54.160
+Does that make sense?
+
+07:54.160 --> 07:55.160
+It does.
+
+07:55.160 --> 07:59.240
+Do you make it more concrete by talking about specific business applications that you've
+
+07:59.240 --> 08:00.240
+looked at?
+
+08:00.240 --> 08:01.240
+Absolutely.
+
+08:01.240 --> 08:08.560
+Right now, my group is using graph analytics to gain a better understanding of money laundering
+
+08:08.560 --> 08:14.120
+and other financial crimes that people attempt to commit using the modern financial system.
+
+08:14.120 --> 08:18.040
+And as Capital One is very much a part of the modern financial system, we will occasionally
+
+08:18.040 --> 08:23.200
+have individuals attempt to perform criminal activity, your laundrom money or something like
+
+08:23.200 --> 08:29.040
+that, you know, inappropriately using Capital One's capabilities, right?
+
+08:29.040 --> 08:34.640
+And so our job is to utilize graph analytics to detect this kind of activity occurring and
+
+08:34.640 --> 08:39.400
+make sure that it is dealt with in an appropriate fashion so that it doesn't affect either
+
+08:39.400 --> 08:44.200
+any of Capital One's customers, anyone else in the United States financial system or doesn't
+
+08:44.200 --> 08:50.560
+pose the kind of moral and legalistic threat that the activities that generate this kind,
+
+08:50.560 --> 08:52.640
+these kind of funds can represent.
+
+08:52.640 --> 08:59.440
+Yeah, I imagine folks that are outside of the financial services industry might not have
+
+08:59.440 --> 09:06.080
+an appreciation for the amount of regulatory pressure that banks are under with regards
+
+09:06.080 --> 09:13.520
+to anti-money laundering AML, but also the amount of investment that banks make in fighting
+
+09:13.520 --> 09:14.520
+money laundering.
+
+09:14.520 --> 09:16.840
+It comes up in a lot of different areas.
+
+09:16.840 --> 09:19.640
+Yeah, it's definitely very important.
+
+09:19.640 --> 09:24.560
+Capital One's regulators have a very vested and very good interest in making sure that
+
+09:24.560 --> 09:28.840
+the financial security of the United States remains strong.
+
+09:28.840 --> 09:33.400
+And so they've definitely taken an appropriate stance in making sure that we are vigilant
+
+09:33.400 --> 09:38.160
+about making sure the activity that goes on through our bank is appropriate.
+
+09:38.160 --> 09:44.480
+And we take that responsibility very, very seriously, investing both internally and working
+
+09:44.480 --> 09:48.080
+with, you know, working collaboratively with academics and other researchers and other
+
+09:48.080 --> 09:53.400
+organizations who specialize in this to make sure that we're as correct as we can possibly
+
+09:53.400 --> 09:54.400
+be.
+
+09:54.400 --> 10:00.400
+Because I mean, there's a lot of, it's a very significant responsibility on our part.
+
+10:00.400 --> 10:04.760
+And so you found graph analytics to be useful here.
+
+10:04.760 --> 10:11.240
+When I hear graph come up, I tend to immediately think of a handful of different things on the
+
+10:11.240 --> 10:18.280
+one end of the spectrum, I think of graphical models like from a machine learning perspective,
+
+10:18.280 --> 10:21.560
+but I also think of graphical databases.
+
+10:21.560 --> 10:24.680
+It sounds like you're incorporating graphical databases for sure.
+
+10:24.680 --> 10:26.840
+Are you incorporating graphical models as well?
+
+10:26.840 --> 10:30.680
+We're actually incorporating a lot of things across that overall spectrum, right?
+
+10:30.680 --> 10:34.440
+Everything from graphical models, which would be things like obviously graphical,
+
+10:34.440 --> 10:35.440
+basic networks.
+
+10:35.440 --> 10:39.960
+There are some more modern techniques being used inside of the deep learning space for
+
+10:39.960 --> 10:42.400
+generating graphical embeddings.
+
+10:42.400 --> 10:47.560
+And of course, the traditional algorithms in the area of performing label and belief propagation,
+
+10:47.560 --> 10:48.560
+right?
+
+10:48.560 --> 10:52.040
+These are all different areas that you can apply inside of the probabilistic graph modeling
+
+10:52.040 --> 10:53.040
+space.
+
+10:53.040 --> 10:54.200
+We absolutely do do that.
+
+10:54.200 --> 10:58.480
+In addition to that, we're working not just with graph databases in the vein of say something
+
+10:58.480 --> 11:03.600
+like Neo4j or something like Titan or Janus graph, for example, we're also working with
+
+11:03.600 --> 11:10.560
+graph processing engines, such as the material inside of Giraffe, Apache Giraffe, I should
+
+11:10.560 --> 11:14.560
+say, Apache Spark, a GraphX, GraphFrames.
+
+11:14.560 --> 11:20.800
+I believe Flink even has a graph API behind it, and even some more esoteric systems as
+
+11:20.800 --> 11:21.800
+well.
+
+11:21.800 --> 11:26.320
+So we're really trying to cover the entirety of that spectrum because having a diversity
+
+11:26.320 --> 11:31.480
+in our modeling approaches really allows us to kind of explore the entire space, and
+
+11:31.480 --> 11:35.200
+it gives us lots of options to try and find the best way to solve the various problems
+
+11:35.200 --> 11:37.200
+that we're attempting to address.
+
+11:37.200 --> 11:39.040
+So what's the best way to walk through that?
+
+11:39.040 --> 11:40.360
+How do you cover any of your talk?
+
+11:40.360 --> 11:44.000
+Do you kind of go bottom up or top down or use case out?
+
+11:44.000 --> 11:49.720
+I'm actually going in my talk, starting with kind of going in the direction of starting
+
+11:49.720 --> 11:55.680
+with graph processing engines, comparing and contrasting them with graph databases, and
+
+11:55.680 --> 12:00.760
+then finally talking about what is kind of a pet project that we've got going on right
+
+12:00.760 --> 12:05.360
+now, which is exploring neural network applications inside of graphs.
+
+12:05.360 --> 12:10.360
+I chose that flow because of a conversation that I actually had about four or five years
+
+12:10.360 --> 12:11.520
+ago.
+
+12:11.520 --> 12:18.120
+Four or five years ago, I was working with a couple of my colleagues at another organization
+
+12:18.120 --> 12:24.320
+and preparing a talk on using graphs inside of malware networks.
+
+12:24.320 --> 12:27.160
+So getting an understanding of how malware is interrelated.
+
+12:27.160 --> 12:30.440
+It was a different role that I was in, a different company at the time, and I was talking
+
+12:30.440 --> 12:33.960
+with some of my co-workers at this organization.
+
+12:33.960 --> 12:39.600
+And one of them mentioned to me that they were curious to know how we were going to make
+
+12:39.600 --> 12:45.280
+this kind of graphical model scale because he said that in his experience, there were
+
+12:45.280 --> 12:49.200
+a number of graph databases and they didn't scale very well at a certain level of nodes
+
+12:49.200 --> 12:52.480
+and edges, and he said, well, how are we going to get around this, right?
+
+12:52.480 --> 12:56.120
+And over the course of this conversation, it kind of became, I think it became clear
+
+12:56.120 --> 13:01.520
+that both of us, there's a much wider variety of different things inside of the graph
+
+13:01.520 --> 13:05.520
+analysis space that not everyone is completely aware of.
+
+13:05.520 --> 13:10.960
+Certainly because of events like strata and the larger big data movement that came through
+
+13:10.960 --> 13:15.240
+several years ago and is still very much ongoing, we've got a really great understanding
+
+13:15.240 --> 13:18.360
+of batch processing and stream processing systems.
+
+13:18.360 --> 13:22.480
+But graphs are still kind of a niche application inside of that space.
+
+13:22.480 --> 13:26.760
+And so kind of as a direct result, when people think graphs, they think graph databases,
+
+13:26.760 --> 13:32.720
+and they naturally think of some of the scalability concerns of graph databases in that space.
+
+13:32.720 --> 13:40.160
+And they're not always aware of kind of the related material inside of graph processing
+
+13:40.160 --> 13:44.640
+engines and some of the probabilistic graphical models and other ways to kind of solve and
+
+13:44.640 --> 13:50.640
+tackle this problem while dealing with a model in a graph space.
+
+13:50.640 --> 13:55.560
+So let's walk through this, the way that you do in your presentation, graphical processing
+
+13:55.560 --> 13:56.880
+engine.
+
+13:56.880 --> 13:58.880
+What are they doing for us?
+
+13:58.880 --> 14:00.600
+How do they help you solve these problems?
+
+14:00.600 --> 14:05.360
+So any kind of graph computation engine, graph processing engine is going to be a system
+
+14:05.360 --> 14:12.680
+that's similar to the way we think about the relationship between Spark and Hadoop or
+
+14:12.680 --> 14:14.400
+HDFS, right?
+
+14:14.400 --> 14:20.600
+You have some system that works on some series of data either in memory or with disk flushes,
+
+14:20.600 --> 14:27.000
+cashing, and it allows you to model your data as a graph and operate it, operate on it
+
+14:27.000 --> 14:32.960
+with a graph DSL or using graph formalisms, right?
+
+14:32.960 --> 14:39.200
+And so a couple of clear examples in the software space are graph X, which is attached to the
+
+14:39.200 --> 14:46.440
+Spark project, graph frames, which is a library that's being built into and around graph X,
+
+14:46.440 --> 14:53.520
+a Pachi giraffe, which is a BSP style graph computation engine that's modeled after Google's
+
+14:53.520 --> 14:54.920
+prequel.
+
+14:54.920 --> 15:00.000
+There's a now defunct project, I believe, called a Pachi Hama, or if it's still ongoing,
+
+15:00.000 --> 15:02.720
+it's definitely died down in its activity.
+
+15:02.720 --> 15:06.280
+You said BSP, BSP bulk synchronous parallel.
+
+15:06.280 --> 15:12.480
+It's a model of computation, which is very extensible and applies well to working with
+
+15:12.480 --> 15:15.080
+graphs in a distributed environment.
+
+15:15.080 --> 15:19.240
+The works primarily off of the concept of performing message passing between individual
+
+15:19.240 --> 15:24.680
+nodes or vertices in the graph and passing messages along the individual connective
+
+15:24.680 --> 15:25.680
+edges.
+
+15:25.680 --> 15:31.240
+It allows you to take a vertex centric view of your graph, which allows you to calculate
+
+15:31.240 --> 15:38.440
+aspects of each individual vertex based on the connectivity of that vertex to its neighbors.
+
+15:38.440 --> 15:43.480
+A good example of this would be something like belief propagation or reputation propagation,
+
+15:43.480 --> 15:48.960
+where individual entities may or may not have some known level of trust inside of the
+
+15:48.960 --> 15:49.960
+graph.
+
+15:49.960 --> 15:55.240
+They propagate that trust to everyone else around them for multiple humps with some kind
+
+15:55.240 --> 15:57.080
+of decay value attached.
+
+15:57.080 --> 16:02.600
+What this functionally allows people to do is allows them to label a set of nodes, propagate
+
+16:02.600 --> 16:06.560
+those labels and say, based on the things I know about and based on what they're connected
+
+16:06.560 --> 16:11.680
+to, how do we start adding labels to those other nodes?
+
+16:11.680 --> 16:16.840
+It allows us to, specifically inside of the work that we're doing right now, it allows
+
+16:16.840 --> 16:22.560
+us to say, hey, we suspect that this particular entity of performing some kind of money laundering
+
+16:22.560 --> 16:27.280
+or fraudulent activity, and I've seen that this person has transacted with 10 people
+
+16:27.280 --> 16:28.280
+around them.
+
+16:28.280 --> 16:32.280
+I don't have any view of the 10 people's reputation around this individual.
+
+16:32.280 --> 16:34.080
+What should my view be?
+
+16:34.080 --> 16:37.680
+So it's kind of a suspicion by association model.
+
+16:37.680 --> 16:50.440
+The way you describe the BSP, it makes me think of, as opposed to a top-down analytical
+
+16:50.440 --> 16:56.840
+operation on this graph, you're almost treating the graph as a distributed system.
+
+16:56.840 --> 17:04.160
+And each of the vertices in the graph is transacting with its neighbors and accumulating,
+
+17:04.160 --> 17:08.680
+for example, certain properties, and then you allow this to happen over time, and then
+
+17:08.680 --> 17:15.040
+you can take a look at the graph top-down, I guess, and learn about these relationships.
+
+17:15.040 --> 17:16.680
+That's absolutely the case.
+
+17:16.680 --> 17:23.440
+I think that's a really great way of expressing how BSP works in practice.
+
+17:23.440 --> 17:30.400
+It's a very interesting distributed systems architecture because it allows the graph itself
+
+17:30.400 --> 17:36.040
+to compute in its own manner, and then there's a concept called a superstep where every single
+
+17:36.040 --> 17:39.400
+vertex turns around and says, OK, I've done all the things I need to do.
+
+17:39.400 --> 17:43.720
+I'm confident that there's no more work for me to do here when your graph says, hey,
+
+17:43.720 --> 17:47.600
+each individual node is complete, then at that point you say, OK, we take a look at the
+
+17:47.600 --> 17:51.880
+entirety of the graph, we see if it's reached convergence or some other stopping function,
+
+17:51.880 --> 17:56.240
+and then do any kind of work that we have to do at that level, and then we allow the next
+
+17:56.240 --> 17:58.160
+stage of computation to continue again.
+
+17:58.160 --> 18:03.120
+Before you comparing these different graphical processing engines in your talk, or really
+
+18:03.120 --> 18:07.200
+just sharing that they exist and what some of the major capabilities are, so it's really
+
+18:07.200 --> 18:08.200
+more of an overview.
+
+18:08.200 --> 18:11.520
+So sharing their major capabilities and kind of what makes them special when you should
+
+18:11.520 --> 18:13.480
+be using them, right?
+
+18:13.480 --> 18:17.720
+I think one of the big takeaways that I'd like to communicate to the audience is that we
+
+18:17.720 --> 18:22.520
+should be using these graph processing engines when we want to work with very large graphs
+
+18:22.520 --> 18:26.760
+that don't fit well into memory, and we're attempting to perform some kind of computation
+
+18:26.760 --> 18:33.760
+on those graphs to calculate a value for each vertex or a large subset of the vertices
+
+18:33.760 --> 18:40.000
+in the graph that isn't easily expressed in a traversal-based system, right?
+
+18:40.000 --> 18:44.840
+Or maybe complicated enough, so that way each of the individual nodes kind of affects
+
+18:44.840 --> 18:47.240
+all the other ones around it, right?
+
+18:47.240 --> 18:51.760
+By doing this, it kind of allows us to do the thing that Spark and other distributed processing
+
+18:51.760 --> 18:53.320
+engines are really great at.
+
+18:53.320 --> 18:57.400
+It allows us to take a large amount of data, iterate it on it very quickly in memory,
+
+18:57.400 --> 19:02.880
+right, and then present a result or more likely a long series of results, right, for the
+
+19:02.880 --> 19:06.840
+user then to interact with in a more interactive method elsewhere.
+
+19:06.840 --> 19:10.640
+And I think that one of the things that I communicate in the talk, or I try to communicate
+
+19:10.640 --> 19:14.600
+in the talk, is that we want to use this in the same way that you would use Spark.
+
+19:14.600 --> 19:18.960
+We don't use Spark generally speaking for truly interactive analytics.
+
+19:18.960 --> 19:22.480
+You could build probably a text search engine and Spark or something like that, but it's
+
+19:22.480 --> 19:25.880
+probably better to do those computations in Spark and then load that into something
+
+19:25.880 --> 19:27.960
+like a elastic search.
+
+19:27.960 --> 19:31.160
+And that kind of model, as applied to graphs, is one of the things we're talking about.
+
+19:31.160 --> 19:35.840
+That's my transition point from talking about graph processing engines and graph computation
+
+19:35.840 --> 19:40.480
+engines to talking about graph databases themselves.
+
+19:40.480 --> 19:46.120
+Before we jump into graph databases, the systems that you mentioned, you'll certainly Spark
+
+19:46.120 --> 19:55.280
+exists in the Java ecosystem. A lot of machine learning is happening in the Python ecosystem.
+
+19:55.280 --> 20:00.800
+And I actually asked the previous interview guest this question earlier.
+
+20:00.800 --> 20:07.320
+You seeing any activity in this graphical processing realm in that Python ecosystem?
+
+20:07.320 --> 20:10.760
+There's a lot of graphical interest going on inside of Python.
+
+20:10.760 --> 20:16.080
+It's mostly expressed in the area of probabilistic graphical models because there's so much
+
+20:16.080 --> 20:19.760
+such a strong ecosystem around scientific computing inside of Python.
+
+20:19.760 --> 20:24.960
+I think the JVM ecosystem is seen a little bit more in the distributed systems space for
+
+20:24.960 --> 20:29.800
+similar reasons. There's a lot of material that already exists for building distributed
+
+20:29.800 --> 20:35.200
+systems, especially when we're talking about graph processing engines that are built on
+
+20:35.200 --> 20:40.280
+top or with a lot of the same fundamental concepts as some of the more traditional processing
+
+20:40.280 --> 20:45.520
+systems. Spark, for example, it makes plenty of sense to allow
+
+20:45.520 --> 20:53.040
+these developers to kind of have that historical basis and use those historical tools.
+
+20:53.040 --> 20:56.400
+One of the things we're seeing a lot of, however, is that in the same way that Spark
+
+20:56.400 --> 21:02.920
+has PySpark, we're also starting to see Python implementations of GraphX and Python implementations
+
+21:02.920 --> 21:09.880
+of graph frames that call out to JVM-based systems on the back end or performing similar
+
+21:09.880 --> 21:13.200
+computations themselves in a Python manner.
+
+21:13.200 --> 21:17.760
+I think one of the areas that we're seeing a lot of excitement inside of Python space
+
+21:17.760 --> 21:23.320
+for graph processing is not in the distributed system space, but in the single node space,
+
+21:23.320 --> 21:28.200
+which is actually really exciting because there's a lot of stuff that you can do that is
+
+21:28.200 --> 21:36.400
+arguably even more efficient in terms of certain metrics on a single node as opposed to multiple
+
+21:36.400 --> 21:40.760
+nodes. This has been discussed in academic literature over the last couple of years from
+
+21:40.760 --> 21:46.240
+about 2015 on, there's been an ongoing discussion in distributed systems, the academic literature
+
+21:46.240 --> 21:50.680
+for distributed systems, talking about kind of what is the configuration that outperforms
+
+21:50.680 --> 21:55.520
+a single thread and things like that. It's kind of interesting to look at the two different
+
+21:55.520 --> 21:58.800
+areas where we're seeing a lot of this development. There's a great deal of sophisticated
+
+21:58.800 --> 22:04.320
+graph processing libraries meant for single node work in the Python ecosystem, running
+
+22:04.320 --> 22:11.240
+from network X to other more sophisticated tools that are very relevant.
+
+22:11.240 --> 22:16.720
+Each of these camps is building on their respective strengths job on the distributed
+
+22:16.720 --> 22:22.400
+computing side, Python on the scientific computing side and data science side and building extensions
+
+22:22.400 --> 22:28.360
+and bridges toward the other side, but those historical strengths still remain.
+
+22:28.360 --> 22:32.200
+Still remain, right? I think that's something that we want to encourage inside of computer
+
+22:32.200 --> 22:36.440
+science as a whole, right? Identifying those foundational elements that have strengths
+
+22:36.440 --> 22:41.720
+and allowing them to be good at them while opening up APIs and bridges, as you said, to
+
+22:41.720 --> 22:47.840
+allow people who don't have necessarily that specific underlying knowledge of that foundation
+
+22:47.840 --> 22:52.520
+or that language element to be able to use those systems effectively. This is a little
+
+22:52.520 --> 23:00.200
+bit of a fringe area, but there's a fair amount of graph processing work going on right
+
+23:00.200 --> 23:07.280
+now, even in the compiled language space. Right now, there's a researcher by the name
+
+23:07.280 --> 23:15.440
+of Frank McSherry, who is doing a spiritual successor to the Niant system that was hosted
+
+23:15.440 --> 23:21.440
+and published and worked on at Microsoft Research. It's called Timely Data Flow, and there's
+
+23:21.440 --> 23:26.280
+a lot of work going on there. He is an incredible researcher.
+
+23:26.280 --> 23:31.120
+That's heard his name before. Yes. He's involved in a lot of things. He was one of the authors
+
+23:31.120 --> 23:35.920
+of the cost paper I referenced earlier. One of his major research areas is understanding
+
+23:35.920 --> 23:40.440
+distributed systems. When do we need a distributed system? When do we need a single node system
+
+23:40.440 --> 23:45.360
+and doing high-performance computing? He's been using Rust recently to do a lot of very
+
+23:45.360 --> 23:51.640
+interesting things, exploring what the data flow model of computation is, and exploring
+
+23:51.640 --> 23:56.960
+how that can be applied to more traditional data processing problems, as well as graph
+
+23:56.960 --> 24:01.600
+processing problems. I mentioned this simply because I think that the area that he's working
+
+24:01.600 --> 24:08.320
+is just fascinating. While that work, I don't think is entirely production ready yet.
+
+24:08.320 --> 24:12.160
+By his own admission, the work that he's doing is he's exploring the space and doing
+
+24:12.160 --> 24:15.800
+a lot of research. I think that there's a lot of stuff that's going on that's bearing
+
+24:15.800 --> 24:20.200
+some very meaningful fruit, and I think people inside of the distributed system space
+
+24:20.200 --> 24:27.760
+should definitely be aware of those discussions that are going on. You also mentioned a project
+
+24:27.760 --> 24:33.320
+out of Google. What was that one? Pregel. P-R-E-G-E-L. Pregel? Yes. Much like the
+
+24:33.320 --> 24:38.880
+MapReduce paper, which was launched some time ago, and then kicked off a whole new
+
+24:38.880 --> 24:43.480
+revolution in open source computing. Google published another paper slightly there a couple
+
+24:43.480 --> 24:51.320
+years after which described a system called Pregel, in which they describe building a system
+
+24:51.320 --> 24:57.520
+internally that they built out. In some cases, if I remember the paper correctly, they
+
+24:57.520 --> 25:04.920
+said that it had turned into one of their primary processing engines, competing with or
+
+25:04.920 --> 25:09.600
+supplementing or assisting MapReduce, their MapReduce implementation internally at
+
+25:09.600 --> 25:17.880
+the time, at least, and they called it Pregel, which relied on the BSP model of computation
+
+25:17.880 --> 25:23.200
+to perform these large distributed graph computations. If you take a look, you can imagine
+
+25:23.200 --> 25:30.640
+that they have tons of to do. Absolutely. To be completely clear, I'm fairly
+
+25:30.640 --> 25:34.920
+sure that they published this paper and I have no idea how it's used internally or if
+
+25:34.920 --> 25:38.600
+it's still being used today. I don't know anything about that, but it was a fascinating
+
+25:38.600 --> 25:42.920
+paper when they published it at the time because it kind of exposed the concept of doing
+
+25:42.920 --> 25:48.040
+distributed graph computations, how they solved particular, hairy problems in the space,
+
+25:48.040 --> 25:52.800
+and they also exposed kind of an API, the internal API that they're utilizing, and saying,
+
+25:52.800 --> 25:56.800
+if you define a system that has the following properties, it would be similar to the Pregel
+
+25:56.800 --> 26:00.840
+system we have internally, and this is how we've modeled that style of computation. Again,
+
+26:00.840 --> 26:06.880
+very similar to their original MapReduce and HDFS papers, right? Or GFS for them, I suppose.
+
+26:06.880 --> 26:12.560
+That's an interesting system. I'd love to know what's happened to it since the publication
+
+26:12.560 --> 26:15.840
+of that paper, but unfortunately, I don't have that inside our knowledge.
+
+26:15.840 --> 26:19.360
+What's the open source project that's implemented that?
+
+26:19.360 --> 26:26.600
+Giraffe. G-I-R-A-P-H. Apache Giraffe. Yeah, I may have misspelled that. Apache Giraffe
+
+26:26.600 --> 26:33.960
+is the project, I believe, that's the closest BSP style implementation since then. I
+
+26:33.960 --> 26:41.000
+think that while both Jelly, which is the graph processing system attached to Flink and
+
+26:41.000 --> 26:46.640
+GraphX, which is the graph processing system, again, attached to Spark, both have Pregel
+
+26:46.640 --> 26:52.640
+operators, so you can use the Pregel API. My understanding is that the backend is informed
+
+26:52.640 --> 26:57.320
+by the BSP style model of computation, but has been continually developed and represents
+
+26:57.320 --> 27:01.960
+kind of a bit of a step in a slightly different direction.
+
+27:01.960 --> 27:06.800
+Meaning the backend of the Giraffe, as opposed to the Flink and the...
+
+27:06.800 --> 27:10.480
+Yeah, the backend of Giraffe, I believe, is much more similar to the original publication
+
+27:10.480 --> 27:22.320
+of the BSP model of computation, whereas my understanding is that both Spark, the GraphX
+
+27:22.320 --> 27:30.520
+system and Flink system were informed by it, but are not as tightly tied to the BSP style.
+
+27:30.520 --> 27:38.040
+And so, you transitioned from talking about graphical processing engines to graph databases.
+
+27:38.040 --> 27:45.080
+Absolutely. How do you see kind of the state of the art there, or maybe let's go back
+
+27:45.080 --> 27:50.560
+to the original flow, like, what's the role of the graphical database in helping you
+
+27:50.560 --> 27:53.920
+solve the kinds of problems you're solving with graphical networks?
+
+27:53.920 --> 28:00.040
+So in the architecture that I propose, right, I propose that users are probably best suited
+
+28:00.040 --> 28:06.760
+to use a graphical processing engine to compute most of the values that they need, right,
+
+28:06.760 --> 28:12.680
+to modify all of the properties in their graph, right, and then to output those results
+
+28:12.680 --> 28:18.080
+into a graph database, which is much easier and much more native for humans to actually
+
+28:18.080 --> 28:19.080
+interact with.
+
+28:19.080 --> 28:23.600
+I think in my talk, I actually go out and say, you know, someone does a whole bunch of
+
+28:23.600 --> 28:28.080
+math on things, and that's great, but at some point humans need to actually use the
+
+28:28.080 --> 28:31.240
+resultant data.
+
+28:31.240 --> 28:37.080
+And so one of the things I state is that because graphical processing engines are capable
+
+28:37.080 --> 28:43.120
+of doing large-scale computations, but are not designed for interactive analytics, for
+
+28:43.120 --> 28:48.040
+example, saying, show me all the friends of this particular individual filter that list
+
+28:48.040 --> 28:52.240
+by the following criteria, so on and so forth.
+
+28:52.240 --> 28:56.320
+One of the things that I suggest is performing as many of these computations as possible
+
+28:56.320 --> 29:00.800
+beforehand, so if you want to do a label propagation or something like that, you do that in
+
+29:00.800 --> 29:06.120
+your graph computation engine, and then you load the graph with all of those computed results
+
+29:06.120 --> 29:12.320
+into a graph database, which is designed for people to interact with and allows you
+
+29:12.320 --> 29:21.160
+often comes with dedicated domain-specific languages for doing traversals very efficiently
+
+29:21.160 --> 29:24.440
+and very easily and very natively, right?
+
+29:24.440 --> 29:33.160
+So in the same way that we probably wouldn't do dynamic astyle analytics using Spark, usually,
+
+29:33.160 --> 29:37.200
+we would want to provide an analyst with a SQL front-end to be able to do that sort
+
+29:37.200 --> 29:38.200
+of thing.
+
+29:38.200 --> 29:40.760
+That's kind of the same model that we're applying here.
+
+29:40.760 --> 29:44.800
+You compute as much as you can inside of your processing engine, and then you pass that
+
+29:44.800 --> 29:49.720
+material over to a graph database, which actually allows someone to interact with it.
+
+29:49.720 --> 29:56.040
+Historically, graph databases have had some degree or another of this graphical processing
+
+29:56.040 --> 30:04.440
+capability built in, and if only because the graphical processing engines weren't standalone,
+
+30:04.440 --> 30:13.440
+they weren't popular as standalone components, so for example, Neo4j has long had a fairly
+
+30:13.440 --> 30:21.920
+well-developed graphical programming model that you can use for data that's in the database.
+
+30:21.920 --> 30:29.840
+Is the idea behind separating that outstrictly scalability notion, or are there other reasons
+
+30:29.840 --> 30:31.080
+why you'd want to do that?
+
+30:31.080 --> 30:33.600
+Well, I think there's two main ones.
+
+30:33.600 --> 30:36.320
+Scalability is absolutely one of the main cases.
+
+30:36.320 --> 30:41.560
+I think the second one ultimately comes down to how you're comfortable expressing certain
+
+30:41.560 --> 30:49.440
+concepts inside of that graph to kind of relate it back to a topic that I think probably
+
+30:49.440 --> 30:52.960
+all of your listeners have worked within the past sequel, right?
+
+30:52.960 --> 30:56.680
+Sequel is a touring complete language, but there's plenty of programs I wouldn't want
+
+30:56.680 --> 30:59.800
+to write in sequel, right?
+
+30:59.800 --> 31:03.000
+Just because it's touring complete doesn't mean that it's necessarily easy, or that it's
+
+31:03.000 --> 31:05.760
+really the tool that's designed for this particular purpose.
+
+31:05.760 --> 31:11.840
+And so while Neo4j, as you referenced, historically had the Gremlin interface, the Gremlin query
+
+31:11.840 --> 31:18.680
+language attached to it, and I believe now supports the cipher query language, I wouldn't
+
+31:18.680 --> 31:23.800
+suggest that either of those query languages are always the best choice for all of the
+
+31:23.800 --> 31:27.000
+graph computations you may want to compute, right?
+
+31:27.000 --> 31:32.640
+So even ignoring possibilities of benefiting from a distributed systems environment, right,
+
+31:32.640 --> 31:34.280
+for scalability.
+
+31:34.280 --> 31:40.880
+The way you are able to express your computations may be benefited by working in one environment
+
+31:40.880 --> 31:43.080
+or the other.
+
+31:43.080 --> 31:47.360
+Possibly due to my background, possibly due to my own biases, I generally have an easier
+
+31:47.360 --> 31:52.720
+way of thinking about graphs from a vertex or a graph-based centric model of computation,
+
+31:52.720 --> 31:55.000
+and so I tend to favor that.
+
+31:55.000 --> 31:58.880
+That combined with the scalability metric is kind of where my recommendation comes from.
+
+31:58.880 --> 32:05.880
+And is there an emerging, you know, gql kind of analogy to SQL for the interface between
+
+32:05.880 --> 32:09.520
+the graphical processing engines and the graphical databases?
+
+32:09.520 --> 32:12.080
+That is a super hot topic.
+
+32:12.080 --> 32:13.080
+Okay.
+
+32:13.080 --> 32:19.040
+So, I think that's probably the easiest way of handling that is doing your computation
+
+32:19.040 --> 32:23.880
+first, emitting that in, let's just say, for the purposes of discussion, CSV or JSON
+
+32:23.880 --> 32:27.960
+or something like that, and then loading that into your graphical database, right?
+
+32:27.960 --> 32:33.520
+That may be a little ineligant at some point, but it definitely works.
+
+32:33.520 --> 32:39.520
+And actually, there's a couple of new services coming out that make doing that particular path
+
+32:39.520 --> 32:40.520
+a little bit easier.
+
+32:40.520 --> 32:44.560
+Let's put that to the side for just a second, right?
+
+32:44.560 --> 32:49.680
+One of the things, one of the projects that's definitely being worked on right now is an
+
+32:49.680 --> 32:55.440
+interface to GraphX utilizing the Grumlin query language.
+
+32:55.440 --> 33:00.080
+And I think that that's one very interesting way that you would be able to go about doing
+
+33:00.080 --> 33:01.080
+this.
+
+33:01.080 --> 33:06.840
+And I would be reasonably certain that that would allow you to kind of dynamically load
+
+33:06.840 --> 33:11.480
+some data into various Graph databases that that may exist out there.
+
+33:11.480 --> 33:15.520
+Or at the very least, it's an area that I'd like to see some development kind of go into.
+
+33:15.520 --> 33:21.080
+There are new Graph Processing systems getting, not just Graph Processes, but Graph Data
+
+33:21.080 --> 33:27.120
+Bases getting published on a regular basis. One of them is AWS's Neptune, which I should
+
+33:27.120 --> 33:32.320
+at this point, insert my common disclaimer, I'm a gentleman at Capital One, but nothing
+
+33:32.320 --> 33:36.880
+in here when I talk about any technologies is Capital One telling you to use any of these
+
+33:36.880 --> 33:37.880
+tools.
+
+33:37.880 --> 33:42.440
+I'm merely expressing the fact that I've used them before and I've had various results,
+
+33:42.440 --> 33:45.560
+but I'm not a mouthpiece for my company when I'm talking to you.
+
+33:45.560 --> 33:47.880
+Sorry, got to do that.
+
+33:47.880 --> 33:56.520
+Neptune is a new graphical offering from AWS, which has a lot of interesting properties,
+
+33:56.520 --> 34:03.480
+including saving snapshots of your data into S3, reloading snapshots, reloading data dynamically,
+
+34:03.480 --> 34:09.360
+which might actually take the somewhat in-allegate method that I described kind of at the beginning
+
+34:09.360 --> 34:16.160
+of this area of the discussion and make it a little bit more workable depending on the
+
+34:16.160 --> 34:17.160
+situation.
+
+34:17.160 --> 34:24.160
+Things to think about, taking that from kind of, I think I talk about mostly just dynamically
+
+34:24.160 --> 34:29.960
+just loading your data and taking a snapshot, loading it into a graph database in my talk.
+
+34:29.960 --> 34:34.160
+I talk about that specifically because that's something that's relatively easy to understand
+
+34:34.160 --> 34:40.200
+and discuss and doing something in a more dynamic fashion or a less elegant fashion is a
+
+34:40.200 --> 34:43.760
+matter of engineering and not always a matter of capability.
+
+34:43.760 --> 34:48.280
+As a result, there's a lot of area that you can play in there and that's really judged
+
+34:48.280 --> 34:54.720
+by what's your use case, what kind of reliability and speed guarantees you need to fulfill,
+
+34:54.720 --> 34:57.000
+and that differs on every single area.
+
+34:57.000 --> 35:02.560
+So I'm trying to describe more of a model of architecture, more so than these are the
+
+35:02.560 --> 35:07.440
+specific links that you definitely should be using because all of these graph systems
+
+35:07.440 --> 35:10.720
+at the end of the day, they're really specialist tools, even though some of them are becoming
+
+35:10.720 --> 35:17.360
+more, I don't want to say generic, but more generalized frameworks or being built on
+
+35:17.360 --> 35:18.760
+generalized frameworks.
+
+35:18.760 --> 35:25.680
+I think graph computation is something that is very, very tied to the kind of work that
+
+35:25.680 --> 35:30.520
+you're attempting to do and the kind of space you're operating in and as a result, you
+
+35:30.520 --> 35:36.760
+want to be very sensitive to your use case at every single stage of the operation.
+
+35:36.760 --> 35:44.600
+So maybe taking a further philosophical detour, do you think that in the space we need
+
+35:44.600 --> 35:52.880
+something analogous to a standard query language or conversely do we not need it because
+
+35:52.880 --> 35:57.440
+of what you just said that the architectures and the way we build these applications is
+
+35:57.440 --> 36:04.840
+very use case dependent or is it the case that kind of times of change and if the relational
+
+36:04.840 --> 36:11.000
+database was being invented now as opposed to you have for many years ago, maybe we wouldn't
+
+36:11.000 --> 36:15.120
+have a sequel because we're so comfortable kind of throwing around Jason and manipulating
+
+36:15.120 --> 36:17.000
+it on the fly, that kind of thing.
+
+36:17.000 --> 36:19.880
+So it's funny, it's funny you bring that up.
+
+36:19.880 --> 36:24.840
+I happen to be a proponent in the general case, certainly for graph databases and other
+
+36:24.840 --> 36:32.320
+traversal based systems to say that a common query language is likely to increase adoption.
+
+36:32.320 --> 36:38.000
+I think having the sequel standard is what allowed SQL databases to become as large as
+
+36:38.000 --> 36:43.360
+they effectively have, just simply because of the fact that you knew that you could train
+
+36:43.360 --> 36:49.080
+a series of people in a particular, in a particular style of SQL and it would probably
+
+36:49.080 --> 36:55.540
+transfer in 90% of its volume to any other implementation of the SQL standard assets
+
+36:55.540 --> 37:01.920
+pressed by my sequel or by Postgres or by Oracle or so on and so forth, there's obviously
+
+37:01.920 --> 37:06.920
+some caveats there, but in general I think that led to many, many good things.
+
+37:06.920 --> 37:11.880
+I would suggest that standardization around a query language or a standard for query languages
+
+37:11.880 --> 37:17.280
+is probably something that will have similar beneficial effects as well.
+
+37:17.280 --> 37:22.080
+I've got my own thoughts on which ones I think would be interesting to have, but I don't
+
+37:22.080 --> 37:26.000
+know. I gave you an opportunity.
+
+37:26.000 --> 37:30.800
+I actually favor Gremlin quite a lot, but that may be because that was one of the first
+
+37:30.800 --> 37:35.920
+graph DSLs that I really worked with or spent any kind of time with and so that's probably
+
+37:35.920 --> 37:41.360
+a bias that I have there, but I like the standard as a whole and I think that that organization
+
+37:41.360 --> 37:47.800
+has done a good job of stewardship, the TinkerPop organization used to be a standalone company
+
+37:47.800 --> 37:53.000
+which before that it was a research project from one of the key developers and they've
+
+37:53.000 --> 37:57.080
+transitioned it into kind of a public Apache project since then and so I'd like seeing
+
+37:57.080 --> 38:01.640
+that chain of stewardship moving forward and that's part of that key part of creating
+
+38:01.640 --> 38:03.640
+an eventual standard.
+
+38:03.640 --> 38:08.280
+I think there's a lot of good things about it, so that's one of the areas that I would
+
+38:08.280 --> 38:12.280
+go in, but one way or the other I generally believe that standardization for query languages
+
+38:12.280 --> 38:17.600
+definitely can lead to good things and at a bare minimum definitely leads to kind of
+
+38:17.600 --> 38:23.000
+a greater ease of acceptance, certainly less shock when you deal with a new system for
+
+38:23.000 --> 38:24.000
+the first time.
+
+38:24.000 --> 38:28.160
+It's funny you bring up the statement of chucking around JSON and some of the more modern
+
+38:28.160 --> 38:33.920
+database families moving away from SQL because I think we've actually seen, I'm remembering
+
+38:33.920 --> 38:38.760
+back to when kind of the big wave of distributed key value stores started pouring out into
+
+38:38.760 --> 38:45.880
+the Apache projects and the JVM ecosystem again systems like Cassandra for example which
+
+38:45.880 --> 38:51.560
+originally was a pure key value store around because I think it was Cassandra 2.0 when
+
+38:51.560 --> 38:57.680
+they started integrating the literal CQL query language into it which looks very similar
+
+38:57.680 --> 39:06.520
+to SQL and I think we've seen that with a couple of other databases which kind of just
+
+39:06.520 --> 39:13.960
+talks about SQL's overall kind of cultural dominance, the hegemony that it represents
+
+39:13.960 --> 39:15.880
+is kind of very interesting.
+
+39:15.880 --> 39:22.840
+The databases role is almost like if you're using a database to serve up a model like
+
+39:22.840 --> 39:28.200
+you're building the essentially building the model, the graphical model using the processing
+
+39:28.200 --> 39:33.080
+engine and then you're taking that and sticking into the database for more interactive use.
+
+39:33.080 --> 39:36.680
+I think you're right, I think at the end of the day you're definitely serving the results.
+
+39:36.680 --> 39:39.080
+I don't know if I want to say you're serving the model because it's almost a little bit
+
+39:39.080 --> 39:43.120
+more restrictive right because your model in a standard machine learning environment if
+
+39:43.120 --> 39:47.280
+you're just serving a model, you're definitely just serving one particular thing that takes
+
+39:47.280 --> 39:52.400
+a defined input and exports some kind of defined output whereas for a graph database you've
+
+39:52.400 --> 39:56.040
+got a lot more flexibility you can actually write your own queries and at some level you
+
+39:56.040 --> 40:01.160
+can write secondary stage analytics on top of that if you if that suits your use case.
+
+40:01.160 --> 40:06.760
+But you're definitely right it would be serving kind of a pre-digested at some level some
+
+40:06.760 --> 40:11.560
+kind of digested result in an interface that's maybe a little bit more native to your
+
+40:11.560 --> 40:12.560
+use and utilization.
+
+40:12.560 --> 40:15.160
+Yeah, yeah, absolutely, okay.
+
+40:15.160 --> 40:19.880
+And then so the next part of your talk is then starting to look at graphical models
+
+40:19.880 --> 40:26.960
+from machine learning perspective and potentially even you mentioned graphical embeddings which
+
+40:26.960 --> 40:31.800
+is I'm very intrigued as to the direction that that goes.
+
+40:31.800 --> 40:39.360
+So graph convolutional neural networks are a very active research field currently and
+
+40:39.360 --> 40:44.120
+I caveat any discussion about them by saying that like from an academic perspective the academic
+
+40:44.120 --> 40:49.840
+community still isn't completely decided on whether or not they are a good approach,
+
+40:49.840 --> 40:53.280
+how powerful they actually are and what's going on.
+
+40:53.280 --> 40:55.920
+There's a lot of there's a lot of interest and there's a lot of papers that have been
+
+40:55.920 --> 40:59.760
+published that speak to kind of different techniques and different approaches and different
+
+40:59.760 --> 41:04.360
+ways of thinking about it working with this which have published positive results and
+
+41:04.360 --> 41:05.360
+material like that.
+
+41:05.360 --> 41:10.200
+But as anything inside of academia, two years, three years is not really enough time to
+
+41:10.200 --> 41:13.360
+kind of come to a global consensus on things, right?
+
+41:13.360 --> 41:17.040
+Even in the larger neural networks space that we're seeing right now, there's still discussion
+
+41:17.040 --> 41:21.280
+on like what are we actually learning and how are we actually doing it, right?
+
+41:21.280 --> 41:29.960
+And so in a more specialized area of that larger discussion, something that's even at some
+
+41:29.960 --> 41:34.040
+level newer and has fewer researches kind of staring at it, of course that's a new
+
+41:34.040 --> 41:35.280
+discussion as I'm going.
+
+41:35.280 --> 41:42.040
+One immediate question I have is, has a standard data set, a training data set emerged for
+
+41:42.040 --> 41:45.720
+graphical operations, like is there an image net for graph stuff?
+
+41:45.720 --> 41:49.600
+You know that's interesting, there's actually a lot of different data sets that are frequently
+
+41:49.600 --> 41:53.440
+cited in literature in general, right?
+
+41:53.440 --> 41:56.840
+And they range from the very small to the very large, right?
+
+41:56.840 --> 42:03.240
+Stanford, the SNAP data sets, Stanford publishes, I believe it's Stanford, but it's the SNAP
+
+42:03.240 --> 42:09.240
+data sets, publishes this large list of publicly available graph data sets, and they include
+
+42:09.240 --> 42:16.200
+things like the trust relationship of the website slash dot.
+
+42:16.200 --> 42:23.000
+I don't know if I'm not sure what the demographic age range of your audience usually tends towards,
+
+42:23.000 --> 42:28.960
+but if you're an individual of a certain age, you probably remember slash dot.
+
+42:28.960 --> 42:33.040
+It's old, old kind of things before bread and dig and all that and stuff.
+
+42:33.040 --> 42:38.480
+So the trust graph of slash dot is one of those data sets.
+
+42:38.480 --> 42:45.160
+Live journal had a friendship listing, there's Twitter follower graphs, going all the way
+
+42:45.160 --> 42:49.880
+down to the very small, which are things like kind of a famous graph testing data set called
+
+42:49.880 --> 42:58.720
+Zachary's Karate Club, which is, I kid you not, a collection of I think just a couple
+
+42:58.720 --> 43:05.520
+handfuls of individuals inside of a youth Karate Club associating who identified as friends
+
+43:05.520 --> 43:07.520
+of whom, right?
+
+43:07.520 --> 43:09.360
+So there's less than you publish this data set.
+
+43:09.360 --> 43:12.440
+This isn't me.
+
+43:12.440 --> 43:13.840
+That data set predates me.
+
+43:13.840 --> 43:20.360
+It just happens actually at the different exactly entirely, but so there's a number of these
+
+43:20.360 --> 43:24.720
+data sets that have been published, which are very well studied.
+
+43:24.720 --> 43:30.720
+So there's a couple of them that get get changed about and because of the fact that image
+
+43:30.720 --> 43:34.720
+that image that has a lot of benefits for it in that it's a very large, a very general
+
+43:34.720 --> 43:40.080
+law, all sorts of different images are contained there in graphs, which model kind of the interconnectivity
+
+43:40.080 --> 43:46.880
+of individual nodes mean that attempts at getting one standard kind of data set are going
+
+43:46.880 --> 43:47.880
+to look very different.
+
+43:47.880 --> 43:53.000
+The PGP Web of Trust looks very different than your Facebook association, then your LinkedIn
+
+43:53.000 --> 43:56.280
+association patterns, everything looks a little different.
+
+43:56.280 --> 43:58.840
+Looks very different in what sense?
+
+43:58.840 --> 44:05.040
+The number of things that you connect to, how willing you are to connect to certain things,
+
+44:05.040 --> 44:10.840
+and kind of the general level of interconnectivity of individual nodes, right?
+
+44:10.840 --> 44:14.880
+I would say that probably on social media sites, Facebook and Twitter and things like
+
+44:14.880 --> 44:19.920
+that, you're highly incentivized to connect with a large number of people.
+
+44:19.920 --> 44:23.920
+People that are your close, close friends and people who are acquaintances that you've
+
+44:23.920 --> 44:28.960
+interacted with a few times before, or even in the case of, I guess, both of those websites,
+
+44:28.960 --> 44:34.280
+people who you don't know personally, but they produce content or have opinions that
+
+44:34.280 --> 44:35.280
+you find interesting.
+
+44:35.280 --> 44:39.400
+And so you want to subscribe to them to get their material sent to you, right?
+
+44:39.400 --> 44:47.160
+As opposed to say something that's much more intentional, the PGP Web of Trust, for example,
+
+44:47.160 --> 44:52.520
+for people who use encrypted communications for signing emails and things like that, those
+
+44:52.520 --> 44:57.480
+are intended to be very intentional communications, right?
+
+44:57.480 --> 45:02.400
+You wouldn't state in that kind of Web of Trust that you trust an individual you've never
+
+45:02.400 --> 45:03.560
+met before.
+
+45:03.560 --> 45:07.320
+You probably only trust individuals that you've deliberately sent mail to who you know
+
+45:07.320 --> 45:10.120
+are the people you want to talk to, things like that, right?
+
+45:10.120 --> 45:19.680
+So is the idea then that the popping it up a level, the density or sparsity of the networks
+
+45:19.680 --> 45:26.240
+is dramatically different in, and maybe just not the level of density, but some quality
+
+45:26.240 --> 45:33.840
+of the density is different in that because the methods that we use to process these graphs
+
+45:33.840 --> 45:40.920
+are very sensitive to that, it doesn't make sense to have some general data set.
+
+45:40.920 --> 45:45.040
+Yeah, I would say that's a good way of describing it, right?
+
+45:45.040 --> 45:49.880
+It's the way the graph was formed, the way the graph evolves over time, you know, kind
+
+45:49.880 --> 45:54.920
+of all these things are embedded in the actual structure of the network itself.
+
+45:54.920 --> 46:01.800
+And so as kind of a result, I would suggest that when looking at, you know, papers discussing
+
+46:01.800 --> 46:05.880
+graph computation, you'll usually see, especially looking at systems papers discussing graph
+
+46:05.880 --> 46:12.320
+computation, you will see individuals publishing these papers study the way their algorithm
+
+46:12.320 --> 46:17.480
+or their system performs over multiple different graphs, simply to be aware of that.
+
+46:17.480 --> 46:22.580
+But there are definitely a series of these well-published, well-understood, well-studied
+
+46:22.580 --> 46:24.080
+graphs out there.
+
+46:24.080 --> 46:26.840
+That's not quite like ImageNet, but not that different.
+
+46:26.840 --> 46:31.720
+So then these graphical neural networks, what's, can I give us a snap?
+
+46:31.720 --> 46:33.960
+Parts out of the state of the state there.
+
+46:33.960 --> 46:35.040
+Sure, sure, absolutely.
+
+46:35.040 --> 46:40.600
+So the intuition behind it is, can we use a neural network to gain an understanding of
+
+46:40.600 --> 46:44.040
+individual vertices in a graph, right?
+
+46:44.040 --> 46:48.320
+And over the course of a series of papers, the concept of using neural networks effectively
+
+46:48.320 --> 46:54.480
+modified convolutional neural networks to get an understanding of an embedding of individual
+
+46:54.480 --> 46:57.120
+nodes inside of a graph has come about.
+
+46:57.120 --> 47:02.680
+So in the same way that we kind of look at data that is traditionally, maybe a little
+
+47:02.680 --> 47:07.920
+difficult to vectorize or very, very sparse, and we want to build a denser representation
+
+47:07.920 --> 47:13.080
+of that data, word to vac being kind of the most famous example, but there's all sorts
+
+47:13.080 --> 47:17.800
+of, you know, star to vac and all sorts of things running around right now.
+
+47:17.800 --> 47:21.160
+We would want to do that for graphs as well, because for graphs, right, if you look at
+
+47:21.160 --> 47:29.680
+it in terms of like adjacency matrix, adjacency matrices in large graphs are almost necessarily
+
+47:29.680 --> 47:31.240
+very sparse.
+
+47:31.240 --> 47:34.000
+There's only so many people that you can possibly know.
+
+47:34.000 --> 47:35.960
+There are so many people in the world.
+
+47:35.960 --> 47:41.600
+And so no matter how well traveled or socially, maybe you'll never really make a dent, a
+
+47:41.600 --> 47:45.720
+meaningful dent in the overall population of the planet, right?
+
+47:45.720 --> 47:51.080
+So for a theoretically maximal social graph, right, it's going to be a very sparse matrix.
+
+47:51.080 --> 47:54.040
+Working with sparse matrices is very difficult.
+
+47:54.040 --> 47:57.760
+There's all sorts of mathematical properties you run into to say nothing of like space
+
+47:57.760 --> 48:00.080
+requirements and things like that.
+
+48:00.080 --> 48:04.400
+And so one of the things that people would want it to do is, you know, to come up with
+
+48:04.400 --> 48:08.560
+an embedding matrix to take kind of each of those individual things and bring it to an
+
+48:08.560 --> 48:14.880
+a easily or more easily described point in space that you can perform distance measurements
+
+48:14.880 --> 48:17.080
+on, right?
+
+48:17.080 --> 48:22.520
+And graphical convolutional networks are a means to do such a thing.
+
+48:22.520 --> 48:25.480
+And it's an active area of research right now and there's all sorts of different levels
+
+48:25.480 --> 48:30.400
+of debate going on about it, which I personally find fascinating.
+
+48:30.400 --> 48:35.920
+And one of the things I talk about in my talk is kind of what are they and a couple of
+
+48:35.920 --> 48:38.880
+different ways that you can, you can work with them to some degree.
+
+48:38.880 --> 48:43.920
+One of the things that I'm currently experimenting with now is getting an idea of whether or
+
+48:43.920 --> 48:48.120
+not we can use graphical, the results of these embeddings, I should say, if we can use
+
+48:48.120 --> 48:51.600
+these embeddings to perform more like this queries.
+
+48:51.600 --> 48:56.280
+So let's say that we identify that there is a fraudster somewhere.
+
+48:56.280 --> 49:00.000
+We know that this person has committed fraud and we know that the pattern of which this
+
+49:00.000 --> 49:03.840
+person was committing fraud is somehow distinct or unique.
+
+49:03.840 --> 49:10.640
+One of an investigator asks themself, how do I find more people like this?
+
+49:10.640 --> 49:13.120
+Can you show me some system out there?
+
+49:13.120 --> 49:19.720
+Can I be shown a listing of individuals who have similar patterns of their transactions
+
+49:19.720 --> 49:25.400
+or of the way they behave inside of the financial network that may lead me to believe that
+
+49:25.400 --> 49:28.920
+there is more people like this, this is a newer emerging trend, this is something we can
+
+49:28.920 --> 49:30.920
+look at.
+
+49:30.920 --> 49:35.400
+And getting an idea of what that looks like, we're currently exploring the use of embeddings
+
+49:35.400 --> 49:39.560
+to be able to kind of see what that gives us and how we work with that.
+
+49:39.560 --> 49:43.760
+So in the talk, I kind of expressed that idea, you know, introduce the concept of embeddings
+
+49:43.760 --> 49:46.760
+and talk a little bit about how you would serve embeddings in a manner that would allow
+
+49:46.760 --> 49:52.600
+you to do more like this queries in something significantly more efficient than, you know,
+
+49:52.600 --> 49:55.760
+O to the N squared time, which is always fun.
+
+49:55.760 --> 50:00.160
+You mentioned that it's very early in this space.
+
+50:00.160 --> 50:04.920
+Are there specific areas where it's been or what are the characteristics of areas that
+
+50:04.920 --> 50:09.640
+has been demonstrated to be a useful technique?
+
+50:09.640 --> 50:15.040
+So there's a couple of areas, most of them in the areas of kind of clustering, graph
+
+50:15.040 --> 50:21.320
+coloring, and association into groups, defining community detection.
+
+50:21.320 --> 50:24.920
+That's probably the one that I've spent most of my time looking at.
+
+50:24.920 --> 50:29.280
+There are a handful of others, of course, in the spaces of whole, but I would suggest
+
+50:29.280 --> 50:33.480
+that that's probably the most fruitful and initial area, identifying communities inside
+
+50:33.480 --> 50:36.040
+of a graph, which is a very difficult problem.
+
+50:36.040 --> 50:43.080
+What is the pre-processing or training that's required to train up one of these graphical
+
+50:43.080 --> 50:44.080
+neural networks?
+
+50:44.080 --> 50:50.560
+Is it, are you basically kind of vectorizing your graph in some kind of way as some huge
+
+50:50.560 --> 50:55.040
+sparse vector and just feeding that into a standard CNN or have we changed the...
+
+50:55.040 --> 50:56.040
+So it's a more...
+
+50:56.040 --> 50:57.040
+I mean, architecture, like...
+
+50:57.040 --> 51:00.680
+As everything, it's a little bit more complicated than that, but that's a good kind of
+
+51:00.680 --> 51:04.440
+imagined stuff, that's a good high level representation.
+
+51:04.440 --> 51:08.280
+At the end of the day, you're still working with that adjacency graph, right?
+
+51:08.280 --> 51:09.600
+The adjacency matrix.
+
+51:09.600 --> 51:14.240
+And you're still passing kind of the window that you're working on of the neural network
+
+51:14.240 --> 51:15.240
+over that adjacency matrix.
+
+51:15.240 --> 51:16.840
+Oh, well that's a thing right there.
+
+51:16.840 --> 51:26.080
+It's like, hey, we've got this huge connectivity, or the connectivity of our graph can be expressed
+
+51:26.080 --> 51:30.000
+as this huge sparse matrix, but there's no way we're turning that into a vector and
+
+51:30.000 --> 51:34.600
+feeding it to a network where we're windowing around within this environment.
+
+51:34.600 --> 51:35.600
+Kind of like...
+
+51:35.600 --> 51:36.760
+I guess you can think of it as a convolution.
+
+51:36.760 --> 51:38.440
+I guess that's the whole point of this.
+
+51:38.440 --> 51:39.440
+That's the whole thing.
+
+51:39.440 --> 51:45.160
+And feeding the data into that convolution for the particular techniques that I'm working
+
+51:45.160 --> 51:49.680
+with right now are very similar to performing kind of a random walk through that graph, right?
+
+51:49.680 --> 51:53.640
+So you're following this random walk, you run a series of those random walks, and then
+
+51:53.640 --> 51:56.880
+that gets you kind of what you're looking for based on a particular starting point.
+
+51:56.880 --> 52:02.800
+And you feed that, which is effectively a subgraph into your neural network.
+
+52:02.800 --> 52:03.800
+There's a couple of papers.
+
+52:03.800 --> 52:07.880
+I'll send you a few after after we talk a little bit today, because right now the majority
+
+52:07.880 --> 52:12.200
+of the work that I'm doing in that particular space is working with techniques that have
+
+52:12.200 --> 52:16.720
+been kind of published and discussed and trying to see whether or not they give reasonable
+
+52:16.720 --> 52:20.720
+results so that I'm trying to effectively, I'm trying to find kind of where, what the
+
+52:20.720 --> 52:25.680
+best area to dive in is based on some experimental trials in the data sets that we're working
+
+52:25.680 --> 52:27.080
+with now.
+
+52:27.080 --> 52:31.320
+So for a kind of a deeper mathematical based understanding, I'll send you a paper or two,
+
+52:31.320 --> 52:35.600
+and I think you'll be able to put it up for your listeners or something like that.
+
+52:35.600 --> 52:39.320
+Do you know off the top of your head, some of the key researchers who are working in this
+
+52:39.320 --> 52:40.320
+area?
+
+52:40.320 --> 52:42.840
+I'm terrible with names, so I wouldn't be able to tell you off the top of head.
+
+52:42.840 --> 52:44.840
+Well, we'll include it in the shout outs for sure.
+
+52:44.840 --> 52:45.840
+Absolutely.
+
+52:45.840 --> 52:49.920
+Oh, and fortunately, many of those researchers are really good about doing kind of reproducible
+
+52:49.920 --> 52:50.920
+research.
+
+52:50.920 --> 52:57.440
+So many of them have published the implementations they had for their individual papers on GitHub,
+
+52:57.440 --> 53:02.120
+and you know, it's always really great to see it when researchers do that kind of work.
+
+53:02.120 --> 53:03.120
+Absolutely.
+
+53:03.120 --> 53:04.120
+That's always amazing.
+
+53:04.120 --> 53:05.120
+Absolutely.
+
+53:05.120 --> 53:08.280
+So we've walked through these kind of three elements of your presentation.
+
+53:08.280 --> 53:09.960
+How did you some things up for folks?
+
+53:09.960 --> 53:14.120
+So effectively, I tried some things up by drawing an architectural diagram saying like,
+
+53:14.120 --> 53:18.200
+you know, if you're working with large scale graphs, if you have problems similar to kind
+
+53:18.200 --> 53:20.760
+of this set of things, you may want to consider an
+
+53:20.760 --> 53:23.800
+architecture that looks a little bit similar to this, right?
+
+53:23.800 --> 53:30.000
+Where your underlying layer is some kind of large block data store, you have a graphical
+
+53:30.000 --> 53:35.000
+processing engine directly over that, reading from that and performing its computations,
+
+53:35.000 --> 53:39.240
+feeding those results through some means and mechanism into a graphical database, and
+
+53:39.240 --> 53:43.160
+then serving the results of that graph database, either directly through interfacing directly
+
+53:43.160 --> 53:48.920
+with the graph DB itself or through a series of APIs, a restful API or even a graph
+
+53:48.920 --> 53:51.080
+of results or something.
+
+53:51.080 --> 53:52.080
+Exactly.
+
+53:52.080 --> 53:53.080
+Something along those lines, right?
+
+53:53.080 --> 53:56.760
+Because at the end of the day, the goal of all of this material, right, is to enable
+
+53:56.760 --> 54:03.440
+some kind of analysis, to enable some individual to perform useful work over that data, right?
+
+54:03.440 --> 54:08.640
+And so providing that in different avenues and different ways is definitely relevant because
+
+54:08.640 --> 54:15.480
+you'll have extremely technical and sophisticated investigators or analysts doing direct line
+
+54:15.480 --> 54:17.320
+queries into the database.
+
+54:17.320 --> 54:22.040
+You'll have others that are consuming that material through reporting or through kind
+
+54:22.040 --> 54:26.880
+of a guided interface in some form or fashion, depending on what your use case is.
+
+54:26.880 --> 54:29.520
+You will probably be in some spectrum there.
+
+54:29.520 --> 54:33.200
+And so as a direct result, we want to make sure that you have the ability to communicate
+
+54:33.200 --> 54:36.400
+those results to kind of all those different use cases.
+
+54:36.400 --> 54:37.400
+Awesome.
+
+54:37.400 --> 54:38.400
+Awesome.
+
+54:38.400 --> 54:39.400
+Well, sounds like an awesome talk.
+
+54:39.400 --> 54:42.120
+I'm glad to say much for taking some time to share with us.
+
+54:42.120 --> 54:43.800
+Been a pleasure being here.
+
+54:43.800 --> 54:49.440
+All right, everyone, that's our show for today.
+
+54:49.440 --> 54:55.040
+For more information on Zach or any of the topics we covered in this show, visit twomolai.com
+
+54:55.040 --> 54:58.000
+slash talk slash 188.
+
+54:58.000 --> 55:04.120
+For more information on the entire Strata Data Conference podcast series, visit twomolai.com
+
+55:04.120 --> 55:08.080
+slash strata and Y 2018.
+
+55:08.080 --> 55:12.200
+Thanks again to our sponsors, Capital One and Clara for their support of this show in
+
+55:12.200 --> 55:13.760
+this series.
+
+55:13.760 --> 55:17.440
+As always, thanks so much for listening and catch you next time.
+

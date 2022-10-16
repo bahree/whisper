@@ -1,0 +1,658 @@
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+people, doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington, I want to send a quick thanks to everyone who commented
+on and shared last week's show with Jeff Dean.
+We were super excited to share that show with you and the feedback and love you sent
+our way was amazing.
+Weeks like last are how we expand the Twimble community and get into the ears of people
+who don't know about us yet.
+All your shares, likes, tweets and retweets matter a great deal to us, so thanks.
+Before I introduce today's show, the details for April's Twimble Online Meetup are set.
+Join us on April 18th at 5pm Pacific time as Chris Butler dives headfirst into the topic
+of Trust in AI, covering a myriad of papers in the process.
+To register or for more details, head on over to twimbleai.com slash meetup.
+In this episode, I'm joined by David Rosenberg, data scientist in the office of the CTO at
+Financial Publisher Bloomberg to discuss his work on extracting data from tables and charts
+in natural document formats.
+Bloomberg deals with tons of financial and company data and PDFs and other unstructured
+document formats on a daily basis.
+To make meaning from this information more efficiently, David and his team have implemented
+a deep learning pipeline for extracting data from the documents.
+In our conversation, we dig into the information extraction process, including how it was built,
+how they source their training data, why they use Latech as an intermediate representation,
+and how and why they optimize for pixel-perfect accuracy.
+There's a lot of interesting info in this show, and I think you're going to really enjoy
+it.
+Alright everyone, I am on the line with David Rosenberg.
+David is a data scientist in the CTO's office at Bloomberg, the Financial Publisher.
+He's also an adjunct associate professor in the Center for Data Science at NYU.
+David, welcome to this week in Machine Learning and AI.
+Thanks so much, happy to be here.
+Awesome.
+It's our tradition to have our guests start by introducing themselves to the audience.
+So tell us how did you get involved in data science and machine learning?
+Yeah, sure.
+I've been interested in AI since I was a kid reading science fiction books as an elementary
+school about robots and artificial intelligence really grabbed my interest, and I guess it
+was in eighth grade, there's a summer program, and we got to build these Fisher Technic
+Kit projects that's kind of like motorized and computer controllable Lego Kit, but it
+was made by this company Fisher Technic, and I loved it.
+I thought it was a most amazing thing to be able to control a robot-like device with
+computer programming, and then a few years later, I guess in high school then, I started
+hearing about neural networks, which was my first exposure to machine learning.
+And yeah, for a project, I bought a textbook and I implemented a neural network to do some
+classification on some medical data, and yeah, frankly at the time, I didn't really
+understand very well how the neural network was working at the detailed mathematical level,
+but I had a taste of the ML framework even as like early 90s.
+That's pretty amazing that you were exposed to neural nets in high school.
+Where did you go to high school?
+I went to Montgomery Blair High School in Silver Spring, Maryland.
+It was a math science computer science magnet program.
+I don't remember how I first heard about neural networks, but somehow it came to my attention
+and found a way to special order these books that the local Barnes and Noble, and I coded
+it up in Pascal.
+Nice.
+How did you end up at Bloomberg, and what's your focus there?
+Right.
+So, yeah, two hops to Bloomberg.
+So after grad school, I moved to New York and I joined a startup company that was Tony
+Jabara, who's a machine learning professor, who's a machine learning professor from Columbia.
+Now he's at Netflix.
+I joined his startup company, we're doing a lot of spatial temporal data, machine learning
+based on spatial temporal data, and then eventually got into mobile advertising.
+So doing things like building bidders for ad exchanges, and those kind of fun problems
+that a lot of ML gets applied to these days.
+We got acquired by YP, which is yellow pages, and I stayed there for about a year or
+so, and then I looked for my next step and I ended up at Bloomberg, where at Bloomberg
+I'm in the office of the CTO, and just a small group, I think about 25 people total within
+that group, there's a five person data science group that I'm a member of, and kind of our
+task is to work on strategic projects or plan strategic projects on kind of a two to four
+year time horizon.
+Things that are a little bit too long term for any individual engineering group to really
+plan for, so we kind of make strategic initiatives and kind of point the data science part of
+the company in different different directions.
+So that's kind of the big picture, another way, another way we think about it is if some
+other company were to gain a large advantage over Bloomberg because of some new technology
+in data science that we did not pursue, that would be our fault.
+We're responsible for making sure we're not missing out on important new tech developments.
+Right.
+Can you give us some examples of the kinds of things that you're looking at, or have looked
+at the past that kind of fall into this two to four year time frame?
+Sure, I can.
+So one thing, maybe not quite so such a long term play, but when I joined maybe three
+years ago, there was a machine learning was at this interesting time where neural networks
+were starting to do very well on many tasks, but just kind of specific tasks, like certainly
+vision and some NLP tasks, but it was kind of to get into neural networks, it's a pretty
+big investment in terms of hardware.
+At Bloomberg, we don't have the ability to use the Amazon Cloud or something.
+We need to use internal machines.
+So the CTO office kind of led the movement to try out neural networks, which involves
+investing in cluster GPU machines and seeding projects with various engineering teams
+to see if neural networks was going to benefit the types of problems that we work on.
+And indeed, we have found within a couple of years that it's very important to some areas
+of the work that we do.
+So I could say that strategic, not so much because of the time horizon, but because of
+the investment required that was kind of too large for any individual engineering group
+to take that risk.
+I guess I'm curious about the evolution of the use of machine learning at a company like
+Bloomberg.
+And you said, how long have you been there now?
+I've been coming up on three years.
+Coming up on three years.
+So maybe you'll have a sense of this.
+I talk to people all the time about how enterprises, large businesses kind of evolve these types
+of technologies.
+It's interesting in that there are some businesses where there are parts of the business that
+have used machine learning for a really long time.
+Like it's been baked into, you know, just core ways that they deliver their products.
+But yet and still even at those businesses, there's been like a shift over the past five
+years in the way they've thought about machine learning.
+I'm just curious.
+Like in your words, like, does any of that resonate and how have you seen that evolve at
+Bloomberg?
+Yeah.
+So, I think Bloomberg was fairly early in bringing machine learning into the product,
+which I could tell you a little bit about.
+So I think machine learning at Bloomberg was well underway, I mean, you know, there's
+close to a hundred people doing machine learning at Bloomberg before I even arrived.
+So I can't really speak to how that developed.
+But I can say that even now we're continually trying to find areas where machine learning
+can help via by automation or just kind of maybe more broadly the machine learning, just
+a good data science statistical approach to assessing new, even if it's a rules based
+method to use kind of proper methodology and assessing performance and these sorts of
+things.
+In fact, to that end, to try to see where we can leverage ML more or data science more
+at Bloomberg, another strategic initiative that is almost a year old now coming from the
+CTO department is what we're calling ML EDU, so machine learning education.
+But the purview is broader than ML, it's kind of just data science more broadly.
+And we're trying to educate people at all different levels, basically from the most
+basic understanding of the main concepts of machine learning things like the notion
+of splitting your data into training and test and notions of overfitting these fundamental
+ideas of machine learning that we have a course called ML1, which is two half days and
+it's a few hours lecture and a few hours lab where people go through that.
+And that kind of gives people just a sense of what is this ML about.
+And then we have at the other extreme we have a kind of fairly in-depth course called
+ML101, which is kind of like a master's level machine learning class.
+That's kind of fairly mathematical, but with practical end, which is learning all the
+connections between things like gradient boosting and random forest and L1L2 regularization,
+kind of a standard master's level machine learning class.
+And we're trying to fill in everything in between.
+So how to manipulate data, explore data, visualize it, how to do basic statistics, things like
+AB testing, hypothesis testing, confidence intervals, and then machine learning, predictive
+theory.
+Awesome.
+I am shortly going to be jumping on a plane to head out to the Bay Area for the GTC
+conference.
+Yeah.
+And you will too, probably not before me since I'm getting on a plane in a few hours.
+But you're going to be presenting there on what is presumably one of these projects within
+the CTO's office, data science team that you've been working on.
+Can you tell us about that?
+Sure.
+Sure.
+So the title is information extraction for natural document formats.
+So natural document format, to my knowledge is not really a common terminology, but we
+encountered a lot of Bloomberg.
+And what we mean by that is a document that was designed for easy human consumption and
+comprehension, things like a word document, a PDF document.
+And in particular, what we have in mind for the projects I'll be speaking about is where
+some kind of, there's some kind of underlying data that is represented or that are represented
+in this natural document format in a way that's just fine for a person to comprehend, but
+is not easy at all to extract that data back out into say a database or an Excel spreadsheet
+or something like that.
+And this is a problem that we have a lot of at Bloomberg.
+A Bloomberg.
+So an example of this might be like a chart or graph or something like that.
+Is that the?
+Absolutely.
+Yeah.
+So a scatter plot, a pie chart, a bar chart, or a table, a table of numbers, a table of
+all things, you think should be very easy to extract the data out into an spreadsheet
+or a database or something, but when a table is just represented in a PDF document in the
+middle of a, say, company filing, Bloomberg collects all these documents from other companies,
+things like company filings and these sorts of things.
+And we, these documents that they deliver in a PDF format typically has important data
+in it that we need to extract that it's easy for our Bloomberg's customers to use to
+get to.
+And so traditionally, I think almost since the founding of the company 30 years ago, there's
+been a whole organization within the company called Global Data where it's people's jobs
+to figure out the most efficient and most correct way to extract this information from
+the documents.
+And there's, I can't say exactly how much, but certainly at least hundreds of people
+working on these problems, not necessarily, and it's been going on for 30 years.
+So it's started off mostly by hand.
+And a big effort over the years has been to see how to automate this as much as possible
+or make it more efficient for the people doing it.
+That's kind of the business driver.
+In this particular scenario, I kind of thought this was a solve problem like for 10 years
+now, I thought that financial filings, I forget where, I thought there was the development
+of some standardized XML formats that were used for S1s and all these financial filings
+now.
+It sounds like that it's, I know that maybe the largest companies kind of submit their
+things via these XML formats, but there's still a ton of traditional documents flying
+around with this information.
+They're sure.
+And maybe it's a letter to shareholders that is not necessarily regulated.
+There's no requirements on a format to use.
+And we kind of want to get as much data as we can.
+And even if the US were to go in a certain direction, there's still all the other countries
+that may or may not have these requirements.
+And so, yes, in some sense, perhaps someday everyone will kind of publish all their,
+any data that show up in any inconvenient document will be paired with a, you know, some
+kind of standard XML format, but we're surely not there yet.
+Interesting.
+So, tell me about the approach you're taking with us.
+Sure.
+So, there's kind of three different tasks that I'll be talking about.
+One of them is as far as extracting data from tables that show up in documents.
+And the first task there is to just find the tables in the PDF documents.
+So for that, we're using fairly off the shelf image detection methods.
+The same thing as you would use to find a CAD or a kite or whatever it is in an image.
+One advantage that we have is because we've been solving this problem by hand for so
+many years, we have a tremendous amount of labeled training data.
+And so now we're able to leverage that to build models.
+And one interesting aspect we have is we need, we basically can't afford to automate unless
+the performance will be at least as good as the humans.
+And so before we're willing to cut a human out of the loop completely.
+And so in fact, we've done that for this relatively straightforward problem of at least
+for some kind of sub-problems of finding charts and documents.
+We've been able to exceed human precision and recall, which was great.
+And then the downstream tasks of actually extracting the numbers from the table use some
+other techniques for.
+And so that's the second thing that I'm going to talk about in the presentation, which
+is a little bit futuristic.
+It's not something that we kind of, it's purely research right now.
+That's not something we're planning to productize anytime soon because it's kind of a long
+path.
+But we were inspired by this image captioning work that started a few years ago where you
+could show a picture of a man crossing the street and what it would produce using an image
+to sequence model the sentence man crossed the street or something like that.
+And the idea was like boy, if we could feed in a page of a document and have it output
+directly in one step kind of a well-structured XML or JSON or standardized formatting of
+all the content in that kind of picture of the page or the document wouldn't that be great
+then you could because that's so much easier.
+That's so there's so much you can do with that downstream as far as automated processing.
+It's hard to begin if you just have kind of a raw PDF, the format, if I could show
+you the format of the internal PDF or even a parsed PDF is not very easy to extract the
+structure from.
+So for that problem, so how are we going to apply image caption to this sort of thing?
+So I partnered with a student from Harvard, Yun Tian Dang who had this really cool work
+a year or two ago with Sasha Rush and some others was to convert a picture of an equation
+of mathematical equation that was generated by latex which is kind of mark up for making
+equations and scientific documents.
+And to go from the image and reproduce latex code that you would need to generate that
+equation.
+Interesting.
+You can see as kind of a simple version of going from the image of something to a structured
+representation of kind of the underlying information in the picture that you could then do further
+information extraction on.
+So we wanted to adapt that idea to this problem of information extraction from tables.
+So given the image of a table, that was, and we're restricting here to kind of somewhat
+of a toy problem where we assume the table is generated from latex in the first place
+from a latex document.
+And so the problem is can we regenerate the latex code that would reproduce that table exactly,
+kind of pixel level, exact.
+And so that's another thing I'll be talking about.
+We had a fairly impressive results for that.
+The kind of the exact match rate isn't so high, and it's 40%.
+But the errors are even when it makes errors that are pretty minor.
+So this seems like an interesting line of work that we're saying.
+And the last thing was extracting data from scatter plots.
+So in a document, they'll offer me scatter plots or plots containing information.
+And we found ourselves once or twice with the ruler trying to figure out exactly what points
+are represented in this chart, lining up the point with the axis.
+Right.
+Right.
+It seems like, boy, this should be automatable with all the computer vision technologies
+we have now.
+And this was an interesting thing where we actually thought that this was close enough to something
+we could make a product out of that we kind of went straight for what's the most direct
+way to solve this problem without, you know, it's very tempting to try to make kind of the
+end-to-end solution that are, you know, so striking these days with the neural networks.
+Like for instance, the image of the table to the late echo that produces that would be,
+I consider that an end-to-end solution.
+But so we were tempted to make the input, the chart and the output just be the list of
+points in one fell swoop.
+But it seems to be a little bit too hard for right now for us.
+So we broke that down into a pipeline of steps.
+Each one of which was just using off-the-shelf techniques, start with kind of image recognition
+to find the components of the charts.
+Then we used some various heuristics to put them together and at the end, I could do a fairly
+good job of extracting the data from scatterplots and currently we're working on pie charts
+and next I guess we bar charts and line charts.
+And I mean the goal is to solve the problem in this particular case rather than to come
+up with a very kind of one shot end-to-end solution.
+Right, right.
+So the first of the problems you described was just really localizing these graphical
+the tables.
+The tables in particular or any kind?
+Tables and charts.
+Okay.
+But we were focusing particularly on the tables initially.
+Okay.
+And if you're just looking at tables and charts like I'm curious, how much of the PDF internals
+do you actually use or do you just like take a picture of the page essentially and do
+your image recognition on the page itself?
+Yeah, good question.
+So the punchline is that it can do just fine using just the picture.
+So if you treat each PDF page as a picture just render it and use that as input, that
+works just fine.
+Initially, we were concerned that it would be too hard.
+So we tried to use a part of the PDF to simplify the image.
+So for instance, we figured it doesn't really know you to know exactly what characters
+are there.
+Maybe just needs to know the character type, like letter versus number, this sort of thing.
+Okay.
+You know, render a simpler version of the page that would be easier for the object detection
+system to learn from.
+But it turns out it works just fine with the rendering of the raw.
+I mean, sometimes one works a little better, sometimes the other works a little better,
+but it can go directly from the rendered image.
+So the result of this first step is just, you know, is it like a bounding box and a label
+that says table or chart or?
+It is a bounding box.
+And it sounds, when I first heard about it, I felt like this sounds so easy.
+Why?
+I'm sure everyone's thinking that.
+And it mostly is, but the issue is that, you know, if you don't get the bounding box
+exactly right, if you leave off a column or leave off some of the header, or you don't
+properly separate the headers from the rest of the table, which is another part of finding
+the table in the first place, then the entire extraction is messed up.
+And we don't, and kind of 95% accuracy isn't really good enough.
+So it's always about the, again, if I had pictures, I could show you some.
+So at the, if you go to the presentation, we could show you some really weird looking
+tables that heuristics just will fail on.
+This is actually really, really easy for me to visualize.
+And the reason why is because I often use my cell phone camera to take pictures of receipts
+or pages or things like that.
+And the particular app that I use, you know, whether it's there or several that I use,
+ever notice one cam scanner as another, but these apps will try to, you know, do exactly
+what you're describing, like draw a bounding box around the document and then like use
+that to like, you know, rewarp it or straighten it and crop it from the background.
+But it is uncanny the mistakes that these things will make and how, you know, I don't think
+the accuracy is anywhere near 95% on, you know, what, you know, even if I've got the
+paper on a black notebook or something like that, like it's still seems to be a challenging
+problem.
+And, you know, it's perhaps complicated by the fact that it's running on a mobile device,
+I don't know.
+But I can certainly imagine if you now, kind of, you know, you don't even have the benefit
+of the back, the contrasting background, you've got all different kinds of, you know, shapes
+and sizes of tables and, you know, adjacency of one table to the next.
+And, you know, I can, I can, you know, I said, is it, you know, just this issue of creating
+the back, the bounding box, but as you're describing this, I can imagine all of the complexities
+associated with getting this right.
+Right. And, and you nailed one of the challenges, which is when tables are adjacent, the problem
+of multiple columns, you know, there's often two column or three column documents.
+Yeah, I, I think you appreciate the, it's harder than it sounds, it's harder than it
+sounds.
+Is this a system that you've, you've tried to, or gotten to the point of operationalizing
+it, or is this, this is deployed, this is deployment.
+So this is in, this is kind of in the pipeline, helping people, either it's assisting people
+to annotate documents, so someone will load the document, the document will be kind of
+pre annotated with a guess by this system of finding the tables, and then a human can
+approve or edit those annotations.
+And then for some classes of documents, it's just straight pass through with no human
+oversight needed with decided.
+And that was, and that was going to be my exact question like, do you, you know, are
+you utilizing a model where you identify like a, or you kind of surface when, when the system
+isn't sure to the user and allow the, you know, that human in the loop to kind of make
+the final decision when there's some uncertainty or, you know, does it have to be kind of all
+or nothing?
+It sounds like, it sounds like you are kind of doing that, you know, taking that middle
+ground where you're surfacing the, you know, where there's some ambiguity.
+Right.
+So, yes.
+So I think what one thing that you seem to be speaking about is where the system will perhaps
+based on, you know, what it sees, and it will give a measured response.
+Like, you know, I think this is the bounding box, but my confidence is low or, or they may
+give a numeric score to the confidence or something.
+And then the ones that are low confidence will be highlighted to a user.
+But we feel see for with for now is finding classes of documents that overall have a very
+high performance kind of above human level accuracy or precision recall measures.
+And as a group, those will be kind of passed through because the issue with confidence
+is that you have to trust the confidence measure, you have to trust the confidence score.
+And so that would have to be kind of assessed on its own.
+Okay.
+So, how are these classes of documents described?
+Like is it, you know, all of the, you know, S1s for a major fortune, you know, 500 companies
+all kind of look the same or all of AT&T's, S1s, we've got good performance on or that
+kind of thing.
+Right.
+Yeah.
+It's like a class of documents, like, filings of a certain type, for example, that have
+such a certain regularity to them.
+And the performance is very high that will kind of shun those to automatic pass through,
+which is to say doesn't need a human oversight.
+Okay.
+And it sounds like by implication, then when, you know, when the system's nailed a document
+class, yeah, it's confident, well, you know, aside from confidence, like it, it performs
+extremely well, like, you know, above human levels of performance on every document in
+that class, there's not a lot of variability within the class.
+Yeah.
+That's the idea, right?
+You'd like a more fine-grained certainty measure that one could leverage.
+Yeah.
+I mean, I don't know that it's like, I guess I would expect that within, even within
+a document class, there are still ambiguous situations.
+And I would expect you to want to somehow kind of surface that ambiguity.
+But you don't want to do that.
+You want it to be kind of all or nothing, and I'm really trying to get into the thinking
+there.
+Well, I, you know, it's interesting.
+I think part of it is the way our annotation system works, but the annotation system works
+at the document level.
+So a doc, maybe 10 to 50 pages, and in some sense, we either have a person annotated document
+or we don't.
+At this point, don't have a kind of page-by-page decision on whether it will be annotated.
+Okay.
+So I think that's that part of it.
+That's a bit of it.
+Perhaps an idiosyncrasy of our setup.
+Right.
+Right.
+So if you had, if you could just throw ambiguous pages on a stack and, you know, someone
+goes through those page-by-page, then that might have changed the way you approach that
+piece.
+I think that's right.
+Yeah.
+Although I think, I think being able to trust a confidence score is a interesting problem
+in and of itself.
+You know, it's, it's very, you know, most, most machine learning methods these days output
+something that you are tempted to interpret as a probability, but whether those, oh, for
+a probability of, for classification, for instance, probability of being a cat versus
+not a cat.
+Mm-hmm.
+That's sort of things.
+Right.
+But whether those probabilities are calibrated in the sense that it will actually be right
+that number of times, if, when you predict cat is, that has to be confirmed.
+That's just because a method gives a probability score doesn't mean that's actually the probability,
+I guess.
+Right.
+Right.
+There's an implicit weighting of kind of trusting that confidence versus like assuming
+that it's 100% and kind of pushing those documents through like how is, I don't have
+an intuitive feel for why that trust is any, any better than, you know, even in the case
+where you've got general high level of trust in a class, like, you might, you know, in
+that case, seems like there'd be information in a low confidence, an exceedingly low confidence
+level for a document.
+Right.
+So I think you have the impression.
+Which do we have in better?
+Yeah.
+So I guess, I guess that's all I'm saying.
+So we have a class of documents, which without any information about the individual page
+or the individual document, the overall performance will be, say, 98% precision and recall while
+human is 97 or 98.
+Okay.
+So match or exceed human performance.
+And then you're pointing out, maybe we could do even better by going page by page and
+highlighting the ones that are somewhat less certain and maybe sending those to a human
+and then we can do even better overall.
+Yeah.
+Right.
+Yeah.
+Right.
+Yeah.
+I appreciate you.
+I appreciate you putting it like that.
+It's certainly not my job to, there's often a way to do better.
+But then there are, you know, the trade offs that, you know, come with trying it with doing
+that.
+And if you've achieved a level of performance that you need for your use case, then, you
+know, great.
+Yeah.
+So for the past through the, it's not even 97, 90, it's like essentially a hundred.
+Oh, really?
+Yeah.
+Yeah.
+For the 96, 97, I think they're still good at humans.
+I could, I'm not 100% sure, I'd have to double check that.
+And so another kind of thought that I'm wondering if you are thinking about it and tracking
+is the whole kind of adversarial attack conversation and like, you use some scenario where, you
+know, a company kind of, you know, manipulates the presentation of their data to, you know,
+change the way your parser interprets their charts and tables and, you know, somehow
+affect trades of Bloomberg customers.
+Like, I'm assuming that's something that you folks are thinking about.
+I mean, that's really important.
+So there's a little bit of that we've already seen where there'll be a document that if
+you look at it to the eye, nothing unusual going on.
+But if you parse it with a PDF parser, which tries to extract the text and stuff for you,
+but what we found is some documents will put incorrect information or confusing information
+in a kind of invisible font color.
+And so when you parse it, it's very difficult to figure out what's going on if you use
+like a PDF parser.
+But we've been able to get around those because we just use the rendering of the page.
+And so if the human can't see it, I mean, it can, let me just say that the network can
+figure out what are kind of relevant colors and irrelevant colors and that sort of thing.
+But we're not protected against kind of not necessarily protected against adversarial
+images that could mess up a network, but a human wouldn't see.
+I mean, I don't know how that would work through after being printed out and stuff, I assume
+it would.
+But yeah, of course, we've seen, I assume you're talking about these pretty cool examples
+where there'll be a picture that's clearly a cat and the classifier will give it 99%
+confidence that it's a car or something like that.
+Exactly.
+Exactly.
+That's really interesting.
+We have noticed things like that happening, but it's definitely something we need to keep
+it I have for.
+Yeah.
+I like the way you describe the tricks that folks do with like kind of background colored
+text makes me think of, I just struck me that like in some ways you can think of like
+fine print and some of these things as like adversarial attacks against a human brain,
+right?
+It's like things we do to like, you know, present information so as to missly the
+reader.
+Right.
+Right.
+So the first part is identifying these tables and charts.
+The second part is then parsing the tables and you talked about, you know, some of the
+challenges associated with that as a high level over there.
+You know, where did the kind of the bulk of the work on that particular piece take place
+or were there any like major, you know, what were the major challenges that you had to overcome
+on that, the table interpretation part?
+The finding the tables part or the late tech, the late tech extraction, the reverse engineering
+the tables, I guess.
+Right.
+Right.
+Right.
+One issue is that the images are just bigger.
+There's just much more information in a table potentially than in an equation that which
+has a lot of information, but a table is just can be a whole lot of numbers.
+It could be quite large.
+And there we get into kind of memory issues with these convolutional neural networks.
+When you're training, for instance, if you have, you know, a large input image, you're
+restricted to how big a batch you can use at one time and this will slow down training.
+And so the first challenge is that these things, you know, we're taking two weeks to train,
+which is, you know, it's hard to iterate on a problem when it takes along the train.
+So we did some work at that.
+We happened to have to have received the new Nvidia GPUs at that time.
+So that had 16-bit kind of floating, 16-bit floating point capabilities which are kind
+of theoretically going to be twice as fast and you can kind of have too many weight-storted
+memory because you're only using half as many bits for them.
+So we spent a lot of time trying to adapt to this 16-bit technology so we could have,
+you know, the speed up and the kind of access to put more stuff in memory, but it turned
+out to be much harder than we thought it would be.
+There are a whole bunch of kind of technical issues when we represented our weights in
+our network with only 16 bits.
+And it turns out we weren't alone.
+It turns out this has kind of been, it's kind of a known issue at this point that you don't
+really want to store everything in 16 bits.
+You can do some calculations in 16 bits, but your weights eventually should be stored
+in 32 bits.
+So we spent a lot of time kind of working through that problem.
+And what we're working on now is, I mean, so what's the basic issue with this table to
+latex is that it looks fine, but it doesn't really work that well if you're going for an
+exact match and we're going for an exact match, you know, 40%, that's 40% correct.
+That's pretty low by any of those standards.
+The equations were kind of more up like 80% exactly correct.
+So I mean, and this is ongoing work.
+Is your measure of correctness?
+Is this like pixel, like, you know, pixel overlay or is it something else?
+So is it more information based, I guess?
+Right.
+Yeah.
+So it's not information based.
+During training time, we're just trying to maximize kind of the likelihood of the
+correct latex, but that's training time.
+But when it actually comes to evaluation, we're going for exact pixel-to-pixel match.
+So it's binary.
+You either got it exactly correct or not.
+So what that means is, the inputs the image of the table, the outputs a string of latex
+tokens, which feed that string into a latex compiler, it renders an image.
+And then we compare that image pixel by pixel to be original image.
+And if it's an exact match, it's correct.
+And otherwise, it's incorrect.
+And why do you care about that?
+Why do we care about the exact match?
+You know, why is your bar, I guess there are multiple ways to ask a question like, why
+do you care about kind of the latex representation?
+Why do you care about pixel-to-pixel match?
+You know, why is it just that you've extracted the, you know, the rows and columns of data,
+the headings, the text, the numbers, all that stuff?
+Okay.
+So there's a few things in there.
+Let's see.
+So latex, I don't care about latex per se, latex is kind of a stand-in for a structured
+representation from which it should be easy to do the things you said, extract the rows
+and columns and that sort of thing.
+So why latex, we happen to have access to a huge collection of real world latex documents
+that have tables in them.
+And so that's kind of our label trainings that we went to archive, we scraped out all
+these papers, we found almost a half million tables with the original latex.
+Oh, nice.
+Yeah.
+So I mean, we could have generated artificial tables, but it's really better to work with
+kind of real live natural data.
+So that's, that's part, that's basically how we ended up with latteque.
+Then the question, why do we care about exact match?
+And well, one reason is expedience, which is that it's easy to do and it's actually quite
+difficult to figure out how you would score something that's not an exact match.
+I mean, you could do it in the image space where you then you have this kind of, the image
+is not an exact match and then if you want to rate it by how off it is, you'd have to
+kind of do some alignment and find, it seems like a very complicated problem in itself.
+And then, and then you're asking, what about just measuring how it does a downstream task,
+which is just finding the data, like extracting the data from the latex and, you know, are
+the numbers correct or the headers correct?
+And that would be possible.
+That would, it's still very difficult to score.
+We actually have the same problem with when we're extracting data from scattered plots,
+you know, there's 60 points in the chart, the system finds 57 and the points, you know,
+have to root the amounts of error ranging from 100% to, like by celebrating back there.
+Yeah.
+Sorry about that.
+Yeah.
+Is it kind of a, awards thing going on just starting now next door to me.
+So it sounds like in both the table and the, the scatter plots, you're using the visual
+domain and visual domain accuracy is really, it's just a connection.
+Convenient intermediary for you to be able to test whether you've accomplished the goal,
+whether you're able to replicate the system and because, at least in the case of the tables.
+And I think you're doing the same thing with the, the scatter plots because the table that
+you're generating or predicting is generated via via a structured representation.
+It doesn't really matter what it is, but you happen to have training data that's
+in the tech because you're generating it via a structured representation.
+You know that, you know, downstream, you'll be able to pull the data out the way you
+need to.
+That's, that's right.
+Also, it's, it's convenience to do in the image domain, but also it's, it's hard to
+know exactly what downstream tasks we're going to want to do on the structured representation.
+And maybe there's important information in that boldface versus italics, which you might
+think isn't necessarily part of the core information of the table.
+So the harder tables to extract, a lot of that complexity comes from things like hierarchical
+column headers or row headers or cells that span multiple rows or columns.
+And this is actually difficult to represent in a, it's difficult to score the performance
+on those sorts of mistakes, like what if it didn't properly represent the cell spanning
+to column headers or these sorts of things.
+So I guess, yes, it comes down to simplicity, but also it just not being exactly clear
+how, what else we would do, how else we would score in a way that would be, you know, good
+for any possible downstream task we'd want to do.
+Yeah, now that makes it, that makes a ton of sense, that makes a ton of sense.
+Awesome. So you, in your presentation, you kind of go through these three sub projects.
+Yeah.
+Were there any closing or parting thoughts that would make a good wrap up for us here?
+Well, I guess one, one thing that people often wonder about is, what about all these people
+who are labeling documents and now are they going to be automated away?
+And we're really not worried about it, not because we don't care about people's jobs,
+we absolutely do.
+But because the people doing the labeling are actually often fairly highly trained and
+we'd, we'd love to have them working on harder and deeper problems that they'll have
+time for once the more, the problems that a computer can solve are solved.
+So, you know, questions about we can find the data and then we can flag things that are
+unexpected, then the human can go and tag the unexpected behavior with perhaps linking
+to a possible reason why.
+These sorts of things are more still human level tasks that's not clear are automatable
+in the near future and kind of automating the menial tasks will hopefully be humans
+free to do the tasks that we don't yet know how to automate and maybe are more like specific
+to needing human intelligence at least for now.
+And it sounds like in the example you gave more valuable.
+Right.
+Awesome.
+Well, David, you've been very generous with your time.
+Thank you so much for chatting with us.
+It's been my pleasure.
+Thanks so much.
+All right, everyone, that's our show for today.
+For more information on David or any of the topics covered in this episode, you'll find
+the show notes at twomolei.com slash talk slash one, two, six.
+Thanks once again for listening and catch you next time.

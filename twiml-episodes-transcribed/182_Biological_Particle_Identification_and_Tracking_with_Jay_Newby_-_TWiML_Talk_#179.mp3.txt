@@ -1,0 +1,518 @@
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+people, doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington.
+In today's episode we're joined by Jay Newby, assistant professor in the Department of
+Mathematical and Statistical Sciences at the University of Alberta.
+Jay joins us to discuss his work applying deep learning to biology, including his paper,
+deep neural networks, automate detection for tracking of sub-micron scale particles
+in 2D and 3D.
+In our conversation, Jay gives us an overview of particle tracking and a look at how he combines
+neural networks with physics-based particle filter models.
+We also touch on some of the unique challenges to working at the micron level in biology,
+how we evaluated the success of his experiments, and the next steps for his research.
+A couple of quick meet-up related updates for you.
+Our next Twimble online meet-up is coming up on September 19th and will feature David
+Clement presenting the paper DeepMimic, example guided deep reinforcement learning of physics-based
+character skills.
+This should be a fun one and I encourage you to join us.
+Next up, our second session of the fast.ai study group is starting soon.
+If you've got some coding experience and would like to learn state of the art deep learning,
+this is a great way to do it.
+To join either of these programs, please sign up for the meet-up at twimbleai.com slash
+meet-up.
+All right.
+On to the show.
+All right, everyone.
+I am on the line with Jay Noobie.
+Jay is an assistant professor in the Department of Mathematical and Statistical Sciences at
+the University of Alberta.
+Jay, welcome to this weekend machine learning and AI.
+Thanks, Sam.
+I'm happy to be here.
+Awesome.
+Well, let's get started by having you tell us a little bit about your background and
+your research focus.
+Thanks.
+My background is applied math, specifically modeling, biological phenomena.
+I study small things that move in small spaces, so small things can be pathogens like virus
+or bacteria, they can be biomolecules.
+For the most part, I study things that are moving around inside of cells, but I also study
+extra cellular spaces too.
+These tend to be spaces that are on the scale of a micron, and the objects can be anywhere
+from a few nanometers on up to several microns.
+One of the hallmarks of motion at this scale is that objects when they're in a fluid
+like inside of a cell, they move randomly, and so my area of mathematical focus is
+stochastic processes, and these are dynamical systems that have random elements, so something
+that's changing randomly through time, and that describes the motion of molecules and
+small objects in living systems.
+My PhD thesis was on modeling molecular motor transport.
+Molecular motors are, they are molecular machines that move things literally.
+They burn energy, fuel to move objects, cellular resources, large distances.
+We studied that in neurons, neurons are unique among cells because they have to cast this
+very wide net, they have to cover so much space to construct neural networks, and that
+requires actively moving cellular resources around, and we studied the role of molecular
+motor transport in learning and memory, and that's what led me to study particle tracking.
+When you say particle tracking, what specifically are you referring to, or is there a specific
+type of particle that you're interested in in this research?
+Particle tracking really refers to taking images with the microscope of these small objects
+and small spaces, so this can be the cells, to virus, to many different things.
+We take videos of these objects moving, and then we localize the center of the object
+through time and track its motion.
+From that, we can learn many things about hidden factors, things we can't see about, for
+instance, the fluid of a cell or of a mucosal barrier, mucosal barriers, by the way, they
+defend us against infections and, among many other things, so we can learn things about
+stuff we can see by analyzing the random motion of these particles, but we also learn things
+about the objects themselves.
+For instance, we might be interested in how bacteria move around in mucosal barriers, because
+as we know, there's this very rich ecosystem that we're becoming aware of, that live in
+our GI tract, our lungs, and they play this very symbiotic role in our physiology.
+Really, this task of particle tracking has many different applications in biology.
+Your research is using images and neural networks to do this tracking.
+Can you talk a little bit about the origins of that work?
+Have you been using images and neural nets for a while?
+Sure.
+My background, as I said, isn't in image analysis or machine learning.
+When I started a post-doc at UNC Chapel Hill with Greg Forest, I was working on many different
+projects, and at the root of all of these projects, the data source, it was all particle
+tracking data.
+We would take this particle tracking, which consisted of what we call position time series,
+so X, Y, Z, T, basically, for a list of different particles, and then we would apply stochastic
+modeling to try and learn things.
+It became apparent to me that I needed to really study how this was being done, because
+it's this mixture of software-assisted tools based on traditional image analysis and
+really, really heavy human interaction, so it's a very labor-intensive process.
+As I learn more about how particle tracking software worked, I started to think about
+ways to automate it.
+That's what led me down the road to learning about convolutional neural networks.
+It's kind of a weird road.
+My PhD advisor had done a lot of research on modeling visual cortex, specifically explaining
+how visual hallucination patterns form through various perturbations, like drugs or injury,
+and how those form in the visual cortex.
+It's vaguely aware of how neural networks in the visual system worked and are organized.
+I found it was one of the most amazing things reading how these things were actually trained,
+that these feature, the sequential layered pattern matching was spontaneously emerging from
+the training procedure.
+I tried to apply that technology to the particle tracking task, because what is very time-consuming
+about particle tracking is a very mundane task that humans are really good at doing over
+short periods of time, and that is just staring at a screen at a fixed image and pointing
+out bright blobs.
+I mean, it's a very tedious job, and it's usually left to students and lab technicians,
+and it's very time-consuming.
+The patterns, the way these show up in a microscope image, well, I should back up.
+First of all, for virus, typically are around 10 nanometers to several hundred nanometers
+in diameter, and almost all of them are below what we call the diffraction limit, meaning
+that we can't resolve them with ordinary light microscopes.
+They show up as blurry blobs, sometimes with these diffraction, like these wavy patterns,
+so picture a, dropping a pebble in a pond, and then freezing that, you know, the ripples,
+and then putting them around the bright blob.
+That's kind of what it looks like.
+It's called an airy disc, right?
+So you get these super-imposed particles with little waves around them, and then you
+have to find the center of those patterns, right, where the particle center is.
+And when the wave-like patterns intersect, sometimes, that can really throw off a particle
+tracking software and generate lots of false positives.
+So the patterns are relatively simple, however, a microscope images do present some unique
+challenges.
+So first of all, we're talking about biological fluorophores that emit light that we are
+trying to detect with the microscope, and they emit very small amounts of light.
+We have to have very sensitive cameras that detect, and they're getting very, very good,
+they can detect upwards of 98% of the photons that they're being exposed to.
+But that comes with the price, and that is very low, what we call signal-to-noise ratio.
+That's a common term, I think, that people understand.
+So these images are very noisy.
+So the patterns might be simple, but the conditions are very harsh.
+So I did an interview not too long ago with a guy named David Van Veilin, who's doing
+something very similar at the cellular level.
+He was using, I think, kind of the annotation software that he was using before he started
+looking at applying CNNs was something called Atlas Toolkit.
+Have you heard of that?
+Or do you use something similar?
+I've heard of the Atlas Toolkit, I haven't used that.
+I'm aware of David's work.
+I tried before encountering his paper to do a similar, the very similar thing, and that
+is a cell segmentation.
+It's a very similar idea to track cells as it is to track particles.
+It's very difficult to do the segmentation part of that to distinguish one cell from
+another as individual entities when they're very close together.
+That's a big challenge.
+I just started my group here at the University of Alberta, and that's one of the directions
+that I would like to go.
+There are many, many people I've talked to that are very interested in being able to
+do cell tracking.
+So there's a lot of opportunity, I think.
+I think this is a great playground for people more broadly interested in object tracking,
+because the patterns are very simple, so it's a great way to do a lot of experimentation
+and to also have an impact on the scientific community.
+So with your work at the particle level, I imagine that segmentation comes into play
+in addition to, it sounds like you're trying to maybe relate some particles between frames
+and maybe determine motion vectors and things like that from one frame to the next.
+That's right.
+Yes.
+We try to do that in a way that is as robust and widely applicable as we can.
+But we also have the option to bring in physical models.
+This is where my background is as stochastic processes, in stochastic processes comes
+in.
+It's hard to write down a really physics-based model for the motion of a person, for example.
+But we can write down very good models for the motion of a molecule that's undergoing
+brownie and motion, the classic example of a stochastic process.
+It's the drunkards walk.
+You imagine that at every time point, you roll the dice, the proverbial dice, to figure
+out where you're going to step in the next instant, and how far you're going to step.
+And you assume that you're not going, you don't have a bias or a preference to go in any
+particular direction, and so you will just wander about aimlessly.
+And that is what we see particles doing in these videos.
+So it's a very concrete and direct and invaluable mathematical model.
+We can do this for even more exotic, say, for example, molecular motors, which sort of
+processively move in a particular direction and other things as well.
+So the tracking through time has its own unique challenges, but of course, the main principles
+are very similar to tracking of sort of the macro human scale objects as well.
+One of the recurring themes that I've explored on the podcast is this idea of combining
+neural networks deep learning with physics-based models, and it can be challenging.
+Can you talk a little bit about how you went about that?
+Well right now, we can apply methods separately.
+So we do like a first we'll run the CNN and do object recognition, find the centroid
+of all the particles, and then we kind of have this separate tracking step.
+Now the tracking step can also employ machine learning methods like hidden Markov models,
+easy and networks, basically particle filters, and that's an unfortunate name conflict, right?
+The particle and particle filters is not the same as particles and particle tracking,
+but those ideas are the same.
+So those physical models port directly, these stochastic models of the motion port directly
+into those methods, then everything is an optimization.
+And we can even infer things that are hidden things that we don't see, such as the hidden
+state of a bacteria which uses a flagella like a motor to move around actively, and they
+spread out much more quickly this way.
+And so we can determine if a bacteria say is using its flagella in a certain way, or
+if it's just passively sitting around, and it makes a very powerful tool.
+And what's great about it is all the physical assumptions, right?
+These are very important when you're writing a scientific paper.
+You want to explicitly say all these assumptions that you make in your analysis pipeline, and
+when you use a method like this, they're all in the model, all in this physical model,
+right?
+And then everything is an optimization, just using standard basing statistical tools, everything
+is an optimization, finding the best parameters, the best fit for that model.
+You mentioned particle filters, can you explain what those are?
+Physical filters, they're basically a way of taking observations and inferring hidden
+factors that are, so you might assume that you have, I think the classic example is
+a GPS detector in a truck, and so you would like to be able to get an inference of the
+truck's position based on the noisy GPS recordings.
+So you have some sort of model that relates the GPS recording to the truck's actual position,
+but also where the truck has been in the past influences the inference of where it is
+in the next sort of like time step.
+And so you have an observation model, an emotion model, and you build these all in together.
+So from the neural network perspective, I think the closest analogy maybe is the recurrent
+neural networks, which use kind of like information about the past, the most recent past to make
+inferences about the future.
+And so given your familiarity with David's work and some of the audience's familiarity
+with that work, I'm wondering if there are specific unique challenges that you encounter
+here working at the micron level?
+Yeah, there are many challenges.
+One being that the microscopy sort of developed alongside in the computer age, regular
+photography, I guess you could say, or video compression.
+So all the formats and everything are, there's a million of them and they're all different.
+So it's difficult to work with the data most of the time, everything is uncompressed so
+the data says can be quite large.
+And add to that the difficulties of imaging biological entities that are very dim in
+their emitting very low levels of light.
+And so you also have to deal with very low signal noise ratios.
+So we actually also do 3D video microscopy.
+And that is another unique challenge here.
+And so how do you apply this convolutional neural networks to 3D videos and to also extract
+useful information there?
+So this 3D video sets, of course, are much larger than their 2D counterparts.
+So we have to actually build up special tools to be able to work with those.
+And in the case of 3D, it's using stereo microscopes, is that where the 3D models come
+from or are they generated in a different way?
+So one of the projects that we're really excited about now is doing particle tracking inside
+living cells.
+And so we do 3D particles, we collect 3D videos, so we try to image the entire cytoplasm
+of the cell.
+And the cytoplasm is just the fluid on the inside of the cell.
+So the way this works is that the microscope has a stage, what's called a piezoelectric
+stage, which just has a motor that can move really fast and very accurate small movements.
+And so it moves that stage up and down.
+And then the camera just takes the images sequentially.
+So you kind of one layer at a time, you build up a 3D volume.
+And then it's like a typewriter, you collect one volume and then you restart the beginning
+again and collect the next volume.
+So and in that way, you get this time sequence of volumes that comprise a 3D video.
+One of the things that struck me in looking at some of the images of these particles is
+that they're very dense.
+And so there's a lot of occlusion, there's a lot of overlapping.
+How did you have to do anything special to deal with that?
+Well, the answer is yes and no.
+So that is a very difficult problem that you identified.
+So not only that, but the particles are appearing and disappearing.
+They're overlapping, including, but then they leave, they're too dim, they basically
+leave what we call the focal depth that we're actually imaging.
+And then of course, since they're moving randomly, they can come back in.
+So we have to be able to track them only while they're there and decide when they're
+gone.
+And the way the neural network does this, it sort of, it makes automatically does a couple
+of things that allows us to at least have a first start that doesn't generate any errors.
+Not perfect.
+So for example, when two particles overlap each other in 2D microscopy, what the neural
+network will do is just localize a single particle in that position, leading up to that or
+just after they overlap, one of the particles is typically dimmer or smaller, and the neural
+network will pick up only on the stronger signal.
+So what typically happens is we just stop tracking an object once two particles get close
+enough.
+And so it does chop short that particular particle track, and we might pick it up again later,
+but this is preferable to making errors and mistakes.
+So we can actually do things to correct for this on the linking stage where we assemble
+these centroids into tracks.
+And there's been probably 10 to 20 years of work on this problem, actually, some really
+great methods out there for this.
+So we're in the process of kind of building up this tool box to correct for these little
+things that we see.
+And one of the, so one of the other things I mentioned was the particles appear and disappear.
+So the neural network always outputs a confidence, right?
+It's not just a yes or no answer.
+It tells you how confident it is about a classification.
+We do, you know, foreground versus background, so it's just a binary classification.
+But when particles are dimmer and they're about to leave the field of focus, that confidence
+goes down, and so we can actually take that information into account when we're deciding
+how to link a particle in one frame with an observation in one frame with an observation
+in the next frame.
+And so you, you're using CNNs to do this.
+Does that mean that someone went through and manually annotated some number of frames
+in order to give you training data?
+Great question.
+So yes, somebody did do that.
+Somebody is, well, one of three people was me, and that was not the funnest thing I've
+ever done.
+But the funny thing is we actually didn't up using the hand annotated data.
+So in the lead up to this, as I was learning, frankly, learning about this technology, CNNs,
+how they work, experimenting around with them, I just built up synthetic data, just simulated
+the way that these videos looked.
+And over time that built up to be good enough that we were, when we trained the neural network
+with the synthetic data, I was never able to get anywhere close to the accuracy when
+I replaced that synthetic data with, with manually segmented data.
+So I don't know why, I don't know what the reason for that is.
+I think my guess is that it's because the ground truth was so absolute in the synthetic
+data set, and we were able to randomize the appearance and get the appearance accurate
+enough that we were able to get a robust neural network out of it.
+This is basically impossible, right, to do with human scale images.
+How to use synthetically create an image of a cat, I mean, that's a very hard problem
+in itself.
+But for the scale we were working on, because these objects tend to be below the diffraction
+limit, like I explained, these blurry, wavy patterns, they're relatively simple to create
+synthetically.
+Huh.
+Oh, that's really interesting.
+So what types of, you mentioned that you applied, presumably some kind of noise or filters
+to augment your data, or at least tune it to get as realistic as possible.
+What, can you elaborate on some of those things that you did?
+Yes, I, I, I randomized everything.
+So every sort of parameter I could think of, like how particle size details about the
+shape, I put random background patterns, random amounts of background noise, I tried
+to, to shotgun as wide a field of, of conditions as I possibly could so that, so that we could,
+we could in turn, you know, use this on, on, the idea is to automate this and, and what
+we found in, and extensively testing it in, for over about the last two years now, on
+data from dozens of labs, that it is a surprisingly robust to different conditions, the conditions
+that were outside of what we ever trained it on.
+For example,
+and just a point of clarification, are you saying that the training data that you developed
+is robust, and other people could build models against it, or the models that you built
+are robust, and they work with other people's images.
+The second, right, we saw, we've seen that the, the, the tracker is capable of accurately
+tracking conditions that we've received from labs that were beyond what we actually included
+in the training data, the synthetic training data.
+One example is tracking salmonella.
+These are about one to two microns in size, so they're above the diffraction limit, barely,
+and which means that we can actually resolve the shape, and they're rod shaped.
+So there, we trained everything to recognize, sort of like these, rotationally symmetric
+blurry shapes with the waves, and, and so as we, as we get images that have perturbations
+from that, from that rotationally symmetric pattern, we, we still get recognition.
+So we can track rod shaped, we've, we've tracked comet shaped objects, lots of different
+kinds of background, so we never trained it to ignore large, bright spots, these, these
+show up all the time, though, in experimental videos, but the neural network tracker evades
+those, it ignores those.
+So it's been surprisingly robust, and that's, that's really the key here of what we see
+this, this technology is enabling for us, it's automation.
+Do you think that the advantage of your synthetic data over the manual, you know, granted you
+said you're not really sure why, why it worked the way it did, but did you have just a lot
+more of it?
+Could it be explained by volume alone, do you think, or did you compare comparable training
+data set sizes, synthetic versus real?
+I, I don't think it was the size of the data set, we had a fairly large set of, of hand
+segmented data, it gets so, and this is part of the problem, it's very subjective, there
+are certain really bright particles that show up and, and there's no ambiguity, there's
+no mistaking what they are, but you start getting so particularly when the, when the particles
+get dimmer, they're about to leave the field of focus and reappear, it's a very subjective
+call, whether or not to label them as particles or not.
+So I think that that probably has more to do with it, the synthetic set is very consistent.
+So we, I tried layering in the, the hand segmented data with the synthetic data, with varying proportions
+and, and the performance always went down sharply with the amount of, of the hand segmented
+data that we used for training.
+I can't give a definitive reason why that's true.
+Huh, it's, it's very surprising relative to the way we usually think about this manually
+produced ground truth data.
+And, and also the, the degree to which the CNN models are, you know, they can be very
+sensitive to undesirable characteristics of the, your actual data, and so the simulated
+data that you think might be, looks great, you know, and close, totally confounds these
+models because it's missing some, you know, undesirable or very subtle nuance that is
+in the real data, so it's very interesting result.
+I completely agree.
+I was, I was very surprised when I learned about this technology, everything that I was
+learning, that, that real data was absolutely essential, just turned out, surprisingly
+not to be the case here.
+And so you developed the, the model, how do you, how did you combine the model with the
+tracking element?
+Oh, so how do I combine the, the output of the, of the convolutional neural net with the
+path linking?
+Yes.
+Right.
+Right.
+So right now they're, they're actually quite separated.
+So the first stage is, is processing with the neural net and then, and then we, we segment
+and what we call localized, which means just estimate the centroid of, of the spots.
+And that's all basically done with the output of the neural network.
+And then we take, you know, this disorganizer, a, a, un sequenced collection of particle
+locations at each frame and then we link them together.
+And that is, is, is done, the most robust and most widely applicable method is just to
+use something called the Munkres algorithm, which just says, I'm going to take two sets
+of objects and find the best match between all of those objects that sort of minimizes
+some, some cost in this case distance.
+So that's a, that's a classic tool and object tracking and, and we, we use an, an adaptive
+method.
+Again, we also have to decide when to stop tracking or when to start tracking a new object
+that's appeared and we do that with the confidence from the neural network output.
+But there are a lot of possibilities, I think, that are very exciting in, in machine learning
+or unifying both of these parts together and really taking the linking side and maybe
+using a stochastic model that's physically based or not, but using machine learning
+and training end to end, not just end to end in the CNN, but end to end between the,
+the object recognition and the object tracking side.
+How did you evaluate the ultimate performance of the experiment?
+What were your, the key metrics that you were tracking?
+So we, we looked primarily at the, the success of object recognition in, in, in, in our
+first paper.
+And so there was an assessment of, basically, false positives, false negatives, right?
+But also how accurately it, we detected the center of the particle, the centroid, which
+is important a lot of applications.
+So we, we did a combination of synthetic videos that randomized across a lot of different
+conditions so that we could sort of assess the robustness.
+And this was mostly to compare it to existing software that's, that's already out there
+to emphasize the software that, the currently existing software really requires manually
+tuning parameters on a per video basis.
+So we wanted to emphasize the automation part.
+So that's on synthetic training data.
+But we also of course tested it on experimental videos as well.
+And those were generated in samly's lab where we were tracking synthetic nanoparticles,
+virus, bacteria, and, and then assessing again, the, the, the object accuracy.
+Since then, we have a number of collaborations in, in over, around the last two years where
+we've applied this technique.
+And so we've, I guess, field tested it pretty extensively as well.
+You mentioned that when you incorporated the real data, your performance, dropped significantly.
+How would you characterize the performance differences between just applying the model
+to synthetic data versus real data?
+It's a great question.
+So, of course, the synthetic videos that we used to test it were minor alterations of
+the synthetic videos that we used to train it.
+So of course, it's going to perform very well on those, even though all the conditions
+are sort of randomized.
+The real data, there, there have been some surprises, little things where the neural network
+has failed.
+And so that's given us the opportunity to, to tweak things over time and improve things.
+For example, we noticed that sometimes there is this mixture of, of intensities, pixel intensity.
+So how bright the objects show up.
+So there might be some particles of type A and type B, for example, some that are very
+dim and some that are very, very bright.
+And the neural network would only track the bright ones.
+So that's something we had to go back and, and we built that into our synthetic video generation.
+So the workflow has been that we noticed something that the neural network doesn't quite
+do correctly, and then we go back and build that into this synthetic video generation
+and retrain.
+And that's worked really well for us.
+What are some of the next steps for your research group and in this research direction in general?
+Well, I mentioned before that we're, we're very excited about doing particle tracking
+inside living cells.
+This gives us a, a spatial temporal measurement of, of the, the entire cytoplasm of a cell.
+So we can measure things like crowding, confinement, viscosity.
+You have to remember that all of the chemical reactions, a chemical reaction is just molecule
+A molecule B coming together and they, they come together by random motion, by brownie
+motion usually.
+So they're moving through this fluid and in all of these things like crowding and, and confinement
+and viscosity, they influence the chemical reactions, all of them that are happening inside
+the cells.
+So this, everything that's going on inside physiologically of a cell is, it depends on
+this.
+And so this gives us a quantitative measurement of window into that, and to these conditions.
+Like I mentioned before, we're, we're doing 3D, we're collecting 3D videos for this.
+And one of the real challenges there has been to deal with these large data sets.
+So on a 2D experiment usually generates around 1 to 50 gigabytes of video data, where a
+3D experiment is, it's going to be roughly 10 to 20 times larger than that.
+So we're easily, a single experiment can generate, you know, terabyte or more of data.
+So we needed, so the, and 3D videos themselves are very large files.
+So we needed a way of implementing the neural network, right, that could handle these, these
+large videos.
+And we did this in, with cloud computing resources, we've been using Google Cloud, which has been
+extremely generous in supporting our commercial and our research projects.
+And we've been using Apache Beam to basically implement a map-reduced style processing
+pipeline to, to break up these videos and, and press them, process them once a piece of
+time.
+The great thing about Apache Beam and Google's data flow is that it dynamically manages
+the hardware.
+So if I have a, a small set, maybe I only need 20 CPUs.
+If I have a terabyte, you know, maybe I need a thousand CPUs over hours, and, and, and,
+dynamically instantiates those, those virtual machines and then shuts them down when they're
+no longer needed.
+We're also very interested in delivering this as a commercial web app that people can
+use.
+We want to, we want to empower biologists working in labs that typically don't have a technical
+computer science background with programming skills.
+So we needed, we needed to build something that's very easy to use, platform independent,
+could handle large sets of data.
+And so a cloud-based web app seemed like the best option for us.
+Early on in the discussion, you mentioned a couple of application areas.
+One was looking at neurons and the other was looking at some of these micromotors or
+cellular motors.
+Have you, did you learn anything through the development of the particle tracking system
+about the systems that you ultimately care about?
+Absolutely.
+That's ultimately what we're most excited about doing is learning, learning new things
+biologically speaking.
+So we have applied this to tracking these small fluorescent molecules, we call them gems.
+They are, they're actually synthesized by the cell.
+They're about 30 nanometers in diameter and we're looking at how cells basically programmed
+the cytoplasm, the fluid, that everything moves around inside in these fungal cells.
+They're called aspia, this is in collaboration with Amy Gladfelter's lab at UNC Chapel Hill.
+And what's special about these cells is that lots of different nuclei, many multiple
+nuclei share the same cytoplasmic space.
+They're called syncycia.
+Our typical picture of a cell is one nucleus with DNA, right?
+But syncycia actually are not that uncommon.
+We have them in our own bodies, muscle cells, for example.
+So it's an interesting question to understand how multiple nuclei coexist.
+They all have to undergo division like a cell with, there's a cell cycle and all those
+cell cycles conflict with each other if the nuclei are too close.
+So we are using particle trafficking to try and measure how the cytoplasm is regulated
+programmed in order to isolate these nuclei or maybe they cooperate, maybe they compete.
+We don't, we, there's a lot of questions that we are interested in answering.
+So this is an ongoing project right now.
+And we also study mucosal immunology.
+So we are interested in how virus and bacteria can penetrate a mucosal barrier which could
+potentially lead to an infection.
+So we discovered, this is with SAMLI's lab at UNC Chapel Hill in the School of Pharmacy.
+We discovered that these mucosal barriers actually trap virus by using antibodies, which
+is a potentially therapeutically exploitable avenue of protecting against infection.
+Do you already have some areas of further application of machine learning to your work?
+Absolutely.
+So one of the things I would really like to do is, is move to more of the human scale tracking
+world.
+And to keep going with object tracking, apply it to scientific problems, but to, to track
+say, fish or fruit flies or orbs in controlled laboratory settings where you want three
+dimensional information possibly from two or three different observation points.
+And there, I would like to be able to, to use mobile hardware to, to process this in
+real time, to process and track images in real time.
+Oh, really interesting.
+Well, Jay, thanks so much for taking the time to chat with us about what you're working
+on.
+I appreciate you walking us through it.
+No problem, thanks for having me.
+All right, everyone, that's our show for today for more information on Jay or any of the
+topics covered in this episode, visit twimmelai.com slash talk slash 179.
+If you're a fan of the podcast, we'd like to encourage you to head to your Apple or
+Google podcast app and leave us a five star rating and review.
+Your reviews help inspire us to create more and better content and they help new listeners
+find the show.
+As always, thanks so much for listening and catch you next time.

@@ -1,0 +1,1115 @@
+WEBVTT
+
+00:00.000 --> 00:15.920
+Hello and welcome to another episode of Twimble Talk, the podcast where I interview interesting
+
+00:15.920 --> 00:20.880
+people doing interesting things in machine learning and artificial intelligence.
+
+00:20.880 --> 00:23.360
+I'm your host, Sam Charrington.
+
+00:23.360 --> 00:27.600
+This show you are about to hear as part of a series of shows recorded in San Francisco
+
+00:27.600 --> 00:32.080
+at the Artificial Intelligence Conference, which was hosted by our friends at O'Reilly
+
+00:32.080 --> 00:33.920
+and Intel Nirvana.
+
+00:33.920 --> 00:39.200
+In addition to their support for the event itself, Intel Nirvana is also our sponsor for this
+
+00:39.200 --> 00:41.680
+series of podcasts from the event.
+
+00:41.680 --> 00:46.240
+A huge thanks to them for their continued support of this show.
+
+00:46.240 --> 00:51.280
+Make sure you check out my interview with Navine Rao, VP and GM of Intel's AI Products
+
+00:51.280 --> 00:56.640
+Group, and Scott Appland, Director of Intel's Developer Network, which you can find at
+
+00:56.640 --> 01:00.000
+Twimbleai.com slash talk slash 51.
+
+01:00.880 --> 01:07.120
+At the AI conference, Intel Nirvana announced DevCloud, a cloud hosted hardware and software
+
+01:07.120 --> 01:12.800
+platform for learning, sandboxing, and accelerating the development of AI solutions.
+
+01:13.440 --> 01:20.080
+The DevCloud will be available to 200,000 developers, researchers, academics, and startups via
+
+01:20.080 --> 01:26.400
+the Intel Nirvana AI Academy this month. For more information on the DevCloud or the AI
+
+01:26.400 --> 01:32.560
+Academy, visit intelnervana.com slash dev cloud for machine intelligence.
+
+01:33.360 --> 01:39.040
+In our talk, we take a super deep dive on the mathematical underpinnings of TDA
+
+01:39.040 --> 01:44.800
+and its practical application in software. Nerd alert, all right, onto the show.
+
+01:44.800 --> 01:57.440
+Hey everyone, I am here at the O'Reilly and Intel Nirvana AI conference,
+
+01:57.440 --> 02:03.200
+and I've got the pleasure to be seated here with Gunner Carlson, who is the president of IASD.
+
+02:03.200 --> 02:07.920
+Welcome, Gunner. Thank you. Great to be here. Absolutely. Great to have you.
+
+02:07.920 --> 02:12.320
+So why don't we start with having you tell us a little bit about your background and your
+
+02:12.320 --> 02:19.600
+areas of research? So I come from an academic background. I did my PhD in mathematics, and for
+
+02:19.600 --> 02:25.280
+the first 20, 25 years of my career worked very much in pure mathematics. Over time, I started to
+
+02:25.280 --> 02:30.080
+become more interested in how could we apply things that we were doing in the pure math side,
+
+02:30.080 --> 02:35.440
+down a shorter time frame, because oftentimes the applications have a very long, you know,
+
+02:35.440 --> 02:42.880
+long time to go. So I tried to do some things more quickly, and my main area within mathematics
+
+02:42.880 --> 02:47.280
+is topology, which is the study of shape. In a generalized sense, one can talk about shapes
+
+02:47.280 --> 02:53.120
+and higher dimensions, and so I wanted to apply that to the study of large and complex data.
+
+02:53.120 --> 02:57.600
+It turned out it led to a lot of things, basically a big career change. It wasn't just a little
+
+02:57.600 --> 03:03.680
+hobby thing. You know, we found that it was a very hot topic, both for the National Science Foundation
+
+03:03.680 --> 03:10.720
+and DARPA, the research arm, or the innovation arm within DOD. In the middle of that, we spun out
+
+03:10.720 --> 03:16.160
+a company, a Yazdi Incorporated, which is so commercializing the ideas coming out of there,
+
+03:16.160 --> 03:21.440
+and other things as well. So that's kind of where we are. I live in the Stanford campus,
+
+03:21.440 --> 03:26.000
+a math professor at Stanford, or a retired math professor at Stanford, I should say,
+
+03:26.000 --> 03:31.360
+and they've got the three grown kids who are in the area, and so. Yeah, awesome. So I'm like a busy
+
+03:31.360 --> 03:37.120
+guy. A busy guy, but I don't want to not be busy. Absolutely. Absolutely. So let's talk a little
+
+03:37.120 --> 03:43.360
+bit about topological data analysis and topology in general, which was a topic of a tutorial that
+
+03:43.360 --> 03:48.240
+you did here at the conference today. You mentioned the study of shapes. The first thing that comes to
+
+03:48.240 --> 03:53.600
+my mind is like high school geometry and trigonometry, but I imagine it gets a lot more interesting
+
+03:53.600 --> 03:57.360
+when you're talking about higher dimensions and lots of data. It is, on the other hand,
+
+03:57.360 --> 04:03.360
+sometimes what you can do is get very simple, small representations of complex data sets by
+
+04:03.360 --> 04:10.960
+the things, the simple things that you mentioned. So what we do is we represent data by network
+
+04:10.960 --> 04:15.520
+model. So when you think about mathematical modeling, one often thinks about algebra, one
+
+04:15.520 --> 04:21.520
+thinks about equations, one thinks about various kinds of equations and so forth. But maybe one
+
+04:21.520 --> 04:25.920
+should try to model data by something else, maybe something with a richer output than just
+
+04:25.920 --> 04:32.160
+equations. And for us, the output of our models is a network in the computer science sense that
+
+04:32.160 --> 04:38.400
+is nodes and edges. And it turns out to be a very useful, compressed representations and data sets
+
+04:38.400 --> 04:43.920
+for many different applications. Okay. Interesting. Now, when you say network and nodes and edges,
+
+04:43.920 --> 04:50.160
+I think of graphs, is this graph theory we're talking about? Well, one can view it in that way,
+
+04:50.160 --> 04:56.320
+but you know, a lot of times graph theory deals with very nitty-gritty local discussions of degree
+
+04:56.320 --> 05:00.960
+and so forth. Right. You know, this is sometimes thinking of it as a higher-dimensional shape. So
+
+05:00.960 --> 05:06.640
+for example, you know, a graph with four nodes and it might actually encode a tetrahedron rather
+
+05:06.640 --> 05:12.640
+than just its edges. And so we kind of think in those terms. So yeah, it is graph theory in some
+
+05:12.640 --> 05:16.720
+sense that in the sense that we study graphs, I would say that we do it in a way that's different
+
+05:16.720 --> 05:23.120
+from what is usually meant by graph theory in the math side. It's more a lot's meant by shape
+
+05:23.120 --> 05:28.640
+and topology on the topology side of math, if that makes sense. Okay. And so how does this all play
+
+05:28.640 --> 05:35.040
+into machine learning? One of the big things about machine learning is that it's great, but many
+
+05:35.040 --> 05:41.040
+people, including people like regulators, like MDs, you know, all the people that one might want to
+
+05:41.040 --> 05:46.560
+use it with often regarded as a black box. They regarded it as something which, you know, although it
+
+05:46.560 --> 05:52.000
+seems to produce good answers, they can't put their head around, understand where it came from.
+
+05:52.000 --> 05:57.600
+And that means that sometimes there's some difficulty in, you know, making use of it for those
+
+05:57.600 --> 06:04.560
+reasons. And so we view ourselves, we view the topological data analysis as, you know, a part of
+
+06:04.560 --> 06:10.560
+the growing area of machine learning. You know, we believe that it produces richer models than just
+
+06:10.560 --> 06:16.240
+simply classifiers or linear regression models that come out or clustering that comes out of machine
+
+06:16.240 --> 06:22.160
+learning. And so, you know, it's just augmenting and helping machine learning develop over time.
+
+06:22.160 --> 06:27.840
+That's how we view it. Okay. So I heard a couple of things in there. I heard one that the models are
+
+06:27.840 --> 06:34.800
+richer, and I'd like you to explain or elaborate on why that is, but I also heard that you suggest
+
+06:34.800 --> 06:41.200
+that this approach, the taking things from a topological perspective, aids in explainability. And
+
+06:41.200 --> 06:46.240
+that's a, you know, a huge issue for, you know, the, the constituencies that you mentioned,
+
+06:46.240 --> 06:51.680
+the regulators, but also, you know, a business that's going to depend on, you know, machine learning
+
+06:51.680 --> 06:56.800
+or artificial intelligence, whatever we want to call it. You know, they, they want more than just
+
+06:56.800 --> 07:03.280
+the box set it, right? You know, kind of walk us through, you know, the next level of what TDA is
+
+07:03.280 --> 07:07.600
+all about and how it lends itself to achieving those goals for machine learning.
+
+07:07.600 --> 07:12.240
+So let me talk about an example, you know, for the explainability part for the machine learning.
+
+07:12.240 --> 07:18.080
+So, and let me say, by the way, so what would produce a network? It can be viewed as a map
+
+07:18.080 --> 07:23.760
+of your data in a sense. And so, okay, you know, for us, we're working with a bank that had failed
+
+07:23.760 --> 07:29.120
+the stress testing, seek our stress testing process two years in a row. They had failed it in
+
+07:29.120 --> 07:35.520
+part, most part because they had produced machine learning models, which, you know, were
+
+07:36.560 --> 07:41.040
+reasonably, which were predictive, but which were non-understandable. That is to say, they came
+
+07:41.040 --> 07:46.640
+as a large vector of numbers, vector of coefficients, if you like, and regulators couldn't understand.
+
+07:46.640 --> 07:52.560
+So the stress testing process is the bank basically has to say, I've got this much reserves
+
+07:52.560 --> 07:58.160
+based on my risk, and I've got to justify that some kind of way, and they produced this model,
+
+07:58.160 --> 08:02.480
+but they couldn't explain what the model was doing. That's right. It wasn't explainable enough
+
+08:02.480 --> 08:09.440
+for it. That's correct. And so, for us, now, the model was actually based on a lot of
+
+08:09.440 --> 08:14.160
+features, a lot of macroeconomic and other kind of global economic indicators.
+
+08:14.800 --> 08:21.120
+And so, we built one of our models on that. And within that model, we found several hot spots
+
+08:21.120 --> 08:27.120
+for a correlation with revenue and a business unit. And, but more than one. And so, for each one of
+
+08:27.120 --> 08:33.760
+those, we might join one or two features from each of those hot spots, those groups. And let me say,
+
+08:33.760 --> 08:39.200
+and so the hot spot itself turns out to be a large collection of, you know, of these economic
+
+08:39.200 --> 08:46.320
+indicators, but they were understandable to the regulators. So we tell them, look, we have a
+
+08:46.320 --> 08:52.160
+model with four features, okay, first of all, much small. And then each feature is representative of,
+
+08:52.160 --> 08:57.840
+you know, some class of features, which are recognizable as similar or related by regulators.
+
+08:58.480 --> 09:03.760
+And that is what we would call, you know, an understandable model, a low-dimensional and
+
+09:04.400 --> 09:09.840
+annotation in terms of a group for each one of the features. Okay. I've got some questions.
+
+09:09.840 --> 09:14.240
+So you started out by saying you built, you were talking about their model and you said,
+
+09:14.240 --> 09:20.240
+you built a model on on that. Did you build your model on their model? No, sorry, no, no,
+
+09:20.240 --> 09:24.000
+we're building separate models. We're building their data. Building, you know, very,
+
+09:24.000 --> 09:28.240
+yes, on their data, but not on their model. That's right. We're building, you know, there, we
+
+09:28.240 --> 09:34.080
+involved many hundreds or even thousands of variables. You know, ours was, is a small number of
+
+09:34.080 --> 09:39.680
+variables. And each one is understood as being representative of a class of indicators,
+
+09:39.680 --> 09:45.200
+all of which have strong correlation. Yeah. It almost sounds like what you're doing is
+
+09:45.200 --> 09:51.920
+you're like semantically clustering the features. That's correct. And kind of ranking the features in
+
+09:51.920 --> 09:57.360
+their relevance to the prediction. That's correct. But here's the interesting feature in this.
+
+09:57.360 --> 10:01.120
+You might say, well, why don't you just take all the features and find the ones that are the most
+
+10:01.120 --> 10:05.520
+correlated? Right. You know, why do you need them? Well, the reason is that
+
+10:06.560 --> 10:11.360
+features are perhaps correlated with revenue for different reasons. And so you have different
+
+10:11.360 --> 10:16.240
+groups of things, which are correlated in different ways. If you put them all together, you know,
+
+10:16.240 --> 10:21.760
+you don't get nearly the same kind of explainability as you do when you have to separate them out
+
+10:21.760 --> 10:27.520
+and understand that, you know, each one is representative of a particular class of things that are
+
+10:27.520 --> 10:34.320
+similar. So that's the key thing there. So I get the example and I kind of get what you're doing.
+
+10:34.320 --> 10:40.800
+But still, how do you explain the TDA part of that? Like to at the next level of detail,
+
+10:40.800 --> 10:46.880
+what do we do? What do we do? Let me tell you. And again, this may get a little geeky,
+
+10:46.880 --> 10:53.440
+but let's go ahead. We love geeky. We love geeky. So, you know, the starting point for us is
+
+10:53.440 --> 10:58.880
+always a data set equipped with a similarity measure of some kind. So we encode that as actually a
+
+10:58.880 --> 11:03.680
+distance function, mathematical sense, which is an abstraction of ordinary distance that we have,
+
+11:03.680 --> 11:09.680
+you know, in the plane or in space. And is this is your distance function? Something that might be like
+
+11:09.680 --> 11:16.320
+your error function or is it distance of the, you know, your rows or your points within the
+
+11:16.320 --> 11:22.320
+data set itself? It's distance of one row to another. Okay. Yeah. And so, so, you know, a normal
+
+11:22.320 --> 11:27.360
+thing is supposing that it were, that we really only had two coordinates, you know, two or two
+
+11:27.360 --> 11:34.000
+features. Then my rows would be two vectors, you know, with two entries and I could compute their
+
+11:34.000 --> 11:38.800
+distance regarding them as being in the plane. And that distance would be, that would be a
+
+11:38.800 --> 11:44.160
+perfectly good distance that we could work with. Right. Now, the thing is that oftentimes for,
+
+11:44.160 --> 11:49.280
+you know, for different phenomena with more features, by the way, those formulas for distance
+
+11:49.280 --> 11:53.920
+and dimension two, they extend to any number of dimensions. So if I have a spreadsheet with numbers,
+
+11:53.920 --> 11:57.120
+you know, it doesn't matter whether I've got, you know, five or ten or even a thousand
+
+11:57.920 --> 12:02.720
+fields, it's all for good. You can go ahead and compute with it. But supposing that you're in a
+
+12:02.720 --> 12:09.280
+situation instead, you know, like you are in the study of genetics, where you have long sequences
+
+12:09.280 --> 12:13.840
+and an alphabet of symbols, you know, you want what you might do is you might take the two sequences
+
+12:13.840 --> 12:19.520
+and say, well, how many spots do they differ in? I keep a count of that. And that is a distance or
+
+12:19.520 --> 12:25.040
+similarity measure as well. That's one that wouldn't be using that context. So in fact, you know,
+
+12:25.040 --> 12:29.280
+for us, there are sort of many different choices of these distance functions, there's libraries
+
+12:29.280 --> 12:33.840
+of them and so on. But, you know, I've just given you kind of two important ones. The first one
+
+12:33.840 --> 12:38.240
+would be called Euclidean or general Euclidean. Second one would be called hamming. So it's called
+
+12:38.240 --> 12:43.760
+correlation angle and cosine and so on. So there's a lot of variety of them. But the idea is always
+
+12:43.760 --> 12:50.160
+to get at some notion of similarity of data points. So where the distance is small, we regard the
+
+12:50.160 --> 12:54.960
+data points as similar. And if they're far apart, we regard them as dissimilar. So maybe let's take
+
+12:54.960 --> 13:04.800
+this back to your example with the bank, you know, given a data set that consists of macroeconomic
+
+13:04.800 --> 13:11.280
+factors and transactions, perhaps and portfolios and the like, like, what does a distance mean in
+
+13:11.280 --> 13:15.520
+that context? So all those things though are their numbers, their hearts. So this is really just
+
+13:15.520 --> 13:20.880
+a spreadsheet. So I could do the Euclidean distance there. I think there's a variant on Euclidean
+
+13:20.880 --> 13:24.800
+distance, which is called, you know, variance normalized Euclidean, which means that if you've
+
+13:24.800 --> 13:29.360
+got some variables that have much larger range than others, you might want to make those ranges
+
+13:29.360 --> 13:33.840
+the same so that the one variable doesn't swamp the others. But fundamentally, it would be the
+
+13:33.840 --> 13:37.760
+first one that I talked about, you know, in the notion of Euclidean. Yeah. But I guess maybe the
+
+13:37.760 --> 13:46.080
+question that I'm asking is does Euclidean distance or any distance, I guess, in the general case,
+
+13:46.080 --> 13:54.000
+have like a semantic meaning in a highly high-dimensional data set, or is it just the distance between
+
+13:54.640 --> 14:00.720
+points and data set? You know, I think it does. It's not that one justifies it in terms of
+
+14:00.720 --> 14:07.360
+semantics or theory, but what one observes is that, you know, it does typically coincide with one's
+
+14:07.360 --> 14:13.120
+notion of similarity. If it does not, then, you know, maybe this is a data set for which some other
+
+14:13.120 --> 14:19.520
+metric is, or distance is more usable. Again, it's more what you actually see in the data,
+
+14:19.520 --> 14:24.720
+it's not about the theory that says, oh yes, you know, this is the one you want to use.
+
+14:24.720 --> 14:30.480
+Okay. Got it. So you define this distance metric and apply it to the data and then what?
+
+14:30.480 --> 14:35.920
+And then what? So now, what we want to do is, well, we have a projection of the data set,
+
+14:35.920 --> 14:41.120
+which, and I won't go into detail on that, Scott, but basically what we do is we find we've been
+
+14:41.120 --> 14:46.400
+the data set into overlapping bins. We do that in a systematic way, and it has to do with a
+
+14:46.400 --> 14:52.160
+projection of some kind. And once that's done, we perform a clustering step within each of those
+
+14:52.160 --> 15:00.080
+bins. Each cluster is now made the node of a network, and we connect to nodes if they share a
+
+15:00.080 --> 15:06.720
+data point. So, you know, that's a short version of it. But it's a kind of what we call partial
+
+15:06.720 --> 15:11.040
+clustering. They say we don't apply clustering to the whole data set. We apply it to a bunch of
+
+15:11.040 --> 15:16.560
+pieces, and those produce points for a network or nodes for a network. Okay. Makes sense.
+
+15:16.560 --> 15:21.920
+It does. It almost, it makes me think of a number of things, things like word embeddings.
+
+15:21.920 --> 15:26.800
+It makes me think of things like, I don't even know what, I don't remember the general
+
+15:27.440 --> 15:33.600
+terminology for it, but there's a company called cortical or nementa. Like they, they do something
+
+15:33.600 --> 15:40.160
+similar to word embeddings. It kind of evokes that for me, but it also evokes for me like a
+
+15:40.160 --> 15:44.800
+convolutional neuron that where you're like a windowing your bins or kind of like your
+
+15:44.800 --> 15:50.000
+convolution windows that you're moving across your image. It is a little bit, I think they're,
+
+15:50.000 --> 15:54.880
+actually, I think there are a lot of connections with that. We're just starting to develop those
+
+15:54.880 --> 16:00.320
+now. So, you know, it's a slightly different, it goes through a part of this whole TDA business,
+
+16:00.320 --> 16:04.400
+which we haven't talked about, which is about measuring shape through what's called persistent
+
+16:04.400 --> 16:10.880
+homology. And, you know, that's, this is a very kind of, it's always been regarded as the most
+
+16:10.880 --> 16:17.840
+esoteric part of mathematics for reasons that are kind of quite necessary to it, but nevertheless,
+
+16:17.840 --> 16:21.760
+it's very powerful. It allows you to measure shape. It allows you to say, look, is there a loop
+
+16:21.760 --> 16:26.480
+in your data? Is there a sphere in your data? You know, are there connected components in your,
+
+16:26.480 --> 16:30.960
+all those kind of things that we think about? It allows you to actually measure those in a formal way.
+
+16:32.160 --> 16:37.360
+So, this, this last step you describe your, taking your, your bins and I, I heard that is a
+
+16:37.360 --> 16:42.560
+windowing kind of effective. It's kind of, it's key that the bins be overlapping. In this case,
+
+16:42.560 --> 16:46.400
+that not that they'd be this joint is key that they'd be overlapping. Okay. Because we want the
+
+16:46.400 --> 16:51.040
+clusters to have the ability to overlap so we can draw edges between them. Yeah. Okay. Yeah.
+
+16:51.680 --> 16:56.160
+So, then tell me where you, what you do with your distance metric once you have these
+
+16:56.160 --> 17:00.880
+bins. Actually, now we, that's how we use, that we only use the distance metric so to be able to
+
+17:00.880 --> 17:05.920
+get the bins. Okay. And perform clustering within the bins. Got it. Once I've performed clustering
+
+17:05.920 --> 17:11.840
+within the bins, you know, at this point, I can, for the time being, shelve the, the metric and say,
+
+17:11.840 --> 17:17.040
+look, the representation I'm interested in, which can be thought of as a generalized Venn diagram.
+
+17:17.040 --> 17:20.880
+If you like, you know, is this network model and this network model is something that we now want
+
+17:20.880 --> 17:26.480
+to examine. Okay. All right. So let's talk a little bit more about that examination process. That
+
+17:26.480 --> 17:31.040
+sounds like that's what's next. That's right. So, so let me say, by the way, first of all, that I'm
+
+17:31.040 --> 17:34.880
+going to, what I'm going to describe is sort of the way to sort of interact with the model,
+
+17:34.880 --> 17:40.160
+you know, visually and on the screen and so on. But one can also interact with it programmatically.
+
+17:40.160 --> 17:45.280
+And that's what one wants to do to build applications, ultimately. But, you know, for some kind of,
+
+17:45.280 --> 17:52.080
+some manual data analysis, what one does is one puts the network on a screen through a layout
+
+17:52.080 --> 17:57.680
+algorithm. And now there's lots of things that capabilities that you have, you're able to select
+
+17:57.680 --> 18:02.160
+parts of the network the way you would in Photoshop or Illustrator. And once I do that, I can
+
+18:02.160 --> 18:06.720
+make that into a set of data points because the nodes correspond to collections of data points.
+
+18:06.720 --> 18:13.040
+Okay. So now I have new sets that I can either perform other analysis on or I can ask for their
+
+18:13.040 --> 18:19.360
+explanation. That is to say, what is, what are the features that characterize this subset?
+
+18:19.360 --> 18:24.560
+And that's done in an appropriate mathematical and statistical sense. You know, there are some
+
+18:24.560 --> 18:29.440
+choices on that, but we've made one particular choice. But now what's that choice? And one of the
+
+18:29.440 --> 18:34.960
+same choices. Well, the main thing is that we're deciding we're selecting, you know, we have
+
+18:34.960 --> 18:39.760
+distributions on the group of a particular variable on the groups. And the question is to choose
+
+18:39.760 --> 18:44.800
+those variables, which are maximally different in terms of a so-called Comma-Gorov-Smirinov
+
+18:44.800 --> 18:49.360
+distance on distributions. I'm just saying that I think there are other notions of distance on
+
+18:49.360 --> 18:55.600
+distributions one could use to list those. And so when you say you've made that choice, you mean
+
+18:56.320 --> 19:01.680
+in a given use case, you've selected one of many or the company's approach. The company's
+
+19:01.680 --> 19:05.920
+approach is that one. Got it. That's right. Okay. That's right. But it tends to do a good job of
+
+19:05.920 --> 19:10.720
+maximizing the distance for the cluster problems that you're going off. It does. We find that again,
+
+19:10.720 --> 19:16.160
+yes, we find that the explain capability is quite useful. It works well. Okay. Yeah. Okay. Yeah.
+
+19:16.160 --> 19:20.080
+So anyway, so that's something one can do with it. You can actually color by quantities of
+
+19:20.080 --> 19:25.280
+interest. So if I'm interested in things like revenue new or survival or whatever it is,
+
+19:25.280 --> 19:31.600
+I can color a node by the average value of quantity for each of the data points. And so that
+
+19:31.600 --> 19:36.720
+becomes quite informative. And often what you see in the network is collections of hot spots,
+
+19:36.720 --> 19:42.000
+you know, where some values high and more than one place. And it turns out that they're different,
+
+19:42.000 --> 19:46.880
+they're high there for different reasons often. And that's what's quite why the network is so
+
+19:46.880 --> 19:51.360
+informative. Because otherwise you would just take any aggregate you would study this quantity. And
+
+19:51.360 --> 19:56.720
+since you're then, you know, putting together all the different ways in which that thing goes
+
+19:56.720 --> 20:01.120
+high, you can't understand. You can't make sense of it in the way that you can when it's
+
+20:01.120 --> 20:07.360
+split out like that. You've mentioned that that's this kind of ad hoc interaction with the
+
+20:07.360 --> 20:13.200
+model is just one of one way to interact with the model. But the way you describe that makes me think
+
+20:13.200 --> 20:20.000
+of use cases like forensic types of use cases like I associate with a company like Palantir. Do
+
+20:20.000 --> 20:26.080
+you overlap with with them and the types of use cases you go after? Yeah. So, you know,
+
+20:26.080 --> 20:30.560
+I think the answer is we don't fully know the interconnection. We know, I mean, what they're doing
+
+20:30.560 --> 20:35.520
+is to sort of searching data that comes as a network. You know what I mean? Whereas in our case,
+
+20:35.520 --> 20:40.640
+we're saying, well, actually all data can be represented as networks. And it provides a compression.
+
+20:40.640 --> 20:45.360
+I actually think there are connections there between those things that could make things efficient. But
+
+20:45.360 --> 20:49.920
+wouldn't want to speak to them because I don't, sorry, I don't have firm ideas in mind.
+
+20:49.920 --> 20:55.120
+Do you tend to find yourself pursuing a lot of forensic types of use cases? Or, you know,
+
+20:55.120 --> 21:01.440
+at the moment, we have been focusing on, you know, health care and financial services. We are
+
+21:01.440 --> 21:07.200
+moving back into government in various ways. And so we may very well hit that. Okay. So we talked
+
+21:07.200 --> 21:12.000
+a little bit about this, the ways that you can interact with this network that's created out of the
+
+21:12.000 --> 21:17.520
+data. How else can you use these models? So, you know, another thing that one could do is suppose
+
+21:17.520 --> 21:23.120
+that you have a linear regression or predictive model. Most likely, you know, it's gotten by
+
+21:23.120 --> 21:28.400
+optimizing something and some kind of error function. But it's probably not also not perfect. It's
+
+21:28.400 --> 21:33.920
+probably also the case that there are some areas within your data set, you know, some particular
+
+21:33.920 --> 21:38.240
+phenomena that happen that make that there are some systematic errors that happen. You know,
+
+21:38.240 --> 21:42.960
+you can't correct them within your own model and with the features that you've got. But what it
+
+21:42.960 --> 21:47.920
+allows us to do is it allows us to say, let's take a network and let's color it by that model error.
+
+21:47.920 --> 21:52.400
+Maybe we find some hot spots for model error. And maybe I try to correct around those hot spots
+
+21:52.400 --> 21:56.640
+by adding features somehow. So that's another point of view. I would put it under the general
+
+21:56.640 --> 22:04.080
+heading of model diagnosis and model improvement. So that's another situation. Interesting.
+
+22:04.080 --> 22:08.080
+You mentioned health care. What are some of the use cases in health care? So we have something
+
+22:08.080 --> 22:14.320
+called clinical variation management, which, you know, helps study both finding new and optimizing
+
+22:14.320 --> 22:20.000
+care pads for particular, you know, procedures as well as tracking adherence to them. We have a
+
+22:20.000 --> 22:25.120
+population health kind of application that is working on trying to understand trends in
+
+22:25.120 --> 22:31.680
+population health. Who is going to go to the 5% group who are the most expensive? Who, you know,
+
+22:31.680 --> 22:37.840
+is getting these on track to go bad and how can we improve their chances? That's a couple of
+
+22:37.840 --> 22:42.160
+things. There are some on the financial side as well. We work with hospitals as well as payers
+
+22:42.160 --> 22:48.000
+and the, you know, providers as well as payers and the health care side. And can you maybe just to
+
+22:48.000 --> 22:54.480
+kind of tie all the terminology together? Maybe pick one of those examples and walk us through,
+
+22:55.120 --> 23:00.480
+you know, what the data tends to look like, what the clusters might represent, what are some of
+
+23:00.480 --> 23:06.240
+the findings that someone might see? Yeah. So let's talk about the clinical variation management,
+
+23:06.240 --> 23:11.840
+for example. So, you know, the data there consists basically in all the events that happen during
+
+23:11.840 --> 23:16.480
+the course of someone's stay. Say for some particular surgical procedure, lie in the replacement,
+
+23:16.480 --> 23:22.320
+like bowel surgery and so forth. And so, what one can then do is one needs to put on, you know,
+
+23:22.320 --> 23:26.800
+that set of things, some appropriate similarity measure and that, you know, distance function.
+
+23:26.800 --> 23:32.160
+And that turns out to be, you know, quite a tricky, interesting problem. Probably maybe the key
+
+23:32.160 --> 23:38.240
+part in solving that problem. And then ultimately it produces for us then sort of a consensus
+
+23:38.240 --> 23:45.040
+care pass, maybe a few hair paths that are very good and one consensus together with some explanations
+
+23:45.040 --> 23:50.320
+of what are the key features that differentiate it from others. So it's almost allowing you to
+
+23:50.960 --> 23:58.000
+identify, you know, which outcomes or which features of the care, if you will, kind of correlated
+
+23:58.000 --> 24:04.080
+with success and, you know, maybe where some outliers are. And the features might be, you know,
+
+24:04.080 --> 24:08.560
+what drugs are administered, what doses they're administered, when they're administered,
+
+24:08.560 --> 24:13.120
+things like that. That's exactly right. And just to give you a sense of how it can work in one
+
+24:13.120 --> 24:17.600
+situation. When hospital systems are deciding on care paths, what they usually do is they get
+
+24:17.600 --> 24:23.920
+together sort of the people, the smartest people that they can say who are working on this and they
+
+24:23.920 --> 24:28.640
+get together in a room and they discuss it out and, you know, ultimately come to some kind of
+
+24:28.640 --> 24:33.120
+answer about what it should be. There are a couple of problems with that model, you know, you may,
+
+24:33.120 --> 24:36.640
+and maybe you haven't found all the best people who are doing this procedure. Maybe you haven't
+
+24:36.640 --> 24:41.040
+chosen exactly the right group. And anyway, it's also the case that when people are just sort of
+
+24:41.040 --> 24:46.240
+arguing things out in a room, sometimes, you know, it's the strongest personality rather than the
+
+24:46.240 --> 24:50.000
+strongest case that comes out. So there's all sorts of issues with that. I think there's like
+
+24:50.000 --> 24:56.160
+implicit versus explicit knowledge, right? I mean, there could just be things that some people do
+
+24:56.160 --> 24:59.840
+and they don't really realize that that's that they're doing it different from the other doctors.
+
+24:59.840 --> 25:04.240
+And so they don't know to argue it. Exactly. And then so in fact, that was, you know, what happened
+
+25:04.240 --> 25:09.920
+for us with one of our customers was, you know, exactly some of that. We found that for one
+
+25:09.920 --> 25:14.400
+surgical procedure, there was a group, a small group kind of out in the periphery of the system
+
+25:14.400 --> 25:19.840
+that people hadn't really observed so much, but they were doing something that had good improved
+
+25:19.840 --> 25:25.840
+effect on length of stay. Okay. And so, you know, so that was found. That was, you know, quite an
+
+25:25.840 --> 25:30.720
+important contribution to them. So even just in terms of kind of a search thing like that, it was
+
+25:30.720 --> 25:37.680
+quite quite useful that way. Interesting. So if someone wants to learn more about this, it sounds
+
+25:37.680 --> 25:43.040
+like there's, it sounds like topology is, you know, an interesting place to start. Like what,
+
+25:43.040 --> 25:49.760
+is there a canonical paper or a reference? Let me warn you that of course, if you go to study
+
+25:49.760 --> 25:56.720
+topology, you'll be involved for years before you get to the case. So, so I wouldn't necessarily,
+
+25:56.720 --> 26:01.520
+I mean, one could certainly read some things about it. But what I would say is, well, first of all,
+
+26:01.520 --> 26:05.200
+our company has a lot of stuff on the web, on its website, basically, you can sort of acknowledge
+
+26:05.200 --> 26:11.040
+Center a lot of technical papers and somewhat less technical as well. So I would kind of recommend
+
+26:11.040 --> 26:16.480
+the reading survey paper route as opposed to, you know, taking a textbook and kind of chugging through.
+
+26:17.600 --> 26:22.480
+Because this is a newly developing subject. And so, there are some textbooks in this persistent
+
+26:22.480 --> 26:28.320
+homology side that I talked about. But, you know, the general notion of topological modeling,
+
+26:28.320 --> 26:34.160
+you know, I think we have a lot of stuff on our web creating it. But actually come to think of it.
+
+26:34.160 --> 26:40.320
+Oh, here we do have my colleague, FX Campion, Francis Campion, and I have written a book,
+
+26:40.320 --> 26:44.960
+which is called Machine Intelligence for Healthcare. And so, it's available on Amazon, you know,
+
+26:44.960 --> 26:49.760
+and I recommend that it's got the first half is kind of a discussion of this mathematical modeling.
+
+26:49.760 --> 26:53.600
+And then the second half is specifically, how does this work in healthcare?
+
+26:53.600 --> 26:59.440
+Okay. So, that sounds really interesting. Yeah. And did you elaborate on persistent
+
+26:59.440 --> 27:06.080
+homology? Or did we, you know, I think we had to get, it's, let me just say that it is, it is a
+
+27:06.080 --> 27:13.920
+very interesting way of sort of detecting shape features, certain kinds of shape features in the
+
+27:13.920 --> 27:19.280
+data. And as it is, you know, on the pure math side, it detects features in, you know, in regular
+
+27:19.280 --> 27:23.280
+spaces, spaces with complete information and where you've got the whole, the whole thing.
+
+27:23.840 --> 27:28.640
+It can be used in two ways. The one way is it can be used as a way of recognizing what the
+
+27:28.640 --> 27:34.480
+overall organization of the data set is, you know, is it, we found that, for example, in studying some
+
+27:34.480 --> 27:39.680
+image processing data sets that, you know, the frequently occurring phenomena in three by three
+
+27:39.680 --> 27:45.680
+patches lined around, you know, one circumstance, the circle in a slightly higher, you know,
+
+27:45.680 --> 27:49.920
+level, understand around a mathematical object called a climb model, which is, you know, very,
+
+27:49.920 --> 27:55.200
+it was very interesting for us. We used it for understanding image compression and also texture
+
+27:55.200 --> 27:59.920
+recognition. So that was quite interesting. The second thing, though, is that it can be used,
+
+27:59.920 --> 28:05.280
+and this I think is going to be a much more rapid application is where it gets used to generate
+
+28:05.280 --> 28:11.440
+features in unstructured data. So when you have data that is complicated, but that somehow carries
+
+28:11.440 --> 28:15.760
+a notion of distance on it, like molecules, you know, where the atoms can be regarded as the
+
+28:15.760 --> 28:21.600
+points in the distance has to do with the bonds, then you can attach, so-called persistence
+
+28:21.600 --> 28:26.560
+barcodes to those points, and that's quite useful in organizing and understanding, you know,
+
+28:26.560 --> 28:32.960
+those kind of unstructured databases, databases of unstructured data. Interesting. You mentioned
+
+28:33.920 --> 28:41.120
+earlier, and I saw it in the description of your session as well, something that I think is
+
+28:41.120 --> 28:45.520
+related to this, like identifying loops in data. What does that even mean, loops in data?
+
+28:45.520 --> 28:50.560
+Well, imagine, you know, I had a slide, imagine that you have a picture, you see your data,
+
+28:50.560 --> 28:55.680
+suppose the data is actually in 2D, and supposing that you've got a bunch of dots,
+
+28:55.680 --> 29:00.480
+so the data is a bunch of dots, and it looks like it's kind of surrounding, like it's a circle,
+
+29:00.480 --> 29:05.120
+we see it as a circle. Right, right. So something that like a clustering algorithm
+
+29:05.120 --> 29:10.480
+doesn't really know how to deal with very well, but you can identify this higher order primitive,
+
+29:10.480 --> 29:16.240
+that hey, this is a, like a geometrical primitive, essentially. Exactly. That's exactly right,
+
+29:16.240 --> 29:19.840
+and that's what we're trying to do. We're trying to mimic that fact. You know, we know what a loop
+
+29:19.840 --> 29:25.680
+looks like, but we don't know what it is our brain does to recognize that, and so therefore,
+
+29:25.680 --> 29:31.120
+you do this homology. So imagine that you're trying to understand how do you recognize a letter A
+
+29:31.120 --> 29:37.440
+from a letter B. Right. That letter A has two loops, sorry, a loop and two legs, and the B has two
+
+29:37.440 --> 29:43.440
+loops in it. So if you can find something that counts for you, the number of loops, you're going to
+
+29:43.440 --> 29:47.440
+be able to characterize letter A from a letter B, you'll be able to differentiate it, and you'll
+
+29:47.440 --> 29:52.080
+be able to differentiate it in a way that's font independent. That's independent of the fact that
+
+29:52.080 --> 29:56.800
+you see it from, you know, one from an angle, perhaps, or that it's sitting in the surface of a
+
+29:56.800 --> 30:01.840
+soccer ball. It's kind of, it's miraculously kind of deformation. It doesn't, it doesn't, it's not
+
+30:01.840 --> 30:07.520
+sensitive to those deformations, and that's what homology is. And so that sounds promising,
+
+30:07.520 --> 30:13.520
+but it also sounds, I guess I think about it in the context of deep learning, right? A deep learning
+
+30:13.520 --> 30:18.160
+purist would say, well, you know, it's going to be a lot easier to just throw tons and tons of data
+
+30:18.160 --> 30:25.120
+that have like all different kinds of Bs, you know, and A's, and just let the network teach it.
+
+30:25.120 --> 30:31.280
+And I've had this conversation with some folks that specialize in deep learning around
+
+30:31.920 --> 30:38.320
+combining other approaches to create higher level insights with the deep learning. And one of the
+
+30:38.320 --> 30:43.120
+entrances, I just throw the data at it, and I think I'll figure it out. Of course, what you find is that,
+
+30:43.120 --> 30:47.760
+you know, they're adversarial approaches to that way, you know, so, you know, even for something as
+
+30:47.760 --> 30:53.840
+simple as MNIST, the MNIST dataset, which is of hand drawn numbers, where you find that if you
+
+30:53.840 --> 30:58.800
+just mess with the background a little bit, in a way that, you know, people wouldn't see the
+
+30:58.800 --> 31:03.040
+difference. People will see that, you know, a one is a one and a two is a two, but it messes up
+
+31:03.040 --> 31:09.520
+the deep learner. Oh, yeah, absolutely. And that's a feature question. You see, it's doing a certain kind
+
+31:10.720 --> 31:16.080
+overfitting is perhaps the wrong term, but it's focusing on some features that have to do with
+
+31:16.080 --> 31:21.200
+the background that are not really relevant. And so to the extent that you can feed it features
+
+31:21.200 --> 31:26.000
+that are kind of background independent like that, then you're in good shape. And that's what persistent
+
+31:26.000 --> 31:31.120
+homology is a perfect tool for providing features to a deep learner, because in fact,
+
+31:31.120 --> 31:35.520
+the output of the persistence thing can be regarded as an image, so it kind of fits
+
+31:35.520 --> 31:42.800
+directly into that. So, yeah. Is this an application in like theory, in theory, in principle,
+
+31:42.800 --> 31:50.560
+or are there demonstrable situations using, you know, MNIST or some other dataset that says
+
+31:50.560 --> 31:55.680
+persistent homology outperforms deep learning or has some cost benefit analysis relative?
+
+31:55.680 --> 31:59.520
+Well, remember, it's not outperforming deep learning. It is feeding into deep learning and
+
+31:59.520 --> 32:05.120
+using it. So, the example I would point to. So, we're using the persistent homology to create
+
+32:05.120 --> 32:11.280
+features that either replace the raw images or augment the raw images, and then we're still
+
+32:11.280 --> 32:16.240
+using deep learning to learn. That's correct. Got it. That's correct. Now, again, most of this is
+
+32:16.240 --> 32:21.440
+sort of looking into the future. However, this exact thing has been carried out by, you know,
+
+32:21.440 --> 32:27.120
+a friend of mine or a colleague of mine at Michigan State in a gooey way, who has taken databases
+
+32:27.120 --> 32:32.560
+of molecules, you know, candidates for drugs, you know, and kind of drug discovery, and build
+
+32:32.560 --> 32:37.440
+persistent homology barcodes on them, and then use those, use deep learning on those,
+
+32:37.440 --> 32:42.320
+extremely successfully. Okay. All right. I'll ask you afterwards for the spelling of that name
+
+32:42.320 --> 32:46.560
+so we can... Sure. I'll write it down for you. Yeah. Included. That's right. Awesome.
+
+32:46.560 --> 32:53.280
+Well, it was great to have you here. I learned a ton, and I feel like there's so much more to
+
+32:53.280 --> 32:58.240
+learn about this stuff. There's a lot to learn. I feel that way every day. So, and you know,
+
+32:58.240 --> 33:01.840
+thanks very much. I enjoyed the conversation. Great. Thanks a ton. Sorry. Thank you.
+
+33:05.520 --> 33:11.760
+All right, everyone. That's our show for today. Thanks so much for listening, and of course,
+
+33:11.760 --> 33:17.840
+for your ongoing feedback and support. For more information on Gunner and any of the other topics
+
+33:17.840 --> 33:25.920
+covered in this episode, head on over to twomolei.com slash talk slash 53. For the rest of this series,
+
+33:25.920 --> 33:34.560
+head over to twomolei.com slash AI SF 2017. And please, please, please send us any questions or
+
+33:34.560 --> 33:41.600
+comments that you may have for us or our guests via Twitter, at twomolei or at Sam Charrington,
+
+33:42.240 --> 33:47.520
+or leave a comment on the show notes page. There are a ton of great conferences coming up
+
+33:47.520 --> 33:52.800
+through the end of the year to stay up to date on which events will be attending. And hopefully,
+
+33:52.800 --> 33:59.360
+to meet us there, check out our new events page at twomolei.com slash events,
+
+33:59.360 --> 34:20.320
+twomolei.com slash events. Thanks again for listening, and catch you next time.
+

@@ -1,0 +1,2201 @@
+WEBVTT
+
+00:00.000 --> 00:13.400
+Welcome to the Twimal AI Podcast.
+
+00:13.400 --> 00:22.400
+I'm your host Sam Charrington.
+
+00:22.400 --> 00:25.280
+Hey what's up everyone, producer Amari here.
+
+00:25.280 --> 00:29.600
+Before we get to the show, I want to remind you that our study group for the Fast AI
+
+00:29.600 --> 00:35.560
+course, a Code First Introduction to Natural Language Processing, begins this Saturday,
+
+00:35.560 --> 00:37.800
+December 14th.
+
+00:37.800 --> 00:43.040
+This course will cover NOP applications like Topic Modeling, Classification, Language
+
+00:43.040 --> 00:45.560
+Modeling, and Translation.
+
+00:45.560 --> 00:51.000
+To join the study group and the broader Twimal Online community, head over to TwimalAI.com
+
+00:51.000 --> 00:52.840
+slash community.
+
+00:52.840 --> 00:57.040
+Submitting that form will trigger an invitation to our Slack, and once you're there, join
+
+00:57.040 --> 00:59.680
+the appropriate study group channel.
+
+00:59.680 --> 01:06.160
+Hope to see you online.
+
+01:06.160 --> 01:08.800
+Alright everyone, I am on the line with Stephen Merritti.
+
+01:08.800 --> 01:13.240
+Stephen is an NLP and deep learning researcher.
+
+01:13.240 --> 01:16.600
+Working on a start-up, I'll let him mention that.
+
+01:16.600 --> 01:22.600
+Stephen's a long time friend of the show and was a participant in our conversation back.
+
+01:22.600 --> 01:31.800
+One exactly was that, it was TwimalTalk 234, but that was all around the OpenAI GP2 release
+
+01:31.800 --> 01:37.120
+and we had that great panel discussion about the controversy that surrounded it.
+
+01:37.120 --> 01:43.120
+But now Stephen's back for a standalone interview, particularly on the topic of his recent
+
+01:43.120 --> 01:48.160
+paper, single-headed attention, RNN, stop thinking with your head.
+
+01:48.160 --> 01:50.320
+Stephen, welcome to the TwimalAI podcast.
+
+01:50.320 --> 01:57.320
+Yeah, I'm looking forward to diving into this, but before we do, you didn't have an opportunity
+
+01:57.320 --> 02:01.120
+to give us a full background when we did that panel.
+
+02:01.120 --> 02:06.400
+So why don't you share a little bit about how you got to working in this area?
+
+02:06.400 --> 02:12.600
+Absolutely, I was lucky to actually start working in natural language processing in late
+
+02:12.600 --> 02:13.600
+high school.
+
+02:13.600 --> 02:18.200
+Brilliant professor by the name of Dr. James Kern helps run a summer camp for high school
+
+02:18.200 --> 02:24.520
+kids, and there he introduced, not just programming, but also natural language processing.
+
+02:24.520 --> 02:29.280
+And back in those days, well before deep learning, it was far more of the traditional methods.
+
+02:29.280 --> 02:34.680
+But I got obsessed with it from then, so basically the second I was at university, I was interested
+
+02:34.680 --> 02:40.760
+in working in the field and published some interesting papers primarily on maximum entropy
+
+02:40.760 --> 02:47.600
+models and on combinatorial, categorial grammar pausing if any of the readers' viewers
+
+02:47.600 --> 02:48.600
+are aware.
+
+02:48.600 --> 02:57.920
+But since then, yeah, it's been a bit of a well-end, so when I came over to the US, I went
+
+02:57.920 --> 03:03.840
+to Harvard University for masters, and there I was really obsessed with large data sets,
+
+03:03.840 --> 03:10.160
+thinking that was the right way to kind of machine intelligence or artificial intelligence.
+
+03:10.160 --> 03:16.760
+And since I left then, I worked at a nonprofit called CommonCroll, who they basically
+
+03:16.760 --> 03:21.200
+download billions of pages from the internet every month to turn into a data set, so think
+
+03:21.200 --> 03:26.280
+of it as your kind of own small version of Google's data store.
+
+03:26.280 --> 03:30.920
+Then I worked at Metamind, which was eventually acquired by Salesforce and became Salesforce
+
+03:30.920 --> 03:32.040
+Research.
+
+03:32.040 --> 03:36.800
+And that was where I got most interested in language models.
+
+03:36.800 --> 03:43.720
+And since then, I've left Salesforce Research and started my own startup called DDX times.
+
+03:43.720 --> 03:49.560
+And the idea with that is that I think that language models are amazing tools, just kind
+
+03:49.560 --> 03:55.120
+of new ways of handling a lot of the computation and linguistic costs that we think of every
+
+03:55.120 --> 03:56.120
+day.
+
+03:56.120 --> 04:00.600
+And I'm really interested in kind of unlocking language as a data set, you know, beyond
+
+04:00.600 --> 04:04.760
+the kind of surface level work that we traditionally do.
+
+04:04.760 --> 04:09.720
+So the tagline of the company is, you know, language is humanity's longest running program.
+
+04:09.720 --> 04:13.400
+And it's kind of accumulated all of this craft and all of this information over time and
+
+04:13.400 --> 04:17.600
+hopefully language models will be the way to start unpackaging that and helping humans
+
+04:17.600 --> 04:22.280
+actually look at millions of web pages or, you know, hundreds of years of documents
+
+04:22.280 --> 04:24.880
+without having to read through it all themselves.
+
+04:24.880 --> 04:29.600
+Well, since language models will be playing such a prominent role in this discussion, maybe
+
+04:29.600 --> 04:34.560
+we should start from the top and have you share for those that aren't familiar with
+
+04:34.560 --> 04:38.640
+the terminology, what a language model specifically is trying to do.
+
+04:38.640 --> 04:44.280
+Absolutely, so the kind of most likely example of language models that everyone has probably
+
+04:44.280 --> 04:48.640
+run into is the order suggests on your mobile phone.
+
+04:48.640 --> 04:53.400
+So as you're typing some phrases, kind of highly likely and instead of you're hitting
+
+04:53.400 --> 04:59.320
+each of the keys on your mobile phone, it'll just pop up a word and suggest that instead.
+
+04:59.320 --> 05:03.400
+So that's kind of the example of language model that most people see.
+
+05:03.400 --> 05:07.840
+But it turns out if you keep scaling these language models up, if you use, you know,
+
+05:07.840 --> 05:12.480
+a far more powerful device than your phone, just trying to predict the next token, whether
+
+05:12.480 --> 05:19.760
+that is a character, a word, or a piece of a word, then the machine learning model that
+
+05:19.760 --> 05:25.320
+you produce there ends up encapsulating a lot of kind of interesting pieces of knowledge
+
+05:25.320 --> 05:31.680
+about not just language, but kind of the structure and uses of language itself.
+
+05:31.680 --> 05:38.440
+So there have been amazing examples of just predicting the next character on language modeling
+
+05:38.440 --> 05:40.640
+data sets.
+
+05:40.640 --> 05:46.560
+One example is OpenAI's sentiment neuron, where they, without giving the machine learning
+
+05:46.560 --> 05:52.440
+model any extra information, they gave it a number of Amazon review reviews and they
+
+05:52.440 --> 05:54.360
+asked it to predict the next character.
+
+05:54.360 --> 05:57.320
+So imagine you're just sitting at the keyboard trying to guess the next character that someone
+
+05:57.320 --> 05:58.320
+is typing.
+
+05:58.320 --> 06:00.560
+That's all this machine learning model is doing.
+
+06:00.560 --> 06:05.000
+But from the knowledge that's distilled in that, it's able to accurately predict whether
+
+06:05.000 --> 06:08.480
+it's a positive or a negative review.
+
+06:08.480 --> 06:13.480
+And in fact, when you're generating, you can basically also in a language model, continue
+
+06:13.480 --> 06:16.080
+generating as if it's a positive or a negative review.
+
+06:16.080 --> 06:19.720
+So if I was reviewing my headphones, I would say, well, make it positive.
+
+06:19.720 --> 06:24.400
+And like the headphones have a beautiful sound, crisp, and a very long battery life to
+
+06:24.400 --> 06:31.720
+draw, but then you could flip it negative and language models, say, the headphones have
+
+06:31.720 --> 06:35.520
+static and are constantly annoying and slight ringing in my ears.
+
+06:35.520 --> 06:39.840
+So these language models, as you keep scaling them up, seem to be capturing more and more
+
+06:39.840 --> 06:46.120
+at the very least surface knowledge of text, if not kind of deeper, interesting connections
+
+06:46.120 --> 06:48.960
+that humans might not be fully aware of.
+
+06:48.960 --> 06:55.920
+And so this example you gave, and examples like at GPT-2 and others where you're predicting
+
+06:55.920 --> 07:02.200
+paragraphs and paragraphs, it's all coming from this fundamental ability to predict the
+
+07:02.200 --> 07:03.520
+next character.
+
+07:03.520 --> 07:04.520
+Yes.
+
+07:04.520 --> 07:08.760
+And in those cases, it's usually the next token where that might be a word piece, so you
+
+07:08.760 --> 07:18.000
+might break a word down into, let's say, running because running or so on, but exactly
+
+07:18.000 --> 07:20.720
+that point is just predicting this next token.
+
+07:20.720 --> 07:25.240
+And you can, of course, make the task more complex, but it turns out even just providing
+
+07:25.240 --> 07:30.200
+a huge chunk of text without any additional information about, say, the domain of the
+
+07:30.200 --> 07:36.760
+text or where the text comes from, even the language of the text, you're able to stop
+
+07:36.760 --> 07:39.320
+bling out these interesting details.
+
+07:39.320 --> 07:46.160
+And so this paper that you just published, the SA R&N paper, tell us a little bit about
+
+07:46.160 --> 07:49.480
+the motivation for the paper.
+
+07:49.480 --> 07:53.040
+Yeah, there are two main motivations for the paper.
+
+07:53.040 --> 08:00.600
+One is that the language modeling field of late has primarily been dominated by just
+
+08:00.600 --> 08:02.680
+a single type of neural architecture.
+
+08:02.680 --> 08:09.080
+So a single type of machine learning model that's being created to kind of solve the problem.
+
+08:09.080 --> 08:13.560
+And as I've seen from both language modeling itself, but almost every other field in machine
+
+08:13.560 --> 08:18.200
+learning, there's usually many different ways to tackle a problem.
+
+08:18.200 --> 08:25.480
+And just as one technique has gotten a lot of advantage in recent works, doesn't necessarily
+
+08:25.480 --> 08:29.840
+mean we should be focusing all of our time, all of our effort on that.
+
+08:29.840 --> 08:36.920
+So what I did was rather than using the kind of dominant neural architecture, which is
+
+08:36.920 --> 08:43.320
+called the transformer architecture, I used an older architecture called the LSTM,
+
+08:43.320 --> 08:49.200
+long short term memory, many of your listeners probably would have heard of, to get basically
+
+08:49.200 --> 08:52.280
+quite similar state-of-the-art results.
+
+08:52.280 --> 08:55.960
+It's still not quite at state-of-the-art, but I also used far less resources, which was
+
+08:55.960 --> 08:57.160
+the second part.
+
+08:57.160 --> 09:02.280
+I really wanted a language model that was trainable by the majority of people, because
+
+09:02.280 --> 09:07.240
+a lot of the more recent language models have required tens or hundreds of thousands of
+
+09:07.240 --> 09:12.640
+dollars worth of either cloud compute or equipment and so on.
+
+09:12.640 --> 09:18.120
+So it's really asking the question of what would this field look like if we headed potentially
+
+09:18.120 --> 09:23.040
+a different direction in the past or saw different results and everyone pushed on a different
+
+09:23.040 --> 09:24.040
+direction.
+
+09:24.040 --> 09:30.040
+And also are we sure that we can't achieve many of these results with far less time, far
+
+09:30.040 --> 09:34.880
+less compute, which will mean that it's more available for more people, more researchers,
+
+09:34.880 --> 09:40.180
+more practitioners to actually use these results and try it on their own data sets and
+
+09:40.180 --> 09:41.180
+tasks.
+
+09:41.180 --> 09:48.080
+You mentioned a couple of things, which I'll take a quick second to point folks to some
+
+09:48.080 --> 09:52.480
+references from here on the podcast.
+
+09:52.480 --> 10:01.120
+Back in July, I did a show with Emma Strubel, who did a paper on the environmental impact
+
+10:01.120 --> 10:08.120
+of just the kind of large-scale language model training that you're referring to.
+
+10:08.120 --> 10:14.880
+As you mentioned, these models take tons of compute to train and that is all powered
+
+10:14.880 --> 10:21.640
+by energy and has a huge environmental impact and she traced that down to the actual carbon
+
+10:21.640 --> 10:26.640
+load required to train some of these models and made some comparisons about them.
+
+10:26.640 --> 10:32.280
+So that is an interesting show for folks to check out and then we'll be talking a little
+
+10:32.280 --> 10:40.760
+bit about LSTM's and of course the authority on that is Jürgen Schmidhuber and I just
+
+10:40.760 --> 10:48.040
+show with him about the LSTM back in August of 2017, until we'll talk 44.
+
+10:48.040 --> 10:55.360
+But before we talk specifically about the model you created based on the LSTM, you know,
+
+10:55.360 --> 11:00.960
+walk us through the transformer architecture that folks are spending so much time on
+
+11:00.960 --> 11:03.800
+now, what is it doing?
+
+11:03.800 --> 11:04.800
+How does it work?
+
+11:04.800 --> 11:05.800
+Absolutely.
+
+11:05.800 --> 11:12.720
+So the transformer architecture takes a quite different look at how to do language modeling.
+
+11:12.720 --> 11:18.800
+I might start with LSTM's or RNN's recurrent neural networks and the word they're recurrent
+
+11:18.800 --> 11:24.160
+is that it takes a word at a time and kind of imagine your reading left to right over
+
+11:24.160 --> 11:25.560
+a page.
+
+11:25.560 --> 11:28.720
+Well, transformers have a very different take on this.
+
+11:28.720 --> 11:32.120
+You get up to a current word, let's say I've just thrown a page in front of you and I
+
+11:32.120 --> 11:38.400
+ask you to kind of guess what the next word would be at the bottom of the page.
+
+11:38.400 --> 11:45.200
+Your eyes might dart around to multiple different places on the page and in fact, you know,
+
+11:45.200 --> 11:50.320
+you might look at first maybe the general topic of the language without looking at many
+
+11:50.320 --> 11:52.840
+of the words individually or how they're composed.
+
+11:52.840 --> 11:56.840
+You might skirt around and look whether or not you see specific persons name.
+
+11:56.840 --> 12:02.360
+So the general idea behind transformers is that they actually use attention over dozens
+
+12:02.360 --> 12:06.880
+or hundreds or thousands of the past kind of words or wordpaces that you're looking at
+
+12:06.880 --> 12:12.080
+on the page and each of these words end up kind of doing the exact same thing.
+
+12:12.080 --> 12:15.720
+They look at all the surrounding words as context using attention.
+
+12:15.720 --> 12:20.600
+So a lot of the time, the most important thing for attention is it'll just look at words
+
+12:20.600 --> 12:21.600
+that are local to itself.
+
+12:21.600 --> 12:25.120
+It'll look at the word previous to itself for the last few.
+
+12:25.120 --> 12:30.080
+It might also focus on other most likely related concepts.
+
+12:30.080 --> 12:36.720
+So if you saw there were maybe a pet name on not petting a animal species on the page,
+
+12:36.720 --> 12:40.440
+you might look for other animal species on the page or something else like that.
+
+12:40.440 --> 12:44.720
+So this isn't potentially the best example of describing transformers.
+
+12:44.720 --> 12:49.080
+It's been a while since I've had to try and think through it from kind of the ground
+
+12:49.080 --> 12:50.480
+up.
+
+12:50.480 --> 12:56.760
+But the idea is each word in the page would perform attention to get context about itself
+
+12:56.760 --> 13:01.920
+and about the other words on the page, which also enables you to do some very interesting
+
+13:01.920 --> 13:04.560
+differences to traditional models.
+
+13:04.560 --> 13:09.560
+These models usually don't have any concept of what word is necessarily before or after
+
+13:09.560 --> 13:10.560
+it.
+
+13:10.560 --> 13:13.800
+It will usually learn that or have some amount of that knowledge injected.
+
+13:13.800 --> 13:19.320
+That also means you can extend it quite readily to tasks such as images where you might be
+
+13:19.320 --> 13:23.520
+talking about pixels looking around orals or audio as well.
+
+13:23.520 --> 13:30.280
+So they're not kind of fundamentally sequential models like an RNN or LSTM.
+
+13:30.280 --> 13:38.560
+The relationships between the words are built up solely based on this attention mechanism.
+
+13:38.560 --> 13:39.560
+That's absolutely correct.
+
+13:39.560 --> 13:40.560
+Yeah.
+
+13:40.560 --> 13:44.160
+There's no sequentially necessarily forced on it.
+
+13:44.160 --> 13:48.160
+You can add in a few kind of hints or ideas like that.
+
+13:48.160 --> 13:52.600
+But it suddenly doesn't have the same idea of sequentiality as like a recurrent neural
+
+13:52.600 --> 13:55.960
+network where you're kind of walking one word at a time.
+
+13:55.960 --> 14:01.840
+And because of that, one of the main advantages is that you can parallelize a lot of this.
+
+14:01.840 --> 14:06.720
+So rather than having to walk one word at a time when you're doing processing, transformers
+
+14:06.720 --> 14:13.040
+can usually perform all of these computations across these words in parallel as well.
+
+14:13.040 --> 14:16.720
+So there are certain advantages that's primarily during training, but there are certain
+
+14:16.720 --> 14:22.360
+advantages about the way in which you can parallelize the work too because you make less
+
+14:22.360 --> 14:25.720
+of this constraint on kind of sequentiality.
+
+14:25.720 --> 14:28.680
+You kind of mentioned the couple goals.
+
+14:28.680 --> 14:37.080
+One was to kind of just take on the idea of transformers and explore whether you could
+
+14:37.080 --> 14:41.000
+achieve similar goals with other types of models.
+
+14:41.000 --> 14:49.360
+But that is kind of a starting point of inspiration. How did you end up at a specific model this
+
+14:49.360 --> 14:51.320
+Shah RNN?
+
+14:51.320 --> 14:57.560
+In the past, most of the language models were kind of fixed around either recurrent neural
+
+14:57.560 --> 15:00.920
+networks, but they're also some convolutional neural networks.
+
+15:00.920 --> 15:05.360
+So almost as similar purchase you would have for handling a vision task.
+
+15:05.360 --> 15:12.080
+But for me, in particular, I appreciate and like the aspect of the LSTM, I think it's
+
+15:12.080 --> 15:21.360
+more in line with how, at least I can visualize how I would read or think about reading text.
+
+15:21.360 --> 15:25.520
+And that's suddenly nothing to do with how the human brain thinks or whatever else, but
+
+15:25.520 --> 15:29.640
+it's suddenly at least an abstraction that I can think about and reason through.
+
+15:29.640 --> 15:34.360
+As you're reading text usually, at least I don't know about you, but I usually go woodward.
+
+15:34.360 --> 15:38.920
+And I might glance back at a different part of the page, but I'm suddenly not glancing
+
+15:38.920 --> 15:42.080
+around the page for every word that I'm looking at.
+
+15:42.080 --> 15:46.440
+And so the LSTM or the RNN are far better fits for that.
+
+15:46.440 --> 15:52.560
+You have an interior kind of hidden state, so some sort of memory, and you're storing
+
+15:52.560 --> 15:57.040
+aspects of the current text that you're reading in that memory and using that to predict
+
+15:57.040 --> 15:59.640
+the next word.
+
+15:59.640 --> 16:05.600
+And that I feel is, at least in my mind, a kind of more intuitive fit for how I read compared
+
+16:05.600 --> 16:11.400
+to, say, these multi-headed attention mechanisms used by transformers, where it's equivalent
+
+16:11.400 --> 16:17.520
+of every word you look at on the page glancing for some of these models, hundreds of times
+
+16:17.520 --> 16:21.840
+at different locations on the page to pull information back and forth.
+
+16:21.840 --> 16:26.600
+And they don't generally have this concept of memory as well.
+
+16:26.600 --> 16:32.760
+Some of the most recent transform of paper papers have added memory, but it's suddenly
+
+16:32.760 --> 16:39.320
+nothing quite like the LSTM's at the moment, which I feel has kind of, as I said, a far
+
+16:39.320 --> 16:44.120
+better, intuitive understanding of how we'd go through and reading text.
+
+16:44.120 --> 16:47.920
+You know, talking about these two different types of models, you know, we're contrasting
+
+16:47.920 --> 16:57.240
+the attention mechanism versus the sequentiality, but they're not necessarily mutually exclusive.
+
+16:57.240 --> 17:03.160
+In fact, you use attention as part of the Shah RNN, and attention has been used in conjunction
+
+17:03.160 --> 17:07.120
+with RNNs for quite some time, isn't that right?
+
+17:07.120 --> 17:08.120
+Yeah.
+
+17:08.120 --> 17:14.240
+And that was one of the aspects that I was particularly interested in, and actually researching as well.
+
+17:14.240 --> 17:21.440
+The question of how much of the most recent results for transformers are mostly results
+
+17:21.440 --> 17:28.240
+of these attention mechanisms themselves, versus, you know, maybe what aspects are missing
+
+17:28.240 --> 17:30.320
+from previous models.
+
+17:30.320 --> 17:38.200
+So transformers, they are entirely this multi-headed attention concept, versus LSTM's
+
+17:38.200 --> 17:43.040
+in the past, have generally, mostly just being the LSTM and only added maybe a layer of
+
+17:43.040 --> 17:46.440
+attention here or there, very sparsely.
+
+17:46.440 --> 17:54.680
+But the research seemed to have stopped in probably 2017-18 on extending LSTM's direction.
+
+17:54.680 --> 18:02.200
+So rather than adding attention heads to these existing RNN models, it was kind of literally
+
+18:02.200 --> 18:06.600
+the paper that started, a lot of this was called attention is all you need, which gave
+
+18:06.600 --> 18:09.080
+kind of rise to this transformer approach.
+
+18:09.080 --> 18:14.320
+And people have seemed to stick pretty close to the paper's title, using almost purely
+
+18:14.320 --> 18:17.080
+attention for a lot of these tasks.
+
+18:17.080 --> 18:25.680
+So before transformers took off two or three years ago now, I was also exploring using
+
+18:25.680 --> 18:31.960
+a very simple form of attention on top of these RNN models.
+
+18:31.960 --> 18:35.320
+And it was referred to as a point of sentinel model.
+
+18:35.320 --> 18:40.560
+And the idea is it was that it would allow your LSTM, which is mainly just looking at words
+
+18:40.560 --> 18:45.520
+one at a time, to look back with like one passer of the page to try and pull some information
+
+18:45.520 --> 18:46.520
+back.
+
+18:46.520 --> 18:51.360
+So the kind of intuitive idea was imagine that I give you a highlighter and you're allowed
+
+18:51.360 --> 18:54.880
+to highlight some of the words on the page that you think are relevant to predicting the
+
+18:54.880 --> 18:56.200
+next word.
+
+18:56.200 --> 19:01.960
+And that had incredibly good results, but it wasn't kind of properly integrated into the
+
+19:01.960 --> 19:07.120
+model. It was mainly about pulling in kind of rare words that the model might not understand
+
+19:07.120 --> 19:13.080
+from an kind of information point of view, but it might understand from a positional point
+
+19:13.080 --> 19:14.080
+of view.
+
+19:14.080 --> 19:16.960
+So my last name might be a good example of that.
+
+19:16.960 --> 19:21.680
+Maybe the model has never seen Stephen Merritti, but with an attention mechanism, you highlight
+
+19:21.680 --> 19:25.800
+just Merritti and say, well, just pull that word copy and paste it here.
+
+19:25.800 --> 19:29.680
+So that was the idea initially behind my point of sentinel.
+
+19:29.680 --> 19:34.000
+And that was based off of a lot of work on point networks, which were kind of precursors
+
+19:34.000 --> 19:39.360
+to these transformers and multi-headed attention.
+
+19:39.360 --> 19:45.640
+But allowing the RNN itself to actually use that to update its kind of internal repository
+
+19:45.640 --> 19:51.280
+of knowledge to update its internal memory wasn't heavily used beforehand.
+
+19:51.280 --> 19:54.920
+And so that was the direction that I was interested in taking it.
+
+19:54.920 --> 20:01.080
+And also asking, well, these transform models have had great success with these dozens
+
+20:01.080 --> 20:07.920
+or hundreds of heads, how much, how many heads do you actually need for doing this work
+
+20:07.920 --> 20:10.480
+and how complex do they need to be?
+
+20:10.480 --> 20:17.640
+Is it enough to literally just do one highlight of the page or do you require 20, 100 different
+
+20:17.640 --> 20:22.040
+colors for your highlighter and different levels of granularity?
+
+20:22.040 --> 20:26.440
+And the most surprising result for me is that a single head of attention, so allowing
+
+20:26.440 --> 20:30.800
+the model to kind of glance back at the page once, is enough to get near state of the
+
+20:30.800 --> 20:35.720
+art results when you kind of combine it with an LSTM.
+
+20:35.720 --> 20:43.760
+And now is there a kind of measure of the complexity of the LSTM network, like the number of time
+
+20:43.760 --> 20:51.360
+steps or something like that that is relevant here to get a sense for, well, complexity.
+
+20:51.360 --> 20:54.800
+Yeah, there are a few different directions we could look at.
+
+20:54.800 --> 20:58.240
+And that was also one of the ones that I was interested in thinking about.
+
+20:58.240 --> 21:04.200
+A lot of the time, these larger models aren't actually kind of sensible to put into production.
+
+21:04.200 --> 21:09.160
+They either make a great deal of references or they require a great deal of memory for
+
+21:09.160 --> 21:15.040
+keeping, you know, those references in memory or a great deal of like flops, floating
+
+21:15.040 --> 21:22.120
+point operations are basically the certain amount of compute for your GPU.
+
+21:22.120 --> 21:27.880
+And yeah, part of the idea was that because I'm using only a single head of attention,
+
+21:27.880 --> 21:33.160
+and it's a far simpler one, that's the reference to stop thinking with your head, I'm actually
+
+21:33.160 --> 21:40.720
+able to add in far more tokens into this, the past reference kind of memory window.
+
+21:40.720 --> 21:45.240
+So the size of the page, if you want to think of it that way, that you're able to look back
+
+21:45.240 --> 21:52.800
+over the text, but also that LSTM's, because it's just got this one time step, when you're
+
+21:52.800 --> 21:56.040
+generating, you're interested in just producing one time step.
+
+21:56.040 --> 22:00.960
+And LSTM by itself, you have a very small amount of computation you need to do.
+
+22:00.960 --> 22:05.280
+Versus a transformer, as we mentioned, transform is at least so far, don't have any aspect of
+
+22:05.280 --> 22:06.440
+this memory.
+
+22:06.440 --> 22:11.240
+So every word that they look at, you have to do this full computation over again, and look
+
+22:11.240 --> 22:15.440
+back all the way back over the page, doing a great deal of compute usually.
+
+22:15.440 --> 22:18.520
+Is that at both training and inference?
+
+22:18.520 --> 22:20.480
+Yes, basically.
+
+22:20.480 --> 22:24.800
+And it also gets particularly interesting when it comes to inference, because a lot of
+
+22:24.800 --> 22:31.440
+the parallelization advantages that you had earlier on for training kind of disappear.
+
+22:31.440 --> 22:36.440
+Even training, you already have all the text kind of, you can cheat and imagine that you're
+
+22:36.440 --> 22:41.520
+able to predict the next word, because you've got this written down text exactly as it is.
+
+22:41.520 --> 22:47.600
+So it's equivalent of, I guess, you or me like reading over an existing paper or article,
+
+22:47.600 --> 22:51.520
+versus when you're generating, you obviously can't kind of glance forward to what you would
+
+22:51.520 --> 22:56.080
+have written five or ten sentences ahead.
+
+22:56.080 --> 23:00.560
+And so the model has to step very slowly, one step after the other.
+
+23:00.560 --> 23:05.280
+And when you have a kind of parallel model, as you do with the transform.
+
+23:05.280 --> 23:09.400
+And so the model, you're able to train it on just a single GPU.
+
+23:09.400 --> 23:10.400
+Yeah.
+
+23:10.400 --> 23:13.720
+So all of this lived on a single GPU.
+
+23:13.720 --> 23:17.240
+Thanks to Nvidia, they donated to me some time ago.
+
+23:17.240 --> 23:23.240
+But yes, a single GPU and almost all the experiments were under 24 hours.
+
+23:23.240 --> 23:29.320
+So there's this being this huge push towards cloud compute and everything else like that,
+
+23:29.320 --> 23:31.480
+which there's absolutely no problem with.
+
+23:31.480 --> 23:34.120
+But they're certainly generally not cost effective.
+
+23:34.120 --> 23:42.120
+And I generally want my research to be replicable by, say, a grad student or a freshman or just
+
+23:42.120 --> 23:47.120
+someone who's interested and maybe just has the GPU and their gaming laptop.
+
+23:47.120 --> 23:53.040
+I think there are so many interesting different potential directions for research that it's
+
+23:53.040 --> 23:58.640
+a shame to limit the field to people who have huge amounts of compute or some way of getting
+
+23:58.640 --> 24:01.920
+free credits on these cloud services.
+
+24:01.920 --> 24:04.120
+I've certainly been offered enough of them.
+
+24:04.120 --> 24:08.800
+There are many companies that offer these credits to try to encourage people to play around
+
+24:08.800 --> 24:12.480
+and they'll usually give it to the researchers or universities or so on.
+
+24:12.480 --> 24:17.520
+But at the end of the day, if not everyone has access to those same kind of free credits
+
+24:17.520 --> 24:22.880
+and free resources, then we're limiting the field and limiting the breadth of people
+
+24:22.880 --> 24:24.680
+who can contribute.
+
+24:24.680 --> 24:33.160
+So you created this model based on attention and LSTM and then you ran it against a benchmark
+
+24:33.160 --> 24:41.920
+in this case with the NWIC 8, Hunter Prize Wikipedia data set and you found reasonable
+
+24:41.920 --> 24:43.280
+performance with that.
+
+24:43.280 --> 24:47.520
+Tell us a little bit about the approach to benchmarking you took here.
+
+24:47.520 --> 24:51.960
+So the NWIC 8 data set, it's also referred to as a Hutter Wikipedia Prize.
+
+24:51.960 --> 24:58.280
+And the idea was that it's just grabbing a possible dump of Wikipedia.
+
+24:58.280 --> 25:03.120
+So that's the first 100 million bytes also of English Wikipedia from it's many years
+
+25:03.120 --> 25:04.120
+back now.
+
+25:04.120 --> 25:06.320
+I think it was 2006.
+
+25:06.320 --> 25:09.840
+And this is kind of an interesting data set for a number of reasons.
+
+25:09.840 --> 25:13.360
+One is that it's traditionally being used for traditional compression.
+
+25:13.360 --> 25:18.800
+So if you think of zip files or that type of thing, this was the data set that was frequently
+
+25:18.800 --> 25:25.200
+used to show whether or not a new compression technique was better than past ones.
+
+25:25.200 --> 25:30.960
+So it has been kind of heavily thought through by a number of different people in terms
+
+25:30.960 --> 25:33.040
+of traditional data compression.
+
+25:33.040 --> 25:38.000
+And one of the fascinating things about language models is that they are actually also data
+
+25:38.000 --> 25:43.640
+compresses that certainly not used generally to actually compress files that we might deal
+
+25:43.640 --> 25:45.240
+with every day.
+
+25:45.240 --> 25:49.640
+But by being able to better predict the next token, it actually means you're able to spend
+
+25:49.640 --> 25:54.160
+less and less bits storing the data set itself.
+
+25:54.160 --> 26:01.120
+And this has been considered a potential demonstration of kind of the idea that compression and machine
+
+26:01.120 --> 26:05.440
+learning and artificial intelligence kind of all wrap up into one thing.
+
+26:05.440 --> 26:09.440
+Because compression at the end of the day is being able to produce a larger sequence
+
+26:09.440 --> 26:13.880
+from a smaller sequence because you have some knowledge about the structure of how the
+
+26:13.880 --> 26:15.560
+data goes together.
+
+26:15.560 --> 26:21.880
+And in the exact same way, if you have a knowledge about the structure of a given language
+
+26:21.880 --> 26:28.600
+that you're talking in, let's say it's English, or the structure of XML, which is also part
+
+26:28.600 --> 26:33.160
+of this data dump, you're able to better predict the next token, which means you're able
+
+26:33.160 --> 26:35.280
+to better compress the file.
+
+26:35.280 --> 26:38.200
+So this is a really interesting data set in my mind.
+
+26:38.200 --> 26:44.080
+And it also, of course, runs over Wikipedia, which has already a great kind of collection
+
+26:44.080 --> 26:48.240
+of all of the world's information in it.
+
+26:48.240 --> 26:52.160
+So that was the data set that I was interested in exploring.
+
+26:52.160 --> 26:57.160
+And yes, it's been one of these standard data sets to explore for language models for
+
+26:57.160 --> 26:58.480
+quite some time.
+
+26:58.480 --> 27:02.760
+And it turns out with this relatively simple architecture that kind of jumped off in a
+
+27:02.760 --> 27:07.880
+different direction, my sharp LSTM, I was able to achieve results that would have been
+
+27:07.880 --> 27:10.720
+instead of a year or two ago, unfortunately.
+
+27:10.720 --> 27:18.320
+But in able to achieve these results in 12 to maybe 20 hours, depending on your GPU or
+
+27:18.320 --> 27:21.280
+depending on the exact formulation of the model.
+
+27:21.280 --> 27:27.880
+So far, faster than a lot of these kind of larger models and almost with a minimal size
+
+27:27.880 --> 27:28.880
+as well.
+
+27:28.880 --> 27:37.560
+So does the result and performance that you've seen in the benchmarking generalize to other
+
+27:37.560 --> 27:39.840
+types of tasks?
+
+27:39.840 --> 27:47.000
+For example, many might be familiar with these transformer models and language models like
+
+27:47.000 --> 27:53.120
+GPT-2 through just a text prediction type of a task where you give it a prompt and you
+
+27:53.120 --> 27:55.760
+have it generate some number of words.
+
+27:55.760 --> 28:02.240
+And to expand on that, often, we're surprised at how coherent that text reads.
+
+28:02.240 --> 28:07.080
+Would you expect that this model performs similarly on that type of task and generate
+
+28:07.080 --> 28:12.920
+text that feel so kind of spookily human?
+
+28:12.920 --> 28:18.760
+Yeah, it's a great question and it's one in merely, I don't have direct evidence for
+
+28:18.760 --> 28:24.440
+yet, but at least for this model and this data set, when you compare it against the other
+
+28:24.440 --> 28:29.960
+models, which are all transformer based almost, the numbers are quite similar and when I'm
+
+28:29.960 --> 28:32.080
+looking at the output, it's quite similar.
+
+28:32.080 --> 28:34.200
+The difference would be in scaling.
+
+28:34.200 --> 28:39.000
+So many of these existing transformer models have run over far larger data sets.
+
+28:39.000 --> 28:45.400
+The N-Wik8 data set is only, unfortunately, about 100 megabytes of Wikipedia.
+
+28:45.400 --> 28:50.680
+So far smaller than many of these models that are now training over dozens, hundreds of
+
+28:50.680 --> 28:54.680
+gigabytes of quite varied text.
+
+28:54.680 --> 29:00.440
+So the model I use, it certainly produces some fun and hilarious and interesting Wikipedia
+
+29:00.440 --> 29:01.440
+pages.
+
+29:01.440 --> 29:06.720
+In fact, I love using it to get the kind of reception, like the New York Times writer
+
+29:06.720 --> 29:11.680
+said that this article was the most terrible idea in all of existence.
+
+29:11.680 --> 29:15.040
+Usually this model ends up with beautiful, pithy quirks, but unfortunately, because it's
+
+29:15.040 --> 29:19.520
+mainly focused on the Wikipedia domain, it isn't as expressive as a lot of these larger
+
+29:19.520 --> 29:22.560
+models trained over far more varied texts.
+
+29:22.560 --> 29:26.720
+Now that isn't an issue with the model itself, that's an issue with the data set that I have.
+
+29:26.720 --> 29:31.680
+And the fact that I was mainly trying to get it to run quite quickly.
+
+29:31.680 --> 29:37.480
+But I don't think there is necessarily a limit or going to be an extreme difference in how
+
+29:37.480 --> 29:42.800
+this model would perform for a lot of these kind of text completion tasks.
+
+29:42.800 --> 29:45.160
+But you would have to scale it up.
+
+29:45.160 --> 29:50.080
+And one of the other main centerpieces of the article, the paper that I was talking
+
+29:50.080 --> 29:56.320
+about is the fact that because there was so much attention on performance for the
+
+29:56.320 --> 30:03.680
+past few years, no pun intended, there's models that ended up getting a lot of the focus
+
+30:03.680 --> 30:08.800
+when it comes to both the research, but also the practical engineering behind how to make
+
+30:08.800 --> 30:10.560
+these models scale.
+
+30:10.560 --> 30:16.160
+There are indeed certain advantages that just make it far easier to scale transformers.
+
+30:16.160 --> 30:21.920
+But there are also many known techniques to making other neural networks, formulations
+
+30:21.920 --> 30:27.440
+faster such as the LSTM, that we haven't actually pursued because we're all going off in
+
+30:27.440 --> 30:29.920
+this transformer direction.
+
+30:29.920 --> 30:35.360
+And I feel like that's a bit of a shame, because as more people spend more time working on
+
+30:35.360 --> 30:41.920
+a very particular brand or a particular style of solution to a task, these other solutions
+
+30:41.920 --> 30:45.200
+which might not actually be worse kind of fall to the side.
+
+30:45.200 --> 30:51.280
+And so that's really part of what I was interested in kind of pointing out with this research,
+
+30:51.280 --> 30:55.520
+but up until kind of fairly recently, these results would have been steady art.
+
+30:55.520 --> 31:02.080
+And maybe people have been focusing more on how do you optimize an LSTM or how do we improve
+
+31:02.080 --> 31:05.280
+the way and we can form or how do we scale it up.
+
+31:05.280 --> 31:09.280
+But that kind of tension instead went to transformers.
+
+31:09.280 --> 31:16.840
+When I've played with models like GPT-2 in the past, it becomes very clear, very quickly
+
+31:16.840 --> 31:22.520
+that the model, it's not creating new texts, it's kind of stitching together things that
+
+31:22.520 --> 31:28.280
+it has memorized or seen in the past.
+
+31:28.280 --> 31:33.800
+And these transformer models, because they're huge models, they have a huge parameter
+
+31:33.800 --> 31:36.520
+space and they can memorize a lot of stuff.
+
+31:36.520 --> 31:42.920
+So does a smaller model, you've talked about scaling it up, can it scale up in the same
+
+31:42.920 --> 31:47.240
+way so that it can remember as much stuff?
+
+31:47.240 --> 31:53.360
+Yeah, the concept of scaling up the model, I guess you can go in two different directions.
+
+31:53.360 --> 31:58.560
+One is you can scale up a small model to handle a larger data set or you can of course scale
+
+31:58.560 --> 32:04.000
+up the kind of model architecture from this smaller model to a larger one and also at the
+
+32:04.000 --> 32:06.000
+same time throwing more data.
+
+32:06.000 --> 32:07.520
+I guess let's pull that apart.
+
+32:07.520 --> 32:11.080
+So one is scaling up a small model to a larger data set.
+
+32:11.080 --> 32:16.200
+And it is going to be a limit on how well, at least in the kind of traditional ways that
+
+32:16.200 --> 32:19.600
+language models operate, a small model will work.
+
+32:19.600 --> 32:24.320
+There's just, you know, some limit, it's not going to be able to perfectly memorize all
+
+32:24.320 --> 32:29.320
+of Harry Potter if you, you know, all of these different books, if you're feeding them
+
+32:29.320 --> 32:34.680
+in, just because there's a finite amount of space, a finite number of parameters that
+
+32:34.680 --> 32:38.240
+this language model is able to use.
+
+32:38.240 --> 32:43.960
+But that's also kind of a different question compared to can a small model be able to
+
+32:43.960 --> 32:50.080
+coherently generate text, maybe especially if you gave it, you know, the first few pages
+
+32:50.080 --> 32:54.840
+of Harry Potter to thumb through because we wouldn't call someone unintelligent if say,
+
+32:54.840 --> 33:00.400
+I don't know, I gave the first few pages of Harry Potter to my friend who would never
+
+33:00.400 --> 33:03.520
+read the book and say, try and continue writing along.
+
+33:03.520 --> 33:07.760
+If they don't make a reference to Snape, that's a very different kind of problem than
+
+33:07.760 --> 33:11.320
+them not being able to actually coherently generate text.
+
+33:11.320 --> 33:14.480
+So we are kind of conflating two aspects of language models.
+
+33:14.480 --> 33:17.800
+How much can the language model memorize from the world around it, you know, how much
+
+33:17.800 --> 33:24.640
+of the text that's been written or topics in the world can it kind of cram into its memory?
+
+33:24.640 --> 33:28.560
+And that's usually the form of parameters, that's where the lot of these models scale.
+
+33:28.560 --> 33:33.840
+And the secondary question of, well, can it coherently generate text, you know, how much
+
+33:33.840 --> 33:39.200
+of it is actually some level of understanding of the structure of text or how text might
+
+33:39.200 --> 33:44.640
+work and how much of it is actually just kind of, as you said, reproducing what it's already
+
+33:44.640 --> 33:47.440
+read, what it's already kind of memorized.
+
+33:47.440 --> 33:53.400
+And I'm personally, hopefully, not convinced that we have to keep scaling these models
+
+33:53.400 --> 33:58.400
+up, you know, as a human being, if I, you know, gave my friend that task of completing
+
+33:58.400 --> 34:02.240
+some Harry Potter fanfiction and they'd never read the books before, maybe I could point
+
+34:02.240 --> 34:06.960
+them to the Harry Potter Wikipedia page and maybe that would be enough.
+
+34:06.960 --> 34:10.720
+Maybe they want to thumb through a Wikipedia that's specific to Harry Potter.
+
+34:10.720 --> 34:14.120
+Maybe they need to read through the book, but I suddenly wouldn't have to, you know,
+
+34:14.120 --> 34:19.560
+get them an extra chunk of brain just in order to handle that type of task.
+
+34:19.560 --> 34:24.520
+And so that's the other kind of question and hope in my work.
+
+34:24.520 --> 34:27.800
+Maybe we're scaling up in the direction of being able to memorize more and more of this
+
+34:27.800 --> 34:34.360
+data far too early compared to, you know, having these models potentially be able to refer
+
+34:34.360 --> 34:40.040
+to new data when it needs to and thus be able to generalize better.
+
+34:40.040 --> 34:44.640
+So yeah, I do think that the two quite different questions, which isn't to say that they also
+
+34:44.640 --> 34:50.880
+don't interoperate and interact as well, because one of the fascinating things about text
+
+34:50.880 --> 34:55.560
+is that it's really, if you think it was like memorizing results, humans have spent
+
+34:55.560 --> 35:01.600
+a lot of time generating the text and usually text is beautifully distilled, condensed,
+
+35:01.600 --> 35:03.160
+kind of form of knowledge.
+
+35:03.160 --> 35:05.960
+And so there is obviously a lot of benefit to that.
+
+35:05.960 --> 35:10.960
+And there are obviously ways in which that can help a model train, but, you know, how
+
+35:10.960 --> 35:16.640
+much of that is necessary or maybe a completely different question is, do we think that these
+
+35:16.640 --> 35:20.240
+models can generate something that it hasn't read about before?
+
+35:20.240 --> 35:24.000
+Because that is potentially, you know, there are two different directions we can think
+
+35:24.000 --> 35:29.880
+about with language models, one is kind of minimizing the complexity of these data sets.
+
+35:29.880 --> 35:34.240
+The idea that I'll never be able to read all of the internet or all of Wikipedia, but
+
+35:34.240 --> 35:39.480
+hopefully I don't necessarily need to get to the result or to the information that is
+
+35:39.480 --> 35:41.480
+interesting or useful for my task.
+
+35:41.480 --> 35:46.360
+But then the second one is, well, if you want it to generate something, as we've been
+
+35:46.360 --> 35:51.840
+using with GPT-2 and Transform Excel and a lot of these language models, if we want
+
+35:51.840 --> 35:56.920
+to get it to generate something that's actually quite intelligent, is it enough to be able
+
+35:56.920 --> 36:00.800
+to kind of copy together other pieces of knowledge from the past?
+
+36:00.800 --> 36:01.800
+And I don't know.
+
+36:01.800 --> 36:03.600
+It's an interesting kind of very open question.
+
+36:03.600 --> 36:04.600
+Cool.
+
+36:04.600 --> 36:10.920
+There's a section of the paper where you go into a discussion around tokenization attacks
+
+36:10.920 --> 36:12.240
+and that kind of thing.
+
+36:12.240 --> 36:14.080
+What was that bit all about?
+
+36:14.080 --> 36:15.080
+Yeah.
+
+36:15.080 --> 36:20.480
+So I'll admit this is a section where I'm still having to rethink a lot of what I'm
+
+36:20.480 --> 36:28.320
+pondering, but one of the questions is that I published one of the standard data sets
+
+36:28.320 --> 36:31.360
+for this task called WikiTax103.
+
+36:31.360 --> 36:37.520
+And generally, when you're trying to determine whether or not a language model is performing
+
+36:37.520 --> 36:44.200
+well or not, you have a specific data set and you get it to try and predict an under like
+
+36:44.200 --> 36:47.520
+a test section, a section that hasn't seen before.
+
+36:47.520 --> 36:53.000
+And you asked how confused were you by say, you know, all of these words in succession.
+
+36:53.000 --> 36:58.480
+And tokenization is the idea that you can break these up into kind of different components.
+
+36:58.480 --> 37:03.240
+You might be able to say, just split on spaces and you would consider those words.
+
+37:03.240 --> 37:08.400
+So running, ran, and so forth end up all being separate, but the other concept is you
+
+37:08.400 --> 37:11.000
+could break it up into parts of words.
+
+37:11.000 --> 37:16.560
+So the example I have is specialized because you have special, you have specialized,
+
+37:16.560 --> 37:17.560
+specialized.
+
+37:17.560 --> 37:21.960
+If you break it up into those three different chunks, you can say, well, okay, the word
+
+37:21.960 --> 37:24.080
+special means this type of thing.
+
+37:24.080 --> 37:30.000
+When I add the suffix, eyes, you know, I specialize in a field or I specialized adding
+
+37:30.000 --> 37:34.920
+the D, the additional suffix on top of that, you can see you break the word up into these
+
+37:34.920 --> 37:39.280
+components where even if you don't necessarily understand all of one part, you can better
+
+37:39.280 --> 37:41.120
+understand other pieces.
+
+37:41.120 --> 37:45.840
+So that was part of the idea behind the tokenization attack, whether it was actually fair for these
+
+37:45.840 --> 37:52.040
+different models to compare the numbers by breaking up across these different tokens.
+
+37:52.040 --> 37:56.600
+Turns out I think it actually is, I've been turned smarter people than me have pointed
+
+37:56.600 --> 38:02.320
+out many of the issues in my thinking, but there's also still an issue when it comes to
+
+38:02.320 --> 38:03.320
+generating text.
+
+38:03.320 --> 38:07.920
+So if you've seen from GPT2 or if you've been playing around with that or these other
+
+38:07.920 --> 38:13.240
+online models, most of the time these models have been trained with what we would consider
+
+38:13.240 --> 38:14.240
+gold text.
+
+38:14.240 --> 38:19.440
+So text that we would hopefully have pulled from an intelligent source so it actually makes
+
+38:19.440 --> 38:20.440
+sense.
+
+38:20.440 --> 38:25.880
+And if the language model say guesses the wrong word next, it can recover because you're
+
+38:25.880 --> 38:31.000
+telling it well actually know that word was wrong, you actually meant to say this.
+
+38:31.000 --> 38:34.840
+But if you've played around with these models and you've had it start to generate something
+
+38:34.840 --> 38:40.360
+incorrect, it'll usually start to say getting into this weird loop or start to repeat the
+
+38:40.360 --> 38:46.000
+wrong fact over and over and over again because it says, well, okay, I've seen that text
+
+38:46.000 --> 38:47.000
+generated.
+
+38:47.000 --> 38:51.400
+I assume that everything before it was correct and I'm not going to go back and fix it.
+
+38:51.400 --> 38:57.680
+So the different sizes of these text chunks can also impact that when it comes to generation.
+
+38:57.680 --> 39:02.280
+But yeah, the tokenization attack I've got to admit is less of a well formed argument
+
+39:02.280 --> 39:03.680
+as it turns out.
+
+39:03.680 --> 39:09.160
+It did kind of feel a little bit like you were geeking out and having fun after the
+
+39:09.160 --> 39:11.560
+real work of the paper was done.
+
+39:11.560 --> 39:16.760
+I think it was less well formed than the rest of the paper.
+
+39:16.760 --> 39:18.920
+So I'll have to admit that much.
+
+39:18.920 --> 39:19.920
+Yes.
+
+39:19.920 --> 39:26.200
+You know, is your hope that folks will build on the sharp RNN or you know, put it in the
+
+39:26.200 --> 39:31.160
+production, put in the actual use like what do you, you know, what's your ultimate hope
+
+39:31.160 --> 39:33.640
+for this work and where do you see it going?
+
+39:33.640 --> 39:38.880
+Yeah, I've had people already contact me about pushing something like it into a
+
+39:38.880 --> 39:42.960
+production, because there are a number of advantages, especially for production usage
+
+39:42.960 --> 39:45.480
+or for if you're running small models.
+
+39:45.480 --> 39:49.600
+There are some advantages to it that you don't get out of the transformer.
+
+39:49.600 --> 39:55.000
+But honestly, my main hurt is for us as a field to kind of think through these two different
+
+39:55.000 --> 39:57.200
+directions that we're going.
+
+39:57.200 --> 39:59.680
+One is that we have something that works.
+
+39:59.680 --> 40:03.440
+We have language models and they seem to work well, turns out scaling them up.
+
+40:03.440 --> 40:05.280
+They generally seem to work better.
+
+40:05.280 --> 40:10.520
+But as we scale them up, we are kind of locking ourselves into two different things where
+
+40:10.520 --> 40:14.880
+we're focusing all of our research on this one specific formulation of how to solve the
+
+40:14.880 --> 40:18.800
+task, which we don't know is necessarily correct yet.
+
+40:18.800 --> 40:23.600
+And we're locking in a lot about engineering effort into solving the task using that particular
+
+40:23.600 --> 40:28.160
+formulation, which means that it's more and more difficult for different potential
+
+40:28.160 --> 40:31.720
+approaches to actually even get a start.
+
+40:31.720 --> 40:36.360
+The model slower, or it's just not able to be scaled because the frameworks aren't there
+
+40:36.360 --> 40:37.800
+and so on.
+
+40:37.800 --> 40:44.400
+And I am hoping that the community kind of really thinks about that, because if we kind
+
+40:44.400 --> 40:49.040
+of followed this example, I'm not sure if your readers are aware, but one of the first
+
+40:49.040 --> 40:57.280
+deep learning examples was the cat example that Google did in, I think it was 2012, where
+
+40:57.280 --> 41:04.120
+they used, it was along the lines of 16,000 CPU cores to kind of look at small images in
+
+41:04.120 --> 41:09.040
+order to better classify our number of small classes amongst them, whether or not a cat
+
+41:09.040 --> 41:10.720
+was in the image.
+
+41:10.720 --> 41:14.560
+And that kind of sounds crazy now because you can do that on your mobile phone.
+
+41:14.560 --> 41:18.960
+But that was because we also went a different direction and we realized GPUs were better
+
+41:18.960 --> 41:23.560
+for kind of solving this type of task and we have improved the architecture and so on over
+
+41:23.560 --> 41:24.560
+time.
+
+41:24.560 --> 41:30.960
+Imagine kind of a different history where we instead focus just on using CPUs like this.
+
+41:30.960 --> 41:36.160
+Maybe the only people who'd be able to do machine learning at this point were the Googles
+
+41:36.160 --> 41:41.480
+or the Microsofts or what have you that have the 16,000 CPUs hanging about.
+
+41:41.480 --> 41:48.040
+And so the more we focus on a particular direction and forget about the fact that these
+
+41:48.040 --> 41:52.520
+models are becoming larger and larger and more unwieldy to train and that there are potentially
+
+41:52.520 --> 41:55.280
+other more efficient ways to solve the problem.
+
+41:55.280 --> 42:00.120
+While we might find ourselves locked into a future where only a handful of like large organizations
+
+42:00.120 --> 42:04.560
+are able to do this research and the worst part would be we'd be locked into this future
+
+42:04.560 --> 42:08.880
+not because it's the only way forward but because it's just the way forward that we've
+
+42:08.880 --> 42:10.960
+all pushed.
+
+42:10.960 --> 42:13.360
+So that's really my hope for this paper.
+
+42:13.360 --> 42:18.920
+But additionally if people use the model itself I'll be glad to.
+
+42:18.920 --> 42:26.480
+So kind of put another way your general senses that we've kind of over indexed on exploit
+
+42:26.480 --> 42:30.760
+in this particular case and you're kind of encouraging us to explore more yet there's
+
+42:30.760 --> 42:33.480
+more there to to try.
+
+42:33.480 --> 42:40.520
+That's a beautiful way of putting it yes we have exploited a great deal and that doesn't
+
+42:40.520 --> 42:44.320
+necessarily mean it's the best solution to the task and the the worrying part is you
+
+42:44.320 --> 42:48.800
+know the more we exploit in one direction the more it seems that all other paths are useless
+
+42:48.800 --> 42:52.280
+but that's not necessarily because that useless but because of the amount of effort put
+
+42:52.280 --> 42:56.360
+into just you know making this one design work.
+
+42:56.360 --> 43:03.400
+For folks that want to play around with this you've got code available on GitHub is that
+
+43:03.400 --> 43:04.400
+right?
+
+43:04.400 --> 43:09.240
+Indeed there's code available on GitHub it isn't the most beautiful card but I am also
+
+43:09.240 --> 43:15.480
+going to be rewriting it some point soon with a particular focus on using it in production
+
+43:15.480 --> 43:19.880
+and using it for a number of different tasks because the code base as it stands is really
+
+43:19.880 --> 43:24.080
+my research code base where you know you have a number of different options in here you're
+
+43:24.080 --> 43:29.480
+poking and prodding and trying things out and certainly haven't optimized it for speed
+
+43:29.480 --> 43:34.240
+even though it's you know able to train in only 12 or 20 hours on a GPU.
+
+43:34.240 --> 43:38.400
+But yes there's code available if anyone's interested in playing around with it as a few
+
+43:38.400 --> 43:43.200
+have already started doing please do so and I'll help as much as I can but yeah the
+
+43:43.200 --> 43:45.920
+code is available so get to playing.
+
+43:45.920 --> 43:53.720
+Yeah and I just pulled up the GitHub page and noticed that one of the kind of assumptions
+
+43:53.720 --> 43:59.800
+lies assertions that I made earlier was that this model would have fewer parameters than
+
+43:59.800 --> 44:04.680
+the transformers and at least in the case of the ones that you've mentioned in the table
+
+44:04.680 --> 44:07.880
+that's not necessarily the case.
+
+44:07.880 --> 44:12.520
+Yeah the number and on that remake page is actually a little higher than it actually
+
+44:12.520 --> 44:18.840
+is in the paper 53 million parameters versus I think it's 41 and yes I mentioned that
+
+44:18.840 --> 44:25.120
+in the paper as well there are a few different directions for that.
+
+44:25.120 --> 44:30.440
+One is that LSTMs they generally need to have a fairly large hidden state in order to
+
+44:30.440 --> 44:33.000
+kind of retain memory.
+
+44:33.000 --> 44:37.960
+If your readers are aware of how it works the recurrence the kind of forget gates means
+
+44:37.960 --> 44:43.080
+that it kind of continues left to right I won't go into too much detail about that but
+
+44:43.080 --> 44:49.040
+yeah the exact in terms of competing purely on parameters there are models that are slightly
+
+44:49.040 --> 44:51.840
+better and that's really quite reasonable.
+
+44:51.840 --> 44:56.000
+I also don't think I mentioned the adaptive transformer which does a fair degree better
+
+44:56.000 --> 45:01.120
+as well but this is more of a proof of concept paper it's possible that you could kind of
+
+45:01.120 --> 45:08.760
+trim the shot LSTM down to try to to catch these as well but that's also then a question
+
+45:08.760 --> 45:13.600
+of you know do these necessarily train faster to the use less compute when it comes prediction
+
+45:13.600 --> 45:18.560
+time to so it's really a bit of a trade off on a number of different directions.
+
+45:18.560 --> 45:23.280
+Yeah yeah I guess the biggest thing to jump out to me is that my intuition that the reason
+
+45:23.280 --> 45:28.240
+why transformers you know these large scale transformers were better at kind of pulling
+
+45:28.240 --> 45:31.720
+all these texts out is because they had more parameters but that's not necessarily the
+
+45:31.720 --> 45:32.720
+case.
+
+45:32.720 --> 45:37.240
+No the multi-headed tension like that's the only thing that this paper is not saying at
+
+45:37.240 --> 45:41.160
+all it's not saying that my method is better it's just kind of asking like you know how
+
+45:41.160 --> 45:47.280
+many attention heads are important how do these necessarily work because you know I could
+
+45:47.280 --> 45:51.000
+have well and fully found that you know attention heads were the only thing that was necessary
+
+45:51.000 --> 45:53.960
+for this but that didn't end up being the case.
+
+45:53.960 --> 45:58.880
+But one of the interesting things about these transformables is you if you see those results
+
+45:58.880 --> 46:04.680
+the LSTM is only full layers deep so there are four LSTMs that you kind of pass the information
+
+46:04.680 --> 46:10.920
+through versus these transform models the two that we were talking about that have lower
+
+46:10.920 --> 46:14.480
+parameter accounts that have 12 layers each.
+
+46:14.480 --> 46:21.840
+So you can also either reuse parameters or perform a great deal more computation to potentially
+
+46:21.840 --> 46:26.480
+get similar results by kind of maybe doing the same task you know a few times in a slightly
+
+46:26.480 --> 46:32.320
+more intelligent way and I guess the comparison with that would be either certain compression
+
+46:32.320 --> 46:36.920
+algorithms you know the more time you spend compressing the smaller file size so there
+
+46:36.920 --> 46:39.480
+are kind of these intuitive ideas as well.
+
+46:39.480 --> 46:44.640
+So it's yes possible that by doing a far deeper model that requires more compute we'd
+
+46:44.640 --> 46:49.640
+be able to get better results but that's all that's all kind of open research questions
+
+46:49.640 --> 46:50.640
+yeah.
+
+46:50.640 --> 46:54.960
+Are you surprised by the reception to it or was it in line with what you thought?
+
+46:54.960 --> 47:01.000
+I mean also the reception has been bit more than I was expecting the other issue which
+
+47:01.000 --> 47:05.200
+is interesting is you know you probably noticed in the paper I was just having fun with
+
+47:05.200 --> 47:06.200
+it.
+
+47:06.200 --> 47:12.040
+I mean that's obvious it's a real research paper but like there's this whole secondary
+
+47:12.040 --> 47:16.720
+discussion some people have gotten very angry talking about the scientific voice and whether
+
+47:16.720 --> 47:18.160
+or not I was breaking it.
+
+47:18.160 --> 47:25.400
+The paper is how do you put quite literary and fun and lighthearted it doesn't take
+
+47:25.400 --> 47:31.960
+itself seriously and you know that makes it I think rather accessible and interesting
+
+47:31.960 --> 47:36.720
+but it sounds like others you're getting some flak for that.
+
+47:36.720 --> 47:43.840
+I mean it suddenly ended up being a polarizing thing I need or in retrospect it I do think
+
+47:43.840 --> 47:49.280
+I've suddenly gone too far in some directions and the main one the main point I really
+
+47:49.280 --> 47:58.160
+wish I had done better was it is less accessible to non-English speakers and that's something
+
+47:58.160 --> 48:05.200
+that I in no way ever wanted to have happen and so that's the main thing I've suddenly
+
+48:05.200 --> 48:10.560
+decided on I want to make it far more accessible which you know that might just be additional
+
+48:10.560 --> 48:16.840
+material very simplified explanations as some papers have like blog posts that really
+
+48:16.840 --> 48:22.160
+distill everything out or worth through examples one step at a time but yeah they're kind
+
+48:22.160 --> 48:26.000
+of two other directions that I was thinking about this from one is that I'm now an independent
+
+48:26.000 --> 48:31.320
+researcher I don't have these large companies backing me and papers are really intensive
+
+48:31.320 --> 48:37.120
+things and my natural writing style the way in which I enjoy writing is you know along
+
+48:37.120 --> 48:41.560
+the lines of in the paper some directions as I said I've gone too far but other directions
+
+48:41.560 --> 48:47.600
+people have really enjoyed and it kind of provided me a lot of a lot of room to think
+
+48:47.600 --> 48:53.080
+about what I was writing why I'm doing language modeling like what it means to me and and
+
+48:53.080 --> 49:01.880
+so on but the other direction as well is that I think in this professionalized setting
+
+49:01.880 --> 49:07.040
+a lot of I have this entire kind of section in there where I talk about how you'd have
+
+49:07.040 --> 49:12.600
+to present what I was writing in order for it to be kind of accepted at conferences whilst
+
+49:12.600 --> 49:17.600
+whilst I I have gone too far I think it's also worth it for the academic community to really
+
+49:17.600 --> 49:22.160
+reflect on what they're expecting and what they're enforcing when it comes to papers one
+
+49:22.160 --> 49:26.840
+friend said I should you know and rightly so you should be dispassionate when it comes
+
+49:26.840 --> 49:33.560
+to scientific voice you shouldn't put your opinion into it but just because it isn't
+
+49:33.560 --> 49:38.160
+obvious on the surface that given paper has an opinion doesn't mean that it that there
+
+49:38.160 --> 49:44.520
+is no bias within that paper and whether that's the the papers it compares against the the
+
+49:44.520 --> 49:49.920
+approaches it tries the results it does or doesn't show I think this is this is something
+
+49:49.920 --> 49:54.840
+that the field should actually think about and you know a friend of mine said maybe I'm
+
+49:54.840 --> 49:59.920
+not the right person to think about that or do it but I don't think that science has
+
+49:59.920 --> 50:08.320
+to have a single voice and I don't know I the main thing as well is that you know as
+
+50:08.320 --> 50:12.320
+I said I'm an independent researcher I enjoyed writing it that's probably the best way
+
+50:12.320 --> 50:19.440
+for me to to produce more content so if the if you want more content that's kind of
+
+50:19.440 --> 50:24.800
+the way that I'm writing myself right and you know writing pages of text and getting these
+
+50:24.800 --> 50:29.800
+results is no easy effects are anyway that that's part of the battle as I said I'm still
+
+50:29.800 --> 50:36.600
+I'm still really just thinking through it myself the next paper I will I'll try simultaneously
+
+50:36.600 --> 50:41.080
+turning it down within the main section of the text but maybe I'll do something ridiculous
+
+50:41.080 --> 50:46.720
+like put all the all my funnicides and footnotes or into the appendix or something else like
+
+50:46.720 --> 50:52.400
+that maybe it maybe you need to train a language model on a bunch of boring archive papers
+
+50:52.400 --> 50:59.200
+and then run your paper through it or something like that to turn it into academic speak yes
+
+50:59.200 --> 51:05.760
+the the room of all of the benefits of these is yeah maybe all the optional you're sure
+
+51:05.760 --> 51:11.760
+the hidden text and sections explored and fill out with all the the ridiculous expansions
+
+51:11.760 --> 51:19.800
+yeah right right yeah yeah I hadn't seen that that aspect of the the response to it that's
+
+51:19.800 --> 51:26.080
+another corner of scientific Twitter I guess well yeah it's it's interesting it kind of split
+
+51:26.080 --> 51:34.320
+depending on community lines reddit was the one that was most kind of 50 50 when it came to that
+
+51:34.320 --> 51:41.680
+hacken years had a little bit of a a discussion on it but wasn't that heavy and Twitter was you know
+
+51:41.680 --> 51:47.520
+mercilessly support the other thing is it's all sort of private channels as well that there are
+
+51:47.520 --> 51:54.480
+some some friends of mine who didn't want to you know say it publicly just because they they
+
+51:54.480 --> 52:00.240
+considered this a mistake I made and that they just didn't want to they though as long as I you
+
+52:00.240 --> 52:07.840
+know don't do it again sort of thing yeah as I said I'm I'm thinking through it all like a great
+
+52:07.840 --> 52:15.440
+deal you know maybe maybe I just need to separate out everything and keep the papers boring but
+
+52:16.400 --> 52:21.760
+I don't know I'm still thinking through a little bit well that would be a great loss but you
+
+52:21.760 --> 52:27.680
+know I certainly you know there are certainly as you've mentioned aspects of the argument that
+
+52:27.680 --> 52:34.880
+resonate in terms of accessibility you know to folks that are less familiar with the particular
+
+52:34.880 --> 52:39.760
+idioms and things like that you're using I mean at the same time it's it's opening up to a
+
+52:39.760 --> 52:46.080
+broader like as you said it's opening up to a broader audience I had like you know venture
+
+52:46.080 --> 52:51.440
+capitalists or students that I helped teach in Australia who are still high school students or
+
+52:51.440 --> 52:59.040
+so on being able being able to read the paper and get the vast majority of the content you know
+
+53:00.320 --> 53:04.320
+and then at the same time a lot of these papers if we're talking about reproducibility or
+
+53:04.320 --> 53:10.080
+understandability you know I've included my curd and people have already reproduced it a lot of
+
+53:10.080 --> 53:16.320
+the more complex works I've spent like there was one paper that I spent almost a year trying to
+
+53:16.320 --> 53:22.400
+replicate it was some of the worst worst chunks in my life because this paper was doing better on
+
+53:22.400 --> 53:29.680
+a task that I was really trying to solve it was a language modeling paper I ended up wasting so
+
+53:29.680 --> 53:34.640
+much time so much compute so much energy and that was because the authors even though it was a
+
+53:34.640 --> 53:39.200
+professionally written and well received and published paper the authors didn't include all the
+
+53:39.200 --> 53:46.560
+details to reproduce the work that's kind of what I mean by like a lot of this is kind of you know
+
+53:46.560 --> 53:51.600
+as I said my paper is not necessarily the right balance of it but that there's this reality behind
+
+53:51.600 --> 53:57.680
+the papers that is just papered or go yeah they're fun intended but like that there's this
+
+53:57.680 --> 54:01.440
+full throughout it says like you know oh we only tried this thing it's actually you know you tried
+
+54:01.440 --> 54:06.640
+10 different things and you only reported on that or we don't quite know how this works but we're
+
+54:06.640 --> 54:11.520
+going to pretend we do for the sake of like we're worried about reviewer number two saying that
+
+54:11.520 --> 54:16.240
+this is the obviously don't understand how it works it's not right in our approach or what
+
+54:16.240 --> 54:24.240
+happier so at the very least you know I think my paper makes it obvious that writing styles are
+
+54:24.240 --> 54:31.520
+thought about and enforced but maybe they're not thought about and forced as as publicly as as we
+
+54:31.520 --> 54:37.920
+might might need to think about them yeah well you know I think at the end of the day for a paper
+
+54:38.720 --> 54:47.760
+who's one of whose primary goals is to ask questions of the research community you know
+
+54:47.760 --> 54:52.960
+it strikes me as totally appropriate that it you know ask those questions in a way that
+
+54:52.960 --> 55:00.080
+itself ask questions yeah I think that's the other thing I wanted the off sheet when you when
+
+55:00.080 --> 55:04.640
+you're talking about the community as a whole like I can't decide on the direction of the community
+
+55:04.640 --> 55:09.520
+and I can't necessarily there there are certain things that you can't scientifically prove one way
+
+55:09.520 --> 55:15.120
+over the other like I can't say that we took their own direction by focusing on transformers I can
+
+55:15.120 --> 55:21.440
+just ask the question but maybe there's the right way to do that as well yeah I mean it's you know
+
+55:21.440 --> 55:26.000
+I don't know that it's a right or wrong thing it's you know it's kind of what we've done and I think
+
+55:26.000 --> 55:33.040
+you know you're you're touching on that it's not the only way and I would hope people would get
+
+55:33.040 --> 55:39.520
+that whether they can get those other ways funded at this point because everything is so focused
+
+55:39.520 --> 55:44.720
+on transformers that's a whole other question but yeah maybe you've given someone a data point
+
+55:44.720 --> 55:51.040
+that you know that says that you know their thing should be funded yeah that's the other I mean
+
+55:51.040 --> 55:57.440
+the one of the other first is as well like training language models quickly my postcard based
+
+55:57.440 --> 56:04.800
+AWD LSTM because it was so quick to train similar times it was like 12 hours for many of these
+
+56:04.800 --> 56:10.480
+different datasets you know experiment is we're able to they say do it in like dozens or hundreds
+
+56:10.480 --> 56:16.800
+of languages or dozens or hundreds of variants versus these large language models I know friends
+
+56:16.800 --> 56:23.600
+who they set off the training job and even with you know the 50 or $100,000 spent on some cloud
+
+56:23.600 --> 56:30.720
+compute thing they're waiting one two three four months in order for to get just one result I
+
+56:30.720 --> 56:34.160
+that's the other thing as well not just being an independent research but even when I was a
+
+56:34.160 --> 56:40.080
+researcher who was funded I don't like the idea that the research in the community is just
+
+56:40.080 --> 56:45.360
+becoming more and more predicated on you having access to all this equipment I think there are
+
+56:45.360 --> 56:50.880
+fascinating questions that you know your listeners or even like the high school students I teach
+
+56:50.880 --> 56:55.680
+in Australia anyone else would be able to ask and actually answer in a completely scientific
+
+56:55.680 --> 57:01.280
+and fascinating way but only if we keep making sure that these models are actually
+
+57:01.840 --> 57:08.000
+inner trainable the purchable applicable to the normal person and a lot of these pre-trained
+
+57:08.000 --> 57:13.600
+language models that were being getting recently where the training that for example GPT2
+
+57:13.600 --> 57:20.640
+the Salesforce reaches such as language model as well many of these these different
+
+57:20.640 --> 57:24.400
+approaches they're no longer releasing the training code for it so you get these huge
+
+57:25.280 --> 57:32.880
+model blogs you know GP2 GPT2 excel what have you but no one's necessarily able to reproduce it
+
+57:32.880 --> 57:38.240
+so any research that's on top of that is predicated on either that company or those research
+
+57:38.240 --> 57:45.600
+organizations continuing to release those results of those models or again on the idea that
+
+57:45.600 --> 57:49.200
+you don't have control of the underlying architecture like you can't decide whether it's a
+
+57:49.200 --> 57:54.640
+transformer or an LSTM or whatever else you have to live with whatever else is put out in front of
+
+57:54.640 --> 58:03.840
+you and I don't know it just I I I'm ready to admit one day that you know we have to like
+
+58:03.840 --> 58:10.160
+focus on one direction or you know the compute resources do indeed get this better result and
+
+58:10.160 --> 58:13.920
+you know we can't try all these different things but I don't think that day is yet and I don't
+
+58:13.920 --> 58:21.360
+think that day is necessarily soon well thanks so much for taking the time to share what you're up to
+
+58:21.360 --> 58:27.040
+and talk through this paper really interesting stuff and I am really looking forward to seeing
+
+58:27.040 --> 58:36.560
+what the community does and what you do to kind of extend it all right everyone that is our show
+
+58:36.560 --> 58:44.160
+for today for more information on today's show including our guest heads to tomalei.com slash shows
+
+58:44.800 --> 58:51.520
+once again the co-first introduction to NLP study group begins this Saturday December 14th
+
+58:51.520 --> 58:59.120
+head to tomalei.com slash community to get signed up now thanks for listening and we'll see you
+
+58:59.120 --> 59:29.040
+next week.
+

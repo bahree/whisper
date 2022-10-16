@@ -1,0 +1,597 @@
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+people, doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington.
+In today's episode, I'm joined by Zach Costello, host doctoral fellow at the Joint Bioenergy
+Institute.
+Zach joined me to discuss his recent paper, a machine learning approach to predict metabolic
+pathway dynamics from time series multiomics data.
+In our conversation, we start with an overview of synthetic biology and from there dig into
+Zach's particular application, which is the use of ML techniques to optimize metabolic
+reactions for engineering biofuels at scale.
+We get into an interesting chat about biohacking as well at the end of our interview.
+It turns out it's pretty easy for hobbyists to get started in this type of work, which
+is pretty wild.
+For the interview, remember that the next Twimble online meetup is coming up next Tuesday.
+Nick Teague will lead a discussion on the paper Quantum Machine Learning, which explores
+creating quantum software for machine learning tasks.
+Visit twimlai.com slash meetup for more details or to register.
+Enjoy.
+Alright everyone, I am on the line with Zach Costello.
+Zach is a postdoctoral fellow at the Joint Bioenergy Institute.
+Zach, welcome to this week in machine learning and AI.
+Hi, happy to be here.
+Why don't we get started by having you tell us a little bit about your background and
+how it led you to working on machine learning?
+Absolutely, yeah.
+So I'm a researcher whose goal is to sort of advance the transition of biology into an
+engineering discipline.
+I spend my time solving challenging problems in synthetic biology where I apply a various
+set of skills that I've developed over my education, like machine learning, control theory,
+applied mathematics more generally, and robotic automation.
+My work is kind of situated in between biological theory and practice so that the techniques
+I develop can be validated by either me or my colleagues in the lab.
+And whenever I undertake a project, the goal is to sort of advance the idea of creating
+a world where organisms can be engineered predictably, rapidly, and at low cost.
+In terms of my education, I started out actually as an electrical engineer where I focused
+on electromagnetics as an undergraduate.
+And then I took a position in between that at the Georgia Tech Research Institute where
+I kind of did a little bit of biological application and I started to get into some sort, some
+classification problems involving that.
+But for me, during my education, one of the guiding principles was to sort of pick the
+best teacher over the coolest problem so I could learn as much as possible and as deeply
+as possible.
+I figure there's like fascinating problems everywhere.
+And so, you know, in that vein, I kind of did a little bit of a switch up for my PhD and
+was in a swarm robotics lab under my advisor, Magnus Agerstead, who is just an excellent
+teacher and the theoretical focus in the lab there was a network control theory.
+And my PhD was focused on studying what a certain class of network dynamical systems could
+compute.
+And the fundamental question here was how do you do computation when you actually don't
+have any leaders in charge of it?
+So there's no single thing orchestrating it.
+And there are certain places computers can't go, but they still have to process information
+and react to complex environments.
+So in some sense, even then, I had biological applications in mind.
+And one particular example I was always thinking about is how cells can coordinate to compute.
+And I figured once I finished my doctorate, though I either need to start working in biology
+or I'd never really find my way in.
+So for my postdoc, I made the transition into synthetic biology and I'm doing my postdoc
+now at the Joint Bioenergy Institute in the quantitative metabolic modeling group under
+Dr. Hector Garcia Martin, who has been an excellent advocate for the integration of mathematics,
+machine learning and automation and synthetic biology where it's still pretty nascent.
+And this is where I actually started doing my work formally in machine learning.
+I picked up machine learning as the way to speed up the rate at which I could deal with
+the complex subject of synthetic biology because I did not have a biological background.
+I work with really talented chemical engineers and biochemists and I just won't be able
+to compete for probably another few years on raw biological knowledge.
+So for me, the machine learning provided a way of handling some of that complexity and
+giving me the ability to contribute where I was still developing skills.
+So I love that.
+I often, you know, in talking to people about machine learning and AI, refer to it as
+a superpower that eventually gives folks who wielded a tremendous advantage and your
+story is kind of a great example of that.
+Tell us a little bit more about synthetic bio and what are the kinds of problems you're
+working on there.
+Yeah, absolutely.
+So the way I think about it is when any science becomes sufficiently mature, it sort of
+births a corresponding engineering discipline.
+And so in this case, biology has accumulated a lot of different knowledge over the years
+and these are sort of in the form of individual properties of different parts of biology.
+And synthetic biology is maybe just a rebranding of genetic engineering, but the aim is to make
+biological systems predictably engineerable so that you can solve an array of human challenges.
+And for me specifically, I work in sort of a sub discipline of that called metabolic engineering.
+And in metabolic engineering, we aim to add reactions to metabolisms, to make molecules
+that are useful to people.
+So some examples of those might be fuels, pharmaceuticals, or biomaterials, say spider
+silk or plastics.
+And maybe just to sort of, I think there's probably one key analogy that people can kind
+of key in on to understand what's going on in the context of the conversation I think
+we're likely to have going forward.
+And so I think maybe one of your guests mentioned this before, the central dogma of biology
+is kind of important here, which is DNA is transcribed into RNA, RNA is translated into
+proteins.
+In metabolic engineering, proteins are used to catalyze reactions and so we add reactions
+to an organism to make new chemicals.
+And sort of a good way to think about metabolism as a whole is say a subway system.
+So if you imagine the subway system in the Bay area, each station would represent a particular
+chemical that's present in the body for an important reason.
+And then those are connected through tunnels between these stations.
+So if you want to get from say San Francisco to Oakland, there might be a series of stops.
+Now the tunnels that connect it are actually the proteins here.
+So as we produce protein in the body, what we're actually doing, or produce protein in
+a particular organism, what we're actually doing is sort of providing the track to allow
+us to go from one metabolite to another.
+And in metabolic engineering, it's like a build out.
+So we have an organism that already has sort of like a subway station like layout.
+And we're finding the closest station where we have to build out to a particular molecule.
+And then we find the proteins that will allow us to sort of build out there.
+So the idea is that you've got proteins or what allow you to create these metabolites
+that create some chemical reaction within the body that's desired.
+And you're trying to engineer the protein so that you can goose the creation of these
+metabolites.
+Is that the idea?
+Yeah, in a sense.
+So a lot of times we don't necessarily even create the protein.
+So what we might do when we're building a particular strain, a J. Bay, we build different
+strains of microorganisms by, and we add to their metabolism.
+We might look across all domains of life.
+So we might borrow from mint, breweries, yeast, evergreen trees.
+And inside of all these organisms are tons of different proteins.
+And each protein, you can think of it just like a little nano machine.
+I mean, that's what they are.
+That basically is a factory for turning one chemical into another.
+And so we'll scour these things across life and essentially borrow the important machines
+that each one has painstakingly developed over the many years of its evolution and put
+them into our organism of interest so that they can actually make that thing.
+Is that that aspect of a protein, kind of this micro machine idea?
+Is that fundamental to what a protein is or kind of a side product of the way they
+exist or how they're used in the body?
+Oh, that's absolutely fundamental.
+So every enzyme does this.
+And in fact, there's a great deal of really cool YouTube videos out there that show sort
+of how much like machines they actually are.
+I think that oftentimes people kind of think of them very abstractly, but they're doing
+physical things.
+So for example, there are proteins that literally walk along these structures inside of your
+cells called actin fibers.
+They're essentially the skeleton.
+But it's like a highway.
+So you've got these little proteins and they've got these two little molecular legs and
+they're literally walking along at Dragon Cargo.
+I mean, inside the human body, it's just, it's molecular clockwork.
+It's incredibly complex.
+Wow.
+Wow.
+Yeah.
+So maybe talk through a specific example.
+You're working on specific metabolic pathways in your research.
+Is that right?
+Yeah, absolutely.
+One of the ones that, while we deal with two in the paper, in a recent paper, republished,
+and one of them is producing a molecule called Lymanine, which is a candidate fuel molecule.
+Lymanine is a major component of citrus fruit oils and is actually used as a fragrance.
+If you were to smell it, it has like a lemony scent.
+But it also turns out it can be used as a fuel.
+You can burn it and make your car go.
+And in this case, yeah, so we, like I was saying before, we borrowed several different
+proteins.
+And I think actually the examples I gave you before were for this particular strain.
+For mint and brewers, yeast and evergreen trees, they're about 10 proteins.
+We had to add to this organism.
+And the goal here is to basically take these organisms once you've genetically modified
+them.
+And you put them through a similar process that you brew beer with.
+So essentially you put them in this broth, which contains the sugars they need to live.
+And then you let them grow up.
+And in the process of growing, they release their metabolite.
+So your Lymanine, you make a lot of that.
+If your strain is good, they make as much as possible.
+And you'll actually be able to just skim that off the top or find a way of isolating
+it pretty easily.
+And then you're good.
+So a lot of the problems that we deal with in metabolic engineering involve maximizing
+the production of a particular biomolecule so that we can extract it and use it.
+And so you mentioned a bunch of substances, mint and other things.
+Are these needed to be put into, like, in proportion into this concoction, or are you,
+is it, you know, you've got your trying, you know, just mint or just something else and
+just something else and seeing which ones you can kind of get the most of this Lymanate
+from?
+Oh, so yeah.
+So what we do is we actually never use those organisms.
+We look in their genomes and we pull out parts of their genetic code.
+And that part of the genetic code codes for the particular nano-machine of interest
+inside of those organisms.
+So then we take out, you know, we'll take a protein from men to protein from brewers
+used to protein from evergreen trees.
+And then we will put that in our organism of interest and put that DNA in there and it
+will learn how to make though it then from that DNA, it's able to use that as a blueprint
+to make the proteins that it needs to actually make Lymanate, which is our compound of interest.
+But the challenging part is to make sure you get the proportions of all those proteins
+correct.
+Yeah.
+And in this particular example, the organism of interest is absolutely.
+Yeah.
+So in this study, we were using E. coli.
+E. coli is just one of the standard model organisms in synthetic biology.
+The reason we use it is because it has a lot of genetic tools and it's been studied.
+So it's easy to use things like CRISPR-Cas9, based systems for integrating things and it's
+easy to get DNA out into the organism and it's pretty easy to grow and it grows quickly.
+So E. coli is this, you know, it's basically like a macro machine, if you will.
+And your process is changing some of its micro machinery to let it do different things.
+And you kind of inject these proteins or add these proteins to it to get it to be better
+at producing a particular result for you.
+Yeah, exactly.
+So yeah, we're just adding things to it to help to change its metabolism so it can make
+our target compound 100%.
+Awesome.
+And so how does machine learning and data science fit into all that?
+Oh, yeah.
+This is, so there's a few challenges actually that people, so when we're trying to actually
+put things into these organisms, we have to figure out sort of what proportions we ultimately
+want the proteins to be at, right?
+We want, and we also want to understand the dynamic behavior of these organisms.
+So in order to do that traditionally, it was a very, very complicated process.
+You need a domain expert and that domain expert has to write down very complicated differential
+equations which describe the dynamic behavior of this system.
+And so, you know, we actually went through the process and did that, but it turns out
+that it's really hard to do this well enough because oftentimes the information you need
+to build that model isn't present in the literature.
+So you have to guess.
+You have to make a lot of guessing and you create a very structured model.
+But we saw an opportunity to, instead of just building these models by hand, find a way
+to use machine learning so that we didn't have to make any assumptions about the structure
+of the dynamics of these systems.
+And okay, so maybe the best way to go here is sort of to a 30,000 foot view of what
+we were trying to do in that paper, does that sound reasonable?
+Sure.
+Okay, cool.
+So, once we actually had, so in our case, we were trying to use time series data to actually
+figure out what the dynamic behavior of these systems were.
+And the problem, I think, can be phrased pretty simply, which is, let's say I give you,
+so imagine a ball and a hill.
+And the hill can have any kind of shape.
+Maybe it's oblong, maybe it's bumpy, maybe it's tall or short.
+You don't really know.
+But I'm going to give you a set of trajectories for how the ball rolls down the hill, given
+different starting points.
+So I'm going to put the ball maybe at the top and maybe somewhere down the side of this
+hill.
+And then I'm going to give you just what it looks like for the ball to roll down the
+hill.
+And essentially what we were trying to do is, given all these time series data sets, can
+you actually reconstruct the hill?
+Can you tell me what the hill looks like?
+And in that way, we can actually figure out how the entire system will behave regardless
+of the setup of the proteins in the cell.
+So we're actually able to determine production.
+We're able to simulate all these cells without actually having a model a priori defined.
+So this hill analogy, I think, will be familiar to many or most listeners from kind of conversations
+around gradient descent and finding local optima on the hill.
+It sounds like you're doing something a little different, which is trying to capture the
+hill itself.
+Exactly.
+Yeah.
+So we figure with time series data, what you have is this relationship for how something
+moves.
+And in our case, when you have the whole of metabolism, it's this very complicated dynamic
+process.
+And we want to understand.
+And when I say dynamic process, all that I mean is that let's say we know something about
+what chemicals are present at, what concentrations in the cell at this particular moment, then
+I should be able to tell you, at the next moment, what those chemical compositions are
+going to look like based on the state of the cell.
+And so if we have time series, essentially, we have examples of all those transitions.
+And we can back out, essentially, what should happen more generally if we have enough
+of those transitions.
+And the time series data that you have is what, in particular?
+Yeah.
+So we had initially a really great data set, which I think by most, compared to most of
+the guests here is probably very small.
+But this data set contained a total of six different strains.
+And each of those strains had a time series set of measurements for both proteins.
+So those are the machines.
+So we have protein concentrations.
+And we have metabolite concentrations.
+So these are all sort of the intermediate stations between where, you know, using going
+back to the analogy for the subway station, there's sort of the intermediate chemical stations
+between where I am in metabolism and where I want to go.
+So I've got these two separate concentrations for a set of time points.
+And what I'm trying to do is predict what happens to the metabolites at the very next time
+point.
+Okay.
+And the, maybe going back to the analogy of the hill, the hill then represents, is it
+your ability to predict forward at any point in time or is it, is it something else?
+No, you're exactly right.
+So if you know the hill, right, you can put the ball down anywhere and you can tell me
+what happens next.
+And the same way, if you know how a strain starts out its life, I can tell you how it's
+going to evolve.
+And ultimately, how much limony that will end up producing over time.
+And we can also look to see if there's any problems.
+As these metabolites change, they can signal toxicity issues or other problems that want
+to address in the metabolic engineering process.
+So it gives us a lot of information if we can sort of do these experiments in silico.
+Maybe it's also worth making some points about how there are challenges in synthetic biology
+with machine learning and sort of what are some unique things that we face.
+Before we do that, maybe talk a little bit about the kind of the method, right?
+So you've got this time series data that you captured you're trying to ultimately characterize
+the complex behavior of the system with that time series data.
+How did you get from the data to the characterization?
+What was your overall process?
+Yeah.
+Okay.
+So you have this data, like I said before.
+And from these time series, essentially what we do is we smooth it out because we actually
+have not that many time points.
+And then we calculate the time derivatives for each of the metabolites on this path.
+And so that gives us this relationship between the metabolites at a given time to the metabolites
+at the next instant in time.
+So in other words, how does the internal chemical state of the cell change at each unit in
+that particular time series?
+And once or these are, do you think of these metabolites, these are like partial derivatives
+of this equation that you're ultimately trying to figure out?
+Yeah, just time derivatives, yeah.
+So we have time derivatives of these, we have time derivatives of these metabolic paths
+through time.
+And then each metabolite state derivative pair, including, and also their proteins are
+included in the features for each of these at each time point represents one example that
+will feed to our model.
+And so essentially from the three or six time series, we're able to expand that out.
+And since if we've sampled enough along that curve, then we can actually augment the
+data set and produce on the order of say maybe a hundred examples for each one of those,
+each one of those complete time series curves.
+So it's still relatively small in terms of the total amount of data we have to work
+with.
+Okay.
+So you've got your input features are basically these time series derivatives.
+And then you're using these to predict the overall system characteristics.
+What kind of models did you, are you applying to this?
+Yeah, so because we have sort of limited data, we use more traditional machine learning
+approaches.
+And for us, that meant, you know, random forest, so ensemble tree-based approaches.
+We actually used one of the freely available meta learners, this package called T-POT,
+which allowed us to sort of search for the best models that would help us find the relationship
+between the metabolism state and the metabolism derivative at each time point.
+And yeah, so once we get, once we extract one of those models, then we use that to do
+downstream processing.
+The downstream processing in this case is what?
+Okay.
+So as soon as we have that relationship, the model itself, you can think of that as the
+hill from before.
+So we have, so that model tells us in the context of the hill, if we find a good model,
+we feed it a bunch of time series and then we get a model.
+That model represents our hill.
+So at any time point, or at any point we put the ball down on, we will know exactly where
+it moves at the next point.
+And what we want to actually extract from these models are entirely new time series.
+So what we do is we take that model and we integrate it over time and allow us to get
+trajectories.
+So we can put the ball down at the top of the hill and then essentially use a numerical
+integration technique to let us understand the trajectory of that ball as it rolls down
+the hill.
+And how does that ultimately tie in to allowing you to kind of manufacture these compounds
+more efficiently?
+Yeah.
+So once we have a model that tells us how the organism state evolves over time, then
+what this does is addresses one of the key challenges that we have in synthetic biology,
+which is every time you want to make any data, the reason why our data sets are so small
+is that we can actually make lots of features, so that's not too bad.
+Every time we build a particular strain that makes a particular molecule, it can take
+maybe two, three, six months to get that strain to work, depending on what we're trying
+to do.
+And once we have that strain working, we can actually extract many, many features from
+it.
+But using this model, what we're actually able to do is take relatively few strains, which
+again are very time-consuming and difficult to make, often very expensive as well.
+And then use that to build an in silico model, where we can then do a bunch of experiments
+where we vary a lot of parameters to try to find the best strain to make next.
+And so oftentimes what we're doing is just trying to minimize the amount of things we
+actually have to build because it is so expensive.
+When you're trying to vary the proportions of these strains and kind of come up with a
+next set of things to test, have you applied a machine learning to that particular part
+of the problem, or is that more traditional simulation and things like that?
+Well, traditionally, actually, this is something that we're working on now.
+We have a paper in preparation to kind of handle this issue, absolutely.
+So oftentimes what's traditionally done is that biologists who make the strains themselves
+will basically, they'll make their strains and they'll test them out, and then they'll
+use intuition or knowledge from the literature to make those decisions.
+But once you have a lot of variables, you have a lot of, let's say, a lot of proteins
+that you need to change at once, their intuition often breaks down.
+And so absolutely, we're applying various kinds of methods to making predictions on how
+to change the strain next.
+And that's sort of an extension to this method that we describe in the paper.
+If we use a Bayesian optimization-like approaches to handle that, along with some Monte Carlo
+sampling type approaches.
+So yeah, that work is forthcoming, and hopefully soon we'll be out in the world, so.
+Cool.
+How does the Monte Carlo sampling apply here?
+Oh, I'm not sure I can give this stuff away just yet, but I'd be happy with it.
+It's pre-pub.
+Yeah, it's pre-pub.
+Got it.
+So yeah, I'd love to share, I really would, but as soon as it's out, I'll definitely share
+with everybody.
+Sure enough, fair enough.
+You know, this conversation is interesting.
+It reminds me of an interview that I did recently that hasn't been posted yet with our researcher
+named Nathan Kuts out of the University of Washington, who is trying to also apply control
+systems theory and time series data in his case to the problem of tuning lasers and also
+building models that describe neurological pathways and simple organisms.
+And the thing that he did that is kind of potentially interesting to you, like he's
+also trying to find the shape of the hill, right?
+Like in your case, you know, these things are traditionally models with explicit equations
+and differentiated and all that kind of stuff, and so he created this model that is the
+model is a linear combination of all different kinds of features that you might expect to
+be in one of the physics equations.
+You know, so exponentials and squares and qubits and all these, all these like higher order
+types of factors and then use some relatively simple, you know, linear regression types
+of techniques to fit a model to the time series data and ultimately use that to determine
+like the empirical equations that govern these relationships for the problems that he's
+trying to solve, which sounds kind of interesting, you know, I said that mostly to kind of
+challenge myself to explain what he described to me, but also because it sounds like an
+interesting kind of parallel approach to solving this ultimate problem that you're trying
+to solve.
+Yeah, I mean, I think it's one of these things where you take down deep enough in enough
+fields and there's fundamentally shared challenges.
+And I think definitely one of the big ones right now, one of the things I see cropping
+up in different fields is this issue of how do you understand dynamic behavior just from
+data and anybody who's doing that in a different context is certainly really interesting to
+me.
+You've got this, these systems, like can you talk at all about what the impact of this
+work has been or what kind of results you've seen or like, how is this fundamentally
+changed this work for you?
+Yeah, so we're moving forward now from the paper and we're trying to basically go from
+the smaller data sets that have been collected and motivate bigger data collections so that
+we can see what happens once we actually get into the realm where we can start using
+more sophisticated models.
+And so I mean, so far it's relatively new so there's, we've gotten a lot of interest
+from other researchers and trying to use this for other applications.
+People have been interested in the microbiome, that's one of the big things that people
+are interested in right now, figuring out how this interplay between all these different
+microbes actually plays out because right now there's a real challenge with predactivity
+in that arena.
+So I think the impact going forward is likely to be providing predactivity where before
+a lack of experimental knowledge or a lack of scientific knowledge would have limited
+us for making good models.
+And ultimately, I want to live in a world where more data in some sense equals greater
+predactivity and more knowledge.
+But right now, those things aren't actually all that coupled.
+Are you personally involved in some of these applications to adjacent areas or is this
+just things that you're seeing in the community kind of grow out of some of your work?
+Those things will just be starting for us.
+So we're definitely reaching out and looking for collaborations.
+That's definitely a big thing that, you know, is, is for us.
+And yeah, I mean, definitely, we're, and you know, there's, there's other things
+ongoing recently we've, we've acquired a new robot here at, at a J Bay in order to actually
+start producing the kind of data we really want in order to rigorously evaluate this
+for bigger data sets and see if we can really learn substantial things that will let us
+solve the major challenges of metabolic engineering and do this effectively, effectively
+increase the titers without so much failure in our guessing, yeah.
+But one of the questions that I did have was you mentioned that the kind of cycle time
+of setting up an experiment or, or creating one of these organisms is, you know, on the
+order of months to the, to six months to kind of get it right.
+What all happens in that two to six months?
+Oh, yeah.
+So this is, this is the, the messy and interesting world of the lab.
+So, you know, if, if we, we start out with essentially an idea, which is, all right, here's
+the pro, we're trying to make substance acts.
+Let's go back to, you know, Lymanine say, maybe even we could, we could do a different,
+let's say, Pynine.
+Pynine can, is, is a substance you can find in, in pine nuts and it also, you can use it
+as a jet fuel, it turns out.
+And so, you know, the reaches, researchers, researchers say they want to create, create
+Pynine using one of their strains.
+And so first they go into the literature and they look for all the, the proteins they're
+going to need to put into the organism.
+And so first you need to get those synthesized.
+You have to go send those off to a company who makes that DNA.
+They go ahead and they, they make all that DNA, they send it to us.
+And then, then the next step is the researchers have to test out each one of those proteins
+to make sure they work because we're taking it from some other organism and putting it into
+a new context.
+It's like, if you went to some, you know, semiconductor factory and you used a machine that was
+kind of similar to what you needed and say like a textile factory, you have to bring
+it back and make sure it's still working in that context.
+And so they go through the process of validating all these different enzymes, making sure they
+work.
+And then you have to put them all together into a single piece of DNA and put them in.
+And depending on the organism, this can be a time-consuming process.
+So first you have to put it all together and that can take, you know, a few days to
+a week to do that.
+If it works, if it doesn't, you have to go through a set of troubleshooting steps.
+And then, you know, let's say you actually get it all assembled and you put it in, you
+know, maybe it does certain parts of it don't express well enough.
+Maybe, you know, there's a lot of issues that can go wrong.
+So that can take a period of time as well.
+And then once you get past that point of putting it all in, you have a strain and then you
+can test that strain.
+So all of these things, you know, there's like for almost all those steps, there's like,
+you know, weeks to months, depending on how much difficulty you encounter.
+And then you put it all together and you hope it does what you want it to do.
+So.
+And I've got to imagine that in the kind of scenarios you're describing, the data that
+you're collecting can be fairly noisy, fairly messy, which I think would compound or be
+compounded by the fact that you're not collecting a ton of it.
+Are there things that you've had to do in your pipelines or modeling processes that you've
+had to do specifically because of those issues?
+Yeah.
+We're definitely very aware of it.
+There's a limited amount we can actually do about it right now.
+I mean, really it's going towards future challenges.
+Usually all these experiments, kind of the field standard, which, you know, may have to
+change is you do everything in triplicate.
+So if you do an experiment, you do three copies of the same experiment.
+And then you can use that triplicate data to sort of narrow down where you expect it
+actually to show up.
+And so you can get, you know, tighter bounds on the error for each one of your measurements.
+But oftentimes even after you do that, even after you take into account, you know, all of
+the variation, you still can have really substantial variation in your data.
+And part of that is just because it's a messy process, you know, you have human beings doing
+the sampling and human beings have to be, you know, their lives are taken into account.
+So for example, the data set we're working with was collected by two postdocs.
+Over 72 hours.
+They literally were sitting beside the fermenter and every two to four hours.
+They had to go collect their samples, prep them and deal with them.
+And so like, you know, they took turns like sleeping so that they could do this.
+And that's part of the reason why we don't have a lot of data sets like that.
+Not to mention, you know, it's lack of sleep and then maybe you miss it by 20 minutes
+on the measurement.
+You know, if you've got a time, a variation in your time measurement by plus or minus
+20 minutes, you know, that, that of course can introduce error.
+And there's just little things like that.
+So, you know, one of the things we're hoping is that as we move towards more robotic solutions,
+we can sort of key in on all the components of the error and tighten it up much more.
+And there's definitely, you know, there's definitely industrial players in the field who
+are, who are doing this kind of thing as well.
+Awesome.
+Any advice or pointers for folks that are interested in this area and want to learn
+more about what's happening in it?
+Oh, yeah.
+So pretty much now it's become very accessible.
+If you're interested in biotechnology, there are a lot, at least in San Francisco, there
+are a lot of sort of places where you can learn this, these sort of biohacker spaces.
+So if you're interested, it's out there.
+You can go and visit one of these things, look up your local biohacker space and you can
+go out and figure out, you know, what's going on.
+You can, you can do CRISPR, you know, it's, it's at the end of the day, it's very much
+like cooking.
+And if you know how to follow a recipe, you can learn how to do synthetic biology.
+So then, I had no idea that CRISPR was that accessible, like what is, what's an example
+of something that someone could do, you know, with CRISPR, just accessing a machine at
+one of these biohacker spaces?
+Yeah.
+So CRISPR, you know, just like all the things we were talking about today, it's a protein.
+And so it's defined by a piece of genetic code.
+And so all you need to do is make these genetic constructs and you can use it.
+In our case, you know, typically in biohacker spaces, you're not going to be dealing with
+human cells.
+That's a little bit more challenging.
+There's issues with biosafety and things like that and getting approval.
+So that'll be a little harder.
+But if you want to work with plants or you want to work with, you want to work with microorganisms,
+that's totally doable.
+And so really at the end of the day, all you have is essentially a construct, just a piece
+of DNA that you put into your cells and it will express CRISPR, which is, you know, these
+genetic scissors that will allow you to essentially make cuts in the genome where you want that
+are targeted by these guides.
+And yeah, it's actually very accessible, you know, it's really at the end of the day,
+you're transferring liquids from one thing to another and then if you do this in the right
+order and you design your experiment right, you get, you know, the genetic modifications
+you want and you can verify them in the lab pretty easily.
+What would be in the book of 10 weekend projects to do at a biohacker space?
+Oh, so this is actually, when I was first getting into it, I had very little syn bio experience.
+So I visited some of these.
+I think I guess shout out to bio curious, which is one of the ones in the day that was very
+accessible, very friendly people.
+At first, like the first thing you do in biology typically is you make things glow.
+It turns out.
+And you probably don't need CRISPR for this, but this might be one of the first things
+you do is you sort of put these, you put in a piece of DNA that expresses a glowing protein
+on this thing called GFP that comes from jellyfish and then you put these things under a light
+and you can see them glow.
+And so that, that way you can see the work you want done.
+But in terms of like the cool projects they were doing, I'm not really up to date on what
+everybody's doing now, but at the time they were working on making animal-free milk products
+and things like that or animal-free cheese, I think, vegan cheese and by expressing a protein
+called casin.
+And I'm not sure which genetic tools they were using, but almost certainly you can find
+a way to use, like if you want to get some experience with CRISPR, you can do it at one
+of those places.
+Wow.
+Yeah.
+It's really accessible.
+High school kids are doing it these days.
+Yeah.
+Well, Zach, thanks so much for taking the time to chat with me.
+I learned a ton and I appreciate your explanations and analogies.
+Oh, yeah.
+Absolutely.
+Any time.
+It's been a pleasure.
+Thank you.
+All right, everyone, that's our show for today.
+For more information on Zach or any of the topics covered in today's show, head on over
+to twomolei.com slash talk slash 163.
+Please don't forget to head over to twomolei.com slash nominate to cast your vote for us in the
+People's Choice Podcast Awards.
+And of course, as always, thanks so much for listening and catch you next time.

@@ -1,0 +1,975 @@
+Hello everyone and welcome to another episode of Twimble Talk, the podcast where I interview
+interesting people, doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington.
+So I'm recording this intro in New York City where I've been attending the O'Reilly
+AI and Stratocomferences.
+I did a ton of great interviews here at the events and I'm really looking forward to getting
+these posted over the next few weeks.
+Today though, I've got to show that I know you're going to really enjoy.
+My guess this time is Angie Hugeback, who is Principal Data Scientist at Spare 5.
+A company focused on helping its customers generate the high quality training datasets that
+are so so crucial to developing accurate machine learning models.
+In this show, Angie and I cover a bunch of the real world practicalities of generating
+training datasets.
+We talk through the challenges faced by folks that need to label training data and how
+to develop a cohesive system for performing the various labeling tasks that you're likely
+to encounter.
+We discuss some of the ways that bias can creep into your training data and how to avoid it.
+And we explore some of the popular third-party options that companies look at for scaling
+training data production and how they differ.
+Before we dive into the interview though, I really want to take a moment to acknowledge
+Spare 5, who stepped up to sponsor this episode of the show.
+Now, I'm not going to spend time talking about their service here because Angie and I do
+cover that in the course of the interview, but I will say these three things.
+First, what Spare 5 is doing is really cool.
+And if you have a training data problem and you know who you are if you do, you should
+definitely take a look at what they've got to offer as you explore your options.
+Second, they've put together a great offer for 25 lucky twimble talk listeners, which
+you'll hear towards the end of the interview.
+And third, I'm just very grateful to Spare 5 for helping to make this podcast possible
+for all of you.
+And I want to really encourage you all to show them some love.
+So please, hit them up on Twitter.
+They're at Spare 5, S-P-A-R-E, the number 5.
+And just thank them, visit their website, sign up for a demo, all of these things let
+them know how much you appreciate this podcast and their support for it.
+As always, I'll be linking to Angie and the various things we mentioned on the show in
+the show notes, which you'll be able to find at twimbleai.com slash talk slash six.
+And now onto the interview.
+So hey everybody, welcome to another episode of twimble talk.
+I've got Angie Hugeback, the principal data scientist at Spare 5 on the line Angie, why
+don't you say hi?
+Hi everyone, hi Sam.
+Hey, so happy to have you on here today.
+Yeah, excited to be here.
+All right, yeah, I'm really looking forward to digging into some good stuff.
+Awesome, awesome.
+So why don't we get started by having you give us a little bit about your background
+and how you got started in machine learning?
+Yeah, sure.
+So I started out as a math major in college and I took a stats class.
+I was at the University of Minnesota Duluth and I really fell in love with the idea that
+you know, it was math, but it was applied and you could learn about the world around you
+through math.
+So I got really interested in statistics.
+I ended up getting my masters in PhD in statistics.
+I got my PhD at the University of Chicago and when I came out of school, so I had worked
+with my PhD advisor was really big on teaching me how to creatively solve a problem, do creative
+algorithm development, just start from the basics.
+What are you trying to do and construct from there?
+When I was really interested in doing that, I had a strong interest in machine learning
+types of topics.
+So when I came out of school, I had this idea that I want to work in machine learning,
+but I want to do creative algorithm development and trying to find that.
+And at the time, you know, the term data scientist didn't exist yet, but that's essentially
+what I was interested in doing.
+So it just took me some time from there to kind of blend between the traditional definition
+of statistician and sort of the engineering end of machine learning and find a good balance
+and this is where I landed.
+Awesome.
+Now, what were some other kinds of problems that you were interested in in grad school as
+a statistician, statistician looking into machine learning?
+Yeah, sure.
+There was, when I was doing my master's degree at a master's thesis problem that was really
+fun.
+I was, you know, there's the game mastermind where you have the little colored pegs
+and someone has a code, which is an ordering of colored pegs and you're trying to guess
+through making proposals of, you know, what you think the code might be and getting
+some feedback.
+Right.
+And so I had a lot of fun playing around with.
+I ended up building like a metropolis hastings, important sampling style algorithm to solve
+the game mastermind in a very limited number of steps.
+And, you know, the game is, you know, fairly straightforward when you're dealing with
+six pegs in the traditional sense.
+But then I was taking it up, you know, well, what if it's 14 pegs or 50 pegs and the space
+of the problem becomes incredibly complex?
+And I was really interested in, you know, the metropolis hastings algorithm is kind of
+like a simulated annealing algorithm where you're able to explore a really high dimensional
+space very quickly and kind of rapidly move around in this space and figure out where
+you're making progress and work toward an optimal point.
+So that was fun.
+I also worked on a lot of problems in astronomy.
+So astronomy was something I'd always been interested in but never had a chance to learn
+in school.
+So my advisor was awesome, Mark Clorum.
+He invited me to, you know, come on over into the astronomy department at the University
+of Chicago and talk to the professors there and figure out what kinds of problems they
+were working on where I might be able to help out.
+So I did some work with quasars.
+I got to do some work on some solar science research, got to do so.
+I had an internship at NASA working on some solar research to continue to do some consulting
+with them for a while.
+And then the last project that always sticks out out in my mind wasn't really part of
+my thesis work but when I was in my PhD program, Netflix announced their Netflix prize competition
+which was, it was a competition on predictive modeling to do movie ratings, right?
+So they released this publicly available data set and it was all these pairs of movie
+ID and a user ID and then a rating.
+And then you were supposed to be able to predict how certain users would write certain
+movies.
+And I played around with that problem for about six months.
+It came up with a great solution that was competitive in the contest.
+But then through that, I actually came to a different understanding of what worked better
+in terms of actually making recommendations.
+So I built a movie recommender out of that and headed up on the web actually up until
+about six months ago.
+I was still using it to recommend movies for myself and some of my friends are still
+using it.
+And so those kinds of problems were the things that I was generally interested in.
+Wow.
+I was going through school.
+So does that mean it takes you less time to pick a movie to watch than it takes the rest
+of us?
+Yeah, typically it actually works pretty well.
+I got to get it up and running good.
+Yeah, the best feature was being able to combine two movies.
+So you say, I want to see something that's like, I want to watch a movie that's like
+Flut loose meets fatal attraction or something like that, and then it would come up with some
+great recommendations crossing between those two.
+That was really fun.
+Oh nice.
+You mentioned a whole bunch of really interesting stuff in there.
+I want to mention since you mentioned astronomy, I don't know if you've had a chance to hear
+the last tumultalk episode that I just posted is with Joshua, Joshua Bloom, who's an astronomy
+professor at Berkeley and also the CTO of a company that uses machine learning.
+I think you'll find it super interesting.
+Oh, yeah.
+Thanks.
+I'll check it out.
+Oh, absolutely.
+Thanks.
+I mean, you've given us an entree to go deep kind of quickly here.
+Metropolis hastings and portance.
+Yeah.
+What is that all about?
+Is that an L or stats or a good question?
+I think it's, you know, it was sort of sitting in between the two fields and probably a little
+bit more in ML.
+Yeah.
+So metropolis hastings is one thing important sampling is another.
+Okay.
+Yeah.
+And so, yeah.
+So metropolis hastings, it's really just an optimization technique, you know, for, you
+know, maximizing a function in a high dimensional space where rather than say, you know, following
+the derivative or doing something more mathematical in that sense, you use a random component.
+So you say, you start with a space in the high dimensional field, you say, okay, this
+is my initial starting point.
+And then you propose a point around there that you may go to next.
+And so you, you come up with a proposal function.
+So you say, okay, maybe my proposal is I pick one of my dimensions at random.
+And then I perturb that, that value a little bit with some random, you know, in some random
+distance and in some directions, something like that.
+And you say, okay, that's my proposed point.
+And then you compare your function on that proposed point to the function on the initial
+value.
+And if you're in a better place and you say, oh, yeah, this is a better place to go to,
+you know, you'll always move there.
+But if you're, if it looks a little bit worse than your initial position, you'll still
+move there with some small probability.
+And so what that allows you to do is it allows you to move away from, you know, local minima
+and things like that that you might get stuck in.
+Yeah.
+And it just, yeah, in many, many problems, it provides a kind of a rapid way to search
+through a very high dimensional space.
+Would it be fair to say that if your proposal function was, was your slope in the end-dimensional
+space that it metropolis Hastings, we've kind of approximate gradient descent?
+Um, not exactly, no, the proposal is always another, it's, it's basically a sampling.
+You're going to sample from the collection of all possible points that you might evaluate.
+Okay.
+So, um, I mean, I suppose, I suppose you could create a proposal function that says I
+always select a point that follows, you know, the slope, but, you know, that's the
+thing I suppose you come up with that.
+But typically, you, yeah, your proposal is supposed to have a random component and then
+there's the additional random component that you may choose it, even if it moves in the
+wrong direction.
+Okay.
+Oh, nice. Uh, so, uh, that, that raises a question for me coming from, uh, strong stats
+background, you know, what, how does, how do you feel like this, uh, guide your perspective
+as a data scientist?
+Data science has come to me in a whole ton of things.
+Uh, for many, it's, you know, heavy programming for others, it's heavy data engineering.
+You obviously, it's heavy stats, um, heavy, do you have kind of a philosophy on data science
+and kind of what that all means to you?
+Yeah.
+I mean, yeah, definitely, definitely data science is a, is a big umbrella covering a lot
+of different things.
+And, you know, I think the field, the whole field is, is evolving, right?
+And, you know, and there's, there's more and more applications in this area, many more
+people going into this field.
+Yeah.
+So, um, I'd say now there are a lot more people coming out of a computer science background
+going into this type of work, um, you know, whereas back, you know, when I was coming out
+of school, I, you know, it was almost 50, 50, it was like machine learning was really
+sitting in between, um, statistics and computer science, at least that's the way that it
+was at, at University of Chicago.
+Okay.
+Um, yeah, and I do feel like I think I have, um, I, I tend to approach problems more from
+the predictive modeling, uh, viewpoint.
+I, um, I do a lot with just, um, constructing probabilities, um, likelihood estimation, things
+like that that maybe wouldn't be as commonly used coming straight from a, more computer
+science engineering machine learning perspective where, where it may be more about, um, deep
+learning and, you know, specific types of, of algorithms.
+Um, so, so I guess I see a little bit of a difference there, um, but I, you know, and
+I have background in more traditional statistics, you know, with just doing, you know, I don't
+also, you know, experimental design and, um, doing, um, I, you know, more, more just classic
+kinds of testing issues and, um, distribution comparisons and things like that.
+But I would say that's a small part of my daily work.
+It's one of those, you know, yeah, we do IB testing, we do things like that and I'll participate
+in assisting with those kinds of, um, experimental analysis, um, but typically I'm doing more, um,
+um, yeah, just constructing from probabilities, from likelihoods, um, you know, uh, working
+with predictive modeling, things like that to, you know, to solve our product goals.
+That's it.
+That.
+Are there things that you see commonly in the industry that you think, uh, would be
+different, uh, or approaches that folks take that, uh, they might take differently if more
+people had, uh, uh, a stats background?
+Yeah, I mean, well, I'm, I'm biased, but yeah, I mean, I tend to think, uh, yeah, I don't
+know, I, I see them, I see them blending and I see, you know, in people today that are
+coming out of, you know, strong computer science programs with machine learning background,
+really, there, there's quite a bit of overlap in terms of, you know, the materials that's
+been taught and the skills that are there, so, um, yeah, so I'm not sure, not sure.
+Okay.
+Okay.
+Uh, and so what are you up to now?
+Yeah, so right, so now I'm here at spare five, um, yeah, and, uh, yeah, so what we do here
+at spare five, we do, um, we collect training data for computer vision and natural language
+models.
+So other companies that are building out AI, building out their own machine learning
+models and computer vision and natural language, um, types of problems need really good labeled
+training data in order to power, you know, the algorithms that they're trying to build.
+And so that's what we do.
+So, um, I got really interested in this space because at my, at my prior company, we started,
+um, we were building out to natural language models there and, um, we had some really
+good stuff.
+It was working really well, but we wanted to push it to the next level and the thing that
+was preventing us was just getting that really good labeled data.
+Um, and so I was thinking a lot about that problem.
+And then I heard that, um, Darren, who's our CTO here, I heard that he was at spare five
+when I heard about what they were doing.
+And I just saw a huge opportunity in terms of, I was like, you know, AI is getting really
+big, machine learning is getting really big.
+You know, it's no longer kind of a fringe thing that a few companies are trying out.
+It's, you know, it's like to be in the, in the space, you know, to be competitive companies
+need to be building, building these things out.
+And as far as I can see, the real bottleneck is in the training data.
+So, you know, that was where I was excited to jump in and be a part of that, be a part
+of that business.
+Nice.
+I think there's growing recognition that the availability of training data is one of
+the biggest issues that new entrants to, you know, folks that are trying to apply machine
+learning to various problems take on.
+And, you know, for a lot of people, they look at it and say, and I've heard this, you know,
+I've heard this coming from several different angles, but, you know, something along the
+lines of, you know, soon, if not now, it'll be very difficult for a startup, for example,
+to, you know, compete with Facebook or Google or, you know, large company and industry,
+you know, X because they'll have all the data.
+And then the startup will, you know, will not be able to gather it and label it and all
+that.
+Do you agree with that in general?
+Oh, yeah.
+Oh, yeah, absolutely.
+Absolutely.
+I mean, the way that I see, you know, for, I think for quite a while, the focus was on
+the algorithms themselves and, you know, how do we get better algorithms, better algorithms?
+But at this point, you know, we have so many sophisticated algorithms, very flexible
+algorithms, right, for solving so many different types of problems that, that really the defining
+factor becomes the training data that you have underneath it to power it in terms of what
+you can actually do.
+So, yeah, I think that's a really valid concern.
+Although, you know, I would say, you know, I mean, it definitely depends on what, you know,
+what industry you're trying to jump into if you have a startup and they're trying to
+do something new.
+I think, yeah, I definitely think, you know, if they have a specific problem that they're
+trying to tackle, that, you know, requires a very specific type of data.
+I think there are so a lot of opportunities to get into that space if you have access
+to, right, the ability to get that, get that label data that you need, right, which is,
+which is where we come in.
+Okay, so, walk us through specifically what you guys are doing to help, help companies.
+Sure.
+Absolutely.
+So, I guess, yeah, so I would start by saying, you know, when, so when customers come to
+us, you know, typically, the number one thing that they're looking for, they're looking
+for high quality data, right, and they need that data at scale.
+And so, and I would say, you know, traditionally companies may, you know, initially they may
+start trying to label that data in-house, right, and they may say, you know, everybody
+take a few hours and, you know, look through this data, add some labels, that sort of thing,
+and then quickly find out, like, okay, this is going to take forever, and we don't only
+have the resources, and then a next step that companies sometimes would go to is trying
+to use these, you know, publicly available crowd sourcing, things like mechanical Turk,
+where, you know, yeah, there's a crowd out there.
+Maybe you can, you know, put your data out to them and they can label it, but that can
+be just incredibly painful in terms of, you know, you never know the quality of the
+work that you're getting back.
+It's like you, you end up having to design an entire workflow around just trying to
+QA the data that's coming back to you.
+You end up having to send the data out many, many times over again to multiple different
+people and try to assemble and make some sense out of the results that you're getting back.
+Okay.
+So that can be a real headache.
+So by the time customers get to us, so what we're doing instead is we handle all of
+that headache for you.
+So basically the customer comes to us, what all they need to communicate to us is exactly
+what correctly labeled data constitutes to them, right?
+So they, usually the customer will present us with some examples, you know, these are
+some images.
+Here's some example annotations.
+That would be the correct annotations for these images, that sort of thing.
+And from there, we do all the heavy lifting in terms of, we can, we will take on the task,
+we will create and generate that label data using our own community, which is like a thoroughly
+vetted community.
+We do all of the QA work and we guarantee the level of quality coming back to you and your
+data, right?
+So if you say, these are the specs, this is exactly what correctly labeled data means to us.
+We want 95% of the data coming back to us to be correctly labeled to spec, right?
+Then that's what, that's what we can guarantee and that's what we can provide.
+And so, yeah, so definitely it's, it's quality is the major challenge that we're providing
+just speed and scale.
+And then one other important piece is that we, we provide, we can provide diversity among
+the annotators.
+And so in particular, if there's a specific audience that the customer is interested
+in to say they're building an AI model and this AI model is going to be used by, you
+know, women age, you know, 20 to 30, typically, right, in the US, we can target annotators from
+that audience so that, you know, the keywords or, you know, whatever the labels that they're
+providing are relevant and the types of things that that audience would typically use, which
+is really going to improve the performance for the models themselves, you know, in those
+types of settings.
+So I would say, you know, those are kind of the three, three kind of pillars of problems
+the customers have that, that we were able to solve for them.
+Okay.
+Let's come back to the diversity angle because that's super interesting.
+But even before you get there, if I'm a company and I want to solve a given problem
+in my industry, do you, are you able to help me find the right data or augment the data
+that I do have with other data that might help me drive better predictability?
+Yeah.
+So we don't, we don't go out and find, like, publicly available data sets for you.
+You know, we are in the business of generating the data, but we definitely do augment data.
+So we've done data verification, sometimes, you know, validation, sometimes companies
+have already gone through, you know, some steps of a process to assemble data on their
+own, but they're hitting the point where they're realizing, like, the quality is just
+not there.
+And what they need, you know, what they need our community to help with is just going
+through and validating, which ones are correct, which ones are incorrect, so that they
+can increase the quality there.
+We also, we can definitely augment data, you know, maybe they have images that have certain
+annotations.
+Maybe the images have tags for objects that appear in the image, but the customer now wants
+to identify where in the image does that tag appear.
+So the tag might be dog, and they need to know exactly where in the image the dog is.
+And, you know, we can have our community either do pixel level, polygon annotation around
+the dog in the image, do a bounding box annotation around the dog image, those types of things.
+So yeah, there's there's a really wide variety of things that we can do in that sense.
+Okay.
+How much of this is best thought of as a services or consulting engagement versus some
+platform that you guys have built up that that automates a ton of the, you know, this
+back end work.
+I mean, it's really both, and I guess it depends on, I mean, the platform, I think, is really
+core and central to what we're doing and what we are able to do here.
+But I would say the consulting aspect on the front end of, you know, making sure we design
+the task precisely to, you know, making sure the customer is going to be very happy with
+the data that they receive and that is going to do what they needed to do for their models
+is also absolutely essential.
+So I would say, you know, we do have some customers that come to us that have, you know, teams
+that have been working on these, these problems for a long time and they know exactly what
+they want and they've already got an idea of, you know, exactly how to kind of organize
+the logic of, you know, what, what a correct annotation looks like.
+And in those cases, it can be relatively straightforward for us to move that right into
+our platform.
+In other cases, you know, we've got customers that, you know, they know the types of models
+they want to build, they've been struggling and they may even want, you know, some initial
+consulting on, you know, what types of data are available to us?
+You know, what can we do to improve, you know, improve the quality of their own models
+and we can do some initial consulting there as well.
+So it really just depends on the customer.
+But basically, you know, that yeah, the consulting aspect is setting up all the work, making
+sure we design the task correctly, going through an iterative, you know, process in the
+beginning with the customer where, you know, we say, okay, we think we understand your
+specs, you know, we've designed the task the way we think will work.
+We run, you know, maybe we do a thousand annotations for the customer, return that back
+to them and they verify, yes, this is what we're looking for, you know, yeah, you're,
+you know, yeah, the annotators are understanding the task and this looks good before we go
+to scale.
+Okay, and so you mentioned a bunch of things that customers have typically tried before
+they come to you.
+Are you doing all those things as well, plus some other things like, for example, you
+know, farming the labeling out to multiple people and doing some kind of quorum or voting
+or something like that.
+Right.
+So, so no.
+Okay.
+So, yeah, the simple answer is no.
+So, yeah, so we are not doing crowd sourcing.
+So first of all, we don't use mechanical turf, we don't use any external community, we
+use our own community through our spare five app and through the web that are, you know,
+everyone is fully vetted, we have great detailed information on our users, we get Facebook
+and LinkedIn data from our users, we do lots of survey and skill assessments, we're continuously
+monitoring their, their tasking behaviors in real time, monitoring the quality of, you
+know, of the tasks that are being submitted.
+And so, but we are not crowd sourcing.
+So on the flip side, what we do is we get really, really good at understanding the quality
+of the work that the, that the community members are able to provide so that we are targeting,
+we're targeting the right users from the beginning, right?
+And then, so we've got predictive models in place to identify, when a new task comes
+in, we can identify who are the users that we believe are most likely to do well on
+that task.
+And so, we can initially target the right subset of our community, then we turn the
+task on and we have a real time monitoring system, so we, we turn on that process and
+then as soon as the task is live, all of that real time monitoring is feeding back into
+our predictive models for quality assessment on the user, and so we're making real time
+decisions about when to potentially remove access to a particular, for a particular
+user because we're not seeing the level of quality that we need.
+And so we have a kind of that user quality model running in real time, and then we also
+have an additional layer, which is an answer quality model.
+So depending on the task, for some, for some task types, there are other types of data
+and information available just based on the answer itself that's provided, and so we
+have that additional layer just to make sure that the answer itself is, is meeting our
+quality bar.
+Okay.
+Great.
+That's interesting.
+My initial reaction was, it sounds like crowdsourcing, but, you know, semantics here,
+but it sounds like the key distinction that you guys would make is that, you know, with
+crowdsourcing, you kind of put the task out there, and anyone can kind of take it, and
+what you guys are doing is, you know, targeting it to specific people who developed a relationship
+with over time.
+Is that the right way to think about it?
+That's true.
+And I think, you know, it is a little bit semantics and just culturally help help people
+use the terms, but I think that crowdsourcing often connotates that you're going to send
+a question to multiple users and then assemble a correct answer from those multiple users.
+Okay.
+And so that's kind of the main distinction that I make.
+So a lot, you know, oftentimes if we're talking to customers, especially if they've already
+got a lot of experience themselves working with Mechanical Turk, they're really interested
+in, you know, well, what are the metrics you're using to decide whether you have enough
+consensus on a specific answer to move forward and how many users do you need to ask each
+question and that sort of thing, and in our, in our setting, it's actually irrelevant.
+That's not, that's not the approach we use, that's not the perspective that we follow.
+Okay.
+So is it fair then to think about this space as like Mechanical Turk is an API on top
+of the people, but you have to build everything.
+You're figuring out, figuring out how to get them your tasks, you're figuring out how
+to do all this voting stuff so that you can get decent quality data, whatever.
+Yeah.
+Yeah, you're writing the instructions, you're doing, yeah, you're filtering, you know,
+which users are you going to use, trying, trying to track their quality, all of those things
+yourself.
+Right.
+And then crowd flower, who I think a few months ago announced some specific, some specific
+offerings around labeling that I covered on the podcast, like they're kind of taking,
+they actually originally were on Mechanical Turk, but I think that's right.
+That's right.
+And they're kind of a slightly higher level of abstraction that's doing a little bit
+more of the stuff, but still fundamentally this, we're going to take the task and push
+it to a bunch of people and choose the results.
+And you guys are, you know, we're going to look at your problem and design a solution
+to get you quality data.
+That's exactly right.
+That's exactly right.
+Okay.
+And can you talk a little bit about, you know, as a statistician, like what are some
+of the interesting problems that you've, you've come up against and helping to build this
+for, for spare five?
+Yeah.
+I think, I mean, the, the most interesting and challenging problem for me was just how,
+how do we design a system and a platform that can work in a general sense at scale?
+So, you know, when I, when not, when I started out, you know, we were still doing, there
+was still a component of manual review internally just to, to make sure the various processes
+that we had in place were working as expected.
+And we had a lot of tailored, you know, for this task type, we managed it in this way,
+for this task type, we managed it in this way.
+And so when I came in, that was one of my initial goals was, how do I, how do I come to understand
+this entire system with all the complexity for so many different types of tasks and we
+have objective tasks, we have subjective tasks, we're looking at images, we're looking
+at text, we're doing all of these different types of problems.
+How do we, how do we develop a cohesive system to attack and address all of these different
+tasks types and ensure the right level of quality?
+So that was, that was really exciting for me and the, you know, and that's been the
+focus, you know, over the last several months and, and now we're there.
+And, and so that to me has just been a really exciting accomplishment.
+That sounds pretty huge, can you talk, or can you talk to whatever level of detail you
+can?
+Yeah, I know.
+Pipelines, slash.
+Sure.
+Oh, yeah, yeah.
+Oh, sorry, can you, could you clarify the last part?
+Oh, you're, you're, you're data science pipeline slash technology stack slash, you know,
+kind of anything that can help folks get a sense for, you know, as they're building labeling
+platforms, what are some of the, yeah, things that they need to consider?
+Sure.
+Well, so I can tell you just for the tech stack that we have here.
+So on the backend, we're using Ruby, we use our Postgres, and then we have a lot of
+different AWS services, and then on the front end, we have a web client, as well as
+a native iOS application.
+And yeah, and so let's see, yeah, so I think that there's a little bit, sorry, maybe you
+can give me a little more guidance on exactly what direction you want to.
+Oh, yeah.
+So, so that, that is very helpful on understanding the, the tech platform, it sounds like you
+guys are taking advantage of the cloud and AWS in particular.
+As you, you know, when you thought about this challenge of, okay, we've got all these
+different types of data, how do we unify this into a single platform that eliminates
+like the, a lot of the manual steps that you described?
+Are there any lessons that you've learned about building data science pipelines that helped
+you achieve that goal that you think would be transferable to other people?
+Yeah, and I, I don't know that this is specific to data labeling.
+I would say, I would say one thing that I've learned that, that's worked really well, both
+here and in previous companies that I've been in, in terms of integrating data science
+with the existing tech and existing product is, I think what's, what's really essential
+is you want, you want your data scientists to be focused on prototyping, like rapid prototyping.
+You want, you want them to be really nimble in terms of, you know, hey, if, if something
+about the product changes next week, we want to be able to like dig into the guts of
+our models, make our changes really quickly and be able to push that back out into production
+in a seamless way.
+And, and you don't want your data scientists to have to be spending the majority of their
+time, you know, maintaining and these larger systems and, and really having to, having
+to be so focused on the engineering side in terms of, you know, let's make sure everything
+staying up and stable and doing what it needs to be doing.
+So, so one solution in the team that I led previously at my previous company, one solution
+that we came to, which worked really well was, we developed, so we still wanted our data
+scientists to be able to, to prototype as quickly as possible.
+So I would say, you know, R is fantastic in terms of prototyping.
+You have your, you know, the graphics and visualization component is, you know, on,
+you know, is unsurpassed by, by any other software, you know, you have Python, has lots
+of packages that are fantastic and you can definitely do some good data visualization
+there.
+But our team was focused on R and so we wanted our, our teams to be able to, to do their
+modeling and we had a lot of predictive modeling kinds of work going on there.
+We wanted our data scientists to be able to do the predictive modeling in R and hand
+off the actual model component to the larger system in such a way that, you know, it was
+sort of, you know, plug it in so that you have, you know, these are the inputs coming
+into the model, these are the outputs coming out of R and we want that, we want to be
+able to just take that, that chunk of code that is the model, pass that over into production
+and, and get that plugged in and going at scale and, and that, you know, what, what worked
+really well, what we've done in both situations is we've used, actually used our serve.
+It doesn't have a, a fabulous amount of documentation out there, but it, it works really well and
+there's a, yeah, so anyway, so, so building out a system with our serve, building out some
+software around that to allow kind of, just the kind of input output portion to be handed
+over so that, so that you can have, you know, other standard systems, you know, picking
+it up and hitting your models and, you know, moving that all into the cloud so that you
+can, you know, if you, if you start getting a lot more volume hitting your model than
+you had originally anticipated, right, you just spin up some additional clusters and, and
+manage that traffic.
+Is our serve open source?
+Yes.
+Okay.
+And so what I, I think what I'm hearing is that you've got the, the exploration and the
+model development, that's all happening in R and then, you're able to take those models
+and essentially deploy them into our serve and use that for prediction as opposed to
+having to throw that over to an engineering group to, exactly, using something else.
+Yeah, exactly, exactly, and what I would say too is, I mean, it really depends on the
+algorithm that you come up with.
+If you're prototyping in the end, you end up using something that's mathematically
+very simple, then, you know, then maybe you just pass along, you know, your pseudocode,
+you know what I mean?
+I'm like, okay, these are the kinds of things that I've done.
+These are the steps and you have that re-implemented in a faster language.
+But, but if you're using, you know, there are many, many fantastic predictive modeling packages
+available directly in R and if you, if you get your system set up correctly, you know,
+we were using, you know, we had predictive models with, you know, 1,000 features in real
+time returning results in about 100 milliseconds, right, coming straight out of R. If all you're
+hitting R for is the actual modeling component, right, once it's already constructed.
+So, you know, and I think, and I think keeping the model code in R in that sense just makes
+it all that much easier for, you know, any modifications down the line that need to be
+made and, you know, and, and I think another layer that you can add on top of that, you
+know, which can work really well is, is if you can start to integrate some automated model
+rebuilding mechanisms, right, so you've got, got one system going on that's pulling in
+new data, continuously updating your models and then you've got another system that's just
+plugging into the existing most current model to actually get the results that can work
+really well.
+It's interesting, I'm glad you raised that I was thinking about that as well and if you,
+what you've done to address like model drift over time and if you've been able to build
+in like 360 degree feedback loops, that kind of thing.
+Yeah, so just somewhat, I haven't gone too deep on those sorts of things, so what, what,
+I have some tricks that I like to use in terms of, kind of monitor, model monitoring, when
+you are doing automatic updates and things and so there's various kinds of sanity checks.
+There's a, there's a paper out of Microsoft that was just fantastic in terms of like these
+are all the things that can go wrong when you put your model on autopilot and right and
+these are the things that you need to be monitoring and so with just, they're like seven step-by-step
+suggestions in terms of things that you might want to get implemented and that's fantastic.
+I can, I can try and pull up that paper for you.
+Oh, that would be amazing. That sounds like a great resource.
+Yes.
+Is it relatively recent?
+I believe it was in the last couple of years.
+Yeah, I've got to look it up.
+Just making it in okay.
+Yep.
+And now you guys are focused on computer vision and natural language.
+Is that right?
+Yeah, that's right.
+That's our focus right now.
+And how do those domains influence the approach you've taken?
+Yeah, that's an interesting question.
+So clearly with computer vision, we're dealing with image data, right?
+So I think it's had a huge influence in terms of the types of tooling that we're building
+out to allow our users to correctly annotate the data.
+Our end resulting data is only as good as the tooling allows for user accuracy, right?
+So it's definitely had a major influence in the types of tasks, the types of tooling,
+things like that that we've been designing.
+But I would say at this point, in the general system for QA that we've constructed, that
+is general, it's not specific in those areas.
+But what we would like to do, continue, I guess, delving into, is internally, what can
+we do in terms of natural language and computer vision modeling ourselves internally to improve
+the quality of the results itself?
+And that's something that we're just now starting to dive into.
+Okay.
+So in providing the services that you guys provide, are you needing to get into things
+like deep learning and other things, or are these more the things that the customers
+would use to train with the data that you're providing?
+Yeah, that's right.
+So we purely handle delivery of the training data.
+So we can do some consulting in terms of, yeah, if you use data like this, this is
+how that may affect the models, but it's really just more of a consulting aspect.
+We're not doing any of the model training ourselves, we're not hosting any models, nothing
+like that.
+Okay.
+Okay.
+Interesting.
+Do you have a set of, you know, they're like a top three list of things that you would
+want everyone to know about training data?
+Oh.
+That's a good question.
+Let's see.
+Yeah, I think, yeah, I mean, I think anyone who's got, you know, any experience in the
+field knows that, you know, your model is only as good as your training data.
+If you're, if you're training data really only represents, you know, a subset, a specific
+subset of the space in which you expect your model to function, then, you know, you're
+going to have, you're definitely going to have low accuracy in, in areas where you haven't
+provided as much training data.
+So definitely you need good, good coverage in terms of, you know, whatever, whatever the
+inputs that you're going to be anticipating, that will be coming into this final model
+that you build, you want to make sure that your training data represents those inputs
+as closely as possible in order to get the best results.
+Okay.
+One more?
+One more.
+Well, and I think, I guess one interesting thing to think about is it, you know, it depends,
+I think in the computer vision and natural language applications that we're focused
+on, the quality of the data is really essential, but in other areas, there are situations
+where you can get away with, you know, less, with lower quality training data, and the
+model is, you know, as long as the, as long as the patterns are there, the patterns are
+present, you know, your model, model may still be able to pick up those patterns, right?
+And so, I guess just keeping in mind what level of quality is important or essential for
+the type of model that you're building and the type of methods that you're using, you
+know, there can be some variation there.
+Okay.
+How would you characterize the scenarios in which you can get away with the lower quality
+training data?
+I would say definitely when you're, when your model is more about summarizing and generalizing
+the data, then, you know, having a few odd observations in there isn't going to dramatically
+affect, you know, affect that, that summary.
+Are there any examples that come to mind of customer space X?
+Oh.
+Let's see.
+Well, I don't know, there's some, well, so here's an interesting example, it's a little
+bit on the edge of what you're talking about here.
+So, so Sentient is a customer of ours that is, they're a provider of AI.
+We have a task that we've been running for them for quite some time now.
+What they're interested in understanding is user perception of similarities between
+shoots.
+So they're building out, you know, they have models that they're building out that
+are trying to decide what shoes belong together, not from some specific taxonomy or, you know,
+hierarchy that some human person wrote down.
+But, you know, like, oh, first you go by color and then by size, nothing like that.
+What they want to understand is what a human person looking at a collection of shoes, you
+know, if you say here's one pair of shoes, now look at these other 10 pair of shoes,
+which one is most similar?
+And they're really trying to understand the human's perspective of, you know, which of these
+10 shoes do you think is similar?
+So, it's a very ambiguous task.
+It doesn't actually have a right or a wrong answer, but, but when we throw this task out
+to our users and we return the data back to Sentient, they are able, they've had very good
+success in terms of improving their models, which, you know, in terms of what types of
+results they're able to surface at, you know, as a result of getting a very deep understanding
+of what similarity means at a human level.
+So, you know, there are many, many varying degrees of, you know, of going, you know, the ambiguity
+versus, you know, essentially a very precise, you know, correct answer and it just absolutely
+depends on the model that you're trying to build exactly what you need.
+Okay.
+And that example are they ultimately trying to make recommendations or do something?
+I believe so.
+I believe so.
+Okay.
+Man, I feel like I should have asked you about customer examples.
+Yeah.
+That was awesome.
+Other interesting kind of use cases that you guys have taken on that we can talk about?
+Sure.
+Yeah.
+Well, so here's one we did recently.
+This was kind of different for us and it was a lot of fun.
+So there's a company called Init.ai and they're building AI chatbot technology.
+And so they, they're interested in building these chatbots in specific contexts.
+And so they really, they need conversation data, like they need, you know, a text of conversations
+in these contexts and they're having a difficult time going out and, you know, finding that
+data publicly available, things like that.
+And so, so we were talking with them, you know, and, you know, we've already typically
+done lots of categorization of text, we'll do what's called like aspect opinion linking
+of text, you know, various kinds of NL tasks, but what, what we ended up doing for Init
+was we actually helped them produce the conversations and then took those conversations and labeled
+the data, the text of those conversations.
+So we actually ended up designing a task that we put out to our community, which was,
+you know, pretend you're selling flowers and, you know, and now you'd be the, be the
+person selling flowers and then to another user we're saying, you know, pretend you're
+buying flowers.
+And maybe we, you know, give some guidance, things that the customer is interested in learning
+more about.
+And we actually send, send the task back and forth to collect a complete conversation.
+So, yes, I think we assembled something, I forget on the, I think it was something like
+10,000 conversations that we assembled.
+And then for each of those conversations, we went back and we did the labeling that they
+needed in order to understand the content of what's going on, you know, in those conversations
+to help train the AI models that they're building.
+So that was, that was fun.
+That was fun for us in terms of just designing it out, but it was also fun for the community.
+We got so much feedback from people saying, like, I love this.
+I could do this all day, you know, because you're just, and the conversations were fantastic.
+So I mean, it was, it was really, it was a lot of fun.
+That's awesome.
+That's awesome.
+That reminds me of someone had a month ago or so set up basically these three kind of
+conversational chatbots in a, in a chat room and they were just talking, talking to each
+other.
+And you sit there and monitor and when they got stuck, he just threw out some random thing
+to get them.
+Oh, that's fabulous.
+Oh, I gotta look that up.
+That's fantastic.
+Oh, that's all.
+So I don't know that I'll be able to find that, but if I can, I'll stick it in the
+show.
+Okay, that'd be great.
+That'd be fantastic.
+So one of your top, one of your top three things was subsetting the space, which reminded
+me that we needed to talk about this diversity point.
+Oh, right.
+I want you to kind of start us off in this discussion with, you know, the examples that
+come to mind for you of like where it's been done really poorly.
+Well, well, actually, I have an example.
+This is something we actually had an article in TechCrunch about this recently.
+So we've been thinking about this a lot just since, you know, it's obviously a benefit
+that we can provide to our customers to actually get the diversity and the, you know, the community
+that they need.
+But so we did a little experiment in how, so we started thinking about the question
+of, you know, how different are the results?
+Like how different does the training data look if you're sampling, you know, various types
+of populations?
+And so, you know, and it turns out we really didn't have to dig very deep.
+So one of the first data sets that I went to analyze, we had a task that we had put
+out to our users just as sort of a fun mental break once in a while, which was called rate
+the puppies.
+And so we just show you pictures of puppies and then you rate them from one to five stars,
+you know, cute or okay, maybe not so cute.
+And so we've collected, we've been collecting that data actually over quite a long period
+of time, just, you know, a few puppies to rate, you know, here and there for our users.
+And so the first thing I thought was, okay, let me just take a look at the data and see
+how the ratings differ by gender.
+And so I split the data by gender and it was just dramatic and obvious.
+Difference that the women were rating the puppies as cuter consistently across the board,
+across all puppies.
+And with, and there was a wider gap on the cuter end of the spectrum and the gap was more
+narrow on the not so cute end of the spectrum, but it was, but it was still there.
+And yeah, it was just striking, right?
+And it's, you know, it's a simple example and, you know, okay, well, how, how, doesn't
+matter, you know, how cute the women of the matter rating the puppy is, okay, probably
+not, but it's such a, it's such a clear example of the difference, differences that you can
+get in the training data itself, right, just by sampling a different population.
+And of course, the training data is what's guiding your model in terms of the output that's
+coming up together.
+Mm-hmm.
+Yeah.
+But yeah, so that's an article in TechCrunch, we can put a link to that article as well.
+Okay, nice, nice.
+And so the, do you run into any challenges in identifying diverse communities to target?
+What are the challenges generally that come, come up for you guys and trying to solve
+this problem for people?
+Sure.
+So each of our customers is going to have, you know, their own, their own demographic
+that they're, that they are targeting, right?
+And so at this point, we have a broad international community.
+We have many, many users in the US.
+We also have many, we have a good presence across just internationally.
+And we have good data in terms of who our users are because we, we put out surveys to collect
+demographic information, we, we put out, you know, many different surveys to our users,
+you know, that they're compensated for, for completing these surveys to be able to
+collect that information.
+So we have a good understanding of our, our current user base, which is, you know, which
+is very diverse.
+But we, we occasionally still have a customer come in and ask for something very specific
+that we haven't targeted before.
+So they potentially could say, you know, we have this task and we need, who knows, we
+need experts in bird identification to label these images of birds, you know, and tell us
+precisely what species of bird, you know, this is, you know, something, something like
+that, right?
+And so when that comes up, you know, we can, first of all, we can go out and survey our
+community and find out, you know, in our, in our broad community, do we have people who
+are able, able to do this type of classification already, we can identify them.
+But and if we find that we don't have enough members in the community yet to meet the
+velocity needs or, you know, the volume needs for the customer, then we can go out and
+do specific targeting to bring, like, you know, online marketing to bring those individuals
+into our community.
+And we've had good success with that.
+Okay.
+So we've talked about demographic targeting primarily thus far.
+Have you ever done anything with, uh, psychographic targeting like, right, I don't know for whatever
+reason I'm thinking, hey, we want this to be answered by my Briggs ENTJs or absolutely.
+You know, we've definitely talked about it.
+There's, yeah, there's, you know, there are all sorts of interesting personality profiles
+out there.
+And that's what's kind of lovely is because we do have this stable community that's working
+with us is if we put a survey out to the community, right, you know, and we compensate them
+for their time in completing that survey, we can get any, any data that we need.
+So it's actually, it's actually very easy for us to target the user that the customer
+is interested in.
+Okay.
+Okay.
+And this is a little bit of an aside, but I often think that in the example of like Uber
+ratings, you know, I think that there's probably, well, not probably there's, you know, there
+are, you know, four average radars and there are three average radars like, you know, hard
+graders and easy graders.
+I don't have the impression that, you know, an Uber, for example, would normalize, you know,
+a person's rating against their average rating.
+Right.
+It has a strict interpretation, right?
+Three stars.
+Three stars.
+That's what the user said.
+Yeah.
+Does anyone do something like that or, you know, to what degree to, to what degree to your
+knowledge?
+Do folks think about that in, you know, thinking about like rating schemes?
+And what's the current kind of thinking in the industry around that kind of stuff?
+Yeah.
+So, yeah, this is a little outside of my, my area.
+It's totally right.
+Don't I?
+Yeah.
+Yeah.
+That's okay.
+Yeah.
+I mean, I actually thought about this quite a bit when I was working on the Netflix prize
+competition because in that case, we have the one to five stars rating system.
+Right.
+And so, you know, so I went really deep in, it's just an understanding, like, you know, what
+are, what are these different user profiles or, you know, what types of users are out there
+and, you know, one of these distributions generally look like.
+Yeah.
+It's like on one to five star rating system, you basically get one's four's and five's
+and occasionally a three, you almost never get a two.
+And, you know, so, I don't know, so I have some interesting tidbits and thoughts about
+that in general.
+But, you know, it currently at spare five from our perspective, you know, we occasionally
+do ratings task.
+It's not one of the, it's not one of the common customer requirements.
+And we'll talk with the customer about whether, you know, is a, is a binary answer.
+You're going to be more informative for them or a three level answer versus a five star
+answer.
+And so we do have some experience in background in thinking about what type of data is going
+to come out of those different kinds of rating systems.
+And, you know, and beside just the rating system itself, you know, the wording of the question
+is so important in terms of, you know, you know, the words that you use, if you, if you
+have a three layer system, do you say, you know, perfect, okay, terrible, you know, or
+do you make it more, you know, more nuanced it, right?
+And you're going to get, you're going to get different data based on different wording
+that you use.
+Which thing?
+Yeah.
+Which actually that, just to say going into, you know, another, like a whole, whole
+other area of things that we are thinking about constantly here at spare five is just,
+just in the, the wording and the framing of, of the question is just such an essential
+piece of what we do here, whether, you know, even if it's not a rating question, even
+if it's a totally open ended, you know, writing, writing captions for an image or free text
+keywords versus, you know, very objective taxonomy categorization, things like that.
+The wording of the question makes all the difference, right?
+And so in our case, you know, we actually take our users through, or there's a, there's
+a complete process.
+So when, when a new task comes in, right, where we're iterating with the customer, trying
+to design the task, when we start preparing our users to complete that task, we, we will
+typically put up a tutorial, we'll start with a tutorial, so the user's just working
+through the tutorial, they can work through it as many times as they want, and it's giving
+them direct feedback on whether they're, you know, doing what's appropriate for the
+task.
+The next stage is a qualifier, which is more like a quiz.
+You don't get the feedback as you're doing it.
+At the end, you find out if you pass or not, and typically we won't allow users to continue
+into the task without completing the qualifier, right?
+And so, so we have instructions for the task that we're writing, we have the tutorial
+that we're writing, we have the qualifier that we're writing, and then we have the task
+itself and the questions that we're designing inside the task, right?
+And all of the wording, logic, the orientation and design of that information on the page,
+it is all part of the, you know, the whole formula of how do you get the right data coming
+out at the end?
+So, so that's a really important piece that I think people that are new to this field
+are just finding out about it for the first time don't realize what an intense amount
+of work and thought and effort goes into getting that right.
+That's really interesting.
+To what degree are you relying on, or do you have the benefit of relying on other folks
+research to figure some of the stuff out, or is it all empirical analysis on your part?
+Right.
+So there is definitely a lot of great learning already out there, you know, that's been
+published.
+So we have Dan Weld, is a computer science professor at UW, and he consults with us regularly.
+He's been fantastic.
+He's a crowdsourcing expert, and he's been fantastic about pointing us to, you know, all
+the good research out there about different things that have been tried in terms of, yeah,
+in terms of instructions and tutorials and designing tasks and all those kinds of things.
+So there's definitely a lot of learning there, but I would say, you know, given, given
+that, you know, we are working in a somewhat different space in that we are not doing
+traditional crowdsourcing, we are not, you know, farming answers, questions out to multiple
+users at a time.
+And so there has been a lot of just individualized learning on our part in terms of how do we
+work with our users and what level are our, our users at, you know, how do we, how do
+we bring them through the training process to get them to the level that we need.
+So there's definitely a lot of internal learning, and I would say, you know, each time we do
+another task, you know, each, you know, we have certain task types that we've done again
+and again and again at this point, and we're learning each time we do them along the way,
+how to make refinements, how to optimize that process, you know, how to make it even more
+clear.
+Anything that we can do to make, to make the instructions more clear, it just saves in
+terms of efficiency because we have that many more answers coming through that are actually
+accepted and allowed into the deliverable for the customer.
+Nice.
+Nice.
+I think we're coming up on an hour, anything else that you'd like to share with the audience?
+Yes.
+Absolutely.
+Well, I would say, yeah, if anyone is interested in getting in touch with us, you know,
+a couple of ways to get in touch, you can always head over to spare5.com.
+You can also email me directly.
+I'm Angie at spare5.com.
+And I guess one other thing that we wanted to let the listeners know about, so we have
+a blog series that we started a couple of months ago.
+It's called Conversations in Machine Learning, and it's just all about any interesting
+new applications in AI and ML things, you know, that are popping up all over at various
+companies that we're watching in this space, and for your listeners, we're offering a
+fantastically fabulous spare5 t-shirt to the first 25 people who subscribe to the blog
+series.
+And if anyone's interested, they can sign up at it's a spare5.com slash podcast.
+Well, that's awesome.
+That's awesome.
+And I'll include a link to that, of course, in the show notes.
+Okay.
+Wonderful.
+Thank you.
+Awesome.
+Well, thanks so much, Angie.
+This has been a great conversation, and I really enjoyed it.
+Thank you.
+Thank you.
+Catch you next time.
+Thank you.
+Absolutely.
+Thanks, Sam.
+All right.
+Thanks, bye-bye.
+Thank you.
+All right.
+Everyone, that's it for today's show.
+Thanks so much for listening, and thanks once again to spare5 for sponsoring the show.
+Please don't forget to sign up for their t-shirt offer at spare5.com slash podcast.
+And of course, we both want to hear your feedback.
+On Twitter, I'm at Twimmel AI, T-W-I-M-L-A-I, and spare5 is simply at spare5.
+Reach out to us and let us know what you thought about the conversation.
+Thanks so much for your continued support, and catch you next time.
+Bye-bye.

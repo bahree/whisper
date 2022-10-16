@@ -1,0 +1,1445 @@
+WEBVTT
+
+00:00.000 --> 00:10.560
+All right, everyone. Welcome to another episode of the Twomo AI podcast. I'm your host, Sam
+
+00:10.560 --> 00:17.200
+Charrington, and today I'm joined by Bean Kim, a staff research scientist at Google Brain,
+
+00:17.200 --> 00:23.600
+and an ICLR 2022 inviting speaker. Before we get into today's conversation, though, I encourage
+
+00:23.600 --> 00:29.040
+you to head over to Apple Podcasts or your listening platform of choice and leave us a five-star
+
+00:29.040 --> 00:35.040
+rating and review if you enjoy the show. Bean, welcome to the podcast. Thank you, Sam. Thanks for
+
+00:35.040 --> 00:41.680
+having me. It's honor to be here. I'm really looking forward to our conversation, and I would love to
+
+00:41.680 --> 00:46.640
+have you start by introducing yourself to our audience, sharing a bit about your background,
+
+00:46.640 --> 00:53.440
+and letting us know how you came into the field of machine learning. Yeah, sure. I'm a staff research
+
+00:53.440 --> 01:01.040
+scientist at Brain. I grew up in South Korea. I actually did, I majored in mechanical engineering
+
+01:01.040 --> 01:07.200
+back in the day, until I came to MIT for grad school. I made some robots initially, then until I
+
+01:07.200 --> 01:14.960
+realized robots are so cool, however, limited by physical, like just the time that you have to
+
+01:14.960 --> 01:20.880
+spend to make the robot. And I thought, you know what, if I just remove the physical aspect of
+
+01:20.880 --> 01:25.680
+their research and just go with the brain, I can go faster. I can do many things at the same time,
+
+01:25.680 --> 01:31.600
+computers can do things while I'm sleeping. So I switched to machine learning and did a PhD
+
+01:31.600 --> 01:37.120
+from MIT, then I went through some other jobs and landed in brain. And so tell us a little bit
+
+01:37.120 --> 01:43.280
+about your current research focus. What are the things that you enjoy thinking about? Yeah, so for
+
+01:43.280 --> 01:52.480
+many years, I've been singularly focused on interpretability, which is kind of an umbrella term
+
+01:52.480 --> 01:58.880
+for things starting from how do you understand the data distribution that you're about to train
+
+01:58.880 --> 02:06.320
+your model on to building inherently interpretable models. You design model from scratch, embed rules
+
+02:06.320 --> 02:11.600
+or logic to make sure that you can understand when the model is trained. And although it to
+
+02:11.600 --> 02:16.720
+postdoc interpretability methods, like you have a led your model, somebody gave it to you and you
+
+02:16.720 --> 02:22.000
+can't really change the model, then what do you do? You can use gradients and other things to extract
+
+02:22.000 --> 02:28.320
+some explanations. So that's what I've been really poorly focused on for like last 10 plus years.
+
+02:29.200 --> 02:36.160
+And recently, I've made a little bit of transition thinking about, okay, we've come this far
+
+02:36.160 --> 02:42.800
+developing lots of engineering tools to provide explanations. What are we missing? What do we have
+
+02:42.800 --> 02:49.360
+to do? What is the gap to fill in order for us to move to the next level? And that's what I talk
+
+02:49.360 --> 02:56.000
+about in I clear keynote this year about, well, what we really need to do is to paralyze what we do
+
+02:56.000 --> 03:03.920
+with engineering effort and science. So engineering effort is making tools, perhaps in absence of
+
+03:03.920 --> 03:08.720
+principles, you just kind of try things out and see what works out, build a lot of tests around
+
+03:08.720 --> 03:14.880
+that. Whereas science is approaching this complex mechanism called neural network or machine learning
+
+03:14.880 --> 03:23.280
+models or AI as an organism that we want to study. So go ahead and probe them, analyze their behaviors
+
+03:23.280 --> 03:29.120
+to see what comes out. Like pretend that this is something that we build the hypothesis and build
+
+03:29.120 --> 03:36.880
+tests and data analysis structure around it in order to gain more understanding about this unknown
+
+03:36.880 --> 03:43.760
+object. So I talk a lot about that in my keynote. Your keynote, which is titled Beyond Interpretability
+
+03:43.760 --> 03:49.280
+as you're describing, developing a language to shape our relationships with AI. Before we do go
+
+03:49.280 --> 03:54.960
+beyond interpretability, though, I wonder if it makes sense to start by having you characterize
+
+03:54.960 --> 04:03.680
+where we are as an industry and community with interpretability. What's the best way to characterize
+
+04:03.680 --> 04:11.120
+the current state of the art or the state of the field? There's a lot of needs and passion
+
+04:11.120 --> 04:17.920
+and requirements. We're not fully there yet, right? We're definitely not fully there yet. In fact,
+
+04:17.920 --> 04:27.920
+we're quite far away from it. Some of my work, I kind of took this course, if you call it a journey
+
+04:27.920 --> 04:33.040
+together with the community. I feel like I exactly was at the position where this is so exciting,
+
+04:33.040 --> 04:37.680
+we can do so much things and did a lot of things. And then I was at one point in 2018 in Eurip's
+
+04:37.680 --> 04:44.480
+paper. We shared a little shocking discovery that showed that a lot of interpretability methods
+
+04:44.480 --> 04:50.400
+that we've been using and deployed are not actually showing what you think it's showing.
+
+04:51.840 --> 04:58.880
+To TLDR of that paper is that when you show explanation from a trained model and you randomize
+
+04:58.880 --> 05:04.240
+that model, so go in there, just mess it up. And so now the model is garbage and show explanations
+
+05:04.240 --> 05:10.080
+from that model. You can't tell them apart. As a human, you can't tell them apart. As a computer,
+
+05:10.080 --> 05:16.000
+oftentimes you also can't tell them apart. That was a big paper. Right. And that was, you know,
+
+05:16.000 --> 05:24.080
+it received both very enthusiastic and people, some people who didn't like to, didn't like what
+
+05:24.080 --> 05:28.720
+they're reading, right? Because we had this trust and passion around these methods. And including
+
+05:28.720 --> 05:36.720
+myself, I test the own method that I developed and to my surprise and disappointment that the
+
+05:36.720 --> 05:41.200
+methods that I worked on also don't really pass that sanity check test to what we call.
+
+05:42.800 --> 05:48.880
+And since then, I think we've been, as a community, many smart people, people smarter me,
+
+05:48.880 --> 05:55.120
+joined to think really carefully about what does it mean to make progress? It's not just about
+
+05:55.920 --> 06:01.600
+making a reasonable and convincing picture of a bird and show an explanation of why that was a bird.
+
+06:01.600 --> 06:07.360
+Much more beyond that, we have to rigorously validate what we're seeing. We have to conduct human
+
+06:07.360 --> 06:13.920
+experiments to make sure that what we hope to happen actually happens with the human. So if,
+
+06:13.920 --> 06:18.080
+for example, this might be a good segue to also talk about one of my people or this conference
+
+06:18.080 --> 06:25.680
+that I clear where we argue that if your goal is to detect spurious correlation, then existing
+
+06:25.680 --> 06:31.440
+methods won't work for you unless you know what that spurious correlations are or let it.
+
+06:32.400 --> 06:37.040
+So just the community has been thinking a lot about, that's just a example of many other work
+
+06:37.040 --> 06:42.640
+that start to think about what is a test that we can use this explanation for and what are the
+
+06:42.640 --> 06:48.960
+tasks we simply cannot and should not. In terms of, do you have a sense for
+
+06:48.960 --> 06:56.320
+in practice and in industry practice, kind of what are the techniques that folks are
+
+06:57.520 --> 07:03.600
+using and the kind of state of the field from that perspective and I ask that mostly because
+
+07:04.720 --> 07:08.880
+you know, some of the first methods that I remember hearing about are like lime and
+
+07:08.880 --> 07:15.360
+chapp and those are still the ones that I hear about. You know, is that I'm not hearing and there's
+
+07:15.360 --> 07:19.920
+this rich field of folks of things that folks are doing or are those still the ones that are
+
+07:19.920 --> 07:26.480
+most used in practice? Do you have a sense for that? Yeah, I've seen many methods used across
+
+07:26.480 --> 07:32.400
+Google and other industry just, you know, people picked their favorites and I should mention that
+
+07:33.120 --> 07:38.320
+you know, the conclusion of our study that I just mentioned in 2018, I need to check paper,
+
+07:38.320 --> 07:44.800
+isn't to conclude, okay, all these methods don't use it, it's not that. The conclusion is that
+
+07:44.800 --> 07:50.560
+we don't yet understand what these explanations are showing, what information these explanations
+
+07:50.560 --> 07:58.720
+have and so if your goal is to, for example, just look at candidates of features that might have
+
+07:58.720 --> 08:04.480
+been used in model prediction, then perhaps these methods do work for you. In fact, we have
+
+08:04.480 --> 08:10.800
+plenty of other papers that showed they present these explanations in from doctors, like actual
+
+08:10.800 --> 08:18.080
+doctors and show that yes, they do help. So it's not to say, you know, all these family of methods,
+
+08:18.080 --> 08:22.320
+we should throw them away, it's not, it's just to say we should be very careful, we should build a
+
+08:22.320 --> 08:27.360
+lot of tests around it to make sure that it fits your bill, what you're trying to do. So to your
+
+08:27.360 --> 08:34.000
+question, I think they're, and exactly to follow to what I just said, it really depends on what
+
+08:34.000 --> 08:41.280
+you're trying to do. So sometimes Lyme is a very simple method, elegant, elegant simple,
+
+08:41.280 --> 08:48.320
+but that simplicity also implies that if your decision boundary is very curvy, for example,
+
+08:48.320 --> 08:54.560
+very complex, fitting a linear function in any of the local area is not going to be a good
+
+08:54.560 --> 09:00.080
+approximation of how your model works. So in that cases, it will not, it will not be the best
+
+09:00.080 --> 09:05.440
+friend for you. Other cases, you know, there are computationally really expensive methods,
+
+09:05.440 --> 09:10.640
+and if you are a task has to be something that decision has to make very quickly,
+
+09:10.640 --> 09:14.480
+that's not going to work for you, because it's just simply so slow, it doesn't work for what
+
+09:14.480 --> 09:20.080
+you're trying to do. So I've seen many family of methods like those, you know, Greg came,
+
+09:20.080 --> 09:26.080
+in fact, SmoothGrad also used in many domains, like TKW used many. There isn't, I haven't seen a
+
+09:26.080 --> 09:31.920
+single method that works for everybody, and I suspect there will be, there will never be
+
+09:31.920 --> 09:38.720
+a single method that's going to work for everybody. Awesome, awesome. And so your talk
+
+09:38.720 --> 09:48.160
+beyond interpretability, you kind of organize that around these core ideas of studying machines
+
+09:48.160 --> 09:56.240
+and isolation, and you spoke a little bit to that, studying machines in conjunction with humans,
+
+09:56.240 --> 10:00.960
+and then this kind of broader idea of alignment. You know, let's maybe go through those when you
+
+10:00.960 --> 10:07.440
+talk about studying machines with in isolation, you're talking about applying the scientific method
+
+10:07.440 --> 10:14.080
+to studying the machine learning methods we're building. You know, speak more about some of the
+
+10:14.080 --> 10:19.280
+methods that you've explored and the way you think about that category. Yeah, this is the
+
+10:19.280 --> 10:25.360
+category that I'm super excited about, because there's so much work we can do in this, and just
+
+10:25.360 --> 10:31.680
+so little has been explored. And the things that I talk about in this talk is just one of many,
+
+10:31.680 --> 10:37.600
+many, many centuries old studies after studies about humans. This is just one tiny bit of it,
+
+10:37.600 --> 10:42.400
+not even point zero zero one percent. And that should just kind of give, hopefully give you a
+
+10:42.400 --> 10:49.520
+scope of what I'm talking about when I say studying machines as a scientific object and leverage
+
+10:49.520 --> 10:56.400
+studies done on humans. We've done many, many studies on humans, biases, perceptual biases,
+
+10:56.400 --> 11:01.760
+cognitive biases, or just capability, what we can see and what we can cannot see.
+
+11:01.760 --> 11:07.600
+So there's a Gestalt study that was a historical Gestalt study from psychology.
+
+11:07.600 --> 11:14.400
+Was it psychology and you applied similar ideas to studying machine learning models?
+
+11:14.400 --> 11:18.720
+Yeah, that's right. So I can tell you a little more about what I exactly did. So Gestalt
+
+11:18.720 --> 11:25.200
+phenomenon for those who are familiar with it is something that is very strong phenomenon.
+
+11:25.200 --> 11:30.400
+That for example, I show you this triangle. Actually, just think about Amazon logo, right?
+
+11:30.400 --> 11:36.480
+The Amazon logo has this arrow hidden inside of it. It's called A to Z and it's point at it.
+
+11:36.480 --> 11:42.640
+FedEx logo actually has also this arrow embedded inside. And those design decisions are
+
+11:42.640 --> 11:48.960
+essentially based on a group of strong perceptual phenomenon called the Gestalt phenomenon.
+
+11:48.960 --> 11:55.360
+And designers to this day leverage those very strong phenomenon to make visually appealing
+
+11:55.360 --> 12:02.240
+things. The one specific rule of Gestalt, Gestalt rule, if you make your Gestalt principles
+
+12:02.240 --> 12:07.520
+or law, that we study is a closure effect, which is if I show you a pack, my three pack
+
+12:07.520 --> 12:13.760
+pens that align nicely, humanized can now help yourself, help yourself, but seeing a triangle,
+
+12:13.760 --> 12:19.120
+even though there's no triangle. And we are, our core question of that paper was,
+
+12:19.120 --> 12:26.160
+well, does neural network have the same thing? Because if it does, that says something about how,
+
+12:26.960 --> 12:31.920
+how our brain works versus how neural network brain works. And you can imagine that's just
+
+12:31.920 --> 12:37.280
+the beginning of so many other studies that we've done on humans. If I give you a high number,
+
+12:37.280 --> 12:42.560
+for example, a really famous example, Danny Cannonman spoke, talks about, if I give you a high
+
+12:42.560 --> 12:47.280
+number of any kind, like I just say, how many things, how many trees do you think we have in Seattle,
+
+12:47.280 --> 12:53.760
+and you give me a number? Then I ask you completely on related question, let's say, how many people
+
+12:53.760 --> 12:58.560
+cross borders between United States and Canada or something? My answer is biased higher.
+
+12:58.560 --> 13:05.040
+Exactly. Yeah. And it's such a robust statistical phenomenon that it's so embedded in us.
+
+13:05.040 --> 13:11.200
+So then the question is, what are those embedded inherent biases for phenomenon that neural network
+
+13:11.200 --> 13:17.600
+has? We have no idea. We just have no idea. And there's so much studies we can do to just literally
+
+13:17.600 --> 13:23.120
+leverage what we did in humans and just test to ask machines, craft a design experiment really
+
+13:23.120 --> 13:29.200
+well and do that experiment to see what happens in machines. Now, when you're talking about the
+
+13:29.200 --> 13:36.800
+Gestalt phenomenon in particular, and this example of the Pac-Man and the triangle, are you
+
+13:38.720 --> 13:47.440
+trying to conduct like literally that specific experiment, meaning a visual experiment and things
+
+13:47.440 --> 13:53.440
+like Pac-Man and triangles? Because it raises for me the question, what does it even mean for the
+
+13:53.440 --> 13:57.280
+machine to be doing what the human is doing? I thought you were going to ask a slightly different
+
+13:57.280 --> 14:01.600
+question also to both our interesting questions. So let me ask you a question first.
+
+14:02.320 --> 14:05.520
+What does it even mean the machine is to be doing what humans are doing?
+
+14:06.080 --> 14:12.960
+I just elaborate, you know, I'm thinking of, you know, as we first started to build deep networks,
+
+14:12.960 --> 14:17.840
+you know, some of the early studies like deep dream and others like looked at the early layers
+
+14:17.840 --> 14:22.320
+of the network and found, you know, textures here and shapes here. Is it like trying to
+
+14:22.320 --> 14:27.440
+introspect networks and see if we've got to triangle somewhere or or something else?
+
+14:27.440 --> 14:33.520
+No, it's a lot more global understanding of of the object. So let's say let's we didn't do this
+
+14:33.520 --> 14:37.920
+in the paper, but let's say we did the following and I can tell you what that might imply. So
+
+14:37.920 --> 14:45.360
+let's say I showed in the paper, yeah, the network has guessed all a fact and which means that we
+
+14:45.360 --> 14:52.000
+can we don't even have to occlude things in an image in order for it to learn how to fill in the
+
+14:52.000 --> 14:57.200
+gap because you know what, if I put a triangle and put something on top of it and now network can
+
+14:57.200 --> 15:03.440
+only see parts of the triangle, we already know that network will fill in that gap and what that
+
+15:03.440 --> 15:08.320
+means that might have an implication for the way that we augment the data, the data augmentation,
+
+15:08.320 --> 15:14.880
+we intentionally rotate and shift or blow up the image or put occlusion on top of it to make
+
+15:14.880 --> 15:19.920
+sure that network can be robust to these changes. Perhaps you don't have to do that if you know
+
+15:19.920 --> 15:25.040
+enough about what the network is already capable of, maybe that could inform data augmentation.
+
+15:25.040 --> 15:33.360
+And that, that's just a small example of many, many things that will guide our developing,
+
+15:33.360 --> 15:38.400
+our decisions when they we develop these neural networks. What are the gaps that we should really
+
+15:38.400 --> 15:42.880
+teach them to? Because they don't have it a LED in inherently. And what are the things we should
+
+15:42.880 --> 15:48.880
+rather, we don't have to worry about because it already has some architecture, something about the
+
+15:48.880 --> 15:56.160
+way we built it, already builds in those capabilities. And so what are some examples of experiments that
+
+15:56.160 --> 16:00.720
+you ran to try to demonstrate this? And maybe before that, what was the question that you thought I
+
+16:00.720 --> 16:06.080
+was going to ask? Yes, so I thought you were going to ask, you know, in traditional Gestalt
+
+16:06.080 --> 16:13.280
+phenomenon, the way that they test humans is response time. So they put some distracting objects
+
+16:13.280 --> 16:17.200
+in the screen and they put a Gestalt triangle and say where's the Gestalt triangle or where's
+
+16:17.200 --> 16:22.000
+this anger thing that how fast they can find it. And so I thought you're going to ask, how did
+
+16:22.000 --> 16:27.360
+you test that in neural network? Because that's, I think, the core challenge of doing what I'm,
+
+16:28.240 --> 16:34.800
+what I'm incurred, what I am excited about doing to in order to bring test experiments that's
+
+16:34.800 --> 16:40.640
+done on humans to be done for neural networks. You would have to think very carefully about,
+
+16:40.640 --> 16:45.520
+okay, we can't really measure response time because there's no such thing in neural network.
+
+16:45.520 --> 16:50.640
+How would you design an experiment such that you can still measure the effect robustly,
+
+16:50.640 --> 16:57.520
+but convincingly? So things that we did, or we did a lot of testing into, okay, the way that we
+
+16:57.520 --> 17:03.120
+measure is the simple metric of closure measure, what we call closure measure. Now, what could go wrong?
+
+17:03.120 --> 17:09.040
+Would it go wrong? If I have, these are some, some of the details, but there are some confounding
+
+17:09.040 --> 17:14.640
+factors that we should really rule out and test that metric with those potential confoundings to
+
+17:14.640 --> 17:19.440
+make sure that we're not fooling ourselves, that this metric actually fakes fully measure what we
+
+17:19.440 --> 17:25.280
+want to measure. Can you explain the metric before talking through some of the confounding factors?
+
+17:25.280 --> 17:32.640
+Yeah, it's actually pretty simple. So metric itself is a cosine similarity between two set
+
+17:33.280 --> 17:41.680
+two pairs. So first pair is a gestal triangle, which invokes that closure phenomenon to full
+
+17:41.680 --> 17:46.480
+triangle. So this measures how similar is it to the neural networks embedding space, how similar.
+
+17:47.520 --> 17:55.280
+And we subtract that cosine similarity with a, what we call disorder triangle. So the same
+
+17:55.280 --> 18:01.120
+Pac-Man, but Pac-Man are now slightly rotated so that you no longer see the triangle.
+
+18:01.120 --> 18:06.960
+And similarly between that disorder triangle to the full triangle. And we just subtract two.
+
+18:06.960 --> 18:12.880
+Then that's all there is really. And we do this for every layer and every, every bottom like
+
+18:12.880 --> 18:17.600
+layers. For the rest of that, if there's speed connection, you make sure that every information
+
+18:17.600 --> 18:24.960
+is coming to that layer. For the confoundings, now many things can go wrong. So for example,
+
+18:24.960 --> 18:32.640
+if I make, if I don't, if I don't control for the location of this triangle, for example,
+
+18:32.640 --> 18:38.400
+when I compare the gestal triangle to full triangle, if they're, they're literal pixel overlap,
+
+18:38.960 --> 18:44.560
+is a lot more than this order triangle, that's a problem, right? Because it's literally the same,
+
+18:44.560 --> 18:49.120
+it's just this pure pixel overlap is going to be a confounding factor.
+
+18:50.000 --> 18:54.800
+So the, because in the journal or same thing in the same place is going to think of, I think that
+
+18:54.800 --> 19:00.240
+these two things are similar. And it's not going to abstract out to read the read our intention,
+
+19:00.240 --> 19:05.520
+which is to express, well, here are incomplete triangle versus complete triangles.
+
+19:05.520 --> 19:10.560
+So what we do is we change the background color. We rotate them around. We, in this way,
+
+19:10.560 --> 19:17.360
+and both in, in local data, which we call, we control for all that and measure the average effect.
+
+19:17.360 --> 19:22.800
+I'm not sure that we cover this, but the, the presumption being the result is you identified the,
+
+19:23.600 --> 19:29.280
+that this effect is present in neural networks. That's right. But how do you characterize it to,
+
+19:29.280 --> 19:35.440
+to a certain degree, or what, what's the interesting, you know, what's the degree, I guess?
+
+19:36.000 --> 19:43.680
+Yeah. So the interesting nugget in this is that it only exists when the network is able to
+
+19:43.680 --> 19:51.680
+generalize. So if let's say I have a network that was overfitted to some random labels,
+
+19:51.680 --> 19:56.080
+which we can totally do, we can achieve up to 90 something present accuracy. If I give you random
+
+19:56.080 --> 20:00.720
+label, it's happily overfit. But test time, it doesn't know how to generalize. It never learn
+
+20:00.720 --> 20:06.560
+what is the meaning of say frog or cat. Those networks do not show the closure effect.
+
+20:07.120 --> 20:14.640
+It's only the regularly trained network. We also try to keep the label correct, but instead
+
+20:14.640 --> 20:20.880
+shuffle the pixels. So that means I am destroying the local features and train the network.
+
+20:20.880 --> 20:27.120
+Again, it is happy to overfit the data because labels are correct, but pixels are shuffled.
+
+20:28.320 --> 20:35.120
+If there is some statistical patterns across the classes, for example, all the cats,
+
+20:35.120 --> 20:41.680
+the average value of pixels or 0.5, whereas all the dogs are 0.3. So our question was,
+
+20:41.680 --> 20:49.360
+can, would neural network leverage that neural network train those destroyed local structure?
+
+20:49.360 --> 20:55.920
+Will it still have closure effect? Because if it does, it's not the spatial
+
+20:55.920 --> 21:01.120
+meaningfulness that causes closure effect. It's something else. It's something else that we don't
+
+21:01.120 --> 21:06.160
+know. And that's something we should, we must investigate. It turns out that if you destroy
+
+21:06.160 --> 21:12.400
+the local feature, it does not have closure effect. So you might ask, okay, so what does that mean?
+
+21:12.400 --> 21:18.320
+What does that mean? Ultimately, why are we doing this? So ultimately, my studies like this,
+
+21:18.320 --> 21:24.800
+I think will lead to insights such as, for example, does that mean that if we build in more
+
+21:24.800 --> 21:29.680
+human-like perception in neural network, when we design this network, LLM's, vision language model,
+
+21:29.680 --> 21:37.680
+whatever, maybe that means we will help generalization. Now, there's a huge logical jump that I made
+
+21:37.680 --> 21:43.120
+there because error this way, causal analysis, this way, doesn't mean the other way. However,
+
+21:43.120 --> 21:48.560
+a lot of studies that could perhaps show that relationship or absence of that relationship
+
+21:48.560 --> 21:52.400
+could really guide us designing these models because at the end of the day, we're the ones
+
+21:52.400 --> 21:58.000
+making decisions what to make next. Within this broad category of studying machines and isolation,
+
+21:58.000 --> 22:01.920
+that's just one of the studies that you've conducted. What are some others?
+
+22:02.720 --> 22:10.640
+Yeah, so in another study that I share, it's preliminary results, but this is in that work,
+
+22:10.640 --> 22:18.640
+we think about the saliency methods, which is the target of the topic of discussion in
+
+22:18.640 --> 22:22.960
+the sanity check paper that where we show the training or on training or you can tell the
+
+22:22.960 --> 22:29.760
+difference in this saliency map based family of explanation. So we kind of take a deeper dive
+
+22:29.760 --> 22:36.160
+into that. So then our question in that paper was, okay, so humans can tell the difference,
+
+22:36.160 --> 22:42.320
+but maybe the information is there. It's just that we can tell. And perhaps the other way around
+
+22:42.320 --> 22:48.560
+is true too. What if there's information that human can tell the machines can't? So in that
+
+22:48.560 --> 22:55.600
+paper, we show both of the information. So it turns out that if I train a model with the same
+
+22:55.600 --> 23:00.400
+data, same architecture, but just different seeds. So now I have two models that roughly
+
+23:00.400 --> 23:03.840
+achieve the same accuracy, but just literally different seeds and different weights.
+
+23:03.840 --> 23:08.400
+When I get explanations, humans can tell the difference. They look the same. Like I looked at
+
+23:08.400 --> 23:15.520
+many, many of those same, but for neural network, it can tell which which explanation came from
+
+23:15.520 --> 23:22.800
+which model close to perfection, close to 99% 96, the more than 96% accuracy. So that's like
+
+23:22.800 --> 23:28.160
+concrete evidence of some information that humans cannot read off of these explanations,
+
+23:28.160 --> 23:34.400
+but it's there. This paper characterizes that effect as a fingerprinting of the model.
+
+23:35.600 --> 23:43.200
+Does that have implications in kind of adversarial data leakage and questions like that,
+
+23:43.200 --> 23:47.520
+or are those tangential to the kinds of things you're thinking about?
+
+23:48.240 --> 23:56.000
+I think it has implications to that. But in this work, we focus on explanations alone
+
+23:56.000 --> 24:04.640
+that what sort of fingerprints of the model we show that one can read off of the explanation.
+
+24:04.640 --> 24:09.920
+So for example, you can imagine actually now you said it. Now I think actually there's
+
+24:09.920 --> 24:14.560
+better more link to that. So for example, there has been work that shows, if you just give me
+
+24:14.560 --> 24:19.680
+explanations, I can actually completely reconstruct a model. I think this has worked from many years
+
+24:19.680 --> 24:25.520
+ago, Barry Moritz-Hardt's group in when he was in Berkeley. And what does that mean? Well,
+
+24:25.520 --> 24:32.000
+that means that if somebody requires me to provide older explanations for the input data that
+
+24:32.000 --> 24:39.760
+customers are using, then that could be used to reverse engineer preparatory information
+
+24:39.760 --> 24:46.080
+and intellectual property gets really a big question. I think that's what you're referring to.
+
+24:46.080 --> 24:51.360
+And further, there's other results that suggest that because if we're talking about large models
+
+24:51.360 --> 24:56.000
+that can memorize data, there's actually training data that can leak into the model. And if that
+
+24:56.000 --> 25:02.720
+leaks out through explanations, then you're also exposing the potentially private information.
+
+25:02.720 --> 25:08.160
+That's right. And Catalina Uler's work from MIT showed that this also happens in VAE models
+
+25:08.160 --> 25:14.240
+where you can completely reconstruct every single training data because they're attracting points
+
+25:14.240 --> 25:21.520
+of the network. You can 100%. And apparently, this phenomenon is widely common. Nicholas
+
+25:21.520 --> 25:28.800
+Papernod's paper, Rikus Karlin's paper, all show that this liquid not about explanation,
+
+25:28.800 --> 25:35.040
+but just the liquid of the training data completely is possible. So that all should really hint us
+
+25:35.040 --> 25:40.880
+that there's just so much we don't know about neural network. And all these studies are super
+
+25:40.880 --> 25:46.560
+useful. But somebody should also think about, okay, well, let's just go back to the drawing board,
+
+25:46.560 --> 25:53.040
+zero, beginning. And consider this as an alien. And let's think about how we can study this alien
+
+25:53.040 --> 25:57.840
+because there's just simply so much to study, we need a lot of different approaches to study
+
+25:57.840 --> 26:04.080
+this important alien. And so this first category that we've talked about is, hey, we've got the alien
+
+26:04.080 --> 26:11.200
+in a room and we're just kind of, you know, probing and studying the alien. Is the studying machines
+
+26:11.200 --> 26:18.080
+with humans? Is that more looking at the alien and the context of collaborating or working with
+
+26:18.080 --> 26:24.160
+humans? That's right. To extend the analogy. Yes, exactly. That's right. And I think we should go
+
+26:24.160 --> 26:30.400
+one step forward. So a lot of people talk about collaborating with machines and how we can leverage
+
+26:30.400 --> 26:38.960
+each other's intelligence and augmented intelligence and so on. But in fact, I think what's perhaps
+
+26:38.960 --> 26:46.480
+more important to recognize is that as we interact with these machines and work with AI and live
+
+26:46.480 --> 26:52.800
+in this society where every single thing that we do or somehow some AI models are behind them
+
+26:52.800 --> 27:00.000
+or most of it anyway, we should know that that is changing our behavior. That's changing us.
+
+27:00.000 --> 27:05.360
+It's changing the society. Take Twitter, take YouTube, whatever. People spend a normal
+
+27:05.360 --> 27:11.760
+amount of time on social media. Who decides what you see? Who decides what you see from which you
+
+27:11.760 --> 27:17.360
+decide you make a decision about your life, about your career? How what you think? How angry you
+
+27:17.360 --> 27:25.520
+are or how happy you are? That ecosystem between machines and humans, it's not just collaborations
+
+27:25.520 --> 27:33.040
+and leveraging each other. It's a whole world that we're now living with AI. And the language
+
+27:33.040 --> 27:41.280
+aspect of my talk, how I think that this language must be developed that we should put
+
+27:41.280 --> 27:45.840
+force together to develop this language. And I even think that once we develop this language,
+
+27:45.840 --> 27:50.640
+this might be something we are taught in school. For kids as they learn math in high school and
+
+27:50.640 --> 27:55.920
+middle school, maybe this is another language that they will learn in schools because it's so
+
+27:55.920 --> 28:01.920
+important so that we have effective ways to manage and communicate with these machines.
+
+28:01.920 --> 28:08.960
+So pulling back again. I was curious why you characterize it as a language as opposed to
+
+28:08.960 --> 28:16.000
+a set of principles or foundational understanding about using machines. What makes you think of it as
+
+28:16.000 --> 28:23.600
+as a language or communication vehicle? It representational differences. So if we have same
+
+28:23.600 --> 28:28.400
+representation as a human, we can agree on our principle because the underlying
+
+28:29.280 --> 28:35.840
+vocabulary that exercises those principles, we agree. We know that you and I know we live a life
+
+28:35.840 --> 28:42.320
+and we live and die. We live under the constraints of gravity. We all know that. We have common
+
+28:42.320 --> 28:47.920
+understanding. With the machines, we don't have that. So that means even if we have a principle
+
+28:47.920 --> 28:54.480
+defined in our own language, we may not be able to communicate what that really means to machines.
+
+28:54.480 --> 29:00.080
+We even have hard time communicating with each other what, for example, fairness, fair justice means.
+
+29:00.640 --> 29:06.240
+And the challenge is so high, I believe that in order to just really feel that gaps in our
+
+29:06.240 --> 29:11.680
+representational spaces, it would have to be back and forth. It would have to be a conversation
+
+29:11.680 --> 29:17.600
+and to have a conversation, we need rich language that both of us can express what we really mean.
+
+29:17.600 --> 29:22.000
+And that's why language is important. Tell us a bit about your research program that explores
+
+29:22.000 --> 29:28.800
+some of these ideas. Yeah, so I must say that this is weird at the beginning of a huge effort
+
+29:28.800 --> 29:34.080
+that we, as a community, I hope that we will push down, push on. And lots of folks already have
+
+29:34.080 --> 29:41.440
+thought about this. So to build this language, we have to study airlines as we're AI models,
+
+29:41.440 --> 29:48.400
+as an object of scientific study. And not just that in isolation, but also in this whole ecosystem
+
+29:48.400 --> 29:53.840
+between machines and humans. We live in an ecosystem. We influence each other. We should study
+
+29:53.840 --> 30:01.920
+that interaction very carefully. But on top of, but in addition to that, we need to humans have
+
+30:01.920 --> 30:09.040
+amazing capacity to learn new things. We should expand what we know. This is a great opportunity
+
+30:09.040 --> 30:16.720
+to meet a coworker who is sometimes smarter than me, thinking about your network,
+
+30:16.720 --> 30:22.720
+who could really show us how to view a problem that we've been trying to solve from a different
+
+30:22.720 --> 30:28.080
+angle. And that could really inspire us to see the solution that we didn't perhaps previously
+
+30:28.080 --> 30:34.800
+solve before. So expanding what we know is another branch of this research program that I am
+
+30:34.800 --> 30:40.720
+envisioning. And some of those work that I talked about in keynote is Alpha Zero, thinking about Alpha
+
+30:40.720 --> 30:47.200
+Zero, the superhuman network that plays chess better than any other humans. How do we go about,
+
+30:47.200 --> 30:53.920
+can we do in-depth study in this amazing network to see how do we interpret them? What does it know
+
+30:53.920 --> 30:58.320
+and what does it not know? How much of our representational space overlap?
+
+30:58.320 --> 31:05.840
+What's your sense for how far we are there? How far we are with that in the case of Alpha Zero?
+
+31:05.840 --> 31:11.760
+We are far, we're far away. I think that answers to a lot of those questions. All of the far
+
+31:11.760 --> 31:18.160
+questions were far. Yeah, it's why it's a research in which why I'm excited to pursue
+
+31:18.160 --> 31:23.200
+distraction for, you know, probably first. I hope that before I, before end of my day,
+
+31:23.200 --> 31:29.760
+I would see some a lot different than than where we are now. But we are far away, but the things
+
+31:29.760 --> 31:35.120
+that we discovered in that work is already really interesting and frankly encouraging. So when
+
+31:35.120 --> 31:40.400
+we started that project, we have this Alpha Zero Network. Only thing that we knew about that is
+
+31:40.400 --> 31:45.120
+that it plays chess really, really well. It can be the stock fish engine, which is arguably the
+
+31:45.120 --> 31:52.240
+best chess engine in the world. And note that the chess engine, human player, it's very hard for
+
+31:52.240 --> 31:58.240
+human player, any human players to beat the chess engine. So this is arguably a very, very good
+
+31:58.240 --> 32:03.200
+machine. So when we started that project, we weren't sure what we're going to find. We had ideas
+
+32:03.200 --> 32:09.520
+that, okay, well, let's first try to detect human chess concepts in this network and see if it's
+
+32:09.520 --> 32:14.160
+there at all. And we honestly thought we don't know what will happen. How much like we will,
+
+32:14.160 --> 32:22.080
+will we find 30% of human concepts, 20%, 80%, and we ended up finding quite identifying these
+
+32:22.080 --> 32:28.240
+human concepts a lot in Alpha Zero, which is encouraging news, because that means that at least
+
+32:29.440 --> 32:36.080
+some concept that at least correlates with how we understand chess, how we play chess,
+
+32:36.080 --> 32:43.760
+exists in Alpha Zero. That's a great news as a common ground to start to expand what we know.
+
+32:44.320 --> 32:49.360
+So in the follow-up work that we're going to do this summer and next year kind of a long term
+
+32:49.360 --> 32:58.640
+project is with this amazing performer professional chess player also PhD student in machine learning.
+
+32:58.640 --> 33:06.480
+She's going to join, her name is Lisa Shutt. She's going to join us to work on this problem of,
+
+33:06.480 --> 33:12.160
+okay, now we have an expert chess player who also know machine learning. How can we discover new
+
+33:12.160 --> 33:18.720
+concepts that we didn't know before? What are some other work that you're seeing that in the
+
+33:18.720 --> 33:27.520
+machines with humans category? You mentioned that you're early on in that part of the research.
+
+33:27.520 --> 33:32.240
+Are there other examples of things that you're looking at there? Yeah, so I would love to talk
+
+33:32.240 --> 33:39.600
+about artist art project that we've done in as a part of expanding what we know. This is human and
+
+33:39.600 --> 33:47.120
+machine collaborating together to inspire each other. So I have a long passion for art related
+
+33:47.120 --> 33:54.160
+projects because my aunt is an artist in Paris, my mom is an artist. I was just naturally dragged
+
+33:54.160 --> 34:01.920
+to something that could, that are just beautiful, beautiful to see, beautiful to feel and think
+
+34:01.920 --> 34:12.080
+about. So this project came out of the art and culture team in at Google and with a nor project
+
+34:12.080 --> 34:20.560
+who are amazing three designers and artists in London and they, we had this idea of, okay,
+
+34:20.560 --> 34:28.160
+what if we use the bizzalignment between how machines view the world when I show you this flower,
+
+34:28.160 --> 34:32.480
+would machine also think it's pretty? Would machine think it's very small? Would machine think
+
+34:32.480 --> 34:38.880
+it's purple and is it inspiring? Does it inspire it spring time of the year? Or would it think about
+
+34:38.880 --> 34:44.000
+something else? And what if I excommunicate something to the machine and say, hey, machine,
+
+34:44.000 --> 34:50.400
+I think this is pretty. I think this has, Phil makes me think about babies because it's a small plant.
+
+34:51.600 --> 34:56.800
+What do you think machine? And machine comes back with other images from different pool that say,
+
+34:56.800 --> 35:02.800
+hey, I think these are images that inspires me when you talk about that flower. And there's this
+
+35:02.800 --> 35:08.640
+communication back and forth from which I get inspired by say, oh, interesting. So you are thinking
+
+35:08.640 --> 35:13.440
+ocean for some reason from this flower. I can kind of say that inspires me this one time I was
+
+35:13.440 --> 35:19.280
+in the lotion blah, blah, blah. So that communication, what which we call moodboard, well, it's a standard
+
+35:19.280 --> 35:24.480
+word, but we call moodboard search and concept camera is some tools that we built to enable this
+
+35:24.480 --> 35:30.800
+communication, which we are all open sourcing in a couple of weeks. And I think directions like
+
+35:30.800 --> 35:35.840
+that, like deep dream, you talked about deep dream, there has been our projects around deep dream
+
+35:35.840 --> 35:43.040
+to inspire humans. Directions like that, our project, music, we are hoping to also do some
+
+35:43.040 --> 35:49.840
+music projects, or exciting because it's also about not just thinking about task tasks,
+
+35:49.840 --> 35:53.600
+task prediction, prediction prediction, it's also about how can we enrich
+
+35:55.040 --> 36:01.920
+humans, us and artists and other people behind a machine learning community to leverage this tool.
+
+36:01.920 --> 36:07.760
+I think that's extremely exciting. In the case of that heart project concept camera, I'm envisioning
+
+36:07.760 --> 36:15.040
+you've got some embedding space of images and you've got your little plant, you find where it is
+
+36:15.040 --> 36:20.480
+in that embedding space or what's closest to it. And then you kind of walk the neighborhood to see
+
+36:21.440 --> 36:26.080
+what's around it. And that's what the machine is thinking of is, is that along the lines?
+
+36:26.080 --> 36:30.720
+Very similar. Okay. Yeah, it's very similar. So I can give you an example of what artists,
+
+36:30.720 --> 36:37.680
+one artist, we hired artists to build artistic concept. It's not just a one flower. And one of the
+
+36:37.680 --> 36:43.360
+concepts that she built was, this was actually one of our engineers, she built a concept of father.
+
+36:44.320 --> 36:51.680
+It reminded me of all the images she collected, reminded her of her father who passed. And it
+
+36:51.680 --> 36:57.920
+consists of images like ocean, maybe some blurry leaves, it's very diverse set of images. And from
+
+36:57.920 --> 37:02.880
+that such an abstract concept, what machines, we take all those abstract concepts and build the
+
+37:02.880 --> 37:08.080
+concept vector from that those images in the embedding space as you described. And then find
+
+37:08.080 --> 37:14.800
+other images from a different pool, maybe by cropping or blowing up some part of the image or
+
+37:14.800 --> 37:20.880
+removing some part of an image to identify where does this concept present in other set of images.
+
+37:20.880 --> 37:26.160
+And that's how we create the conversation. Talk a little bit about the, is there an interactive
+
+37:26.160 --> 37:31.840
+element of the conversation? Is that just sequentially kind of choosing another image or is there
+
+37:32.320 --> 37:37.200
+another framing for that? Yeah, yeah. So we do, there's a lot of interactions. So after
+
+37:37.200 --> 37:43.520
+machines came back in with set of images, you can up vote or down vote to indicate, no, no, no,
+
+37:43.520 --> 37:49.840
+that's not what I meant. Yes, yes, more of these. You can crop and scale the images to show better
+
+37:49.840 --> 37:56.320
+showcase this is really what I meant. And you can go back and force infinitely. Images are such a powerful
+
+37:56.320 --> 38:06.480
+means for visual art in terms of communication, because how quickly you can digest number of images
+
+38:06.480 --> 38:11.920
+at the same time. So we leverage that in this work. And is there also an explanations element to
+
+38:11.920 --> 38:19.040
+this work? Yeah, good question. So we tried a few things in the tools that we broadcast. One of
+
+38:19.040 --> 38:26.880
+which we do is focus mode, which represent we simply do very simple things because again,
+
+38:26.880 --> 38:31.520
+we weren't sure if the saliency maps would hold up to this task. So instead, we decided to do
+
+38:31.520 --> 38:37.840
+something very simple. So whenever there's a concept present, we, if you click a box, then it will
+
+38:37.840 --> 38:43.760
+show a box in the whole image to show what machine, which part of the image that was most activated
+
+38:43.760 --> 38:49.200
+by this concept from machines perspective. So that's the only explanation part of this project.
+
+38:50.320 --> 38:54.880
+Okay. There's also heap met mode, but that's that's rather
+
+38:55.920 --> 39:04.480
+stealth mode for now. That's what? It's a stealth part of the project. Not in an exciting way.
+
+39:04.480 --> 39:12.240
+I should. Yeah. It's some some more work has to be done there. Got it. Got it. Other other aspects of
+
+39:12.240 --> 39:18.320
+this machines, studying machines in conjunction with with humans that we can talk about.
+
+39:19.200 --> 39:25.360
+Let's see. Some of the aspects that I am excited about and I can tell you a little bit about
+
+39:25.360 --> 39:31.360
+few projects that I'm currently working on. And I think that's that's really exciting next step. So
+
+39:31.360 --> 39:39.680
+one, we are looking at what sort of behaviors emerge in multi-agent reinforcement learning setting.
+
+39:39.680 --> 39:43.520
+So if you, if you just let them wild and learn and give them
+
+39:44.480 --> 39:48.880
+pretty high level rewards and they are team working at trying to work as team,
+
+39:49.600 --> 39:58.160
+what are what's the division of labor? How do they learn what to do? So if I build say an agent that
+
+39:58.160 --> 40:06.720
+has four legs, intuitively if we give two people a task of let's try to run as fast as we can and
+
+40:06.720 --> 40:11.600
+you you have this this thing, then we would naturally the first person would grab the first leg
+
+40:11.600 --> 40:16.720
+and then the second person will grab the letter to two back legs, right? Will that what does that
+
+40:16.720 --> 40:23.040
+happen in in multi-agent RL setting? You don't know. What if we have 10 legs? What if we also have
+
+40:23.040 --> 40:30.400
+legs and a wheel and a wing? What happens? Those are just really out there curiosity-based questions
+
+40:30.400 --> 40:37.920
+that we're thinking about. It reminds me a little bit of a conversation I had a couple of years ago
+
+40:37.920 --> 40:45.600
+with Blaze, Agroira Yarkas, also at Google and some of his thoughts on kind of this concept of
+
+40:45.600 --> 40:51.600
+social intelligence emerging between agents. Is that a collaborator on this project or is that
+
+40:51.600 --> 40:58.960
+that? Oh Blaze, Blaze very busy. I would love to collaborate with you Blaze if you were watching
+
+40:58.960 --> 41:06.720
+the fun, but he's very busy. It is similar. I think in many years ahead of time that's completely
+
+41:06.720 --> 41:12.240
+feasible idea. I wouldn't be surprised that there are some efficient behaviors that are maybe
+
+41:12.240 --> 41:17.200
+similar, maybe this similar with how humans work together, they would emerge in this important
+
+41:17.200 --> 41:23.200
+thing is though that we have to look out for it. We have to have our tool right tools to see when
+
+41:23.200 --> 41:30.240
+that emerges we notices and we confirm or just confirm that it's the desirable thing that we want
+
+41:30.240 --> 41:34.080
+them there and that there's something to be done or maybe if you should do something about it.
+
+41:37.040 --> 41:42.560
+I was going to also tell you about this second project that briefly might be interest people.
+
+41:42.560 --> 41:48.320
+There has been a lot of, as everyone knows, that large language model or vision language model has
+
+41:48.320 --> 41:55.840
+been just impressive. Frankly, it might be fair to say there's some change of paradigm to some
+
+41:55.840 --> 42:01.840
+extent in the way that we work with these different modalities or one modality in different tasks.
+
+42:02.640 --> 42:10.480
+So we've been thinking about in the case of, say, palm model from Google and work with Jeff
+
+42:10.480 --> 42:18.960
+Dean and others, how does it do what it does in that big giant yet sparse model, where does it come
+
+42:18.960 --> 42:24.560
+from? And if you, for example, fine tune the model to some other tasks, what changes, what really
+
+42:24.560 --> 42:31.760
+changes, what information resides and what right information gets lost. That's been something that's
+
+42:31.760 --> 42:37.120
+been on my mind too. And do you have early results from that work that you can talk about?
+
+42:37.120 --> 42:47.440
+No. Clearly an exciting and important area given the, as you describe the paradigm shift that
+
+42:48.800 --> 42:57.840
+LLMs are bringing about. Yeah. And I think, I think, I know you also, you also talk to Emily Bender
+
+42:57.840 --> 43:02.400
+about about whole thing, think about LLM. I think we need to be careful. And which is why I don't
+
+43:02.400 --> 43:07.440
+want to, you know, make claims about, oh, we can't have this preliminary results until I really
+
+43:07.440 --> 43:12.560
+confirm as a scientist, you know, really confirm, rigorously confirm, and triple confirm to see,
+
+43:12.560 --> 43:18.640
+okay, this is, this is really it. And then I share it. Otherwise, there's just a lot of information
+
+43:18.640 --> 43:26.400
+that may be lacking or to, to only fuel the hype around AI when sometimes it's fair to have
+
+43:26.400 --> 43:35.040
+the hype sometimes isn't fair. One of the things on that note that LLMs and transformers
+
+43:35.040 --> 43:42.240
+more broadly are unlocking is this whole opportunity to do multimodal models.
+
+43:44.480 --> 43:50.320
+What's the, the state of play around applying some of the work around explainability and
+
+43:50.320 --> 43:59.200
+understanding to multimodal? Yeah, it is in the, it is infancy. I think the difficulty, it's
+
+43:59.200 --> 44:04.800
+difficult to answer that question because while I see a lot of tools that we developed are on
+
+44:04.800 --> 44:09.280
+embedding space. For example, this concept activation vector or concept vector, we do everything
+
+44:09.280 --> 44:15.120
+on embedding space because we know that that's an efficient, tightly learned space that we can do
+
+44:15.120 --> 44:21.360
+stuff about intervene, do causal inference, it's a nice space. And that still exists in this
+
+44:21.360 --> 44:27.520
+model model. So it should extend. Ideally, it should, but then in a way, it kind of shouldn't
+
+44:27.520 --> 44:33.760
+because do the things that what they can do is so different, it must be that some different
+
+44:33.760 --> 44:39.040
+way of encoding information has happened in this large language model in one way or another.
+
+44:39.040 --> 44:44.240
+So in a way, I'm optimistic to where baby we can extend these techniques, but in other,
+
+44:44.240 --> 44:50.400
+on the other hand, we have to be very careful, especially careful because our human biases
+
+44:50.400 --> 44:57.040
+are amazing, something that we have and we cannot get over, can escape. And that means because
+
+44:57.040 --> 45:03.840
+that's excited about these advances, because I, the developer, already biased, when we work on these
+
+45:03.840 --> 45:10.480
+models, we have to be very careful, probably double blind myself when I do research to make sure
+
+45:10.480 --> 45:15.360
+that I'm not fooling myself. So that introduces additional challenge.
+
+45:15.360 --> 45:19.440
+It seems like appropriate caution coming from the author of paper that said,
+
+45:19.440 --> 45:25.040
+hey, all these things that we learned about explainably don't explain what we thought they explained.
+
+45:25.040 --> 45:26.560
+I learned my lesson in a hard way.
+
+45:29.760 --> 45:36.640
+You mentioned under the final category that you described that you were talking through in your
+
+45:36.640 --> 45:43.280
+talk around alignment. One of those core elements there is this idea of concept vectors and some
+
+45:43.280 --> 45:49.440
+of the work there. Can you speak a little bit to that? Yeah, yeah. It's a line of work that I'm
+
+45:49.440 --> 45:54.880
+hugely excited about and have been working on for years. So the overarching idea is the following.
+
+45:54.880 --> 46:00.800
+So prior to concept-based explanation, what we've been looking at are things like saliency map,
+
+46:00.800 --> 46:05.600
+where I put a number in the pixel, and that's what you're looking at. So if you want an explanation
+
+46:05.600 --> 46:11.920
+for a picture of a bird, then you look at a picture of a bird and maybe 10,000 other pictures of birds
+
+46:11.920 --> 46:19.680
+to see, okay, what are the common patterns among the class of birds. What concept-based explanation
+
+46:19.680 --> 46:24.000
+suggests is that let's not do that because that's not even how humans communicate to each other.
+
+46:24.000 --> 46:29.360
+I talked to you in words that in abstractist words and you understand you're nodding, right?
+
+46:29.360 --> 46:34.720
+I can tell you your glasses, you sit on a chair. I don't have to explain everything about each
+
+46:34.720 --> 46:41.120
+pixel in you that I'm looking at you to communicate what I'm saying. So we have a more efficient
+
+46:41.120 --> 46:45.920
+high band with communication. So why don't we build that high band communication with machines
+
+46:45.920 --> 46:51.360
+and humans? And this concept-based explanation is a first step towards that. So instead of pixels,
+
+46:51.360 --> 46:57.920
+let's abstractize and use the language that we used with the between humans. So fluffy bird,
+
+46:57.920 --> 47:05.360
+fluffy dog, or a striped, or a circular shaped biopsy and then cell that looks a little bit
+
+47:05.360 --> 47:10.720
+oval shape. That's how doctors can talk to each other. So let's use those extra-type concepts,
+
+47:10.720 --> 47:18.960
+extra abstract, more abstract concepts to have machines communicate to us. And the way we do it
+
+47:18.960 --> 47:25.680
+is to by building this concept activation vectors. So you say doctors, give me, I have this medical
+
+47:25.680 --> 47:33.520
+concept of irregular boundaries in the biopsy samples. I will give you some examples and we will
+
+47:33.520 --> 47:38.720
+map those examples in an embedding space, which gives us a vector. There are lots of different ways
+
+47:38.720 --> 47:43.520
+to do it, but we do it many, many times so that we can get some robust measure of this direction
+
+47:43.520 --> 47:48.720
+and the vector. And once you have this vector, you can do a lot of things. You can ask the model,
+
+47:48.720 --> 47:53.680
+okay, here's a direction in the embedding space. Do you care about this direction? If I move things
+
+47:53.680 --> 47:59.840
+a little bit, would your prediction change a lot? Because that means that then the direction
+
+47:59.840 --> 48:05.120
+influence system model in terms of first order derivative, in terms of sensitivity test.
+
+48:06.160 --> 48:12.240
+If I remove that direction altogether, what do you do? Do you do you explode and give up and
+
+48:12.240 --> 48:19.040
+go home? Or you're just fine, like it's as if it didn't have to exist. So by the core concept is
+
+48:19.040 --> 48:28.240
+simply the building in this complex concept around medical or human ideas into this one vector
+
+48:28.240 --> 48:32.960
+and then so that we can build that this vector can be a bridge between machines and humans'
+
+48:32.960 --> 48:41.120
+communication. In thinking about the concept we discussed earlier around language that
+
+48:41.120 --> 48:48.960
+linguistic constructs to enable machines and humans to communicate and these abstract ideas
+
+48:48.960 --> 48:56.560
+around concepts, does it support at all the call that some industry are making for us to kind
+
+48:56.560 --> 49:04.320
+of marry symbolic methods for AI and statistical methods for AI? Yes, absolutely. I know Rao
+
+49:04.320 --> 49:14.560
+is a proponent of this and I agree with Rao on this that at some level I think
+
+49:16.080 --> 49:21.200
+when our principles are just the only way and perhaps safest way to do a task,
+
+49:21.920 --> 49:28.800
+then I think symbolic based representations would be inevitable because that's just we decided
+
+49:28.800 --> 49:34.640
+as a human, we're the human, we're making AI machines. As a human we decided that that's just how
+
+49:34.640 --> 49:40.400
+it's going to go, especially might be important in high-stake decisions where we know that this
+
+49:40.400 --> 49:47.840
+is the way that we've been doing and we don't yet have better way to do it or we need more
+
+49:47.840 --> 49:53.920
+empirical evidence until we switch the way that we do things. Then I think that those representation
+
+49:53.920 --> 50:00.000
+would have to be part of the equation. We can't just do everything in freely distributed
+
+50:00.000 --> 50:03.680
+representation unless there's some breakthrough that could convince me otherwise.
+
+50:04.800 --> 50:10.880
+We'll stay tuned for that. Being, it's been wonderful chatting with you. Thanks so much for joining
+
+50:10.880 --> 50:16.160
+us and sharing a bit about what you're working on and what you're excited about and what you
+
+50:16.160 --> 50:27.120
+share it at. I clear. Thank you, Sam. Thanks for having me. Thank you.
+

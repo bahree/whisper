@@ -1,0 +1,467 @@
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+people, doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington.
+Today we're joined by Yas fund of S. Tyson, PhD student in engineering at Cambridge University.
+Yas' research focuses on applying LSTMs or long short-term memory neural networks to biological
+data for various tasks.
+In our conversation we discuss his paper, The Unreasonable Effectiveness of the Forgetgate,
+in which he explores the various gates that make up an LSTM module and the general impact
+of getting rid of gates on the computational intensity of training the networks.
+Yas eventually determines that leaving only the Forgetgate results in a quote unquote
+unreasonably effective network and we discuss why.
+He also gives us some great LSTM-related resources, including references to you against Schmidhuber,
+whose research group invented the LSTM and who I spoke to back in Twimble Talk No. 44.
+Before we get to the episode, I'd like to join Pegasystems, this episode's sponsor,
+and inviting you to meet me at the MGM Grand in Las Vegas, June 2nd through 5th at Pegaworld,
+the company's annual digital transformation conference.
+Pegasystems puts AI in the center of its customer engagement software so that it optimizes
+every customer test point on every channel in real time.
+That way each interaction is relevant and timely to each individual customer, no matter if
+it's a sales call, a digital marketing campaign, or a customer service chat either online
+or in store.
+And the system is always learning in real time to make the next interaction better.
+Pegas Customers are the real stars at Pegaworld, there you'll hear great stories of AI applied
+to the customer experience at real Pegas Customers.
+The event is a great way to learn from a who's who of the Fortune 500, and of course I'll
+be there in speaking as well.
+To register, visit Pegaworld.com and use the promo code Twimble19 when you sign up for
+$200 off.
+Again, that's Twimble19, it's as easy as that.
+Hope to see you there.
+And now on to the show.
+Alright everyone, I am on the line with Yas Fundovesthizen.
+Yas is completing his PhD in engineering at Cambridge University.
+Yas, welcome to this week in machine learning and AI.
+Thank you Sam.
+So we were joking earlier, you're kind of in this weird intermediary state, intermediate
+state between having finished all of the requirements for your PhD and kind of waiting to get the
+actual degree conferred.
+Tell us a little bit about your background and what you studied at Cambridge.
+Yeah, so in all honesty, I fell into the machine learning field a bit by accident.
+And I think this story is kind of true for a lot of people with the big current hype.
+So where it all started is I started with biomedical engineering undergrad, I'm South African,
+and I studied at Statenbach University over there.
+And straight out of the undergrad, I realized that I still want to learn a bit more.
+So I started the masters in like effectively computational neuroscience.
+And this is where I really had like my first little experience with machine learning.
+We played with like basic models, like linear discriminant analysis and like self organizing
+maps.
+And actually like halfway through the masters, I was accepted at Cambridge and actually
+Oxford and like received scholarships for both.
+So I was quite happy.
+And I decided to stop the masters to go start a PhD at Cambridge.
+And my initial like plan was to do I was I think a bit ambitious, but my initial plan
+was to.
+I wanted to effectively create like a wristwatch that could like measure anything about your
+body, like kind of look at detail at your blood.
+And like tell you, for example, to like today you have to eat a banana, otherwise tomorrow
+you're going to get a heart attack that kind of that level of accuracy.
+So kind of like a tricorder prize type of device?
+Yeah, yeah, pretty much.
+And then my supervisor at the time told me like, oh well, there's a range of problems
+that you have to solve to get to this end product.
+And she said one of the like most fundamental ones is probably like analyzing these signals
+and making predictions.
+So I kind of started, yeah, I guess looking at ways of like analyzing these signals and
+making predictions and just speaking around in a really awesome lab, I heard about like
+these temporal machine learning techniques that could easily solve this problem.
+And that's kind of where I started playing with them.
+And like I played with theater market models, which is like a more conventional technique
+and also with some of the new deep learning techniques like recurrent neural networks.
+And I guess after seeing my first few lines of like of gradient descent happening, I completely
+fell in love with deep learning and that's that's where it all kicked off, yeah.
+Have you been seeking to apply what you've been learning about machine learning and deep
+learning back to these biomedical applications or have you totally dived into the more theoretical
+side of ML and deep learning?
+Yeah, so that's a really good question actually.
+So this started my PhD was very lean heavily towards biological applications.
+And I guess my whole thesis has this whole theme as well.
+But pretty early on we realized that well my supervisor and I realized that it's a very
+like tough field with a lot of red tape and it's hard to get data, it's hard to get anything
+implemented.
+There's a lot of like bureaucracy in some areas.
+And I didn't like to like struggle with this during my PhD.
+So I think halfway through we decided that it might be good to kind of slightly pivot
+towards a more theoretical kind of thesis.
+So it has like both aspects.
+But I feel like I have a strong opinion that like it's the biological field because it has
+all these barriers.
+We need to like put a lot more effort into it.
+So I'm quite happy that I could kind of put a lot more effort into that kind of side.
+Yeah.
+And you mentioned that you're planning to start a company.
+Is it based on the work that you've done at Cambridge?
+So not really.
+It's it's based on Cambridge in a way because what I had to because I'm from South Africa,
+what I had to do quite often in Cambridge is do like a Skype call back home or a WhatsApp
+call or all of these internet-based calls.
+And like after the PhD, well, I guess like even before the PhD, I knew I wanted to try
+and start a company.
+And having like I'm sure you and a lot of other people have experienced the like the
+poor quality in any internet-based call like Skype or a WhatsApp voice call.
+And essentially I thought well why don't we just try and fix this like machine learning
+currently has has achieved remarkable things in terms of generating super-resolution images
+and like doing video interpolation.
+So essentially that's kind of how how my colleague and I started out with the new idea that
+we're trying to pursue.
+You're not calling a pie-piper are you?
+I'm glad you made that connection.
+That's probably a good thing.
+One of the papers that came out of your PhD is called the unreasonable effectiveness of
+the forget gate.
+How did that work come about?
+Yeah.
+So well, maybe I'll just quickly say where the name came from.
+I have to give homage to André Carpathy, who he had a blog post called the unreasonable
+effectiveness of RNNs, Ricardo Networks.
+And I think a lot of people really love this blog post and I also love it.
+I read it.
+So that's kind of where the name inspiration came from.
+But to to jump back to the question, essentially in the the final parts of my PhD, I started
+working a bit like I looked at two things at the same time.
+One was this biological application that we had, which was to essentially infer from peripheral
+neural signals what an agent or what a human or some animal is doing based on those signals.
+And essentially if you want to create a prosthetic device that can like in real time react to these
+neural signals, it has to be very low powered and very resource efficient.
+So we'd already had a solution that could infer what the human is doing based on those
+signals.
+But now we needed to make it much more computationally efficient.
+So that was like the one driver.
+The second or the thing I was working on in parallel was I looked at initialization techniques
+for in general kind of, I guess neural networks or deep learning models, but also specific
+more specifically for LSTMs or the long short term memory recurrent neural network.
+And I guess I played around with various approaches to initialization for LSTMs and with ways
+of like I guess quantizing them or pruning them or making them more efficient.
+And then I happened to stumble upon this architecture that I've explained in the paper, which
+essentially did like, first of all, we were surprised, okay, it kind of saves computation.
+But then yeah, we were really surprised when it did a lot better than the original LSTM.
+So yeah.
+Interesting.
+And before we get too far, I should probably note because there's somebody that's jumping
+up out of their chair on the on the bar or something like that, that the whole unreasonable
+effectiveness thing dates back before Carpathy to a guy Eugene Wigner who wrote a paper,
+the unreasonable effectiveness of mathematics and the natural sciences back in 1959.
+But we were joking a little bit before we started the interview that I noted that I've
+gone through the math of RNNs several times and it's not quite intuitive to me.
+You mentioned that you have the same experience having studied it for your degree as well.
+Maybe a good place to start is to talk about the, or LSTMs in particular, the role of
+gates in LSTMs?
+Yeah, yeah.
+So I guess I could give a little history of how it all developed.
+Essentially recurrent neural networks were designed because they share parameters across
+this time dimension.
+So it makes them a lot more efficient.
+Kind of like the same way that convolutional neural networks share parameters across the
+spatial dimension, the 2D spatial dimension.
+But one problem you run into with recurrent neural networks is that because you're kind
+of over time you're multiplying the same weights or the same information with each other the
+whole time, you run into, you usually run into gradient problems.
+And back in, I think it's 97, Hawthorite Renshmit Hoover realized that, okay, I guess they
+approach it from a slightly different direction, but they thought that, or argue that you have,
+when you do back propagation, you have through a recurrent neural network.
+Some of the, like if you, if you want to remember something and you want to forget something
+of the input sequence, there's kind of conflicting updates through the same edges.
+So they thought or proposed that if you use an input and output gate, this could kind
+of solve that conflict and kind of protect, so in there are an answer, it could kind of
+protect the cell or the memory from these conflicting updates.
+And that's worked pretty well.
+And then I think a few years later, it was Gares in 2000 who, he realized that this works
+well, but you can have, if the memory cell of the RNN or the, like, I guess the state doesn't
+have a mechanism of forgetting some of the information, there's a possibility that it could
+grow indefinitely and kind of break down the network.
+So he proposed a forget gate, and this would then allow the cell to kind of forget some
+of the information over time.
+And that's kind of the LSTM that we know today.
+That's kind of how the gates help the LSTM to prevent these gradient problems during training.
+Got it.
+So forget gate is part of the typical LSTM that is commonly in use nowadays.
+Yes.
+So the typical LSTM has three gates, the input gate, which controls how much information
+is input at each time step.
+The output gate, which controls how much information is output to the next cell or to your output
+layer at each time step.
+And then the forget gate, which essentially just says, how much should I forget at each
+time, time step?
+I'm trying to get that kind of your observations about the forget gate and what kind of caused
+you to start looking at that as an interesting part of this approach.
+In 2015, there were two papers that kind of at the same time said, or concluded that the
+forget gate is the most important part of the LSTM.
+They did like these ablation studies that removed the few gates at a time and they kind
+of found that every time you remove the forget gate, like the performance just drops drastically.
+And this was, I think, just aphowitz and a graph.
+And essentially, that was kind of my starting point.
+I realized, like, okay, let's, if they say it's this important, let's remove everything
+we can and just keep the forget gate and see where we go from there.
+And that was kind of, that was, yeah, it had decent performance.
+But like on a typical data set called MNIST, that I think everyone knows this pretty well
+now.
+If you kind of, if you process that in scanline order, you get many subsections that are
+like have 10 or 20 consecutive zeros.
+And essentially, this makes it super hard for the network if it's only forget gate to
+remember anything by the end of those zero, like 10 or 20 zeros.
+So that's where I had to like, I realized, okay, we need to kind of initialize this better
+to be able to kind of retain memory over those periods of zero.
+You know, I guess what's interesting about this is that it's counterintuitive.
+So you use the forget gate and the memory, but not the input and output gates.
+And found that you had this performance improvement.
+Yeah, yeah.
+So essentially, I saw this example recently.
+So if you like take an image and you want to classify what's in it, essentially what
+like a network or what you can visualize it as is like, you remove every single element
+of that image except the part that you care about.
+For instance, if it's a panda, you remove like all the buildings, branches and like trees
+behind it.
+And you just have to the panda face or something.
+So essentially like that could be summarized as to learn something, you just need to know
+what you need to forget.
+And I guess like that's kind of kind of in a way what happens here, but it's not completely
+true because we have only one gate, which is the forget gate, but this gate at the moment
+or in the new network controls both how much information is forgotten and also how much
+new information comes in.
+So it's kind of it's coupled with this gate just like performing both of those roles.
+Is that observation that learning is primarily about forgetting at odds with the emphasis
+on attention-based methods that are, you seem less about forgetting and more about trying
+to figure out what to remember?
+I think it's all just semantics in a way, it's just how you phrase or perceive it, yeah.
+So it could be either way and I think attention mechanisms could also be said as like, oh
+well attention mechanisms, just make sure that you kind of forget about the rest and focus
+on something that's like relevant.
+So it's just how you perceive it, I guess.
+I'm curious, have you tried applying them in concert with one another, you know, I'm
+thinking of forgetting all the way down?
+All right.
+No, I haven't.
+So you mean like applying this new network with attention mechanisms?
+Right.
+No, I haven't tried that, but that's a pretty cool idea.
+Based on this, you were inspired to create another network architecture called Janet.
+Yeah.
+What is Janet about?
+So Janet is essentially the network that we've been discussing now.
+Okay.
+Yeah.
+So the Janet is just the name I gave for this new, I guess, way of processing information
+or this, I guess, simplified version of the Alistair.
+We chose the name kind of in a lab meeting.
+I don't know if I'm allowed to say this, but I'll try.
+Essentially, I don't think that this is like a network that is the best.
+And because people make so many new networks every day, it's just like, this is just another
+one of those.
+So it's just another network in that sense.
+But it happened to also be a nice little acronym for Yosses Awesome Network.
+So we kind of have this little lab joke about it, but yeah.
+Okay.
+I think what threw me off in thinking that it was a different network was the pictures
+that I've seen of it still have these other gates in them, or at least what I look like
+to me, these other gates, am I reading those pictures incorrectly?
+What pictures have you seen?
+So, yeah.
+So the gates in the Janet are essentially, it's just one gate, which is the forget gate
+of the Alistair.
+So it's like, the Janet is just the LSTM with every thing I move except for the forget
+gate.
+So your paper was kind of presenting an analysis of this network and its performance on MNIST
+and potentially other data sets?
+Yeah.
+So I guess we, there are a few papers who like that bring up new types of recurrent neural
+networks.
+This memory problem, or I guess both the memory problem over very long sequences and the
+problem of exploding and vanishing gradients is quite a, quite a big problem.
+So you have quite a few of these papers that just kind of have these benchmark memory tests.
+And that's kind of what we try to follow over here.
+So one of them is MNIST, which has this hard problem, as I mentioned before, of like consecutive
+zeros.
+Then there's perturbed MNIST, which we also tested on, which essentially just does a random
+permutation of all the pixels in the MNIST image.
+And this kind of creates longer dependencies over time if you process this in scanline order.
+And then there are a few others.
+The two we test is the ad and the copy task.
+And essentially it's just for the ad task, it's two sequences where one is zeros and ones.
+And the other one is continuous values.
+And wherever you have ones in the binary sequence, you need to add those corresponding numbers
+in the continuous valued sequence.
+So it's like it kind of tests the memory of this network.
+And then the same for the copy task just needs to remember everything at the start of the
+sequence all the way to the end and be able to regenerate that at the end.
+So yeah, and then obviously we've tested it on a few other datasets since then.
+For the paper, we also tested it on one of my biological datasets called MIT, B-I-H,
+arrhythmia dataset, which is like a dataset of ECG heartbeats that are classified into
+five different types of heartbeats arrhythmias.
+And it worked better on that dataset as well.
+And when you say better relative to whatever the state of the art is on these datasets or
+relative to vanilla LSTMs.
+So for the dataset, I mean the MIT, the ECG dataset, there aren't that many, I guess, state
+of the art results.
+So we just compared it to the LSTM and it does better than the LSTM.
+On the other datasets, it's kind of, it's harder to say.
+So in all cases, the Janet does better than the LSTM on those datasets.
+But then there are like different, I guess, models that do even better than the Janet.
+So like the wave net does, I'm sure you're familiar with there.
+Yeah, the wave net is a new, very good model by DeepMind.
+And that model does quite well on perturbed MNIST, but then does slightly worse than Janet
+on the normal MNIST.
+And yeah, you have quite a few of the similar nuances for other models that have also been
+proposed.
+What was the role of the way you initialized the network in the results you saw?
+For the Janet to work on datasets like MNIST, you have to initialize it using this
+Corona initialization scheme that we proposed in the paper.
+But the initialization scheme was initially proposed by Talek and Oliver.
+It's also a really, really cool paper in 2018, published that I clear.
+But so if you don't use that initialization scheme for MNIST, it would, like, the Janet
+wouldn't learn anything.
+You would kind of have this accuracy around 5% throughout training for, and then for
+tasks that are slightly easier to learn that don't have, like, long consecutive periods
+of zero, the Janet, like, can still learn, but it definitely does a lot better if you
+use this initialization scheme.
+For the LSTM, you also get some benefits, I guess, like, more stability during training
+if you use Corona initialization, but the benefits aren't as clear as it is for the Janet.
+And how does the initialization scheme work?
+Yeah, so essentially, what Talek and Oliver found was that.
+If you, or the, I guess, the characteristic for getting time of the RNN is, sorry, of
+the LSTM, is one over the Forgetgate value.
+So at the start, if you're, if we initialize it according to the way we always initialize
+for Getgate, you essentially have a really small value for the Forgetgate or relatively
+small value.
+This means that you're forgetting the amount of time steps you can go through before you
+forget everything that you, that you saw before it is, like, is limited to probably four
+or five time steps.
+And this is problematic if you have, if you need to kind of retain memory over longer periods.
+And they kind of said, well, okay, we can, we can be smarter about how we initialize the
+Forgetgate, well, all the Gates, in fact, and that is essentially to, like, at the start
+of training, the values that matter a lot for, for the LSTM is the, the biases.
+And initially, or traditionally, we've always just initialize them to be zero.
+But Talek and Oliver kind of said, we should initialize them as the log of a uniform distribution
+between one and the maximum number of time steps we have.
+And that kind of gives you that, make sure that some of the Forgetgate kind of allow
+the network to remember very long periods up to the end of the sequence.
+And some of them are still, like, short term kind of cells, which kind of can't forget
+at every second or third step.
+What's the intuition for why this specific kind, well, first of all, did you try other initialization
+schemes with Janet?
+And if so, and there was kind of a binary, you know, work didn't work kind of situation.
+What's your intuition for why this one, you know, performed, whereas others didn't?
+Yeah.
+So I did, I did try a few other initialization schemes.
+I'm sure I've forgotten a few of them as well, because this was kind of, you're done quite
+a while ago.
+But the, like, one of the things I tried quite a lot is, or I saw from, I saw from
+Alchreiter and Schmidt Hooper that they tried this thing in 97 as well, which they just,
+they randomly guess some of the initial parameters between, like, certain values.
+And if you do that enough, you can actually get a network that does as well as a trained
+one without actually ever training it, you just initialize it to this perfect, like, network.
+I tried something similar where I would, I know kind of what our current initialization
+schemes are, and I would kind of guess random parameters in those ranges and see, kind
+of, if this kind of yields any better networks that you can then train from or, like, improve
+from.
+But this unfortunately didn't work or it gave the same results or, like, the same performance
+as you would get with the normal other steam initialization.
+And then beyond that, I, yeah, I don't think I can't remember anything else I tried.
+And how did you contextualize this within the sphere of biological applications for your
+thesis?
+Yeah, so I think I mentioned before that we were like, we were searching for a variant
+of the LSTM that is computationally more efficient than just the normal one.
+So there are various ways you can do this.
+Some of them are, like, it's called pruning, which I, it comes from way back.
+And another one is quantization, where essentially you just, you kind of quantize the weights to
+be kind of, yeah, certain values that don't take up too much memory and computation.
+And then I guess, like, I was kind of impressed by the gated recurrent unit, which is like
+another version of recurrent neural networks, which only used two gates instead of the three
+that the LSTM uses.
+So I was like, oh, can we do, can we do one better than the GRU?
+And we just have one gate and still do as well.
+So yeah.
+And then sorry, I just remembered something from the previous question, which is in terms
+of an initialization, one thing that I kind of found at the end was when we started using
+more units in the layers of the Janet and the LSTM, we found that the Janet kind of, instead
+of just doing better at the end, it kind of also learned a lot quicker.
+So it would get to the highest point of accuracy a lot quicker than a word with less units,
+which is kind of, yeah, that makes sense.
+But then I thought like a really cool thing we can try is to play around with this as
+in like, it's kind of, if you have a really big Janet, you can kind of just guess the right
+solution or very close to the right solution from the start and then remove a lot of units
+to say compensation and then just train the rest to kind of give you that perfect model.
+So that's something in terms of an initialization that I think is also worth pursuing.
+Is that a potential future direction or did you get specific results with that?
+That's a potential future direction.
+I have, yeah, I've been slightly busy with other things since then, but that's something
+I want to play with.
+Got it.
+What's the, in general, the impact of getting rid of the other gates on the computational
+intensity of training one of these networks?
+In terms of like computational time, it doesn't improve things that much.
+And also I guess in just the feed forward processing time during testing, because a lot of
+your like computational time is limited by the sequential nature of the LSTM, which in
+the case of the LSTM and the Janet are essentially the same, because you need to like process
+things at every time step.
+But the part where it does save, which also saves on I guess battery usage if this is a device
+that's to be used in a portable device, sorry, a model to be used in a portable device.
+Then having using less memory is quite helpful.
+So the Janet uses half the memory that the LSTM uses and kind of gets better accuracies
+for the datasets that we tested on, which is quite good.
+And that also meant that we could train much bigger Janet's on the same GPU, whereas
+for an LSTM, you would quickly run out of memory on the GPU.
+Did you look at the same memory and compute and power implications from an inference perspective
+with the train Janet model?
+Is there any difference there?
+No, so yeah, so I'm like, it's the same on that side.
+So for both like training a model and for doing inference, I guess it saves half the parameters
+and computational time is roughly the same.
+It's slightly shorter for the Janet, but nothing significant.
+You noted that you, you know, that compared to WaveNet this, you know, this underperforms.
+But is there a place for it within the domain of general purpose mobile network?
+So is it, you know, do you, are there other reasons why it's kind of a research experiment
+and not necessarily practical?
+It's hard to say off the bat.
+I think, yeah, I don't know, this, I guess at the time very much trapped in this very
+research focused, I guess, domain.
+I think like it's not the ultimate best solution that there is yet.
+I think it's just, it was kind of interesting to show that kind of, this is how much importance
+the forget gate has in this network.
+It's kind of interesting to see.
+I think there, yeah, for each specific problem, you would have to have a specific like network
+and a specific solution that's best suited for that problem.
+There are some where the Janet could be, could be that.
+I think specifically in like anything where you have very long term memory requirements
+and only a single output at the end.
+We kind of have that requirement plus a, I guess, a resource efficiency requirement.
+So yeah, I think like the wave net is quite like, it's quite a large network in terms
+of number of layers, but it uses very little parameters.
+So yeah, there are pros and cons in both.
+Are there specific examples that come to mind of scenarios where you'd have this, you
+know, long sequence in time with a single output?
+Yeah, so I guess like a lot of biological signals have that feature.
+So like, if you have, if you're measuring a heartbeat for a few seconds, that's quite
+a lot of time steps that you have to analyze and then you kind of have to make a single
+prediction at the end of all those time steps.
+So that's like a typical scenario where you would have a really long signal with a single
+output at the end.
+An example where it's not that like that is, for instance, when you're generating, when
+you're doing like translation, you have to generate the, or yeah, maybe just, I guess,
+sentence generation.
+You have to generate a word at each time step or you have to classify it's part of speech
+at each time step.
+That's kind of not a very long term dependency, or yeah, a long term dependency with a single
+output because you're outputting something at each time step.
+Okay, cool, you mentioned in our conversation a couple of things that you'd like to play
+with in the future.
+Are there areas that you would like to see someone continue working on beyond the ones
+we've discussed?
+No, I think I mentioned all of them.
+I think just applying this to more datasets, specifically datasets with long term dependencies
+and a single output at the end, that's cool.
+So if anyone can get more types of data than are like that, I think that would be really
+interesting to see.
+And then obviously also like playing around with this new initialization feature where
+you can kind of almost, in the first instance, guess the correct, well, very close to the
+correct network and then just do a few more steps of training to get there, like a K-shop
+learning approach.
+I think those would be interesting to see.
+Cool, interesting.
+Well, thanks for taking the time to chat with me about this.
+Cool stuff.
+Anytime.
+Thank you.
+All right, everyone, that's our show for today.
+For more information on Yoss or any of the topics covered in this episode, visit twomelai.com
+slash talk slash 240.
+As always, thanks so much for listening and catch you next time.

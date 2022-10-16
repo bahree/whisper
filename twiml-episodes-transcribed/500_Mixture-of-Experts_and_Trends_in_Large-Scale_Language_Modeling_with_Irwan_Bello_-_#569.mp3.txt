@@ -1,0 +1,459 @@
+All right, everyone. Welcome to another episode of the Twimmel AI podcast. I'm your host, Sam
+Charrington. And today I'm joined by Erwin Bello. Erwin was formerly a research scientist at
+Google Brain and is now on the founding team at a stealth AI startup. Before we get into today's
+conversation, please be sure to take a moment to head over to Apple Podcasts or your listening
+platform of choice. And if you enjoy the show, please leave us a five star rating and review.
+Erwin, welcome to the show. Thank you. Thanks for having me. I'm looking forward to our conversation.
+We're going to be digging into your research on sparse expert models as well as some of the
+trends you're following in large language models. But before we do that, I'd love to have you
+share a little bit about your background and how you came to work in machine learning.
+Yes, so I have a background in applied math and stats. I studied both in France. Then came to
+Stanford as a great student, mostly statistics and computer science. And during that time,
+studying, you know, I slowly got into AI and mostly deep learning, starting with computer vision,
+also doing some natural language processing. And I thought that that line of focus was really
+interesting. And so after graduating, I went to Google Brain to keep working on deep learning.
+I spent, you know, roughly five years there, mostly doing deep learning research,
+some product stuff as well, worked on a bunch of, you know, on a wide range of projects,
+like starting with a combinatorial optimization and ranking, also worked on some auto-ML,
+where you use machine learning to learn machine learning itself. And most recently, I worked on
+computer vision and also large scale models with a focus on this new exciting class of architectures
+called sparse expert models. Nice. That is a great segue. Why don't we jump into that topic?
+I guess we should start at the top. What is a sparse expert model?
+Yeah, so perhaps the easiest way to define them is by contrast to regular dance models.
+So regular dance models apply the same parameters to all inputs. And by contrast,
+sparse expert networks dynamically select which parameters to use for each input.
+So that means that part of your neural networks, like parts of your neural network are activated
+on a pair example basis. You know, in practice, if you have a batch of examples,
+all of the networks, parts will be activated, but for a single example,
+that single example is only going to see part of the network parameters. And so this allows
+to increase model capacity in the sense that you're working with much more parameters
+without increasing computation of flops. Because each input and in that context input can refer
+to either sentence or a token. Each input only interacts with the same number of parameters and
+therefore has the same amount of computation applied to it.
+And the case that you're looking at here with these sparse expert models, are you specifically
+targeting extreme levels of sparsity in the data? Or, no, okay, no. So usually other examples of
+sparsity can refer to the datasets. For example, you know, in reinforcement learning,
+people will talk about sparse rewards. Sparse expert models like the sparsity is in the model.
+And the reason the way you can, the reason why it's called spars is because they're equivalent to
+having very large dense models where parts of the model weights are zeroed out. And so if you look
+at your metrics multiplies, at your matrices in your model, having a set of experts is the same
+as having a very large matrices with a lot of zeros. And so this kind of sparse.
+Sorry, experts in this case refers to dynamically swapping out parameters based on an error.
+In this case, like it's sort of an independently learned neural network that has unique weights.
+And so typically you'll have a bunch of them, like let's say you're working with a hundred experts.
+And an input comes in. You have a router network that decides where to send that output, that input,
+you know, you might send it to only one expert or three experts. You reach two experts.
+You know, so the experts take the input, computing output, and then at the end of your layer,
+the expert outputs get sort of average with expert probabilities as well.
+On top of that, when you train these architectures, you have a low-spanning
+thing objective to make sure that all the experts are, you know, used roughly uniformly because
+you don't want to be in a situation where, you know, a lot of your experts are
+unused during training because that's bad for utilization. But yeah, at the very high level,
+this is equivalent to having a very large dense matrix with a lot of zeros.
+Is having some large number of independently trained experts, I guess the way I originally heard
+you describe this or what I thought I heard was not necessarily these independently trained experts
+or networks, but swapping out parameters at a particular layer of a single network based on
+the input. Are those kind of functionally equivalent? Yeah, that's correct, yeah.
+Yeah. So, you know, typically you'd have a dense layer, you have an input,
+it's multiply in the, you know, in the easiest case, it's multiply by matrix and that matrix has weights
+and it corresponds to a single expert, right? In the case of mixture of experts, now you have
+a lot of experts, you know, it can go up to hundreds, even more. And you selects, each input is
+routed with a network that is also trained. Yeah, everything is trained, you know, jointly, but, you know,
+that router sends an input to an expert and that expert does the computation. And the other experts
+do not get to see that input, so that's why it's pass. Yeah, this allows, you know, the networks to
+like vastly expand the number of parameters because instead of having, you know, one expert in the
+dense of, in the case of a dense network, now you have, let's say, a hundred. And so these
+these layers have, you know, a hundred times more parameters. These parameters are not sort of
+functionally equivalent to dense parameters because they're sparse and so it's not the same as
+just, you know, a hundred X in your model size, but it does bring a lot of benefits at pre-training
+and now it's when we're tuning on the stream applications as well. And are each of the experts
+also typically deep networks, or did they tend to be shallower networks then?
+Okay, so it's usually, you know, usually your entire deep neural net is pretty deep, so let's say, you know, 50 layers. But each
+expert layer is usually, you know, a two layer neural net actually. Okay, you know, you can do it one or two
+like we do two because, you know, paper, it's tied to our choice of activation functions, but those
+are pretty shallow. And we find that this is kind of the best, this gives the best results. Another
+thing we found in that paper is that you don't want to use expert layers everywhere because that
+leads to a bad sort of quality to latency tradeoff. So, you know, the name of the game in a lot of
+these researchers to get the most performance at a given, you know, training cost or in
+French budget, right? And so, when you do sort of, when you optimize your architecture, what you do
+is like you're trying to get like, no, good accuracy, but maintaining the network speed. And so, for
+that we find that, you know, having expert layers, every four blocks of layers is a good, is a good
+choice. And that's what we went with in that paper. Okay. Can you talk a little bit about the
+kind of the scalability of the method? How well does it scale? And what did you have to do to get
+it to scale? So, just zooming out a little bit. With mixture of expert models, now you have
+two dimensions that are different. So, you have the number of formulas versus the flops or the
+amount of computation. Usually, they're the same. For dense models, they're the same because more
+primers means more computations as well. With expert models, if you scale the number of experts,
+you're not scaling the number of computation that is applied, for example. And so, this adds
+like an additional dimension that, you know, makes the problem a little bit more difficult to study.
+But so, yeah, actually, scaling mixture of expert models was kind of an solved problem
+that motivated our research on the subject. And so, one thing that people noticed was that
+they were able to scale the number of experts, to the number of primers. But when they were
+scaling the flops, or like just the amount of computation applied throughout the model,
+training these models would usually lead to instabilities. So, until recently, these models were
+quite unreliable at scale, at computation scale, flops scale. And so, you know, one contribution of
+our recent work with my co-workers at Google Brain was to figure out how do we make this large scale
+mixture of experts train stably, right? So, you know, we did a large scale study of
+quality versus stability trade-offs. One thing we found is that usually the techniques to improve
+stability, health accuracy or performance quite a bit. And so, that's, you know, that's not super
+satisfying. We ended up sort of repurposing an auxiliary loss called the Z loss. So, that loss
+is usually applied to the final sort of layer logits. Now, we applied it in the router of the
+experts. So, again, the router is the small neural network that takes inputs and decides where to
+which experts to send them. And so, one thing we found was that when we apply an auxiliary loss
+on the router to sort of make the probably distribution over which experts to send each input,
+we make that distribution more, you know, more smooth. We found that this helped a lot with
+stability. So, that's one of the contribution of the paper. Another, you know,
+a line of work was that you want to design these models and scale them while taking
+your hardware into considerations. So, that process of routing inputs to experts, you know,
+requires your accelerators to communicate between them. So, you know, let's say in our case,
+we were working with TPUs. And so, you know, one simple way to see it is like, let's say, you know,
+you have one expert per TPU, right? So, depending on where you want to send an input,
+you're going to have to send that token to a different TPU. And so, there are communication costs
+associated with that process. And so, that's kind of, yeah, a requirement to think ahead and think
+about, you know, the trade-off of communication versus computation to set some of the model dimensions
+optimally. And so, that's one thing we explored a bit that we explained in the paper.
+And did you set those dimensions empirically or did you develop some formulation for
+how you might optimize that? A little bit of both. I would say, it's mostly empirical, but
+you know, in what direction to go usually. So, the process is usually, you know, you'll train
+a network and you'll both look at its, you know, its loss or accuracy. And at the same time,
+you'll profile the network. And so, you'll see, okay, how that much time is spent on, you know,
+communication in that layer, that much time is spent on computation in that layer. And as you're
+run more and more experiments, you start getting a sort of a mental model for how to, you know,
+improve performance or improve latency without holding the other. So, that was kind of an iterative
+process mostly. Going back to your previous point about the introduction of ZLOS,
+you know, was it clear in the process of designing the architecture that, you know,
+that was what you needed to do? Or how did you get to, oh, ZLOS is going to fix this.
+Well, you know, the credit goes to one of my collaborators, Sparratt, who figured out, but,
+no, so, you know, we started by exploring sort of all the classic techniques to, to improve
+stability. You know, usually it's like you inject some noise so that if the model goes
+unstable, it's used to walking with noise. And so, maybe it can recover from that instability.
+Another technique is that you clip activations so that the model does an output, you know,
+activations that are out of its usual range. But these techniques, you know, we found that they
+held model quality a lot. So, that's not satisfying. I think we thought about the ZLOS in the context of
+around of errors and numerical precision. So, you know, one direction that a lot of recent
+large tail modeling work is exploring is to reduce, like, you know, to use lower precision
+format, format, exactly quantization. Because this enables more efficient communication
+cost between processes, between processors and our memories, also faster computation,
+and, you know, just also less memory requirement for storing distances and activations.
+The issue with lower precision formats or quantization is that it comes at the expense of larger
+round of errors, right, because depending on which precision format you have, you know, sort of a minimum
+distance between two consecutive floating points. And so, yeah, if you use lower precision,
+it's faster, but larger round of errors. And in certain cases, this round of errors can lead to
+instability that you can't recover from. This is when, you know, the training loss
+all of a sudden explodes, and you don't recover from from that point in the weight space once
+you fridge that. And so, what the ZLOS does is that, so it's a little penalty that you add on top
+of the logits of the router to encourage these logits to be small in value. And because they're
+smaller, they're more accurately modeled in floating point format. And so, what we found is that,
+so first of all, whenever you use logits, you want to use sort of a FP32 format,
+like kind of a high precision format, because these logits are like exponentiated. And so,
+if there's a small round of error in the logits, there's going to be a much larger round of error
+in the exponentiated logit, which are the probabilities. But we found that, so, you know,
+that's a trick that, you know, a lot of people know, and most of these architectures are using,
+it's like, you use float 16 everywhere, or B float 16 everywhere. But in your softmax functions,
+or when you have a logit, you use, you cast your inputs to float 32. But that wasn't enough
+for the router. And so, the idea was like, yeah, let's, you know, let's have this additional loss
+to make sure that these logits are even smaller, so that they can be more accurately modeled.
+To be clear, were you also using quantization in your process, or was it more
+quantization in general introduces noise, and z-loss is used to fight, you know,
+quantization noise may be at a work with our noise. Our architectures, you know, we use B float 16.
+She's a precision format with 16 bits, which is slightly different from, well, actually quite
+different from FB 16. But, you know, B float 16 is supported on TPUs, and it has sort of a larger
+range of numbers it can, it can represent, but at the cost of also larger round of errors compared
+to FB 16. And so, you know, we already knew of this trick of always using, you know, full
+precision or FB 32, when you're used, when you're in logits or before applying softmax or
+exponential, exponential, exponential. So, we already kind of did that by default. You know,
+we're not the ones that figured out that trick out. I think we explained it pretty well. We,
+know, we go in depth in that paper, you know, trying to solve as a guide for people who want to
+design large scale models and sparse models in general. But we didn't invent that. What we
+figured out though was that this wasn't enough in the router. So, remember that the router,
+you know, decides which, where to, which experts to send each tokens to. In practice, you know,
+the router outputs are probably distribution over all of the experts. So, you know, this is
+implemented by a softmax, right? Like, you take, you have a scalar for, you know, or like a
+log probability for where to send the expert, your input token, and then you take a softmax of that.
+And so, we thought, you know, if FB 32 is not enough, what can we do? Right? Like,
+one thing you can do is to push these logits to be smarter, so that run of errors, how to even less.
+What did you find experimentally overall with the method? What, what, what data sets did you
+benchmark it on and what kind of results did you see? Yes. So, we pre-trained on, mostly on C4,
+like CommonCrawl, you know, which is a few hundred billions or even more depending on how you filter
+tokens. But so, one of the issues that we also solved in that paper was that people were having
+sort of uncertain quality when fine-tuning this mix of expert models. So, usually the way you
+get set up the art and this NLP task is by pre-training large language models for quite some time,
+like, you know, hundreds of billions of tokens, and then fine-tuning on the task of interest.
+And so, sparse models were showing a lot of promise in the pre-training phase where you
+you would see, you know, speed ups around 4 to 7x, you know, so that would mean, like, you know,
+instead of training a dense model for like 10 days, I can get the same results with a sparse
+model for two days, trained for two days, but only at pre-training. When you would move to that second
+phase of fine-tuning, yeah, like the sort of improvement of the sparse model over the dense model
+would kind of like vanish, you know, and this was, you know, that was kind of a big issue, right?
+So, there were two big issues. Meaning, pre-training took just as long as with a dense model or
+pre-training took way longer and undid all the gains on, I'm sorry, fine-tuning.
+So fine-tuning undid all the gains. Okay. Usually fine-tuning is faster because the datasets are
+faster, so you were less about sort of the duration of fine-tuning, but fine-tuning undid all the gains.
+Okay, so that was the second issue we addressed in that work, the first one being that
+these models didn't scale reliably because of instability. And so, you know, we
+we run a lot of experiments on fine-tuning and we identified a rather counter-intuitive
+property, which is that the way you fine-tune sparse models is quite different than the way you
+want to fine-tune dense models. And so, if you just take the same hyper-primers that you usually
+take for dense models, those hyper-primers are pretty bad for sparse models and actually
+using them for fine-tuning will undo all the gains that you had from pre-chain.
+And so, we had to, you know, we come up with sort of hyper-primer recommendations
+in the paper. Usually, you want to increase the noise at a high level, you want to increase the
+noise when fine-tuning sparse expert models. We believe that this is because sparse models are
+more of a prone to other feeling, right? With sparse models, you have a much larger
+modeling capacity because you have way more parameters. And so, there's a risk of other
+feeling on these, you know, smaller fine-tuning datasets. Another thing that, you know, is a
+potential hypothesis, you know, there's no way to, no one has really verified that yet, but,
+you know, I think that's kind of an ectotic evidence from a couple of papers that this is the case,
+is that there is, there is a range of parameters versus computation that is optimal for sparse
+models and you don't want to deviate too much from that range. So, you know, as I said earlier,
+now, the amount of compute and the number of parameters are not necessarily related
+anymore because when you increase the number of experts, you increase parameters, but you don't
+increase computation. You know, and a bunch of papers have tried to, you know, yeah, let's use
+a thousand experts, you know. And so, you have a Nance model, like a sparse model with
+trillion of parameters, but relatively much fewer computations. And so, I think there's some
+evidence that this is a bad scenario and that you want to keep in the more, you don't want to stay
+in the more reasonable ratio of parameters versus compute. And yet, there's this like, you know,
+maybe somewhat instantiated theory that parameters correspond to knowledge and computation correspond
+to, corresponds to intelligence, you know, for whatever nibblest definitions of knowledge and
+intelligence, you want to work with. But I think this kind of makes sense, right? It's like more
+parameters, like parameters can encode knowledge and computation referred to, yeah, how much
+computation, how much can you sort of modify an input. So, that kind of makes sense to me. And
+this is also what's supported by some of these experimental results. What
+tasks did you, were all of the tasks that you were looking at in the paper NLP tasks? Yes.
+And is the method applicable to other types of tasks? Yeah, it's actually been applied
+to vision kind of concurrently. Like the first user of mixed-up export models was for NLP,
+but yeah, it's been done in vision since. So, this is really like a modeling or like a new class
+of architectures. You can apply to different modalities, different tasks. I think, you know,
+maybe NLP and maybe textual domains, I think intuitively, might make more sense. Because
+tokens are kind of sparse, you know, in the NLP. Whereas vision, I feel like, is a bit more
+continuous. And do you see these types of models as being something that, you know, it's a tool
+on the shelf or in the tool bag and under a certain set of conditions, you know, it might be the
+tool that you reach for, or do you see it as more of a, you know, a step in evolution. And this
+is what we're going to be doing as a standard approach at some point in time.
+So, I think our paper tries to take it from, you know, the format to the letter.
+Okay. So, this is definitely, you know, like an additional tool, not two chefs in the
+deep learning toolbox per se. But the results are comparing enough that this is something you
+seriously want to consider. Again, as I said, there are quite some technical details in
+getting them to work reliably. Also, especially making them fast on your hardware and software
+stack. So, you know, as I explained before, like depending on some of the, you know, under communication
+costs on your hardware, you might want to set this mixture of experts differently.
+Then there's also a question at inference, which is that, you know, if you do inference for a
+single sort of input, it's very inefficient because you have all these other experts that aren't
+used at the same time. And so, I would mostly use them for, like, batch inference when you know
+that all of the experts are going to be used. That's one. Another thing that makes inference a little
+bit more complicated is that, you know, with a dense model, if you have a very small batch size,
+you know, it can fit on few accelerators. But now, sparse models may have much more, you know,
+way more parameters. And so, you need a large number of GPUs or TPUs also at inference.
+So, and again, that may only be worth it if you know, if you have high throughput, like a lot of
+queries per second, and you can batch things together. But I would say there's definitely something
+to consider seriously. It just takes a little bit more technical expertise. And, you know,
+there are also a lot of other things that I think are very exciting in the space at the moment
+that people should also consider. That kind of complimentary, you know, like, mix of experts,
+I really see as like this new class of architectures that I really think, I think, you know,
+I think in 10 years it's going to be like, what are people who are really applying, like,
+all the same parameters to all inputs, like that's kind of insane, right?
+Well, I wanted to go down on the idea of new class of architectures. One question that was
+emerging for me is, in some ways, it sounds like a technique. And in other ways, it sounds like
+an architecture, meaning, you know, there's part of me that wants to, hey, can we just take,
+you know, off the shelf burt or something and apply mixture of experts at individual layers?
+You know, verse, but you've also articulated that there are, you know, that there are constraints
+around the number of consecutive layers that you'd want to have, for example,
+to suggest that, you know, it's not ever going to be a plug-and-play kind of thing. Can you talk
+a little bit about that? I think it's kind of this, you know, if you think about belt and GPT,
+you know, these architectures have also been optimized, right? Like, the way that the model
+dimensions are set, or like, the normalization, the activation functions, like, people have
+optimized these over the years. And the fact that we recommend, you know, hey, maybe apply
+the sparse layer every four layers, that's just an optimization that we figured out and that people
+can apply directly, or like some of our recommendations on how to set up some of the export-related
+dimensions based on the hardware. There's also something that we figured out that people can
+apply directly. I would say it's harder to, you know, understand and to work with then
+dance models, but, you know, for some of these large-scale runs that, you know, are costing
+in the millions of dollars, this is something that, you know, it's worth figuring out.
+Yeah, and maybe another way to ask my question is, you know, if you, if, you know, knowing what you know
+and having this tool available, you wanted to create a kind of, you know, best-in-class,
+large-scale language model, would you, like, start with, you know, a bird or a GPT or something,
+and try to apply mixture of experts to it, or would you start with, you know, what you know
+about mixture of experts, and try to build off of that to get to a language model. Does that
+question make sense? Yeah, I see what you mean. I would start with, you know, the easiest,
+which is, you know, selling from GPT or about, then, like, creating, like, I think we really wrote
+this paper as a sort of a design guide for using mixture of experts. Got it. So it's not, you know,
+fundamental, new, it's not, I'm not trying to, it's both disparage it. And new architectures.
+That's the technique of having mixture of experts, right? Like, now you have, you have these
+two dimensions that you can scale independently and so on. And Sparsity in general is kind of a,
+I was going to say it's a mindset, but, you know, it's a, it's a general technique, right? But if you're just,
+a practitioner, or you want to use them in, like, you don't care too much about figuring things out,
+then I recommend using sort of the architectures that people have figured out. Right, right.
+And what I'm here is not fundamentally incompatible with existing things. You just have to,
+you know, be careful in how you apply it and follow along with some of the learnings that,
+you know, this paper articulates and what will surely come after. Yeah, exactly. So the same way,
+I guess, yeah, you know, the same way we have different architectures, like CNNs, you know,
+transformers, like births, GPT, others, you can specify all of those architectures, right?
+In that paper, we walk with, uh, in color of the color transformers models. And so our recommendations
+are kind of general, but also mostly applied to in color of the color models. But if you were to,
+you know, specify a, a, a, you'd have to do something slightly different, you know, and so it's kind
+of like a new, it's like a new class in the same way that, like, it opens a new dimension for scaling
+these models. You can take any architecture and make it spouse on that spouse, basically.
+Awesome. Awesome. We had a couple of other things that we wanted to talk about and, you know,
+maybe one we can jump into is, you know, and it follows a little bit from talking about language
+models, but you are, you've got some research interests in kind of retrieval problems and alignment
+problems in that space. Let's talk a little bit about what you've seen on the retrieval side.
+Tell us about the problem and why it interests you. Yeah, so, you know, one thing I said when we're
+talking about spouse models is that one of the benefits of increasing the number of parameters
+that has two impacts, two factors, right? Like, first, you have additional compute at training
+and inference time. And so the model is smaller in a way, but you also have increased
+memorization of the training data. You know, again, there's a story that more parameters
+corresponds to more knowledge. And so rather than simply scaling the model size, one alternative
+is to equip models with ability to directly access a large database when performing predictions.
+And so this is also like what a recent line of fork is exploring, just like retrieval from
+large databases as a complementary to simply scaling language models. And so there are a few
+sort of like different directions. The first one is retrieving from the training data set.
+There's this recent paper called Retro, like retrieval enhanced transformer from friends at DeepMind,
+where they augment the training set with, you know, each chunk of the training set
+with its key nearest neighbors from the training database. And so during training and also at
+inference, the model has access to these neighbor chunks and can utilize them when making predictions.
+And so what they find is that, you know, you can match the performance of much larger
+language models with much smaller language models. So I think in their papers, they say, you know,
+we have like comparable results as GP3 with a model that's 25 times smaller. And so, you know,
+of course, you know, this retrieval process, you know, adds some latency and some, you know,
+some complexity, but, you know, this kind of like scaling gains, like 25x, also very exciting.
+That's, yeah, something else to explore besides just scaling or like sparsity.
+And I think that's very interesting. There's one thing even more recent that
+consists in like retrieving from the web, right? So, you know, when you retrieve from a fixed
+training database, you're not going to be up to date with the world's latest knowledge and
+events, right? There's this aspect of generalization that scaling doesn't help with,
+it's like temporal generalization. Like if your model was trained in 2019, it's not going to know
+about 2021. You know, you could argue that like a good enough model can predict the future,
+but I don't think we're there yet. So, so what people have have proposed is to, you know,
+continuously update the database with the latest state of the world and the latest knowledge,
+but that's basically the internet, right? So, what you can do is like outsource
+documentary retrieval to the web by using, you know, like a search engine, like Microsoft being
+or Google search. And yeah, learn, have your language model learn to interact with the web
+to retrieve documents that help for predictions. So, there's this recent paper from a
+player that I really like called WebGPT that does just that where, you know, they have humans navigate
+the web to answer questions. So, they collect demonstrations from how humans use the web,
+and then they train a language model to replicate that. And so, similarly, they show that like a
+much smaller model can match performance of much larger models and that this retrieval process helps
+into factual accuracy, truthfulness, coherence, and so on. And so, I think that's also very promising.
+Are these these ideas in the case of the the data set or the web? Are we primarily using retrieval
+to augment generation? Or one way to use retrieval is to to augment generation, right? You
+reach out to some data set, you get some chunk of text and that gives you a little bit more richness
+to manipulate when you're trying to spit something out. Another way is to think about the
+data set as as you described earlier, kind of a pure knowledge store that you're kind of,
+I think it was like operating on when you're trying to make an inference decision. How do you
+do you see aspects of both of those? And how do you think about retrieval?
+How do you distinguish also maybe the distinction between both aspects is like how clean the database is?
+Is that correct? I think what I'm trying to get at is when the how and when the data is being
+used and you know, maybe pulling it back to this analogy, you know, how kind of pure the databases
+to what degree is the data is the database really knowledge as opposed to augmenting expressiveness
+later? It's mostly the the later like. Okay. In this in this in this recent walks, you know,
+the retrieval knowledge base is just your training data set or whatever the web gives you, you know,
+and so this is going to be very noisy. This isn't like, you know, sort of entity, entity knowledge
+bases where you have, you know, like person, date of birth, like country, right? This is just like,
+you find a nearest, you find the top K nearest neighbors in all of your training
+corpora and you use that to have additional context when making predictions. And that's kind
+of enough to get really good results. You know, it could be that you get better results with sort
+of a more created database retrieve from, but I think that, you know, your efforts are and budget
+are this better spent somewhere else. We also mentioned alignment and those problems. Can you share
+a bit about what you're seeing there? Yeah. So, you know, dislodged language models are kind of
+becoming the the Swiss army knife of of an LP. They have fairly amazing like transfer learning
+capabilities in the future or zero-shot setup event. So, you train on a lot of text mostly coming
+from the internet and then at inference, the model is doing pretty good at like random tasks
+that weren't really part of the training set. But there's one sort of issue here is that the
+pre-training objective that we use to train these language models is basically predict the next
+token, right, from a web page in the internet. You know, that's where most of the data comes from.
+And so, that objective is quite different from the objective, you know, follow the user's
+instructions, you know, and preferably in a helpful and safe manner. And so, as a result,
+like large language models, you know, in spite of all the impressive results that have led to
+are not that good at following people's instructions, right? There's like a misalignment between
+how you train them and how we intend to use them. And so, there's been efforts towards sort of aligning
+these models with human intent by fine tuning them on data we care about. So, they're kind of like
+two lines of work in the direction. The first one is called instruction tuning, where during fine
+tuning, you're going to augment each task with a verbal description of the task itself, right? So,
+you should fine tune on, you know, translation data. You're going to be like,
+translate from, you know, English to French, then you're going to have your English sentence
+in the target is going to be the French sentence. And by having enough of these tasks that are
+described verbally, the hope is that at inference, the model can generalize across new tasks that are
+unseen during fine tuning. So, using that example of translating again, maybe at inference,
+I could be like head translate from legalese to regular or simple English. And because the model
+kind of knows what it's supposed to do when translating, now it just has to sort of, you know,
+understand, okay, what is legalese and what is regular simple English to perform that new unseen
+task. And so, you know, there's a similar story here that you get equivalent performance
+as much larger models. I think this paper called T0 reports, you know, 16, like similar
+performance with a model that are 16 times smaller. The second line of work in the direction is
+more direct alignment, where, you know, it's mostly driven by open AI and public. What they did is
+that they basically gave access to these models. They gave access to these models to people that,
+you know, just try to use them. And they generate like the collect actual data of how users want to
+use these models. Yeah, basically, it's kind of like assistant-assistant like data, right? Like
+help me plan a wedding or like help me write a marketing campaign for Red Bull or whatsoever.
+And so, they use this approach called reinforcement learning from human preferences,
+which is a two-step process. So the first step is to collect comparison data based on human
+preferences. And so, for example, you can output, you know, let's say, so human inputs,
+some prompt to a model and the model will propose two-candy data outputs. Then the model
+selects which one it prefers, right? Sorry, the human selects which one it prefers. And so,
+that process creates a data set of comparison data, right? Like given to, given an input and two
+candidate outputs, this is the one that is preferred by humans. So what you can do is train a model
+on that data. And this is called a reward model, because you're going to use that model as
+to provide reward to sort of, you know, like a reinforcement learning algorithm. And so,
+the second step of that process is to train your language model with a policy-gradient method,
+with the reward model providing these rewards. And by sort of going through that process iteratively,
+you get very close to the outputs matching what the humans would have preferred. And this is kind
+of like aligning models with human intention. There's a similar story here that like, you know,
+actually the results in these walks are pretty impressive, like yet. Rather than having GP3,
+you can have a model that's 100 times smaller. And by, you know, aligning it with human intentions
+with this two-step process of like collecting comparison data and using it to train your language
+model with reinforcement learning. You get better or like preferred outputs to a model that 100
+times larger. So I think something that I'm kind of really looking forward to is when people are
+going to combine all these recent advancements, figure out, you know, which dimensions to scale,
+like, yeah, I think once you do a mixture of experts, like alignments, retrieval, you know,
+you spend a lot of money and you use to scale everything, figure out how to do it the proper way.
+Yeah. No, I think we're looking at something that's going to be fairly amazing. So pretty exciting
+about that. Yeah, I mean, that's kind of the name of the game. We've got point optimizations,
+heading in different directions. And we just need to figure out how to combine the model to
+create some more general version of intelligence. Yeah, exactly. That kind of research is pretty
+costly, though, because it's very hard to extrapolate performance, you know, at small scale.
+Actually, one thing that I saw, again and again, when I was at Google, it's like, you know,
+you see a paper that that proposes a new idea or like a new architecture, you know, like Google,
+let me try it. And then you trade it like Google scale, which is usually, you know,
+in order of magnitude larger than academic scale, right? Yeah. And you find that like,
+you know, improvements completely vanish. And so it's that a is that a reproducibility problem
+or is that a fundamentally the method just didn't scale the mental issue? Yeah. But I think
+that's really like sort of a, there's something deeper behind that fact is that,
+yeah, it's very hard to extrapolate techniques. Also, people, I think this kind of stuff would be
+seen if people were, you know, designing, scaling laws in a very rigorous way. But, you know,
+that takes a lot of time. And usually people just say like, hey, you know, the baseline is this,
+I did that and I get a better number, but we have no idea what happens when you scale.
+I also think, you know, like this whole like scaling direction has made
+rigorous baselines much harder, having rigorous baselines much harder because, you know,
+these models are pretty costly both in time and of course financially. And so each data point
+that you consider for your ablation study, you know, my cost you weeks are hundreds to millions of
+dollars. And so, you know, research has kind of evolved from like this very, at least in that
+field, right, like from very rigorous settings to let's just try to, you know, figure out
+among a lot of noise, what works best. I mean, I'd say, you know, even there was already a lack of
+rigorous baselines even in overfield, so that just doesn't help. Yeah. Yeah.
+Yeah, I mean, that brings into, brings into light or the conversation, a lot of issues that we've
+been talking about in the field, the lack of rigor overfitting on, you know, a few data sets,
+you know, all these I think are accentuated by the scale that you're trying to operate at.
+Yeah. I wrote a paper about this last year, actually, like that show that in computer vision,
+a lot of the improvements that, you know, research that posted about came from training tricks,
+as opposed to the so-claim architectural improvements, that you could still get very competitive
+results by simply scaling resnets, which are, you know, like six years old or seven years old,
+that you didn't need like all these like fancy new stuff. It was just like, yeah, tech,
+the architecture that you know walks, figure out how to scale it properly and training properly,
+and usually you're going to be very close to state of DL, you know, trying all these architectural tricks,
+like, doesn't matter, basically. And I think that's something that people have come towards, like,
+now there's much less architectural research, you know, people use transformers most of the time.
+You know, there's this mixture of experts thing, which is kind of like, which I think is a big
+enough change that like, it's a real change. It's not like, you know, hey, use a depot ice convolution
+here instead of a convolution there. But yeah, I think, you know, with that scale, with the
+scaling direction, like, we're kind of moving away from the academic research setup, right? That's
+like a widening gap between what can be done in academia and industry. And only a few organizations
+have the technical expertise or the financial leeway to support this kind of work. Then I'll see
+that gap closing anytime soon. Yeah, I mean, I don't doubt if you like, you know, open efforts,
+like the third AI and big science. Stanford is also starting a, yeah, exactly. Stanford is also
+starting a group. So, you know, I think some people are rallying and, you know, realizing, hey,
+we can't just let big companies have access to those. But there are a little bit behind,
+and like, yeah, there's dark kind of questions about, you know, how long you can sustain that kind
+of research and this kind of costs. Yeah, awesome. Well, Erwan, thanks so much for taking the time
+to chat for those who are still with us. This interview has been a long time in the works.
+And Erwan's continued it to advance his research. And I'm super glad we're able to finally get
+together. And I really enjoyed the conversation. Thank you for having me. Awesome. Thank you.

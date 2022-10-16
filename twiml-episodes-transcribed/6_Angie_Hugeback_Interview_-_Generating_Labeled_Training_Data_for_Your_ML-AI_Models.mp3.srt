@@ -1,0 +1,3900 @@
+1
+00:00:00,000 --> 00:00:16,000
+Hello everyone and welcome to another episode of Twimble Talk, the podcast where I interview
+
+2
+00:00:16,000 --> 00:00:21,440
+interesting people, doing interesting things in machine learning and artificial intelligence.
+
+3
+00:00:21,440 --> 00:00:24,360
+I'm your host Sam Charrington.
+
+4
+00:00:24,360 --> 00:00:29,200
+So I'm recording this intro in New York City where I've been attending the O'Reilly
+
+5
+00:00:29,200 --> 00:00:31,680
+AI and Stratocomferences.
+
+6
+00:00:31,680 --> 00:00:36,400
+I did a ton of great interviews here at the events and I'm really looking forward to getting
+
+7
+00:00:36,400 --> 00:00:38,640
+these posted over the next few weeks.
+
+8
+00:00:38,640 --> 00:00:43,640
+Today though, I've got to show that I know you're going to really enjoy.
+
+9
+00:00:43,640 --> 00:00:49,160
+My guess this time is Angie Hugeback, who is Principal Data Scientist at Spare 5.
+
+10
+00:00:49,160 --> 00:00:53,960
+A company focused on helping its customers generate the high quality training datasets that
+
+11
+00:00:53,960 --> 00:00:58,880
+are so so crucial to developing accurate machine learning models.
+
+12
+00:00:58,880 --> 00:01:03,920
+In this show, Angie and I cover a bunch of the real world practicalities of generating
+
+13
+00:01:03,920 --> 00:01:05,840
+training datasets.
+
+14
+00:01:05,840 --> 00:01:09,720
+We talk through the challenges faced by folks that need to label training data and how
+
+15
+00:01:09,720 --> 00:01:14,400
+to develop a cohesive system for performing the various labeling tasks that you're likely
+
+16
+00:01:14,400 --> 00:01:15,800
+to encounter.
+
+17
+00:01:15,800 --> 00:01:20,520
+We discuss some of the ways that bias can creep into your training data and how to avoid it.
+
+18
+00:01:20,520 --> 00:01:24,400
+And we explore some of the popular third-party options that companies look at for scaling
+
+19
+00:01:24,400 --> 00:01:28,200
+training data production and how they differ.
+
+20
+00:01:28,200 --> 00:01:32,000
+Before we dive into the interview though, I really want to take a moment to acknowledge
+
+21
+00:01:32,000 --> 00:01:36,240
+Spare 5, who stepped up to sponsor this episode of the show.
+
+22
+00:01:36,240 --> 00:01:40,440
+Now, I'm not going to spend time talking about their service here because Angie and I do
+
+23
+00:01:40,440 --> 00:01:45,240
+cover that in the course of the interview, but I will say these three things.
+
+24
+00:01:45,240 --> 00:01:48,160
+First, what Spare 5 is doing is really cool.
+
+25
+00:01:48,160 --> 00:01:52,480
+And if you have a training data problem and you know who you are if you do, you should
+
+26
+00:01:52,480 --> 00:01:57,040
+definitely take a look at what they've got to offer as you explore your options.
+
+27
+00:01:57,040 --> 00:02:02,200
+Second, they've put together a great offer for 25 lucky twimble talk listeners, which
+
+28
+00:02:02,200 --> 00:02:05,640
+you'll hear towards the end of the interview.
+
+29
+00:02:05,640 --> 00:02:10,160
+And third, I'm just very grateful to Spare 5 for helping to make this podcast possible
+
+30
+00:02:10,160 --> 00:02:11,720
+for all of you.
+
+31
+00:02:11,720 --> 00:02:15,600
+And I want to really encourage you all to show them some love.
+
+32
+00:02:15,600 --> 00:02:18,160
+So please, hit them up on Twitter.
+
+33
+00:02:18,160 --> 00:02:22,560
+They're at Spare 5, S-P-A-R-E, the number 5.
+
+34
+00:02:22,560 --> 00:02:27,080
+And just thank them, visit their website, sign up for a demo, all of these things let
+
+35
+00:02:27,080 --> 00:02:31,760
+them know how much you appreciate this podcast and their support for it.
+
+36
+00:02:31,760 --> 00:02:36,760
+As always, I'll be linking to Angie and the various things we mentioned on the show in
+
+37
+00:02:36,760 --> 00:02:45,360
+the show notes, which you'll be able to find at twimbleai.com slash talk slash six.
+
+38
+00:02:45,360 --> 00:02:54,840
+And now onto the interview.
+
+39
+00:02:54,840 --> 00:02:58,680
+So hey everybody, welcome to another episode of twimble talk.
+
+40
+00:02:58,680 --> 00:03:04,720
+I've got Angie Hugeback, the principal data scientist at Spare 5 on the line Angie, why
+
+41
+00:03:04,720 --> 00:03:05,800
+don't you say hi?
+
+42
+00:03:05,800 --> 00:03:08,040
+Hi everyone, hi Sam.
+
+43
+00:03:08,040 --> 00:03:11,840
+Hey, so happy to have you on here today.
+
+44
+00:03:11,840 --> 00:03:13,320
+Yeah, excited to be here.
+
+45
+00:03:13,320 --> 00:03:16,520
+All right, yeah, I'm really looking forward to digging into some good stuff.
+
+46
+00:03:16,520 --> 00:03:17,520
+Awesome, awesome.
+
+47
+00:03:17,520 --> 00:03:21,960
+So why don't we get started by having you give us a little bit about your background
+
+48
+00:03:21,960 --> 00:03:24,440
+and how you got started in machine learning?
+
+49
+00:03:24,440 --> 00:03:26,960
+Yeah, sure.
+
+50
+00:03:26,960 --> 00:03:31,840
+So I started out as a math major in college and I took a stats class.
+
+51
+00:03:31,840 --> 00:03:36,160
+I was at the University of Minnesota Duluth and I really fell in love with the idea that
+
+52
+00:03:36,160 --> 00:03:41,600
+you know, it was math, but it was applied and you could learn about the world around you
+
+53
+00:03:41,600 --> 00:03:43,600
+through math.
+
+54
+00:03:43,600 --> 00:03:44,600
+So I got really interested in statistics.
+
+55
+00:03:44,600 --> 00:03:48,240
+I ended up getting my masters in PhD in statistics.
+
+56
+00:03:48,240 --> 00:03:54,240
+I got my PhD at the University of Chicago and when I came out of school, so I had worked
+
+57
+00:03:54,240 --> 00:04:01,480
+with my PhD advisor was really big on teaching me how to creatively solve a problem, do creative
+
+58
+00:04:01,480 --> 00:04:04,320
+algorithm development, just start from the basics.
+
+59
+00:04:04,320 --> 00:04:06,840
+What are you trying to do and construct from there?
+
+60
+00:04:06,840 --> 00:04:12,160
+When I was really interested in doing that, I had a strong interest in machine learning
+
+61
+00:04:12,160 --> 00:04:13,560
+types of topics.
+
+62
+00:04:13,560 --> 00:04:17,040
+So when I came out of school, I had this idea that I want to work in machine learning,
+
+63
+00:04:17,040 --> 00:04:21,320
+but I want to do creative algorithm development and trying to find that.
+
+64
+00:04:21,320 --> 00:04:26,520
+And at the time, you know, the term data scientist didn't exist yet, but that's essentially
+
+65
+00:04:26,520 --> 00:04:29,040
+what I was interested in doing.
+
+66
+00:04:29,040 --> 00:04:34,040
+So it just took me some time from there to kind of blend between the traditional definition
+
+67
+00:04:34,040 --> 00:04:39,440
+of statistician and sort of the engineering end of machine learning and find a good balance
+
+68
+00:04:39,440 --> 00:04:41,480
+and this is where I landed.
+
+69
+00:04:41,480 --> 00:04:42,480
+Awesome.
+
+70
+00:04:42,480 --> 00:04:48,600
+Now, what were some other kinds of problems that you were interested in in grad school as
+
+71
+00:04:48,600 --> 00:04:52,520
+a statistician, statistician looking into machine learning?
+
+72
+00:04:52,520 --> 00:04:53,520
+Yeah, sure.
+
+73
+00:04:53,520 --> 00:04:57,200
+There was, when I was doing my master's degree at a master's thesis problem that was really
+
+74
+00:04:57,200 --> 00:04:58,200
+fun.
+
+75
+00:04:58,200 --> 00:05:01,760
+I was, you know, there's the game mastermind where you have the little colored pegs
+
+76
+00:05:01,760 --> 00:05:07,320
+and someone has a code, which is an ordering of colored pegs and you're trying to guess
+
+77
+00:05:07,320 --> 00:05:11,200
+through making proposals of, you know, what you think the code might be and getting
+
+78
+00:05:11,200 --> 00:05:12,200
+some feedback.
+
+79
+00:05:12,200 --> 00:05:13,200
+Right.
+
+80
+00:05:13,200 --> 00:05:14,880
+And so I had a lot of fun playing around with.
+
+81
+00:05:14,880 --> 00:05:22,280
+I ended up building like a metropolis hastings, important sampling style algorithm to solve
+
+82
+00:05:22,280 --> 00:05:26,320
+the game mastermind in a very limited number of steps.
+
+83
+00:05:26,320 --> 00:05:30,680
+And, you know, the game is, you know, fairly straightforward when you're dealing with
+
+84
+00:05:30,680 --> 00:05:32,520
+six pegs in the traditional sense.
+
+85
+00:05:32,520 --> 00:05:37,240
+But then I was taking it up, you know, well, what if it's 14 pegs or 50 pegs and the space
+
+86
+00:05:37,240 --> 00:05:40,000
+of the problem becomes incredibly complex?
+
+87
+00:05:40,000 --> 00:05:44,040
+And I was really interested in, you know, the metropolis hastings algorithm is kind of
+
+88
+00:05:44,040 --> 00:05:49,360
+like a simulated annealing algorithm where you're able to explore a really high dimensional
+
+89
+00:05:49,360 --> 00:05:54,080
+space very quickly and kind of rapidly move around in this space and figure out where
+
+90
+00:05:54,080 --> 00:05:56,480
+you're making progress and work toward an optimal point.
+
+91
+00:05:56,480 --> 00:05:58,640
+So that was fun.
+
+92
+00:05:58,640 --> 00:06:02,280
+I also worked on a lot of problems in astronomy.
+
+93
+00:06:02,280 --> 00:06:05,880
+So astronomy was something I'd always been interested in but never had a chance to learn
+
+94
+00:06:05,880 --> 00:06:07,640
+in school.
+
+95
+00:06:07,640 --> 00:06:10,960
+So my advisor was awesome, Mark Clorum.
+
+96
+00:06:10,960 --> 00:06:16,880
+He invited me to, you know, come on over into the astronomy department at the University
+
+97
+00:06:16,880 --> 00:06:19,720
+of Chicago and talk to the professors there and figure out what kinds of problems they
+
+98
+00:06:19,720 --> 00:06:22,480
+were working on where I might be able to help out.
+
+99
+00:06:22,480 --> 00:06:25,200
+So I did some work with quasars.
+
+100
+00:06:25,200 --> 00:06:30,960
+I got to do some work on some solar science research, got to do so.
+
+101
+00:06:30,960 --> 00:06:36,880
+I had an internship at NASA working on some solar research to continue to do some consulting
+
+102
+00:06:36,880 --> 00:06:38,680
+with them for a while.
+
+103
+00:06:38,680 --> 00:06:42,680
+And then the last project that always sticks out out in my mind wasn't really part of
+
+104
+00:06:42,680 --> 00:06:50,040
+my thesis work but when I was in my PhD program, Netflix announced their Netflix prize competition
+
+105
+00:06:50,040 --> 00:06:57,320
+which was, it was a competition on predictive modeling to do movie ratings, right?
+
+106
+00:06:57,320 --> 00:07:02,880
+So they released this publicly available data set and it was all these pairs of movie
+
+107
+00:07:02,880 --> 00:07:06,400
+ID and a user ID and then a rating.
+
+108
+00:07:06,400 --> 00:07:11,240
+And then you were supposed to be able to predict how certain users would write certain
+
+109
+00:07:11,240 --> 00:07:12,240
+movies.
+
+110
+00:07:12,240 --> 00:07:14,560
+And I played around with that problem for about six months.
+
+111
+00:07:14,560 --> 00:07:22,920
+It came up with a great solution that was competitive in the contest.
+
+112
+00:07:22,920 --> 00:07:29,400
+But then through that, I actually came to a different understanding of what worked better
+
+113
+00:07:29,400 --> 00:07:31,840
+in terms of actually making recommendations.
+
+114
+00:07:31,840 --> 00:07:36,640
+So I built a movie recommender out of that and headed up on the web actually up until
+
+115
+00:07:36,640 --> 00:07:37,960
+about six months ago.
+
+116
+00:07:37,960 --> 00:07:42,080
+I was still using it to recommend movies for myself and some of my friends are still
+
+117
+00:07:42,080 --> 00:07:43,480
+using it.
+
+118
+00:07:43,480 --> 00:07:47,720
+And so those kinds of problems were the things that I was generally interested in.
+
+119
+00:07:47,720 --> 00:07:48,720
+Wow.
+
+120
+00:07:48,720 --> 00:07:50,920
+I was going through school.
+
+121
+00:07:50,920 --> 00:07:55,080
+So does that mean it takes you less time to pick a movie to watch than it takes the rest
+
+122
+00:07:55,080 --> 00:07:56,080
+of us?
+
+123
+00:07:56,080 --> 00:07:58,760
+Yeah, typically it actually works pretty well.
+
+124
+00:07:58,760 --> 00:08:00,440
+I got to get it up and running good.
+
+125
+00:08:00,440 --> 00:08:04,000
+Yeah, the best feature was being able to combine two movies.
+
+126
+00:08:04,000 --> 00:08:08,920
+So you say, I want to see something that's like, I want to watch a movie that's like
+
+127
+00:08:08,920 --> 00:08:15,280
+Flut loose meets fatal attraction or something like that, and then it would come up with some
+
+128
+00:08:15,280 --> 00:08:17,680
+great recommendations crossing between those two.
+
+129
+00:08:17,680 --> 00:08:18,680
+That was really fun.
+
+130
+00:08:18,680 --> 00:08:19,680
+Oh nice.
+
+131
+00:08:19,680 --> 00:08:23,760
+You mentioned a whole bunch of really interesting stuff in there.
+
+132
+00:08:23,760 --> 00:08:28,400
+I want to mention since you mentioned astronomy, I don't know if you've had a chance to hear
+
+133
+00:08:28,400 --> 00:08:37,320
+the last tumultalk episode that I just posted is with Joshua, Joshua Bloom, who's an astronomy
+
+134
+00:08:37,320 --> 00:08:42,600
+professor at Berkeley and also the CTO of a company that uses machine learning.
+
+135
+00:08:42,600 --> 00:08:44,040
+I think you'll find it super interesting.
+
+136
+00:08:44,040 --> 00:08:45,040
+Oh, yeah.
+
+137
+00:08:45,040 --> 00:08:46,040
+Thanks.
+
+138
+00:08:46,040 --> 00:08:47,040
+I'll check it out.
+
+139
+00:08:47,040 --> 00:08:48,040
+Oh, absolutely.
+
+140
+00:08:48,040 --> 00:08:49,040
+Thanks.
+
+141
+00:08:49,040 --> 00:08:52,280
+I mean, you've given us an entree to go deep kind of quickly here.
+
+142
+00:08:52,280 --> 00:08:54,280
+Metropolis hastings and portance.
+
+143
+00:08:54,280 --> 00:08:55,280
+Yeah.
+
+144
+00:08:55,280 --> 00:08:56,280
+What is that all about?
+
+145
+00:08:56,280 --> 00:09:00,440
+Is that an L or stats or a good question?
+
+146
+00:09:00,440 --> 00:09:04,960
+I think it's, you know, it was sort of sitting in between the two fields and probably a little
+
+147
+00:09:04,960 --> 00:09:05,960
+bit more in ML.
+
+148
+00:09:05,960 --> 00:09:06,960
+Yeah.
+
+149
+00:09:06,960 --> 00:09:10,280
+So metropolis hastings is one thing important sampling is another.
+
+150
+00:09:10,280 --> 00:09:11,280
+Okay.
+
+151
+00:09:11,280 --> 00:09:12,280
+Yeah.
+
+152
+00:09:12,280 --> 00:09:13,280
+And so, yeah.
+
+153
+00:09:13,280 --> 00:09:17,520
+So metropolis hastings, it's really just an optimization technique, you know, for, you
+
+154
+00:09:17,520 --> 00:09:24,280
+know, maximizing a function in a high dimensional space where rather than say, you know, following
+
+155
+00:09:24,280 --> 00:09:30,200
+the derivative or doing something more mathematical in that sense, you use a random component.
+
+156
+00:09:30,200 --> 00:09:34,400
+So you say, you start with a space in the high dimensional field, you say, okay, this
+
+157
+00:09:34,400 --> 00:09:36,120
+is my initial starting point.
+
+158
+00:09:36,120 --> 00:09:41,920
+And then you propose a point around there that you may go to next.
+
+159
+00:09:41,920 --> 00:09:44,800
+And so you, you come up with a proposal function.
+
+160
+00:09:44,800 --> 00:09:52,120
+So you say, okay, maybe my proposal is I pick one of my dimensions at random.
+
+161
+00:09:52,120 --> 00:09:59,400
+And then I perturb that, that value a little bit with some random, you know, in some random
+
+162
+00:09:59,400 --> 00:10:02,120
+distance and in some directions, something like that.
+
+163
+00:10:02,120 --> 00:10:04,120
+And you say, okay, that's my proposed point.
+
+164
+00:10:04,120 --> 00:10:09,440
+And then you compare your function on that proposed point to the function on the initial
+
+165
+00:10:09,440 --> 00:10:10,440
+value.
+
+166
+00:10:10,440 --> 00:10:13,960
+And if you're in a better place and you say, oh, yeah, this is a better place to go to,
+
+167
+00:10:13,960 --> 00:10:16,240
+you know, you'll always move there.
+
+168
+00:10:16,240 --> 00:10:19,360
+But if you're, if it looks a little bit worse than your initial position, you'll still
+
+169
+00:10:19,360 --> 00:10:21,920
+move there with some small probability.
+
+170
+00:10:21,920 --> 00:10:27,280
+And so what that allows you to do is it allows you to move away from, you know, local minima
+
+171
+00:10:27,280 --> 00:10:29,640
+and things like that that you might get stuck in.
+
+172
+00:10:29,640 --> 00:10:30,640
+Yeah.
+
+173
+00:10:30,640 --> 00:10:37,280
+And it just, yeah, in many, many problems, it provides a kind of a rapid way to search
+
+174
+00:10:37,280 --> 00:10:40,200
+through a very high dimensional space.
+
+175
+00:10:40,200 --> 00:10:47,800
+Would it be fair to say that if your proposal function was, was your slope in the end-dimensional
+
+176
+00:10:47,800 --> 00:10:53,280
+space that it metropolis Hastings, we've kind of approximate gradient descent?
+
+177
+00:10:53,280 --> 00:11:00,040
+Um, not exactly, no, the proposal is always another, it's, it's basically a sampling.
+
+178
+00:11:00,040 --> 00:11:04,840
+You're going to sample from the collection of all possible points that you might evaluate.
+
+179
+00:11:04,840 --> 00:11:05,840
+Okay.
+
+180
+00:11:05,840 --> 00:11:10,200
+So, um, I mean, I suppose, I suppose you could create a proposal function that says I
+
+181
+00:11:10,200 --> 00:11:14,800
+always select a point that follows, you know, the slope, but, you know, that's the
+
+182
+00:11:14,800 --> 00:11:16,120
+thing I suppose you come up with that.
+
+183
+00:11:16,120 --> 00:11:19,960
+But typically, you, yeah, your proposal is supposed to have a random component and then
+
+184
+00:11:19,960 --> 00:11:23,400
+there's the additional random component that you may choose it, even if it moves in the
+
+185
+00:11:23,400 --> 00:11:24,400
+wrong direction.
+
+186
+00:11:24,400 --> 00:11:25,400
+Okay.
+
+187
+00:11:25,400 --> 00:11:34,000
+Oh, nice. Uh, so, uh, that, that raises a question for me coming from, uh, strong stats
+
+188
+00:11:34,000 --> 00:11:40,440
+background, you know, what, how does, how do you feel like this, uh, guide your perspective
+
+189
+00:11:40,440 --> 00:11:42,120
+as a data scientist?
+
+190
+00:11:42,120 --> 00:11:45,120
+Data science has come to me in a whole ton of things.
+
+191
+00:11:45,120 --> 00:11:51,360
+Uh, for many, it's, you know, heavy programming for others, it's heavy data engineering.
+
+192
+00:11:51,360 --> 00:11:59,000
+You obviously, it's heavy stats, um, heavy, do you have kind of a philosophy on data science
+
+193
+00:11:59,000 --> 00:12:00,640
+and kind of what that all means to you?
+
+194
+00:12:00,640 --> 00:12:01,640
+Yeah.
+
+195
+00:12:01,640 --> 00:12:05,160
+I mean, yeah, definitely, definitely data science is a, is a big umbrella covering a lot
+
+196
+00:12:05,160 --> 00:12:06,160
+of different things.
+
+197
+00:12:06,160 --> 00:12:09,600
+And, you know, I think the field, the whole field is, is evolving, right?
+
+198
+00:12:09,600 --> 00:12:13,000
+And, you know, and there's, there's more and more applications in this area, many more
+
+199
+00:12:13,000 --> 00:12:14,280
+people going into this field.
+
+200
+00:12:14,280 --> 00:12:15,280
+Yeah.
+
+201
+00:12:15,280 --> 00:12:20,160
+So, um, I'd say now there are a lot more people coming out of a computer science background
+
+202
+00:12:20,160 --> 00:12:25,400
+going into this type of work, um, you know, whereas back, you know, when I was coming out
+
+203
+00:12:25,400 --> 00:12:28,600
+of school, I, you know, it was almost 50, 50, it was like machine learning was really
+
+204
+00:12:28,600 --> 00:12:32,280
+sitting in between, um, statistics and computer science, at least that's the way that it
+
+205
+00:12:32,280 --> 00:12:34,120
+was at, at University of Chicago.
+
+206
+00:12:34,120 --> 00:12:35,120
+Okay.
+
+207
+00:12:35,120 --> 00:12:41,000
+Um, yeah, and I do feel like I think I have, um, I, I tend to approach problems more from
+
+208
+00:12:41,000 --> 00:12:44,720
+the predictive modeling, uh, viewpoint.
+
+209
+00:12:44,720 --> 00:12:51,240
+I, um, I do a lot with just, um, constructing probabilities, um, likelihood estimation, things
+
+210
+00:12:51,240 --> 00:12:56,400
+like that that maybe wouldn't be as commonly used coming straight from a, more computer
+
+211
+00:12:56,400 --> 00:13:00,840
+science engineering machine learning perspective where, where it may be more about, um, deep
+
+212
+00:13:00,840 --> 00:13:05,200
+learning and, you know, specific types of, of algorithms.
+
+213
+00:13:05,200 --> 00:13:10,240
+Um, so, so I guess I see a little bit of a difference there, um, but I, you know, and
+
+214
+00:13:10,240 --> 00:13:15,960
+I have background in more traditional statistics, you know, with just doing, you know, I don't
+
+215
+00:13:15,960 --> 00:13:22,840
+also, you know, experimental design and, um, doing, um, I, you know, more, more just classic
+
+216
+00:13:22,840 --> 00:13:26,360
+kinds of testing issues and, um, distribution comparisons and things like that.
+
+217
+00:13:26,360 --> 00:13:29,480
+But I would say that's a small part of my daily work.
+
+218
+00:13:29,480 --> 00:13:33,120
+It's one of those, you know, yeah, we do IB testing, we do things like that and I'll participate
+
+219
+00:13:33,120 --> 00:13:39,000
+in assisting with those kinds of, um, experimental analysis, um, but typically I'm doing more, um,
+
+220
+00:13:39,000 --> 00:13:44,640
+um, yeah, just constructing from probabilities, from likelihoods, um, you know, uh, working
+
+221
+00:13:44,640 --> 00:13:48,920
+with predictive modeling, things like that to, you know, to solve our product goals.
+
+222
+00:13:48,920 --> 00:13:49,920
+That's it.
+
+223
+00:13:49,920 --> 00:13:50,920
+That.
+
+224
+00:13:50,920 --> 00:13:56,760
+Are there things that you see commonly in the industry that you think, uh, would be
+
+225
+00:13:56,760 --> 00:14:02,120
+different, uh, or approaches that folks take that, uh, they might take differently if more
+
+226
+00:14:02,120 --> 00:14:05,320
+people had, uh, uh, a stats background?
+
+227
+00:14:05,320 --> 00:14:13,160
+Yeah, I mean, well, I'm, I'm biased, but yeah, I mean, I tend to think, uh, yeah, I don't
+
+228
+00:14:13,160 --> 00:14:16,760
+know, I, I see them, I see them blending and I see, you know, in people today that are
+
+229
+00:14:16,760 --> 00:14:21,000
+coming out of, you know, strong computer science programs with machine learning background,
+
+230
+00:14:21,000 --> 00:14:24,920
+really, there, there's quite a bit of overlap in terms of, you know, the materials that's
+
+231
+00:14:24,920 --> 00:14:29,600
+been taught and the skills that are there, so, um, yeah, so I'm not sure, not sure.
+
+232
+00:14:29,600 --> 00:14:30,600
+Okay.
+
+233
+00:14:30,600 --> 00:14:31,600
+Okay.
+
+234
+00:14:31,600 --> 00:14:33,040
+Uh, and so what are you up to now?
+
+235
+00:14:33,040 --> 00:14:40,680
+Yeah, so right, so now I'm here at spare five, um, yeah, and, uh, yeah, so what we do here
+
+236
+00:14:40,680 --> 00:14:46,600
+at spare five, we do, um, we collect training data for computer vision and natural language
+
+237
+00:14:46,600 --> 00:14:47,600
+models.
+
+238
+00:14:47,600 --> 00:14:51,160
+So other companies that are building out AI, building out their own machine learning
+
+239
+00:14:51,160 --> 00:14:57,240
+models and computer vision and natural language, um, types of problems need really good labeled
+
+240
+00:14:57,240 --> 00:15:01,400
+training data in order to power, you know, the algorithms that they're trying to build.
+
+241
+00:15:01,400 --> 00:15:02,640
+And so that's what we do.
+
+242
+00:15:02,640 --> 00:15:10,040
+So, um, I got really interested in this space because at my, at my prior company, we started,
+
+243
+00:15:10,040 --> 00:15:14,320
+um, we were building out to natural language models there and, um, we had some really
+
+244
+00:15:14,320 --> 00:15:15,320
+good stuff.
+
+245
+00:15:15,320 --> 00:15:18,760
+It was working really well, but we wanted to push it to the next level and the thing that
+
+246
+00:15:18,760 --> 00:15:22,520
+was preventing us was just getting that really good labeled data.
+
+247
+00:15:22,520 --> 00:15:26,160
+Um, and so I was thinking a lot about that problem.
+
+248
+00:15:26,160 --> 00:15:31,200
+And then I heard that, um, Darren, who's our CTO here, I heard that he was at spare five
+
+249
+00:15:31,200 --> 00:15:33,280
+when I heard about what they were doing.
+
+250
+00:15:33,280 --> 00:15:39,240
+And I just saw a huge opportunity in terms of, I was like, you know, AI is getting really
+
+251
+00:15:39,240 --> 00:15:41,320
+big, machine learning is getting really big.
+
+252
+00:15:41,320 --> 00:15:45,640
+You know, it's no longer kind of a fringe thing that a few companies are trying out.
+
+253
+00:15:45,640 --> 00:15:49,400
+It's, you know, it's like to be in the, in the space, you know, to be competitive companies
+
+254
+00:15:49,400 --> 00:15:52,160
+need to be building, building these things out.
+
+255
+00:15:52,160 --> 00:15:56,240
+And as far as I can see, the real bottleneck is in the training data.
+
+256
+00:15:56,240 --> 00:16:03,560
+So, you know, that was where I was excited to jump in and be a part of that, be a part
+
+257
+00:16:03,560 --> 00:16:04,560
+of that business.
+
+258
+00:16:04,560 --> 00:16:05,560
+Nice.
+
+259
+00:16:05,560 --> 00:16:11,840
+I think there's growing recognition that the availability of training data is one of
+
+260
+00:16:11,840 --> 00:16:19,120
+the biggest issues that new entrants to, you know, folks that are trying to apply machine
+
+261
+00:16:19,120 --> 00:16:21,640
+learning to various problems take on.
+
+262
+00:16:21,640 --> 00:16:26,200
+And, you know, for a lot of people, they look at it and say, and I've heard this, you know,
+
+263
+00:16:26,200 --> 00:16:29,360
+I've heard this coming from several different angles, but, you know, something along the
+
+264
+00:16:29,360 --> 00:16:37,600
+lines of, you know, soon, if not now, it'll be very difficult for a startup, for example,
+
+265
+00:16:37,600 --> 00:16:43,240
+to, you know, compete with Facebook or Google or, you know, large company and industry,
+
+266
+00:16:43,240 --> 00:16:46,160
+you know, X because they'll have all the data.
+
+267
+00:16:46,160 --> 00:16:52,120
+And then the startup will, you know, will not be able to gather it and label it and all
+
+268
+00:16:52,120 --> 00:16:53,120
+that.
+
+269
+00:16:53,120 --> 00:16:54,120
+Do you agree with that in general?
+
+270
+00:16:54,120 --> 00:16:55,120
+Oh, yeah.
+
+271
+00:16:55,120 --> 00:16:56,120
+Oh, yeah, absolutely.
+
+272
+00:16:56,120 --> 00:16:57,120
+Absolutely.
+
+273
+00:16:57,120 --> 00:17:02,720
+I mean, the way that I see, you know, for, I think for quite a while, the focus was on
+
+274
+00:17:02,720 --> 00:17:06,720
+the algorithms themselves and, you know, how do we get better algorithms, better algorithms?
+
+275
+00:17:06,720 --> 00:17:11,280
+But at this point, you know, we have so many sophisticated algorithms, very flexible
+
+276
+00:17:11,280 --> 00:17:15,680
+algorithms, right, for solving so many different types of problems that, that really the defining
+
+277
+00:17:15,680 --> 00:17:19,800
+factor becomes the training data that you have underneath it to power it in terms of what
+
+278
+00:17:19,800 --> 00:17:20,800
+you can actually do.
+
+279
+00:17:20,800 --> 00:17:23,520
+So, yeah, I think that's a really valid concern.
+
+280
+00:17:23,520 --> 00:17:28,960
+Although, you know, I would say, you know, I mean, it definitely depends on what, you know,
+
+281
+00:17:28,960 --> 00:17:31,480
+what industry you're trying to jump into if you have a startup and they're trying to
+
+282
+00:17:31,480 --> 00:17:32,480
+do something new.
+
+283
+00:17:32,480 --> 00:17:37,160
+I think, yeah, I definitely think, you know, if they have a specific problem that they're
+
+284
+00:17:37,160 --> 00:17:42,720
+trying to tackle, that, you know, requires a very specific type of data.
+
+285
+00:17:42,720 --> 00:17:47,040
+I think there are so a lot of opportunities to get into that space if you have access
+
+286
+00:17:47,040 --> 00:17:51,680
+to, right, the ability to get that, get that label data that you need, right, which is,
+
+287
+00:17:51,680 --> 00:17:52,880
+which is where we come in.
+
+288
+00:17:52,880 --> 00:17:59,760
+Okay, so, walk us through specifically what you guys are doing to help, help companies.
+
+289
+00:17:59,760 --> 00:18:00,760
+Sure.
+
+290
+00:18:00,760 --> 00:18:01,760
+Absolutely.
+
+291
+00:18:01,760 --> 00:18:07,280
+So, I guess, yeah, so I would start by saying, you know, when, so when customers come to
+
+292
+00:18:07,280 --> 00:18:13,200
+us, you know, typically, the number one thing that they're looking for, they're looking
+
+293
+00:18:13,200 --> 00:18:19,280
+for high quality data, right, and they need that data at scale.
+
+294
+00:18:19,280 --> 00:18:26,760
+And so, and I would say, you know, traditionally companies may, you know, initially they may
+
+295
+00:18:26,760 --> 00:18:31,920
+start trying to label that data in-house, right, and they may say, you know, everybody
+
+296
+00:18:31,920 --> 00:18:35,600
+take a few hours and, you know, look through this data, add some labels, that sort of thing,
+
+297
+00:18:35,600 --> 00:18:38,280
+and then quickly find out, like, okay, this is going to take forever, and we don't only
+
+298
+00:18:38,280 --> 00:18:43,800
+have the resources, and then a next step that companies sometimes would go to is trying
+
+299
+00:18:43,800 --> 00:18:51,200
+to use these, you know, publicly available crowd sourcing, things like mechanical Turk,
+
+300
+00:18:51,200 --> 00:18:53,240
+where, you know, yeah, there's a crowd out there.
+
+301
+00:18:53,240 --> 00:18:57,200
+Maybe you can, you know, put your data out to them and they can label it, but that can
+
+302
+00:18:57,200 --> 00:19:01,480
+be just incredibly painful in terms of, you know, you never know the quality of the
+
+303
+00:19:01,480 --> 00:19:02,720
+work that you're getting back.
+
+304
+00:19:02,720 --> 00:19:07,240
+It's like you, you end up having to design an entire workflow around just trying to
+
+305
+00:19:07,240 --> 00:19:09,280
+QA the data that's coming back to you.
+
+306
+00:19:09,280 --> 00:19:13,360
+You end up having to send the data out many, many times over again to multiple different
+
+307
+00:19:13,360 --> 00:19:16,640
+people and try to assemble and make some sense out of the results that you're getting back.
+
+308
+00:19:16,640 --> 00:19:17,640
+Okay.
+
+309
+00:19:17,640 --> 00:19:18,800
+So that can be a real headache.
+
+310
+00:19:18,800 --> 00:19:26,280
+So by the time customers get to us, so what we're doing instead is we handle all of
+
+311
+00:19:26,280 --> 00:19:27,720
+that headache for you.
+
+312
+00:19:27,720 --> 00:19:32,400
+So basically the customer comes to us, what all they need to communicate to us is exactly
+
+313
+00:19:32,400 --> 00:19:37,480
+what correctly labeled data constitutes to them, right?
+
+314
+00:19:37,480 --> 00:19:43,280
+So they, usually the customer will present us with some examples, you know, these are
+
+315
+00:19:43,280 --> 00:19:44,280
+some images.
+
+316
+00:19:44,280 --> 00:19:45,880
+Here's some example annotations.
+
+317
+00:19:45,880 --> 00:19:50,200
+That would be the correct annotations for these images, that sort of thing.
+
+318
+00:19:50,200 --> 00:19:58,320
+And from there, we do all the heavy lifting in terms of, we can, we will take on the task,
+
+319
+00:19:58,320 --> 00:20:04,360
+we will create and generate that label data using our own community, which is like a thoroughly
+
+320
+00:20:04,360 --> 00:20:05,960
+vetted community.
+
+321
+00:20:05,960 --> 00:20:11,000
+We do all of the QA work and we guarantee the level of quality coming back to you and your
+
+322
+00:20:11,000 --> 00:20:12,000
+data, right?
+
+323
+00:20:12,000 --> 00:20:18,560
+So if you say, these are the specs, this is exactly what correctly labeled data means to us.
+
+324
+00:20:18,560 --> 00:20:24,280
+We want 95% of the data coming back to us to be correctly labeled to spec, right?
+
+325
+00:20:24,280 --> 00:20:27,800
+Then that's what, that's what we can guarantee and that's what we can provide.
+
+326
+00:20:27,800 --> 00:20:32,480
+And so, yeah, so definitely it's, it's quality is the major challenge that we're providing
+
+327
+00:20:32,480 --> 00:20:34,600
+just speed and scale.
+
+328
+00:20:34,600 --> 00:20:41,120
+And then one other important piece is that we, we provide, we can provide diversity among
+
+329
+00:20:41,120 --> 00:20:42,840
+the annotators.
+
+330
+00:20:42,840 --> 00:20:47,520
+And so in particular, if there's a specific audience that the customer is interested
+
+331
+00:20:47,520 --> 00:20:54,120
+in to say they're building an AI model and this AI model is going to be used by, you
+
+332
+00:20:54,120 --> 00:21:01,040
+know, women age, you know, 20 to 30, typically, right, in the US, we can target annotators from
+
+333
+00:21:01,040 --> 00:21:05,560
+that audience so that, you know, the keywords or, you know, whatever the labels that they're
+
+334
+00:21:05,560 --> 00:21:11,520
+providing are relevant and the types of things that that audience would typically use, which
+
+335
+00:21:11,520 --> 00:21:16,040
+is really going to improve the performance for the models themselves, you know, in those
+
+336
+00:21:16,040 --> 00:21:17,040
+types of settings.
+
+337
+00:21:17,040 --> 00:21:22,040
+So I would say, you know, those are kind of the three, three kind of pillars of problems
+
+338
+00:21:22,040 --> 00:21:25,320
+the customers have that, that we were able to solve for them.
+
+339
+00:21:25,320 --> 00:21:26,320
+Okay.
+
+340
+00:21:26,320 --> 00:21:30,680
+Let's come back to the diversity angle because that's super interesting.
+
+341
+00:21:30,680 --> 00:21:37,640
+But even before you get there, if I'm a company and I want to solve a given problem
+
+342
+00:21:37,640 --> 00:21:44,280
+in my industry, do you, are you able to help me find the right data or augment the data
+
+343
+00:21:44,280 --> 00:21:48,840
+that I do have with other data that might help me drive better predictability?
+
+344
+00:21:48,840 --> 00:21:49,840
+Yeah.
+
+345
+00:21:49,840 --> 00:21:55,520
+So we don't, we don't go out and find, like, publicly available data sets for you.
+
+346
+00:21:55,520 --> 00:21:59,800
+You know, we are in the business of generating the data, but we definitely do augment data.
+
+347
+00:21:59,800 --> 00:22:03,960
+So we've done data verification, sometimes, you know, validation, sometimes companies
+
+348
+00:22:03,960 --> 00:22:07,480
+have already gone through, you know, some steps of a process to assemble data on their
+
+349
+00:22:07,480 --> 00:22:10,240
+own, but they're hitting the point where they're realizing, like, the quality is just
+
+350
+00:22:10,240 --> 00:22:11,240
+not there.
+
+351
+00:22:11,240 --> 00:22:14,920
+And what they need, you know, what they need our community to help with is just going
+
+352
+00:22:14,920 --> 00:22:18,200
+through and validating, which ones are correct, which ones are incorrect, so that they
+
+353
+00:22:18,200 --> 00:22:20,480
+can increase the quality there.
+
+354
+00:22:20,480 --> 00:22:26,320
+We also, we can definitely augment data, you know, maybe they have images that have certain
+
+355
+00:22:26,320 --> 00:22:27,320
+annotations.
+
+356
+00:22:27,320 --> 00:22:33,320
+Maybe the images have tags for objects that appear in the image, but the customer now wants
+
+357
+00:22:33,320 --> 00:22:36,080
+to identify where in the image does that tag appear.
+
+358
+00:22:36,080 --> 00:22:41,360
+So the tag might be dog, and they need to know exactly where in the image the dog is.
+
+359
+00:22:41,360 --> 00:22:47,320
+And, you know, we can have our community either do pixel level, polygon annotation around
+
+360
+00:22:47,320 --> 00:22:53,800
+the dog in the image, do a bounding box annotation around the dog image, those types of things.
+
+361
+00:22:53,800 --> 00:22:58,960
+So yeah, there's there's a really wide variety of things that we can do in that sense.
+
+362
+00:22:58,960 --> 00:22:59,960
+Okay.
+
+363
+00:22:59,960 --> 00:23:07,160
+How much of this is best thought of as a services or consulting engagement versus some
+
+364
+00:23:07,160 --> 00:23:13,240
+platform that you guys have built up that that automates a ton of the, you know, this
+
+365
+00:23:13,240 --> 00:23:14,240
+back end work.
+
+366
+00:23:14,240 --> 00:23:19,880
+I mean, it's really both, and I guess it depends on, I mean, the platform, I think, is really
+
+367
+00:23:19,880 --> 00:23:24,200
+core and central to what we're doing and what we are able to do here.
+
+368
+00:23:24,200 --> 00:23:28,800
+But I would say the consulting aspect on the front end of, you know, making sure we design
+
+369
+00:23:28,800 --> 00:23:33,800
+the task precisely to, you know, making sure the customer is going to be very happy with
+
+370
+00:23:33,800 --> 00:23:37,880
+the data that they receive and that is going to do what they needed to do for their models
+
+371
+00:23:37,880 --> 00:23:40,360
+is also absolutely essential.
+
+372
+00:23:40,360 --> 00:23:45,880
+So I would say, you know, we do have some customers that come to us that have, you know, teams
+
+373
+00:23:45,880 --> 00:23:50,040
+that have been working on these, these problems for a long time and they know exactly what
+
+374
+00:23:50,040 --> 00:23:54,320
+they want and they've already got an idea of, you know, exactly how to kind of organize
+
+375
+00:23:54,320 --> 00:23:58,440
+the logic of, you know, what, what a correct annotation looks like.
+
+376
+00:23:58,440 --> 00:24:02,000
+And in those cases, it can be relatively straightforward for us to move that right into
+
+377
+00:24:02,000 --> 00:24:03,160
+our platform.
+
+378
+00:24:03,160 --> 00:24:09,040
+In other cases, you know, we've got customers that, you know, they know the types of models
+
+379
+00:24:09,040 --> 00:24:13,360
+they want to build, they've been struggling and they may even want, you know, some initial
+
+380
+00:24:13,360 --> 00:24:17,760
+consulting on, you know, what types of data are available to us?
+
+381
+00:24:17,760 --> 00:24:25,480
+You know, what can we do to improve, you know, improve the quality of their own models
+
+382
+00:24:25,480 --> 00:24:27,920
+and we can do some initial consulting there as well.
+
+383
+00:24:27,920 --> 00:24:30,480
+So it really just depends on the customer.
+
+384
+00:24:30,480 --> 00:24:35,720
+But basically, you know, that yeah, the consulting aspect is setting up all the work, making
+
+385
+00:24:35,720 --> 00:24:41,600
+sure we design the task correctly, going through an iterative, you know, process in the
+
+386
+00:24:41,600 --> 00:24:45,720
+beginning with the customer where, you know, we say, okay, we think we understand your
+
+387
+00:24:45,720 --> 00:24:48,520
+specs, you know, we've designed the task the way we think will work.
+
+388
+00:24:48,520 --> 00:24:52,960
+We run, you know, maybe we do a thousand annotations for the customer, return that back
+
+389
+00:24:52,960 --> 00:24:56,840
+to them and they verify, yes, this is what we're looking for, you know, yeah, you're,
+
+390
+00:24:56,840 --> 00:25:01,520
+you know, yeah, the annotators are understanding the task and this looks good before we go
+
+391
+00:25:01,520 --> 00:25:02,520
+to scale.
+
+392
+00:25:02,520 --> 00:25:09,960
+Okay, and so you mentioned a bunch of things that customers have typically tried before
+
+393
+00:25:09,960 --> 00:25:11,560
+they come to you.
+
+394
+00:25:11,560 --> 00:25:16,440
+Are you doing all those things as well, plus some other things like, for example, you
+
+395
+00:25:16,440 --> 00:25:22,400
+know, farming the labeling out to multiple people and doing some kind of quorum or voting
+
+396
+00:25:22,400 --> 00:25:24,000
+or something like that.
+
+397
+00:25:24,000 --> 00:25:25,000
+Right.
+
+398
+00:25:25,000 --> 00:25:26,000
+So, so no.
+
+399
+00:25:26,000 --> 00:25:27,000
+Okay.
+
+400
+00:25:27,000 --> 00:25:29,640
+So, yeah, the simple answer is no.
+
+401
+00:25:29,640 --> 00:25:34,680
+So, yeah, so we are not doing crowd sourcing.
+
+402
+00:25:34,680 --> 00:25:39,680
+So first of all, we don't use mechanical turf, we don't use any external community, we
+
+403
+00:25:39,680 --> 00:25:45,480
+use our own community through our spare five app and through the web that are, you know,
+
+404
+00:25:45,480 --> 00:25:49,960
+everyone is fully vetted, we have great detailed information on our users, we get Facebook
+
+405
+00:25:49,960 --> 00:25:54,960
+and LinkedIn data from our users, we do lots of survey and skill assessments, we're continuously
+
+406
+00:25:54,960 --> 00:26:01,440
+monitoring their, their tasking behaviors in real time, monitoring the quality of, you
+
+407
+00:26:01,440 --> 00:26:03,760
+know, of the tasks that are being submitted.
+
+408
+00:26:03,760 --> 00:26:06,520
+And so, but we are not crowd sourcing.
+
+409
+00:26:06,520 --> 00:26:12,160
+So on the flip side, what we do is we get really, really good at understanding the quality
+
+410
+00:26:12,160 --> 00:26:18,840
+of the work that the, that the community members are able to provide so that we are targeting,
+
+411
+00:26:18,840 --> 00:26:22,920
+we're targeting the right users from the beginning, right?
+
+412
+00:26:22,920 --> 00:26:27,040
+And then, so we've got predictive models in place to identify, when a new task comes
+
+413
+00:26:27,040 --> 00:26:33,680
+in, we can identify who are the users that we believe are most likely to do well on
+
+414
+00:26:33,680 --> 00:26:34,680
+that task.
+
+415
+00:26:34,680 --> 00:26:40,280
+And so, we can initially target the right subset of our community, then we turn the
+
+416
+00:26:40,280 --> 00:26:47,200
+task on and we have a real time monitoring system, so we, we turn on that process and
+
+417
+00:26:47,200 --> 00:26:52,800
+then as soon as the task is live, all of that real time monitoring is feeding back into
+
+418
+00:26:52,800 --> 00:26:59,320
+our predictive models for quality assessment on the user, and so we're making real time
+
+419
+00:26:59,320 --> 00:27:06,360
+decisions about when to potentially remove access to a particular, for a particular
+
+420
+00:27:06,360 --> 00:27:10,680
+user because we're not seeing the level of quality that we need.
+
+421
+00:27:10,680 --> 00:27:16,320
+And so we have a kind of that user quality model running in real time, and then we also
+
+422
+00:27:16,320 --> 00:27:20,040
+have an additional layer, which is an answer quality model.
+
+423
+00:27:20,040 --> 00:27:27,640
+So depending on the task, for some, for some task types, there are other types of data
+
+424
+00:27:27,640 --> 00:27:31,480
+and information available just based on the answer itself that's provided, and so we
+
+425
+00:27:31,480 --> 00:27:35,160
+have that additional layer just to make sure that the answer itself is, is meeting our
+
+426
+00:27:35,160 --> 00:27:36,160
+quality bar.
+
+427
+00:27:36,160 --> 00:27:37,160
+Okay.
+
+428
+00:27:37,160 --> 00:27:38,160
+Great.
+
+429
+00:27:38,160 --> 00:27:39,160
+That's interesting.
+
+430
+00:27:39,160 --> 00:27:44,760
+My initial reaction was, it sounds like crowdsourcing, but, you know, semantics here,
+
+431
+00:27:44,760 --> 00:27:49,280
+but it sounds like the key distinction that you guys would make is that, you know, with
+
+432
+00:27:49,280 --> 00:27:53,920
+crowdsourcing, you kind of put the task out there, and anyone can kind of take it, and
+
+433
+00:27:53,920 --> 00:28:00,600
+what you guys are doing is, you know, targeting it to specific people who developed a relationship
+
+434
+00:28:00,600 --> 00:28:01,600
+with over time.
+
+435
+00:28:01,600 --> 00:28:03,120
+Is that the right way to think about it?
+
+436
+00:28:03,120 --> 00:28:04,120
+That's true.
+
+437
+00:28:04,120 --> 00:28:07,240
+And I think, you know, it is a little bit semantics and just culturally help help people
+
+438
+00:28:07,240 --> 00:28:13,880
+use the terms, but I think that crowdsourcing often connotates that you're going to send
+
+439
+00:28:13,880 --> 00:28:21,200
+a question to multiple users and then assemble a correct answer from those multiple users.
+
+440
+00:28:21,200 --> 00:28:22,200
+Okay.
+
+441
+00:28:22,200 --> 00:28:24,640
+And so that's kind of the main distinction that I make.
+
+442
+00:28:24,640 --> 00:28:27,880
+So a lot, you know, oftentimes if we're talking to customers, especially if they've already
+
+443
+00:28:27,880 --> 00:28:31,880
+got a lot of experience themselves working with Mechanical Turk, they're really interested
+
+444
+00:28:31,880 --> 00:28:34,960
+in, you know, well, what are the metrics you're using to decide whether you have enough
+
+445
+00:28:34,960 --> 00:28:40,320
+consensus on a specific answer to move forward and how many users do you need to ask each
+
+446
+00:28:40,320 --> 00:28:44,280
+question and that sort of thing, and in our, in our setting, it's actually irrelevant.
+
+447
+00:28:44,280 --> 00:28:48,080
+That's not, that's not the approach we use, that's not the perspective that we follow.
+
+448
+00:28:48,080 --> 00:28:49,080
+Okay.
+
+449
+00:28:49,080 --> 00:28:57,360
+So is it fair then to think about this space as like Mechanical Turk is an API on top
+
+450
+00:28:57,360 --> 00:29:00,080
+of the people, but you have to build everything.
+
+451
+00:29:00,080 --> 00:29:04,080
+You're figuring out, figuring out how to get them your tasks, you're figuring out how
+
+452
+00:29:04,080 --> 00:29:07,560
+to do all this voting stuff so that you can get decent quality data, whatever.
+
+453
+00:29:07,560 --> 00:29:08,560
+Yeah.
+
+454
+00:29:08,560 --> 00:29:13,520
+Yeah, you're writing the instructions, you're doing, yeah, you're filtering, you know,
+
+455
+00:29:13,520 --> 00:29:17,320
+which users are you going to use, trying, trying to track their quality, all of those things
+
+456
+00:29:17,320 --> 00:29:18,320
+yourself.
+
+457
+00:29:18,320 --> 00:29:19,320
+Right.
+
+458
+00:29:19,320 --> 00:29:25,320
+And then crowd flower, who I think a few months ago announced some specific, some specific
+
+459
+00:29:25,320 --> 00:29:31,600
+offerings around labeling that I covered on the podcast, like they're kind of taking,
+
+460
+00:29:31,600 --> 00:29:34,600
+they actually originally were on Mechanical Turk, but I think that's right.
+
+461
+00:29:34,600 --> 00:29:35,600
+That's right.
+
+462
+00:29:35,600 --> 00:29:40,720
+And they're kind of a slightly higher level of abstraction that's doing a little bit
+
+463
+00:29:40,720 --> 00:29:45,880
+more of the stuff, but still fundamentally this, we're going to take the task and push
+
+464
+00:29:45,880 --> 00:29:49,880
+it to a bunch of people and choose the results.
+
+465
+00:29:49,880 --> 00:29:54,960
+And you guys are, you know, we're going to look at your problem and design a solution
+
+466
+00:29:54,960 --> 00:29:55,960
+to get you quality data.
+
+467
+00:29:55,960 --> 00:29:57,960
+That's exactly right.
+
+468
+00:29:57,960 --> 00:29:59,400
+That's exactly right.
+
+469
+00:29:59,400 --> 00:30:01,400
+Okay.
+
+470
+00:30:01,400 --> 00:30:06,200
+And can you talk a little bit about, you know, as a statistician, like what are some
+
+471
+00:30:06,200 --> 00:30:12,320
+of the interesting problems that you've, you've come up against and helping to build this
+
+472
+00:30:12,320 --> 00:30:13,840
+for, for spare five?
+
+473
+00:30:13,840 --> 00:30:14,840
+Yeah.
+
+474
+00:30:14,840 --> 00:30:22,280
+I think, I mean, the, the most interesting and challenging problem for me was just how,
+
+475
+00:30:22,280 --> 00:30:28,160
+how do we design a system and a platform that can work in a general sense at scale?
+
+476
+00:30:28,160 --> 00:30:34,920
+So, you know, when I, when not, when I started out, you know, we were still doing, there
+
+477
+00:30:34,920 --> 00:30:40,200
+was still a component of manual review internally just to, to make sure the various processes
+
+478
+00:30:40,200 --> 00:30:43,040
+that we had in place were working as expected.
+
+479
+00:30:43,040 --> 00:30:47,040
+And we had a lot of tailored, you know, for this task type, we managed it in this way,
+
+480
+00:30:47,040 --> 00:30:49,000
+for this task type, we managed it in this way.
+
+481
+00:30:49,000 --> 00:30:56,000
+And so when I came in, that was one of my initial goals was, how do I, how do I come to understand
+
+482
+00:30:56,000 --> 00:31:00,680
+this entire system with all the complexity for so many different types of tasks and we
+
+483
+00:31:00,680 --> 00:31:04,880
+have objective tasks, we have subjective tasks, we're looking at images, we're looking
+
+484
+00:31:04,880 --> 00:31:08,520
+at text, we're doing all of these different types of problems.
+
+485
+00:31:08,520 --> 00:31:15,920
+How do we, how do we develop a cohesive system to attack and address all of these different
+
+486
+00:31:15,920 --> 00:31:18,920
+tasks types and ensure the right level of quality?
+
+487
+00:31:18,920 --> 00:31:24,600
+So that was, that was really exciting for me and the, you know, and that's been the
+
+488
+00:31:24,600 --> 00:31:28,840
+focus, you know, over the last several months and, and now we're there.
+
+489
+00:31:28,840 --> 00:31:33,240
+And, and so that to me has just been a really exciting accomplishment.
+
+490
+00:31:33,240 --> 00:31:38,560
+That sounds pretty huge, can you talk, or can you talk to whatever level of detail you
+
+491
+00:31:38,560 --> 00:31:39,560
+can?
+
+492
+00:31:39,560 --> 00:31:40,560
+Yeah, I know.
+
+493
+00:31:40,560 --> 00:31:41,560
+Pipelines, slash.
+
+494
+00:31:41,560 --> 00:31:42,560
+Sure.
+
+495
+00:31:42,560 --> 00:31:43,560
+Oh, yeah, yeah.
+
+496
+00:31:43,560 --> 00:31:46,960
+Oh, sorry, can you, could you clarify the last part?
+
+497
+00:31:46,960 --> 00:31:52,160
+Oh, you're, you're, you're data science pipeline slash technology stack slash, you know,
+
+498
+00:31:52,160 --> 00:31:59,680
+kind of anything that can help folks get a sense for, you know, as they're building labeling
+
+499
+00:31:59,680 --> 00:32:04,720
+platforms, what are some of the, yeah, things that they need to consider?
+
+500
+00:32:04,720 --> 00:32:05,720
+Sure.
+
+501
+00:32:05,720 --> 00:32:09,280
+Well, so I can tell you just for the tech stack that we have here.
+
+502
+00:32:09,280 --> 00:32:16,480
+So on the backend, we're using Ruby, we use our Postgres, and then we have a lot of
+
+503
+00:32:16,480 --> 00:32:21,840
+different AWS services, and then on the front end, we have a web client, as well as
+
+504
+00:32:21,840 --> 00:32:25,800
+a native iOS application.
+
+505
+00:32:25,800 --> 00:32:34,680
+And yeah, and so let's see, yeah, so I think that there's a little bit, sorry, maybe you
+
+506
+00:32:34,680 --> 00:32:37,280
+can give me a little more guidance on exactly what direction you want to.
+
+507
+00:32:37,280 --> 00:32:38,280
+Oh, yeah.
+
+508
+00:32:38,280 --> 00:32:44,720
+So, so that, that is very helpful on understanding the, the tech platform, it sounds like you
+
+509
+00:32:44,720 --> 00:32:50,000
+guys are taking advantage of the cloud and AWS in particular.
+
+510
+00:32:50,000 --> 00:32:55,040
+As you, you know, when you thought about this challenge of, okay, we've got all these
+
+511
+00:32:55,040 --> 00:33:02,560
+different types of data, how do we unify this into a single platform that eliminates
+
+512
+00:33:02,560 --> 00:33:07,040
+like the, a lot of the manual steps that you described?
+
+513
+00:33:07,040 --> 00:33:14,000
+Are there any lessons that you've learned about building data science pipelines that helped
+
+514
+00:33:14,000 --> 00:33:18,240
+you achieve that goal that you think would be transferable to other people?
+
+515
+00:33:18,240 --> 00:33:22,760
+Yeah, and I, I don't know that this is specific to data labeling.
+
+516
+00:33:22,760 --> 00:33:28,160
+I would say, I would say one thing that I've learned that, that's worked really well, both
+
+517
+00:33:28,160 --> 00:33:33,000
+here and in previous companies that I've been in, in terms of integrating data science
+
+518
+00:33:33,000 --> 00:33:39,200
+with the existing tech and existing product is, I think what's, what's really essential
+
+519
+00:33:39,200 --> 00:33:46,560
+is you want, you want your data scientists to be focused on prototyping, like rapid prototyping.
+
+520
+00:33:46,560 --> 00:33:51,000
+You want, you want them to be really nimble in terms of, you know, hey, if, if something
+
+521
+00:33:51,000 --> 00:33:54,960
+about the product changes next week, we want to be able to like dig into the guts of
+
+522
+00:33:54,960 --> 00:33:59,440
+our models, make our changes really quickly and be able to push that back out into production
+
+523
+00:33:59,440 --> 00:34:01,240
+in a seamless way.
+
+524
+00:34:01,240 --> 00:34:07,640
+And, and you don't want your data scientists to have to be spending the majority of their
+
+525
+00:34:07,640 --> 00:34:12,920
+time, you know, maintaining and these larger systems and, and really having to, having
+
+526
+00:34:12,920 --> 00:34:17,520
+to be so focused on the engineering side in terms of, you know, let's make sure everything
+
+527
+00:34:17,520 --> 00:34:20,320
+staying up and stable and doing what it needs to be doing.
+
+528
+00:34:20,320 --> 00:34:25,760
+So, so one solution in the team that I led previously at my previous company, one solution
+
+529
+00:34:25,760 --> 00:34:30,880
+that we came to, which worked really well was, we developed, so we still wanted our data
+
+530
+00:34:30,880 --> 00:34:36,760
+scientists to be able to, to prototype as quickly as possible.
+
+531
+00:34:36,760 --> 00:34:40,320
+So I would say, you know, R is fantastic in terms of prototyping.
+
+532
+00:34:40,320 --> 00:34:45,000
+You have your, you know, the graphics and visualization component is, you know, on,
+
+533
+00:34:45,000 --> 00:34:49,960
+you know, is unsurpassed by, by any other software, you know, you have Python, has lots
+
+534
+00:34:49,960 --> 00:34:54,440
+of packages that are fantastic and you can definitely do some good data visualization
+
+535
+00:34:54,440 --> 00:34:55,440
+there.
+
+536
+00:34:55,440 --> 00:35:01,200
+But our team was focused on R and so we wanted our, our teams to be able to, to do their
+
+537
+00:35:01,200 --> 00:35:04,840
+modeling and we had a lot of predictive modeling kinds of work going on there.
+
+538
+00:35:04,840 --> 00:35:09,640
+We wanted our data scientists to be able to do the predictive modeling in R and hand
+
+539
+00:35:09,640 --> 00:35:17,800
+off the actual model component to the larger system in such a way that, you know, it was
+
+540
+00:35:17,800 --> 00:35:21,240
+sort of, you know, plug it in so that you have, you know, these are the inputs coming
+
+541
+00:35:21,240 --> 00:35:25,920
+into the model, these are the outputs coming out of R and we want that, we want to be
+
+542
+00:35:25,920 --> 00:35:31,520
+able to just take that, that chunk of code that is the model, pass that over into production
+
+543
+00:35:31,520 --> 00:35:37,880
+and, and get that plugged in and going at scale and, and that, you know, what, what worked
+
+544
+00:35:37,880 --> 00:35:43,200
+really well, what we've done in both situations is we've used, actually used our serve.
+
+545
+00:35:43,200 --> 00:35:48,680
+It doesn't have a, a fabulous amount of documentation out there, but it, it works really well and
+
+546
+00:35:48,680 --> 00:35:55,840
+there's a, yeah, so anyway, so, so building out a system with our serve, building out some
+
+547
+00:35:55,840 --> 00:36:02,000
+software around that to allow kind of, just the kind of input output portion to be handed
+
+548
+00:36:02,000 --> 00:36:06,960
+over so that, so that you can have, you know, other standard systems, you know, picking
+
+549
+00:36:06,960 --> 00:36:10,800
+it up and hitting your models and, you know, moving that all into the cloud so that you
+
+550
+00:36:10,800 --> 00:36:13,960
+can, you know, if you, if you start getting a lot more volume hitting your model than
+
+551
+00:36:13,960 --> 00:36:17,720
+you had originally anticipated, right, you just spin up some additional clusters and, and
+
+552
+00:36:17,720 --> 00:36:19,520
+manage that traffic.
+
+553
+00:36:19,520 --> 00:36:22,920
+Is our serve open source?
+
+554
+00:36:22,920 --> 00:36:23,920
+Yes.
+
+555
+00:36:23,920 --> 00:36:24,920
+Okay.
+
+556
+00:36:24,920 --> 00:36:32,520
+And so what I, I think what I'm hearing is that you've got the, the exploration and the
+
+557
+00:36:32,520 --> 00:36:38,480
+model development, that's all happening in R and then, you're able to take those models
+
+558
+00:36:38,480 --> 00:36:44,480
+and essentially deploy them into our serve and use that for prediction as opposed to
+
+559
+00:36:44,480 --> 00:36:48,960
+having to throw that over to an engineering group to, exactly, using something else.
+
+560
+00:36:48,960 --> 00:36:52,840
+Yeah, exactly, exactly, and what I would say too is, I mean, it really depends on the
+
+561
+00:36:52,840 --> 00:36:53,880
+algorithm that you come up with.
+
+562
+00:36:53,880 --> 00:36:56,880
+If you're prototyping in the end, you end up using something that's mathematically
+
+563
+00:36:56,880 --> 00:37:02,400
+very simple, then, you know, then maybe you just pass along, you know, your pseudocode,
+
+564
+00:37:02,400 --> 00:37:03,400
+you know what I mean?
+
+565
+00:37:03,400 --> 00:37:05,000
+I'm like, okay, these are the kinds of things that I've done.
+
+566
+00:37:05,000 --> 00:37:08,360
+These are the steps and you have that re-implemented in a faster language.
+
+567
+00:37:08,360 --> 00:37:15,120
+But, but if you're using, you know, there are many, many fantastic predictive modeling packages
+
+568
+00:37:15,120 --> 00:37:21,160
+available directly in R and if you, if you get your system set up correctly, you know,
+
+569
+00:37:21,160 --> 00:37:29,480
+we were using, you know, we had predictive models with, you know, 1,000 features in real
+
+570
+00:37:29,480 --> 00:37:34,280
+time returning results in about 100 milliseconds, right, coming straight out of R. If all you're
+
+571
+00:37:34,280 --> 00:37:38,400
+hitting R for is the actual modeling component, right, once it's already constructed.
+
+572
+00:37:38,400 --> 00:37:44,160
+So, you know, and I think, and I think keeping the model code in R in that sense just makes
+
+573
+00:37:44,160 --> 00:37:48,440
+it all that much easier for, you know, any modifications down the line that need to be
+
+574
+00:37:48,440 --> 00:37:53,840
+made and, you know, and, and I think another layer that you can add on top of that, you
+
+575
+00:37:53,840 --> 00:37:59,240
+know, which can work really well is, is if you can start to integrate some automated model
+
+576
+00:37:59,240 --> 00:38:03,640
+rebuilding mechanisms, right, so you've got, got one system going on that's pulling in
+
+577
+00:38:03,640 --> 00:38:07,880
+new data, continuously updating your models and then you've got another system that's just
+
+578
+00:38:07,880 --> 00:38:12,080
+plugging into the existing most current model to actually get the results that can work
+
+579
+00:38:12,080 --> 00:38:13,080
+really well.
+
+580
+00:38:13,080 --> 00:38:21,320
+It's interesting, I'm glad you raised that I was thinking about that as well and if you,
+
+581
+00:38:21,320 --> 00:38:25,680
+what you've done to address like model drift over time and if you've been able to build
+
+582
+00:38:25,680 --> 00:38:29,200
+in like 360 degree feedback loops, that kind of thing.
+
+583
+00:38:29,200 --> 00:38:34,880
+Yeah, so just somewhat, I haven't gone too deep on those sorts of things, so what, what,
+
+584
+00:38:34,880 --> 00:38:42,360
+I have some tricks that I like to use in terms of, kind of monitor, model monitoring, when
+
+585
+00:38:42,360 --> 00:38:45,640
+you are doing automatic updates and things and so there's various kinds of sanity checks.
+
+586
+00:38:45,640 --> 00:38:50,720
+There's a, there's a paper out of Microsoft that was just fantastic in terms of like these
+
+587
+00:38:50,720 --> 00:38:55,120
+are all the things that can go wrong when you put your model on autopilot and right and
+
+588
+00:38:55,120 --> 00:39:00,560
+these are the things that you need to be monitoring and so with just, they're like seven step-by-step
+
+589
+00:39:00,560 --> 00:39:04,800
+suggestions in terms of things that you might want to get implemented and that's fantastic.
+
+590
+00:39:04,800 --> 00:39:08,320
+I can, I can try and pull up that paper for you.
+
+591
+00:39:08,320 --> 00:39:13,040
+Oh, that would be amazing. That sounds like a great resource.
+
+592
+00:39:13,040 --> 00:39:15,040
+Yes.
+
+593
+00:39:15,040 --> 00:39:17,040
+Is it relatively recent?
+
+594
+00:39:17,040 --> 00:39:19,320
+I believe it was in the last couple of years.
+
+595
+00:39:19,320 --> 00:39:22,440
+Yeah, I've got to look it up.
+
+596
+00:39:22,440 --> 00:39:27,840
+Just making it in okay.
+
+597
+00:39:27,840 --> 00:39:29,160
+Yep.
+
+598
+00:39:29,160 --> 00:39:34,800
+And now you guys are focused on computer vision and natural language.
+
+599
+00:39:34,800 --> 00:39:35,800
+Is that right?
+
+600
+00:39:35,800 --> 00:39:36,800
+Yeah, that's right.
+
+601
+00:39:36,800 --> 00:39:37,800
+That's our focus right now.
+
+602
+00:39:37,800 --> 00:39:42,400
+And how do those domains influence the approach you've taken?
+
+603
+00:39:42,400 --> 00:39:45,720
+Yeah, that's an interesting question.
+
+604
+00:39:45,720 --> 00:39:51,800
+So clearly with computer vision, we're dealing with image data, right?
+
+605
+00:39:51,800 --> 00:39:56,680
+So I think it's had a huge influence in terms of the types of tooling that we're building
+
+606
+00:39:56,680 --> 00:40:02,520
+out to allow our users to correctly annotate the data.
+
+607
+00:40:02,520 --> 00:40:10,120
+Our end resulting data is only as good as the tooling allows for user accuracy, right?
+
+608
+00:40:10,120 --> 00:40:14,880
+So it's definitely had a major influence in the types of tasks, the types of tooling,
+
+609
+00:40:14,880 --> 00:40:17,120
+things like that that we've been designing.
+
+610
+00:40:17,120 --> 00:40:28,040
+But I would say at this point, in the general system for QA that we've constructed, that
+
+611
+00:40:28,040 --> 00:40:31,200
+is general, it's not specific in those areas.
+
+612
+00:40:31,200 --> 00:40:39,480
+But what we would like to do, continue, I guess, delving into, is internally, what can
+
+613
+00:40:39,480 --> 00:40:44,360
+we do in terms of natural language and computer vision modeling ourselves internally to improve
+
+614
+00:40:44,360 --> 00:40:46,480
+the quality of the results itself?
+
+615
+00:40:46,480 --> 00:40:50,840
+And that's something that we're just now starting to dive into.
+
+616
+00:40:50,840 --> 00:40:51,840
+Okay.
+
+617
+00:40:51,840 --> 00:40:59,760
+So in providing the services that you guys provide, are you needing to get into things
+
+618
+00:40:59,760 --> 00:41:05,080
+like deep learning and other things, or are these more the things that the customers
+
+619
+00:41:05,080 --> 00:41:11,840
+would use to train with the data that you're providing?
+
+620
+00:41:11,840 --> 00:41:13,880
+Yeah, that's right.
+
+621
+00:41:13,880 --> 00:41:18,320
+So we purely handle delivery of the training data.
+
+622
+00:41:18,320 --> 00:41:23,600
+So we can do some consulting in terms of, yeah, if you use data like this, this is
+
+623
+00:41:23,600 --> 00:41:27,240
+how that may affect the models, but it's really just more of a consulting aspect.
+
+624
+00:41:27,240 --> 00:41:30,920
+We're not doing any of the model training ourselves, we're not hosting any models, nothing
+
+625
+00:41:30,920 --> 00:41:31,920
+like that.
+
+626
+00:41:31,920 --> 00:41:32,920
+Okay.
+
+627
+00:41:32,920 --> 00:41:33,920
+Okay.
+
+628
+00:41:33,920 --> 00:41:34,920
+Interesting.
+
+629
+00:41:34,920 --> 00:41:41,080
+Do you have a set of, you know, they're like a top three list of things that you would
+
+630
+00:41:41,080 --> 00:41:45,280
+want everyone to know about training data?
+
+631
+00:41:45,280 --> 00:41:46,280
+Oh.
+
+632
+00:41:46,280 --> 00:41:50,120
+That's a good question.
+
+633
+00:41:50,120 --> 00:41:51,520
+Let's see.
+
+634
+00:41:51,520 --> 00:41:56,840
+Yeah, I think, yeah, I mean, I think anyone who's got, you know, any experience in the
+
+635
+00:41:56,840 --> 00:42:00,600
+field knows that, you know, your model is only as good as your training data.
+
+636
+00:42:00,600 --> 00:42:05,640
+If you're, if you're training data really only represents, you know, a subset, a specific
+
+637
+00:42:05,640 --> 00:42:13,480
+subset of the space in which you expect your model to function, then, you know, you're
+
+638
+00:42:13,480 --> 00:42:18,360
+going to have, you're definitely going to have low accuracy in, in areas where you haven't
+
+639
+00:42:18,360 --> 00:42:20,880
+provided as much training data.
+
+640
+00:42:20,880 --> 00:42:25,760
+So definitely you need good, good coverage in terms of, you know, whatever, whatever the
+
+641
+00:42:25,760 --> 00:42:30,440
+inputs that you're going to be anticipating, that will be coming into this final model
+
+642
+00:42:30,440 --> 00:42:33,920
+that you build, you want to make sure that your training data represents those inputs
+
+643
+00:42:33,920 --> 00:42:37,920
+as closely as possible in order to get the best results.
+
+644
+00:42:37,920 --> 00:42:38,920
+Okay.
+
+645
+00:42:38,920 --> 00:42:39,920
+One more?
+
+646
+00:42:39,920 --> 00:42:40,920
+One more.
+
+647
+00:42:40,920 --> 00:42:54,600
+Well, and I think, I guess one interesting thing to think about is it, you know, it depends,
+
+648
+00:42:54,600 --> 00:42:58,360
+I think in the computer vision and natural language applications that we're focused
+
+649
+00:42:58,360 --> 00:43:08,200
+on, the quality of the data is really essential, but in other areas, there are situations
+
+650
+00:43:08,200 --> 00:43:13,800
+where you can get away with, you know, less, with lower quality training data, and the
+
+651
+00:43:13,800 --> 00:43:18,000
+model is, you know, as long as the, as long as the patterns are there, the patterns are
+
+652
+00:43:18,000 --> 00:43:22,600
+present, you know, your model, model may still be able to pick up those patterns, right?
+
+653
+00:43:22,600 --> 00:43:29,280
+And so, I guess just keeping in mind what level of quality is important or essential for
+
+654
+00:43:29,280 --> 00:43:33,720
+the type of model that you're building and the type of methods that you're using, you
+
+655
+00:43:33,720 --> 00:43:35,880
+know, there can be some variation there.
+
+656
+00:43:35,880 --> 00:43:36,880
+Okay.
+
+657
+00:43:36,880 --> 00:43:41,400
+How would you characterize the scenarios in which you can get away with the lower quality
+
+658
+00:43:41,400 --> 00:43:42,880
+training data?
+
+659
+00:43:42,880 --> 00:43:50,200
+I would say definitely when you're, when your model is more about summarizing and generalizing
+
+660
+00:43:50,200 --> 00:43:56,160
+the data, then, you know, having a few odd observations in there isn't going to dramatically
+
+661
+00:43:56,160 --> 00:43:59,200
+affect, you know, affect that, that summary.
+
+662
+00:43:59,200 --> 00:44:04,240
+Are there any examples that come to mind of customer space X?
+
+663
+00:44:04,240 --> 00:44:05,240
+Oh.
+
+664
+00:44:05,240 --> 00:44:07,240
+Let's see.
+
+665
+00:44:07,240 --> 00:44:13,080
+Well, I don't know, there's some, well, so here's an interesting example, it's a little
+
+666
+00:44:13,080 --> 00:44:15,000
+bit on the edge of what you're talking about here.
+
+667
+00:44:15,000 --> 00:44:22,800
+So, so Sentient is a customer of ours that is, they're a provider of AI.
+
+668
+00:44:22,800 --> 00:44:28,400
+We have a task that we've been running for them for quite some time now.
+
+669
+00:44:28,400 --> 00:44:35,560
+What they're interested in understanding is user perception of similarities between
+
+670
+00:44:35,560 --> 00:44:37,160
+shoots.
+
+671
+00:44:37,160 --> 00:44:42,200
+So they're building out, you know, they have models that they're building out that
+
+672
+00:44:42,200 --> 00:44:49,440
+are trying to decide what shoes belong together, not from some specific taxonomy or, you know,
+
+673
+00:44:49,440 --> 00:44:51,880
+hierarchy that some human person wrote down.
+
+674
+00:44:51,880 --> 00:44:55,560
+But, you know, like, oh, first you go by color and then by size, nothing like that.
+
+675
+00:44:55,560 --> 00:45:00,560
+What they want to understand is what a human person looking at a collection of shoes, you
+
+676
+00:45:00,560 --> 00:45:05,000
+know, if you say here's one pair of shoes, now look at these other 10 pair of shoes,
+
+677
+00:45:05,000 --> 00:45:06,520
+which one is most similar?
+
+678
+00:45:06,520 --> 00:45:11,280
+And they're really trying to understand the human's perspective of, you know, which of these
+
+679
+00:45:11,280 --> 00:45:12,680
+10 shoes do you think is similar?
+
+680
+00:45:12,680 --> 00:45:14,360
+So, it's a very ambiguous task.
+
+681
+00:45:14,360 --> 00:45:19,640
+It doesn't actually have a right or a wrong answer, but, but when we throw this task out
+
+682
+00:45:19,640 --> 00:45:25,560
+to our users and we return the data back to Sentient, they are able, they've had very good
+
+683
+00:45:25,560 --> 00:45:29,840
+success in terms of improving their models, which, you know, in terms of what types of
+
+684
+00:45:29,840 --> 00:45:35,840
+results they're able to surface at, you know, as a result of getting a very deep understanding
+
+685
+00:45:35,840 --> 00:45:38,880
+of what similarity means at a human level.
+
+686
+00:45:38,880 --> 00:45:45,200
+So, you know, there are many, many varying degrees of, you know, of going, you know, the ambiguity
+
+687
+00:45:45,200 --> 00:45:51,480
+versus, you know, essentially a very precise, you know, correct answer and it just absolutely
+
+688
+00:45:51,480 --> 00:45:54,960
+depends on the model that you're trying to build exactly what you need.
+
+689
+00:45:54,960 --> 00:45:55,960
+Okay.
+
+690
+00:45:55,960 --> 00:45:59,600
+And that example are they ultimately trying to make recommendations or do something?
+
+691
+00:45:59,600 --> 00:46:00,600
+I believe so.
+
+692
+00:46:00,600 --> 00:46:01,600
+I believe so.
+
+693
+00:46:01,600 --> 00:46:02,600
+Okay.
+
+694
+00:46:02,600 --> 00:46:05,600
+Man, I feel like I should have asked you about customer examples.
+
+695
+00:46:05,600 --> 00:46:06,600
+Yeah.
+
+696
+00:46:06,600 --> 00:46:09,360
+That was awesome.
+
+697
+00:46:09,360 --> 00:46:15,600
+Other interesting kind of use cases that you guys have taken on that we can talk about?
+
+698
+00:46:15,600 --> 00:46:16,600
+Sure.
+
+699
+00:46:16,600 --> 00:46:17,600
+Yeah.
+
+700
+00:46:17,600 --> 00:46:18,600
+Well, so here's one we did recently.
+
+701
+00:46:18,600 --> 00:46:20,680
+This was kind of different for us and it was a lot of fun.
+
+702
+00:46:20,680 --> 00:46:28,320
+So there's a company called Init.ai and they're building AI chatbot technology.
+
+703
+00:46:28,320 --> 00:46:35,160
+And so they, they're interested in building these chatbots in specific contexts.
+
+704
+00:46:35,160 --> 00:46:43,000
+And so they really, they need conversation data, like they need, you know, a text of conversations
+
+705
+00:46:43,000 --> 00:46:47,840
+in these contexts and they're having a difficult time going out and, you know, finding that
+
+706
+00:46:47,840 --> 00:46:49,720
+data publicly available, things like that.
+
+707
+00:46:49,720 --> 00:46:55,200
+And so, so we were talking with them, you know, and, you know, we've already typically
+
+708
+00:46:55,200 --> 00:47:00,120
+done lots of categorization of text, we'll do what's called like aspect opinion linking
+
+709
+00:47:00,120 --> 00:47:06,000
+of text, you know, various kinds of NL tasks, but what, what we ended up doing for Init
+
+710
+00:47:06,000 --> 00:47:14,560
+was we actually helped them produce the conversations and then took those conversations and labeled
+
+711
+00:47:14,560 --> 00:47:16,720
+the data, the text of those conversations.
+
+712
+00:47:16,720 --> 00:47:21,360
+So we actually ended up designing a task that we put out to our community, which was,
+
+713
+00:47:21,360 --> 00:47:26,520
+you know, pretend you're selling flowers and, you know, and now you'd be the, be the
+
+714
+00:47:26,520 --> 00:47:29,400
+person selling flowers and then to another user we're saying, you know, pretend you're
+
+715
+00:47:29,400 --> 00:47:30,400
+buying flowers.
+
+716
+00:47:30,400 --> 00:47:34,240
+And maybe we, you know, give some guidance, things that the customer is interested in learning
+
+717
+00:47:34,240 --> 00:47:35,240
+more about.
+
+718
+00:47:35,240 --> 00:47:40,000
+And we actually send, send the task back and forth to collect a complete conversation.
+
+719
+00:47:40,000 --> 00:47:45,160
+So, yes, I think we assembled something, I forget on the, I think it was something like
+
+720
+00:47:45,160 --> 00:47:47,360
+10,000 conversations that we assembled.
+
+721
+00:47:47,360 --> 00:47:51,360
+And then for each of those conversations, we went back and we did the labeling that they
+
+722
+00:47:51,360 --> 00:47:57,080
+needed in order to understand the content of what's going on, you know, in those conversations
+
+723
+00:47:57,080 --> 00:47:59,600
+to help train the AI models that they're building.
+
+724
+00:47:59,600 --> 00:48:00,920
+So that was, that was fun.
+
+725
+00:48:00,920 --> 00:48:04,800
+That was fun for us in terms of just designing it out, but it was also fun for the community.
+
+726
+00:48:04,800 --> 00:48:07,880
+We got so much feedback from people saying, like, I love this.
+
+727
+00:48:07,880 --> 00:48:13,040
+I could do this all day, you know, because you're just, and the conversations were fantastic.
+
+728
+00:48:13,040 --> 00:48:16,400
+So I mean, it was, it was really, it was a lot of fun.
+
+729
+00:48:16,400 --> 00:48:17,400
+That's awesome.
+
+730
+00:48:17,400 --> 00:48:18,400
+That's awesome.
+
+731
+00:48:18,400 --> 00:48:25,120
+That reminds me of someone had a month ago or so set up basically these three kind of
+
+732
+00:48:25,120 --> 00:48:30,240
+conversational chatbots in a, in a chat room and they were just talking, talking to each
+
+733
+00:48:30,240 --> 00:48:31,240
+other.
+
+734
+00:48:31,240 --> 00:48:34,840
+And you sit there and monitor and when they got stuck, he just threw out some random thing
+
+735
+00:48:34,840 --> 00:48:35,840
+to get them.
+
+736
+00:48:35,840 --> 00:48:37,600
+Oh, that's fabulous.
+
+737
+00:48:37,600 --> 00:48:39,960
+Oh, I gotta look that up.
+
+738
+00:48:39,960 --> 00:48:41,440
+That's fantastic.
+
+739
+00:48:41,440 --> 00:48:44,560
+Oh, that's all.
+
+740
+00:48:44,560 --> 00:48:49,400
+So I don't know that I'll be able to find that, but if I can, I'll stick it in the
+
+741
+00:48:49,400 --> 00:48:50,400
+show.
+
+742
+00:48:50,400 --> 00:48:51,400
+Okay, that'd be great.
+
+743
+00:48:51,400 --> 00:48:52,400
+That'd be fantastic.
+
+744
+00:48:52,400 --> 00:48:59,680
+So one of your top, one of your top three things was subsetting the space, which reminded
+
+745
+00:48:59,680 --> 00:49:02,920
+me that we needed to talk about this diversity point.
+
+746
+00:49:02,920 --> 00:49:03,920
+Oh, right.
+
+747
+00:49:03,920 --> 00:49:07,440
+I want you to kind of start us off in this discussion with, you know, the examples that
+
+748
+00:49:07,440 --> 00:49:10,960
+come to mind for you of like where it's been done really poorly.
+
+749
+00:49:10,960 --> 00:49:13,760
+Well, well, actually, I have an example.
+
+750
+00:49:13,760 --> 00:49:18,800
+This is something we actually had an article in TechCrunch about this recently.
+
+751
+00:49:18,800 --> 00:49:22,600
+So we've been thinking about this a lot just since, you know, it's obviously a benefit
+
+752
+00:49:22,600 --> 00:49:26,120
+that we can provide to our customers to actually get the diversity and the, you know, the community
+
+753
+00:49:26,120 --> 00:49:27,440
+that they need.
+
+754
+00:49:27,440 --> 00:49:31,840
+But so we did a little experiment in how, so we started thinking about the question
+
+755
+00:49:31,840 --> 00:49:34,520
+of, you know, how different are the results?
+
+756
+00:49:34,520 --> 00:49:38,560
+Like how different does the training data look if you're sampling, you know, various types
+
+757
+00:49:38,560 --> 00:49:40,240
+of populations?
+
+758
+00:49:40,240 --> 00:49:44,160
+And so, you know, and it turns out we really didn't have to dig very deep.
+
+759
+00:49:44,160 --> 00:49:50,000
+So one of the first data sets that I went to analyze, we had a task that we had put
+
+760
+00:49:50,000 --> 00:49:56,040
+out to our users just as sort of a fun mental break once in a while, which was called rate
+
+761
+00:49:56,040 --> 00:49:57,040
+the puppies.
+
+762
+00:49:57,040 --> 00:50:02,720
+And so we just show you pictures of puppies and then you rate them from one to five stars,
+
+763
+00:50:02,720 --> 00:50:06,120
+you know, cute or okay, maybe not so cute.
+
+764
+00:50:06,120 --> 00:50:10,400
+And so we've collected, we've been collecting that data actually over quite a long period
+
+765
+00:50:10,400 --> 00:50:14,640
+of time, just, you know, a few puppies to rate, you know, here and there for our users.
+
+766
+00:50:14,640 --> 00:50:18,920
+And so the first thing I thought was, okay, let me just take a look at the data and see
+
+767
+00:50:18,920 --> 00:50:20,640
+how the ratings differ by gender.
+
+768
+00:50:20,640 --> 00:50:26,240
+And so I split the data by gender and it was just dramatic and obvious.
+
+769
+00:50:26,240 --> 00:50:31,720
+Difference that the women were rating the puppies as cuter consistently across the board,
+
+770
+00:50:31,720 --> 00:50:33,480
+across all puppies.
+
+771
+00:50:33,480 --> 00:50:39,640
+And with, and there was a wider gap on the cuter end of the spectrum and the gap was more
+
+772
+00:50:39,640 --> 00:50:44,680
+narrow on the not so cute end of the spectrum, but it was, but it was still there.
+
+773
+00:50:44,680 --> 00:50:46,720
+And yeah, it was just striking, right?
+
+774
+00:50:46,720 --> 00:50:50,800
+And it's, you know, it's a simple example and, you know, okay, well, how, how, doesn't
+
+775
+00:50:50,800 --> 00:50:54,680
+matter, you know, how cute the women of the matter rating the puppy is, okay, probably
+
+776
+00:50:54,680 --> 00:51:01,200
+not, but it's such a, it's such a clear example of the difference, differences that you can
+
+777
+00:51:01,200 --> 00:51:06,800
+get in the training data itself, right, just by sampling a different population.
+
+778
+00:51:06,800 --> 00:51:11,320
+And of course, the training data is what's guiding your model in terms of the output that's
+
+779
+00:51:11,320 --> 00:51:12,320
+coming up together.
+
+780
+00:51:12,320 --> 00:51:13,320
+Mm-hmm.
+
+781
+00:51:13,320 --> 00:51:14,320
+Yeah.
+
+782
+00:51:14,320 --> 00:51:18,920
+But yeah, so that's an article in TechCrunch, we can put a link to that article as well.
+
+783
+00:51:18,920 --> 00:51:19,920
+Okay, nice, nice.
+
+784
+00:51:19,920 --> 00:51:32,040
+And so the, do you run into any challenges in identifying diverse communities to target?
+
+785
+00:51:32,040 --> 00:51:35,520
+What are the challenges generally that come, come up for you guys and trying to solve
+
+786
+00:51:35,520 --> 00:51:37,200
+this problem for people?
+
+787
+00:51:37,200 --> 00:51:38,200
+Sure.
+
+788
+00:51:38,200 --> 00:51:42,120
+So each of our customers is going to have, you know, their own, their own demographic
+
+789
+00:51:42,120 --> 00:51:44,680
+that they're, that they are targeting, right?
+
+790
+00:51:44,680 --> 00:51:49,040
+And so at this point, we have a broad international community.
+
+791
+00:51:49,040 --> 00:51:50,640
+We have many, many users in the US.
+
+792
+00:51:50,640 --> 00:51:55,480
+We also have many, we have a good presence across just internationally.
+
+793
+00:51:55,480 --> 00:52:02,240
+And we have good data in terms of who our users are because we, we put out surveys to collect
+
+794
+00:52:02,240 --> 00:52:06,440
+demographic information, we, we put out, you know, many different surveys to our users,
+
+795
+00:52:06,440 --> 00:52:09,480
+you know, that they're compensated for, for completing these surveys to be able to
+
+796
+00:52:09,480 --> 00:52:10,480
+collect that information.
+
+797
+00:52:10,480 --> 00:52:15,240
+So we have a good understanding of our, our current user base, which is, you know, which
+
+798
+00:52:15,240 --> 00:52:16,240
+is very diverse.
+
+799
+00:52:16,240 --> 00:52:20,760
+But we, we occasionally still have a customer come in and ask for something very specific
+
+800
+00:52:20,760 --> 00:52:22,640
+that we haven't targeted before.
+
+801
+00:52:22,640 --> 00:52:28,720
+So they potentially could say, you know, we have this task and we need, who knows, we
+
+802
+00:52:28,720 --> 00:52:34,440
+need experts in bird identification to label these images of birds, you know, and tell us
+
+803
+00:52:34,440 --> 00:52:38,000
+precisely what species of bird, you know, this is, you know, something, something like
+
+804
+00:52:38,000 --> 00:52:39,000
+that, right?
+
+805
+00:52:39,000 --> 00:52:42,240
+And so when that comes up, you know, we can, first of all, we can go out and survey our
+
+806
+00:52:42,240 --> 00:52:46,000
+community and find out, you know, in our, in our broad community, do we have people who
+
+807
+00:52:46,000 --> 00:52:51,040
+are able, able to do this type of classification already, we can identify them.
+
+808
+00:52:51,040 --> 00:52:55,240
+But and if we find that we don't have enough members in the community yet to meet the
+
+809
+00:52:55,240 --> 00:53:00,080
+velocity needs or, you know, the volume needs for the customer, then we can go out and
+
+810
+00:53:00,080 --> 00:53:05,160
+do specific targeting to bring, like, you know, online marketing to bring those individuals
+
+811
+00:53:05,160 --> 00:53:06,160
+into our community.
+
+812
+00:53:06,160 --> 00:53:08,000
+And we've had good success with that.
+
+813
+00:53:08,000 --> 00:53:09,000
+Okay.
+
+814
+00:53:09,000 --> 00:53:13,640
+So we've talked about demographic targeting primarily thus far.
+
+815
+00:53:13,640 --> 00:53:20,280
+Have you ever done anything with, uh, psychographic targeting like, right, I don't know for whatever
+
+816
+00:53:20,280 --> 00:53:26,120
+reason I'm thinking, hey, we want this to be answered by my Briggs ENTJs or absolutely.
+
+817
+00:53:26,120 --> 00:53:29,440
+You know, we've definitely talked about it.
+
+818
+00:53:29,440 --> 00:53:33,200
+There's, yeah, there's, you know, there are all sorts of interesting personality profiles
+
+819
+00:53:33,200 --> 00:53:34,200
+out there.
+
+820
+00:53:34,200 --> 00:53:39,280
+And that's what's kind of lovely is because we do have this stable community that's working
+
+821
+00:53:39,280 --> 00:53:44,560
+with us is if we put a survey out to the community, right, you know, and we compensate them
+
+822
+00:53:44,560 --> 00:53:49,360
+for their time in completing that survey, we can get any, any data that we need.
+
+823
+00:53:49,360 --> 00:53:53,880
+So it's actually, it's actually very easy for us to target the user that the customer
+
+824
+00:53:53,880 --> 00:53:54,880
+is interested in.
+
+825
+00:53:54,880 --> 00:53:55,880
+Okay.
+
+826
+00:53:55,880 --> 00:53:56,880
+Okay.
+
+827
+00:53:56,880 --> 00:54:01,360
+And this is a little bit of an aside, but I often think that in the example of like Uber
+
+828
+00:54:01,360 --> 00:54:06,600
+ratings, you know, I think that there's probably, well, not probably there's, you know, there
+
+829
+00:54:06,600 --> 00:54:11,640
+are, you know, four average radars and there are three average radars like, you know, hard
+
+830
+00:54:11,640 --> 00:54:14,160
+graders and easy graders.
+
+831
+00:54:14,160 --> 00:54:19,360
+I don't have the impression that, you know, an Uber, for example, would normalize, you know,
+
+832
+00:54:19,360 --> 00:54:22,160
+a person's rating against their average rating.
+
+833
+00:54:22,160 --> 00:54:23,160
+Right.
+
+834
+00:54:23,160 --> 00:54:26,160
+It has a strict interpretation, right?
+
+835
+00:54:26,160 --> 00:54:27,160
+Three stars.
+
+836
+00:54:27,160 --> 00:54:28,160
+Three stars.
+
+837
+00:54:28,160 --> 00:54:29,160
+That's what the user said.
+
+838
+00:54:29,160 --> 00:54:30,160
+Yeah.
+
+839
+00:54:30,160 --> 00:54:36,360
+Does anyone do something like that or, you know, to what degree to, to what degree to your
+
+840
+00:54:36,360 --> 00:54:37,360
+knowledge?
+
+841
+00:54:37,360 --> 00:54:42,360
+Do folks think about that in, you know, thinking about like rating schemes?
+
+842
+00:54:42,360 --> 00:54:46,520
+And what's the current kind of thinking in the industry around that kind of stuff?
+
+843
+00:54:46,520 --> 00:54:47,520
+Yeah.
+
+844
+00:54:47,520 --> 00:54:50,360
+So, yeah, this is a little outside of my, my area.
+
+845
+00:54:50,360 --> 00:54:51,360
+It's totally right.
+
+846
+00:54:51,360 --> 00:54:52,360
+Don't I?
+
+847
+00:54:52,360 --> 00:54:53,360
+Yeah.
+
+848
+00:54:53,360 --> 00:54:54,360
+Yeah.
+
+849
+00:54:54,360 --> 00:54:55,360
+That's okay.
+
+850
+00:54:55,360 --> 00:54:56,360
+Yeah.
+
+851
+00:54:56,360 --> 00:54:57,360
+I mean, I actually thought about this quite a bit when I was working on the Netflix prize
+
+852
+00:54:57,360 --> 00:55:01,360
+competition because in that case, we have the one to five stars rating system.
+
+853
+00:55:01,360 --> 00:55:02,360
+Right.
+
+854
+00:55:02,360 --> 00:55:05,800
+And so, you know, so I went really deep in, it's just an understanding, like, you know, what
+
+855
+00:55:05,800 --> 00:55:09,520
+are, what are these different user profiles or, you know, what types of users are out there
+
+856
+00:55:09,520 --> 00:55:11,760
+and, you know, one of these distributions generally look like.
+
+857
+00:55:11,760 --> 00:55:12,760
+Yeah.
+
+858
+00:55:12,760 --> 00:55:16,040
+It's like on one to five star rating system, you basically get one's four's and five's
+
+859
+00:55:16,040 --> 00:55:19,240
+and occasionally a three, you almost never get a two.
+
+860
+00:55:19,240 --> 00:55:24,280
+And, you know, so, I don't know, so I have some interesting tidbits and thoughts about
+
+861
+00:55:24,280 --> 00:55:25,280
+that in general.
+
+862
+00:55:25,280 --> 00:55:32,000
+But, you know, it currently at spare five from our perspective, you know, we occasionally
+
+863
+00:55:32,000 --> 00:55:33,000
+do ratings task.
+
+864
+00:55:33,000 --> 00:55:37,520
+It's not one of the, it's not one of the common customer requirements.
+
+865
+00:55:37,520 --> 00:55:41,080
+And we'll talk with the customer about whether, you know, is a, is a binary answer.
+
+866
+00:55:41,080 --> 00:55:44,160
+You're going to be more informative for them or a three level answer versus a five star
+
+867
+00:55:44,160 --> 00:55:45,160
+answer.
+
+868
+00:55:45,160 --> 00:55:50,480
+And so we do have some experience in background in thinking about what type of data is going
+
+869
+00:55:50,480 --> 00:55:52,720
+to come out of those different kinds of rating systems.
+
+870
+00:55:52,720 --> 00:55:56,800
+And, you know, and beside just the rating system itself, you know, the wording of the question
+
+871
+00:55:56,800 --> 00:56:00,920
+is so important in terms of, you know, you know, the words that you use, if you, if you
+
+872
+00:56:00,920 --> 00:56:07,000
+have a three layer system, do you say, you know, perfect, okay, terrible, you know, or
+
+873
+00:56:07,000 --> 00:56:09,960
+do you make it more, you know, more nuanced it, right?
+
+874
+00:56:09,960 --> 00:56:13,640
+And you're going to get, you're going to get different data based on different wording
+
+875
+00:56:13,640 --> 00:56:14,640
+that you use.
+
+876
+00:56:14,640 --> 00:56:15,640
+Which thing?
+
+877
+00:56:15,640 --> 00:56:16,640
+Yeah.
+
+878
+00:56:16,640 --> 00:56:21,720
+Which actually that, just to say going into, you know, another, like a whole, whole
+
+879
+00:56:21,720 --> 00:56:26,360
+other area of things that we are thinking about constantly here at spare five is just,
+
+880
+00:56:26,360 --> 00:56:32,960
+just in the, the wording and the framing of, of the question is just such an essential
+
+881
+00:56:32,960 --> 00:56:36,400
+piece of what we do here, whether, you know, even if it's not a rating question, even
+
+882
+00:56:36,400 --> 00:56:42,520
+if it's a totally open ended, you know, writing, writing captions for an image or free text
+
+883
+00:56:42,520 --> 00:56:49,600
+keywords versus, you know, very objective taxonomy categorization, things like that.
+
+884
+00:56:49,600 --> 00:56:53,880
+The wording of the question makes all the difference, right?
+
+885
+00:56:53,880 --> 00:56:59,920
+And so in our case, you know, we actually take our users through, or there's a, there's
+
+886
+00:56:59,920 --> 00:57:00,920
+a complete process.
+
+887
+00:57:00,920 --> 00:57:04,320
+So when, when a new task comes in, right, where we're iterating with the customer, trying
+
+888
+00:57:04,320 --> 00:57:10,360
+to design the task, when we start preparing our users to complete that task, we, we will
+
+889
+00:57:10,360 --> 00:57:13,840
+typically put up a tutorial, we'll start with a tutorial, so the user's just working
+
+890
+00:57:13,840 --> 00:57:16,560
+through the tutorial, they can work through it as many times as they want, and it's giving
+
+891
+00:57:16,560 --> 00:57:19,960
+them direct feedback on whether they're, you know, doing what's appropriate for the
+
+892
+00:57:19,960 --> 00:57:21,160
+task.
+
+893
+00:57:21,160 --> 00:57:24,040
+The next stage is a qualifier, which is more like a quiz.
+
+894
+00:57:24,040 --> 00:57:26,080
+You don't get the feedback as you're doing it.
+
+895
+00:57:26,080 --> 00:57:30,840
+At the end, you find out if you pass or not, and typically we won't allow users to continue
+
+896
+00:57:30,840 --> 00:57:34,640
+into the task without completing the qualifier, right?
+
+897
+00:57:34,640 --> 00:57:39,080
+And so, so we have instructions for the task that we're writing, we have the tutorial
+
+898
+00:57:39,080 --> 00:57:42,080
+that we're writing, we have the qualifier that we're writing, and then we have the task
+
+899
+00:57:42,080 --> 00:57:47,240
+itself and the questions that we're designing inside the task, right?
+
+900
+00:57:47,240 --> 00:57:53,400
+And all of the wording, logic, the orientation and design of that information on the page,
+
+901
+00:57:53,400 --> 00:57:59,960
+it is all part of the, you know, the whole formula of how do you get the right data coming
+
+902
+00:57:59,960 --> 00:58:00,960
+out at the end?
+
+903
+00:58:00,960 --> 00:58:06,520
+So, so that's a really important piece that I think people that are new to this field
+
+904
+00:58:06,520 --> 00:58:11,280
+are just finding out about it for the first time don't realize what an intense amount
+
+905
+00:58:11,280 --> 00:58:16,600
+of work and thought and effort goes into getting that right.
+
+906
+00:58:16,600 --> 00:58:17,720
+That's really interesting.
+
+907
+00:58:17,720 --> 00:58:24,320
+To what degree are you relying on, or do you have the benefit of relying on other folks
+
+908
+00:58:24,320 --> 00:58:30,240
+research to figure some of the stuff out, or is it all empirical analysis on your part?
+
+909
+00:58:30,240 --> 00:58:31,240
+Right.
+
+910
+00:58:31,240 --> 00:58:36,840
+So there is definitely a lot of great learning already out there, you know, that's been
+
+911
+00:58:36,840 --> 00:58:37,840
+published.
+
+912
+00:58:37,840 --> 00:58:45,560
+So we have Dan Weld, is a computer science professor at UW, and he consults with us regularly.
+
+913
+00:58:45,560 --> 00:58:46,560
+He's been fantastic.
+
+914
+00:58:46,560 --> 00:58:52,560
+He's a crowdsourcing expert, and he's been fantastic about pointing us to, you know, all
+
+915
+00:58:52,560 --> 00:58:56,520
+the good research out there about different things that have been tried in terms of, yeah,
+
+916
+00:58:56,520 --> 00:59:00,200
+in terms of instructions and tutorials and designing tasks and all those kinds of things.
+
+917
+00:59:00,200 --> 00:59:07,040
+So there's definitely a lot of learning there, but I would say, you know, given, given
+
+918
+00:59:07,040 --> 00:59:13,520
+that, you know, we are working in a somewhat different space in that we are not doing
+
+919
+00:59:13,520 --> 00:59:17,640
+traditional crowdsourcing, we are not, you know, farming answers, questions out to multiple
+
+920
+00:59:17,640 --> 00:59:18,640
+users at a time.
+
+921
+00:59:18,640 --> 00:59:23,040
+And so there has been a lot of just individualized learning on our part in terms of how do we
+
+922
+00:59:23,040 --> 00:59:28,600
+work with our users and what level are our, our users at, you know, how do we, how do
+
+923
+00:59:28,600 --> 00:59:32,720
+we bring them through the training process to get them to the level that we need.
+
+924
+00:59:32,720 --> 00:59:36,600
+So there's definitely a lot of internal learning, and I would say, you know, each time we do
+
+925
+00:59:36,600 --> 00:59:40,800
+another task, you know, each, you know, we have certain task types that we've done again
+
+926
+00:59:40,800 --> 00:59:44,160
+and again and again at this point, and we're learning each time we do them along the way,
+
+927
+00:59:44,160 --> 00:59:48,440
+how to make refinements, how to optimize that process, you know, how to make it even more
+
+928
+00:59:48,440 --> 00:59:49,440
+clear.
+
+929
+00:59:49,440 --> 00:59:53,960
+Anything that we can do to make, to make the instructions more clear, it just saves in
+
+930
+00:59:53,960 --> 00:59:56,960
+terms of efficiency because we have that many more answers coming through that are actually
+
+931
+00:59:56,960 --> 01:00:01,120
+accepted and allowed into the deliverable for the customer.
+
+932
+01:00:01,120 --> 01:00:02,120
+Nice.
+
+933
+01:00:02,120 --> 01:00:03,120
+Nice.
+
+934
+01:00:03,120 --> 01:00:07,920
+I think we're coming up on an hour, anything else that you'd like to share with the audience?
+
+935
+01:00:07,920 --> 01:00:08,920
+Yes.
+
+936
+01:00:08,920 --> 01:00:09,920
+Absolutely.
+
+937
+01:00:09,920 --> 01:00:16,960
+Well, I would say, yeah, if anyone is interested in getting in touch with us, you know,
+
+938
+01:00:16,960 --> 01:00:21,320
+a couple of ways to get in touch, you can always head over to spare5.com.
+
+939
+01:00:21,320 --> 01:00:23,200
+You can also email me directly.
+
+940
+01:00:23,200 --> 01:00:27,120
+I'm Angie at spare5.com.
+
+941
+01:00:27,120 --> 01:00:30,600
+And I guess one other thing that we wanted to let the listeners know about, so we have
+
+942
+01:00:30,600 --> 01:00:33,480
+a blog series that we started a couple of months ago.
+
+943
+01:00:33,480 --> 01:00:38,400
+It's called Conversations in Machine Learning, and it's just all about any interesting
+
+944
+01:00:38,400 --> 01:00:43,760
+new applications in AI and ML things, you know, that are popping up all over at various
+
+945
+01:00:43,760 --> 01:00:48,960
+companies that we're watching in this space, and for your listeners, we're offering a
+
+946
+01:00:48,960 --> 01:00:54,840
+fantastically fabulous spare5 t-shirt to the first 25 people who subscribe to the blog
+
+947
+01:00:54,840 --> 01:00:56,160
+series.
+
+948
+01:00:56,160 --> 01:01:01,680
+And if anyone's interested, they can sign up at it's a spare5.com slash podcast.
+
+949
+01:01:01,680 --> 01:01:02,680
+Well, that's awesome.
+
+950
+01:01:02,680 --> 01:01:03,680
+That's awesome.
+
+951
+01:01:03,680 --> 01:01:07,320
+And I'll include a link to that, of course, in the show notes.
+
+952
+01:01:07,320 --> 01:01:08,320
+Okay.
+
+953
+01:01:08,320 --> 01:01:09,320
+Wonderful.
+
+954
+01:01:09,320 --> 01:01:10,320
+Thank you.
+
+955
+01:01:10,320 --> 01:01:11,320
+Awesome.
+
+956
+01:01:11,320 --> 01:01:12,320
+Well, thanks so much, Angie.
+
+957
+01:01:12,320 --> 01:01:13,320
+This has been a great conversation, and I really enjoyed it.
+
+958
+01:01:13,320 --> 01:01:14,320
+Thank you.
+
+959
+01:01:14,320 --> 01:01:15,320
+Thank you.
+
+960
+01:01:15,320 --> 01:01:16,320
+Catch you next time.
+
+961
+01:01:16,320 --> 01:01:17,320
+Thank you.
+
+962
+01:01:17,320 --> 01:01:18,320
+Absolutely.
+
+963
+01:01:18,320 --> 01:01:19,320
+Thanks, Sam.
+
+964
+01:01:19,320 --> 01:01:20,320
+All right.
+
+965
+01:01:20,320 --> 01:01:21,320
+Thanks, bye-bye.
+
+966
+01:01:21,320 --> 01:01:22,320
+Thank you.
+
+967
+01:01:22,320 --> 01:01:23,320
+All right.
+
+968
+01:01:23,320 --> 01:01:28,320
+Everyone, that's it for today's show.
+
+969
+01:01:28,320 --> 01:01:34,920
+Thanks so much for listening, and thanks once again to spare5 for sponsoring the show.
+
+970
+01:01:34,920 --> 01:01:41,720
+Please don't forget to sign up for their t-shirt offer at spare5.com slash podcast.
+
+971
+01:01:41,720 --> 01:01:44,680
+And of course, we both want to hear your feedback.
+
+972
+01:01:44,680 --> 01:01:52,360
+On Twitter, I'm at Twimmel AI, T-W-I-M-L-A-I, and spare5 is simply at spare5.
+
+973
+01:01:52,360 --> 01:01:55,560
+Reach out to us and let us know what you thought about the conversation.
+
+974
+01:01:55,560 --> 01:02:24,080
+Thanks so much for your continued support, and catch you next time.
+
+975
+01:02:25,560 --> 01:02:26,560
+Bye-bye.
+

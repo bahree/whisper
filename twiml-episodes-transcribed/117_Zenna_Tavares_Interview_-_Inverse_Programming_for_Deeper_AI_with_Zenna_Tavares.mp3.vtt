@@ -1,0 +1,983 @@
+WEBVTT
+
+00:00.000 --> 00:16.320
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+
+00:16.320 --> 00:21.480
+people, doing interesting things in machine learning and artificial intelligence.
+
+00:21.480 --> 00:31.080
+I'm your host Sam Charrington.
+
+00:31.080 --> 00:36.040
+I want to start out with a huge thanks to everyone who joined in on our My AI discussion
+
+00:36.040 --> 00:37.840
+over the last few weeks.
+
+00:37.840 --> 00:42.800
+We received some outstanding entries to the contest, and now it's your turn to check
+
+00:42.800 --> 00:45.000
+them out and vote for a winner.
+
+00:45.000 --> 00:51.240
+Do this by visiting our contest page at twimbleai.com slash My AI.
+
+00:51.240 --> 00:57.360
+Swimming remains open through Sunday March 14th at 11.59pm Eastern time.
+
+00:57.360 --> 01:00.680
+A quick bit about the next Twimble online meetup.
+
+01:00.680 --> 01:06.080
+The meetup will be on Tuesday March 13th, and Sean Devlin will be doing an in-depth review
+
+01:06.080 --> 01:11.520
+of reinforcement learning and presenting the Google Deep Mind paper, playing Atari with
+
+01:11.520 --> 01:13.920
+deep reinforcement learning.
+
+01:13.920 --> 01:22.280
+Get on over to twimbleai.com slash Meetup to learn more or register.
+
+01:22.280 --> 01:27.000
+For today's show, the final episode in our Black and AI series, I'm speaking with Zena
+
+01:27.000 --> 01:32.680
+Tavarez, a PhD student in both the Department of Brain and Cognitive Sciences and the Computer
+
+01:32.680 --> 01:36.600
+Science and Artificial Intelligence Lab at MIT.
+
+01:36.600 --> 01:41.040
+I spent some time with Zena after his talk at the Strange Loop Conference, titled Running
+
+01:41.040 --> 01:44.680
+Programs in Reverse for Deeper AI.
+
+01:44.680 --> 01:49.240
+Zena shared some great insight into his work on program inversion, an area which lies
+
+01:49.240 --> 01:54.960
+at the intersection of Bayesian modeling, deep learning, and computational logic.
+
+01:54.960 --> 01:59.120
+We set the stage with the discussion of inverse graphics and the similarity between graphic
+
+01:59.120 --> 02:01.520
+inversion and vision inversion.
+
+02:01.520 --> 02:05.680
+We then discussed the application of these techniques to intelligent systems, including
+
+02:05.680 --> 02:08.080
+the idea of parametric inversion.
+
+02:08.080 --> 02:13.400
+Last, but not least, Zena details how these techniques might be implemented and discusses
+
+02:13.400 --> 02:19.920
+his work on reverse flow, a library to execute tensorflow programs backwards, and sigma.jl,
+
+02:19.920 --> 02:25.840
+a probabilistic programming environment implemented in the Dynamic Programming Language, Julia.
+
+02:25.840 --> 02:29.320
+This talk packs a punch, and I'm glad to share it with you.
+
+02:29.320 --> 02:34.320
+Let's get to it.
+
+02:34.320 --> 02:38.840
+Hey everyone, I am here at the Strange Loop Conference, and I have the pleasure of being
+
+02:38.840 --> 02:49.320
+joined by Zena Tavarez, and Zena is a PhD student at MIT, and he is, actually, he spoke
+
+02:49.320 --> 02:55.960
+this morning here at the conference on Running Programs in Reverse for Deeper AI, and I'm
+
+02:55.960 --> 03:01.200
+really interested in hearing more about what that's all about.
+
+03:01.200 --> 03:02.200
+So welcome.
+
+03:02.200 --> 03:03.200
+Thank you, Zena.
+
+03:03.200 --> 03:05.800
+Great to have you on.
+
+03:05.800 --> 03:09.840
+So why don't we start by having you tell us a little bit about your background, how
+
+03:09.840 --> 03:14.160
+you got interested in AI, what are you up to at MIT, all that stuff?
+
+03:14.160 --> 03:16.640
+Yeah, so I'm from London.
+
+03:16.640 --> 03:22.760
+I studied electronic engineering for my undergrad, and I think I first got into research.
+
+03:22.760 --> 03:27.920
+I became interested in research when I studied abroad in Japan, and so I went to Japan,
+
+03:27.920 --> 03:31.880
+and I worked in this lab, the PI for that lab, the advisor for that lab.
+
+03:31.880 --> 03:37.280
+His famous Japanese guy, you might have seen him, he builds these really lifelike robots,
+
+03:37.280 --> 03:40.760
+so he builds them of people in the lab, so look, there's one of him, and there's one
+
+03:40.760 --> 03:46.200
+of some of the lab students, oh wow, and so that was my first kind of touch of research,
+
+03:46.200 --> 03:50.400
+and I thought, this is a cool environment, and also I thought studying the brain is a
+
+03:50.400 --> 03:55.720
+cool thing, and so I finished my undergrad, I did a master's degree, which is in basically
+
+03:55.720 --> 04:00.000
+neuroscience, and so then after that I thought, okay, let me come to the States, and I came
+
+04:00.000 --> 04:05.640
+to MIT, and I joined MIT in the BCS, which is the brain and cognitive sciences department,
+
+04:05.640 --> 04:10.480
+so it's a mixture of neuroscience and cognitive science, which is basically psychology,
+
+04:10.480 --> 04:14.880
+okay, and from there I kind of transitioned more into the computer science side, and so
+
+04:14.880 --> 04:19.760
+now I sit in C cell, the computer science AI lab, and where I work on basically using
+
+04:19.760 --> 04:25.240
+ideas from computer science and programming languages to study things about how the mind
+
+04:25.240 --> 04:26.240
+works.
+
+04:26.240 --> 04:33.640
+But wow, wow, sounds like a, you've been a bunch of interesting places, for sure.
+
+04:33.640 --> 04:39.640
+So I read the abstract for your talk, running programs in reverse, and it sounds like
+
+04:39.640 --> 04:43.840
+that's a thing, like programming version, I hadn't heard about that before, you tell
+
+04:43.840 --> 04:48.920
+us a little bit about programming version and like, how, where's the intersection between
+
+04:48.920 --> 04:49.920
+that and AI?
+
+04:49.920 --> 04:57.760
+Sure, so maybe the best way to describe it is how I came to the problem, and so there's
+
+04:57.760 --> 05:03.600
+a professor at MIT called Just Ten and Bound, and when I joined MIT he was talking about
+
+05:03.600 --> 05:04.600
+this idea.
+
+05:04.600 --> 05:10.720
+Just Ten and Bound, the networking guy, or operating systems, I don't think so, he's
+
+05:10.720 --> 05:16.680
+more of a psychologist, a co, okay, I think there's another Just Ten and Bound that wrote
+
+05:16.680 --> 05:24.280
+a book, and I forget which book that we use in, in my engineering program, either networking
+
+05:24.280 --> 05:27.400
+or operating systems or something.
+
+05:27.400 --> 05:30.720
+Yeah, well I think it's the same thing, it could be the same thing, anyway, so Just Ten
+
+05:30.720 --> 05:39.120
+and Bound, MIT and MIT, okay, and he told me about this idea of inverse graphics, and
+
+05:39.120 --> 05:44.360
+the way he describes it is basically like this, so you can think of rendering this process,
+
+05:44.360 --> 05:49.960
+which using animation films like Toy Story to go from a 3D representation of the world
+
+05:49.960 --> 05:55.840
+to 2D images or a video that you're going to see when you go to the movies, and you
+
+05:55.840 --> 06:01.360
+can think of vision as in seeing as the inverse of that process, in the sense that I get
+
+06:01.360 --> 06:06.040
+into my eyes two dimensional images, and somehow from now I infer the three dimensional
+
+06:06.040 --> 06:11.160
+structure of the world, I infer the geometry I can figure out where the light saw, I can
+
+06:11.160 --> 06:15.600
+figure out where I am in relation to the world, and so there's this like inverse relationship
+
+06:15.600 --> 06:22.480
+between rendering or graphics and vision, okay, and so it's not, I don't think it's his
+
+06:22.480 --> 06:27.160
+idea, it's an old idea in computer vision, but nobody's really taking it literally,
+
+06:27.160 --> 06:32.360
+right, and so some other people in Josh's lab, like Tedges and Elka, they've worked on similar
+
+06:32.360 --> 06:38.120
+projects, and the idea I had was okay, what if we like literally literally took this
+
+06:38.120 --> 06:44.080
+idea, like what if we took a rendering algorithm similar to the kind they use in computer graphics
+
+06:44.080 --> 06:49.520
+and tried to run that algorithm backwards, from the output, from the image literally backwards
+
+06:49.520 --> 06:57.080
+to the 3D structure, oh wow, okay, so that was the kind of the motivation, like how I came
+
+06:57.080 --> 07:03.080
+to this project, and then after we started, I mean there's many issues that arise, but
+
+07:03.080 --> 07:06.840
+we realized that it's actually kind of a general framework that we can use to think about
+
+07:06.840 --> 07:12.640
+many different kinds of problems, okay, and it sounds like at least in the graphics case,
+
+07:12.640 --> 07:20.120
+it works generally, I mean it works in the research sense, right, so I mean it produces
+
+07:20.120 --> 07:26.480
+something, yeah, we have a working prototype for a particular kind of graphics, so we can
+
+07:26.480 --> 07:34.120
+take in 2D images from a fairly primitive voxel renderer, so the images in the output
+
+07:34.120 --> 07:40.560
+are 3D voxel shapes, so we can't do like super complicated geometric structure, but we
+
+07:40.560 --> 07:45.080
+can do kind of cool interesting shapes, and we're doing it in a way which I don't think
+
+07:45.080 --> 07:51.600
+anybody has done before, so we hope that we can scale up to these, to real realistic
+
+07:51.600 --> 07:57.800
+scenes, but that's going to require a lot more work, okay, okay, and so what you were talking
+
+07:57.800 --> 08:03.520
+about here was applying that to AI, so yeah, so I started with this example of inverse
+
+08:03.520 --> 08:10.200
+rendering, inverse graphics, right, but the way I opened my talk was talking about this
+
+08:10.200 --> 08:15.840
+idea of mental simulation, so mental simulation is an idea, it's an old idea in psychology,
+
+08:15.840 --> 08:19.440
+and the basic idea is that the way that you can reason about the world, like the way that
+
+08:19.440 --> 08:24.480
+I can pick up objects or know that something is stable or unstable, is that I have a kind
+
+08:24.480 --> 08:28.880
+of simulator in my head, right, and so I look at the world, I can show up to model of
+
+08:28.880 --> 08:32.480
+the world inside my head, and then I can run that simulation and figure out what's going
+
+08:32.480 --> 08:37.120
+to happen, so I can figure out, oh, this is, this is, this object's not stable because
+
+08:37.120 --> 08:43.840
+in my simulation it falls over, right, and so one of the ways that we're trying to basically
+
+08:43.840 --> 08:48.400
+extend this idea of inverse graphics to more general problems is say, or can we like
+
+08:48.400 --> 08:53.800
+do inverse physical simulation, right, so for example, you could say things like, oh,
+
+08:53.800 --> 09:00.680
+what I want to do is fold some clothes, right, or I want to, you know, pick up some object
+
+09:00.680 --> 09:04.680
+in some, you know, in some dynamic environment, and so one way to frame that problem is to
+
+09:04.680 --> 09:10.560
+say, well, I have some end state that I'm trying to get to, let me run a kind of a physical
+
+09:10.560 --> 09:15.000
+simulation backwards and say, okay, what are the inputs that have to go into that system
+
+09:15.000 --> 09:19.560
+for me to reach the desired end state, okay, and so that's the way that we're trying to solve
+
+09:19.560 --> 09:22.920
+the problem, I mean, many people approach the problem in various different ways, I would
+
+09:22.920 --> 09:26.320
+say that the kind of the main distinguishing point about our approach is that we really
+
+09:26.320 --> 09:30.200
+try to take this idea literally, we take real physical simulations and we're trying
+
+09:30.200 --> 09:34.400
+to run them backwards, the tools that we've developed, they're quite general, so they
+
+09:34.400 --> 09:39.240
+can apply to many different problems, so if you can reformulate your problem in terms
+
+09:39.240 --> 09:44.040
+of a kind of programming version, then hopefully we can have a like a stab at trying to solve
+
+09:44.040 --> 09:45.040
+it.
+
+09:45.040 --> 09:52.040
+And so do I need to reformulate my problem in terms of, in the terms of programming
+
+09:52.040 --> 09:55.920
+version, or is that something that your tools will do or help me do?
+
+09:55.920 --> 10:02.080
+That's something you need to do, but I mean, it's not like, you're speaking of me reformulating
+
+10:02.080 --> 10:09.520
+my problem at the level of a problem statement, or like, I've got the, okay, not my program.
+
+10:09.520 --> 10:13.600
+Yeah, yeah, so the problem statement, that's what I'm talking about, so if you can formulate
+
+10:13.600 --> 10:19.920
+your problem in your head or like, as a former programming version, and what I would argue
+
+10:19.920 --> 10:24.000
+is that actually many problems can be formulated in terms of programming version, right, because
+
+10:24.000 --> 10:30.560
+programs are very general things, right, can you give us some examples of ones that will
+
+10:30.560 --> 10:32.400
+help us wrap our heads around the concept?
+
+10:32.400 --> 10:38.160
+Sure, so, okay, so for example, and I'm not saying that we can solve this kind of problem
+
+10:38.160 --> 10:43.760
+yet, right, but for example, you know, if you had a big kind of quantum simulator, right,
+
+10:43.760 --> 10:49.320
+which takes this input, some molecules, and as output, you know, it says, okay, how efficient
+
+10:49.320 --> 10:54.280
+would this molecule be as, you know, in a solar panel, for example, okay, so this is like
+
+10:54.280 --> 10:57.640
+a forward simulator, it does all kind of quantum simulations, and it says, okay, the efficiency
+
+10:57.640 --> 11:03.160
+of this molecule, you know, is 90%, whatever, right, so you can think of the inverse of that
+
+11:03.160 --> 11:08.280
+process as going from the efficiency that you want back to the molecule, so now you have
+
+11:08.280 --> 11:14.440
+a kind of discovery of chemicals, right, got it, or optimization, right, so, you know,
+
+11:14.440 --> 11:19.320
+optimization, optimization comes up in all kinds of fields, and so you have some loss function
+
+11:19.320 --> 11:23.560
+which takes in something and says, okay, how good is that thing, right, if you can invert
+
+11:23.560 --> 11:27.960
+an optimization, so if you can invert a loss function, you can do optimization, you can say,
+
+11:27.960 --> 11:32.600
+okay, here is the cost that I'm trying to achieve, right, what is the input that, you know,
+
+11:32.600 --> 11:37.640
+realizes that cost, right, it strikes me from hearing the examples that you gave that,
+
+11:37.640 --> 11:47.160
+you know, the challenges that the, in the forward direction, the output space is like much more
+
+11:47.160 --> 11:52.760
+constrained, it's a number, right, whereas in the reverse direction, the output space is massive,
+
+11:52.760 --> 11:58.360
+if not infinite, yeah, yeah, yeah, exactly, so, yeah, so when I first came to this, you know,
+
+11:58.360 --> 12:03.240
+this idea, you know, I remember I was sitting in one of Josh's, just telling Bob, so that
+
+12:03.240 --> 12:07.480
+means, I think, okay, why don't we just try and run this program backwards, right, and obviously,
+
+12:07.480 --> 12:12.360
+the first thing you get into is that often these functions or these programs are not invertible,
+
+12:12.360 --> 12:16.840
+right, which means that there are many outputs which map to the same, so many inputs which map
+
+12:16.840 --> 12:22.520
+to the same output, and so in the inverse direction, you have a choice, like, which way should you go,
+
+12:22.520 --> 12:26.760
+which way should you go backwards, right, if I've got any x's which map to y, and I'm going
+
+12:26.760 --> 12:31.320
+backwards from y to x, like, what should I choose, how do I do that, right, and so the theory that
+
+12:31.320 --> 12:37.640
+I came up with, we now call parametric inversion, okay, and basically says, if you're trying to invert
+
+12:37.640 --> 12:42.280
+a non-invertical function, so there's multiple x, there's multiple inputs which map to the same
+
+12:42.280 --> 12:48.440
+output, we can parameterize that choice, okay, we construct this new thing, we call it a parametric
+
+12:48.440 --> 12:54.760
+inverse, so we'll take in some value y, but also a parameter theta, and give you back one of the
+
+12:54.760 --> 13:01.080
+x's which map to y, so just to give me a very simple example, absolute value function is not invertible,
+
+13:01.080 --> 13:06.040
+right, so because if I take the absolute value of five, I get five, yeah, if I take absolute value
+
+13:06.040 --> 13:10.120
+of minus five, I get also get five, right, but I can construct this thing called a parametric
+
+13:10.120 --> 13:15.880
+inverse, and it will take in some value, let's call it y, five in this case, and the parameter,
+
+13:15.880 --> 13:21.560
+let's say it's either one or minus one, and it will just return this parameter theta times y,
+
+13:22.120 --> 13:26.040
+right, so the point is that the output, depending on your choice of theta, will be either
+
+13:26.040 --> 13:32.440
+five or minus five, right, obviously that's a kind of a trivial example, but the intuition or the
+
+13:32.440 --> 13:37.160
+idea that we had was, oh, you can define these simple inverses for all of our simple functions,
+
+13:37.160 --> 13:43.080
+like absolute value, addition, multiplication, sign, and so on, and it turns out with a little bit of
+
+13:43.080 --> 13:48.840
+work, actually you can define inverses for much more complicated functions, or much more complicated
+
+13:48.840 --> 13:54.600
+programs. And is the idea then for, with the example that you gave around finding a molecule that
+
+13:54.600 --> 14:01.160
+achieves x, you know, a level of efficiency in a solar panel that you would be able to
+
+14:02.280 --> 14:08.280
+constrain by some set of molecules, or for example, that would be your parameter.
+
+14:08.280 --> 14:11.960
+So in this case, so, yeah, so suppose you give me some program, it's forward simulation,
+
+14:11.960 --> 14:16.760
+right, and I think I can construct this parametric inverse, so you'll have many parameters,
+
+14:16.760 --> 14:21.240
+and as you vary over the parameters, you'll get out different molecules with the desired
+
+14:21.240 --> 14:27.320
+efficiency. And so if you have some further constraints, I don't know, maybe you want a small
+
+14:27.320 --> 14:31.400
+molecule, or maybe you want a molecule that you can synthesize, then you can add these constraints
+
+14:31.400 --> 14:35.960
+to the, you can impose those constraints on the parameter space, right, and so a parametric
+
+14:35.960 --> 14:40.040
+inverse basically gives you the choice, you choose a parameter value, and it'll be back one of
+
+14:40.040 --> 14:45.720
+like a different input which maps to the same output. And so you mentioned that you have
+
+14:45.720 --> 14:52.280
+your current researches, or you mentioned in your abstract, I should say your current researches
+
+14:52.280 --> 14:58.680
+applying this specifically to TensorFlow programs, and inverting the computational graphs for
+
+14:58.680 --> 15:03.480
+deep neural nets. So yeah, so we built a lot of machinery around TensorFlow programs.
+
+15:03.480 --> 15:11.080
+Okay. It's not so much that we're focused on inverting neural networks, although that's
+
+15:11.080 --> 15:15.400
+something that we've been considering, just that TensorFlow programs have a nice kind of
+
+15:15.400 --> 15:20.120
+representation which is amenable to our algorithms, right, and so TensorFlow, you know,
+
+15:20.120 --> 15:26.120
+the graph structure, the graph structure, yeah, so people often use it for, you know,
+
+15:26.120 --> 15:29.960
+neural networks, but really it's a general kind of programming language, like in a better
+
+15:29.960 --> 15:38.760
+programming language. And so we have a tool, some GitHub, in some kind of slightly broken
+
+15:38.760 --> 15:44.840
+state, but one thing I would say is that more recently we've been moving over to using the
+
+15:44.840 --> 15:50.680
+Julia program in language. Okay. And so we've kind of been building our own version of TensorFlow
+
+15:51.560 --> 15:56.920
+in Julia. It's still thing. Yeah, so we still can compile down to TensorFlow if you want to use
+
+15:56.920 --> 16:00.920
+TensorFlow. Okay. TensorFlow has all these great things for optimization and so on that we want to,
+
+16:00.920 --> 16:06.120
+you know, I don't want to re-implement. Right. So we can still compile down to TensorFlow and Python,
+
+16:06.840 --> 16:11.880
+but we basically we move to Julia because, um, basically because of the type system it allows us
+
+16:11.880 --> 16:17.080
+to do a lot more things more efficiently with a lot less code. So that's the, that's the
+
+16:17.080 --> 16:21.240
+direction we're going. And I would also recommend other people check out Julia if they get the
+
+16:21.240 --> 16:27.800
+chance. Huh. So can you give me some examples of the application of this AI systems or deep learning
+
+16:27.800 --> 16:35.000
+systems? Yeah. So, so the ones, I mean, the ones I've spoken about in vision. So, you know,
+
+16:35.000 --> 16:39.480
+basically if we're trying to build robots that act in the real world, they're going to have to
+
+16:39.480 --> 16:43.880
+manipulate objects in the real world. Right. So, you know, for example, you can pick up a cup,
+
+16:43.880 --> 16:47.640
+right. This cup on the table and you know, it's, you know, it's a little bit elastic. It has a
+
+16:47.640 --> 16:51.880
+particular shape. It has some, you know, resistance. All these things you know about the physical world
+
+16:52.440 --> 16:56.280
+allow you to freely interact with the physical world. Right. And so you have some physical
+
+16:56.280 --> 17:02.200
+intuition. And I would argue that in order to build robots that aren't so rigid in how they
+
+17:02.200 --> 17:07.800
+interact with the world, we're going, we're going to have to kind of embed that physical knowledge
+
+17:07.800 --> 17:13.720
+into their brains as well. Okay. And one way to do that is to allow them to have a simulator in
+
+17:13.720 --> 17:19.080
+a mind. But many of the things that they'll use this simulation for are kind of inverse simulation.
+
+17:19.080 --> 17:23.720
+So they'll, you know, for example, they may see the cup on the floor and they can figure out,
+
+17:23.720 --> 17:30.760
+oh, it fell over at some point in time. Or to go to the lower, like the lower perceptual things,
+
+17:30.760 --> 17:34.760
+like how does a robot learn to see? How does a robot see in the world? Well, it's got to take in
+
+17:34.760 --> 17:39.480
+images, you know, in its camera eyes and somehow figure out the geometric structure of the world.
+
+17:39.480 --> 17:43.960
+So it knows that the door, you know, is so, you know, so far away, it can just
+
+17:43.960 --> 17:48.760
+ambiguous between the colors of the lights versus the color of the material. So I think many of
+
+17:48.760 --> 17:54.280
+like the core, I don't have a like a concrete thing that we're trying to build, but I think many of
+
+17:54.280 --> 18:01.400
+the core problems in AI, you know, this kind of technology is relevant to me. It's still a research
+
+18:01.400 --> 18:08.200
+project. I mean, yeah. So it's kind of thing that we do. And so you were careful to kind of
+
+18:08.200 --> 18:16.520
+distinguish between TensorFlow as a general programming framework and it's common use in deep
+
+18:16.520 --> 18:24.920
+learning. But does the work that you've done and the results that you've seen with reverse flow
+
+18:24.920 --> 18:32.200
+apply to deep neural nets that are constructed in TensorFlow? And like, what are there any like
+
+18:32.200 --> 18:40.440
+practical examples that you can cite of taking like a real TensorFlow program and doing this program
+
+18:40.440 --> 18:46.920
+in version to it and having it produce something? Yeah. So there was a lot of, I mean, there's a
+
+18:46.920 --> 18:52.040
+lot of work with like adversarial examples recently. And like, but before, you know, those work
+
+18:52.040 --> 18:57.000
+basically say, okay, if I've trained some neural network, I want to find out, you know, what
+
+18:57.000 --> 19:01.640
+inputs would cause a kind of weird misclassification. People have worked on this for a little while.
+
+19:02.680 --> 19:08.120
+And so in some sense, we can invert neural networks in a kind of, in a sense that, you know,
+
+19:08.120 --> 19:15.000
+even a complicated neural network eventually just boils down to some sequence of primitive operations.
+
+19:15.000 --> 19:20.040
+Sure. Basically multiplications, sounds, and some right, nonlinearity. Even that nonlinearity
+
+19:20.040 --> 19:25.160
+also boils down to even simpler things. So because our inversion algorithm is defined in terms
+
+19:25.160 --> 19:31.160
+of these primitive operations, in principle, we can invert, you know, a neural network with
+
+19:31.160 --> 19:36.360
+the current framework. But in practice, it's not the best way to do it. And so one of the things
+
+19:36.360 --> 19:43.000
+that we've been working on is how can we kind of take a better approach to inverting neural networks?
+
+19:43.000 --> 19:45.960
+And so to the second part of your question, like, why might you want to do that?
+
+19:45.960 --> 19:51.640
+But for me, I think the most interesting application is, again, inverting models of the world. So
+
+19:52.440 --> 19:57.720
+I've worked on inverse graphics. And to do that, I write down a normal render in algorithm.
+
+19:57.720 --> 20:01.560
+I happen to write it in TensorFlow, but, you know, I could have written it in Python or see
+
+20:01.560 --> 20:08.200
+or so on. But I think humans, we learn algorithms. We learn algorithms, you know, from experience.
+
+20:08.920 --> 20:14.520
+And so it'll be nice if we could take a learned algorithm. So something like a neural network
+
+20:14.520 --> 20:19.000
+and also invert that. So I do, I can do inverse graphics. But the algorithm that I'm
+
+20:19.000 --> 20:24.840
+inverting is a more realistic version of reality. Is there an implication there that you're
+
+20:26.200 --> 20:31.960
+inverting not a, I guess the picture that I had in my head of this was that you're
+
+20:33.240 --> 20:40.520
+not you're inverting a, I guess an architecture absence of like having been trained.
+
+20:40.520 --> 20:45.640
+Yeah. But it sounds like what you're saying is you're, you know, the learning is coming in through
+
+20:45.640 --> 20:50.760
+the training. And so we're inverting this trained. No, it's not something that we're doing right now.
+
+20:50.760 --> 20:56.200
+Right. Right now we think conceptual. This is conceptual. I mean, maybe like a better example would be
+
+20:57.000 --> 21:03.080
+in like physics and dynamics. So we can build pretty impressive physical simulators that work
+
+21:03.080 --> 21:08.120
+well for, you know, rigid bodies and, you know, some elastic bodies. But they're not so good at
+
+21:08.120 --> 21:13.240
+things like hair, for example, and they're not so good at simulating things like cloth. And yet
+
+21:13.240 --> 21:18.520
+humans can still, you know, manipulate cloth. We still have a good intuition about how that works.
+
+21:19.240 --> 21:24.200
+And so I think a learning approach could supplement that so we can maybe have some part of that
+
+21:24.200 --> 21:28.440
+model which is, you know, handwritten and some part of that model is learn from experience. And there
+
+21:28.440 --> 21:33.480
+are people who are working on this right now. It's interesting. So one of the examples that
+
+21:33.480 --> 21:39.960
+comes to mind for me is there are some folks at Berkeley in their intelligent robotics lab that
+
+21:39.960 --> 21:48.280
+are applying reinforcement learning to teaching a robot how to tie a knot. Right. Right. And a rope.
+
+21:49.800 --> 21:56.280
+And so, you know, they're, you know, the rope, the rope is basically trying to mess around with
+
+21:56.280 --> 22:04.360
+the rope and learn the rope dynamics. And it sounds like, you know, the approach that you're describing
+
+22:04.360 --> 22:10.040
+would be, I don't know, how, how would the approach you're describing fit into that? It's like,
+
+22:10.040 --> 22:18.040
+once you learn this model for kind of basic rope dynamics, you can invert it to what is the
+
+22:18.040 --> 22:23.640
+conceptual thing that you're inverting it to? So like the way you have to formulate this,
+
+22:23.640 --> 22:28.360
+formulate it in this way, you'd say, okay, I have a model of, you know, rope dynamics.
+
+22:28.920 --> 22:33.320
+Right. And you can think about this as a, probably a temporal model, right. So the time is
+
+22:33.320 --> 22:39.320
+available. And I have some desired state, like I want, you know, after some amount of time to
+
+22:39.320 --> 22:44.120
+whatever, right. I want the rope to be in a knotted state. Right. And so the inputs that
+
+22:44.120 --> 22:51.480
+at system are my actions. And obviously the system also acts in the absence of me doing anything.
+
+22:51.480 --> 22:55.000
+Right. Right. And so it's the inversion in the sense that I have to figure out what are the
+
+22:55.000 --> 23:02.280
+actions that I need to input into the system for me to tie them not. Right. Right. And so this is,
+
+23:02.280 --> 23:07.960
+I'm supposed to, these actions produce this model. Right. And so like, I mean, in some ways,
+
+23:07.960 --> 23:11.320
+you know, people have an intuition. It's like, if I want to do something, like, what do I have to
+
+23:11.320 --> 23:16.360
+do for that to be true? Yeah. And so that's how you would formulate the problem in this way.
+
+23:16.360 --> 23:25.080
+Um, but the rope dynamics, as I'm saying, as I've been saying, this is something I think you
+
+23:25.080 --> 23:29.880
+could learn. Right. We don't, I mean, maybe people do have, you know, good models for rope dynamics,
+
+23:29.880 --> 23:33.080
+I'm not sure. I think it's so work in progress. Right. Okay. So yeah.
+
+23:34.920 --> 23:38.680
+Interesting. Interesting. So what else did you cover in the talk?
+
+23:40.200 --> 23:44.520
+So the third, I mean, the first, I talked a bit about Julia. I would say that the first,
+
+23:44.520 --> 23:48.920
+you know, 10 minutes was, actually, I talked a little about psychology experiments.
+
+23:48.920 --> 23:56.280
+Okay. Um, from what perspective? So there's an experiment from the 1970s. I mean, so
+
+23:57.160 --> 24:01.480
+these are all about this idea of mental simulation. Okay. And it's kind of, you know,
+
+24:01.480 --> 24:06.840
+it's kind of hard to describe without diagrams, but the basic idea, it's called mental rotation,
+
+24:06.840 --> 24:11.720
+the basic idea is that you can see different shapes. And they're either the same shape,
+
+24:11.720 --> 24:17.400
+but rotate it from different angles or their different shapes. Like different shapes entirely.
+
+24:17.400 --> 24:22.520
+Okay. And so people did these studies where they said, okay, look at many of these shapes and
+
+24:22.520 --> 24:26.360
+say whether you think they're the same or whether you think they're different. And what they found
+
+24:26.360 --> 24:32.840
+is a very tight linear correlation with the angle of rotation and the amount of time it took people
+
+24:32.840 --> 24:38.760
+to respond. Okay. Like, lending some support to the idea that the way people answer this question
+
+24:38.760 --> 24:42.600
+is that they look at these, they look at the shapes and they do a kind of mental rotation. And they
+
+24:42.600 --> 24:48.440
+say, oh, I can rotate shape A into shape B. And like, if they're more, you know, if they're more
+
+24:48.440 --> 24:54.280
+rotated, they're longer than simulation takes. Yeah. And so like a whole subfield of psychological
+
+24:54.280 --> 24:59.400
+research came out of that idea. And so some part of my talk was saying, okay, this is, you know,
+
+24:59.400 --> 25:04.040
+obviously there's a lot of who work there. And I always see they've done a lot of studies,
+
+25:04.040 --> 25:08.520
+can we take that idea and make it computational? Can we build computational models of it?
+
+25:08.520 --> 25:13.720
+And can we build an AI that can do something similar? And if we were to do that, what kind of
+
+25:13.720 --> 25:19.080
+technologies would we need? What kind of algorithm would we need? So like, personally, I'm
+
+25:19.080 --> 25:23.480
+motivated by like core interest in small studies like this, which pinpoint something interesting
+
+25:23.480 --> 25:28.040
+about how the mind works. And then you realize that despite all the kind of core stuff that's
+
+25:28.040 --> 25:32.600
+happening in AI at the moment, deep learning, there are all these really simple things that we really
+
+25:32.600 --> 25:36.520
+haven't even got the right way to think about. Right. And so those are the things that interest
+
+25:36.520 --> 25:44.680
+the most. Right. Right. Cool. And then you mentioned Julia. You mentioned the type, the type safe
+
+25:45.480 --> 25:53.400
+aspect of it. Is Julia something that comes up a lot in the context of AI? Does it lend
+
+25:53.400 --> 25:59.880
+itself to that type of work? Specifically, I haven't heard it come up in that context much.
+
+25:59.880 --> 26:08.200
+Yeah. So I'm in the main frameworks for AI definitely in Python. Sure. Right. And I guess
+
+26:08.200 --> 26:13.720
+that's taught, which is a lure. Right. But I would say Julia is building momentum. So Julia,
+
+26:13.720 --> 26:19.000
+I mean, it came out of MIT and the people who did it, you know, well, kind of data scientists,
+
+26:20.280 --> 26:25.320
+maybe not machine learning people as such, but people who use MATLAB or see, I think that
+
+26:25.320 --> 26:29.480
+I was watching a guy watching a talk. And one of the main developers who said he had this
+
+26:29.480 --> 26:36.040
+huge stack of C, R, MATLAB, and Python. Right. And it's like, why is it so complicated? And so
+
+26:36.040 --> 26:40.680
+that was kind of the birth of of this language. To the main point, so that one, it's very fast.
+
+26:41.240 --> 26:47.480
+Okay. It's dynamic. It's also compiled. And it has a kind of interest in type system,
+
+26:47.480 --> 26:51.320
+like a multi-method dispatch type system. I mean, it's what does that mean?
+
+26:53.240 --> 26:58.840
+So like in an object-oriented language, like Python, for example, or C++, you have some
+
+26:58.840 --> 27:04.520
+object, like, I don't know, you have like cat, and you do cat dot, you know, make a sound, right?
+
+27:04.520 --> 27:11.160
+Cat dot meow. Cat dot meow. Um, in Julia, the methods, so this is what people call a single
+
+27:11.160 --> 27:16.280
+dispatch, right? But in Julia, the methods are not part of the object. They live, they live in
+
+27:16.280 --> 27:23.400
+like a separate space. Okay. And so you would do meow, which takes in an object of type cat,
+
+27:24.280 --> 27:27.720
+and it would meow that cat. And so obviously you can do more things. You can have meow
+
+27:27.720 --> 27:32.520
+taking an object of type cat and some other object, dog and, you know, the cat meow as a dog.
+
+27:33.480 --> 27:38.360
+So it sounds like a, you know, a simple thing, but it turns out that if you build your language
+
+27:38.360 --> 27:44.440
+on that principle, lots of nice, elegant features fall out. Um, is this related to the content
+
+27:44.440 --> 27:49.320
+of mixes? It's, you know, it's definitely not used in machine learning so much, but I would say there's
+
+27:49.320 --> 27:55.080
+a few packages like flux.jl. There's also a TensorFlow binding, TensorFlow.jl. Okay.
+
+27:55.080 --> 27:59.880
+Um, and so I think it's getting momentum. And I think because it's built on like a, like a nice
+
+27:59.880 --> 28:05.560
+set of core principles, I think actually it has the opportunity to strive as a machine learning,
+
+28:06.760 --> 28:13.880
+language. Okay. That's what I want. Nice. Nice. And does it, it presumably, it has some kind of,
+
+28:13.880 --> 28:20.040
+you know, native or provided by a package, uh, strong notion of matrices and arrays and all
+
+28:20.040 --> 28:24.920
+that stuff. Yeah. Yeah. So yeah, all of that stuff is. Oh, that's there. And it's really well designed
+
+28:24.920 --> 28:30.760
+as well. They put a lot of thought into how to take what's good about MATLAB, discard, what's bad.
+
+28:32.360 --> 28:37.080
+And so you have multi-dimensional arrays and you have all the kind of things that you would expect
+
+28:37.080 --> 28:43.080
+from like a numerical program language. Right. And it's fascinating. Also, there's like a GPU
+
+28:43.080 --> 28:48.520
+library now so you can call native CUDA. Okay. So there's a lot of stuff. Okay. Cool.
+
+28:48.520 --> 28:55.000
+Uh, did we hit on everything? Did you cover it in your talk? I think so pretty much. Yeah. Awesome.
+
+28:55.000 --> 29:00.360
+Awesome. Well, thanks so much for taking a few minutes to chat with us. All right. Thanks a lot. Appreciate it. Thanks.
+
+29:03.640 --> 29:09.720
+All right, everyone. That's our show for today. For more information on Xenna or any of the topics
+
+29:09.720 --> 29:15.640
+covered in this episode, head on over to twimlai.com slash talk slash 114.
+
+29:15.640 --> 29:23.560
+And definitely remember to vote for your favorite My AI video at twimlai.com slash My AI.
+
+29:23.560 --> 29:53.480
+And of course, thanks so much for listening and catch you next time.
+

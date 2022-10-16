@@ -1,0 +1,512 @@
+Hello and welcome to another episode of Twimal Talk, the podcast where I interview interesting
+people, doing interesting things in machine learning and artificial intelligence.
+I'm your host, Sam Charrington.
+This is the second show in our series of podcasts from the recent Wrangle Conference.
+As you might know, a few weeks ago I was in San Francisco for Wrangle, which is a great
+little conference brought to you by our friends over at Claudeira.
+Wrangle is such a fun event each year.
+It brings an interesting and diverse community of data scientists to an intimate and informal
+setting for great talks on real data science projects and issues, not to mention Cowboy
+Hatson BBQ.
+If you haven't caught the first episode in our Wrangle series, Twimal Talk No. 39 with
+Drew Conway.
+You'll want to be sure to check that out.
+It's a great interview and the intro includes important announcements about this series
+as well as our latest ticket giveaway, our online research paper discussion group, and
+my email newsletter.
+The show you're listening to now features my interview with Sharath Rao.
+I reached out to Sharath about being on the show and was blown away when he replied that
+not only had he heard about the show, but that he was a fan and an avid listener.
+My conversation with him digs into some of the practical lessons and patterns he's learned
+by building production ready, web scale data products based on machine learning models,
+including the search and recommendation systems at Instacart.
+A quick note before we dive in, as is the case with my other field recordings, there's
+a bit of unavoidable background noise in this interview.
+Sorry about that, and now on to the show.
+All right everyone, I am here with Sharath Rao.
+He's an engineering manager at Instacart, and we are on location at the Wrangle conference,
+and Sharath has a talk later on, and I'm fortunate enough to have him here to tell us a little
+bit about what he's going to tell the Wrangle audience about.
+So Sharath, welcome to the show, it's great to have you.
+Great, thanks for having me Sam, I'm a big fan of the show from having heard earlier episodes.
+Nice, nice, well I really appreciate that.
+As you know, one of the places I like to get started then is to have folks introduce
+themselves, tell us a little bit about what you're up to, and how you got there.
+Yeah, yeah definitely.
+So I'm at Instacart, I've been here for a couple of years, Instacart is an on-demand grocery
+delivery service, and my role here is, I started off as the data scientist or machine learning
+engineer focused on search personalization and recommendations, and now I do that, but
+also lead a team that is working on that effort.
+So prior to this, I've spent time at a couple of companies doing search, advertising,
+and auctions, that sort of stuff over the last 10 years.
+And even going back further, grad school, I worked on speech recognition and speech translation
+before it was practically useful in the field.
+That's part of the reason why I started working on other things after grad school.
+So yeah, so that's probably captures the range of things.
+Awesome, awesome.
+I hear a lot of stories from folks who, you know, I was working on this stuff in grad school
+and it just wasn't ready, or we were in the middle of the AI winter, and it kind of went
+into hibernation.
+And now that we're all so focused on doing this stuff, it's like time to dust off those
+skills.
+Absolutely.
+Yeah.
+So in your description, you said data science, slash machine learning engineering, how
+evolved is the distinction between the two of those at Instacart, and do you consider
+yourself as spanning both?
+Yeah, let me take the first one first.
+I think at Instacart, well, or was industry, I think we are moving better, you know, towards
+understanding these two roles.
+And so at least we are sort of settling around maybe three roles, actually data analysts,
+data scientists, and data engineers.
+Even if they're slightly called separately, I think maybe their companies like maybe LinkedIn
+or maybe NB where probably have data scientists and machine learning engineers and data engineers.
+But broadly, the difference is around, you know, people working on data products, building
+systems and algorithms, essentially things that are consumed by other algorithms and systems
+who might be like machine learning engineers, people working on things, the output of which
+is used for, you know, decision making, you know, by the team that they serve or the executive
+leadership.
+We call them data analysts at Instacart, but data scientists elsewhere, and then finally
+data engineers who are working on like platform infrastructure typically comes in, you know,
+maybe later in the company stage.
+Right.
+Right.
+I think it's a lot of progress we've made from just a few years ago, and, you know, data
+scientists was this unicorn that no one could really hire because we've defined it in
+such a way that, you know, it requires these disparate skills that, you know, aren't traditionally
+paired.
+Yeah, I remember back in maybe 2012, 2013, the term of unicorn data scientist was probably
+one that captures what he just described, but I don't hear that too often.
+There's more like specialization and people understand that over time, most professions
+end up specializing, although I'd imagine, in depends on the context of the companies,
+I would imagine say startups, if they're hiring their first data scientist, they probably
+want somebody who can also do like the other two things that are reasonable level of competence.
+Overall, in a macro view, I think, the roles have sort of specialized over time.
+Yeah.
+And I remember back in that same time period, 2012, I think as a community, we thought
+that it would take way longer for us to reach this level of maturity, because like you'd
+see these stats that say, you know, we're going to have, you know, we're going to be under
+resource in terms of the number of data scientists until like the year 2050 or something like
+that.
+I think this specialization has been part of the key for alleviating that stress, although
+we're far from having enough, you know, people with data competencies to meet all the
+demand.
+Right.
+I think every speaker at an event like this gets up and says, oh, and by the way, we're hiring.
+Yes.
+Right.
+Yeah.
+So I've heard that and also more recently I've heard about and maybe even seen it in
+the field where there's, you know, with, you know, obviously the market has responded to
+at least a perceived lack of, you know, strong talent.
+And so we have quick, like smaller one of your masters or bootcamps that have served the
+need.
+So as a result, I think in maybe in some part of the market, they might, maybe at like
+optimum or even oversupply of, you know, data scientists at arguably at starting level.
+Really?
+Well, that's happening quickly.
+Maybe I mean, just generally that I guess everything is moving faster and now even for
+example, with newer areas around, say, deep learning and AI, there is, you know, there
+are more research institutes, there are more, again, training, you know, workshops and
+so on that people respond faster to needs than maybe they used to.
+Mm-hmm.
+Interesting.
+All right.
+So you talk.
+Yes.
+You've got to talk in an hour.
+Yeah.
+What's your talk about?
+Sure.
+So my talk is title lessons from integrating data, machine learning models into data products.
+So initially I had a two part talk, but you know, today I'm talking about like the part
+one of that.
+But really the, the genesis of that comes from having worked at first of all, you know,
+relatively a smaller company as opposed to some of the bigger companies that were in
+we have, there is a product per se and there are machine learning models that are integrated
+into various parts of the product that are making different decisions for the customers.
+So there's that and then there is aspects about like data scientists building models, model
+prototypes and even productionizing them, but also interfacing with product engineers
+within a single team.
+And the fact that what I call like all model, all model prototypes look familiar, but every
+model and production is unique in its own way.
+So I'm trying to understand, try to frame a conversation about what does it mean to have
+a model and production?
+You know, what are the questions to ask yourself and how do we communicate as data scientists
+with in a product managers and product engineers about what this model does, what are its requirements,
+what are the constraints?
+And so that's, that's what I'll be talking about.
+Okay, so how do you, how do you structure walking people through that?
+Yeah, I try to keep it, try to find, you know, going back to conversations within the
+team, for example, each time we, we have one team that has, you know, three or four product
+engineers, you know, a couple of data scientists in a designer and a PM, right?
+And largely most of the work happens, you know, within the team.
+And each time we work on an experiment or a feature that that data's data scientists build,
+we have this conversation about how will this go into production?
+And typically the conversations, you know, if you think about it like the process of building
+a model, thinking about a problem, building a model prototype, largely happens, you know,
+within the domain of data science and maybe, you know, with some interaction at the PM.
+But the moment it goes into production, it's now touching like so many different parts
+of the system.
+And, you know, a couple of things come in like, how much time do we have to make, make
+a decision in terms of like the model, you know, running in production, you know, many
+if you're serving up pages live to the web, you know, you've got to serve, yeah, serving
+latency, for example, yeah, address right?
+Yeah, so there's a constraint that very often gets dictated by the product itself and
+rightly so.
+And then there's this question of, you know, for the model to be successful, how much information
+does it need?
+And how can I get that information?
+By information, I mean like, for example, let's say you're trying to recommend a product.
+Maybe you definitely need to know if you want to, you know, it's a personalized recommendation,
+you need to know the user, you know, user identity of their past data, you probably need
+to know like what page they're on and so on.
+But do you really need to know their recent searches and, you know, recent activity, like
+that certainly is like short-term context.
+So how much context do we need, does the model need rather to operate successfully?
+Both of these sort of give you a way to think about, can I cash my recommendations?
+You know, what can I cash versus what needs to be served in real time?
+If it's real time, can I do a reasonably well if, you know, let's say, let's say I'm making
+a decision about what product to show based on things that you've added to the cart recently.
+So think of a model that is continuously producing a, you know, prediction of what, what part
+is a good recommendation?
+But it doesn't necessarily surface that.
+It's always, you know, continuing to score and maintain a best estimate of a recommendation
+in the background.
+But, you know, at any point it's available with a best effort response.
+So this is an example where you don't, you know, you have a good response whenever there's
+a need for it.
+We can wait until the last moment to actually serve that recommendation.
+So those things that happen in the background.
+Are you describing a system that is doing like online learning or active learning, which
+is where you're updating your model kind of in place?
+Well, yeah.
+So the model could be static, model need not be updated, but the model predictions could
+be happening continuously in the background based on, based on whatever data it sees.
+It doesn't need to score in immediately reporting, it can keep scoring as it gets more data
+and then always be ready to serve a recommendation when necessary.
+Okay.
+So that gives us like, you know, so we have this, you know, four quadrant because I'm considering
+latency and context sensitivity of the model behavior.
+And we get these four quadrants where, you know, you obviously have like high latency is
+okay, but you have context sensitive and the other, basically, the other four possibilities,
+other three possibilities.
+And so it's part of what you've observed, then, you know, are we at the point of maturity
+and thinking about this that, you know, for each of these quadrants, we've got like design
+patterns or best practices that teams, you know, either at InstaCard or in the industry
+are following?
+Certainly, InstaCard, we try to place ourselves and don't like, where does this model sort
+of lie, you know, just mentally and internally.
+And that's sort of all, given that we've built a few experiences, few models over the past
+a couple of years, we have patterns, you know, we know, we sort of know 90% of, you know,
+the way the model is integrated in the rest of the product, when we are thinking about
+the model, we don't have to like start from scratch each time.
+So for example, search, search ranking, you know, we latency needs to be really low.
+And context sensitivity, we can start off with, you know, low context sensitivity, I mean,
+let's say you're simply matching the search query and the bunch of products without like
+recent context.
+If you could start there, then as we, the way to improve the model would be to, well,
+continue to have latency requirement being low, but make it more context sensitive, obviously
+there's a lot of work that might involve a model that is ranking, re-ranking products
+based on, you know, recent activity.
+So that's one example.
+So with search, we start, I call it we start from quadrant four and go to quadrant one.
+Sort of will be clear from the slides, I guess, but with the recommendations, it's almost
+always the case that you start with, you know, in start in quadrant three, where you cache
+as much as possible, you score them, you know, in batch mode, you cache them and then you
+serve.
+So that keeps, that gives you, you know, you can use as much information as you want,
+and you know, gives you the latitude to use more data and have like recommendations.
+The way to improve that would be to go from quadrant four to, or quadrant three to two,
+I guess, where, you know, you still, you know, latency is still not a consideration.
+You're re-ranking your products, your, you know, candidate products, and, you know,
+in the background, be very, very, to serve.
+And then finally, you might have like, you know, contextual recommendations wherein you
+have to recommend something, you know, immediately, and so that becomes like a real-time recommendation,
+which is, you know, a model that, you know, re-ranks a set of products that you've cached,
+you know, based on the context.
+So the set of products you've cached may be personalized or maybe not personalized, but
+then when you serve, you re-rank it based on user activity and make it personalized.
+Yeah.
+So how much of this machine learning engineering is machine learning and how much is engineering,
+meaning a lot of what we're talking about is, you know, system level, scalability, like,
+you know, just hardcore software engineering that, you know, in a lot of ways is orthogonal
+to the machine learning.
+Well, I guess the model stuff isn't, but in a lot of ways it seems orthogonal.
+There are principles at least that seem orthogonal to the thing that you're scaling, right?
+It's, it's web-scale engineering, yeah, applied to M-O.
+So like fine tune that statement, how much of it, you know, a specific is domain specific
+and where are those points that it gets super domain specific?
+That's a really good question.
+And I think the point at which it gets domain specific is that, as a data scientist,
+you understand the model, its assumptions, its requirements.
+At what point, you know, it'll fail to perform.
+What does it absolutely need?
+What is table stakes versus, you know, what is a cherry on the top?
+You understand that and you, well, you need to understand that and then articulate it
+to, you know, product engineers and to others on the team.
+Obviously, you don't want to do that right at the end when you've already built the model
+but you want to do it right at the beginning so that you can know up front if there are
+any constraints on the engineering side.
+Right.
+So it is sort of good mix of machine learning, you know, and software engineering.
+And even product design, frankly, you know, I'd imagine we've one of one of the things
+you found, for example, is we may have some latitude in how we change the product experience
+for a user based on some of the constraints on the engineering and machine learning
+side.
+For example, if you want to buy yourself time to be able to score, what would that interface?
+What will we do with the customer at that time?
+How do we design the product experience?
+Yeah.
+Interesting, I've been, I've talked to a few people about this, like, I think there's
+an evolving field of like, I always call it intelligent design but that's like way over
+loaded but there needs to be, and I think there will be, you know, some, you know, thought
+best practices for lack of a better term, like just a way of thinking about designing
+kind of in light of machine learning and intelligence and things like that, that, you know, I don't
+see a lot of people talking about that kind of stuff yet.
+And it's not necessarily exactly what you're describing here, what you're describing is
+even, you know, kind of going back to the previous question, it's really more the interaction
+between, you know, design and product engineering and like performance engineering and things
+like that, like how does our, how does the system, how does a user experience change because
+of the limitations, you know, in, you know, performance and product engineering and stuff
+like that?
+Yeah, I definitely think it's definitely controversial to suggest that we have to change user experiences
+to work with the limitations of, you know, engineering or machine learning, right?
+And it may not be common to do that but I wish I had like more examples where it's
+possible to do maybe, maybe it's not something that we generally talk about, if indeed it happens
+in the field.
+And that's the other thing, which is like, it's hard to talk like about machine learning
+models and production, widely, simply because there are a lot of details that are probably
+very specific to the product and, you know, one just assumes that it's not interesting
+to somebody else or that these details don't really generalize.
+So there is no, there are definitely basic principles, you know, software engineering,
+but beyond that are there other principles that are specific or that are more important
+when it comes to like software engineering with like machine learning systems or data products.
+So I called out a couple of examples of some work in the community like recently, maybe
+about early this year, there was a document from one of the machine learning engineers
+at Google about, I think it's called rules of machine learning or so.
+It talks about a really nice, what I think is it quite reading for data scientists building
+data products.
+And what are the different things, what are the different trade-offs, what are different
+stages of building a data product?
+And talks a lot about the engineering aspects, the training, the data management, metrics,
+the interface between like metrics and our model formulations and so on.
+It's kind of like, you know, it's a four-page PDF with such a density of knowledge.
+Like, at Instacard, we had like a reading group session, we spent like, I let a group
+with like two hours of going through that and they're talking through like salient ideas
+from that paper.
+Okay.
+Well, I have to make sure I get a link for that one and post it up in the show.
+Definitely, yeah.
+There's one more people that are like, quickly, which from Pinterest, where they talk about
+the evolution of the recommendation systems over three years.
+And this is, it's a really good one, I think.
+It talks about, incidentally, it talks about how they started it off with a simple system
+that was like caching recommendations of the Quadrant 3 world.
+And then from the how they progress from that to, you know, Quadrant 1, where they use
+what you get, what you cash, and then you re-rank it with a model.
+It's helpful to have this, you know, view of how this really massive, you know, at-scale
+recommendation system evolved so that, you know, people who haven't done that before
+don't need to believe that we need to start with what Pinterest has in production after
+three years of work.
+Right.
+Right.
+So, it's sort of underappreciated part of literature, I think.
+Yeah.
+So, this is maybe a little bit of a tangent, but I don't know if you've heard on some
+recent podcasts I've mentioned that I'm going to be starting a, like, an online paper
+reading group of podcast listeners.
+I mentioned it randomly in a podcast, and like, there were a bunch of people who expressed
+interest in it.
+So, I'm going to be getting that kicked off, but since you mentioned that you are involved
+in one at Instacart, any tips for running a paper reading group?
+Great.
+So, yeah, let me see.
+We have, like, two different sessions where all the data scientists come together, you
+know, sort of alternate weeks, and one of them is, or the one that I was talking about,
+we call that lunch and learn, we have, we do it over lunch every Tuesday.
+And the bar, in a sense, is that, you know, I had a time we talk about, like, what paper
+we are, what somebody is going to lead a discussion.
+That person doesn't need to have completely understood, but it's helpful for them to be
+able to know enough to drive the discussion.
+It's obviously optional for, you know, people who want to attend, because, you know, we
+have, we touch different domains in Instacart so somebody may not be particularly, you know,
+keen on a paper.
+And, but then it helps to have, like, discussion, you know, if you come in, make sure you've
+skimmed the paper and come in for discussion.
+We talk about what the paper, some of the, you know, what it takes away from the paper,
+and also, like, how that immediately might apply to what we're working on, you know, in
+our regular work.
+How long did they turn around?
+It's a one-hour, and we typically have anything from, like, eight to twelve people and
+odd, you know, group, you know, I would say maybe, like, four to five of them will live,
+like, let's put the paper a little bit.
+Yeah.
+But I think these are opportunities for people to not just learn, but also lead a discussion
+and people get better at it as they go.
+Yeah.
+Yeah.
+Okay.
+Well, I'm really looking forward to it.
+And, like I said, a lot of people, a lot of other people seem to be looking forward to
+it as well.
+Yeah.
+Also, have you joined us and then walk us to a paper over here of your choice?
+Really, yeah, definitely.
+Yeah, I think it's very common in, like, grad school and, like, research labs to be,
+like, doing this, like, reading the paper is an art and understanding, like, what is
+the next, what are the assumptions, what are the achieved, what are the opportunities
+from here, like, how can we build on that, what is relevant to us, how hard is it to reproduce,
+you know, in our environment, right, that, you know, what are the generalizable lessons,
+so to speak.
+Yeah.
+Those are sort of the questions we are thinking about.
+Yeah.
+Yeah.
+So, kind of going back to your presentation, what are the generalizable lessons from your
+presentation?
+Sure.
+So, one of them is to think deeply about how the model integrates into your product.
+Have the discussion ahead of time with people outside, you know, your own group, like, off
+data scientists, maybe, you know, product managers, product engineers, like, the kickoff
+meetings should probably talk about that.
+And at what level are you having that conversation, because there's integration from a perspective
+of data, there's integration from a perspective of data sources, APIs.
+Yeah.
+Generally, at the level of APIs.
+Okay.
+And it's also a way to sort of get a buy-in from product engineers, build that relationship
+so that, you know, think shouldn't look like you're just throwing things or the fence
+to the engineer and asking them to, like, productionize it.
+I think, for them to understand it in a way that is at a level that they can even provide
+an input to and, you know, contribute to improve the design, like, the technical implementation
+would be helpful.
+And I picked out, like, two different aspects of, like, latency and context sensitivity.
+There might be others.
+I mean, I picked up two and I got a four quadrant hub.
+Yeah.
+We can pick, look at, you know, more aspects of it that are generalizable across models.
+And, yeah, this, I hope it sort of evolves into a discussion about how we can, you know,
+we have ways to talk about model prototypes, you know, how a problem is set up and how
+training data is generated, you know, at someone, you know, the model is fit and we persist
+the model we have, you know, abstractions about what happens, you know, in training phases.
+But abstractions that help us understand how a model is, you know, being served or the
+model predictions are being served and, you know, how it's actually executed and implemented
+might be helpful.
+Mm-hmm.
+Yeah, I keep coming back to this idea of design patterns, like, you know, you may be familiar
+with the gang of four design patterns book where there's, you know, they've cataloged,
+I don't remember the year, but, you know, cataloged a lot of, I've been oriented design
+principles.
+Like, are we there yet with machine learning or?
+Great question.
+And I think I probably had a, I tweeted this question a few, maybe, maybe a year ago,
+like, what sort of abstractions do we have for, you know, serving machine learning models
+in production?
+Right.
+Right.
+I don't know if any that is, that substantially builds on, like, you know, software engineering
+patterns, like, or I don't know if anything that the community has agreed on.
+I'm sure there are a lot of things that in people's heads.
+Yeah.
+And a little bit of that I'm talking about today will be about, like, what I, you know,
+we've seen and working in our team.
+But going back to the Google doc, I think that, again, although it talks about more than
+just serving, I think we need more of that in the community, yeah.
+To mention that there isn't enough generalizable because things are just too coupled with the,
+with the product is probably not, not true.
+Hmm.
+Yeah, you made an interesting comment early in the conversation about how you have a lot
+of these machine learning models in production, but they, you know, at some level, they all
+seem like snowflakes, I guess, is what I took from that.
+And that, you know, it's been, it's been an effort and a challenge to kind of extract
+the general principles from across these different environments, is that kind of what you
+were getting at?
+Yeah.
+Insofar as we're talking about, like, implementation.
+Right.
+Yeah.
+Right.
+That's all in different problems, but there might be, like, in terms of, like, software
+engineering patterns, they share, like, some of these aspects that they then, in one
+of these quadrants.
+And are there common implementation slash architectural patterns that, you know, that are kind
+of assumptions for you guys that, you know, you're doing across all, at least all new
+efforts.
+Like, for example, microservices, are you doing microservices, containers, are you doing
+containers?
+Like, does any of that, where does the kind of evolution of the state of the art and, you
+know, software engineering for non-ML stuff intersect with ML stuff?
+Good question.
+And, well, at the early point, yeah, we have services that are, well, we can call them
+microservices, I guess, but, yeah, we have, you know, engineers, product engineers and
+mission engineers agree on, you know, certain contracts.
+And so that is, like, table stakes.
+There are questions about, like, what can we cache, what can we not cache?
+There are questions about, well, yeah, how long can we cache something, you know, what
+sort of, what sort of data stores we might use, and what is configurable, what is not, what
+is, yeah, what is an experiment versus what is not.
+Most things are experiments, how much do we expect to iterate on this feature before,
+you know, we think we're done for a while, which is, I think, for a company like Instacart,
+where there are a lot of different places we can invest in.
+It might be, like, quite a few months before we come back to, you know, we too of something
+that we built.
+Yeah.
+Because, you know, we're still exploring the space of areas where machine learning can
+help, and, you know, where help the most, I guess, yeah.
+But do you, to a point about, like, beyond software editing, what is new, yeah, I don't
+think I have an answer right now.
+Okay.
+Okay.
+To follow up on your last comment on just the opportunity prioritization, at Instacart
+are you generally taking an approach of, like, trying to take on, you know, big moonshot
+types of problems and, you know, make a few small big bets to kind of, you know, ensure
+that your resources are focused on, you know, these things that could have outsized
+an impact, or is it more, you know, we're going to try to, you know, we're going to try
+to touch, you know, broadly, you know, in, you know, high impact, but more concentrated
+ways to kind of spread that impact around, you know, the systems in the various business
+teams and processes.
+Yeah.
+I think there's probably the, there's a top down and bottom up in terms of what sort of
+projects get worked on and explored, you know, within, you know, within, say, data
+science for, just to stay in data science for a moment.
+So we have company goals about, like, what are we, quarterly goals, long-term goals,
+translate the company goals, which typically talk, you know, are aligned to some metrics,
+and, you know, different teams should know how they can move certain metrics.
+And, you know, there is, and then we think about, like, what sort of a data science effort
+could serve that metric.
+So there's that.
+What I call the bottom up is, well, you know, in the end, we are still, we are e-commerce,
+but also last mile, you know, logistics operation.
+So naturally with that domain, some problems just are there.
+Like if you have e-commerce operation, you have a search engine, and if you have a search
+engine, you're probably working on, like, you know, spell correction and autocomplete
+and, you know, search ranking, matching, business understanding, the queries better,
+and recommendation systems and so on.
+So we already know, given the kind of data we have, and we collect, what sort of problems
+have been addressed, like, what sort of product features have been useful, in that sense.
+So between the top down and bottom up, I think we generally find, you know, tactically projects
+to work on, you know, given, you know, current goals, yeah.
+And oftentimes, you know, we hit, like, dimension utilities, soon enough for plateau,
+soon enough, maybe in the first version, we might wait for, like, a while before we come
+back to it.
+Okay.
+Interesting.
+Well, I think you've got a presentation to get ready for, but I really appreciate
+you taking the time to chat with us, and I'm looking forward to your talk.
+Sure.
+Thank you, Sam.
+Thanks, sure.
+All right, everyone, that's our show for today.
+Thanks so much for listening, and for your continued support of this podcast.
+For the notes for this episode, to ask any questions, or to let us know how you like
+the show, leave a comment on the show notes page at twimmelai.com slash talk slash 39.
+Thanks again to our sponsor for the Wrangle Conference series, Cloud era, to learn more
+about Cloud era and the company's data science workbench family of products, visit them at
+cloudera.com, and be sure to let them know how much you appreciate their support of the
+podcast by tweeting to them at at cloud era.
+If you're interested in joining our first Twimmel online meetup, where we'll discuss
+Apple's recent research paper on generative adversarial networks, you can register for
+that at twimmelai.com slash meetup.
+And don't forget to sign up for our email newsletter at twimmelai.com slash newsletter.
+Thanks again for listening, and catch you next time.

@@ -1,0 +1,678 @@
+Hi, it's Sam, a quick story before we get going.
+A few weeks ago at the Twomel AI Summit, I met a listener, Nicholas, who works for a leading
+energy company.
+We spent a bit of time chatting, and he mentioned a few of the things he'd learned about on
+the podcast that he went ahead and implemented at his company.
+He was particularly excited about the semantic folding technology he learned about on Twomel
+Talk Number 10.
+Then, a couple of weeks later, I spoke with Alex, who works at a leading German career
+site.
+Alex mentioned that he'd recently kicked off a project there to explore applying zero-shop
+machine learning.
+Once again, an idea he learned about on the podcast.
+I'd really like to hear more stories like this.
+If the podcast has helped you at work or school, if it's educated or connected to you
+to resources or techniques you've found useful or valuable, please take a moment to share
+them over at twomelai.com slash 2av, the number 2av.
+The occasion, of course, is the podcast's second birthday.
+So go ahead, give it this birthday present.
+Okay, Nick, hit it.
+Hello, and welcome to another episode of Twomel Talk.
+The podcast why interview interesting people, doing interesting things in machine learning
+and artificial intelligence.
+I'm your host, Sam Charrington.
+In this episode of our train AI series, I sit down with Anima Anon Kumar, brand professor
+at Caltech and principal scientist with Amazon Web Services to discuss the research she's
+doing out of her tensor lab.
+In our conversation, we review the application of tensor operations to machine learning and
+discuss how an example problem, document categorization, might be approached using three-dimensional
+tensors to discover topics and relationships between them.
+We touch on multi-dimensionality, expectation maximization, and the Amazon products Sage
+Maker and Comprehend.
+Anima also goes into how to tensorize neural networks and apply our understanding of tensor
+algebra to perform better architecture searches.
+Before we start, though, a shout out to our friends over at Figure 8 for their sponsorship
+of this week's series.
+Figure 8 is the essential human and aloop AI platform for data science and machine learning
+teams.
+The Figure 8 software platform trains, tests, and tunes machine learning models to make
+AI work in the real world.
+Learn more at www.figure-8.com.
+Just a reminder, this episode was recorded on site at Train AI, so there is some unavoidable
+background noise.
+And now on to the show.
+All right, everyone.
+I am pleased to be seated here with Anima Anankumar.
+Anima is Bren Professor and Microsoft and Sloan Fellow in the Department of Computing
+and Mathematical Sciences at Caltech, as well as a principal scientist with Amazon Web
+Services.
+Anima, welcome to this weekend machine learning and AI.
+Thank you, Sam.
+It's a pleasure to be here.
+Yeah.
+It's absolutely a pleasure to finally get an interview going.
+It's not been that long since I saw you last, scaled ML, I think.
+Stanford.
+That's right.
+I mean, the scaled ML was a small and an intimate event, but just so many amazing speakers
+and the audience was also really cool to interact with.
+Absolutely.
+Absolutely.
+Can you tell us a little bit about your background and how you got interested and started down the
+path of ML and AI?
+Yeah.
+I guess you could say, like, even as a child, I was always interested in math, you know,
+like to me, like kind of just the aspect of understanding a lot of structure and explaining
+the world through math seem magical.
+And then through the years, you know, I did engineering and in the beginning of my PhD,
+I wanted to ask questions on how we can use mathematical techniques to understand data
+better, to process them better, scale that up and run them in real systems.
+Of course, my beginning was humble, you know, I was looking at purely the theoretical aspects
+I was asking questions and sensor networks.
+Now you might call them Internet of Things.
+IoT.
+Right.
+It didn't exist, which dates me.
+But the questions were still very relevant today.
+How much of learning do you do on the edge, on the devices?
+How do you transmit this?
+What about bandwidth constraints?
+How do you route them?
+How do you exploit the correlations of measurements between different sensors?
+So these were the questions that I started tackling.
+And to me, like solving these math problems was very fascinating.
+But I wanted to also get them working on real systems, right?
+So because back then, we didn't have the IoT revolution going at, I decided to switch
+to settings where I could just purely work with data.
+So I suppose we have all the data in one place.
+Can we do something interesting and can I try this out in different scenarios?
+And that's when I started working on probabilistic graphical models, understanding relationships
+between variables, how we can discover those graphical relationships at scale.
+And what techniques would allow us to provide guarantees?
+Like, when do we successfully discover them?
+And understanding really, when we can discover information about hidden variables.
+So as you can imagine, every model is wrong, right?
+So there's only better models which can approximate the real world.
+In some ways, you know, better than others.
+But the question is whether having hidden variables will allow us to have a more realistic model.
+Because so many times we cannot measure everything about the real world.
+So the ones that are hidden from the measurements can be incorporated them into the model
+and how do we discover them.
+As an example, you know, think about categorizing documents, right?
+So there's a whole bunch of news articles.
+But suppose there's no human annotation of what the documents are talking about,
+then that's a hidden variable.
+We don't know those categories for the documents.
+So suppose we can incorporate them as hidden variables
+and use the text as absurd variables.
+Can we now learn about these relationships from data?
+Even when the variables are not directly absurd?
+Okay, great.
+And so your lab at Caltech is called the tensor lab.
+And you spend a lot of your time focusing on researching tensors
+and tensor implementations of machine learning algorithms and things like that.
+Can you maybe walk us through that line of research and what it's all about
+and tie it back to this problem that you started with?
+Absolutely.
+I mean, it's been a very interesting journey.
+It's taken me about six years now to see the tensor field mature more, right?
+So I do want to add a caveat.
+You know, the research on tensor algebra is very different from tensor flow.
+You know, there is always this one person in the audience
+who will ask me about tensor flow when I give the talk on tensor.
+The common point there is the phrase tensor, which means what?
+Yeah, so tensor, you know, as a naive definition, right,
+is a multi-dimensional array.
+So now you don't just have two dimensions.
+It's not just rows and columns, you have many more dimensions in your array
+that can be thought of a tensor.
+But then there is a deeper algebraic meaning that I think many people
+who are not in the field may not be aware, right?
+So just as we treat the matrix not just as rows or columns,
+there's a whole host of linear algebraic techniques.
+So matrix really can be thought of as an operator.
+You're operating matrix on a field, you know,
+you're using that to change your vector, right,
+when you multiply a vector.
+The transformation of some sort.
+Exactly, exactly.
+And so tensors could be thought of as a richer class of such transformations.
+And so in that sense, the tensor flow term is apt
+because you have an input data, which can be thought of as a tensor.
+And there's an output that's also a tensor, right?
+I mean, if it's just a vector, that's a special case of tensor.
+So tensor flow is one that kind of flows through the network
+as a series of tensor transformations.
+But the shortcoming in most of the current networks
+is we are still using linear algebraic computations
+in different layers.
+Whether it's a fully connected layer
+where we are doing a matrix multiplication,
+it could be a convolutional layer
+where we have these set of filters.
+So can we now expand these set of operations to more dimensions?
+To give you an example, you know, can we now in a layer
+instead of doing just a matrix multiplication?
+Can we directly operate on higher dimensional tensors?
+If the input to a layer is now a three-dimensional set of activations
+from the previous layer, can we now set up a computation
+that doesn't just turn into a matrix multiplication?
+That directly operates on all the three dimensions.
+And so can exploit the information of different dimensions more effectively.
+Is it just me or as part of the challenge with this,
+the general trouble we have visualizing higher dimensions than three?
+Yeah, no, it's interesting that you ask.
+Actually, people, you know, this is not new, right?
+Like, thinking in high dimensions.
+There is a book I discovered a few years ago called Flatland from...
+Edwin Abbott.
+Yeah, exactly.
+Right? So it's been in arts.
+It's been in literature, the general theory of relativity
+thinks about many dimensions, right?
+So to tell the audience about what this book is about,
+the part that I found it fascinating is this is set up in a two-dimensional world.
+Like every person is a two-dimensional object like a square or a polygon.
+And then there's a three-dimensional monster that visits this world, right?
+So as the three-dimensional object is moving through the two-dimensional world,
+it's rapidly changing shapes.
+And so that's very scary to the two-dimensional people.
+So I would use this analogy that many people,
+when they cannot visualize something,
+they feel that's way too abstract or that's confusing.
+But then math is much richer than just the three dimensions that we live in.
+Or the four-dimension, if you use time, right?
+So they can formulate and solve problems in infinite dimensions.
+And that form of thinking and that form of algorithms
+will help us process all the multimodal data we are obtaining today.
+So it's not just visual data, it could be textual data.
+There's, again, to other domain knowledge.
+So how do we use all this in an integrated approach?
+And that's where tensors can have a big impact.
+And so maybe give us some concrete examples.
+I mean, one of the things that strikes me is that when we're talking about sensor data,
+we're talking about sensor data that, and this is perhaps maybe naive,
+but we're talking about sensor data that comes from an inherently three-dimensional world.
+I guess if you start layering on time and maybe channels and things like that,
+it gets more complex.
+Is that where the multi-dimensionality comes from?
+You know, when we're extracting fundamentally,
+we're extracting things from our real world.
+It's interesting that you ask, because indeed, one direct way of using tensors
+is when the data itself has many dimensions, right?
+But another more nuanced way of using it is to model the relationships between data.
+So let me go back to the example of document categorization.
+So I talked about how do we automatically discover
+the categories or topics in documents when there are no labels available, right?
+So unsupervised learning problems tend to be really hard,
+because we don't have a human label saying, example saying,
+where, what are the topics?
+So in this scenario, what you can do is intuitively look at frequency of words,
+right? This bag of words is the simplest technique that's out there.
+So you can just count words.
+So let's say the word apple, it appears a lot in the document.
+I mean, this by itself is not informative because it could be the fruit
+or it could be the company, right?
+So now you can say, okay, let me not just count one word,
+let me count occurrences, pairwise occurrences of words.
+So what if the word apple and orange occurs together, right?
+So even in this case, maybe it's likely to be fruit,
+but orange is also a company, right?
+So now what about three words?
+If I count like occurrences of triplets of words,
+if it's apple, orange, banana, then likely it's a fruit, right?
+But it's humanly impossible to go label every triplets of categories
+and say what topics they should belong to, right?
+So can there be algorithms that can automatically discover at scale
+these higher order relationships?
+Right, so if you think about pairwise relationships, they are correlations.
+So you can represent that as a matrix.
+So you list all the words as rows and columns,
+which count the core occurrences that can be represented as a matrix.
+But if you have to do that-
+So N-Y's relationships correlates to end-dimensional tensors.
+Precisely.
+And now the question is, what class of operations can you do on them
+to discover these hidden variables to discover the topics in documents?
+And what I showed in one of my first papers is how we can decompose
+a certain tensor, a three-dimensional tensor,
+and discover the topics and discover the relationship
+between those topics and the words in the documents.
+Interesting.
+And so prior to this work or prior to a tensor-oriented approach,
+we would first go through the step of mapping this all
+to linear algebra and matrix operations and things like that.
+And it sounds like the argument is that that's inefficient.
+Is it an inefficiency or are we missing out on key tools in doing that?
+So there is a bit of everything.
+So for this specific, as always, the problem is complicated.
+For this specific topic of modeling and other latent variable estimation,
+there were two sets of approaches.
+One is expectation maximization.
+So you have the likelihood function.
+So you do a sort of local search method and hope
+to reach globally optimal solution.
+But many times, it gets stuck, especially
+for high-dimensional problems.
+And it's also slow.
+And the other approach, these matrix approaches,
+tend to do simple linear dimensionality reduction techniques.
+The principle component analysis is the most common one.
+So if you try to do a matrix approach or a linear algebra approach
+for topic modeling, you would only discover the subspace
+of the topic vectors.
+So you won't discover the actual modeling.
+And also, there is the class of spectral clustering
+where if the documents have separated topics,
+you could try to do a clustering approach.
+But in many cases, they are not.
+There are news articles talking both about science and politics and so on.
+So there is no separation of documents into distinct categories.
+And in those problems, there is really
+no other approach other than expectation maximization
+that people have used in practice before.
+And what we found is in our experiments
+that these tensor methods can be scaled up very efficiently
+because they can build on current linear algebra techniques
+and be parallelized in an embarrassingly parallel way.
+And we have that actually now available
+with Amazon SageMaker and the Comprehend Service.
+So with that, we have benchmarks that we've released
+comparing it to open source topic modeling frameworks
+that use expectation maximization.
+And we see SageMaker and what?
+So SageMaker is the machine learning platform to run experiments.
+And the comprehend is the natural language processing service.
+OK.
+So with Comprehend, you can go and directly
+access the results of topic modeling with SageMaker.
+You can even play around with the algorithm and run benchmarks and so on.
+Tell me if this is right.
+It strikes me that your work is kind of operating in two dimensions.
+Well, now I'm overusing the term dimensions.
+But there's this one angle where there are different approaches.
+There's expectation maximization.
+There's PCA and others.
+And your work is not just that, or is it, the tenserization
+of expectation maximization.
+It's another approach, but it's an approach
+that is made possible because you can operate in this tensor domain.
+Is that correct?
+Or it really is another approach.
+It's looking at a different objective.
+So if you have a probabilistic model,
+the standard approach is maximized likelihood.
+But classically, there was another approach which
+was to match the moments.
+It goes back to spearmen.
+In fact, it goes back to even Gauss, if you go.
+If you only match the first two moments,
+that's when you get a Gaussian distribution
+as an approximation to your true distribution.
+And what this is doing is now expanding
+those two higher order moments and also
+to many coordinates, to multivariate distributions.
+Because the intuition is now, if you have a mixture of Gaussians,
+you can all just do with two second order moments.
+You need to go to higher order moments
+to try to separate the mixture components.
+And that applies to a broad class of models.
+Is tenser and tensor operations a tool
+that we can kind of naively go back and apply
+to these other things like expectation maximization PCA?
+And is it a magic wand that we can wave at other results
+and make them better or do we need a whole new set of approaches
+that are designed with this set of operations in mind?
+So I would say there's this whole spectrum of problems.
+Some are more low-hanging fruit than the other ones.
+So there are indeed some straightforward use of tensors
+where you say, like, oh, PCA.
+Now I can do PCA in more dimensions.
+Let me tenserize it.
+On the other hand, there are more sophisticated approaches
+where I can ask, can I now look at the problem
+in a new light because I can use tensor methods?
+Is this really the right approach there?
+And so yeah, so there is a whole spectrum.
+And the one that I'm recently been exploring a lot more
+on has been on tenserizing neural networks,
+but in interesting ways, because the question is,
+when can we win over simple linear algebraic techniques
+over different layers?
+Or can we even think of the overall deep layers
+as some kind of hierarchical tensor transformation?
+Because that's what it really is.
+And one of the works that some of the researchers
+have looked at, Nadok Cohen as the primary author,
+has been precisely to ask that.
+Can we look at algebraic techniques, the group theory,
+to understand neural networks better?
+So walk us through that because I think you presented that
+at scale.ml, and one of the examples
+you use if I'm remembering this correctly
+was looking at a computer vision task
+and convolutional neural nets and kind of mapping that
+to what that might look like in a tensor world.
+Am I remembering that correctly?
+A little bit.
+I mean, yes, I think so the basic problem there
+is we have these convolutional layers,
+and then you feed the output of the convolutional layers
+to the fully connected layers.
+So the output of the convolutional layers
+is actually a three-dimensional structure
+because there is the spatial dimensions
+and then there's the number of channels.
+But then when we are feeding them to the fully connected layers,
+we are flattening them and just turning it
+to a matrix multiplication.
+So we are all losing all the three-dimensional information.
+And the question we asked was a very simple one.
+What if we try to preserve this three-dimensional information
+all the way to the end?
+And the way to do it is instead of doing matrix multiplication,
+turn that into a three-dimensional tensor contraction.
+So multiply with weights on each of the dimensions
+of the three-dimensional tensor.
+And in the last layer, do a tensor regression
+and use a low-rank tensor weights as a way
+to reduce the number of parameters.
+And that's what we found.
+We found a huge amount of space savings
+compared to the standard neural networks
+up to 65% in these fully connected layers.
+Space savings in what sense?
+In terms of the number of parameters.
+So the idea is by exploiting all the dimensionality
+information, we can have more compact networks.
+OK.
+How else are you looking at applying this work?
+Yeah.
+And so that was one example.
+The other set of examples is, as I said,
+to investigate the ability of tensors
+to capture higher-order correlations better.
+And so we looked at time series.
+And so here, this can be very challenging
+because there can be all kinds of higher-order correlations
+that affect forecasting outcomes.
+And especially if you want to forecast
+way into the future, there can be much more important.
+And so what we did was we took RNNs and LSTMs
+and used a window of measurements
+and looked at tensorizations of them.
+And of course, if you naively tensorize that blows up
+the number of parameters, because that's a high-order
+tensor.
+But then you can do efficient tensor
+train approximations, a low-rank approximation.
+So what that yields is a succinct representation
+of higher-order correlations.
+And we found a lot of benefit compared
+to baseline LSTMs on a range of data sets,
+like forecasting, traffic, hour-saheads, forecasting,
+weather, hundreds of days into the future.
+So there is a much better performance in those settings.
+So I can foresee a lot of such cases
+where we have a diverse set of measurements.
+So in tensors become a natural framework
+to encode the input.
+But then even during their processing
+through all the layers, you kind of treat them
+as tensor operations.
+So you can exploit the information
+in different dimensions more effectively.
+Do you see this tensorization as it's applied
+to neural networks?
+Is this something that is automatable
+or is it akin to network architecture
+in its level of complexity?
+Did you do this via graduate student descent,
+or did you want it through some process?
+I mean, so I would say as a great starting point,
+would be to have a software framework that makes it easy
+to define these layers.
+So that's where John Kosofi, he
+interned with our group last year, and he's been working
+with me and also his advisors back in London
+on developing tensorly framework.
+So the tensorly software, you can think of it as Keras.
+It has a front end that makes it very easy
+to define these tensor operations.
+But you can now connect it to multiple different backends.
+TensorFlow, PyTor, TirmixNet, and the baseline NAMPI
+as well.
+So if you don't want to bother about deep learning,
+you can even just do basic NAMPI
+and do the operations on CPU.
+But the benefit with this is now different researchers
+and developers can go try out different architectures,
+see what works well in their domain for their data sets.
+And so I would say that's a good starting point.
+But indeed, the architecture design
+would be more complex because we
+have a broader set of operations.
+But on the other hand, I do think
+there's some nice research to be done
+in terms of how we can use group theories,
+how we can use our understanding of tensor algebra
+to do better architecture search.
+elaborate on that, what are you thinking there?
+I mean, this kind of, you know, has also
+been seen in quantum systems and other areas of physics
+on asking different forms of tensor representations,
+what kind of correlation structures to the end use,
+and what would make sense for a particular domain?
+And we're just basically touching the surface of this,
+so it's not still an algorithm that we can automate.
+But I think those kinds of understanding
+could help us design better architecture search.
+So again, I would say like, you know,
+we're talking about architecture search, right?
+And that is indeed a hard problem.
+I mean, right now, even simple, greedy search
+kind of approaches take up a lot of resources.
+So if we want to solve it at scale very efficiently,
+that's out there.
+OK.
+But on the other hand, there are some immediate things
+we can do to improve the current state of art.
+What are the things that you're working on?
+Yeah, it's been really a broad set of problems.
+I recently, I think I shared it online on slide share
+that talks about how to, you know,
+bring our thinking of all aspects of AI together, right?
+So I see three facets.
+There is data, there are algorithms,
+and then there's the infrastructure.
+And until now, we've been kind of thinking of each separately,
+but there's a need to bring them together
+to have the best efficiency, the best impact.
+To give an example, you know, typically,
+we first collect data, feed them into machine learning algorithms.
+But in most practical applications,
+data is such a crucial aspect.
+And what we found in a series of studies
+is you can drastically improve data collection, aggregation,
+and augment our current data better.
+To give an example, we looked at the name-density recognition
+task, and the on-to-notes is the biggest public benchmark there.
+The one is what's it called?
+On-to-notes.
+OK.
+On-to-notes.
+Yeah.
+And so then we ran a simple active learning heuristic
+which says, you know, feed the current model
+a set of labeled examples.
+And after it updates, look for the examples
+that have a high uncertainty in the current model.
+So this is the basic active learning framework.
+And we found that we could reach the state of the art
+with just 25% of the dataset.
+So there are two aspects to it.
+One is that active learning can drastically reduce
+our data requirements.
+And the other is, most of the time, we are collecting data
+that's really relevant.
+We don't need huge datasets.
+Many times, you can even do deep learning on small data.
+And that, to me, presents a lot of promise
+because in so many domains, we don't
+have the luxury of large datasets.
+So how do you map this to this idea of data algorithms
+and infrastructure?
+Because in this case, what we are doing
+is we're planning our data collection
+in the loop with our model training.
+So we can ask the same in terms of even aggregating data.
+You have a whole crowd of workers.
+How do you reconcile differences in their answers?
+The standard approaches, we do majority voting.
+We have a whole bunch of annotators.
+We try to clean up the input data very carefully.
+Then we feed it to the machine learning model.
+But what we show is you can, in fact,
+do them both in the loop.
+You can try to keep learning about the annotator quality
+as you go along to train the machine learning model.
+And the machine learning model can help you
+come up with better estimates of annotator quality.
+And with this, in fact, with the Microsoft Coco data
+sets, we took the raw annotations that were available
+for this data set.
+And we found that the optimal thing to do
+was to have just a single annotator per sample.
+So if you had a fixed budget of annotations,
+you're better off labeling more samples
+than to be very careful about labeling every sample
+and having a whole lot of annotators
+to reduce the noise on a single sample.
+Oh, interesting.
+Interesting.
+Of the three, you haven't mentioned infrastructure.
+How does that tie into the loop?
+Or how do we tie that more closely into the loop?
+Right.
+So this ties in with the work I've been doing
+at Amazon Web Services.
+So naturally, I think the answer will be the cloud
+because they're not just saying because I'm
+in the cloud division.
+I mean, as we scale up these models,
+as we have data requirements grow,
+the only answer will be to allow for elastic scaling
+and put computing at the hands of every individual.
+Anybody can go access large amounts of infrastructure.
+So that's the basic aspect, like making
+GPUs available to everyone is the starting point.
+But where I find a lot of interesting challenges
+is when we try to build machine learning services
+across all levels of the stack.
+So there's an expert developer who likes to maybe tweak
+with the backend to enterprises that just want
+to run application services and not even worry
+about any machine learning that's going on underneath.
+How do we satisfy the needs of these diverse customers?
+And I've been involved in building SageMaker.
+That's the machine learning platform
+that removes a lot of heavy lifting associated
+with DevOps work when it comes to productionizing AI.
+So how do we go from prototyping
+to a full-scale production machine learning service
+very easily?
+And the idea is we have built all these algorithms
+where there's a backend that automatically scales
+to multiple machines and gives high efficiency.
+And there's also the model serving aspect that helps you
+to manage different models, do A, B testing very easily,
+and deploy the models in a very scalable way.
+So I think all these aspects, so we are just
+beginning to think in an integrated way
+and there'll be more of it in the future.
+Awesome, awesome.
+You were just on a panel here at Train AI.
+What was the panel about?
+Yeah, so Rob Monroe, the CDO figure eight,
+you know, formerly crowd flower,
+was earlier in our group in Amazon AI.
+So we've interacted a lot.
+We've had a lot of discussions about data,
+about the state of machine learning,
+about his adventures around the world.
+He's, I don't know if you know, he's cycle large parts
+of India, Africa, like, you know, there is, you know,
+so Rob is great.
+And so it's very happy to be on a panel when he invited me
+that asks about taking somebody from PhD to products, right?
+So academia versus industry, and for me,
+being in both the world, I felt like, you know,
+this was a great fit.
+How would you summarize the panel,
+like, what were the main insights offered?
+Yeah, I think the main one is, like, you know,
+the question of like, why PhD, right?
+Like, it looks like, oh, there's so much happening
+in industry, why PhD?
+I think there is a lot of relevance for PhD,
+even today, in fact, more than before,
+because first of all, there's a whole set of unsolved problems
+and industry is looking at only a sliver of them.
+And in industry, sometimes things are so fast moving,
+you have to kind of get ship products
+and you don't have that opportunity for a deeper thinking.
+Right? So if you're kind of in a position to say,
+I want this adventure.
+I want to, like, explore on my own.
+I want to ask my own questions, right?
+Then PhD is the right fit.
+But it's not for everybody.
+So it's like, I would never advise somebody to do a PhD
+just to get a machine learning job, right?
+So that's like the novelism, yeah, exactly.
+And so, yeah, they were useful
+and very interesting discussions like that.
+Fantastic.
+Well, Nima, before we wind down any other thoughts
+that you'd like to share?
+No, I think I really appreciate all the great work
+that you're doing.
+I think it's very important to publicize all the efforts
+that are happening in AI and machine learning.
+And more importantly, like, kind of give a realistic view
+of the field, right?
+So I do think there is a lot of hype in the media on one hand
+and at the same time, a lot of fear mongering
+and sometimes by big and powerful names that I'm sure of.
+So we may name us.
+Yeah, but it's very easy to infer.
+And I completely disagree.
+I think it's a, I would call it an abuse of power
+to kind of use their positions to do this kind of a fear
+mongering because there's a lot of real world impact
+to be had, especially a lot of social impact to be had
+through the use of AI.
+And we are still very much at the beginning.
+There is so much development to be done.
+And investing in AI, investing in AI education
+should be the priorities of governments and organizations.
+So I'm so happy that, you know, you have this podcast
+and you're making efforts to provide a balanced view
+of the topic.
+Great.
+Well, thank you so much.
+It's great to chat with you.
+Thank you.
+All right, everyone.
+That's our show for today.
+For more information on Anima or any of the topics
+covered in this episode, head on over to twimlai.com slash
+talk slash 142.
+Thanks again to figure eight for their sponsorship
+of this show.
+To follow along with the train AI series,
+visit twimlai.com slash train AI 2018.
+Finally, show us some love for the podcast second anniversary
+and share how it's been helpful to you.
+You can do that over at twimlai.com slash 2AV.
+Thanks so much for listening and catch you next time.

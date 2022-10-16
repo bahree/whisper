@@ -1,0 +1,1721 @@
+WEBVTT
+
+00:00.000 --> 00:15.920
+Hello and welcome to another episode of Twimble Talk, the podcast where I interview interesting
+
+00:15.920 --> 00:20.880
+people doing interesting things in machine learning and artificial intelligence.
+
+00:20.880 --> 00:23.520
+I'm your host Sam Charrington.
+
+00:23.520 --> 00:30.160
+We are back with our second show this week, episode 2 of our Autonomous Vehicle Series.
+
+00:30.160 --> 00:35.400
+This time around, we're joined by Jinsheng Shao of AutoX, a company building computer
+
+00:35.400 --> 00:39.000
+vision-centric solutions for autonomous vehicles.
+
+00:39.000 --> 00:45.440
+Jinsheng, a PhD graduate of MIT's CSEL lab, joins me to discuss the different layers of the
+
+00:45.440 --> 00:51.000
+Autonomous Vehicle Stack and the models for machine perception currently used in self-driving
+
+00:51.000 --> 00:52.320
+cars.
+
+00:52.320 --> 00:57.560
+If you're new to the Autonomous Vehicle space, I am confident that you'll learn a ton.
+
+00:57.560 --> 01:01.760
+And even if you know the space in general, you'll get a really interesting glimpse into
+
+01:01.760 --> 01:07.560
+why Jinsheng thinks AutoX's direct perception approach is superior to end-to-end processing
+
+01:07.560 --> 01:10.640
+or mediated perception.
+
+01:10.640 --> 01:15.280
+Our Autonomous Vehicle Series is sponsored by Mighty AI, and I'd like to take a moment
+
+01:15.280 --> 01:18.040
+now to thank them for their support.
+
+01:18.040 --> 01:22.560
+Mighty AI delivers training and validation data to companies building computer vision
+
+01:22.560 --> 01:25.000
+models for autonomous vehicles.
+
+01:25.000 --> 01:29.960
+Their platform combines guaranteed accuracy, with scale and expertise, thanks to their
+
+01:29.960 --> 01:35.200
+full stack of annotation software, consulting and managed services, proprietary machine
+
+01:35.200 --> 01:39.920
+learning, and a global community of pre-qualified annotators.
+
+01:39.920 --> 01:44.520
+If you haven't caught my interview with their CEO, Darren Nakuda, in the last show,
+
+01:44.520 --> 01:48.440
+we'll talk number 57, please make sure to check it out.
+
+01:48.440 --> 01:56.200
+And of course, be sure to visit them at www.mty.ai to learn more, and follow them at at Mighty
+
+01:56.200 --> 01:58.600
+underscore AI on Twitter.
+
+01:58.600 --> 02:02.600
+Before we jump in, if you're in New York City next week, we hope you'll join us at
+
+02:02.600 --> 02:05.880
+the NYU Future Labs AI Summit.
+
+02:05.880 --> 02:10.360
+As you may remember, we attended the inaugural Summit back in April, had a great time and
+
+02:10.360 --> 02:15.040
+shared some great interviews, which we'll link to in the show notes for your listening pleasure.
+
+02:15.040 --> 02:19.960
+This year's event features more great speakers, including Karina Cortez, head of research at
+
+02:19.960 --> 02:26.800
+Google New York, David Venturelli, Science Operations Manager at NASA Ames Quantum AI Lab,
+
+02:26.800 --> 02:31.480
+and Dennis Mortensen, CEO and founder of startup x.ai.
+
+02:31.480 --> 02:40.320
+For the event homepage, visit aiSummit2017.futurelabs.nyc, and for 25% off of all tickets,
+
+02:40.320 --> 02:43.880
+use code twimmold25.
+
+02:43.880 --> 02:48.360
+We'll be at the summit happy hour on Monday the 30th, and the summit itself on Tuesday the
+
+02:48.360 --> 02:52.000
+31st, and we look forward to meeting you there.
+
+02:52.000 --> 02:54.520
+And now on to the show.
+
+02:54.520 --> 03:05.200
+All right, everyone, I am on the line with Jensheng Shou.
+
+03:05.200 --> 03:12.280
+Jensheng is the founder and CEO of AutoX, a company that is doing some interesting things
+
+03:12.280 --> 03:14.280
+in the autonomous vehicle space.
+
+03:14.280 --> 03:18.320
+Jensheng, welcome to this week in machine learning and AI.
+
+03:18.320 --> 03:19.920
+Thank you, everyone.
+
+03:19.920 --> 03:20.920
+Great.
+
+03:20.920 --> 03:25.960
+Why don't we get started by having you introduce yourself and tell us a little bit about your
+
+03:25.960 --> 03:33.360
+background and how you got interested in autonomous vehicles and ML and AI more generally.
+
+03:33.360 --> 03:35.400
+Yeah, sure, sounds great.
+
+03:35.400 --> 03:37.840
+I got my PhD from MIT.
+
+03:37.840 --> 03:44.240
+I spent four years at MIT in the computer science and artificial intelligence trying to
+
+03:44.240 --> 03:45.560
+get my PhD.
+
+03:45.560 --> 03:49.200
+My research area is in computer vision and robotics.
+
+03:49.200 --> 03:52.320
+So I have been working in this space for quite a while.
+
+03:52.320 --> 03:58.520
+So after I graduated from MIT, I went to Princeton University as a professor.
+
+03:58.520 --> 04:03.920
+I was the founding director of the computer vision and robotics at Princeton University
+
+04:03.920 --> 04:05.640
+at the Department of Computer Science.
+
+04:05.640 --> 04:06.640
+OK.
+
+04:06.640 --> 04:12.640
+Our research is about trying to make computer sees, enable them to interact with the physical
+
+04:12.640 --> 04:13.640
+world.
+
+04:13.640 --> 04:19.560
+For example, these days we have images like from camera or from other sensors, this kind
+
+04:19.560 --> 04:26.120
+of sensor input, and then we try to pass what's going on in order to make it get an understanding
+
+04:26.120 --> 04:31.200
+of the physical world about the traffic situation, about people working around in order to make
+
+04:31.200 --> 04:32.200
+sense of the world.
+
+04:32.200 --> 04:36.520
+And after that, we can interact with the physical world, we can design robots.
+
+04:36.520 --> 04:41.440
+So in our way, we were designing all kinds of robots, including, of course, like my big
+
+04:41.440 --> 04:47.600
+self-driving cars, as well as a smaller robot working around, moving around inside an indoor
+
+04:47.600 --> 04:52.200
+space and have robot hands to grab objects and so on.
+
+04:52.200 --> 04:56.440
+So that, for example, I will participate in the Amazon Picking Challenge last year with
+
+04:56.440 --> 05:00.000
+a robot arm together with a team of experts from MIT.
+
+05:00.000 --> 05:04.960
+We have a joint team together and we get pretty good score in the final competition for
+
+05:04.960 --> 05:06.960
+robot picking challenge as well.
+
+05:06.960 --> 05:07.960
+Oh, wow.
+
+05:07.960 --> 05:11.440
+Is this the first time you've participated in the Picking Challenge?
+
+05:11.440 --> 05:17.120
+It was the first time, yeah, but also the last time.
+
+05:17.120 --> 05:22.360
+So after that, I started this company, AutoX, working on self-driving car and we focused
+
+05:22.360 --> 05:24.160
+on, we are being very focused.
+
+05:24.160 --> 05:28.760
+So right now, we focus on trying to make the self-driving car technology really good
+
+05:28.760 --> 05:30.680
+enough for practical usage.
+
+05:30.680 --> 05:32.680
+Uh-huh.
+
+05:32.680 --> 05:38.280
+What I've learned about the company, just from some of my background, reading is that
+
+05:38.280 --> 05:46.680
+you are really focused on trying to enable self-driving cars based strictly on vision-based
+
+05:46.680 --> 05:51.600
+technologies as opposed to LiDAR and some of the other sensors that, you know, we think
+
+05:51.600 --> 05:55.600
+of when we think of like the Google self-driving car, is that the case?
+
+05:55.600 --> 06:02.000
+Kyle, it's not exactly like that, but we are, our solution, I would say is camera-first
+
+06:02.000 --> 06:03.000
+solution.
+
+06:03.000 --> 06:07.520
+So we are not against any other sensor, we are very open to use any sensor.
+
+06:07.520 --> 06:12.960
+But at the same time, we primarily focus on using camera as our primary sensor.
+
+06:12.960 --> 06:17.840
+One of the reason is that, that's two reason, one is the cost factor.
+
+06:17.840 --> 06:24.400
+Camera displays the battery go cost, but other sensors, such as high resolution LiDAR,
+
+06:24.400 --> 06:25.760
+they are very expensive.
+
+06:25.760 --> 06:26.760
+Right.
+
+06:26.760 --> 06:33.440
+So if we are to make a product that can really be used by every citizen, by everyone, it has
+
+06:33.440 --> 06:39.560
+to be go cost enough so that financial actually makes sense to have the self-driving car.
+
+06:39.560 --> 06:45.000
+Because if a self-driving car is way more expensive than a car plus a few full-time driver,
+
+06:45.000 --> 06:48.560
+then it doesn't really make any sense, particularly.
+
+06:48.560 --> 06:49.560
+Right.
+
+06:49.560 --> 06:52.800
+So for us, we are camera-first solution, that's one thing.
+
+06:52.800 --> 06:56.520
+The other thing is also technicality, it's not just the cost.
+
+06:56.520 --> 07:02.960
+Technically, typical camera has very high resolution, but even a very high-end LiDAR, for
+
+07:02.960 --> 07:10.640
+example, a very expensive 80,000 US dollar LiDAR, is still have only 64-bing vertically.
+
+07:10.640 --> 07:16.680
+The resolution of a high-end LiDAR is simply too low so that it cannot be used for many
+
+07:16.680 --> 07:24.640
+situations, such as, like, CT, in CT downtown, variable 5 urban driving, it has to be able
+
+07:24.640 --> 07:30.640
+to recognize those subtle details, small objects, complications in order to be able to drive
+
+07:30.640 --> 07:31.640
+safety.
+
+07:31.640 --> 07:36.640
+But high-end LiDAR simply doesn't really have the inner resolution compared to a camera
+
+07:36.640 --> 07:38.920
+to do this task.
+
+07:38.920 --> 07:45.760
+And you said that LiDAR with the 16, did you say 16 by 16 resolution, or what, how did
+
+07:45.760 --> 07:46.760
+you?
+
+07:46.760 --> 07:52.480
+LiDAR, a lot of LiDAR these days, they are springing LiDAR, so they have 360 degree coverage
+
+07:52.480 --> 07:53.480
+horizontally.
+
+07:53.480 --> 07:57.520
+But vertically, they have a fixed number of bings.
+
+07:57.520 --> 08:02.600
+The LiDAR was deferring to, it's the highest and LiDAR, it's 64, 64.
+
+08:02.600 --> 08:03.600
+64.
+
+08:03.600 --> 08:04.600
+Got it.
+
+08:04.600 --> 08:08.000
+And you said that was, how much do those units cost?
+
+08:08.000 --> 08:11.000
+Those units cost 80,000 US dollar now.
+
+08:11.000 --> 08:12.000
+80,000, wow.
+
+08:12.000 --> 08:13.000
+Yeah, 80.
+
+08:13.000 --> 08:14.000
+Yeah.
+
+08:14.000 --> 08:15.400
+And actually, it's not.
+
+08:15.400 --> 08:18.280
+The other problem is, it's not automatic grid.
+
+08:18.280 --> 08:22.680
+That means if you keep using the LiDAR in high temperature, in low temperature, it's
+
+08:22.680 --> 08:24.960
+going to break in a few months.
+
+08:24.960 --> 08:29.600
+Like for any hardware that can be installed on the vehicle, actually, people are spouting
+
+08:29.600 --> 08:33.800
+it has a lifetime of like 15 years.
+
+08:33.800 --> 08:35.800
+Okay.
+
+08:35.800 --> 08:41.440
+And also on your website, you talk about your goal being to try to enable self-driving
+
+08:41.440 --> 08:43.760
+cars with just $50 worth of cameras.
+
+08:43.760 --> 08:48.760
+And in fact, you, you've got off the shelf webcams in a picture mounted on the hood of
+
+08:48.760 --> 08:49.760
+a car.
+
+08:49.760 --> 08:53.280
+I think they're the same one that I have, the Logitech C920.
+
+08:53.280 --> 08:54.280
+Yes.
+
+08:54.280 --> 08:59.400
+Of course, that's not for final production, but yes, of course, the initial experiment
+
+08:59.400 --> 09:03.760
+we're actually using those Logitech webcams, they're very old cars.
+
+09:03.760 --> 09:08.760
+But to moving towards production, now we're upgrading our camera with the other camera
+
+09:08.760 --> 09:14.080
+that is not webcams, but they're actually a similar price level, they are not much more
+
+09:14.080 --> 09:15.080
+expensive.
+
+09:15.080 --> 09:16.080
+Okay.
+
+09:16.080 --> 09:22.800
+Maybe we can dig into, you know, what are some of the things that you're doing or the
+
+09:22.800 --> 09:29.680
+ways that you're thinking about the problem that enables you to take this camera first
+
+09:29.680 --> 09:30.680
+approach?
+
+09:30.680 --> 09:31.680
+Yeah.
+
+09:31.680 --> 09:32.680
+That's a very good question.
+
+09:32.680 --> 09:33.680
+Yeah.
+
+09:33.680 --> 09:38.880
+A one thing that we try to emphasize is camera actually have a lot of potential.
+
+09:38.880 --> 09:44.720
+Like for example, a lot of people say that then can your camera be system dry at night?
+
+09:44.720 --> 09:45.720
+Actually, yes.
+
+09:45.720 --> 09:51.240
+Because a lot of camera displays the feature is actually much better than human eyes.
+
+09:51.240 --> 09:56.800
+The way it's actually missing for the camera-based solution is really a very good software.
+
+09:56.800 --> 10:00.760
+It's very sophisticated, very advanced AI algorithm.
+
+10:00.760 --> 10:04.480
+That's what is missing to make the camera-based solution desirable.
+
+10:04.480 --> 10:07.720
+That's for example, human use the guide on our two eyes.
+
+10:07.720 --> 10:13.280
+We don't have a spinning ride out on top of our head shooting leaders, but we can still
+
+10:13.280 --> 10:15.280
+drive very safely.
+
+10:15.280 --> 10:20.600
+So that's why it's missing really about the software.
+
+10:20.600 --> 10:23.520
+This is where our key innovation comes in.
+
+10:23.520 --> 10:28.960
+In our company, most of us are software engineers, all researchers were working in this space
+
+10:28.960 --> 10:36.440
+trying to develop a very advanced perception system as well as a very robust printing system
+
+10:36.440 --> 10:42.400
+and decision-making system in order to work together side by side to have a robust solution.
+
+10:42.400 --> 10:48.000
+So maybe I can start with the general pipeline of the architecture first.
+
+10:48.000 --> 10:53.440
+So that three major-style autonomous driving, in the autonomous driving software step.
+
+10:53.440 --> 10:58.120
+One is the perception, the other one is the printing and decision-making, and the third
+
+10:58.120 --> 11:00.240
+one is the control.
+
+11:00.240 --> 11:06.040
+Perception is deferring to the part that will take the image and other sensors as input.
+
+11:06.040 --> 11:11.240
+Trying to make capture what is going on in the physical world, get the traffic situation,
+
+11:11.240 --> 11:15.240
+and trying to have the software to understand, okay, this is an object.
+
+11:15.240 --> 11:21.400
+This object is moving, and this is a traffic sign, and this is a traffic light, and get
+
+11:21.400 --> 11:23.560
+a sense of the world.
+
+11:23.560 --> 11:25.080
+And that's the perception part.
+
+11:25.080 --> 11:27.720
+And then after that, that's the decision-making part.
+
+11:27.720 --> 11:33.000
+It's like, even now the computer can understand what's going on in the physical world.
+
+11:33.000 --> 11:35.240
+Now the computer needs to make this decision.
+
+11:35.240 --> 11:40.280
+Should the car stop or should the car go, how fast it should go, how much it should turn,
+
+11:40.280 --> 11:43.640
+or all these are the decision-making and printing part.
+
+11:43.640 --> 11:48.440
+And after it made a plan, now finally, we need to execute the plan.
+
+11:48.440 --> 11:49.440
+That's the control part.
+
+11:49.440 --> 11:55.760
+We need to control the vehicle, actually going to execute the plan and behave accordingly.
+
+11:55.760 --> 11:57.440
+That's the control part.
+
+11:57.440 --> 12:03.640
+So these are the three major building blocks, three major steps, you know, full-step software
+
+12:03.640 --> 12:04.880
+for autonomous driving.
+
+12:04.880 --> 12:07.680
+Okay, perception, planning, and control.
+
+12:07.680 --> 12:08.680
+Exactly.
+
+12:08.680 --> 12:15.520
+And the different schools, how to do this, there's one approach that is more traditional
+
+12:15.520 --> 12:21.240
+Google based approach, or we know now, based approach is try to do every step separately,
+
+12:21.240 --> 12:22.720
+complete separately.
+
+12:22.720 --> 12:27.760
+So the perception part will focus on making a very good understanding of the physical
+
+12:27.760 --> 12:31.200
+world, make sure everyone everything is perfect.
+
+12:31.200 --> 12:35.200
+In particular, you're trying to get, I would say, a point cloud variable or pixel-wise
+
+12:35.200 --> 12:41.400
+level, like for each image, or each pixel in the image, they try to make a perfect understanding
+
+12:41.400 --> 12:47.280
+of what the object is, like is this pixel beyond to a car, or is this pixel beyond to a
+
+12:47.280 --> 12:51.120
+road surface to help pixel-wise understanding.
+
+12:51.120 --> 12:56.720
+And then, given this pixel-wise understanding, they try to have a 3D understanding of the
+
+12:56.720 --> 13:01.920
+physical world in order to support that decision-making and printing.
+
+13:01.920 --> 13:05.920
+That's one typical approach, which we call mediated perception.
+
+13:05.920 --> 13:06.920
+Mediated perception?
+
+13:06.920 --> 13:07.920
+Yes.
+
+13:07.920 --> 13:08.920
+Okay.
+
+13:08.920 --> 13:15.760
+So that's another approach that is recently populated by a media, is trying to do end-to-end,
+
+13:15.760 --> 13:17.360
+everything end-to-end together.
+
+13:17.360 --> 13:22.560
+Remember, we are talking with a 3-step, that perception, that's printing, that's control.
+
+13:22.560 --> 13:26.040
+The immediate approach is trying to fuse everything together.
+
+13:26.040 --> 13:28.760
+They no longer use a modularized approach.
+
+13:28.760 --> 13:33.840
+They just put everything together into a huge gigantic neural network, so they take the
+
+13:33.840 --> 13:38.720
+sensor, such as the image at the input, and the neural network just output directly the
+
+13:38.720 --> 13:39.720
+control.
+
+13:39.720 --> 13:41.720
+How much break you should apply?
+
+13:41.720 --> 13:46.120
+How much stealing talk we should apply to the stealing world?
+
+13:46.120 --> 13:49.240
+So that's the end-to-end approach from the media.
+
+13:49.240 --> 13:50.240
+Okay.
+
+13:50.240 --> 13:55.400
+But both approach have a lot of problems, I would say, at least some problem.
+
+13:55.400 --> 13:57.240
+Maybe we're talking about end-to-end first.
+
+13:57.240 --> 14:02.760
+The end-to-end first, the problem is everything is working like a black box, it's very difficult
+
+14:02.760 --> 14:03.760
+to provide input.
+
+14:03.760 --> 14:09.440
+That, for example, if a computer drives a car to an intersection, now you can turn left.
+
+14:09.440 --> 14:10.920
+Now you can also turn right.
+
+14:10.920 --> 14:14.960
+But it's actually very difficult to tell the computer to turn right.
+
+14:14.960 --> 14:20.120
+Because the computer will look at this intersection, and it will make up its mind, because it's
+
+14:20.120 --> 14:21.120
+a black box.
+
+14:21.120 --> 14:26.480
+I then automatically tell you, okay, I'm going to turn right, I'm going to just turn
+
+14:26.480 --> 14:27.480
+right.
+
+14:27.480 --> 14:32.160
+So it's very difficult to control what's going on inside, everything is just a black box.
+
+14:32.160 --> 14:35.120
+That's one major job out there, end-to-end approach.
+
+14:35.120 --> 14:42.520
+If I can jump in, that's an issue I've never really thought much about is when you're building
+
+14:42.520 --> 14:51.480
+systems that are controlled by neural networks, the ability to, for example, override the system
+
+14:51.480 --> 14:59.040
+or provide user direction, is that a software engineering challenge, like you have systems
+
+14:59.040 --> 15:04.360
+that take the neural network input and take the user input and just prioritize the user
+
+15:04.360 --> 15:10.280
+input, or is that a neural network challenge where you're providing the neural network input
+
+15:10.280 --> 15:14.200
+in, and you have to train the system to prefer it.
+
+15:14.200 --> 15:16.480
+I'll say it depends on the detail.
+
+15:16.480 --> 15:22.280
+For this cloud end-to-end approach, if everything is completely end-to-end, then that is not
+
+15:22.280 --> 15:27.840
+just a software engineering problem, it's really a more research-generated neural network
+
+15:27.840 --> 15:28.840
+problem.
+
+15:28.840 --> 15:33.360
+Because the neural network will decide everything for you, you don't really have a choice.
+
+15:33.360 --> 15:37.640
+Whatever the computer, the neural network decides, that's the result.
+
+15:37.640 --> 15:42.480
+But if you are able to use the neural network in a more modularized approach, use the neural
+
+15:42.480 --> 15:47.360
+network to do certain tasks and the other part to do, another neural network to do certain
+
+15:47.360 --> 15:51.120
+tasks, and then eventually you have some way to combine it together.
+
+15:51.120 --> 15:55.680
+In that way, the user actually can have more input.
+
+15:55.680 --> 16:00.800
+So that's actually, that's a very good question, that point of the one job of the completely
+
+16:00.800 --> 16:01.800
+end-to-end approach.
+
+16:01.800 --> 16:05.920
+It's like now the computer decides where you are going to go, where you are going to
+
+16:05.920 --> 16:06.920
+stop.
+
+16:06.920 --> 16:10.520
+That's obviously not usable for us.
+
+16:10.520 --> 16:16.480
+And another problem for the end-to-end approach is the amount of data required to have this
+
+16:16.480 --> 16:18.280
+system up and running.
+
+16:18.280 --> 16:22.520
+You can imagine that to cover the space, to change a good neural network, we will need
+
+16:22.520 --> 16:28.520
+to cover pretty much all the use case, all the potential traffic scenarios in the changing
+
+16:28.520 --> 16:32.320
+data in order to change the neural network to behave smartly.
+
+16:32.320 --> 16:36.360
+But this kind of approach is very difficult because you can imagine that even in the same
+
+16:36.360 --> 16:41.760
+role, in the same role intersection, for example, or in the same highway merging point, there
+
+16:41.760 --> 16:46.520
+could be many different kind of traffic, that could be different numbers of cars, those
+
+16:46.520 --> 16:51.040
+cars could be a different position, each car can have different size, each car could
+
+16:51.040 --> 16:56.400
+have different color, each car can have different speed, each car can have different reaction
+
+16:56.400 --> 17:00.520
+tongue, all these are different, now we need to cover the whole space, we need to have
+
+17:00.520 --> 17:06.320
+enough changing data to put forth all the space, and this is still assuming at the same traffic
+
+17:06.320 --> 17:12.200
+merging point, if you have different role, different role condition, different language,
+
+17:12.200 --> 17:17.720
+different, that makes the number of changing data requirement is so big that probably
+
+17:17.720 --> 17:23.120
+even like the whole human society catch a data for thousands of years, we may not still
+
+17:23.120 --> 17:28.000
+have enough data to change a good neural network to cover all the space.
+
+17:28.000 --> 17:34.640
+That's another typical job of the N2N approach, is the amount of data you require is really
+
+17:34.640 --> 17:35.640
+gigantic.
+
+17:35.640 --> 17:44.360
+I mean, just as maybe a counterpoint, the impression I'm getting from folks that are doing
+
+17:44.360 --> 17:51.160
+things that are more like the end-to-end approach in video and Google is that they're making
+
+17:51.160 --> 17:52.800
+a lot of progress, right?
+
+17:52.800 --> 17:57.640
+I'm not getting the impression that they think it's going to take thousands of years to train
+
+17:57.640 --> 18:00.560
+you know, these systems to be operable.
+
+18:00.560 --> 18:04.640
+That's not really true because the Google approach, they are not end-to-end, we're talking
+
+18:04.640 --> 18:05.640
+about.
+
+18:05.640 --> 18:10.480
+Yeah, the Google approach is the second, the next approach I'm going to describe is the
+
+18:10.480 --> 18:15.760
+mediatic perception approach, they are the operative end-to-end, they cut the end-to-end
+
+18:15.760 --> 18:22.320
+into many, many different small steps, into so many steps, basically, and each step,
+
+18:22.320 --> 18:25.600
+they will do something very, just very, very small step.
+
+18:25.600 --> 18:30.320
+The mediatic perception approach typically is that, take the sensor input that I remember,
+
+18:30.320 --> 18:35.520
+the end-to-end is about merging the perception, training, control, all into one single step.
+
+18:35.520 --> 18:40.160
+Now, the mediatic perception is different, they're not only separate them into different
+
+18:40.160 --> 18:44.160
+steps, even each step they separate into many sub-steps.
+
+18:44.160 --> 18:50.560
+For example, when Google's approach, in this kind of approach, they take the image as
+
+18:50.560 --> 18:58.680
+the input, and then they try to get a pixel-wise recognition of each pixel in the image, and
+
+18:58.680 --> 19:03.920
+that's not useful for driving, so that's the first step, and then after that, they convert
+
+19:03.920 --> 19:10.560
+this pixel-wise segmentation into a more 3D understanding of the world.
+
+19:10.560 --> 19:15.560
+For example, they will get a 3D building box, a box to contain each card, each vehicle
+
+19:15.560 --> 19:17.800
+will have a box to contain the card.
+
+19:17.800 --> 19:25.880
+So sound, meaning you've got from your LiDAR sensor, you've got a point cloud, and you've
+
+19:25.880 --> 19:35.560
+got from your image a two-dimensional view that identified that some two-dimensional set
+
+19:35.560 --> 19:42.440
+of contiguous pixels as a car, they would fuse those two to determine a 3D bounding
+
+19:42.440 --> 19:48.360
+box for the vehicle based on both the point cloud and the image data.
+
+19:48.360 --> 19:57.040
+Yes, that's right, but you can see about this, there's a lot of information in this process
+
+19:57.040 --> 20:02.200
+that we're trying so hard to get, they're not particularly useful, that for example,
+
+20:02.200 --> 20:08.680
+the height of the vehicle, we don't really care, no matter how tall the vehicle is, we
+
+20:08.680 --> 20:13.000
+don't want to hit them.
+
+20:13.000 --> 20:15.000
+So that a lot of information is...
+
+20:15.000 --> 20:19.360
+But you want to know how tall the clearance is for a bridge that you're trying to cross
+
+20:19.360 --> 20:21.120
+under, or an overpass?
+
+20:21.120 --> 20:22.120
+Yes, that is.
+
+20:22.120 --> 20:26.520
+So that certain information that is useful, that certain information that are not useful
+
+20:26.520 --> 20:31.400
+for us to try, so that's the point exactly we're making.
+
+20:31.400 --> 20:36.520
+In Google's approach is the optical end to end, they try to get everything, no matter
+
+20:36.520 --> 20:42.320
+it's useful or it's not useful, they all get it out, and whether it's going to be
+
+20:42.320 --> 20:43.320
+useful or not.
+
+20:43.320 --> 20:49.560
+I would say this approach is safer, but it's overkill, it's a lot of redundancy that
+
+20:49.560 --> 20:51.600
+we can squeeze out.
+
+20:51.600 --> 20:56.840
+Because every big of information we shred, that's always a cost, that's a cost of computation
+
+20:56.840 --> 21:02.800
+on board, if you extract a lot of information that's not useful, it weighs a lot of computation.
+
+21:02.800 --> 21:07.920
+Secondly, it's also a lot of engineering and research time, because if we spend so many
+
+21:07.920 --> 21:12.680
+engineering efforts to get those information and actually they're not being used, there
+
+21:12.680 --> 21:14.920
+is a waste of time as well.
+
+21:14.920 --> 21:18.480
+And certainly it's a waste of changing data, because then you'll get a lot of changing
+
+21:18.480 --> 21:23.960
+data with a lot of heavy annotation in order to get something that's not really useful.
+
+21:23.960 --> 21:25.920
+So that's another problem.
+
+21:25.920 --> 21:28.560
+Auto-X will count in between.
+
+21:28.560 --> 21:33.520
+We feel that mediatic perception have some advantage, but it may be overkill.
+
+21:33.520 --> 21:38.160
+We see the different problem of end-to-end perception, an end-to-end approach that is
+
+21:38.160 --> 21:42.480
+completely end-to-end, that's a lot of problem, but the good thing is it's more simple and
+
+21:42.480 --> 21:43.800
+more elegant.
+
+21:43.800 --> 21:49.120
+So we design something called the Degrad perception, which is flowing between, is that we're
+
+21:49.120 --> 21:55.200
+trying to only get those information that are useful for driving, and we're not getting
+
+21:55.200 --> 21:57.040
+those that are used these for driving.
+
+21:57.040 --> 22:02.800
+A lot of information that in the mediatic perception approach, they get out is useful
+
+22:02.800 --> 22:08.240
+for other tasks, that if I'm a bird, I'm flying around, definitely I need to know how
+
+22:08.240 --> 22:09.960
+high is the car.
+
+22:09.960 --> 22:15.400
+So it's a lot of useful information for other applications, but not for autonomous driving.
+
+22:15.400 --> 22:20.880
+So for our approach, we're trying to identify the needs of information that are useful
+
+22:20.880 --> 22:27.080
+for autonomous driving, and we ignore those that are used these for autonomous driving, and we only
+
+22:27.080 --> 22:32.320
+focus on spending the computation power, spending the engineering effort, spending money
+
+22:32.320 --> 22:38.560
+on gathering training data for those useful information, and we call those useful information
+
+22:38.560 --> 22:46.400
+for those indicators, for example, I can give you a example, this is terminology that
+
+22:46.400 --> 22:51.520
+is dedicated for robotic audit, for example, if I give you a mark that you can do water,
+
+22:51.520 --> 22:56.760
+a mark, whether the mark you can have a handle, typical mark have a handle, the handle
+
+22:56.760 --> 23:01.800
+will afford you to grab the handle so that you can raise the mark.
+
+23:01.800 --> 23:08.920
+So a fordance means the environment or the object allows you to support you to do certain
+
+23:08.920 --> 23:13.160
+action, intelligent agents to do certain action.
+
+23:13.160 --> 23:18.760
+So that's what we call a fordance, and in the autonomous driving scenario is the same,
+
+23:18.760 --> 23:26.560
+is that is the current traffic situation for you to do certain tasks, that for example,
+
+23:26.560 --> 23:31.480
+is the traffic, now it's a traffic jam, that means the fordance of this current traffic
+
+23:31.480 --> 23:37.600
+situation cannot afford you to speed up your car into a 60 miles per hour.
+
+23:37.600 --> 23:43.360
+So the autonomous driving, what we actually need is, we need to get the affordance, can
+
+23:43.360 --> 23:48.880
+the current traffic situation, can the current road condition, can the current physical condition
+
+23:48.880 --> 23:54.760
+allow you, can afford the autonomous driving car to perform certain action.
+
+23:54.760 --> 23:59.440
+So this is the list of essential things that we really need for autonomous driving.
+
+23:59.440 --> 24:08.200
+I guess one question that comes to mind for me is that affordance as a key metric seems,
+
+24:08.200 --> 24:16.120
+it's alright what to say this, it strikes me as it's like a, it's a planning metric.
+
+24:16.120 --> 24:22.160
+Like if I have a route that I'm trying to pursue and I want to plan, you know, my next
+
+24:22.160 --> 24:28.720
+step, whether it's change lane or turn or something like that, does the current situation
+
+24:28.720 --> 24:32.120
+allow me to do what I want to do.
+
+24:32.120 --> 24:38.800
+But there's also a requirement that these vehicles be, you know, reactionary to things
+
+24:38.800 --> 24:40.800
+that happen.
+
+24:40.800 --> 24:45.600
+And I'm wondering, you know, when I think just the way affordance sounds like it doesn't,
+
+24:45.600 --> 24:51.040
+it's not necessarily as applicable in those types of scenarios, is that the case?
+
+24:51.040 --> 24:56.720
+In the now sense, maybe yes, but you know, the general sense, because when we say affordance,
+
+24:56.720 --> 25:02.640
+it's not static, it's a dynamic signal, but for example, in the more computer sounds
+
+25:02.640 --> 25:08.280
+language, the computer is making a decision 30 for a second.
+
+25:08.280 --> 25:12.360
+That means every second the computer is making 30 decisions.
+
+25:12.360 --> 25:17.240
+That means the computer is changing that my quickly, very quickly, point five thing to
+
+25:17.240 --> 25:18.240
+me.
+
+25:18.240 --> 25:23.800
+So if you, so if the car cuts me off, then, you know, I'm still, I still need to figure
+
+25:23.800 --> 25:29.240
+out if I can afford to go straight, for example, and that's happening at 30 frames per second.
+
+25:29.240 --> 25:34.520
+Yeah, so then suddenly the affordance becomes very reacting, because if the situation
+
+25:34.520 --> 25:39.680
+changes a little bit, the affordance changes and then it's basically being very reacting.
+
+25:39.680 --> 25:44.880
+So in the general sense, the affordance is deferring to all these reacting behavior
+
+25:44.880 --> 25:45.880
+as well.
+
+25:45.880 --> 25:46.880
+Okay.
+
+25:46.880 --> 25:47.880
+Thanks.
+
+25:47.880 --> 25:48.880
+Yeah.
+
+25:48.880 --> 25:56.360
+So what we do is we take the existing auto driving approach and we squeeze out and we
+
+25:56.360 --> 26:01.400
+see which part is really essential, which part is, which affordance is very necessary
+
+26:01.400 --> 26:06.960
+for auto driving and we are focusing our energy on making those very reliable so that we
+
+26:06.960 --> 26:10.440
+can have very robust auto driving solution.
+
+26:10.440 --> 26:15.840
+That's basically the unique part of our technology.
+
+26:15.840 --> 26:24.640
+It sounds like then in the mediated perception world, they are, are they ultimately trying
+
+26:24.640 --> 26:33.480
+to get to affordances as well, but they're, they haven't pruned the, the universes of affordances
+
+26:33.480 --> 26:38.760
+that they care about or is there not really the concept of affordance there?
+
+26:38.760 --> 26:45.040
+I believe that's a concept of affordance there is just like when they designed this system,
+
+26:45.040 --> 26:51.360
+it probably, it was like that a girl, this kind of system, at that time they didn't seem
+
+26:51.360 --> 26:56.920
+too much about this, they spent a lot of time probably focusing on other aspects.
+
+26:56.920 --> 27:02.640
+So the system design was a little bit no longer the greatest way, no longer the most
+
+27:02.640 --> 27:05.960
+arrogant way to do the technology.
+
+27:05.960 --> 27:11.960
+So I also believe that maybe in the future when they were also mixing about this, people
+
+27:11.960 --> 27:15.360
+passed them out, they're also impressed as well.
+
+27:15.360 --> 27:21.760
+When we're talking about affordances and this direct perception, trying to focus on
+
+27:21.760 --> 27:27.800
+only the most relevant affordances, is there an enumeration of those, is there, you
+
+27:27.800 --> 27:32.960
+know, are there a 10, are there a 20, are there hundreds, does that question make sense
+
+27:32.960 --> 27:38.880
+or is it more like, you know, is that more, is it less a high level concept and more
+
+27:38.880 --> 27:43.680
+something that's implemented, you know, in the software that's like some vector of,
+
+27:43.680 --> 27:47.360
+you know, affordances that's determined on the fly?
+
+27:47.360 --> 27:49.200
+Yeah, that's made sense.
+
+27:49.200 --> 27:55.440
+It does, if you numerally at least, it's probably less than 200, it's 100 something.
+
+27:55.440 --> 28:01.360
+Of course, a different traffic situation is not like you have the whole 100, it always
+
+28:01.360 --> 28:04.000
+does only a subset that makes sense.
+
+28:04.000 --> 28:09.680
+So we'll classify the traffic scenario into different subset, and then each subset, we
+
+28:09.680 --> 28:16.360
+will derive a smaller number of perception indicator, the affordance indicator in order
+
+28:16.360 --> 28:20.840
+to try the car and to have the car behave appropriately.
+
+28:20.840 --> 28:29.160
+Okay, and so since you call this direct perception, does that mean that the planning and the
+
+28:29.160 --> 28:34.680
+control layers of the stack remain the same and they're just getting inputs from this
+
+28:34.680 --> 28:40.520
+different kind of perception, or did those also change to accommodate direct perception
+
+28:40.520 --> 28:41.520
+and affordances?
+
+28:41.520 --> 28:48.520
+Yes, and yes, in the sense that if we just focus on talking about the repossession, but
+
+28:48.520 --> 28:53.960
+mediatic perception, yes, this part of the difference only on the perception, but there's
+
+28:53.960 --> 28:59.480
+another dimension of technology that is different from other companies that we mentioned at
+
+28:59.480 --> 29:07.120
+the beginning of the conversation is we are focused on using camera instead of radar.
+
+29:07.120 --> 29:11.880
+The mediatic perception, the repossession, they can both apply to radar and camera, but
+
+29:11.880 --> 29:17.680
+if we are talking about camera, that's another way of difficulty, because for camera, because
+
+29:17.680 --> 29:24.960
+it's not an active sensor, it's not shooting up laser, the distance measurement is usually
+
+29:24.960 --> 29:29.600
+more noisy, so there will be more noise in the distance measurement.
+
+29:29.600 --> 29:36.800
+So we have to model the uncertainty of the object distance, object speed, and so on.
+
+29:36.800 --> 29:42.360
+And that means the decision making planning and control path have to be more robust as
+
+29:42.360 --> 29:43.360
+well.
+
+29:43.360 --> 29:48.320
+Therefore, in a sort of way that the decision making and the planning path will also spend
+
+29:48.320 --> 29:55.600
+a lot of time making it to take the uncertainty from the perception needle into account as well
+
+29:55.600 --> 29:59.520
+in order to have a battery or bus auto-redriving system.
+
+29:59.520 --> 30:05.960
+And so when I think of a system that is looking at images, trying to calculate distances
+
+30:05.960 --> 30:13.320
+of from the car to objects in those images, and then applying another layer of uncertainty,
+
+30:13.320 --> 30:20.920
+that calls to mind some type of Bayesian type of system, is that what you're doing underneath?
+
+30:20.920 --> 30:26.720
+It's not exactly Bayesian, but Bayesian is one of the many ways to encode uncertainty,
+
+30:26.720 --> 30:32.240
+but in our environment, it's a lot of other ways to encode uncertainty as well.
+
+30:32.240 --> 30:36.400
+It's not necessarily a fully Bayesian framework, because technically Bayesian framework
+
+30:36.400 --> 30:42.720
+will have some technical requirements of being Bayesian, but at least will still cut it
+
+30:42.720 --> 30:45.200
+into the uncertainty into account.
+
+30:45.200 --> 30:50.600
+As for a lot of other systems for traditional auto-redriving systems, they actually don't
+
+30:50.600 --> 30:56.160
+get into uncertainty into account, that planning and decision making is completely decisive.
+
+30:56.160 --> 31:02.960
+But if this is going to happen, then what will happen is a pure if-else statement only.
+
+31:02.960 --> 31:09.320
+But for our solution, it's much more robust because we consider the uncertainty of the perception
+
+31:09.320 --> 31:15.280
+needle, we take uncertainty into account, assuming the perception needle is not perfect
+
+31:15.280 --> 31:23.000
+and we are able to make use of the uncertainty estimation in order to make a plan that is
+
+31:23.000 --> 31:27.320
+doable even if that something is going to happen.
+
+31:27.320 --> 31:34.640
+So when you talk about the if-else kinds of constructors, is that that's specific
+
+31:34.640 --> 31:41.000
+to mediated perception, like end to end, there would just be a neural network that's doing
+
+31:41.000 --> 31:44.320
+something that doesn't involve if-else.
+
+31:44.320 --> 31:50.800
+But with a mediated perception, you've got some control system that is taking in perception
+
+31:50.800 --> 31:57.880
+inputs and the planning is based on if-else or I guess I don't think of these systems
+
+31:57.880 --> 32:06.000
+as very if-then-else, very traditionally rules-based as opposed to based on train networks.
+
+32:06.000 --> 32:14.040
+Yes, if I do, I say if-else statement is referring mostly to mediated perception system.
+
+32:14.040 --> 32:21.040
+The reason why it's that is because I was saying 99% of the companies working in this space
+
+32:21.040 --> 32:23.760
+are still using mediated perception.
+
+32:23.760 --> 32:30.880
+The end train approach is mostly on the research side, still very difficult to be practically
+
+32:30.880 --> 32:31.880
+used.
+
+32:31.880 --> 32:32.880
+Okay.
+
+32:32.880 --> 32:33.880
+Yeah.
+
+32:33.880 --> 32:41.720
+And so at what layer of the stack do you find the if-else, you know, the rules-based parts
+
+32:41.720 --> 32:45.600
+of the system and a mediated perception approach?
+
+32:45.600 --> 32:51.680
+It's usually on the decision-making, like after the perception and big for the control,
+
+32:51.680 --> 32:58.000
+the planning and decision-making, usually people have to manually write down all the rules,
+
+32:58.000 --> 33:01.200
+it's hundreds of thousands of rules.
+
+33:01.200 --> 33:08.520
+For example, if a car is kind of encroaching on my lane, you know, from the left then,
+
+33:08.520 --> 33:10.960
+you know, turn right.
+
+33:10.960 --> 33:15.160
+And what's the granularity of these rules, I guess, is what I'm trying to wrap my head
+
+33:15.160 --> 33:16.160
+around?
+
+33:16.160 --> 33:17.800
+Can you give me examples there?
+
+33:17.800 --> 33:22.320
+This granularity of the rule is valid detail, it's not just so general.
+
+33:22.320 --> 33:26.960
+It's more like if the car is approaching you from the left then, you need to estimate
+
+33:26.960 --> 33:32.760
+the size of the car, the distance of the car, and the speed of the car and the acceleration
+
+33:32.760 --> 33:36.400
+of the car in order for you to decide what to do accordingly.
+
+33:36.400 --> 33:43.400
+So depends on different speed, different size, different rows, structures, are we turning,
+
+33:43.400 --> 33:49.840
+we have turning right or is on the street or is on the curvy or they are all different.
+
+33:49.840 --> 33:54.200
+So you have to encode all this information and they have many different combinations
+
+33:54.200 --> 33:56.080
+in order to encode all these rules.
+
+33:56.080 --> 34:00.840
+That's why there are so many rules has to have to be returned out.
+
+34:00.840 --> 34:02.080
+Right, right.
+
+34:02.080 --> 34:09.240
+So it strikes me that, I mean, you, I'm trying to put together these three approaches that
+
+34:09.240 --> 34:14.000
+you've mentioned end to end pixel wise direct perception.
+
+34:14.000 --> 34:22.880
+It strikes me that you can have a system that is, you know, there are still more degrees
+
+34:22.880 --> 34:29.720
+of, you know, the flexibility of kind of inserting machine learning into different layers
+
+34:29.720 --> 34:30.720
+of this.
+
+34:30.720 --> 34:36.360
+For example, you know, with mediated perception, a company could start with a mediated perception
+
+34:36.360 --> 34:41.680
+system and swap out the planning decision making, you know, with the train neural net,
+
+34:41.680 --> 34:46.480
+you know, for example, without changing the way the perception works.
+
+34:46.480 --> 34:48.680
+Is that, where does that fall apart?
+
+34:48.680 --> 34:50.960
+Why aren't people doing that?
+
+34:50.960 --> 34:51.960
+It's possible.
+
+34:51.960 --> 34:58.720
+That's possible, but just particularly very difficult to make work that right now the
+
+34:58.720 --> 35:04.480
+neural network is still performed very well, mostly on the perceptions that for the other
+
+35:04.480 --> 35:09.720
+like decision making and so on, it's very difficult to still have the neural network working.
+
+35:09.720 --> 35:15.720
+That has been some research, for example, using the enforcement learning, some tiny by
+
+35:15.720 --> 35:22.960
+similar to AlphaGo, to purchase, to do design tasks, but it's not at the level of maturity
+
+35:22.960 --> 35:26.880
+that most people are willing to use for production here.
+
+35:26.880 --> 35:34.640
+So it's still mostly in the research stage, it's not ready for the work product.
+
+35:34.640 --> 35:41.040
+And even non deep learning machine learning models, I guess the, what I'm trying to wrap
+
+35:41.040 --> 35:48.600
+my head around is intuitively, you know, after you've gone through the perception step,
+
+35:48.600 --> 35:56.760
+you've got, you know, a set of, you know, a set of features that represent what you've learned
+
+35:56.760 --> 36:03.160
+about, you know, 3D space around the vehicle, the vehicle dynamics and all that.
+
+36:03.160 --> 36:10.520
+Is it that the, you know, the dimensionality of that is too high for either traditional
+
+36:10.520 --> 36:16.880
+machine learning models or deep learning, or is it something else that is really the
+
+36:16.880 --> 36:18.640
+main challenge?
+
+36:18.640 --> 36:23.240
+The difficulty is not about the dimension or the size of the data.
+
+36:23.240 --> 36:27.800
+The difficulty is about the space is not fixed mapping.
+
+36:27.800 --> 36:28.800
+Let's put it this way.
+
+36:28.800 --> 36:34.000
+For neural network, a lot of traditional machine learning such as the very famous support
+
+36:34.000 --> 36:37.400
+vector machine, what they are trying to learn is a function.
+
+36:37.400 --> 36:39.240
+You give me some input.
+
+36:39.240 --> 36:44.480
+I have a mapping tool to output, so it's a function.
+
+36:44.480 --> 36:48.280
+You give me, you change your input, my output change, and so on.
+
+36:48.280 --> 36:53.880
+But when we talk about robotics, when we talk about autonomous driving specifically,
+
+36:53.880 --> 37:00.000
+it's very regarding what's going to happen in the next step, depends on what I do now.
+
+37:00.000 --> 37:06.640
+If I speed up my car, suddenly the car you found me making scare, me speed up as well.
+
+37:06.640 --> 37:12.360
+And since I'm not predictable, it's not just me changing, it's not fixed mapping.
+
+37:12.360 --> 37:17.320
+Is everything going to happen in the future depends on what's happening now.
+
+37:17.320 --> 37:21.680
+So there's a sequential causality in between.
+
+37:21.680 --> 37:28.960
+That makes it a fixed mapping, that mapping function f, mapping x, f to get y, that's very
+
+37:28.960 --> 37:33.120
+not very, not degraded applicable to this kind of application.
+
+37:33.120 --> 37:39.840
+So that's why people have to imagine something new, more fancy stuff, try to do this.
+
+37:39.840 --> 37:40.840
+Okay.
+
+37:40.840 --> 37:45.840
+So tell me a little bit about the progress you've made, is how far along are you?
+
+37:45.840 --> 37:52.200
+Yeah, we are a young company, we get started 13 months ago, just a little bit over a year.
+
+37:52.200 --> 37:56.320
+Sparkling in the past year, we already made a lot of progress.
+
+37:56.320 --> 38:02.280
+So people from our website, autox.ai, you may see that our car already shows an initial
+
+38:02.280 --> 38:08.640
+prototype driving on the street, doing a lot of demos, can drive safety, using camera
+
+38:08.640 --> 38:13.200
+to achieve almost all the driving behavior that will require.
+
+38:13.200 --> 38:19.960
+So we are moving very fast, our plan is to in a very near future, we can really have
+
+38:19.960 --> 38:26.040
+a product, made the technology so perfect, good enough to have a little product out to
+
+38:26.040 --> 38:28.120
+the market very soon.
+
+38:28.120 --> 38:33.360
+And we are working with a lot of partners, several major partners, such as car manufacturers
+
+38:33.360 --> 38:39.560
+or just companies, try to commercialize our product as soon as possible.
+
+38:39.560 --> 38:46.160
+And it doesn't sound like the model is one, like I think what Kama is trying to do, that
+
+38:46.160 --> 38:51.400
+to have like an aftermarket kit that you can just deploy on your vehicle.
+
+38:51.400 --> 38:57.640
+Yeah, we are not interested in aftermarket at all, because aftermarket, in some sense,
+
+38:57.640 --> 39:02.400
+it's almost not doable, there are two aspects that may not be doable.
+
+39:02.400 --> 39:07.640
+The first is the, because we need to set up the camera, we need to set up a computer,
+
+39:07.640 --> 39:13.080
+the modification of the car is a lot, quite a lot, and most people simply do not have
+
+39:13.080 --> 39:18.720
+the skillset, or they just don't want that car to look really ugly with the things dangling
+
+39:18.720 --> 39:19.720
+around.
+
+39:19.720 --> 39:21.120
+It's just not very safe as well.
+
+39:21.120 --> 39:25.880
+What happens if the camera falls to the ground and then while you auto-drive it, it's
+
+39:25.880 --> 39:29.120
+just simply very not very easy to do that.
+
+39:29.120 --> 39:34.600
+And there's also a even more fundamental problem that nobody point out is that most vehicle
+
+39:34.600 --> 39:41.800
+available today on the market already get bought by the customers, they do not support
+
+39:41.800 --> 39:43.400
+drive by while.
+
+39:43.400 --> 39:49.560
+That means the steering wheel, the brake, the throttle, the acceleration, they all have to
+
+39:49.560 --> 39:52.760
+control manually mechanically.
+
+39:52.760 --> 39:56.880
+There's no way, no adequate way, no easy way that you can have a computer to control
+
+39:56.880 --> 39:58.360
+that for you.
+
+39:58.360 --> 40:02.440
+If that's the case, most people, and they have this aftermarket kid, they still cannot
+
+40:02.440 --> 40:04.440
+control that car.
+
+40:04.440 --> 40:10.480
+But for example, if you look at Commodore AI's modification of the car, if you read the details,
+
+40:10.480 --> 40:13.320
+it actually cannot control the car under battery or speed.
+
+40:13.320 --> 40:19.320
+It can only take over the control of the car, for example, about 20 or 25 miles per hour.
+
+40:19.320 --> 40:23.760
+If you are driving at 10 miles per hour, the computer cannot control it.
+
+40:23.760 --> 40:30.480
+So there's always some certain limitation for those cars, for aftermarket retro 15.
+
+40:30.480 --> 40:37.240
+So that's why we're focusing on our company, we put safety as the primary goal for deployment
+
+40:37.240 --> 40:39.560
+or any autonomous driving technology.
+
+40:39.560 --> 40:45.000
+So we're not only the software have to be smart enough to be safe, but the hardware,
+
+40:45.000 --> 40:51.080
+it has to be good enough to provide redundancy as well as provide very solid hardware that
+
+40:51.080 --> 40:55.000
+can run at least a few years, I would say, for autonomous driving.
+
+40:55.000 --> 41:01.480
+Instead of a drive for three days and a camera for on the ground, then what happens now?
+
+41:01.480 --> 41:02.480
+Yeah.
+
+41:02.480 --> 41:03.480
+Right.
+
+41:03.480 --> 41:04.480
+Right.
+
+41:04.480 --> 41:05.480
+Okay, great, great.
+
+41:05.480 --> 41:10.160
+Well, I really enjoyed this discussion and learned a ton about the autonomous vehicle space
+
+41:10.160 --> 41:13.480
+in general, not to mention what AutoX is doing.
+
+41:13.480 --> 41:17.120
+Is there anything else that you'd like to share with us?
+
+41:17.120 --> 41:18.120
+Yeah, sure.
+
+41:18.120 --> 41:21.960
+Like I mentioned, we're a very young company and we're still quickly growing, but right
+
+41:21.960 --> 41:27.120
+now we have a member of 30 and we're trying to go to at least a hundred in a year.
+
+41:27.120 --> 41:33.640
+So we're actively recruiting, so if the audience are interested in exploring or also working
+
+41:33.640 --> 41:38.800
+together, the cutting edge research to really make a difference to the world, please come
+
+41:38.800 --> 41:39.800
+to the virus.
+
+41:39.800 --> 41:46.760
+You can visit our website, www.autox.ai to learn more about our opening.
+
+41:46.760 --> 41:47.760
+Thank you very much.
+
+41:47.760 --> 41:48.760
+Awesome.
+
+41:48.760 --> 41:49.760
+Thanks, Jen Shaw.
+
+41:49.760 --> 41:52.080
+I really appreciate it and it was great chatting with you.
+
+41:52.080 --> 41:53.080
+Okay, great.
+
+41:53.080 --> 41:54.080
+That was.
+
+41:54.080 --> 41:56.080
+Thank you very much.
+
+41:56.080 --> 42:00.680
+All right, everyone.
+
+42:00.680 --> 42:02.760
+That's our show for today.
+
+42:02.760 --> 42:07.840
+Thanks so much for listening and for your continued feedback and support.
+
+42:07.840 --> 42:12.920
+For more information on Jen Shaw or any of the topics covered in this episode, head on
+
+42:12.920 --> 42:17.480
+over to twimlai.com slash talk slash 58.
+
+42:17.480 --> 42:25.120
+To follow along with the Autonomous Vehicle Series, visit twimlai.com slash AB 2017.
+
+42:25.120 --> 42:30.040
+Of course, please, please, please send us any questions or comments you may have.
+
+42:30.040 --> 42:37.240
+For us or our guests, be a Twitter at twimlai or directly to me at Sam Charrington or leave
+
+42:37.240 --> 42:39.960
+a comment on the show notes page.
+
+42:39.960 --> 42:46.520
+Also, be sure to check out our last show, twimletalk number 57, with Mighty AI, co-founder
+
+42:46.520 --> 42:52.800
+and CEO Darren Nakuda at twimlai.com slash talk slash 57.
+
+42:52.800 --> 42:59.280
+And check out some of the interesting things they're working on at www.mty.ai.
+
+42:59.280 --> 43:09.920
+Thanks again for listening and catch you next time.
+

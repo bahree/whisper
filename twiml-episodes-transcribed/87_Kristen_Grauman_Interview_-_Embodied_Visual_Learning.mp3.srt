@@ -1,0 +1,1764 @@
+1
+00:00:00,000 --> 00:00:15,920
+Hello and welcome to another episode of Twimble Talk, the podcast where I interview interesting
+
+2
+00:00:15,920 --> 00:00:20,880
+people doing interesting things in machine learning and artificial intelligence.
+
+3
+00:00:20,880 --> 00:00:23,760
+I'm your host Sam Charrington.
+
+4
+00:00:23,760 --> 00:00:28,320
+This week on the podcast, we're featuring a series of conversations from the AWS re-invent
+
+5
+00:00:28,320 --> 00:00:33,600
+conference in Las Vegas. I had a great time at this event, getting caught up on the new machine
+
+6
+00:00:33,600 --> 00:00:39,520
+learning and AI products and services announced by AWS and its partners. If you missed the news
+
+7
+00:00:39,520 --> 00:00:44,880
+coming out of re-invent and want to know more about what one of the biggest AI platform providers
+
+8
+00:00:44,880 --> 00:00:51,040
+is up to, make sure you check out Monday's show, Twimble Talk number 83. Around table discussion,
+
+9
+00:00:51,040 --> 00:00:56,960
+I held with Dave McCrory and Lawrence Chung. We cover all of AWS's most important news,
+
+10
+00:00:56,960 --> 00:01:03,680
+including the new SageMaker, DeepLens, Recognition Video, Transcription, Alexa for Business,
+
+11
+00:01:03,680 --> 00:01:10,480
+Greengrass ML inference, and more. This week, we're also running a special listener appreciation
+
+12
+00:01:10,480 --> 00:01:16,560
+contest to celebrate hitting 1 million listens here on the podcast and to thank you all for being
+
+13
+00:01:16,560 --> 00:01:24,720
+so awesome. Tweet to us using the hashtag TwimbleOneMill to enter. Every entry gets a fly
+
+14
+00:01:24,720 --> 00:01:30,240
+TwimbleOneMill sticker, plus a chance to win a limited run t-shirt commemorating the occasion.
+
+15
+00:01:31,200 --> 00:01:36,320
+We'll be digging into the Magic Twimble swag bag and giving away some other mystery prizes as well,
+
+16
+00:01:36,320 --> 00:01:43,360
+so you definitely don't want to miss this. If you're not on Twitter or you want more ways to enter,
+
+17
+00:01:43,360 --> 00:01:48,320
+visit twimbleai.com slash TwimbleOneMill for the full rundown.
+
+18
+00:01:49,360 --> 00:01:53,920
+Before we dive in, I'd like to thank our good friends over at Intel Nirvana for their
+
+19
+00:01:53,920 --> 00:01:59,520
+sponsorship of this podcast and our reinvent series. One of the big announcements at reinvent
+
+20
+00:01:59,520 --> 00:02:05,760
+this year was the release of Amazon DeepLens, a fully programmable deep learning enabled wireless
+
+21
+00:02:05,760 --> 00:02:12,320
+video camera designed to help developers learn and experiment with AI both in the cloud and at the
+
+22
+00:02:12,320 --> 00:02:19,120
+edge. DeepLens is powered by an Intel Atom X5 processor, which delivers up to 100 gigaflops
+
+23
+00:02:19,120 --> 00:02:24,560
+of processing power to onboard applications. To learn more about DeepLens and the other
+
+24
+00:02:24,560 --> 00:02:30,080
+interesting things Intel's been up to in the AI space, check out intelnervana.com.
+
+25
+00:02:31,200 --> 00:02:36,960
+Okay, this time around we're joined by Kristen Grouman, professor in the Department of Computer
+
+26
+00:02:36,960 --> 00:02:42,560
+Science at UT Austin. Kristen specializes in computer vision and joined me leading up to her
+
+27
+00:02:42,560 --> 00:02:48,800
+talk on learning where to look in video at reinvent deep learning summit. Kristen and I dig into
+
+28
+00:02:48,800 --> 00:02:54,880
+the details of her research and talk, including how an embodied video system can internalize the
+
+29
+00:02:54,880 --> 00:03:01,200
+link between how I move and what I see so as to learn how and where to move in its environment.
+
+30
+00:03:01,920 --> 00:03:07,280
+We discuss various policies for learning to look around actively and how an agent can learn
+
+31
+00:03:07,280 --> 00:03:13,360
+to focus attention on the interesting elements of a scene. This was a really interesting conversation
+
+32
+00:03:13,360 --> 00:03:19,600
+and I'm sure you'll learn a ton from it. And now on to the show.
+
+33
+00:03:24,080 --> 00:03:28,800
+All right, everyone. I'm at AWS reinvent and I've got the pleasure of being seated here with
+
+34
+00:03:28,800 --> 00:03:35,040
+Kristen Grouman. Kristen is a professor in the Department of Computer Science at UT Austin.
+
+35
+00:03:35,040 --> 00:03:39,360
+Kristen, welcome to this weekend machine learning in AI. Thank you. Thanks for having me.
+
+36
+00:03:39,360 --> 00:03:47,440
+Absolutely. So you are speaking here today at the deep learning summit that's part of reinvent
+
+37
+00:03:47,440 --> 00:03:52,480
+and I'm really interested in learning a little bit more about your talk and what you'll be sharing.
+
+38
+00:03:52,480 --> 00:03:56,560
+But before we do that, why don't we start by having you tell us a little bit about your
+
+39
+00:03:56,560 --> 00:04:01,920
+background and how you got interested in machine learning? Sure. Well, I'll work backwards
+
+40
+00:04:01,920 --> 00:04:07,040
+right now. As you said, I'm at UT Austin. I'm a faculty member. I've been there for 11 years now
+
+41
+00:04:07,040 --> 00:04:14,480
+and my specialty is in computer vision and machine learning. So that's the part of artificial
+
+42
+00:04:14,480 --> 00:04:18,960
+intelligence where you want to make algorithms that can understand images and video. So before
+
+43
+00:04:18,960 --> 00:04:25,280
+coming to UT Austin about 11 years ago, I did my PhD at MIT and prior to that, I was at Boston
+
+44
+00:04:25,280 --> 00:04:33,920
+College and from undergrad. So I got into AI happily as an undergrad. I actually had the chance
+
+45
+00:04:33,920 --> 00:04:38,720
+to take courses that were relevant, including a course in computer vision. And from that,
+
+46
+00:04:38,720 --> 00:04:44,320
+got the chance to work with a professor doing some small research project that really
+
+47
+00:04:45,040 --> 00:04:50,960
+got me excited and got me the chance to get into the research world and then at degree at school
+
+48
+00:04:50,960 --> 00:04:57,200
+where I explored some more. Did you do computer vision at MIT? Yes, yeah. And as part of CSAIL
+
+49
+00:04:57,200 --> 00:05:04,320
+or another lab there? Yeah, I was in CSAIL. In fact, I'm old enough that it was the AI lab before
+
+50
+00:05:04,320 --> 00:05:09,760
+it became CSAIL. But during my time there, yeah, we transitioned from a separate AI lab to CSAIL.
+
+51
+00:05:09,760 --> 00:05:15,760
+Okay. And what did you, what was your research focus there? So my PhD work was focused on
+
+52
+00:05:15,760 --> 00:05:23,440
+object recognition. Okay. And in particular, we were developing ways to work with what are called
+
+53
+00:05:23,440 --> 00:05:29,360
+local feature representations. So being able to match objects based on local parts that are
+
+54
+00:05:29,360 --> 00:05:36,480
+repeatable. And the key to my thesis in a nutshell was to show how to perform discriminative learning
+
+55
+00:05:36,480 --> 00:05:41,680
+with these sets of local features. So we developed something called the pyramid match kernel that
+
+56
+00:05:41,680 --> 00:05:47,840
+was very effective for fast matching of sets of features to do recognition. Can you give an
+
+57
+00:05:47,840 --> 00:05:53,040
+example of local feature recognition and where that comes into play? Sure. Yeah. So
+
+58
+00:05:53,040 --> 00:05:59,920
+prior to kind of the major advances with CNNs, commercial neural networks, one representation
+
+59
+00:05:59,920 --> 00:06:06,480
+of choice was to use interest operators to find local points and images that are going to be
+
+60
+00:06:06,480 --> 00:06:13,200
+repeatedly detectable across scale changes, lighting changes, viewpoint changes, and then describe
+
+61
+00:06:13,200 --> 00:06:18,960
+the content around each of these local points with some invariant or tolerant representation
+
+62
+00:06:18,960 --> 00:06:24,160
+that's tolerant to changes. Is this different from like an edge detector or something like that?
+
+63
+00:06:24,160 --> 00:06:29,920
+Well, so an edge detector also can be a pointwise operator. So what's really, what's really powerful
+
+64
+00:06:29,920 --> 00:06:35,200
+about these local representations was the repeatability under different viewing conditions. So
+
+65
+00:06:36,080 --> 00:06:40,960
+once we could find points that would be the same points, even if you scaled the image by two,
+
+66
+00:06:40,960 --> 00:06:45,840
+or even if you rotated the camera by 20 degrees, or if you changed the lighting in the room.
+
+67
+00:06:45,840 --> 00:06:51,200
+So with those kind of features being repeatedly detected, you have nice invariance so that you're
+
+68
+00:06:51,200 --> 00:06:55,040
+really robust to change as you experience in the real world when you see the thing again.
+
+69
+00:06:56,080 --> 00:07:00,320
+And that kind of representation got going and these features got going originally from
+
+70
+00:07:00,320 --> 00:07:05,600
+multi-view geometry work, where you need to be able to match and do triangulation and reconstruct a
+
+71
+00:07:05,600 --> 00:07:10,560
+3D scene. But around that time, we're talking back when I was doing my PhD. This was then found
+
+72
+00:07:10,560 --> 00:07:14,880
+to be quite important in a similar way for recognition because you want to find the object again,
+
+73
+00:07:14,880 --> 00:07:20,240
+even when it's had these changes. So the learning challenge came up when if you want to jump up to
+
+74
+00:07:20,240 --> 00:07:25,360
+categorization, not just finding that same object again, but finding, you know, not bus this bus,
+
+75
+00:07:25,360 --> 00:07:29,840
+but any bus or not this car, any car, then you need to do some kind of learning on top of that
+
+76
+00:07:29,840 --> 00:07:36,080
+sort of representation. As a way to generalize what you've learned from the points to the class
+
+77
+00:07:36,080 --> 00:07:42,800
+of object that you're trying to be able to recognize. It's interesting. So you describe an element of
+
+78
+00:07:42,800 --> 00:07:48,480
+that that is it's kind of invariant to, you know, positional changes and things like that. And
+
+79
+00:07:48,480 --> 00:07:53,600
+I guess I'm thinking of this experience I had yesterday with so AWS announced this developer
+
+80
+00:07:53,600 --> 00:08:00,800
+toolkit called DeepLens. It's basically a camera on a basically a small computer that is self-contained
+
+81
+00:08:00,800 --> 00:08:05,600
+and you can do you can kind of train models in a cloud and push them out to this little computer
+
+82
+00:08:05,600 --> 00:08:11,040
+and do inference at the edge. And they did a workshop where you're detecting a hot dog,
+
+83
+00:08:11,040 --> 00:08:16,800
+basically hot dog, not hot dog, Silicon Valley reference. And one of the things that was you know,
+
+84
+00:08:16,800 --> 00:08:21,440
+one of the things that was real clear is that it was very intolerant to, you know, positional
+
+85
+00:08:21,440 --> 00:08:26,080
+changes in the hot dog, you know, basically the hot dog had to fill the whole frame in order for
+
+86
+00:08:26,080 --> 00:08:31,600
+it to be able to recognize it. You know, are there elements of the the approach that you were
+
+87
+00:08:31,600 --> 00:08:38,000
+describing that you worked on in grad school that would, you know, you know, and granted that was
+
+88
+00:08:38,000 --> 00:08:42,640
+a, that was a squeeze net model. So it was like a limited, you know, it's a very limited model
+
+89
+00:08:42,640 --> 00:08:46,960
+that was designed to fit on this embedded device. But, you know, there are elements of that kind of
+
+90
+00:08:46,960 --> 00:08:52,560
+work that you, you know, that are being tied to what folks were doing today with CNNs to try
+
+91
+00:08:52,560 --> 00:08:57,360
+to make them more kind of invariant to those kinds of, you know, positional shifts.
+
+92
+00:08:57,360 --> 00:09:02,720
+Yeah. So I mean, a couple of things. One, my PhD work was back in 2006. So we're talking about
+
+93
+00:09:02,720 --> 00:09:07,200
+things that are not what I'm working on now. But those local features, in fact, have that kind of
+
+94
+00:09:07,200 --> 00:09:12,240
+invariance more strongly than your vanilla CNN representation will for the whole image.
+
+95
+00:09:12,720 --> 00:09:16,480
+So if you want to just treat object recognition as an image classification problem,
+
+96
+00:09:16,480 --> 00:09:21,040
+that's really a simplification, right? Because when you want to recognize an object, it's not
+
+97
+00:09:21,040 --> 00:09:26,080
+necessarily, as you said, just frame right in the view, such that it occupies most of the pixels.
+
+98
+00:09:26,080 --> 00:09:33,760
+If it is image classification, super powerful, including with, you know, even a squeezed CNN.
+
+99
+00:09:33,760 --> 00:09:37,600
+But if you want to recognize an object that's, first of all, sitting in a room full of clutter,
+
+100
+00:09:38,400 --> 00:09:41,920
+then you also have to tackle what's called the detection problem, which means, you know,
+
+101
+00:09:41,920 --> 00:09:46,480
+localizing and finding where boundaries of objects are, or, you know, the very least scanning
+
+102
+00:09:46,480 --> 00:09:52,800
+around to make classification decisions. Furthermore, the kind of work we do now, you know, we're
+
+103
+00:09:52,800 --> 00:09:57,600
+actually interested in this very question, you know, if I have an agent that's visually intelligent,
+
+104
+00:09:57,600 --> 00:10:02,560
+you know, it's not enough for it to be handed flashcards and ask to name them. It's a stepping stone,
+
+105
+00:10:02,560 --> 00:10:06,400
+and it's a huge one that, you know, has grown so much in the last four or five years.
+
+106
+00:10:06,400 --> 00:10:09,200
+But they also need to be able to figure out which pictures should this agent be taking.
+
+107
+00:10:09,840 --> 00:10:14,000
+Where does it have to look? What is an object? Even if that's an object, I haven't seen
+
+108
+00:10:14,000 --> 00:10:19,520
+the eye being the agent, you know, haven't seen before during training. So, yeah, I think you can,
+
+109
+00:10:19,520 --> 00:10:24,560
+the kind of demo you described is super powerful, but, you know, not all problems are, you know,
+
+110
+00:10:24,560 --> 00:10:29,120
+we have to go even further than image classification on a web photo or a photo that's kind of closely
+
+111
+00:10:29,120 --> 00:10:36,080
+zoomed in. And that's actually a great transition to the topic of your discussion later on today,
+
+112
+00:10:36,080 --> 00:10:40,800
+right? You're talking about, well, why don't you tell us a little bit about what you're talking
+
+113
+00:10:40,800 --> 00:10:46,720
+about today? Sure. Yeah. So, my plan today is to give an overview of one segment of my group's work,
+
+114
+00:10:46,720 --> 00:10:53,600
+and what I'm going to focus on is the theme of learning where to look in video. So, again,
+
+115
+00:10:53,600 --> 00:11:00,240
+when we think about training up today's state-of-the-art object recognition systems, such as those that take
+
+116
+00:11:00,240 --> 00:11:05,040
+decompletional neural networks, train them on a dataset like ImageNet, for which you have a million
+
+117
+00:11:05,040 --> 00:11:10,240
+images, say, with thousands of different categories, you can name. Well, benchmarks like that,
+
+118
+00:11:10,240 --> 00:11:16,080
+and training sources like that, treat the problem only in part, and this is because
+
+119
+00:11:16,880 --> 00:11:22,160
+they bake in intelligence about how those photos even came to exist, right? So, these are
+
+120
+00:11:22,160 --> 00:11:26,960
+human-daken photos. And their photos, furthermore, that they have the good composition of human
+
+121
+00:11:26,960 --> 00:11:31,360
+photographer would make, furthermore, they were chosen to be uploaded on the web to even be good
+
+122
+00:11:31,360 --> 00:11:37,680
+enough as an exemplar that someone wants to see. And so, if you can draft that with what you get if
+
+123
+00:11:37,680 --> 00:11:44,000
+you strap a camera to a person's head, or if you strap a camera to a robot's head, or a vehicle,
+
+124
+00:11:44,720 --> 00:11:51,360
+all such kind of egocentric or first-person perspective views, coupled with video, meaning
+
+125
+00:11:51,360 --> 00:11:57,120
+ongoing observation, not just a well-chosen moment in time, but, you know, just continuous video,
+
+126
+00:11:57,120 --> 00:12:02,000
+then you'll see that the image content and quality is quite different. And if you're not going
+
+127
+00:12:02,000 --> 00:12:08,400
+to rely on that baked in intelligence about human-taken photos, then party your job in the system is to
+
+128
+00:12:08,400 --> 00:12:12,640
+decide where to look in the first place. And so, my talk today, that's kind of the motivating
+
+129
+00:12:13,600 --> 00:12:19,200
+disparity, right? From going from labeling photos that humans took to having a dynamic camera in
+
+130
+00:12:19,200 --> 00:12:25,040
+the world that captures video on an ongoing way and has intelligence about which parts of it matter
+
+131
+00:12:25,040 --> 00:12:30,000
+or which parts are recognition-worthy. So, that's my theme, and then I'm going to talk about that
+
+132
+00:12:30,000 --> 00:12:39,920
+on a few fronts. One is to look at how to have systems that learn in an embodied manner. So,
+
+133
+00:12:39,920 --> 00:12:45,040
+if you think about snapshots on the web as disembodied, right? Because they're just these moments in
+
+134
+00:12:45,040 --> 00:12:49,600
+time, you know, that humans took. Well, then if you have embodied learning observations,
+
+135
+00:12:50,400 --> 00:12:54,960
+you might be able to do something more. And so, take this as a loose inspiration, you know, we
+
+136
+00:12:54,960 --> 00:13:01,440
+certainly know biological systems build up their visual representations, not from flashcard learning,
+
+137
+00:13:01,440 --> 00:13:06,800
+like the web photos you could take to be, but instead from interacting, moving in the world and
+
+138
+00:13:06,800 --> 00:13:11,920
+having the context of that motion and interaction as part of the learning process. So, you know,
+
+139
+00:13:11,920 --> 00:13:17,200
+think of a baby doing this, for example, and there's, you know, there's enough evidence on the
+
+140
+00:13:17,200 --> 00:13:21,360
+cognitive science side, and that's actually crucial, you know, like I'll point to a study with
+
+141
+00:13:21,360 --> 00:13:27,040
+kittens, a famous one back from the 60s, where if you deprive a kitten of the ability to control
+
+142
+00:13:27,040 --> 00:13:31,360
+its own motion, it has severe determinants to visual perception development, even if it sees
+
+143
+00:13:31,360 --> 00:13:37,520
+the same things that a kitten who can control its own motion sees. Interesting. So, so that's kind
+
+144
+00:13:37,520 --> 00:13:42,560
+of the first thing you look at at that is motivation. We've been studying how to perform visual
+
+145
+00:13:42,560 --> 00:13:48,240
+learning in a body context, and one of our steps in that direction is to take first person
+
+146
+00:13:48,240 --> 00:13:54,240
+egocentric video. So, video in our case, this one's captured on a vehicle, where we don't just see
+
+147
+00:13:54,240 --> 00:14:00,320
+the pixels in the video. We also can pay attention to what we call motor signals. So, physical
+
+148
+00:14:00,320 --> 00:14:05,840
+measurements about how the agent is moving in sync with the video that we observe.
+
+149
+00:14:05,840 --> 00:14:12,000
+So, now we're talking about kind of direction orientation of a vehicle in addition to the video
+
+150
+00:14:12,000 --> 00:14:16,640
+that is capturing. That's right. Yeah. So, we look at the GPS coordinates and the heading of the
+
+151
+00:14:16,640 --> 00:14:22,960
+vehicle and sensed from, you know, outside of the visual sensors, and now we look at them synchronized
+
+152
+00:14:22,960 --> 00:14:28,480
+with the video stream. And then the idea is that this video stream let it be unlabeled, which means,
+
+153
+00:14:28,480 --> 00:14:33,120
+you know, no human is set down and done some annotation on it. It's just video that's been captured,
+
+154
+00:14:33,120 --> 00:14:42,160
+but the goal was to let the system discover the structure linking the two, so that it's building
+
+155
+00:14:42,160 --> 00:14:47,520
+its own visual representation that's informed by this embodiment. So, more specifically,
+
+156
+00:14:48,320 --> 00:14:55,520
+we posed it in terms of eagomotion-conditioned new-view predictions. So... Eagomotion-conditioned
+
+157
+00:14:55,520 --> 00:15:00,000
+new-view prediction. Yeah, so there's a lot of words that wants what it... What we're saying is that,
+
+158
+00:15:00,000 --> 00:15:05,200
+okay, suppose you are seeing something, you, the agent, of course, at a current moment in time.
+
+159
+00:15:05,200 --> 00:15:10,400
+Now, can we have a representation where it's predictable for that agent? How things will look
+
+160
+00:15:10,400 --> 00:15:16,320
+if it moves in a certain way? Mm-hmm. Okay. So, you can teach that from unlabeled video, right? If it
+
+161
+00:15:16,320 --> 00:15:21,280
+knows senses its motion, sees what it sees, it's going to learn that connection between how I move
+
+162
+00:15:21,280 --> 00:15:27,200
+and what I see as a function of my motion, so... And so, if I can just take a step to kind of
+
+163
+00:15:27,200 --> 00:15:33,360
+paraphrase here, you know, we've seen there's a... You know, there's work that's been done on,
+
+164
+00:15:33,360 --> 00:15:39,200
+you know, just taking still video from a single perspective and trying to predict future frames
+
+165
+00:15:39,200 --> 00:15:45,360
+based on what the learning system has seen so far. And what you're doing is you're taking that
+
+166
+00:15:45,360 --> 00:15:51,200
+a step further by coupling, you know, first of all, the learning system isn't static. It's, you know,
+
+167
+00:15:51,200 --> 00:15:56,240
+it's in motion and it's field-of-view shifts. And so, you're trying to incorporate that signal
+
+168
+00:15:56,240 --> 00:16:01,040
+into its ability to predict what it's seeing next as well. Yeah, you can definitely think of it
+
+169
+00:16:01,040 --> 00:16:07,520
+that way. And furthermore, so both the dynamic camera and the embodiment or kind of physical motor
+
+170
+00:16:07,520 --> 00:16:13,040
+signal being part of the learning process are distinct. And thirdly, the desire to have
+
+171
+00:16:13,600 --> 00:16:18,960
+this be part of representation learning for better recognition. So, once this learning happens,
+
+172
+00:16:19,520 --> 00:16:23,840
+the idea is this will give us, you know, we'll learn this embedding that is capable to do view
+
+173
+00:16:23,840 --> 00:16:29,520
+prediction as a function of ego motion. And now you give us maybe a video, but also even a static
+
+174
+00:16:29,520 --> 00:16:35,600
+photo. And that can be embedded in this space where those benefits of visual perception that
+
+175
+00:16:36,400 --> 00:16:41,360
+you arrive at by paying attention to ego motion are there so that even the static frame,
+
+176
+00:16:41,360 --> 00:16:46,960
+static image representation is stronger. And so, we'll tackle classic recognition tasks and
+
+177
+00:16:46,960 --> 00:16:51,440
+bump them up because of this kind of so-called pre-training from unlabeled video.
+
+178
+00:16:51,440 --> 00:16:57,520
+You're talking about embeddings here and representations. And I usually hear that in the context of,
+
+179
+00:16:57,520 --> 00:17:02,000
+you know, word embeddings and things like that. And less so in the context of video,
+
+180
+00:17:02,000 --> 00:17:07,040
+is that common or is that fairly common in the video world as well? Right. And so, the word
+
+181
+00:17:07,040 --> 00:17:11,840
+embedding here, I just mean as a learned feature space. So, you come in with your x, which is your
+
+182
+00:17:11,840 --> 00:17:17,040
+image or your video frame or your video sequence. And then there's some f of x you want to apply.
+
+183
+00:17:17,040 --> 00:17:21,760
+And the f will be the thing you learn, which will embed x into a space that is more appropriate
+
+184
+00:17:21,760 --> 00:17:26,160
+for what you're trying to do. Got it. Okay. Okay. So, that's kind of the challenge that you're
+
+185
+00:17:26,160 --> 00:17:31,760
+going after. Like, where are you in terms of that research? Yeah. So, in this part of the work,
+
+186
+00:17:32,080 --> 00:17:39,200
+we had some nice results come out. So, we trained this idea with video captured from a vehicle.
+
+187
+00:17:39,200 --> 00:17:43,360
+There's a dataset called kitty that's widely used for autonomous driving kind of work.
+
+188
+00:17:43,360 --> 00:17:51,280
+So, we take that video, no labels, learn representation from it. And then tackle a number of
+
+189
+00:17:51,280 --> 00:17:56,320
+recognition challenges. I'll take one. So, we take a scene categorization task where your job
+
+190
+00:17:56,320 --> 00:18:04,320
+is to name the category among 400 categories that a new image belongs to. Is it a cathedral? Is it
+
+191
+00:18:04,320 --> 00:18:11,760
+a plaza? Is it a courtyard? Is it a hotel room? Etc. And what we found, just kind of a nutshell,
+
+192
+00:18:11,760 --> 00:18:18,080
+is that with this unsupervised pre-training from unlabeled video, the system will have a 30%
+
+193
+00:18:18,080 --> 00:18:23,120
+increase in accuracy compared to what it'll get if it's just training in the traditional way,
+
+194
+00:18:23,120 --> 00:18:30,080
+which means those disembodied photos that are labeled. So, there's a particularly evident
+
+195
+00:18:30,080 --> 00:18:35,760
+when you are low on training data. So, if you don't have a million exemplars for cathedral,
+
+196
+00:18:35,760 --> 00:18:42,400
+say, but you have a handful, or some other, or any other class that sits in the long tail of
+
+197
+00:18:42,400 --> 00:18:47,440
+objects, then this is especially important to have this kind of free learning from just moving
+
+198
+00:18:47,440 --> 00:18:51,280
+around the world and looking at things. So, where does the labeling come in? Where did that come in?
+
+199
+00:18:51,280 --> 00:18:55,600
+Yeah. Okay, right. So, we can learn this representation purely in an unsupervised way,
+
+200
+00:18:55,600 --> 00:19:00,560
+and now I'll do any classification we like, you know, train a CNN train, a nearest neighbor
+
+201
+00:19:00,560 --> 00:19:05,760
+cost fire train us for a vector machine, any, you know, depending on the capacity of the model required
+
+202
+00:19:05,760 --> 00:19:09,840
+in the amount of labeled data you have, you know, go from this pre-trained representation to
+
+203
+00:19:09,840 --> 00:19:15,920
+tackle it there, or, and we've explored two ways, or you could treat our video learning as a
+
+204
+00:19:15,920 --> 00:19:20,720
+regularizer for the classification task and do it jointly. And so, your question, where is
+
+205
+00:19:20,720 --> 00:19:27,040
+labeled data come in? If we have, when we have task-specific data that is labeled, then either
+
+206
+00:19:27,040 --> 00:19:31,840
+we'll use it, you know, in this modular way, pre-trained and now trained for the supervised task,
+
+207
+00:19:31,840 --> 00:19:36,640
+or jointly, where the video is kind of a supplement to the labeled instances you're using to train
+
+208
+00:19:36,640 --> 00:19:40,800
+for the target task. Okay, so let's look at each of those in, in series in the first case,
+
+209
+00:19:41,520 --> 00:19:46,800
+your pre-training on the video data coming up with your embedding and features and things
+
+210
+00:19:46,800 --> 00:19:51,840
+like that. How does that feed into the training of the next model? Yeah. So, in that, that first case,
+
+211
+00:19:51,840 --> 00:19:58,000
+it's very modular in that, now, just imagine, instead of starting x equals pixel vector,
+
+212
+00:19:58,000 --> 00:20:02,400
+you start with x equals our embedding. Feature vector? Yeah. Okay. So, you're in a vector space,
+
+213
+00:20:02,400 --> 00:20:07,680
+and so that's just like off the shelf. Okay. And so, that would have the advantages of being
+
+214
+00:20:07,680 --> 00:20:13,440
+modular, you know, the recognition task you wish to tackle with this feature space can be,
+
+215
+00:20:13,440 --> 00:20:17,440
+it can arise in the future, right? And the data doesn't have to be seen together. Okay.
+
+216
+00:20:17,440 --> 00:20:22,640
+Whereas if you treat it the second way, this assumes you've got the task data for your task of
+
+217
+00:20:22,640 --> 00:20:27,040
+interest in hand at that very same moment as you learned from the video, and so you jointly train them.
+
+218
+00:20:28,400 --> 00:20:34,320
+Okay. And so, you've got some results that show performance improvements relative to,
+
+219
+00:20:35,120 --> 00:20:40,480
+relative to what specifically, what model did you base line against? So, always apples to apples.
+
+220
+00:20:40,480 --> 00:20:47,040
+So, whatever recognition model classifier would be used for that scene recognition task,
+
+221
+00:20:47,040 --> 00:20:52,960
+and whichever label data it would receive, we take the exact same far method. So, for example,
+
+222
+00:20:52,960 --> 00:20:57,280
+if it's a CNN, which we've tested, then the same, you know, we're talking about the same
+
+223
+00:20:57,280 --> 00:21:03,840
+CNN architecture plus or minus this learning from a label video. Okay. Same amount of labels for both.
+
+224
+00:21:03,840 --> 00:21:08,320
+So, that's the important baseline to say, if I just did everything the same way, but now I also
+
+225
+00:21:08,320 --> 00:21:13,680
+have this benefit of watching video and knowing how I moved, then how much better does that make
+
+226
+00:21:13,680 --> 00:21:18,000
+anything? Okay. Interesting. So, what else are you covering in your talk today? Yeah. So,
+
+227
+00:21:18,000 --> 00:21:22,240
+this is the first thing I'll look at. And then from there, we transitioned because what I just
+
+228
+00:21:22,240 --> 00:21:31,040
+described was learning from how an agent moves before a recognition task. And then we think, okay,
+
+229
+00:21:31,040 --> 00:21:36,240
+not only do we have to, well, not only would we like to benefit from this ego-motion embodiment
+
+230
+00:21:36,240 --> 00:21:42,160
+being in the world when learning, but also when acting or testing. So, we've been looking at
+
+231
+00:21:42,160 --> 00:21:50,800
+active recognition. Active recognition is a problem where you are not passively given the data to
+
+232
+00:21:50,800 --> 00:21:55,360
+recognize you. And I keep saying you and I am always talking about the system, right? The system
+
+233
+00:21:55,360 --> 00:22:00,400
+is given an environment and it has to make choices about what observations to even collect
+
+234
+00:22:00,880 --> 00:22:05,840
+to succeed in the task. So, active recognition systems would want to be able to know where to
+
+235
+00:22:05,840 --> 00:22:12,240
+look around in the scene and sequence to decide what the scene is or to let to recognize an object
+
+236
+00:22:12,240 --> 00:22:17,760
+or equivalently a robot with active recognition would be able to hold an object and turn it
+
+237
+00:22:17,760 --> 00:22:23,520
+in the sequence of ways such that it rapidly deduces what the subject is. So, either manipulating
+
+238
+00:22:23,520 --> 00:22:30,320
+your the embodiment or manipulating the objects itself to essentially get better information about
+
+239
+00:22:30,320 --> 00:22:36,160
+what it's seeing. Exactly. And how do you go about doing all that? Yeah, right. And so, it actually
+
+240
+00:22:36,160 --> 00:22:41,440
+flows well from the ego-motion-based learning. Now, you can imagine that if an agent's going to be
+
+241
+00:22:41,440 --> 00:22:48,160
+smart about choosing its motions, one way to get smart about that is for it to be able to predict
+
+242
+00:22:48,160 --> 00:22:53,360
+how things might look if it moved a certain way. Because if you can look forward in time or
+
+243
+00:22:53,360 --> 00:23:00,720
+motion that way, then you can predict which motions you could make that would most reduce ambiguity.
+
+244
+00:23:00,720 --> 00:23:04,320
+You know, I have a current set of posteriars over all the objects I know or all the scenes I know
+
+245
+00:23:05,040 --> 00:23:10,400
+and then I can envision how things are going to perhaps change if I move in ways once
+
+246
+00:23:10,400 --> 00:23:16,000
+you're n and it doesn't have to be discrete, of course. But then which of those n would most
+
+247
+00:23:16,800 --> 00:23:22,240
+reduce the entropy of those posteriars, right? To say, okay, things are starting to converge more,
+
+248
+00:23:22,240 --> 00:23:27,360
+I think the subject is getting more clear. So, that ability to look ahead is related to what I was
+
+249
+00:23:27,360 --> 00:23:32,960
+describing for the ego-motion condition, view prediction. But you're not done with that. So,
+
+250
+00:23:32,960 --> 00:23:39,600
+what we explored for first to tackle this is so-called end-to-end approach where we would
+
+251
+00:23:39,600 --> 00:23:44,320
+jointly train modules to do all the important steps of active recognition. So, what are they?
+
+252
+00:23:44,320 --> 00:23:50,240
+There's three. One is perception. So, a way to take the raw sense or input and map it into some
+
+253
+00:23:50,240 --> 00:23:55,600
+internal representation that's useful for the task, you know, key to representation learning.
+
+254
+00:23:56,160 --> 00:24:03,280
+Two is action selection. So, some component that makes that intelligent choice about which
+
+255
+00:24:03,280 --> 00:24:08,320
+motion to make or which manipulation to issue. And then three, evidence fusion, which says,
+
+256
+00:24:08,320 --> 00:24:13,200
+okay, this is happening in a loop. And so, as these observations come in, how do I aggregate everything
+
+257
+00:24:13,200 --> 00:24:19,280
+I've seen to inform the next round of action selection? Or, you know, if I'm stopping to give my
+
+258
+00:24:19,280 --> 00:24:27,360
+final estimate? Okay. So, it sounds to me like, is it fair to say that in a way we're trying to
+
+259
+00:24:28,160 --> 00:24:33,840
+build curiosity in the model? Like, the way I'm thinking about it and correct me if I'm off here
+
+260
+00:24:33,840 --> 00:24:39,760
+and I'm simplifying. But, you know, the robot is looking at a scene. It's just determining a set of
+
+261
+00:24:39,760 --> 00:24:46,560
+probabilities of, you know, what future scenes might look like if it oriented itself in different
+
+262
+00:24:46,560 --> 00:24:53,680
+ways. And one strategy would be for it to, you know, to orient itself in a way that has the
+
+263
+00:24:54,720 --> 00:24:59,840
+the lowest, probably like it, where it's the most unclear about what's going to happen. So,
+
+264
+00:24:59,840 --> 00:25:05,040
+as to learn the environment, which strikes me as like a curiosity type of motivation.
+
+265
+00:25:05,040 --> 00:25:09,040
+Yeah. This is a great point you're making. In fact, at least to two things. So, one is,
+
+266
+00:25:09,840 --> 00:25:15,120
+if that's exactly the right intuition. And in the case of recognition, it's curious for a goal,
+
+267
+00:25:15,120 --> 00:25:21,520
+right? So, this is the case where there is some task that the agent knows it's learning to do well.
+
+268
+00:25:21,520 --> 00:25:25,360
+And in fact, we're going to be learning this in a reinforcement learning manner.
+
+269
+00:25:25,360 --> 00:25:31,360
+I was just going to ask about that. And so, the next, you can, the system could learn in two ways.
+
+270
+00:25:31,360 --> 00:25:35,760
+It could learn it in a greedy, myopic way, which says I always want the next, what's called the
+
+271
+00:25:35,760 --> 00:25:41,360
+next best view, you know, which would be roughly, you know, let's pick the one that most, you know,
+
+272
+00:25:41,360 --> 00:25:45,920
+increases information gain. But you can also train these reinforcement learning systems for some
+
+273
+00:25:45,920 --> 00:25:51,600
+budget of time that says, well, I'm, you know, I don't need to always make just one next best.
+
+274
+00:25:51,600 --> 00:25:56,720
+I'd like to think about a sequence of motions that will get me to my resolution. So, you know,
+
+275
+00:25:56,720 --> 00:26:01,040
+because in every step, maybe the agent can't teleport out of this building to another one,
+
+276
+00:26:01,040 --> 00:26:05,600
+but it can make a sequence of motions that, in aggregate, it expects to have good influence.
+
+277
+00:26:05,600 --> 00:26:12,400
+So, that's kind of analogous to tuning your Explorer exploit or how short-term the agent is.
+
+278
+00:26:13,040 --> 00:26:17,360
+Right. So, right, how short-term it is is definitely really, and so it's saying, if you have a time
+
+279
+00:26:17,360 --> 00:26:23,280
+horizon for decision-making, then you can train this big network consisting of all these modules,
+
+280
+00:26:23,280 --> 00:26:27,120
+I mentioned, a perception and evidence, fusion, action selection, could be trained to target that
+
+281
+00:26:27,120 --> 00:26:31,920
+budget. This is all controlled by how you specify that reward function, right? And you could also
+
+282
+00:26:31,920 --> 00:26:37,200
+target it to be more instantaneous, just always greedily making the next best move. If you don't,
+
+283
+00:26:37,200 --> 00:26:41,920
+if you don't have it, doesn't make sense to have a budget to target. So, we kind of explore both
+
+284
+00:26:41,920 --> 00:26:46,240
+of those. And, but when you mention curiosity, it really rings a bell for me, too, because
+
+285
+00:26:46,960 --> 00:26:51,040
+where we've gone since then, looking at this is to suppose, well, what if we have an agent that
+
+286
+00:26:51,040 --> 00:26:57,280
+has to be smart of how to look around, not just for this task that I've pre-ordained, right?
+
+287
+00:26:57,280 --> 00:27:03,280
+Not just for image and classification or whatever it is, but just for a system I'm going to deploy,
+
+288
+00:27:03,280 --> 00:27:07,760
+it needs to be intelligent about looking around before that task gets defined. It's kind of in an
+
+289
+00:27:07,760 --> 00:27:13,120
+absolute sense. And this is what starts to sound like curiosity, right? Because it needs to be
+
+290
+00:27:13,120 --> 00:27:18,480
+able to jump into a new environment, look around, and have those look around motions be smart,
+
+291
+00:27:18,480 --> 00:27:23,680
+but not purely motivated by a closed world of decisions that it's going to make.
+
+292
+00:27:23,680 --> 00:27:29,760
+Right. You know, I think about that, you know, the far end of simplicity, like just looking around
+
+293
+00:27:29,760 --> 00:27:34,400
+this room, objects on a table are going to be more interesting than a wall, for example. And so,
+
+294
+00:27:35,200 --> 00:27:39,200
+you know, I think that some of the same things that we traditionally use for object detection,
+
+295
+00:27:39,200 --> 00:27:45,040
+like features and edges and color variation and things like that might percolate out as signals for
+
+296
+00:27:45,040 --> 00:27:50,080
+this kind of model. Is that right? Yeah, so you're right. So, what will a system learn if it's
+
+297
+00:27:50,080 --> 00:27:54,560
+asked to be able to look around intelligently without a recognition goal? Right. And so,
+
+298
+00:27:54,560 --> 00:28:00,800
+our expectation is it will learn to look at the places that are least predictable from
+
+299
+00:28:00,800 --> 00:28:04,880
+everything else around. So, your example of an object on the table in the wall, well, once the
+
+300
+00:28:04,880 --> 00:28:08,800
+system has seen a part of the wall, a lot of walls are smooth. And so, there's little need to
+
+301
+00:28:08,800 --> 00:28:13,360
+evaluate many other glimpses on that wall, because with high probability, they're going to be similar.
+
+302
+00:28:13,360 --> 00:28:19,280
+And you can learn that. And whereas, once an agent glimpses a part of a scene that's interesting,
+
+303
+00:28:19,280 --> 00:28:22,560
+which can be more textured, which also means harder to
+
+304
+00:28:23,360 --> 00:28:29,360
+infer missing pixels of, then it'll start concentrating some observations there until it becomes
+
+305
+00:28:29,360 --> 00:28:34,640
+clear what, you know, by drawing on regularities learned before, for other scenes, you know,
+
+306
+00:28:34,640 --> 00:28:38,560
+that would help you reconstruct those. Yeah, strikes me that one of the
+
+307
+00:28:40,080 --> 00:28:45,520
+the differences between kind of the human visual system and the, you know, cameras is that,
+
+308
+00:28:45,520 --> 00:28:51,520
+you know, we've got a focal area and then peripheral. And so, it seems like it's more important for us
+
+309
+00:28:51,520 --> 00:28:57,840
+to, you know, move our heads around and kind of focus on different things where, as, you know,
+
+310
+00:28:57,840 --> 00:29:02,800
+robot can just like do a 360 degree scan and capture the pixels of everything. Like, why do we even
+
+311
+00:29:02,800 --> 00:29:09,680
+need this learning-based curiosity given the differences between cameras and vision? Yeah,
+
+312
+00:29:09,680 --> 00:29:14,800
+it's a really good point. So, that's right. Sensing can almost, in some dimensions, is more complete
+
+313
+00:29:14,800 --> 00:29:18,960
+for a robot, you know, like you said, it's 360 capture. And in fact, that's the kind of data we
+
+314
+00:29:18,960 --> 00:29:23,840
+work with right now. But don't forget that the robot also needs to move in the world, right? So,
+
+315
+00:29:23,840 --> 00:29:28,560
+even if I have omnidirectional observations at a place in space, what I need to know can be
+
+316
+00:29:28,560 --> 00:29:33,920
+around the corner. And so, you think about, you know, if it's not just narrow field of view glimpses,
+
+317
+00:29:34,880 --> 00:29:39,280
+even if you don't aren't restricted that way, you still have a need to move in the scene.
+
+318
+00:29:39,840 --> 00:29:44,400
+Or something, I think about that case of an agent robot holding an object in which it's
+
+319
+00:29:44,400 --> 00:29:49,760
+own manipulator is including part of it or, you know, part of the object is behind. So, even with
+
+320
+00:29:49,760 --> 00:29:55,120
+omnidirectional view, there's content that's invisible. It's behind the object. Okay. Yeah. Okay,
+
+321
+00:29:55,120 --> 00:29:59,920
+interesting. And was there another example or scenario that you walk through that you're planning
+
+322
+00:29:59,920 --> 00:30:04,400
+to walk through in your talk? Oh, yeah. So, we've talked about kind of ego-motion and forming how
+
+323
+00:30:04,400 --> 00:30:10,240
+the agent learns representation. Then we kind of bring that up into active recognition by learning
+
+324
+00:30:10,240 --> 00:30:16,400
+policies for how to intelligently move around to make recognition decisions or just explore in a
+
+325
+00:30:16,400 --> 00:30:22,640
+curious way. So, the last thing that I look at is instead of kind of how to look around as a
+
+326
+00:30:22,640 --> 00:30:26,400
+agent-centered question, I think about it actually as a human-centered question. So,
+
+327
+00:30:27,680 --> 00:30:33,440
+we were working with 360 video, which cried exciting media, Domain, a immersive video,
+
+328
+00:30:33,440 --> 00:30:43,440
+and connecting to VR. And the way you right now watch a 360 video as a human viewer is a little bit
+
+329
+00:30:43,440 --> 00:30:47,520
+of trial and error, right? Because you can't see what's behind you. And so, whether you wear a
+
+330
+00:30:47,520 --> 00:30:52,560
+headset, whether you sit at a computer and mouse around on an interface like on YouTube to view
+
+331
+00:30:52,560 --> 00:30:58,400
+the 360 content, you are in charge of deciding where to look, right? And so, it's a little bit of
+
+332
+00:30:58,400 --> 00:31:01,920
+trial error in the sense that you may have to watch a video a couple times to really know where the
+
+333
+00:31:01,920 --> 00:31:08,640
+interesting things are. And so, while 360 video is so appealing, even as a consumer for, you know,
+
+334
+00:31:08,640 --> 00:31:12,480
+just capturing everything. So, I don't have to make those decisions at capture time.
+
+335
+00:31:12,480 --> 00:31:17,760
+Well, you're still left with this decision-making at viewer time, right? So, we looked at this with
+
+336
+00:31:17,760 --> 00:31:24,400
+the where to look question in mind. And what we've been developing is a way for learning how to direct,
+
+337
+00:31:25,280 --> 00:31:30,960
+well, think of it as automatic video cinematography. So, can we learn how to direct a narrow field of
+
+338
+00:31:30,960 --> 00:31:38,240
+you virtual camera within that 360 sphere? So, both in terms of its viewpoint, angle as well as the
+
+339
+00:31:38,240 --> 00:31:46,400
+zoom. Okay. So, that you could map a 360 video into a normal field of video that's 2D and flat
+
+340
+00:31:46,400 --> 00:31:51,920
+and planar. And interesting. Yeah, and got the stuff, right? So, and this is, you know, right away,
+
+341
+00:31:51,920 --> 00:31:56,480
+that sounds... And there's a temporal aspect of this as well, because you're not, or I'm assuming
+
+342
+00:31:56,480 --> 00:32:02,800
+you're trying to smoothly pan around this 360 view as opposed to flash, you know, some sequence of
+
+343
+00:32:02,800 --> 00:32:09,600
+interesting things in it. Yeah. So, it has to be carving out a video path that has some kind of
+
+344
+00:32:09,600 --> 00:32:14,800
+motion model as well. Okay. Not just... So, your question almost always to the two parts of the
+
+345
+00:32:14,800 --> 00:32:19,040
+approach. And one is to figure out where are the pieces on this sphere that look capture-worthy.
+
+346
+00:32:19,040 --> 00:32:25,520
+And then how do I optimize, yeah, a path to get them as well as possible. And now, I'm immediately
+
+347
+00:32:25,520 --> 00:32:30,240
+kind of brought to two thoughts on how you would go about this. One is kind of the extension of all
+
+348
+00:32:30,240 --> 00:32:36,480
+the stuff that we spoke about earlier where you're learning, you know, features of interest based on,
+
+349
+00:32:37,440 --> 00:32:42,720
+based on the kind of the observations themselves and trying to identify, you know, the stuff we
+
+350
+00:32:42,720 --> 00:32:47,200
+talked about previously, another would be, you know, like imitation learning, put the human in the
+
+351
+00:32:47,200 --> 00:32:51,040
+heads that have a bunch of people look around and kind of trying to learn a model based on what
+
+352
+00:32:51,040 --> 00:32:56,320
+they find interesting. Are you looking at both of those or... Yeah, we're actually pursuing something
+
+353
+00:32:56,320 --> 00:33:02,080
+distinct, but the kind of the imitation learning would make a lot of sense. And it's something
+
+354
+00:33:02,720 --> 00:33:06,480
+to consider, right? And you can just treat it as a supervised problem where, if I've seen where
+
+355
+00:33:06,480 --> 00:33:13,040
+humans tend to look, or even better if I get to see video editors edit, then I've got, you know,
+
+356
+00:33:13,040 --> 00:33:17,760
+good data to train with. Problem is that's, as you can imagine, that's going to be hard to build up
+
+357
+00:33:17,760 --> 00:33:22,160
+enough data for potentially, right? So it's expensive on the annotation side. So our insight was
+
+358
+00:33:22,160 --> 00:33:28,000
+that this actually can be learned from unlabeled video. And that's because people take a lot of video,
+
+359
+00:33:28,000 --> 00:33:33,120
+that's not 360, that is normal field of view. Right. And of course, we know it's online. And
+
+360
+00:33:33,120 --> 00:33:37,600
+for the more people kind of have selected video that's worth uploading. So what we do is have the
+
+361
+00:33:37,600 --> 00:33:44,880
+agent, the learning algorithm look at hundreds of hours of unlabeled video on YouTube, a varying
+
+362
+00:33:44,880 --> 00:33:49,520
+content. Right. So we'd like this to be content independent to build up a model of what human
+
+363
+00:33:49,520 --> 00:33:54,320
+taking video looks like. Okay. And now you get your 360 content. Imagine chopping it up into all
+
+364
+00:33:54,320 --> 00:33:59,760
+these glimpses throughout the viewing sphere. And over time, so there's space time chunks, then
+
+365
+00:34:00,080 --> 00:34:05,760
+just trying to score these by saying, how, how much like this manifold of human taking video
+
+366
+00:34:05,760 --> 00:34:11,120
+are each of these glimpses like? No, it just interrupt. Is there a lot of 360 video on YouTube? Yeah.
+
+367
+00:34:11,120 --> 00:34:16,480
+Really? I know. Well, I didn't, you know, and I wasn't aware either until we started this project,
+
+368
+00:34:16,480 --> 00:34:20,640
+maybe two, one and a half, two years ago. There is. And, you know, we've looked, started
+
+369
+00:34:20,640 --> 00:34:25,680
+to look at some of the stats. I mean, we're on the research side, of course. But we found stats,
+
+370
+00:34:25,680 --> 00:34:31,120
+like, you know, the 360 camera sales are expected to go by 100% every year for the next six years.
+
+371
+00:34:31,120 --> 00:34:35,680
+I hope I got that right. You know, so there's huge growth, both in the, the sale on the use of the
+
+372
+00:34:35,680 --> 00:34:41,840
+cameras plus the content is online. And yeah, you can download these 360 videos and 4K from Google,
+
+373
+00:34:41,840 --> 00:34:46,800
+right? Right. That's what we do to get our data set. So that's how you acquire the data sets,
+
+374
+00:34:46,800 --> 00:34:51,920
+put one by me again, what the insight is to. Yeah. So the insight is the points of interest there?
+
+375
+00:34:51,920 --> 00:34:58,240
+Yeah, rather than have kind of an intensive annotated version of training our system where humans
+
+376
+00:34:58,240 --> 00:35:04,160
+teach it where to look explicitly, will let it be implicit in free label because if I have
+
+377
+00:35:04,160 --> 00:35:09,520
+massive collection of unlabeled video, these are all videos that humans took from normal field
+
+378
+00:35:09,520 --> 00:35:16,080
+of view cameras. Then the notion is, when you give me a glimpse, and here a glimpse means some
+
+379
+00:35:16,080 --> 00:35:22,560
+narrow field of view carve out from a 360 video, say, let it be five seconds long, say. Now, if you
+
+380
+00:35:22,560 --> 00:35:29,520
+take out that glimpse and now do some computation to say, how close is it to this manifold of human
+
+381
+00:35:29,520 --> 00:35:36,160
+taking content? Like based on some, in our case, 3D convolutional features of that glimpse,
+
+382
+00:35:36,960 --> 00:35:41,360
+is it close to that space or is it really far? If it's close, that means it shares some visual
+
+383
+00:35:41,360 --> 00:35:46,160
+properties. Indeed, in our case, what closeness will mean will be things like framing effects.
+
+384
+00:35:46,720 --> 00:35:53,440
+So if I understand what you're saying, you've got 3D video, but you've also got regular 2D
+
+385
+00:35:53,440 --> 00:35:59,760
+video, and you're mapping scenes from the 3D or you're trying to map qualities of the scenes from
+
+386
+00:35:59,760 --> 00:36:05,520
+the 3D video to the 2D video to identify what looks like a human taken video, is that right? Exactly,
+
+387
+00:36:05,520 --> 00:36:12,560
+yes. That's interesting. Okay. So that's where the kind of capture worthy measure comes from,
+
+388
+00:36:12,560 --> 00:36:18,000
+and it comes from unannotated data, and it really does pick up on things like framing, composition.
+
+389
+00:36:18,000 --> 00:36:24,640
+So if you have a 360 camera just bouncing around the world, I suppose not unintelligently driven,
+
+390
+00:36:24,640 --> 00:36:30,560
+then a lot of the views are not well framed, but there's some portion of it that is, and so that's
+
+391
+00:36:30,560 --> 00:36:34,640
+that's one thing that'll be learned, kind of the composition, the framing effects. You can potentially
+
+392
+00:36:34,640 --> 00:36:40,480
+also learn content, right? So the kind of things that are worse filming versus the blank wall,
+
+393
+00:36:40,480 --> 00:36:47,360
+no, the scene with the people, probably. Wow, really interesting. You mentioned that these
+
+394
+00:36:47,360 --> 00:36:52,000
+three things that you talked about are just kind of one of a bunch of things that you work on in
+
+395
+00:36:52,000 --> 00:36:57,120
+your lab. Can you give us an overview of some of your areas of interest? Yeah, so the other areas
+
+396
+00:36:57,120 --> 00:37:03,280
+that we work on today, one, is looking at fashion. So we've been looking at, for a long time, we've
+
+397
+00:37:03,280 --> 00:37:08,640
+been looking at semantic representations built on what are called attributes. So these properties,
+
+398
+00:37:08,640 --> 00:37:14,800
+like fuzzy, flat, red, metallic, etc. And so this is kind of a way to connect visual properties
+
+399
+00:37:14,800 --> 00:37:20,160
+with language. So we've been working on attributes for many years, including developing
+
+400
+00:37:20,160 --> 00:37:25,600
+interactive image search techniques that exploit them. Like I want to find the image that's like this,
+
+401
+00:37:25,600 --> 00:37:30,480
+or the image of a shoe, say that's like this, but pointier, that kind of thing. And more recently,
+
+402
+00:37:30,480 --> 00:37:35,520
+we've been looking at fashion in the attribute space, but now at full body images of people and
+
+403
+00:37:35,520 --> 00:37:42,480
+understanding things like style and trend forecasting and compatibility between items. So this is one
+
+404
+00:37:42,480 --> 00:37:47,760
+project looking at fashion and vision. Okay. We touched on kind of two parts of my work. Really,
+
+405
+00:37:47,760 --> 00:37:53,280
+one is embodied visual perception, which is kind of on this border of vision and robotics to do
+
+406
+00:37:53,280 --> 00:37:59,840
+recognition in the world. Right. And we touched on 360 video analysis, which we're working in.
+
+407
+00:37:59,840 --> 00:38:05,040
+The other elements of my group right now, we have some work looking at image and video segmentation.
+
+408
+00:38:05,040 --> 00:38:09,280
+Okay. It's kind of very core vision type stuff of finding objects and video and images.
+
+409
+00:38:09,280 --> 00:38:17,360
+And finally, how to do things quickly. So specifically recognition. So we're looking at how to
+
+410
+00:38:18,320 --> 00:38:24,080
+have a system that can make only observations it needs in the sense of timely recognition.
+
+411
+00:38:24,080 --> 00:38:28,320
+So if I have a very deep network, for example, but I can't afford to run the whole thing,
+
+412
+00:38:28,320 --> 00:38:33,920
+can I dynamically choose which portions of it to run for a given new image? Or if I have a video
+
+413
+00:38:33,920 --> 00:38:38,000
+where, you know, we talked about how to do this in embodied way, but even if I'm disembodied and
+
+414
+00:38:38,000 --> 00:38:42,080
+I'm just a machine sitting there processing video, you know, what parts of the video need
+
+415
+00:38:42,080 --> 00:38:46,960
+attention and what features should I extract on each part? And so what specifically are we
+
+416
+00:38:47,440 --> 00:38:52,240
+are in the, let's say the simplest case of an image, what specifically are you doing there?
+
+417
+00:38:52,240 --> 00:38:56,320
+Yeah. So what we've been doing most recently, and this is a collaboration with my colleagues
+
+418
+00:38:56,320 --> 00:39:01,760
+at IBM. We've been looking at if you have, you know, ResNet. So this is one architecture that's
+
+419
+00:39:01,760 --> 00:39:07,760
+quite successful. Has these skip connections between layers and blocks. So we have an approach
+
+420
+00:39:07,760 --> 00:39:13,760
+that will use reinforcement learning to come up with a policy that is input condition to decide
+
+421
+00:39:13,760 --> 00:39:18,640
+how to route through that network dynamically so that, you know, ideally maybe you'd like to run
+
+422
+00:39:18,640 --> 00:39:24,720
+every single one. But with time pressure, you will then decide which to keep and which to drop.
+
+423
+00:39:25,440 --> 00:39:31,120
+And so that means, let's see, I mean, for a fraction of the block computation will nearly meet
+
+424
+00:39:31,120 --> 00:39:35,600
+the even actually match the accuracy of the full network running every area.
+
+425
+00:39:35,600 --> 00:39:41,760
+Oh, that's really cool. Well, I really appreciate you taking the time out to chat with me this
+
+426
+00:39:41,760 --> 00:39:48,320
+morning. Any final words or ways for, you know, places to point folks, ways for folks to get in touch
+
+427
+00:39:48,320 --> 00:39:53,200
+with you? Oh, sure. Well, thanks. Of course, for having me, it's great to have this discussion.
+
+428
+00:39:53,200 --> 00:39:58,240
+People who are interested in this work can check out our website from my homepage and we share
+
+429
+00:39:58,240 --> 00:40:03,440
+the papers, but also the code and data surrounding all the things we're doing. So I'm happy to see
+
+430
+00:40:03,440 --> 00:40:08,320
+anyone being able to use them or build on them. Oh, great. We'll definitely link to that in the show
+
+431
+00:40:08,320 --> 00:40:12,240
+notes. So folks will be able to find it easily from there. All right. Well, Kristen, thanks so
+
+432
+00:40:12,240 --> 00:40:15,760
+much. I really appreciate it having you on the show. Okay. Thank you. Nice talking with you.
+
+433
+00:40:20,080 --> 00:40:26,480
+All right, everyone. That's our show for today. Thanks so much for listening and for your continued
+
+434
+00:40:26,480 --> 00:40:32,720
+feedback and support. For more information on Kristen or any of the topics covered in this episode,
+
+435
+00:40:32,720 --> 00:40:40,800
+head on over to twimlai.com slash talk slash 85. To follow along with the AWS reinvent series,
+
+436
+00:40:40,800 --> 00:40:50,720
+visit twimlai.com slash reinvent. To enter our twimla 1 mil contest, visit twimlai.com slash twimla 1
+
+437
+00:40:50,720 --> 00:40:57,280
+mil. Of course, we'd be delighted to hear from you either via a comment on the show notes page
+
+438
+00:40:57,280 --> 00:41:05,280
+or via Twitter to at twimlai or at sam charrington. Thanks again to intel nirvana for their sponsorship
+
+439
+00:41:05,280 --> 00:41:10,160
+of this series. To learn more about their role in deep lens and the other things they've been
+
+440
+00:41:10,160 --> 00:41:18,080
+up to, visit intel nirvana.com. And of course, thanks once again to you for listening and catch you
+
+441
+00:41:18,080 --> 00:41:28,080
+next time.
+

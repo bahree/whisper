@@ -1,0 +1,1601 @@
+WEBVTT
+
+00:00.000 --> 00:16.320
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+
+00:16.320 --> 00:21.480
+people, doing interesting things in machine learning and artificial intelligence.
+
+00:21.480 --> 00:31.280
+I'm your host Sam Charrington.
+
+00:31.280 --> 00:36.040
+For this the final episode of our reinvent series were joined by Thorsten Joachim's professor
+
+00:36.040 --> 00:39.640
+in the Department of Computer Science at Cornell University.
+
+00:39.640 --> 00:44.400
+Thorsten participated in the conference's AI Summit, presenting his research on unbiased
+
+00:44.400 --> 00:47.120
+learning from biased user feedback.
+
+00:47.120 --> 00:51.680
+In our conversation we take a look at some of the various ways that inherent biases
+
+00:51.680 --> 00:55.760
+are introduced in recommender systems and how to avoid them.
+
+00:55.760 --> 00:59.760
+We discuss how inference techniques can be used to make learning algorithms robust to these
+
+00:59.760 --> 01:05.640
+types of biases and how they can be enabled with the right types of logging policies.
+
+01:05.640 --> 01:09.880
+Don't forget, next week I'm in Seattle at CubeCon and I'd love to connect with any
+
+01:09.880 --> 01:12.920
+listeners in the area or in attendance.
+
+01:12.920 --> 01:19.040
+Take me up on Twitter at Sam Charrington or via email or the Twimble AI website.
+
+01:19.040 --> 01:24.000
+And now on to the show.
+
+01:24.000 --> 01:27.600
+Alright everyone, I am on the line with Thorsten Joachim's.
+
+01:27.600 --> 01:32.360
+Thorsten is professor in the Department of Computer Science at Cornell University.
+
+01:32.360 --> 01:35.800
+Thorsten, welcome to this week in machine learning and AI.
+
+01:35.800 --> 01:36.800
+Thank you for having me.
+
+01:36.800 --> 01:37.800
+It's a pleasure.
+
+01:37.800 --> 01:38.800
+Absolutely.
+
+01:38.800 --> 01:45.520
+So, before we dive in, I'd love for you to share a little bit about your background
+
+01:45.520 --> 01:52.640
+and how you got interested and involved in machine learning and artificial intelligence.
+
+01:52.640 --> 02:00.840
+I was actually quite accidental how I got to machine learning and how all of the started.
+
+02:00.840 --> 02:07.320
+I got my degrees at the University of Dortmund in Germany and there was exactly one professor
+
+02:07.320 --> 02:11.920
+who did artificial intelligence and that was always something that fascinated me.
+
+02:11.920 --> 02:16.400
+And that was Katarina Morik and she did machine learning and so that's how I got into machine
+
+02:16.400 --> 02:17.400
+learning.
+
+02:17.400 --> 02:23.440
+But I very quickly realized that within AI, this is the, I think one of the most exciting
+
+02:23.440 --> 02:32.360
+areas to be in because it really enables AI in a way that we can't really foresee and
+
+02:32.360 --> 02:37.200
+that creates interesting new results that we just, I mean, that we haven't programmed
+
+02:37.200 --> 02:38.200
+in our systems.
+
+02:38.200 --> 02:41.880
+So, I think this idea of learning from data is just fascinating.
+
+02:41.880 --> 02:42.880
+Absolutely.
+
+02:42.880 --> 02:43.880
+Absolutely.
+
+02:43.880 --> 02:48.880
+I think you have many in the listening audience that will agree with you.
+
+02:48.880 --> 02:53.040
+And so, you were here in Las Vegas.
+
+02:53.040 --> 02:54.440
+I'm still in Las Vegas.
+
+02:54.440 --> 02:56.280
+You are back at Cornell.
+
+02:56.280 --> 03:04.560
+You were here in Las Vegas presenting at the AI Summit at the Reinvent Conference.
+
+03:04.560 --> 03:06.400
+What were you presenting on there?
+
+03:06.400 --> 03:07.760
+Yeah, that's right.
+
+03:07.760 --> 03:15.760
+So much of my work, actually both as a professor here at Cornell, as well as an Amazon
+
+03:15.760 --> 03:21.920
+Scholar working in Amazon Music, has to do with learning from lock data, from interaction
+
+03:21.920 --> 03:22.920
+locks.
+
+03:22.920 --> 03:29.920
+And what I mean by this is the kind of data that we observe in our systems, kind of as
+
+03:29.920 --> 03:32.240
+a side product of people using the system.
+
+03:32.240 --> 03:37.440
+So it's like the locks of a search engine where you can see what people query and where
+
+03:37.440 --> 03:43.720
+they click or recommender systems where, you know, we make recommendations and we see
+
+03:43.720 --> 03:50.120
+whether people follow this recommendation, e-commerce systems, but also now reaching
+
+03:50.120 --> 03:55.960
+more and more out into the physical world, like smart homes and self-driving cars.
+
+03:55.960 --> 04:01.960
+Any time where people use the system and we receive feedback, I think this is one of
+
+04:01.960 --> 04:07.440
+the most plentiful data that we have and it's certainly, I mean, it reveals the choices
+
+04:07.440 --> 04:11.560
+that people make and that reveals a lot of knowledge about the world.
+
+04:11.560 --> 04:16.960
+But at the same time, it's data that's actually pretty difficult to analyze because it's
+
+04:16.960 --> 04:19.680
+biased in multiple ways.
+
+04:19.680 --> 04:25.320
+And dealing with these biases, I think, I mean, that's what my talk was about and that's
+
+04:25.320 --> 04:27.200
+what much of my research is also about.
+
+04:27.200 --> 04:30.320
+How do we learn from this data and how do we de-bias it?
+
+04:30.320 --> 04:31.320
+Okay.
+
+04:31.320 --> 04:38.360
+I can give you a simple example of what I mean by bias here and bias has many different
+
+04:38.360 --> 04:42.960
+meanings and actually many of these different meanings apply, but let me be very specific
+
+04:42.960 --> 04:44.800
+about one of the meanings.
+
+04:44.800 --> 04:50.400
+So think about a movie recommendation system.
+
+04:50.400 --> 04:57.640
+Netflix released this big data set, now many years ago, actually, at this point.
+
+04:57.640 --> 05:03.960
+And if you look at that data set and look at the average star rating that people give,
+
+05:03.960 --> 05:07.280
+you're kind of in the four star region.
+
+05:07.280 --> 05:14.240
+And if you think about it, well, I mean, that can be reflective of the kind of average
+
+05:14.240 --> 05:19.240
+rating that people would give an Amazon, a Netflix movie, right?
+
+05:19.240 --> 05:26.200
+So if I actually drew a random movie from the Netflix catalog and had a random user, a
+
+05:26.200 --> 05:31.080
+uniformed random, rate that movie, that wouldn't be a four star movie, probably, right?
+
+05:31.080 --> 05:32.800
+It would be much lower.
+
+05:32.800 --> 05:38.520
+So if I look at the ratings that people provide, they're actually self-selected, right?
+
+05:38.520 --> 05:39.520
+They're biased.
+
+05:39.520 --> 05:42.040
+People rate the movies that they watch.
+
+05:42.040 --> 05:45.480
+And of course, they watch the movies that they think they will like.
+
+05:45.480 --> 05:52.600
+So if I look at the revealed ratings that people give, then that's a biased sample of
+
+05:52.600 --> 05:55.720
+all the ratings that they would probably want to give.
+
+05:55.720 --> 06:03.960
+Now that's a problem because if I don't account for this, I can be really far off in evaluating
+
+06:03.960 --> 06:08.600
+how good my movie recommendation will do, a system will do.
+
+06:08.600 --> 06:14.200
+And in particular, if I now think about what a recommendation system should actually do,
+
+06:14.200 --> 06:20.440
+is it should actually change the distribution of ratings that the user gives, right?
+
+06:20.440 --> 06:26.280
+What the user wants from a recommendation system is interesting new choices.
+
+06:26.280 --> 06:33.360
+So if I now take all data that I have and then train a new recommendation system from
+
+06:33.360 --> 06:38.960
+it, deploy that, the data that I'm gathering now actually will have a different distribution,
+
+06:38.960 --> 06:39.960
+right?
+
+06:39.960 --> 06:44.440
+It will be biased by the recommendations that the new system makes.
+
+06:44.440 --> 06:52.520
+And so what I really want is, I have to account for the fact that if I train a system and
+
+06:52.520 --> 06:57.360
+then field it, I'm actually intervening in the world and I'm changing the distribution
+
+06:57.360 --> 06:58.360
+of my data.
+
+06:58.360 --> 07:04.840
+I always have these kind of counterfactual problems that I need to solve of what will happen
+
+07:04.840 --> 07:07.240
+if I change my system.
+
+07:07.240 --> 07:11.840
+And that's what makes this learning from log data hard because what I observe is the behavior
+
+07:11.840 --> 07:17.400
+on my old system, but what I really want to optimize is the behavior or the benefit that
+
+07:17.400 --> 07:19.840
+people draw from my new system.
+
+07:19.840 --> 07:22.200
+But for that, I don't have data yet.
+
+07:22.200 --> 07:31.200
+So what I talked about in the talk is basically how to deal with these kind of bias and shift
+
+07:31.200 --> 07:32.200
+problems.
+
+07:32.200 --> 07:34.200
+This is a super interesting topic.
+
+07:34.200 --> 07:38.760
+I remember a conversation that I had with someone on the podcast.
+
+07:38.760 --> 07:44.280
+I don't remember how it came up or who it was, but we were talking about this issue of
+
+07:44.280 --> 07:48.560
+bias and user rankings and user feedback.
+
+07:48.560 --> 07:54.480
+And one of the comments that I remember making was that, you know, you kind of describing
+
+07:54.480 --> 08:02.160
+this almost bias at the level of the data set, but there's also, you know, individual bias.
+
+08:02.160 --> 08:08.520
+Like some, you know, I may be a, you know, my kind of average movies are three, but for
+
+08:08.520 --> 08:11.760
+some people it's a two and for other people it's a four.
+
+08:11.760 --> 08:16.040
+And I remember asking the person in this context that they've heard of kind of research
+
+08:16.040 --> 08:20.840
+into how to deal with all of that and we didn't come up with anything.
+
+08:20.840 --> 08:24.320
+So I mean, I imagine these are issues that you're very familiar with.
+
+08:24.320 --> 08:25.320
+Yeah.
+
+08:25.320 --> 08:26.320
+I mean, right.
+
+08:26.320 --> 08:32.880
+There's, there's, as I said, bias has many different meanings in this context.
+
+08:32.880 --> 08:35.960
+What I've been talking about is selection bias, really.
+
+08:35.960 --> 08:41.160
+There's also this kind of, you could call this, you know, that people use a rating scale
+
+08:41.160 --> 08:43.080
+in a different way.
+
+08:43.080 --> 08:45.280
+And we've actually done research on that as well.
+
+08:45.280 --> 08:53.920
+So in particular, that comes up when you do things like peer grading or peer reviewing.
+
+08:53.920 --> 08:55.160
+And so that's right.
+
+08:55.160 --> 09:03.080
+So one reviewer may use, you know, a scale from one to 10, like, you know, mostly give
+
+09:03.080 --> 09:05.520
+like high ratings or low ratings.
+
+09:05.520 --> 09:09.360
+Another user may, you know, kind of anchor the scale at some other place.
+
+09:09.360 --> 09:10.360
+Yeah.
+
+09:10.360 --> 09:12.800
+We've actually done work on that problem as well.
+
+09:12.800 --> 09:15.960
+Although that's that's somewhat different.
+
+09:15.960 --> 09:24.240
+And we've actually deployed this at the KDD conference in 2015 when I was one of the program
+
+09:24.240 --> 09:30.000
+co-chairs and trying to actually de-buy as reviewer ratings to come at kind of fairer decisions
+
+09:30.000 --> 09:32.520
+about which papers to accept.
+
+09:32.520 --> 09:35.880
+But that's, that's slightly different this problem.
+
+09:35.880 --> 09:43.600
+And when I'm talking about here is really more that it's about where we get data.
+
+09:43.600 --> 09:48.640
+And you know, that there's a selection of, you know, what ratings we observe and which
+
+09:48.640 --> 09:49.640
+ones we don't.
+
+09:49.640 --> 09:54.400
+So the extreme case, I mean, this comes up basically in all online systems.
+
+09:54.400 --> 10:00.160
+So and some of the extreme cases are, for example, an ad placement system.
+
+10:00.160 --> 10:03.560
+And there it's really very clear.
+
+10:03.560 --> 10:08.880
+So if I think about an ad placement system, let's say display advertising, then I have
+
+10:08.880 --> 10:13.280
+my current system that's displaying ads.
+
+10:13.280 --> 10:17.800
+And so a new user comes in to a particular page.
+
+10:17.800 --> 10:21.920
+My current system now selects an ad to display.
+
+10:21.920 --> 10:27.120
+And then for that particular ad, I get to see whether the user clicks on it or not.
+
+10:27.120 --> 10:32.480
+But I don't get to see what would have happened if the system had presented a different ad.
+
+10:32.480 --> 10:39.000
+So here I very much have a selection bias that the current system in production influences
+
+10:39.000 --> 10:46.560
+where I observe feedback or think about a search engine where your current ranking function,
+
+10:46.560 --> 10:50.880
+you know, in response to a particular query, a potential ranking.
+
+10:50.880 --> 10:55.360
+And that really puts a strong selection bias where I get clicks, I'm going to get clicks
+
+10:55.360 --> 10:58.320
+on the, you know, top few results.
+
+10:58.320 --> 11:03.320
+You know, it's very unlikely that anybody is going to go to position 100 and reveal
+
+11:03.320 --> 11:07.720
+any of the kind of, you know, whether something was relevant there.
+
+11:07.720 --> 11:13.600
+So again, here we have that the current system that's in production really biases where
+
+11:13.600 --> 11:15.480
+I get clicks.
+
+11:15.480 --> 11:20.760
+And now if I use or where I get feedback and now if I use this data kind of naively to
+
+11:20.760 --> 11:26.680
+do learning from what I'm basically just rediscovering is, you know, whatever my old system
+
+11:26.680 --> 11:28.400
+did.
+
+11:28.400 --> 11:37.760
+And so what we've been doing is to rethink how to use this data from actually from a perspective
+
+11:37.760 --> 11:40.040
+of causal inference.
+
+11:40.040 --> 11:46.040
+So let's let's take the ad placement system as the canonical example here, but it actually
+
+11:46.040 --> 11:48.560
+applies to all of these systems.
+
+11:48.560 --> 11:54.560
+Then the way that you can think about this is really not as a prediction problem, but
+
+11:54.560 --> 12:00.200
+much more as a problem of, you know, just like what you have in like a medical setting
+
+12:00.200 --> 12:03.120
+of applying a treatment.
+
+12:03.120 --> 12:11.960
+So think, you know, if you are, if you want to come up with a personalized treatment
+
+12:11.960 --> 12:17.640
+policy for a particular person, then you may have, let's say some lab measurements for
+
+12:17.640 --> 12:23.440
+that person, then the doctor decides, you know, to give that person, you know, drug
+
+12:23.440 --> 12:28.440
+A or drug B or the surgery, that's the treatment.
+
+12:28.440 --> 12:32.880
+And then you get to observe for that particular treatment that was chosen, whether the person
+
+12:32.880 --> 12:35.440
+gets better or not.
+
+12:35.440 --> 12:40.120
+And it's really the same setup that we have in our online systems as well, like think
+
+12:40.120 --> 12:41.120
+about ad placement, right?
+
+12:41.120 --> 12:46.120
+The user comes in, we have some idea, you know, about the user profile.
+
+12:46.120 --> 12:51.000
+Then we take an action, we apply a treatment, that's a particular ad that we place.
+
+12:51.000 --> 12:54.760
+And then we see the outcome for that particular ad that was chosen.
+
+12:54.760 --> 12:58.880
+But we don't get to see what would have happened if I had applied any of the other treatments,
+
+12:58.880 --> 13:00.800
+any of the other ads.
+
+13:00.800 --> 13:05.400
+And I can make the same story for almost any online system as well.
+
+13:05.400 --> 13:11.960
+So it's really, you know, what we've been doing is we've rethought what it means to do
+
+13:11.960 --> 13:17.560
+learning and online systems kind of from the perspective of learning a policy that makes
+
+13:17.560 --> 13:21.880
+interventions and we want these interventions to have the desired effects in the world,
+
+13:21.880 --> 13:22.880
+right?
+
+13:22.880 --> 13:26.640
+That's what I meant when I said about the recommendation system, what I really want is
+
+13:26.640 --> 13:32.000
+I want to make recommendations to the user and I want to change behavior in a way that
+
+13:32.000 --> 13:34.400
+the user appreciates it.
+
+13:34.400 --> 13:39.200
+So it's really learning, it's learning to intervene, it's not learning to predict.
+
+13:39.200 --> 13:43.800
+And that has interesting implications for, for machine learning and it kind of puts
+
+13:43.800 --> 13:48.840
+it into relation to problems like covariate shift and really causal inference, right?
+
+13:48.840 --> 13:56.520
+We want to have a policy that makes interventions that cause some desired behavior in the world.
+
+13:56.520 --> 14:05.360
+And so is the approach related in some way to the notion of like A, B testing or multivariate
+
+14:05.360 --> 14:11.280
+testing where you're displaying multiple options to the user to give you in this case
+
+14:11.280 --> 14:14.840
+to give you kind of more insights into what you may have missed out on?
+
+14:14.840 --> 14:16.120
+Yeah, that's right on.
+
+14:16.120 --> 14:21.440
+I mean, the kind of gold standard for doing causal inference is a controlled randomized trial,
+
+14:21.440 --> 14:22.440
+right?
+
+14:22.440 --> 14:23.440
+That's what the user meant.
+
+14:23.440 --> 14:27.480
+And if you want to figure out whether drug A is rather than drug B, basically what we
+
+14:27.480 --> 14:34.440
+do is we give some fraction of the population or of our patient's drug A, randomized, another
+
+14:34.440 --> 14:41.440
+fraction gets, gets the other treatment and if we do the randomization correctly, then
+
+14:41.440 --> 14:46.800
+that's a strong evidence of the causal effect of the treatment, right?
+
+14:46.800 --> 14:49.000
+And randomization is the key here.
+
+14:49.000 --> 14:51.240
+It's easier than it sounds.
+
+14:51.240 --> 14:55.360
+It is actually a part of that it sounds easy.
+
+14:55.360 --> 14:56.840
+It sounds easy.
+
+14:56.840 --> 14:57.840
+It sounds easy.
+
+14:57.840 --> 15:00.800
+In practice, it can be quite hard.
+
+15:00.800 --> 15:06.920
+And basically what we're saying, I mean, what you're doing in an AB test and an online
+
+15:06.920 --> 15:10.560
+system is exactly a controlled randomized trial, right?
+
+15:10.560 --> 15:15.120
+Some fraction of your users gets, you know, a ranking function A or a recommended function
+
+15:15.120 --> 15:16.120
+A.
+
+15:16.120 --> 15:18.120
+The other one gets a recommended function B.
+
+15:18.120 --> 15:20.960
+And then you can compare which one works better.
+
+15:20.960 --> 15:27.040
+That's really the gold standard for causal inference, but it's also incredibly expensive.
+
+15:27.040 --> 15:32.760
+What you need to do is you need to code up that, you know, new ranking function or policy
+
+15:32.760 --> 15:34.840
+more generally.
+
+15:34.840 --> 15:39.600
+Then you need to productionize it, you need to test it, and then you need to field it
+
+15:39.600 --> 15:43.880
+on your system, you know, for at least a week because otherwise, you know, you have
+
+15:43.880 --> 15:48.960
+circular effects from the week and probably even longer to get reliable results.
+
+15:48.960 --> 15:53.880
+If you have a lot of different systems that you want to evaluate this way, it's going
+
+15:53.880 --> 15:57.680
+to take you forever, and your machine learning development cycle is going to be incredibly
+
+15:57.680 --> 15:58.680
+slow.
+
+15:58.680 --> 16:00.760
+Or if you don't have a lot of traffic.
+
+16:00.760 --> 16:04.560
+If you don't have a lot of traffic, right, I mean, basically the limiting factor is also
+
+16:04.560 --> 16:05.560
+traffic, right?
+
+16:05.560 --> 16:11.440
+It's developer's time for productionizing all of these policies, and then it's traffic.
+
+16:11.440 --> 16:17.720
+We already have, you know, probably, you know, terabytes of old log data, existing log
+
+16:17.720 --> 16:19.640
+data lying around.
+
+16:19.640 --> 16:24.720
+And if you think about it, online AB testing is actually really wasteful.
+
+16:24.720 --> 16:30.600
+We, you know, we put these policies into production, we collect the data, and then we never
+
+16:30.600 --> 16:31.600
+reuse that data.
+
+16:31.600 --> 16:38.040
+We use it exactly once, and then, you know, we don't actually know what to do with it.
+
+16:38.040 --> 16:45.000
+So the kind of the intriguing idea that we've pursued in over the last few years is whether
+
+16:45.000 --> 16:51.520
+you can actually avoid online AB tests, but instead do something like counterfactual or
+
+16:51.520 --> 16:53.760
+offline AB tests.
+
+16:53.760 --> 16:59.760
+And that's basically addressing the question of, here's a lot of old log data that we already
+
+16:59.760 --> 17:00.760
+have.
+
+17:00.760 --> 17:05.200
+And I'll, we'll have to qualify that this has to be somewhat special log data.
+
+17:05.200 --> 17:08.680
+I'll come back to that in a bit.
+
+17:08.680 --> 17:12.560
+But that we have a lot of log data lying around.
+
+17:12.560 --> 17:17.240
+And that we can now do, answer the following counterfactual question.
+
+17:17.240 --> 17:22.840
+If we have a new policy that we want to evaluate, and do causal inference on, that we asked
+
+17:22.840 --> 17:29.480
+the question, how well would that policy have done if we had used it instead of the policy
+
+17:29.480 --> 17:31.720
+that was actually running at the time.
+
+17:31.720 --> 17:33.840
+So it's this counterfactual question.
+
+17:33.840 --> 17:38.560
+But essentially it gets at the same, at the heart of causal inference again is, you know,
+
+17:38.560 --> 17:40.480
+how good is this policy?
+
+17:40.480 --> 17:46.800
+It can be used the existing log data to evaluate a new policy without ever having to field that
+
+17:46.800 --> 17:49.520
+new policy in a new AB test.
+
+17:49.520 --> 17:55.000
+And it turns out in certain conditions, it's actually possible to do this.
+
+17:55.000 --> 18:01.440
+And if you're able to reuse old log data, you can evaluate a new policy, or let's say
+
+18:01.440 --> 18:05.880
+a new ranking function when you recommend a policy in seconds.
+
+18:05.880 --> 18:11.200
+And you can do that for many, many new policies.
+
+18:11.200 --> 18:17.320
+And now, you know, you're basically now speeding up your development cycle or your evaluation
+
+18:17.320 --> 18:23.920
+cycle from weeks that it takes to do an online AB test to seconds that it takes to do one
+
+18:23.920 --> 18:27.360
+of these counterfactual or offline AB tests.
+
+18:27.360 --> 18:32.080
+So the question of course is, when is this possible?
+
+18:32.080 --> 18:40.520
+And it's possible to do this offline AB testing if the policy that you use to record your
+
+18:40.520 --> 18:46.360
+original data, you know, there's terabytes of log data that you already had, if that
+
+18:46.360 --> 18:49.920
+policy was sufficiently stochastic.
+
+18:49.920 --> 18:53.640
+So that gets us back to controlled randomized trials, right?
+
+18:53.640 --> 19:01.920
+There we also exploited that the assignment of people to or of subjects to conditions
+
+19:01.920 --> 19:07.680
+was random, but it turns out that it doesn't have to be uniformly at random.
+
+19:07.680 --> 19:13.440
+It doesn't have to be, you know, you flip a coin and assign people this way.
+
+19:13.440 --> 19:22.120
+Any form of randomness, even if it's like, you know, 95% to 5% is sufficient to even
+
+19:22.120 --> 19:29.600
+in hindsight, in retrospect, compute unbiased estimates of the performance of a new policy.
+
+19:29.600 --> 19:35.800
+So that leads us into questions or into techniques from causal infants like inverse propensity
+
+19:35.800 --> 19:36.800
+waiting.
+
+19:36.800 --> 19:44.600
+And what this basically means is that you take your existing log data, that was collected
+
+19:44.600 --> 19:51.760
+according to a stochastic policy, and you basically just re-weight distributions to your new
+
+19:51.760 --> 19:52.760
+policy.
+
+19:52.760 --> 19:57.040
+And if you do that in a particular way, you can actually prove that you can get unbiased
+
+19:57.040 --> 20:03.400
+estimates of the performance of a new policy, basically the same number that you would get
+
+20:03.400 --> 20:09.840
+in an online AB test, but just by reusing existing data under the right conditions.
+
+20:09.840 --> 20:12.560
+And if you can do that, then you can also do learning.
+
+20:12.560 --> 20:13.560
+Okay.
+
+20:13.560 --> 20:17.840
+You've mentioned a couple times the, you know, the right conditions and the right ways
+
+20:17.840 --> 20:19.080
+of doing these things.
+
+20:19.080 --> 20:22.600
+How restrictive are these conditions?
+
+20:22.600 --> 20:29.240
+If you want to evaluate a new policy, you can, you have to restrict that policy to actions
+
+20:29.240 --> 20:33.720
+that had non-zero probability of being selected in the past.
+
+20:33.720 --> 20:35.360
+And that's pretty intuitive.
+
+20:35.360 --> 20:42.480
+If you have a new policy that picks actions that you could not have possibly ever taken
+
+20:42.480 --> 20:48.080
+in the past, there's just no way to know whether that action is any good.
+
+20:48.080 --> 20:57.800
+So the basic condition is that you can only evaluate policies on the actions that, you
+
+20:57.800 --> 21:03.080
+know, you're logging policy that collected the data had basically non-zero probability
+
+21:03.080 --> 21:04.080
+of choosing.
+
+21:04.080 --> 21:09.080
+It doesn't mean that it needs to have chosen all of these possible actions, typically only
+
+21:09.080 --> 21:15.040
+a very small subset of it, but it had to have non-zero probability to do it.
+
+21:15.040 --> 21:19.200
+Because this condition derived from kind of like an information theoretic type of approach,
+
+21:19.200 --> 21:28.400
+like you need to have this information in sufficient quantities in your log store, you
+
+21:28.400 --> 21:34.840
+know, to practically do anything, or is it more, you know, from a probabilistic inference
+
+21:34.840 --> 21:39.360
+perspective and, you know, base theorem and dividing by zero?
+
+21:39.360 --> 21:44.440
+It's more actually, I mean, it's more something totally different.
+
+21:44.440 --> 21:49.920
+There is actually, you never really get a dividing by zero problem.
+
+21:49.920 --> 21:50.920
+You get it.
+
+21:50.920 --> 21:52.080
+So there's two problems.
+
+21:52.080 --> 21:57.440
+If you're trying to evaluate the policy that picks actions that weren't even available
+
+21:57.440 --> 22:01.280
+in the past, there's just, do you have no information about them?
+
+22:01.280 --> 22:08.000
+And so at that point, your estimate, your offline A-B test becomes biased.
+
+22:08.000 --> 22:09.800
+It's no longer unbiased.
+
+22:09.800 --> 22:13.480
+Just because, you know, you don't know what to do for these actions, so you're going
+
+22:13.480 --> 22:18.200
+to impute basically a zero there, or, you know, whatever you want to impute.
+
+22:18.200 --> 22:22.560
+And but that's kind of drawn out of the hat, and you don't know whether that's true.
+
+22:22.560 --> 22:28.920
+So if you have zero probability, then you get a biased estimate, but you can avoid it
+
+22:28.920 --> 22:34.640
+by restricting your new policy to only those actions that didn't have zero probability.
+
+22:34.640 --> 22:43.280
+The second issue is that, well, maybe that action had a tiny probability under when you
+
+22:43.280 --> 22:45.120
+locked the data.
+
+22:45.120 --> 22:46.360
+And then you're dividing.
+
+22:46.360 --> 22:51.520
+So if you do this inverse propensity waiting, you're basically dividing by that probability.
+
+22:51.520 --> 22:56.640
+You're dividing your estimate by this very small number, and that drives up the variance
+
+22:56.640 --> 22:58.000
+of your estimate.
+
+22:58.000 --> 23:03.040
+You're unbiased, but you get an estimate that has large variance, which is also not good.
+
+23:03.040 --> 23:09.480
+So there's kind of the fundamental issue of zero probabilities, and then you become biased.
+
+23:09.480 --> 23:14.720
+And then there's the practical issue of if you have very small probabilities of having
+
+23:14.720 --> 23:20.800
+chosen a particular action in your locks, then you become, you're still unbiased, but
+
+23:20.800 --> 23:27.240
+you have large variance, and which is also not, you would have need a lot of data to overcome
+
+23:27.240 --> 23:28.240
+that.
+
+23:28.240 --> 23:29.240
+Right.
+
+23:29.240 --> 23:30.240
+Right.
+
+23:30.240 --> 23:37.920
+And so from the perspective of someone who wants to try to use this, how complex is
+
+23:37.920 --> 23:38.920
+it?
+
+23:38.920 --> 23:42.720
+The mathematics behind it are actually really simple.
+
+23:42.720 --> 23:50.720
+In terms of designing of computation during this offline AB tests is easy.
+
+23:50.720 --> 23:55.440
+It's more, as you said before, you know, things like making sure that the assignment is
+
+23:55.440 --> 24:02.960
+random and computing or logging these propensities, conceptually, that can be quite tricky.
+
+24:02.960 --> 24:06.040
+And then there's the question of learning, right.
+
+24:06.040 --> 24:12.880
+Once you can do this offline evaluation, these offline AB tests, then basically you can
+
+24:12.880 --> 24:19.600
+take existing learning algorithms like, you know, things like a conditional random field
+
+24:19.600 --> 24:21.880
+or a deep network.
+
+24:21.880 --> 24:27.160
+And instead of training them with kind of hand labeled data, you can train them with
+
+24:27.160 --> 24:32.720
+log data because basically what all of these methods are doing is empirical risk minimization.
+
+24:32.720 --> 24:36.880
+So they would, they're minimizing training error, right.
+
+24:36.880 --> 24:42.680
+And training error is nothing like an unbiased estimate of your generalization error.
+
+24:42.680 --> 24:50.080
+And typically we use, you know, the fraction of errors as our unbiased estimate of the generalization
+
+24:50.080 --> 24:51.080
+error.
+
+24:51.080 --> 24:53.280
+And that's what we use as training error.
+
+24:53.280 --> 24:59.560
+But these inverse propensity score estimators are also unbiased estimators of my generalization
+
+24:59.560 --> 25:05.080
+error. So I can basically just substitute my normal training error for which I need hand
+
+25:05.080 --> 25:11.880
+labeled data with these IPS weighted types of training errors for which I can use log data
+
+25:11.880 --> 25:13.880
+to train them.
+
+25:13.880 --> 25:20.720
+So I can basically this way, I can repurpose many existing, as I said, like deep learning
+
+25:20.720 --> 25:26.040
+or other learning algorithms, just by training them according to a different objective.
+
+25:26.040 --> 25:31.280
+And that's something that we've been developing over the past few years as well.
+
+25:31.280 --> 25:38.560
+So how can we train now based on log data, all of these methods, instead of having to
+
+25:38.560 --> 25:43.080
+use hand labeled full information data?
+
+25:43.080 --> 25:50.040
+And so is it the case that I'm only able to use this technique going forward in the
+
+25:50.040 --> 25:57.440
+sense of, you know, once I start to generate my experiment in a way that's consistent with
+
+25:57.440 --> 26:03.960
+the conditions we've discussed, you know, then I have access to all of this log data,
+
+26:03.960 --> 26:09.160
+but, you know, likely if I've not been thinking about this previously, and I try to apply
+
+26:09.160 --> 26:17.120
+it, everything that I have is, you know, either kind of a mess, or I don't have enough
+
+26:17.120 --> 26:24.160
+applicable rigor, or my approach hasn't been systemized in a way that I can do this.
+
+26:24.160 --> 26:31.080
+Or can you always kind of select, you know, a subset of cases for which your old log
+
+26:31.080 --> 26:33.880
+data is useful, and then just work with that?
+
+26:33.880 --> 26:34.880
+Right.
+
+26:34.880 --> 26:35.880
+Yeah.
+
+26:35.880 --> 26:41.120
+So it's certainly easiest if you're logging your data already in mind that you want it
+
+26:41.120 --> 26:42.680
+to be stochastic.
+
+26:42.680 --> 26:49.120
+So for example, a simple way of doing this is if you're currently using some deterministic
+
+26:49.120 --> 26:56.200
+rule that maybe, you know, scores your candidates and then picks the candidate with the maximum
+
+26:56.200 --> 26:57.200
+score.
+
+26:57.200 --> 27:01.840
+That's, you know, how many ad placement systems, for example, work.
+
+27:01.840 --> 27:10.680
+That would be a deterministic blogging policy, and that would be difficult to use.
+
+27:10.680 --> 27:15.320
+But you can easily turn this into a stochastic logging policy by changing this arc max into
+
+27:15.320 --> 27:16.640
+a softmax.
+
+27:16.640 --> 27:21.120
+And then you would be logging new data where you know exactly, you know, the probability
+
+27:21.120 --> 27:25.160
+of choosing each of these individual actions.
+
+27:25.160 --> 27:26.480
+That's certainly the easiest.
+
+27:26.480 --> 27:33.960
+And you refer to this as a logging policy, it's not the logging itself that you're changing.
+
+27:33.960 --> 27:38.680
+It's kind of the underlying thing that you're doing, you know, displaying ads or recommendations
+
+27:38.680 --> 27:42.680
+or what have you, and you're just logging what happens.
+
+27:42.680 --> 27:44.440
+Am I interpreting that correctly?
+
+27:44.440 --> 27:45.440
+That's right.
+
+27:45.440 --> 27:50.840
+What I mean by logging policy is just whatever your system was, that was in operations when
+
+27:50.840 --> 27:52.000
+you created the logs.
+
+27:52.000 --> 27:58.480
+So it's the ranking function that you've used or, you know, the ad placement function or
+
+27:58.480 --> 28:03.920
+the recommender that was actually in production when you recorded the logs.
+
+28:03.920 --> 28:04.920
+Okay.
+
+28:04.920 --> 28:09.840
+So yeah, it's easiest if that is explicitly stochastic and you made it stochastic in a way
+
+28:09.840 --> 28:15.440
+that you can easily record all of the propensities and the probabilities of choosing the respective
+
+28:15.440 --> 28:16.440
+actions.
+
+28:16.440 --> 28:17.840
+That's great.
+
+28:17.840 --> 28:23.720
+But in many cases, I would argue that the data that you have, the log data that you have
+
+28:23.720 --> 28:25.760
+is already stochastic.
+
+28:25.760 --> 28:32.760
+So for example, if you've been running AB tests in the past, then the assignment of users
+
+28:32.760 --> 28:38.280
+to different conditions of your AB test, that was a random assignment already.
+
+28:38.280 --> 28:45.000
+So it's already stochastic in a sense that any particular user could have gotten multiple
+
+28:45.000 --> 28:47.280
+different versions of the system.
+
+28:47.280 --> 28:52.280
+And that's stochasticity that you already have and that you can exploit.
+
+28:52.280 --> 29:00.080
+Actually we've shown that in ranking settings where you have, let's say, a search engine,
+
+29:00.080 --> 29:05.240
+there you can, even if you have a deterministic ranking function, you can exploit that your
+
+29:05.240 --> 29:07.280
+users are stochastic.
+
+29:07.280 --> 29:12.320
+So in particular, some users will go down to position three, some will go down position
+
+29:12.320 --> 29:15.840
+five, some will go down to position 20.
+
+29:15.840 --> 29:21.800
+And this stochasticity is something that you can actually exploit, even though your system
+
+29:21.800 --> 29:27.480
+is deterministic, the logs are still stochastic because your users are stochastic.
+
+29:27.480 --> 29:35.640
+To do that, you would then need to estimate something like propensity curve based on position.
+
+29:35.640 --> 29:39.560
+But that's something we can do and we actually have an upcoming wisdom paper for how to do
+
+29:39.560 --> 29:41.560
+that very efficiently.
+
+29:41.560 --> 29:49.800
+It strikes me that there might be some implications on the effectiveness of this relative to whatever
+
+29:49.800 --> 29:51.960
+your distribution is.
+
+29:51.960 --> 29:56.320
+You kind of alluded to this earlier with the comments about the variants.
+
+29:56.320 --> 30:05.720
+If you've got a distribution that has a wide variance or many choices, for example, do
+
+30:05.720 --> 30:13.360
+all of these things come into play and your ability to learn and converge on a solution?
+
+30:13.360 --> 30:14.360
+Yeah.
+
+30:14.360 --> 30:20.880
+I mean, you're right on in a sense that if the system that logged the data is very different
+
+30:20.880 --> 30:29.840
+from the system that you're now evaluating effectively, we often talk about effective
+
+30:29.840 --> 30:34.360
+sample size in these settings when you do these counterfactual estimates.
+
+30:34.360 --> 30:39.720
+If these two systems are very far apart, then it's quite intuitive that whatever is in
+
+30:39.720 --> 30:47.800
+your log data doesn't tell you that much about the evaluation of this new system.
+
+30:47.800 --> 30:52.680
+If they're very different, the overlap between the two is very small.
+
+30:52.680 --> 30:59.800
+This will typically show itself in kind of having large variants in your offline AB tests.
+
+30:59.800 --> 31:05.120
+So really there is practical limitations about what you can evaluate and how reliably
+
+31:05.120 --> 31:06.480
+can evaluate.
+
+31:06.480 --> 31:13.080
+This works best if the new system that you want to evaluate is not that far away from
+
+31:13.080 --> 31:17.480
+the production system or from the logging policy that logged the data.
+
+31:17.480 --> 31:24.840
+And there are diagnostics to kind of see how reliable you are here.
+
+31:24.840 --> 31:25.840
+But you're right.
+
+31:25.840 --> 31:30.960
+If your new system does something completely different from the old system, there's
+
+31:30.960 --> 31:33.200
+just not enough information in the logs.
+
+31:33.200 --> 31:37.720
+But it would argue in many cases, you're making incremental improvements, you're changing
+
+31:37.720 --> 31:41.720
+your ranking function, you're changing a little bit, you're changing your ad placement
+
+31:41.720 --> 31:43.480
+function a little bit.
+
+31:43.480 --> 31:49.640
+So I'd say many of the kind of online AB tests that you're doing today could probably
+
+31:49.640 --> 31:54.640
+be replaced by these types of offline kind of actual AB tests.
+
+31:54.640 --> 32:00.000
+But then once in a while, you have to go out, collect new data probably.
+
+32:00.000 --> 32:06.360
+And I would also say that before making a big launch decision, I would just double check
+
+32:06.360 --> 32:13.440
+in an online AB test that really everything's fine and that there's nothing unforeseen
+
+32:13.440 --> 32:14.880
+is happening.
+
+32:14.880 --> 32:21.200
+But I think these offline AB tests are really interesting for speeding up your development
+
+32:21.200 --> 32:26.440
+cycle that you don't have to go out, get new data for every little decision that you're
+
+32:26.440 --> 32:27.440
+making.
+
+32:27.440 --> 32:30.960
+But you just need to kind of get a reality check once in a while.
+
+32:30.960 --> 32:38.200
+Does this impose a requirement on folks that are using this technique that they need to
+
+32:38.200 --> 32:43.000
+keep track of their distributions in some way, like in their logs in a way that they're
+
+32:43.000 --> 32:45.000
+probably not doing today?
+
+32:45.000 --> 32:46.000
+Yeah.
+
+32:46.000 --> 32:52.240
+So the biggest thing is probably that whenever you pick an action and you're logging this,
+
+32:52.240 --> 32:59.480
+that you also log what's called the propensity, which is the probability of taking that action
+
+32:59.480 --> 33:01.440
+under the current policy.
+
+33:01.440 --> 33:06.920
+So the logging policy that, as I said, ideally is stochastic.
+
+33:06.920 --> 33:11.120
+So it will pick actions from a distribution.
+
+33:11.120 --> 33:16.160
+And when it makes its choice, you just record that one number of what the probability of
+
+33:16.160 --> 33:17.720
+that choice was.
+
+33:17.720 --> 33:20.400
+And that's the most important thing to log.
+
+33:20.400 --> 33:24.880
+And with that number, you can, you know, that's the most important number for doing this
+
+33:24.880 --> 33:26.920
+in first propensity waiting.
+
+33:26.920 --> 33:29.360
+And it's really just one additional number that you need to log.
+
+33:29.360 --> 33:33.560
+It's not that you need to log the whole distribution or anything complicated.
+
+33:33.560 --> 33:35.200
+It's just this one number.
+
+33:35.200 --> 33:43.520
+It sounds like a really interesting technique, does it fit into a broader array of tools kind
+
+33:43.520 --> 33:47.680
+of based around a similar idea that folks should be looking into?
+
+33:47.680 --> 33:48.680
+Yeah.
+
+33:48.680 --> 33:55.520
+I mean, this idea of doing this counterfactual evaluation has been something that, you know,
+
+33:55.520 --> 34:01.640
+especially also people at Microsoft, but now much more broadly in it has been accepted
+
+34:01.640 --> 34:08.320
+in industry, you know, there were very interesting papers at the last Rex's conference on both
+
+34:08.320 --> 34:18.600
+from YouTube, implementing this kind of counterfactual learning techniques from Spotify.
+
+34:18.600 --> 34:26.600
+So I mean, this is an area that is maturing and where there's actually now a lot of interest
+
+34:26.600 --> 34:34.480
+both in academia and also in industry on how to design better estimators, how to design
+
+34:34.480 --> 34:37.920
+learning algorithms that are robust in this setting.
+
+34:37.920 --> 34:41.160
+Because arguably, really, that's where the data is, right?
+
+34:41.160 --> 34:45.160
+That's where we have lots and lots of training data.
+
+34:45.160 --> 34:49.640
+And it's much cheaper to work with this data than to get, you know, hand labeled data.
+
+34:49.640 --> 34:50.840
+Very interesting, Seth.
+
+34:50.840 --> 34:55.800
+Were there any other things that you covered in your talk at the conference?
+
+34:55.800 --> 35:00.280
+One thing that I would love to have covered more, but I didn't have the time is actually
+
+35:00.280 --> 35:05.040
+the, you know, the other meaning of, of bias.
+
+35:05.040 --> 35:08.440
+And that's the meaning in terms of fairness.
+
+35:08.440 --> 35:13.640
+Because I think actually all of these questions are quite related.
+
+35:13.640 --> 35:20.680
+So once you think about, you know, what your system does not as prediction, but as a policy
+
+35:20.680 --> 35:26.760
+that has effects in the real world and that has desirable effects and undesirable effects
+
+35:26.760 --> 35:32.280
+that you may want to optimize or minimize, then really thinking about, I mean, that is
+
+35:32.280 --> 35:37.520
+really the right vocabulary to think about fairness of your policy as well, right?
+
+35:37.520 --> 35:42.840
+And we've been thinking, I mean, that's actually been very interesting for me personally
+
+35:42.840 --> 35:44.560
+in terms of my research.
+
+35:44.560 --> 35:52.240
+And it's really enabled me to talk about fairness, let's say, of a search engine in a much more
+
+35:52.240 --> 35:53.400
+concise way.
+
+35:53.400 --> 35:59.840
+So for example, you know, if you think about what a search engine does, it's really a
+
+35:59.840 --> 36:07.520
+system that, you know, allocates attention among the items that it ranks.
+
+36:07.520 --> 36:12.760
+So from that perspective, you know, it's a policy and it's a policy that has an effect
+
+36:12.760 --> 36:16.400
+on both the users of the system.
+
+36:16.400 --> 36:19.040
+Those would be the people typing in the query.
+
+36:19.040 --> 36:24.280
+But it's also a policy that has an effect on the items that are being ranked, right?
+
+36:24.280 --> 36:29.080
+And in particular, in the way that this policy allocates exposure, you know, things that
+
+36:29.080 --> 36:35.600
+get ranked to position one, get more exposure than things that are ranked to position 10.
+
+36:35.600 --> 36:42.480
+So now, if you think about it that way, what we want is we want policies that allocate
+
+36:42.480 --> 36:45.960
+exposure in a way that is fair.
+
+36:45.960 --> 36:51.760
+And what's fair, it's both, it has to be fair both to the users as well as to the items
+
+36:51.760 --> 36:52.760
+being ranked.
+
+36:52.760 --> 36:58.760
+Because, you know, if you think about the settings where we use rankings today, the items,
+
+36:58.760 --> 37:03.200
+you know, could be people that are candidates for a job.
+
+37:03.200 --> 37:09.680
+And so we want to make sure that, you know, that we don't, for example, if they're protected
+
+37:09.680 --> 37:16.320
+groups among our job candidates, that we're allocating exposure in a fair way and we're
+
+37:16.320 --> 37:20.720
+not biasing how the system allocates exposure.
+
+37:20.720 --> 37:26.280
+What was actually, what's interesting is an information retrieval going back to the 70s
+
+37:26.280 --> 37:35.040
+coming out of library science, there was this very strong focus on maximizing the utility
+
+37:35.040 --> 37:38.880
+of the system to the people who type in the query.
+
+37:38.880 --> 37:44.240
+And that was fine when we were ranking books in the library because, you know, there it's
+
+37:44.240 --> 37:49.360
+really more mostly about the, you know, the people coming to the library wanting to find
+
+37:49.360 --> 37:50.680
+books.
+
+37:50.680 --> 37:54.280
+And the books really didn't have many rights or needed much protection.
+
+37:54.280 --> 37:58.200
+It was really a tool for finding what people wanted.
+
+37:58.200 --> 38:03.040
+But now when we're ranking, let's say job candidates or, you know, ranking romantic,
+
+38:03.040 --> 38:07.360
+potential romantic partners or, you know, we're ranking anything, it's really that we
+
+38:07.360 --> 38:11.720
+have to rethink what it means to design a ranking system.
+
+38:11.720 --> 38:19.360
+And this old principle of ranking by probability of relevance is actually not necessarily fair.
+
+38:19.360 --> 38:25.840
+I mean, we want to rank based on marriage and married equals relevance, but we can allocate
+
+38:25.840 --> 38:28.360
+exposure in many different ways.
+
+38:28.360 --> 38:34.480
+So current retrieval system basically are a winner takes all types of system wherever
+
+38:34.480 --> 38:41.440
+claims the first spot is, you know, getting that by far the most attention.
+
+38:41.440 --> 38:47.400
+But let's say for ranking job candidates, if we have two candidates that are, let's
+
+38:47.400 --> 38:55.160
+say we have 10 candidates that have almost the same qualifications for the job, one person
+
+38:55.160 --> 39:00.080
+is absolutely better than let's say the other people.
+
+39:00.080 --> 39:06.520
+Is it really fair that that epsilon better person gets far more than epsilon more attention
+
+39:06.520 --> 39:07.840
+than all the other 10?
+
+39:07.840 --> 39:09.320
+I'm not sure, right?
+
+39:09.320 --> 39:15.080
+So we may argue for any particular situation that we actually, we still want to allocate
+
+39:15.080 --> 39:20.200
+exposure based on relevance, but this kind of winner takes all is not maybe not the right
+
+39:20.200 --> 39:21.200
+way.
+
+39:21.200 --> 39:25.960
+Maybe we want to actually make exposure proportional to relevance, which would mean that
+
+39:25.960 --> 39:30.000
+all of these 10 candidates would get almost the same exposure, just this one person gets
+
+39:30.000 --> 39:34.880
+like a little bit of epsilon more, but it's not a winner takes all system anymore.
+
+39:34.880 --> 39:40.400
+So I think many of the techniques of debiasing data that I've talked about here for selection
+
+39:40.400 --> 39:45.720
+biases and propensity waiting are actually extremely useful for also dealing with fairness
+
+39:45.720 --> 39:46.720
+in this settings.
+
+39:46.720 --> 39:48.960
+And so I think there's an interesting connection there.
+
+39:48.960 --> 39:49.960
+Okay.
+
+39:49.960 --> 39:56.320
+Is that later interpretation something that you've published on today?
+
+39:56.320 --> 40:00.400
+Yeah, that we had a KDD paper at the last KDD conference.
+
+40:00.400 --> 40:05.280
+It sounds like really interesting work and I'm really thankful for you for taking the
+
+40:05.280 --> 40:07.200
+time to share it with us.
+
+40:07.200 --> 40:08.600
+Yeah, it was fun.
+
+40:08.600 --> 40:09.600
+Thank you.
+
+40:09.600 --> 40:10.600
+Absolutely.
+
+40:10.600 --> 40:11.600
+Thanks, Thorson.
+
+40:11.600 --> 40:17.280
+All right, everyone, that's our show for today.
+
+40:17.280 --> 40:22.760
+For more information on Thorson or any of the topics covered in this show, visit twimmalei.com
+
+40:22.760 --> 40:25.880
+slash talk slash 207.
+
+40:25.880 --> 40:47.000
+As always, thanks so much for listening and catch you next time.
+

@@ -1,0 +1,2516 @@
+WEBVTT
+
+00:00.000 --> 00:15.920
+Hello and welcome to another episode of Twimble Talk, the podcast where I interview interesting
+
+00:15.920 --> 00:20.880
+people doing interesting things in machine learning and artificial intelligence.
+
+00:20.880 --> 00:25.720
+I'm your host Sam Charrington, a bit about the show you're about to hear.
+
+00:25.720 --> 00:29.860
+This show is part of a series that I'm really excited about, in part because I've been
+
+00:29.860 --> 00:32.900
+working to bring it to you for quite a while now.
+
+00:32.900 --> 00:37.060
+The focus of this series is a sampling of the really interesting work being done over
+
+00:37.060 --> 00:44.540
+at OpenAI, the independent AI research lab, founded by Elon Musk, Sam Altman, and others.
+
+00:44.540 --> 00:48.020
+A few quick announcements before we dive into the show.
+
+00:48.020 --> 00:53.060
+In a few weeks, we'll be holding our last Twimble online meetup of the year.
+
+00:53.060 --> 00:58.100
+On Wednesday, December 13th, please join us and bring your thoughts on the top machine
+
+00:58.100 --> 01:02.660
+learning and AI stories of 2017 for our discussion segment.
+
+01:02.660 --> 01:08.380
+For our main presentation, formal Twimble Talk guest, Bruno Gensalves, we'll be discussing
+
+01:08.380 --> 01:13.900
+the paper, understanding deep learning requires rethinking generalization, by Shi Juan
+
+01:13.900 --> 01:17.340
+Zhang from MIT and Google Brain and others.
+
+01:17.340 --> 01:22.140
+You can find more details and register at twimlai.com slash meetup.
+
+01:22.140 --> 01:27.500
+Also, we need to build out our 2018 presentation schedule for the meetup.
+
+01:27.500 --> 01:32.060
+So if you'd like to present your own work or your favorite third-party paper, please
+
+01:32.060 --> 01:40.100
+reach out to us via email at teamattwimlai.com or ping us on social media and let us know.
+
+01:40.100 --> 01:44.260
+If you receive my newsletter, you already know this, but Twimble is growing and we're
+
+01:44.260 --> 01:49.300
+looking for an energetic and passionate community manager to help managing grow programs
+
+01:49.300 --> 01:55.220
+like the podcast and meetup and some other exciting things we've gotten store for 2018.
+
+01:55.220 --> 01:57.820
+This is a full-time role that can be done remotely.
+
+01:57.820 --> 02:02.420
+If you're interested in learning more, reach out to me for additional details.
+
+02:02.420 --> 02:06.540
+I should mention that if you don't already get my newsletter, you are really missing
+
+02:06.540 --> 02:12.020
+out and you should visit twimlai.com slash newsletter to sign up.
+
+02:12.020 --> 02:18.340
+In this show, I'm joined by Jonas Schneider, robotics technical team lead at OpenAI.
+
+02:18.340 --> 02:22.900
+While in San Francisco a few months ago, I sat down with Jonas at the OpenAI office during
+
+02:22.900 --> 02:27.060
+which we covered a lot of really interesting ground, including not just OpenAI's work
+
+02:27.060 --> 02:33.180
+in robotics, but also OpenAI Jim, which was the first project he worked on at OpenAI,
+
+02:33.180 --> 02:38.540
+as well as how they approach setting up the infrastructure for their experimental work,
+
+02:38.540 --> 02:42.900
+including how they've set up a robot as a service environment for their researchers,
+
+02:42.900 --> 02:47.540
+and how they use the open source Kubernetes project to manage their compute environment.
+
+02:47.540 --> 02:49.580
+Check it out and let us know what you think.
+
+02:49.580 --> 02:53.580
+I really enjoyed this one, a quick note before we jump in.
+
+02:53.580 --> 02:58.180
+Support for this OpenAI series is brought to you by our friends at NVIDIA, a company
+
+02:58.180 --> 03:01.900
+which is also a supporter of OpenAI itself.
+
+03:01.900 --> 03:05.580
+If you're listening to this podcast, you already know about NVIDIA and all the great
+
+03:05.580 --> 03:09.740
+things they're doing to support advancements in AI research and practice.
+
+03:09.740 --> 03:14.300
+What you may not know is that the company has a significant presence at the NIPPS conference
+
+03:14.300 --> 03:19.780
+going on next week in Long Beach, California, including four accepted papers.
+
+03:19.780 --> 03:26.060
+To learn more about the NVIDIA presence at NIPPS, head on over to twimlai.com slash NVIDIA
+
+03:26.060 --> 03:28.540
+and be sure to visit them at the conference.
+
+03:28.540 --> 03:33.020
+Of course, I'll be at NIPPS as well and I'd love to meet you if you'll be there, so
+
+03:33.020 --> 03:35.460
+please reach out if you will.
+
+03:35.460 --> 03:45.060
+And now on to the show.
+
+03:45.060 --> 03:50.500
+All right, well, hey everyone, I am here at the OpenAI offices and I am with Jonas Schneider.
+
+03:50.500 --> 03:55.820
+Jonas is a member of technical staff here as well as being the technical team lead for
+
+03:55.820 --> 03:56.820
+robotics.
+
+03:56.820 --> 03:58.460
+Welcome to the podcast, Jonas.
+
+03:58.460 --> 03:59.460
+Hey, glad to be here.
+
+03:59.460 --> 04:01.740
+It's great to have you on the show.
+
+04:01.740 --> 04:05.940
+Why don't we get started by having you tell us a little bit about your background and
+
+04:05.940 --> 04:08.780
+how you got interested in artificial intelligence?
+
+04:08.780 --> 04:13.300
+Yeah, so my background is actually, so I work on OpenAI's robotics team, but my background
+
+04:13.300 --> 04:14.820
+is actually in software engineering.
+
+04:14.820 --> 04:19.780
+Okay, my background is neither in robotics, like classical, like academic robotics, nor
+
+04:19.780 --> 04:23.500
+machine learning, which is of course like OpenAI's big focus.
+
+04:23.500 --> 04:27.780
+And so in the robotics team, we kind of have a couple of different skillsets coming together.
+
+04:27.780 --> 04:31.820
+So in the robotics, there's of course machine learning experts and also software engineering
+
+04:31.820 --> 04:33.060
+people like me.
+
+04:33.060 --> 04:37.020
+So before OpenAI, I was actually software engineering intern at Stripe.
+
+04:37.020 --> 04:41.100
+That's also where I met our CTO, Greg Brockman, who is now a CTO at OpenAI.
+
+04:41.100 --> 04:45.340
+And so basically, yeah, and so that was actually, like, while I was still in college.
+
+04:45.340 --> 04:49.340
+And so after I was done with college, I actually reached out to record and was like, so what's
+
+04:49.340 --> 04:50.500
+up these days?
+
+04:50.500 --> 04:52.460
+What kind of stuff are you working on?
+
+04:52.460 --> 04:54.180
+And so he introduced me to OpenAI.
+
+04:54.180 --> 04:55.180
+Fantastic.
+
+04:55.180 --> 04:56.180
+Yeah.
+
+04:56.180 --> 04:59.180
+So I actually got started working on OpenAI Gym.
+
+04:59.180 --> 05:03.580
+So that was kind of like my, I was a contractor for OpenAI there, basically working with Greg.
+
+05:03.580 --> 05:08.140
+And so that's how it kind of got started thinking about all these AI ML things.
+
+05:08.140 --> 05:10.980
+And then eventually I got started working on OpenAI's robotics team.
+
+05:10.980 --> 05:11.980
+Awesome.
+
+05:11.980 --> 05:12.980
+Awesome.
+
+05:12.980 --> 05:15.220
+So tell me a little bit about the work that you do on the robotics team.
+
+05:15.220 --> 05:16.220
+Yeah.
+
+05:16.220 --> 05:21.660
+So the goal of the robotics team basically is to enable new capabilities for robots.
+
+05:21.660 --> 05:25.700
+So today's robots, they're really good at like very specific tasks, for example, like
+
+05:25.700 --> 05:30.500
+in a factory robot, you have an assembly line and you have a robot that can place one
+
+05:30.500 --> 05:34.180
+very specific screw into one specific location on the part that you're assembling.
+
+05:34.180 --> 05:36.460
+For example, then robots are great at that.
+
+05:36.460 --> 05:37.460
+They're really good at that.
+
+05:37.460 --> 05:38.820
+They can, they have very, very high precision.
+
+05:38.820 --> 05:42.700
+They can, like, they can repeat this movement, like, tens of thousands of times.
+
+05:42.700 --> 05:45.900
+And they, yeah, and they, they never get tired or anything.
+
+05:45.900 --> 05:49.420
+But the issue is that these environments are very constrained, of course, because like,
+
+05:49.420 --> 05:50.420
+that's how a factory is.
+
+05:50.420 --> 05:51.420
+Like, everything is super precise.
+
+05:51.420 --> 05:56.020
+Whenever something like unexpected happens, you just abort.
+
+05:56.020 --> 05:57.020
+Right.
+
+05:57.020 --> 06:00.420
+And you like, and the human goes in there and like, figures it out and it resets and then
+
+06:00.420 --> 06:01.420
+it goes on again.
+
+06:01.420 --> 06:02.420
+Right.
+
+06:02.420 --> 06:05.740
+But so that's very different from, for example, like a home environment where like, if
+
+06:05.740 --> 06:10.060
+you're trying to clean up someone's apartment, for example, where like unexpected stuff happens
+
+06:10.060 --> 06:13.300
+all the time and you're like, something like falls over, then you have to like react to
+
+06:13.300 --> 06:14.300
+that and pick it back up.
+
+06:14.300 --> 06:15.300
+Yeah.
+
+06:15.300 --> 06:19.900
+So this is like a very simple task, but it turns out that like today's robots are actually
+
+06:19.900 --> 06:23.940
+not that great at operating these unconstrained environments.
+
+06:23.940 --> 06:28.540
+And usually the reason for that is that they are pre-programmed, basically.
+
+06:28.540 --> 06:31.660
+So when you, when you're, when you have this factory setting, someone, like, when you
+
+06:31.660 --> 06:36.140
+set up the robot initially, someone goes in there and like, and basically like programs,
+
+06:36.140 --> 06:38.460
+this exact movement pattern for the robot.
+
+06:38.460 --> 06:41.980
+But of course, and that works great in this constrained environment, but in an unconstrained
+
+06:41.980 --> 06:46.420
+environment, you actually can't really do that because you have to react to what, what's
+
+06:46.420 --> 06:48.140
+happening in the environment.
+
+06:48.140 --> 06:52.860
+And so that's why today's robots are like, very pre-restricted in these kinds of environments.
+
+06:52.860 --> 06:55.380
+And we're, we're trying to embark on solving that.
+
+06:55.380 --> 06:56.380
+Nice.
+
+06:56.380 --> 06:57.380
+Nice.
+
+06:57.380 --> 07:02.140
+So it sounds like the, you know, we're talking about the environments as being constrained
+
+07:02.140 --> 07:03.580
+and unconstrained.
+
+07:03.580 --> 07:07.940
+But in a lot of cases, it's my sense that the constraints themselves are artificially
+
+07:07.940 --> 07:08.940
+imposed.
+
+07:08.940 --> 07:12.820
+Like the, you know, the factory environment is constrained because it has to be because
+
+07:12.820 --> 07:14.660
+that's the way they can get the robots to work.
+
+07:14.660 --> 07:19.660
+Like, do you look at applying this stuff in the industrial settings as well?
+
+07:19.660 --> 07:24.780
+Well, so the thing is, like, yeah, you're of course exactly right, that basically, basically
+
+07:24.780 --> 07:28.660
+today's automation, like basically everything, like the way these factories are designed
+
+07:28.660 --> 07:30.980
+is exactly so that the robots can function.
+
+07:30.980 --> 07:35.340
+I think for the most part, it will be, or at least with the current state of, of like
+
+07:35.340 --> 07:40.440
+capabilities of ML-based systems, it will actually be pretty hard to be better than
+
+07:40.440 --> 07:44.740
+this constrained environment, if, if basically your, like, your application or your business
+
+07:44.740 --> 07:48.020
+is like fine with operating in a constrained environment.
+
+07:48.020 --> 07:52.420
+So for example, like while it might be nice to, let's say there's a Tesla, there's a Tesla
+
+07:52.420 --> 07:55.340
+like robot that moves the auto bodies around.
+
+07:55.340 --> 07:56.340
+Right.
+
+07:56.340 --> 07:59.260
+And then, and then let's say like it, like of course it would be nice, for example, like
+
+07:59.260 --> 08:03.420
+if, if it would be smart enough to react to, if it like drops the thing on the floor,
+
+08:03.420 --> 08:06.740
+if it could like pick it back up and just pick when you're going on, but these events
+
+08:06.740 --> 08:11.220
+are so rare that, and basically of course there's like a lot of other engineering factors
+
+08:11.220 --> 08:15.340
+there where like you got to be sure that if the robots in this like reaction mode that
+
+08:15.340 --> 08:19.500
+it doesn't, doesn't accidentally, I call like more failure somewhere else in the system.
+
+08:19.500 --> 08:22.620
+And basically just because these events are so rare in, if your environment is already
+
+08:22.620 --> 08:23.620
+constrained.
+
+08:23.620 --> 08:26.340
+So we're like, we're not really looking at that, I guess like in the, definitely in the
+
+08:26.340 --> 08:27.700
+short, short and medium term.
+
+08:27.700 --> 08:32.780
+I'm thinking about applications like pick and place types of applications where I've
+
+08:32.780 --> 08:39.980
+seen a number of research is kind of in the context of, you know, today, a robot that's
+
+08:39.980 --> 08:42.340
+being used to bolt stuff in, right.
+
+08:42.340 --> 08:48.700
+It's getting these bolts that are like preloaded into, you know, a very constrained like a harness
+
+08:48.700 --> 08:51.180
+that basically it can bolt in, right.
+
+08:51.180 --> 08:55.900
+But some of the examples show that in some instances you might want to just put a box
+
+08:55.900 --> 09:02.140
+of bolts and let the robot kind of grasp the bolts and then from there bolt them in.
+
+09:02.140 --> 09:07.580
+And I guess the question is, have you, have you looked at the, you know, is that really
+
+09:07.580 --> 09:08.580
+practical?
+
+09:08.580 --> 09:12.500
+Like, is that where you see the application of this kind of stuff or it's like, no, the
+
+09:12.500 --> 09:15.260
+industrial environments, you know, we've got that kind of figured out.
+
+09:15.260 --> 09:19.660
+People probably aren't going to, you know, switch from using these, you know, the very
+
+09:19.660 --> 09:24.100
+rigid environments to the more unstructured environments to save a little bit of that
+
+09:24.100 --> 09:25.100
+upfront cost.
+
+09:25.100 --> 09:26.100
+Yeah.
+
+09:26.100 --> 09:29.420
+So I think there are definitely, there are some opportunities, basically, specifically
+
+09:29.420 --> 09:32.580
+in the areas you mentioned, like machine tending, basically where like, you have this
+
+09:32.580 --> 09:37.140
+inbound, like box of parts and they come from like a, like a some vendor and you basically
+
+09:37.140 --> 09:40.500
+have to like feed them to the machines correctly, like unpack them.
+
+09:40.500 --> 09:42.820
+And that is again, because it's kind of an unconstrained environment, you don't really
+
+09:42.820 --> 09:46.580
+know, like they might change like their shipping material and suddenly it looks different
+
+09:46.580 --> 09:48.660
+and you have to process this package differently.
+
+09:48.660 --> 09:49.660
+Mm-hmm.
+
+09:49.660 --> 09:53.780
+And also one, one other, one other kind of interesting example is actually plugging in cables.
+
+09:53.780 --> 09:57.940
+So that's something that, that all these industrial robots are also very bad at, it turns
+
+09:57.940 --> 10:01.780
+out, because like cables are deformable and basically there again, you might have to
+
+10:01.780 --> 10:05.940
+react like if the cable is bending weirdly, you have to like poke it so it falls into the
+
+10:05.940 --> 10:06.940
+correct place.
+
+10:06.940 --> 10:10.100
+And so this is actually something that consumes a lot of time, in, for example, like auto
+
+10:10.100 --> 10:13.980
+assembly, where basically you can do the entire frame, it's all, all the body size and
+
+10:13.980 --> 10:14.980
+all super nice.
+
+10:14.980 --> 10:18.460
+And then you have a bunch of people like installing all the stuff in the interior, for
+
+10:18.460 --> 10:21.940
+example, and that includes, actually, it really is like one very specific task that
+
+10:21.940 --> 10:25.620
+people have tried to automate using the classical robotics, it's plugging in these
+
+10:25.620 --> 10:30.180
+like connectors basically, or I guess maybe like a day-to-day variant of this would be
+
+10:30.180 --> 10:34.420
+like plugging in a charger into, like plugging your phone into like a phone charger.
+
+10:34.420 --> 10:38.620
+But it turns out basically for these problems you also, you actually, like, these are surprisingly
+
+10:38.620 --> 10:42.940
+hard, because you have to like figure out the like exact positioning for the charger
+
+10:42.940 --> 10:44.540
+and then plug it in for like a year.
+
+10:44.540 --> 10:49.640
+So we built USB-C and like lightning reversible ones to make it easy for robots to charge
+
+10:49.640 --> 10:51.340
+our phones for us.
+
+10:51.340 --> 10:57.140
+Yeah, so I think definitely like for the industrial applications, like, it, why it might be hard
+
+10:57.140 --> 11:01.060
+to basically, in the short term, improve on the stuff that is already handled by robots,
+
+11:01.060 --> 11:05.860
+there are definitely a lot of fringe cases that, like, there's, there's no way that you
+
+11:05.860 --> 11:09.620
+could currently even, like, get close to automating it and new technologies could enable
+
+11:09.620 --> 11:10.620
+that.
+
+11:10.620 --> 11:11.620
+Okay.
+
+11:11.620 --> 11:15.820
+So tell me a little bit about some of the areas of research that you're pursuing to kind
+
+11:15.820 --> 11:17.820
+of enable this, this vision.
+
+11:17.820 --> 11:18.820
+Yeah.
+
+11:18.820 --> 11:24.540
+Basically, the thing we're very interested in is basically acting on, and reacting on feedback
+
+11:24.540 --> 11:25.780
+from the real world.
+
+11:25.780 --> 11:29.900
+So basically this, and this kind of feedback is really also what gives, what gives humans
+
+11:29.900 --> 11:34.140
+this super good, like manipulation, like super good, like robotic skills, basically.
+
+11:34.140 --> 11:35.140
+Okay.
+
+11:35.140 --> 11:39.380
+So one, actually one, one quick experiment you can verify that is if you try to, to, if
+
+11:39.380 --> 11:43.860
+you put both of your index fingers out, like horizontally, and doing this, yeah, yeah.
+
+11:43.860 --> 11:47.060
+And you try to move them, move them together and like touch the fingertips.
+
+11:47.060 --> 11:49.500
+That's very easy to do, and you can always do it.
+
+11:49.500 --> 11:50.500
+Yeah.
+
+11:50.500 --> 11:52.900
+But so, but, and now try doing it again with your eyes closed.
+
+11:52.900 --> 11:53.900
+Mm-hmm.
+
+11:53.900 --> 11:56.340
+And it turns out this is actually, it's actually really hard.
+
+11:56.340 --> 11:57.340
+Ha, ha.
+
+11:57.340 --> 11:58.340
+Yeah.
+
+11:58.340 --> 12:00.180
+And like, after a while, you can, like, if you have, like, the touch feedback.
+
+12:00.180 --> 12:04.820
+But basically, so the thing there is that, like, actually human motion is not very precise,
+
+12:04.820 --> 12:09.300
+but it is very good at, like, figuring out, oh, I'm, like, off in this, in some direction
+
+12:09.300 --> 12:10.300
+and then going for it.
+
+12:10.300 --> 12:11.300
+And going for it.
+
+12:11.300 --> 12:12.300
+Going for it.
+
+12:12.300 --> 12:13.300
+Exactly.
+
+12:13.300 --> 12:16.140
+And so that is actually a thing that, that, like, again, these, like, industrial robots,
+
+12:16.140 --> 12:18.420
+like, they don't really do that on, like, a higher level.
+
+12:18.420 --> 12:22.220
+They do it on, like, a very, like, very low level of, like, am I in the right place?
+
+12:22.220 --> 12:25.100
+But this gets harder if you have, like, other objects or something that you're interacting
+
+12:25.100 --> 12:26.100
+with.
+
+12:26.100 --> 12:28.820
+And so this is what, like, this is one area that I research focused on, basically, taking
+
+12:28.820 --> 12:33.700
+data from the real world and using that, like, online in the loop to have the robot be
+
+12:33.700 --> 12:37.220
+able to, like, react to what it's doing and what, like, the things it's interacting
+
+12:37.220 --> 12:41.060
+with, which could be, like, a block or, like, like, whatever object that you're working
+
+12:41.060 --> 12:42.060
+with is doing.
+
+12:42.060 --> 12:45.500
+And like, if you're, like, grasping it correctly, for example, or if you're moving it
+
+12:45.500 --> 12:46.500
+to the right place.
+
+12:46.500 --> 12:48.060
+And so how do you do that?
+
+12:48.060 --> 12:49.060
+Yeah.
+
+12:49.060 --> 12:50.700
+That's a very good question.
+
+12:50.700 --> 12:54.500
+So there we're, we're building on, on the, on the large body of work that has, that
+
+12:54.500 --> 12:58.660
+has been done in the computer, like, in the, like, ML-based computer vision areas.
+
+12:58.660 --> 13:03.140
+So basically, we take, we take a convolutional neural network that's been, that's been trained
+
+13:03.140 --> 13:06.260
+on ImageNet to do this, like, image recognition challenge.
+
+13:06.260 --> 13:10.420
+And then we basically slice off the, the last layers of that network where it, where it
+
+13:10.420 --> 13:13.060
+does this thing of, like, classifying an object into categories.
+
+13:13.060 --> 13:14.060
+Right.
+
+13:14.060 --> 13:15.060
+Yeah.
+
+13:15.060 --> 13:18.580
+And the parts we want from that is basically the lower level features of the network,
+
+13:18.580 --> 13:22.220
+like figuring out, like, where edges are, where, like, these, like, small features are.
+
+13:22.220 --> 13:25.820
+And then we instead train it to predict the state of the world, basically.
+
+13:25.820 --> 13:30.740
+So, so we're using this, this, this machine learning pipeline, basically, to, to feed
+
+13:30.740 --> 13:34.820
+an image from, like, a normal webcam or something like that that's attached to the robot.
+
+13:34.820 --> 13:39.420
+And then have, have this neural network that uses this image to predict, like, where,
+
+13:39.420 --> 13:40.420
+like, where am I?
+
+13:40.420 --> 13:42.060
+And where is, like, what state am I in?
+
+13:42.060 --> 13:44.140
+What, where is the object that I'm interacting with?
+
+13:44.140 --> 13:47.500
+And then we use that to, to correct the movement of the robot.
+
+13:47.500 --> 13:49.980
+Are we close to doing this?
+
+13:49.980 --> 13:52.820
+It seems like it would be helpful to do this in three dimensions, like, are we close
+
+13:52.820 --> 13:53.820
+to that at all?
+
+13:53.820 --> 13:54.820
+Right.
+
+13:54.820 --> 13:58.300
+I think so, so maybe not for the general case, but probably if you have, like, basically
+
+13:58.300 --> 14:01.100
+something where you, where you know, at least a little about, like, what kinds of objects
+
+14:01.100 --> 14:05.500
+you're dealing with, then, then I don't think anyone has done it yet, but, but it's, like,
+
+14:05.500 --> 14:07.740
+we think it would probably be doable.
+
+14:07.740 --> 14:10.020
+So, so the work, the work that we've done.
+
+14:10.020 --> 14:15.980
+So we use this technique called domain randomization, where we basically, so, so questions, of course,
+
+14:15.980 --> 14:17.340
+how do you train this network?
+
+14:17.340 --> 14:20.620
+So what I just mentioned earlier with, like, predicting the position of things.
+
+14:20.620 --> 14:24.380
+And the way we do it is basically we create chaos in simulation.
+
+14:24.380 --> 14:27.420
+Because the problem is, if you just feed it images from a simulator, the real world
+
+14:27.420 --> 14:28.420
+will look different.
+
+14:28.420 --> 14:32.300
+And then it will just get confused and be like, this is weird, why is there, like, a pixel
+
+14:32.300 --> 14:36.100
+in the back that I, that is now, like, bright, where, where it was, like, dark always
+
+14:36.100 --> 14:40.460
+before. And the way we get around that is by basically randomizing everything in the
+
+14:40.460 --> 14:41.460
+simulator.
+
+14:41.460 --> 14:45.460
+It looks pretty crazy because we basically replace all the textures in this, like, 3D rendered
+
+14:45.460 --> 14:49.860
+scene with random textures, like random colors, random patterns.
+
+14:49.860 --> 14:55.340
+It looks, we just call it the disco, because it's just random colors everywhere.
+
+14:55.340 --> 14:59.260
+And basically this, this kind of makes the network robust against, like, variations
+
+14:59.260 --> 15:00.460
+in the environment.
+
+15:00.460 --> 15:03.700
+And so this is actually, and, and basically you can measure that, like, if you do this,
+
+15:03.700 --> 15:08.460
+then in the real world will look as just, like, another incarnation of, like, of the
+
+15:08.460 --> 15:10.420
+random, of this random setting.
+
+15:10.420 --> 15:11.420
+And it will work.
+
+15:11.420 --> 15:14.140
+And if you don't, it will just be, like, completely off of it.
+
+15:14.140 --> 15:15.140
+Okay.
+
+15:15.140 --> 15:20.580
+Yeah, one of the projects that Peter Beelow is working on is, like, tying a knot, using
+
+15:20.580 --> 15:22.660
+a robot to tie a knot in some string.
+
+15:22.660 --> 15:25.260
+And there's a, he's got an interesting video about this.
+
+15:25.260 --> 15:30.940
+But one of the comments in the, in the video or the commentary on the page is, like, you
+
+15:30.940 --> 15:34.460
+know, it works great if the rope is on a green table, but it totally fails if the rope
+
+15:34.460 --> 15:38.300
+is on a red table, or if the rope is, like, striped or something like that.
+
+15:38.300 --> 15:43.820
+It sounds like this domain randomization is, you know, trying to solve for that same kind
+
+15:43.820 --> 15:44.820
+of problem.
+
+15:44.820 --> 15:45.820
+All right.
+
+15:45.820 --> 15:46.820
+Yeah.
+
+15:46.820 --> 15:47.820
+Yeah, totally.
+
+15:47.820 --> 15:51.140
+I think so, so for the, for the, like, rope, like, for the, like, rope stuff specifically.
+
+15:51.140 --> 15:56.140
+So the reason why, like, why people do this at all is, is because a rope, like, similar
+
+15:56.140 --> 16:00.260
+to the, to the phone charger, like, the phone connector, is that because the rope is flexible,
+
+16:00.260 --> 16:03.620
+like, does not, like, just, like, like a block or something.
+
+16:03.620 --> 16:07.060
+And basically, to tie a rope, you have to, like, either, you have to have some, like,
+
+16:07.060 --> 16:09.940
+some internal model of, like, how is it going to bend if I, like, if you, like, turn
+
+16:09.940 --> 16:10.940
+it this way?
+
+16:10.940 --> 16:14.180
+So I guess people just, like, work on this, and, like, it's a couple, like, it's a couple
+
+16:14.180 --> 16:16.100
+from the, like, perception way.
+
+16:16.100 --> 16:19.820
+But this is very plausible for you, like, put these, put these two results together to
+
+16:19.820 --> 16:23.940
+create something that can, kind of, in an arbitrary colored environment.
+
+16:23.940 --> 16:24.940
+Yeah.
+
+16:24.940 --> 16:25.940
+Yeah.
+
+16:25.940 --> 16:34.140
+What makes me think of is, is Apple's recent CVPR paper, where they use GAN approach to
+
+16:34.140 --> 16:38.540
+take simulated images, like, from a video game engine, and kind of make them look like
+
+16:38.540 --> 16:41.700
+real images, so that they would perform better in the real world.
+
+16:41.700 --> 16:46.900
+Like, the ultimate goal is to have this robot perform well in the real world.
+
+16:46.900 --> 16:53.980
+You are trying to, trying to avoid overfitting by, kind of, doing, you know, randomization
+
+16:53.980 --> 16:57.900
+of your backgrounds and, you know, funky colors and all that kind of stuff.
+
+16:57.900 --> 17:02.420
+But do you still then have the problem of, hey, this doesn't look like the real world?
+
+17:02.420 --> 17:04.460
+And, like, how do you approach that?
+
+17:04.460 --> 17:08.460
+This is actually very interesting, like, high level questions that, like, I don't think
+
+17:08.460 --> 17:10.380
+there's a different, different answer to.
+
+17:10.380 --> 17:13.900
+It's basically the question of, like, do you, basically, should you invest time in making
+
+17:13.900 --> 17:19.380
+your simulations, like, super nice and photorealistic, basically, to have, like, special rendering
+
+17:19.380 --> 17:24.660
+artifacts of, like, light reflections and basically just make your, make your, make your
+
+17:24.660 --> 17:29.020
+simulation be almost indistinguishable from the real world, or whether you can actually
+
+17:29.020 --> 17:33.500
+get away with having really lacking simulation, basically, that is, like, very rudimentary,
+
+17:33.500 --> 17:38.780
+just has, like, the geometry and, like, edges and the couple of, like, 3D lights.
+
+17:38.780 --> 17:43.180
+And then you can use, like, neural network, regularization techniques to basically use
+
+17:43.180 --> 17:45.340
+that to make the network robust against it.
+
+17:45.340 --> 17:50.940
+And more generally, in the case of, of your research, you know, what, using the domain
+
+17:50.940 --> 17:56.820
+randomization, like, what kind of performance have you seen in the real world, and have
+
+17:56.820 --> 18:03.300
+you explored ways to enhance real work performance beyond the domain?
+
+18:03.300 --> 18:09.100
+Are there specifics to the simulation environment that calls your training to kind of overfit
+
+18:09.100 --> 18:10.900
+on simulated looking images?
+
+18:10.900 --> 18:14.340
+Yeah, yeah, so, like, like, I remember that's, when we're initially doing this domain
+
+18:14.340 --> 18:17.980
+randomization work, so, so the setting that we did there was, we basically had a table
+
+18:17.980 --> 18:20.660
+off, like, different colors, like, wooden blocks.
+
+18:20.660 --> 18:24.140
+And then we had the robot, basically, you could give it to commands of something, like,
+
+18:24.140 --> 18:26.380
+stack the green block on top of the blue block.
+
+18:26.380 --> 18:29.620
+And then it would, like, basically correctly localize these blocks.
+
+18:29.620 --> 18:33.060
+And this was with an accuracy of, I believe, a couple of millimeters.
+
+18:33.060 --> 18:37.220
+So it was pretty decent for, like, given that this was really, like, just a normal, like,
+
+18:37.220 --> 18:41.580
+HD webcam, like, basically, nothing, basically, nothing that's, like, super specialized
+
+18:41.580 --> 18:46.340
+robotics equipment, but I actually remember that initially, sometimes it was just failing
+
+18:46.340 --> 18:47.340
+randomly.
+
+18:47.340 --> 18:48.340
+And we didn't really know why.
+
+18:48.340 --> 18:49.340
+Okay.
+
+18:49.340 --> 18:54.260
+And then it turned out that if there was someone standing in the background, then casting
+
+18:54.260 --> 18:55.740
+shadow or something like that.
+
+18:55.740 --> 18:56.740
+Exactly.
+
+18:56.740 --> 18:57.740
+Exactly.
+
+18:57.740 --> 19:00.900
+Or just having, like, a leg or, like, a foot in the image that threw it off.
+
+19:00.900 --> 19:05.060
+And that is actually, basically, like, these kind of things encourage us to just make the
+
+19:05.060 --> 19:07.540
+simulation crazier, basically.
+
+19:07.540 --> 19:11.460
+And then if you have this, these random distractors appear in the background during the
+
+19:11.460 --> 19:15.140
+training as well, then it will actually be, again, robust to that.
+
+19:15.140 --> 19:21.900
+And so how did you characterize the performance gains, you know, after using the domain randomization?
+
+19:21.900 --> 19:26.780
+The way we measured it actually is we just had, like, an actual, like, object tracking system
+
+19:26.780 --> 19:28.940
+and just measured the error from that.
+
+19:28.940 --> 19:32.420
+But, of course, it's also just reflected in the, like, success rate of, like, how often
+
+19:32.420 --> 19:35.660
+could you, like, stack the correct block, like, on top of the other one.
+
+19:35.660 --> 19:39.340
+And basically, if it didn't do the domain randomization, it would just, like, run it to the
+
+19:39.340 --> 19:40.340
+table or something.
+
+19:40.340 --> 19:42.740
+So it was, like, it was, like, very, very, very off.
+
+19:42.740 --> 19:47.900
+And basically, to your performance metric was bad versus good, sort of, sort of, yes,
+
+19:47.900 --> 19:48.900
+what's the sort of?
+
+19:48.900 --> 19:49.900
+Yes.
+
+19:49.900 --> 19:53.140
+So, like, basically, what we did initially when we did work during the domain randomization
+
+19:53.140 --> 19:59.780
+is we actually, one of the researchers, Josh spent a very long time basically just moving
+
+19:59.780 --> 20:04.460
+around pieces in the real world and, like, adjusting the, like, camera position and basically
+
+20:04.460 --> 20:05.460
+just fine tuning it.
+
+20:05.460 --> 20:07.220
+So it would be, like, just right.
+
+20:07.220 --> 20:11.180
+And it would, like, appear to work, but then as soon as you, basically, like, you could
+
+20:11.180 --> 20:12.500
+see that it wasn't really working.
+
+20:12.500 --> 20:16.300
+Like, it was only working if you, like, basically, like, manually overfitted to, like, one,
+
+20:16.300 --> 20:18.140
+one very specific instance.
+
+20:18.140 --> 20:21.340
+But basically, the, the, the main randomization helped, like, helping with that.
+
+20:21.340 --> 20:22.340
+Okay.
+
+20:22.340 --> 20:28.140
+And so did you build a custom simulator to do this or did you use some off-the-shelf thing?
+
+20:28.140 --> 20:29.140
+Yeah.
+
+20:29.140 --> 20:32.380
+So pretty much all of all of what we do these days is in, is running in Madroco.
+
+20:32.380 --> 20:33.380
+Okay.
+
+20:33.380 --> 20:34.380
+Madroco?
+
+20:34.380 --> 20:35.380
+Yeah.
+
+20:35.380 --> 20:36.380
+So tell me about that.
+
+20:36.380 --> 20:41.180
+Um, Madroco is this physics simulator developed by University of Washington professor,
+
+20:41.180 --> 20:42.180
+M.O.
+
+20:42.180 --> 20:43.180
+To Dora.
+
+20:43.180 --> 20:44.180
+Okay.
+
+20:44.180 --> 20:47.180
+And it's pretty much the, I would say, the standard in, um, and basically these, like,
+
+20:47.180 --> 20:50.420
+kind of, like, robotics and, like, robotics-related tasks.
+
+20:50.420 --> 20:55.900
+It's also used for all the physics-related environments in, in open-air gym.
+
+20:55.900 --> 21:00.700
+And so basically, if you ever seen the, like, yellow, like, humanoid, humanoid walking
+
+21:00.700 --> 21:02.380
+around, that's, that's Madroco.
+
+21:02.380 --> 21:04.700
+And basically having these, like, capsule geometries.
+
+21:04.700 --> 21:07.820
+And the good thing about Madroco, as opposed to, like, of course, there are many other physics
+
+21:07.820 --> 21:09.820
+engines, like, game physics engines.
+
+21:09.820 --> 21:10.900
+There's Nvidia physics.
+
+21:10.900 --> 21:11.900
+Right.
+
+21:11.900 --> 21:15.340
+There's a bunch of, yeah, like, from an Unreal engine, they all bring their own Nvidia.
+
+21:15.340 --> 21:19.180
+They announced some new simulation engine at the last GTC.
+
+21:19.180 --> 21:20.180
+I forget.
+
+21:20.180 --> 21:22.580
+The Vinci or some kind of name thing.
+
+21:22.580 --> 21:23.580
+Flex.
+
+21:23.580 --> 21:24.580
+Flex?
+
+21:24.580 --> 21:25.580
+I don't know.
+
+21:25.580 --> 21:28.500
+I thought it was a person who has a whole bunch of them because they really like making
+
+21:28.500 --> 21:29.500
+beautiful things.
+
+21:29.500 --> 21:34.140
+So the thing that game engines do for the most part is they are often not super concerned
+
+21:34.140 --> 21:37.660
+about accuracy or physical realism, which is totally fine.
+
+21:37.660 --> 21:42.060
+They just, they're just working on making something that, that looks great and is performance
+
+21:42.060 --> 21:43.060
+too.
+
+21:43.060 --> 21:46.700
+And Madroco kind of comes from a different perspective there, where it comes from, like,
+
+21:46.700 --> 21:48.660
+robotics people, basically.
+
+21:48.660 --> 21:53.340
+And they, and they are using this for, like, optimal control, which is kind of the analytical
+
+21:53.340 --> 21:57.300
+way of, like, how do you control the system to achieve a given task?
+
+21:57.300 --> 22:02.500
+And it has pretty good features for accurately describing an actual physical robot, like it
+
+22:02.500 --> 22:07.500
+can do things like friction and, like, tendon-based or a way you pull on cables to move the robot
+
+22:07.500 --> 22:08.500
+around.
+
+22:08.500 --> 22:09.500
+Okay.
+
+22:09.500 --> 22:12.100
+It has a bunch of these things that, like, you could, you could implement them, like, on
+
+22:12.100 --> 22:16.020
+top of the game engines for the most part, but they just don't come with it.
+
+22:16.020 --> 22:18.020
+And also Madroco is just, like, engineering-wise.
+
+22:18.020 --> 22:19.020
+It's pretty practical.
+
+22:19.020 --> 22:23.220
+It's just, like, a library that you link against, and then you can use it.
+
+22:23.220 --> 22:25.100
+Mink against, so it's, like, C++ or something.
+
+22:25.100 --> 22:26.100
+Yeah.
+
+22:26.100 --> 22:27.100
+Exactly.
+
+22:27.100 --> 22:28.100
+Yeah.
+
+22:28.100 --> 22:29.100
+So, like, it's not open-source.
+
+22:29.100 --> 22:30.100
+It's commercial, unfortunately.
+
+22:30.100 --> 22:34.500
+There's, like, a lot of the popular simulators are, like, is there a dominant open-source
+
+22:34.500 --> 22:35.500
+simulator?
+
+22:35.500 --> 22:36.500
+Yeah.
+
+22:36.500 --> 22:37.500
+It's bullet.
+
+22:37.500 --> 22:38.500
+Bullet is pretty popular.
+
+22:38.500 --> 22:41.900
+And we've actually been looking at it, like, maybe switching to that, just because it's
+
+22:41.900 --> 22:42.900
+open-source.
+
+22:42.900 --> 22:43.900
+Yeah.
+
+22:43.900 --> 22:44.900
+That's pretty much it.
+
+22:44.900 --> 22:49.100
+Because it's just, like, on, like, a day-to-day, it's just very convenient to be, like,
+
+22:49.100 --> 22:50.100
+what is happening?
+
+22:50.100 --> 22:51.100
+This is weird.
+
+22:51.100 --> 22:53.100
+Let me just dive into the code and see what's going on.
+
+22:53.100 --> 22:57.500
+But also, I would think to make it easier for other people to replicate your results and
+
+22:57.500 --> 23:00.500
+to, you know, try to build on the kinds of things that you're doing.
+
+23:00.500 --> 23:01.500
+Yeah.
+
+23:01.500 --> 23:03.500
+You don't have to say, well, you have to first go get a license.
+
+23:03.500 --> 23:04.500
+Yeah.
+
+23:04.500 --> 23:08.700
+So, I believe they do have, like, pre-favorable agreements, at least for students.
+
+23:08.700 --> 23:10.700
+So, I think as a student, you can get it for free.
+
+23:10.700 --> 23:11.700
+Okay.
+
+23:11.700 --> 23:12.700
+Yeah.
+
+23:12.700 --> 23:15.300
+But so, like, the good thing about Madroco is that it's basically that it's, like, wild
+
+23:15.300 --> 23:16.300
+kind of, like, a walled garden.
+
+23:16.300 --> 23:17.300
+Yeah.
+
+23:17.300 --> 23:18.600
+It's a pretty nice walled garden.
+
+23:18.600 --> 23:19.900
+And it's, yeah, and things.
+
+23:19.900 --> 23:20.900
+Yeah.
+
+23:20.900 --> 23:21.900
+Said every walled garden maker.
+
+23:21.900 --> 23:22.900
+Well, we're not doing it.
+
+23:22.900 --> 23:24.900
+We're not garden makers.
+
+23:24.900 --> 23:27.700
+No, I'm putting a word in Madroco now.
+
+23:27.700 --> 23:28.700
+That's true.
+
+23:28.700 --> 23:29.700
+It's true.
+
+23:29.700 --> 23:33.900
+The one thing where we've actually been eyeing some of the game engine fitting simulators
+
+23:33.900 --> 23:38.460
+as well is actually exactly like dealing with these deformable objects, like a cable or
+
+23:38.460 --> 23:41.260
+the rope or liquids, even, like stuff like that.
+
+23:41.260 --> 23:45.500
+That is something that Madroco can't really deal with because it's entirely, like, a rigid
+
+23:45.500 --> 23:46.700
+body simulator.
+
+23:46.700 --> 23:53.180
+And it basically, like, it's performance scales with the, like, basically, it gets slow
+
+23:53.180 --> 23:56.300
+very quickly if you have a bunch of things, like, moving around.
+
+23:56.300 --> 23:57.300
+Okay.
+
+23:57.300 --> 24:00.540
+Basically, like, of course, a scale thing doesn't matter at all because it's just, like,
+
+24:00.540 --> 24:02.140
+meshes and just numbers.
+
+24:02.140 --> 24:07.420
+But if you have, like, if you have, like, a bowl of, like, a thousand pearls or something,
+
+24:07.420 --> 24:11.780
+there would be, it would be pretty, pretty gnarly in which awkward probably we haven't
+
+24:11.780 --> 24:12.780
+tried it.
+
+24:12.780 --> 24:16.020
+But we have tried, like, I believe you've basically tried to do, like, a jenga, kind
+
+24:16.020 --> 24:17.500
+of, like, a jenga set up.
+
+24:17.500 --> 24:21.900
+And it was just, like, jiggle around and then eventually, like, kind of explode or just
+
+24:21.900 --> 24:22.900
+fall apart.
+
+24:22.900 --> 24:23.900
+Yeah.
+
+24:23.900 --> 24:27.220
+So I think it's, like, a limit of, like, maybe, like, a couple hundreds of, like, of
+
+24:27.220 --> 24:30.980
+basically, of, like, rigid individual bodies flying around or not flying around but moving
+
+24:30.980 --> 24:31.980
+around.
+
+24:31.980 --> 24:36.220
+Is that rigid body simulation or something that learns itself to distributed compute
+
+24:36.220 --> 24:38.980
+or does that not work so well?
+
+24:38.980 --> 24:40.980
+Or does it just Madroco not support that?
+
+24:40.980 --> 24:41.980
+That's a good question.
+
+24:41.980 --> 24:47.180
+So I think the, I believe, I believe the creators of Madroco have tried to basically run
+
+24:47.180 --> 24:51.660
+it under OpenCL, so to, like, GPU accelerated.
+
+24:51.660 --> 24:54.740
+But I think the main problem with that is they're actually, it's very similar from the
+
+24:54.740 --> 24:59.060
+computer computation you would, you would run for, for running a neural network where it's
+
+24:59.060 --> 25:03.700
+basically just like a bunch of, just a bunch of, like, matrix multiplies or, like, related
+
+25:03.700 --> 25:04.700
+related things.
+
+25:04.700 --> 25:08.780
+But for the physics simulation, you actually have a lot of branching because you run, like,
+
+25:08.780 --> 25:11.860
+a collision detection system and then you do something, it's like, if there's a collision,
+
+25:11.860 --> 25:15.660
+then do these things and you do that for, like, all the collisions in the scene or something
+
+25:15.660 --> 25:16.660
+like that.
+
+25:16.660 --> 25:20.580
+And that is something that, like, at least, take two days to use, I can't deal super
+
+25:20.580 --> 25:21.580
+well with that.
+
+25:21.580 --> 25:26.420
+I think actually in the, this was, like, a long time ago, but I think in video, they
+
+25:26.420 --> 25:29.820
+used to sell something, like, a physics processing unit, a PPU.
+
+25:29.820 --> 25:33.700
+Actually, I'm not sure if it was a video, but, like, some, like, some, some vendor, and
+
+25:33.700 --> 25:37.500
+they basically try to make it, like, an established, like, hardware accelerated physics.
+
+25:37.500 --> 25:41.380
+This was, like, marked to gamers, I really, I don't think, I don't think it ever really
+
+25:41.380 --> 25:44.660
+took off because eventually people realized, actually, CPUs are pretty good.
+
+25:44.660 --> 25:48.500
+The screws are pretty smooth, and especially with, like, with, like, today's where you
+
+25:48.500 --> 25:53.140
+have a bunch of cores, you could just have a physics core, and, you, and at least in
+
+25:53.140 --> 25:55.260
+the, like, game setting, it just works pretty well.
+
+25:55.260 --> 25:58.940
+That being said, basically, today, or, like, at least a bit more joke with us, it's, it's
+
+25:58.940 --> 26:03.780
+just a single thread CPU processing, it's, it's, it's pretty fast, but I think you'd
+
+26:03.780 --> 26:06.940
+probably be hard pressed to distribute that specific architecture.
+
+26:06.940 --> 26:11.180
+Actually, probably some of the other, like, basically, if you had something like a, like,
+
+26:11.180 --> 26:15.980
+some of the game engine, similar to our particle base, so, for example, Nvidia's flex.
+
+26:15.980 --> 26:19.900
+And basically, they don't represent bodies as, like, like, a rigid mesh.
+
+26:19.900 --> 26:23.380
+Yeah, it's basically, it's literally just, like, just, like, a bunch of particles that
+
+26:23.380 --> 26:26.900
+have some, like, basically, some, like, stickiness, what they stick to each other applied.
+
+26:26.900 --> 26:29.860
+I believe there have been some attempts at, like, distributing that, where basically
+
+26:29.860 --> 26:33.820
+we have, like, cells of the world, and every, like, every node basically computes all
+
+26:33.820 --> 26:37.620
+the particles that are, like, in this specific cell, then they, like, hand it off to some
+
+26:37.620 --> 26:38.620
+other node.
+
+26:38.620 --> 26:39.620
+Okay.
+
+26:39.620 --> 26:40.620
+But we're not using that today.
+
+26:40.620 --> 26:41.620
+Okay.
+
+26:41.620 --> 26:42.620
+Interesting, interesting.
+
+26:42.620 --> 26:46.940
+So, I think we're going to talk about simulation and tell me a little bit about the, I guess,
+
+26:46.940 --> 26:51.580
+the process for, you know, the relationship between your training data and your simulator
+
+26:51.580 --> 26:56.020
+and, like, how you load all that up and, like, how you build the simulation and, you know,
+
+26:56.020 --> 27:02.860
+are there things that you've learned about integrating simulation into AI training pipeline
+
+27:02.860 --> 27:07.620
+that are maybe, you know, not intuitive or, you know, maybe, you know, stimulators weren't
+
+27:07.620 --> 27:08.940
+really designed to do this.
+
+27:08.940 --> 27:11.700
+And so, it was kind of hard, but we figured out how to do X, Y, C.
+
+27:11.700 --> 27:12.700
+Yeah.
+
+27:12.700 --> 27:17.100
+So, I would say for the simulation, and this is actually kind of following the, like,
+
+27:17.100 --> 27:20.140
+the, like, what we're just talking about with the distributed aspect of it.
+
+27:20.140 --> 27:23.580
+One reason why we're not, like, pushing out, pushing out super hard is because we actually
+
+27:23.580 --> 27:25.380
+can just horizontally scale it.
+
+27:25.380 --> 27:30.900
+So actually the way we, we basically do our training, which is basically running a lot
+
+27:30.900 --> 27:32.140
+of simulators.
+
+27:32.140 --> 27:34.740
+So you can do, you can distribute it in this way.
+
+27:34.740 --> 27:37.180
+It's just that the simulators are all independent of each other.
+
+27:37.180 --> 27:40.580
+Like, they do, they all simulate the same, like, the whole scene, but they all have, like,
+
+27:40.580 --> 27:43.660
+different, like, they all basically run, like, different, like, they all run the same
+
+27:43.660 --> 27:46.180
+scene or some randomize version of it.
+
+27:46.180 --> 27:50.900
+But they, they basically, basically, instead of, like, serializing all the attempts, we
+
+27:50.900 --> 27:56.500
+just paralyzed, like, 10, or, like, actually more, like, a thousand of them.
+
+27:56.500 --> 28:00.820
+So the way we actually run our training is we have, like, one box that actually does
+
+28:00.820 --> 28:04.460
+the, like, tens of flow, like, the computation for actually training the network and
+
+28:04.460 --> 28:05.820
+like, taking in the data.
+
+28:05.820 --> 28:10.540
+And then we have a bunch of, like, worker or, like, evaluator machines that basically
+
+28:10.540 --> 28:15.340
+like, take in the current best guess for, like, for the policy, which is, like, our
+
+28:15.340 --> 28:16.700
+trained neural network.
+
+28:16.700 --> 28:20.180
+And then they basically roll that out in a simulator, which basically just means they run
+
+28:20.180 --> 28:21.540
+it over and over again.
+
+28:21.540 --> 28:25.900
+And so this happens on, like, hundreds or thousands of machines, like, in parallel.
+
+28:25.900 --> 28:27.620
+And, but they don't really talk to each other.
+
+28:27.620 --> 28:29.220
+Like, they just do this on their own.
+
+28:29.220 --> 28:33.300
+And then they actually send this experience back to the optimizer node.
+
+28:33.300 --> 28:38.020
+And that's basically where we, where we transfer numbers to actually improve the policy.
+
+28:38.020 --> 28:45.300
+So you, you generate a policy, generate a network, you push it out to a bunch of different
+
+28:45.300 --> 28:46.300
+nodes in parallel.
+
+28:46.300 --> 28:49.780
+Like, what's, what's the input to those nodes?
+
+28:49.780 --> 28:53.780
+Are you giving each of those nodes specific input or are they just kind of running things
+
+28:53.780 --> 28:58.660
+in random and, you know, computing a function or something like that across a random
+
+28:58.660 --> 28:59.660
+distribution?
+
+28:59.660 --> 29:00.660
+Yeah.
+
+29:00.660 --> 29:02.860
+So, so the worker nodes, they basically receive, they receive the parameters for the
+
+29:02.860 --> 29:03.860
+policy.
+
+29:03.860 --> 29:07.260
+And there's like some shared configuration for, like, what's the kind of scene I'll be
+
+29:07.260 --> 29:08.260
+running?
+
+29:08.260 --> 29:11.420
+Like, what's the robot and like, where, like, where are the objects that we're interacting
+
+29:11.420 --> 29:12.420
+with?
+
+29:12.420 --> 29:14.100
+Like, what's their, what's their initial positions?
+
+29:14.100 --> 29:18.020
+There are actually a couple different ways of, of how to communicate the results back
+
+29:18.020 --> 29:20.700
+to this, like, central, like, mastermind machine.
+
+29:20.700 --> 29:25.420
+So one way is if you actually have the workers do the, do the gradient computation.
+
+29:25.420 --> 29:28.740
+So they basically, they roll out the physics simulators.
+
+29:28.740 --> 29:31.580
+And then they figure out some kind of reward or cost function for this.
+
+29:31.580 --> 29:33.060
+And like, what's this a good roll out?
+
+29:33.060 --> 29:36.940
+Like, we end up in a good state where, like, for example, when you're moving these blocks
+
+29:36.940 --> 29:40.660
+around, like, the, the right block, end up on top of the other right block.
+
+29:40.660 --> 29:44.660
+And then the workers figure out, okay, if my parameters were like tweaked slightly differently,
+
+29:44.660 --> 29:46.460
+I would have gotten a better outcome this time.
+
+29:46.460 --> 29:47.460
+Yeah.
+
+29:47.460 --> 29:50.940
+And then the other, the other approach is to, is to just send over the raw, like, what
+
+29:50.940 --> 29:55.500
+happened in simulation to the, to optimize the machine and then let, let the, the optimizer
+
+29:55.500 --> 29:59.100
+figure out what the, what the parameters should be and like, how we should change them.
+
+29:59.100 --> 30:00.100
+Okay.
+
+30:00.100 --> 30:03.620
+And which do you tend to do the, both or, yeah, so right now we do the, we do the sending
+
+30:03.620 --> 30:07.540
+over the experience or the latter thing, which is just because it's simpler for the most
+
+30:07.540 --> 30:11.140
+part, because then the basically the workers are kind of dumb and they don't need to worry
+
+30:11.140 --> 30:12.420
+about that much.
+
+30:12.420 --> 30:15.980
+But there's a situation where this can actually be problematic, especially if you're, like,
+
+30:15.980 --> 30:19.860
+if your observations are big, for example, if you're, like, if your observation, which
+
+30:19.860 --> 30:23.820
+is like what your, what your policy or your agent is, is using to make a decision for
+
+30:23.820 --> 30:27.980
+what to do next, that is something big, like an image from a simulated camera.
+
+30:27.980 --> 30:30.820
+Then you don't want to send that over the network, just because there's so many of them
+
+30:30.820 --> 30:32.820
+and just clogs up the entire bandwidth.
+
+30:32.820 --> 30:36.780
+Where we'll probably look into the, and just switching to the sending over the gradients
+
+30:36.780 --> 30:40.980
+over the network over, over the next few months, especially as we move to these more
+
+30:40.980 --> 30:43.220
+like high dimensional observations.
+
+30:43.220 --> 30:48.220
+And is the, the infrastructure that you're doing all this with, like, is this all hand
+
+30:48.220 --> 30:53.580
+crafted stuff or, like, I had a conversation with Ian Stoica about Ray the other day,
+
+30:53.580 --> 30:55.860
+like, you're using something like Ray to do that.
+
+30:55.860 --> 30:57.500
+So we're actually using Kubernetes.
+
+30:57.500 --> 30:58.500
+Yeah.
+
+30:58.500 --> 31:02.180
+So, so we, I believe we had a, we did like an infrastructure blog post about this a couple
+
+31:02.180 --> 31:07.820
+months back, but basically we run, we run lots of Kubernetes clusters across all of the
+
+31:07.820 --> 31:08.820
+major clouds as well.
+
+31:08.820 --> 31:12.580
+Like, we're running on, we're running on Azure, we're running on AWS, you also have some
+
+31:12.580 --> 31:13.980
+stuff running on Google.
+
+31:13.980 --> 31:16.860
+So yeah, there's a, there's a, there's a lot of compute.
+
+31:16.860 --> 31:20.780
+The way actually we went is using these tools is actually somewhat simple.
+
+31:20.780 --> 31:26.140
+You, you basically just tell, tell Kubernetes in our case to, here's this batch job, run
+
+31:26.140 --> 31:30.860
+this thing once for the GPU optimizer and run this thing once for the couple hundred
+
+31:30.860 --> 31:33.940
+worker machines and it just kind of goes in, does it?
+
+31:33.940 --> 31:38.700
+But there is like, there is a ceiling there where like, where you can't, just because it's
+
+31:38.700 --> 31:43.540
+not really the original use case for Kubernetes, I believe the, like, what they, what they
+
+31:43.540 --> 31:47.540
+recommend as a limit is like, not more than, say, 10,000 nodes, which is just a lot, of
+
+31:47.540 --> 31:48.540
+course.
+
+31:48.540 --> 31:49.900
+And have you bumped up against that one?
+
+31:49.900 --> 31:50.900
+Yeah.
+
+31:50.900 --> 31:54.060
+So we have bumped against previous limits where the limit was something like 5,000 and
+
+31:54.060 --> 31:58.820
+then it won't crash, but it will just become like more and more unhappy and just stop
+
+31:58.820 --> 32:03.100
+responding and like, basically things will become weird in the cluster.
+
+32:03.100 --> 32:05.220
+And how long are these simulation jobs?
+
+32:05.220 --> 32:09.820
+Are they, you know, they're not like on the order of training jobs that are days and
+
+32:09.820 --> 32:10.820
+days.
+
+32:10.820 --> 32:11.820
+They're much shorter.
+
+32:11.820 --> 32:12.820
+Is that the case?
+
+32:12.820 --> 32:13.820
+Yeah.
+
+32:13.820 --> 32:14.820
+Yeah.
+
+32:14.820 --> 32:15.820
+So, yeah.
+
+32:15.820 --> 32:16.820
+So basically, so one specific cycle is much shorter.
+
+32:16.820 --> 32:20.500
+Like a one specific cycle of basically get the current policy parameters to a bunch of roll
+
+32:20.500 --> 32:22.020
+outs and then back.
+
+32:22.020 --> 32:26.620
+That's something like maybe like a second, but the way we actually start them is we, we
+
+32:26.620 --> 32:30.900
+basically just keep the keep these like rollout machines around the same way that we keep
+
+32:30.900 --> 32:31.900
+the training.
+
+32:31.900 --> 32:34.900
+So they basically they just want like temporary cluster basically.
+
+32:34.900 --> 32:35.900
+Okay.
+
+32:35.900 --> 32:38.900
+And that cluster will just stay around for the duration of of the entire training, which
+
+32:38.900 --> 32:41.940
+is like maybe like a day or a day.
+
+32:41.940 --> 32:42.940
+Okay.
+
+32:42.940 --> 32:43.940
+Interesting.
+
+32:43.940 --> 32:50.180
+And so, you know, all this is to help you develop a kind of a better model, the simulation.
+
+32:50.180 --> 32:53.220
+Like, what do you do when you want to test that in the real world?
+
+32:53.220 --> 32:54.220
+Ah, yeah.
+
+32:54.220 --> 32:57.020
+This is going to be a pretty important question for you.
+
+32:57.020 --> 32:58.020
+Exactly.
+
+32:58.020 --> 32:59.020
+Exactly.
+
+32:59.020 --> 33:00.020
+So, yeah.
+
+33:00.020 --> 33:02.020
+So the kind of interesting thing is that a lot of other areas in machine learning, they
+
+33:02.020 --> 33:03.700
+just kind of stop short of that.
+
+33:03.700 --> 33:06.020
+And they're like, well, this is a model looks pretty reasonable.
+
+33:06.020 --> 33:07.020
+Right.
+
+33:07.020 --> 33:08.020
+So it's fine.
+
+33:08.020 --> 33:09.020
+We're done here.
+
+33:09.020 --> 33:12.780
+And so we're actually really adamant about like dumping through all the hoops to actually
+
+33:12.780 --> 33:14.420
+to actually make it run on the robot.
+
+33:14.420 --> 33:15.420
+Okay.
+
+33:15.420 --> 33:17.260
+Because we found that it helps like keep us honest.
+
+33:17.260 --> 33:22.060
+Basically it's like very easy to be impressed by like cool stuff happening in a simulator.
+
+33:22.060 --> 33:24.700
+But usually there's some caveats that make it harder.
+
+33:24.700 --> 33:29.900
+For example, like if like some of the like robots meshes, like aren't actually like touching
+
+33:29.900 --> 33:32.660
+each other or something into a robot mesh.
+
+33:32.660 --> 33:36.540
+So basically that's kind of just the shape of like some like part of the robot, like a
+
+33:36.540 --> 33:37.540
+limb of the robot.
+
+33:37.540 --> 33:38.540
+Okay.
+
+33:38.540 --> 33:42.700
+And usually for example, for the for when you're determining whether like the robot is pushing
+
+33:42.700 --> 33:46.620
+something, you do this like collision test of like is the robot colliding with an object
+
+33:46.620 --> 33:49.020
+and if yes, then you push the object away.
+
+33:49.020 --> 33:53.620
+But the thing is like while like while you have to super nice like visual rendition of
+
+33:53.620 --> 33:57.540
+the robot with like a nice like models, all the aspects and excrues or something.
+
+33:57.540 --> 33:58.540
+Yeah.
+
+33:58.540 --> 34:02.020
+Often the geometry is actually used for this collision check, which actually determines
+
+34:02.020 --> 34:06.420
+what's happening in the like physics wise might be like a like a simple version of this
+
+34:06.420 --> 34:07.420
+geometry.
+
+34:07.420 --> 34:10.940
+Like it might just be like a cylinder where the actual robot is something super complex
+
+34:10.940 --> 34:13.540
+like it with like rounded corners or something like that.
+
+34:13.540 --> 34:15.940
+So your angles are all off and kind of this power.
+
+34:15.940 --> 34:16.940
+Yeah.
+
+34:16.940 --> 34:17.940
+Yeah.
+
+34:17.940 --> 34:18.940
+Yeah.
+
+34:18.940 --> 34:22.300
+So like this gone, so like kind of like tricky and just thinking of thinking that something
+
+34:22.300 --> 34:23.300
+works.
+
+34:23.300 --> 34:26.900
+Whereas it doesn't actually work if you try it in the real world right now.
+
+34:26.900 --> 34:32.100
+And so the so the way we run we actually run run our policies on the real world.
+
+34:32.100 --> 34:36.980
+We have developed our system called robots as a service, which basically means that the
+
+34:36.980 --> 34:42.060
+robot goes onto the network and then people can connect to it and like run like run specific
+
+34:42.060 --> 34:45.340
+algorithms or like the models that they trained on the robot.
+
+34:45.340 --> 34:50.660
+And so there's some like specific like technical things that they think is like non trivial
+
+34:50.660 --> 34:54.980
+because it is like a real time environment and you can't just basically it's much harder
+
+34:54.980 --> 34:59.220
+than just simulating like a piece of software like people often do with like Atari games.
+
+34:59.220 --> 35:03.420
+For example, for training, you have to be careful if you don't miss like a cycle because
+
+35:03.420 --> 35:08.340
+otherwise your policy will get super confused because your time step will just be longer
+
+35:08.340 --> 35:09.340
+for example.
+
+35:09.340 --> 35:13.500
+So basically like working on all these artifacts has actually turned this robots as a service
+
+35:13.500 --> 35:16.260
+system into into a pretty big engineering project here.
+
+35:16.260 --> 35:21.500
+So the example you gave struck me is something that is more of a training artifact and training
+
+35:21.500 --> 35:27.420
+issue as opposed to deploying it to the physical robot like how is it how does it manifest itself
+
+35:27.420 --> 35:31.540
+on the physical robot in such a way that you could do something about it there.
+
+35:31.540 --> 35:32.540
+Yeah.
+
+35:32.540 --> 35:37.820
+So the specific example of like so in simulation, it would start at like T equals zero.
+
+35:37.820 --> 35:41.900
+Then you get some like current state to decide what you want to do and you set the action.
+
+35:41.900 --> 35:46.580
+But basically while you're thinking about this simulation stops right it's paused.
+
+35:46.580 --> 35:50.740
+So basically you do this computation then you get your output and then you advance a simulation
+
+35:50.740 --> 35:54.420
+by one step and then you repeat you think again and you step again.
+
+35:54.420 --> 35:58.580
+In the real world of course all of this happens like simultaneously and you I just don't
+
+35:58.580 --> 36:01.220
+get the chance to just like pause and think for a while.
+
+36:01.220 --> 36:06.260
+So you've got inertia and continuous variables and all the stuff that exactly exactly.
+
+36:06.260 --> 36:09.220
+But you raise a very interesting question like is it a training problem or an evaluation
+
+36:09.220 --> 36:14.620
+problem and actually for most of these things these things it can be both like like sticking
+
+36:14.620 --> 36:16.980
+with the like timing discrepancy example.
+
+36:16.980 --> 36:19.940
+There's basically always like this is pretty much like a decision we have to make for like
+
+36:19.940 --> 36:24.740
+every every issue so much of this that comes up is like are we okay with like investing
+
+36:24.740 --> 36:31.020
+time in actually like ironing out this issue in our like in our software stack or should
+
+36:31.020 --> 36:35.100
+we just be like oh well I mean if there's some fluctuation in the time step then we
+
+36:35.100 --> 36:39.020
+can just train with that and basically just add that to this to the set of things that
+
+36:39.020 --> 36:44.380
+we randomized in simulation right and basically there's always a balance of these two choices
+
+36:44.380 --> 36:48.980
+like either make the simulation harder or make your your real world system more predictable
+
+36:48.980 --> 36:52.940
+to execute and so this is kind of it and this is kind of an area where you have to pick
+
+36:52.940 --> 36:56.460
+your battles to some extent right because if you like if you have if you just have too
+
+36:56.460 --> 37:01.500
+many unknowns then it's while like there's like a theory radical it should be theoretically
+
+37:01.500 --> 37:05.660
+possible for for you to be able to learn a model that can cope with all of these uncertainties
+
+37:05.660 --> 37:09.500
+it will just be very hard to practice to debug it and inspect it and see if something
+
+37:09.500 --> 37:13.900
+was wrong and you can't and then you will basically you will see a break and then you'll be like well
+
+37:13.900 --> 37:18.380
+so why did it break and basically they're getting to the bottom of that requires you to exactly
+
+37:18.380 --> 37:23.020
+do this part where you remove like as many of the unknowns as possible but you surely read that
+
+37:23.020 --> 37:28.060
+basically it's in the end our policies eventually we want them to be capable of basically you put
+
+37:28.060 --> 37:32.780
+them on your robot that is very terribly instrumented or has like really weird software that causes
+
+37:32.780 --> 37:37.660
+like lags and delays and just figure it out I don't think we're there quite yet okay okay
+
+37:38.300 --> 37:43.500
+and so you call this robot as a service do you have is it like on demand like you have a
+
+37:43.500 --> 37:50.060
+a bank upstairs of like thousands of robots just swinging around and or do you have you know
+
+37:50.060 --> 37:55.180
+a robot or two connected to the network that folks can like you know there's a calendar
+
+37:55.180 --> 38:00.140
+an outlook or whatever that they schedule their robot time with like how cloud like is this
+
+38:00.140 --> 38:05.100
+I really wish it would be the former but but it is in fact closer to the latter so we actually
+
+38:05.100 --> 38:09.180
+thought about and actually some others so some folks over at Google I think this was circulating
+
+38:09.180 --> 38:13.340
+they they actually did this they bought a bank of robots they bought I think like around 50
+
+38:13.340 --> 38:17.260
+or something like robot arms right and just had them do these like grasping grasping tasks
+
+38:17.260 --> 38:22.300
+yeah we thought about doing that too but at least with the current setup it's it's exactly
+
+38:22.300 --> 38:25.980
+that like we have a fetch we have a couple big we have a couple other of other robot arms
+
+38:26.540 --> 38:30.620
+and these are like individually connected to the network and we usually do the scheduling by like
+
+38:30.620 --> 38:38.060
+whoever is around the robot at the time um so scheduling by proximity exactly exactly okay the
+
+38:38.060 --> 38:42.140
+main reason why they actually need like a specific system for like accessing the robot there is
+
+38:42.140 --> 38:46.540
+that so these robots all come with software right they come with some kind of software they come
+
+38:46.540 --> 38:51.420
+with either like they come either with some integration for Ross which is the robot operating system
+
+38:51.420 --> 38:56.700
+which is a big open source effort to to provide like a like a very like unified framework for
+
+38:56.700 --> 39:02.140
+you're not a bit Rosscon that's going on now I think oh is this going on right now and bank
+
+39:02.140 --> 39:07.100
+over oh great well shout out to Rosscon so we're actually not using Ross
+
+39:13.580 --> 39:19.180
+yeah so we found that like Ross actually really great if you if what you have is you have a robot
+
+39:19.180 --> 39:23.020
+and then you have a bunch of like other things around it that you want that that you want to use
+
+39:23.020 --> 39:26.860
+for example you have your robot arm and then you might have like some like like a light
+
+39:26.860 --> 39:32.060
+I think I've got a bunch of modules and yeah exactly exactly just so many yeah and and you have
+
+39:32.060 --> 39:37.180
+and you have like tracking cameras or you have like maybe you have like one one robot that is your
+
+39:37.180 --> 39:40.860
+arm and then one robot that is your gripper and they need to be independently controlled or
+
+39:40.860 --> 39:45.340
+something like that and we found that that is that's really great that like all these things
+
+39:45.340 --> 39:49.580
+already ship with with the ship with drivers for Ross and you can just plug them plucking together
+
+39:49.580 --> 39:54.060
+and they will and they will just work pretty much out of the box I think for us it it kind of comes
+
+39:54.060 --> 39:59.260
+back to the issue we we talked about before this where where they are just timing uncertainties
+
+39:59.260 --> 40:04.460
+basically and you don't really know what's what's going on inside the system for example if you had
+
+40:04.460 --> 40:09.500
+this this case where you have a robot and you have some external sensor and in Ross they
+
+40:09.500 --> 40:13.820
+would just appear like here you're about to use the sensor great you're all set but actually
+
+40:13.820 --> 40:18.860
+there might be like subtle things there were for example the timing updates for both of these
+
+40:18.860 --> 40:23.020
+systems might be out of phase where like the robot updates and then there's delay and then the
+
+40:23.020 --> 40:28.300
+sensor updates and then then you will have like a timing lag there and while this wouldn't matter
+
+40:28.300 --> 40:32.460
+in like for a lot of the like like classical applications where you do something where like
+
+40:32.460 --> 40:36.620
+you collect data over 10 seconds or something and you're basically doing this in a very slow
+
+40:36.620 --> 40:42.060
+way and then then you don't really care about what what the what this is like tiny differences
+
+40:42.060 --> 40:45.900
+it cause problems for our case where we basically we try to instantly react to like if something
+
+40:45.900 --> 40:50.860
+changes in the in the environment you might be at tens of milliseconds before we feed this back
+
+40:50.860 --> 40:56.380
+into like into the policy to correct correct for that and so this is why we actually have to be
+
+40:56.380 --> 41:01.820
+like super careful about like what are the exact timing like timing phases of all these sensors
+
+41:01.820 --> 41:07.180
+and so so we found that a better lot of the lot of the Ross abstractions are actually they
+
+41:07.180 --> 41:11.500
+can encapsulate this and hide it from you which is actually great I think for the majority of
+
+41:11.500 --> 41:15.820
+use cases it just doesn't work that well for us so we actually do need full control over these
+
+41:15.820 --> 41:21.820
+things okay so do you did you write your own operating system or is it more like less like an
+
+41:21.820 --> 41:27.580
+operating system more like a thin layer that you know I'm assuming that at the bottom of this it's
+
+41:27.580 --> 41:33.020
+all kind of just your controlling step promoters and stuff like that through IO ports and you know
+
+41:33.020 --> 41:36.860
+there's got to be some kind of you want some kind of software layer there to make that a little
+
+41:36.860 --> 41:40.860
+easier did you just roll that around yourself exactly so it's pretty much like a layer of middleware
+
+41:40.860 --> 41:45.020
+basically so we didn't we didn't really write right our own OS or something right so for some
+
+41:45.020 --> 41:49.740
+of our robots we actually we basically get rid of all the software that they ship with yeah and
+
+41:49.740 --> 41:54.140
+just basically like if there's some firmware on like some embedded microcontrollers on the robot
+
+41:54.140 --> 41:58.940
+then we will we usually won't touch that because that and that will because that will also usually
+
+41:58.940 --> 42:04.940
+be fast and predictable like well defined yeah but so the issue with the with the off-the-shelf
+
+42:04.940 --> 42:10.940
+option was like code path lengths or you know you know variable because they're accounting for
+
+42:10.940 --> 42:15.420
+plugging in like external modules and all that kind of stuff is it that well yes so there's
+
+42:15.420 --> 42:20.060
+certainly a lot of complexity in that like they like they basically have this this entire framework
+
+42:20.060 --> 42:24.700
+for being like plug and play but but like they're actually also like real operational issues where
+
+42:24.700 --> 42:28.940
+like for example like this the the timing issue I just mentioned like wouldn't be because they like
+
+42:28.940 --> 42:32.860
+it's not that crazy basically that we have to like make sure that our code has like constant
+
+42:32.860 --> 42:37.660
+execution time or something it's just you have to like for example like usually these like systems
+
+42:37.660 --> 42:42.460
+have some kind of trigger signal okay and you have to you basically just have to to lay your
+
+42:42.460 --> 42:47.580
+code out in a way that like now my cycle starts you trigger all the systems basically you synchronize
+
+42:47.580 --> 42:51.420
+all of them and then you like read out all that data or something like that and that's how you
+
+42:51.420 --> 42:56.620
+synchronize synchronize all these things so it's not so much like really like dark magic of like
+
+42:56.620 --> 43:01.020
+performance optimization it's basically for the most part we just have like a very specific usage
+
+43:01.020 --> 43:06.700
+pattern that requires like carefully thinking about like basically when like when when do we do what
+
+43:06.700 --> 43:14.700
+and so pulling this all together you're trying to develop a technique that allows the robot to
+
+43:14.700 --> 43:20.140
+you know be more like the human and can kind of do you know fine tune course correction you know
+
+43:20.140 --> 43:26.540
+as it's operating and you train all these models and simulation like how do you then use that
+
+43:26.540 --> 43:33.020
+with the robots and do you know do the inference to make those course corrections like how does
+
+43:33.020 --> 43:38.380
+all that part work yeah so so basically right now what we're like what we're still like aiming for
+
+43:38.380 --> 43:44.140
+is that we actually don't do any don't do any fine tuning basically of our model in the real world
+
+43:44.140 --> 43:50.540
+so so we train our model simulation and then we we basically just rolled out on the real robot like
+
+43:50.540 --> 43:54.540
+you'll be gathered all your sensor data like from the robot and from your like internal from
+
+43:54.540 --> 43:58.620
+external like cameras and tracking systems and stuff like that and you feed that into the policy
+
+43:58.620 --> 44:03.740
+you do the inference and then you react to that and so the basically the adaptation loop
+
+44:03.740 --> 44:08.300
+for like figuring out like differences between the the real world and the simulator right now
+
+44:08.300 --> 44:12.940
+is actually like at least for us it's pretty much manual still so there are lots of like there are
+
+44:12.940 --> 44:18.220
+lots of ideas for for basically doing this kind of like metal learning where you learn to learn
+
+44:18.220 --> 44:22.780
+to adapt to a new environment and we've had some initial success with that for basically
+
+44:22.780 --> 44:27.980
+imitating a human doing some behavior and then you would you would figure out it's like oh what
+
+44:27.980 --> 44:32.140
+are these the what are the semantics that the human intended to achieve with with this task
+
+44:32.140 --> 44:35.500
+I think it's probably like like more like a more like a general segment is like this stuff is
+
+44:35.500 --> 44:40.540
+still pretty early both in the in the robotics and the like ML communities but it is super
+
+44:40.540 --> 44:44.700
+interesting and and eventually we'll want to do something where like we have a bunch of the
+
+44:44.700 --> 44:49.180
+different simulators we talked about might even have like different kinds of robots and
+
+44:49.180 --> 44:53.580
+basically just increasing the like breadth of this distribution so you encapsulate like more and
+
+44:53.580 --> 44:58.540
+more things and and really hope that your that your policy gets to the like gets to the bottom of
+
+44:58.540 --> 45:03.420
+like I see this is how I learned to like control a new robot in an entire new environment
+
+45:03.420 --> 45:07.340
+okay so this is something we're super excited about and eventually we're hoping that like
+
+45:07.980 --> 45:13.980
+this will enable a robot that can that can truly solve a variety of like very complex tasks
+
+45:13.980 --> 45:18.940
+on a variety of different robot platforms okay and so if I wanted to learn more about
+
+45:18.940 --> 45:24.300
+this dig into the details like see it in action like have you published code on this or like
+
+45:24.860 --> 45:29.980
+you know what is what would be required for someone kind of you know play with this and try
+
+45:29.980 --> 45:34.780
+to replicate what you did yeah so we did a pretty big release a couple months ago where we basically
+
+45:34.780 --> 45:39.500
+put some of the things we talked about together like the domain randomization part and the part
+
+45:39.500 --> 45:44.940
+where you where you observe your human and figure out okay I want to do like this specific task
+
+45:44.940 --> 45:48.940
+and like the robot imitates this in like a new setting we have a release there where we basically
+
+45:48.940 --> 45:53.580
+show like like show how it works like show how how the networks are aligned and like how they like
+
+45:53.580 --> 45:58.620
+basically how we feed the data from one to the other and how they train okay and we'll probably
+
+45:58.620 --> 46:03.180
+be be publishing at least parts of this robot as a service layer that they just talked about
+
+46:03.180 --> 46:06.780
+together with like our next set of research results there like we figured it doesn't really make
+
+46:06.780 --> 46:11.180
+sense for them to just be the kind of on their own because then you there's a lot of moving parts
+
+46:11.180 --> 46:16.300
+right exactly exactly and so the the issue there is that like even if you open source the code then
+
+46:16.300 --> 46:20.940
+it's like well great you can get started today just add a really expensive robot to the mix but like
+
+46:20.940 --> 46:24.780
+we'll definitely be as we publish our research we want to release like both the research and the
+
+46:24.780 --> 46:30.540
+infrastructure parts required for it okay cool awesome well Jonas thanks so much for taking
+
+46:30.540 --> 46:34.540
+the time to chat with me about this is really cool stuff awesome thank you for having me for sure
+
+46:34.540 --> 46:44.860
+all right everyone that's our show for today thanks so much for listening and for your continued
+
+46:44.860 --> 46:50.380
+feedback and support for more information on Jonas or any of the topics covered in this
+
+46:50.380 --> 46:58.300
+episode head on over to twimlai.com slash talk slash 76 to follow along with our open AI series
+
+46:58.300 --> 47:05.260
+visit twimlai.com slash open AI of course you can send along your feedback or questions via
+
+47:05.260 --> 47:11.820
+Twitter to add twimlai or at Sam charrington or leave a comment right on the show notes page
+
+47:13.020 --> 47:18.140
+thanks once again to Nvidia for their support of this series to learn more about what they're
+
+47:18.140 --> 47:26.620
+doing at nips visit twimlai.com slash Nvidia and of course thanks once again to you for listening
+
+47:26.620 --> 47:36.620
+and catch you next time
+

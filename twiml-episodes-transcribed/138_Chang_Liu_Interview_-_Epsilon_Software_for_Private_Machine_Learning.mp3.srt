@@ -1,0 +1,3052 @@
+1
+00:00:00,000 --> 00:00:16,320
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+
+2
+00:00:16,320 --> 00:00:21,480
+people, doing interesting things in machine learning and artificial intelligence.
+
+3
+00:00:21,480 --> 00:00:31,520
+I'm your host Sam Charrington.
+
+4
+00:00:31,520 --> 00:00:36,400
+I'd like to start out by thanking everyone who joined me last week at the Twimble AI Summit
+
+5
+00:00:36,400 --> 00:00:37,960
+in Las Vegas.
+
+6
+00:00:37,960 --> 00:00:39,960
+It was a great event.
+
+7
+00:00:39,960 --> 00:00:44,920
+For a summary of the event and my key takeaways from each of the event sessions, sign up for
+
+8
+00:00:44,920 --> 00:00:49,840
+my newsletter at twimbleai.com slash newsletter.
+
+9
+00:00:49,840 --> 00:00:54,160
+I wrote about it right after returning from the event last week and when you sign up,
+
+10
+00:00:54,160 --> 00:00:58,720
+you'll automatically get an email telling you how to get access to back issues.
+
+11
+00:00:58,720 --> 00:01:04,480
+Again, that's twimbleai.com slash newsletter.
+
+12
+00:01:04,480 --> 00:01:06,480
+Event season continues this week.
+
+13
+00:01:06,480 --> 00:01:11,320
+Tomorrow I'm key noting at the Prepare AI event here in St. Louis and then making my way
+
+14
+00:01:11,320 --> 00:01:15,840
+out to San Francisco for Figure H's Train AI Conference.
+
+15
+00:01:15,840 --> 00:01:21,320
+The Train AI agenda looks awesome and I'll be on site all day podcasting so if you're
+
+16
+00:01:21,320 --> 00:01:25,400
+in the Bay area, you should definitely plan to stop by.
+
+17
+00:01:25,400 --> 00:01:31,680
+Of course, if you do, use the discount code Twimbleai for 30% off of registration.
+
+18
+00:01:31,680 --> 00:01:35,040
+Be sure to give me a shout if you're planning to be around.
+
+19
+00:01:35,040 --> 00:01:41,720
+In this episode, I'm joined by John Bohannon, Director of Science at AI Startup Primer.
+
+20
+00:01:41,720 --> 00:01:46,000
+As you all may know, a few weeks ago, we released my interview with Google Legend, Jeff
+
+21
+00:01:46,000 --> 00:01:51,080
+Dean, which by the way, you should definitely check out if you haven't already.
+
+22
+00:01:51,080 --> 00:01:56,040
+Anyway, in that interview, Jeff mentions the recent explosion of machine learning papers
+
+23
+00:01:56,040 --> 00:02:00,760
+on archive, which I responded to jokingly by asking whether Google had already developed
+
+24
+00:02:00,760 --> 00:02:04,680
+the AI system to help them summarize and track all of them.
+
+25
+00:02:04,680 --> 00:02:08,720
+While Jeff didn't have anything specific to offer, a listener reached out and let me
+
+26
+00:02:08,720 --> 00:02:12,920
+know that John was in fact already working on this problem.
+
+27
+00:02:12,920 --> 00:02:18,120
+In our conversation, John and I discuss his work on Primer Science, a tool that harvests
+
+28
+00:02:18,120 --> 00:02:24,000
+content uploaded to archive, sorts it into natural topics using unsupervised learning,
+
+29
+00:02:24,000 --> 00:02:28,640
+then gives relevant summaries of the activity happening in different innovation areas.
+
+30
+00:02:28,640 --> 00:02:32,520
+We spend a good amount of time on the inner workings of Primer Science, including their
+
+31
+00:02:32,520 --> 00:02:36,920
+data pipeline and some of the tools they use, how they determine ground truth for training
+
+32
+00:02:36,920 --> 00:02:41,720
+their models, and the use of heuristics to supplement NLP in their processing.
+
+33
+00:02:41,720 --> 00:02:43,920
+Alright, let's do it.
+
+34
+00:02:43,920 --> 00:02:52,200
+Alright, everyone, I am on the line with John Bohannon.
+
+35
+00:02:52,200 --> 00:02:56,360
+John is Director of Science at a startup called Primer.
+
+36
+00:02:56,360 --> 00:02:59,200
+John, welcome to this week in machine learning and AI.
+
+37
+00:02:59,200 --> 00:03:00,200
+Hey!
+
+38
+00:03:00,200 --> 00:03:01,840
+So this conversation is an interesting one.
+
+39
+00:03:01,840 --> 00:03:08,440
+They grew out of a listener response to a comment made in my recent interview with Jeff Dean.
+
+40
+00:03:08,440 --> 00:03:13,680
+Jeff commented on the explosion of machine learning papers on archive, and I jokingly
+
+41
+00:03:13,680 --> 00:03:18,320
+asked if Google had already developed the deep learning based summarization techniques
+
+42
+00:03:18,320 --> 00:03:20,080
+to help us all keep up.
+
+43
+00:03:20,080 --> 00:03:24,080
+And it turns out that one of your colleagues, John, reached out to let me know that you
+
+44
+00:03:24,080 --> 00:03:27,120
+have been working on this and have built it.
+
+45
+00:03:27,120 --> 00:03:30,560
+And I think just before we got started, you showed it to me and it's pretty cool.
+
+46
+00:03:30,560 --> 00:03:37,080
+So here we are, but before we get into the details of that project, you've got an interesting
+
+47
+00:03:37,080 --> 00:03:40,840
+background in molecular biology and data journalism.
+
+48
+00:03:40,840 --> 00:03:45,320
+How did you find your way to AI?
+
+49
+00:03:45,320 --> 00:03:53,280
+It's a long journey, but I think it started in computer camp when I was nine years old.
+
+50
+00:03:53,280 --> 00:03:56,040
+So that's the kind of summer camp I went to.
+
+51
+00:03:56,040 --> 00:04:04,520
+And yeah, as my studies progressed, I actually drifted away into biology in a PhD in molecular
+
+52
+00:04:04,520 --> 00:04:11,720
+biology, and then before doing my next postdoc, I wanted to take a break and do something
+
+53
+00:04:11,720 --> 00:04:12,720
+different.
+
+54
+00:04:12,720 --> 00:04:18,760
+So I tried being a journalist, a science journalist, and fell in love with it and basically jumped
+
+55
+00:04:18,760 --> 00:04:24,040
+off the academic track and became eventually a computational journalist, basically using
+
+56
+00:04:24,040 --> 00:04:31,120
+data and code to find and tell stories that are impossible to tell otherwise.
+
+57
+00:04:31,120 --> 00:04:37,280
+And a friend of mine named Sean Gorley, who did his PhD with me in England at the same
+
+58
+00:04:37,280 --> 00:04:44,640
+time, I actually lived in the same house, our fate eventually became intertwined again.
+
+59
+00:04:44,640 --> 00:04:51,280
+I moved to the Bay area to do a visiting scholar stint at Berkeley, and he's in San Francisco.
+
+60
+00:04:51,280 --> 00:04:54,920
+He says, hey, John, I've got this startup called Primer.
+
+61
+00:04:54,920 --> 00:04:58,000
+And you really should come by and check out what we're doing.
+
+62
+00:04:58,000 --> 00:05:04,120
+I think you're going to find that the stuff we're working on really, really matches with
+
+63
+00:05:04,120 --> 00:05:06,040
+the stuff you work on.
+
+64
+00:05:06,040 --> 00:05:11,040
+And so eventually I had some time and I was like, okay, I'll pop over there for a week.
+
+65
+00:05:11,040 --> 00:05:18,960
+And sure enough, within one day, it was clear that they were solving problems that I just
+
+66
+00:05:18,960 --> 00:05:25,080
+find so hard and I wanted so badly to solve myself, that basically if you can't beat
+
+67
+00:05:25,080 --> 00:05:26,680
+them, join them.
+
+68
+00:05:26,680 --> 00:05:29,280
+Nice, nice.
+
+69
+00:05:29,280 --> 00:05:36,560
+So maybe for context, you can tell us a little bit about what the company does and the
+
+70
+00:05:36,560 --> 00:05:40,080
+kinds of problems that they're working on or you're working on.
+
+71
+00:05:40,080 --> 00:05:41,080
+Yeah.
+
+72
+00:05:41,080 --> 00:05:48,200
+So Primer at its core is an AI company that's trying to make machines that read and write.
+
+73
+00:05:48,200 --> 00:05:51,520
+That's the fundamental problem that underlies all this.
+
+74
+00:05:51,520 --> 00:05:58,800
+In terms of a business model, we, for example, automate a lot of the work that a junior analyst
+
+75
+00:05:58,800 --> 00:06:03,520
+would do in, say, a bank or the intelligence community.
+
+76
+00:06:03,520 --> 00:06:06,280
+Also frankly, what a journalist does.
+
+77
+00:06:06,280 --> 00:06:11,560
+I feel like I'm reverse engineering myself every day because a lot of what you have to
+
+78
+00:06:11,560 --> 00:06:12,560
+do.
+
+79
+00:06:12,560 --> 00:06:19,560
+It's also somewhat automating a lot of what you do, Sam, like all of our jobs, what we
+
+80
+00:06:19,560 --> 00:06:24,360
+have in common is that we have to read a ton of stuff, often very technical stuff, and
+
+81
+00:06:24,360 --> 00:06:25,760
+makes sense of it.
+
+82
+00:06:25,760 --> 00:06:30,720
+And then tell stories, like that is the fundamental unit of information.
+
+83
+00:06:30,720 --> 00:06:33,800
+That's our data structure, a story.
+
+84
+00:06:33,800 --> 00:06:38,040
+And that is really hard for computers to do.
+
+85
+00:06:38,040 --> 00:06:40,600
+It's really hard for people to do.
+
+86
+00:06:40,600 --> 00:06:41,600
+Exactly.
+
+87
+00:06:41,600 --> 00:06:45,080
+Yeah, it's one of those things that's both, that's hard for everyone.
+
+88
+00:06:45,080 --> 00:06:53,400
+So I think you're relatively new to this podcast, but those that have been around for a while
+
+89
+00:06:53,400 --> 00:06:59,440
+from the beginning know that it started out as more of a news-oriented format as opposed
+
+90
+00:06:59,440 --> 00:07:01,920
+to an interview format.
+
+91
+00:07:01,920 --> 00:07:08,160
+And basically, my mission was to kind of summarize the most interesting AI and ML tidbits from
+
+92
+00:07:08,160 --> 00:07:09,880
+the previous week's news.
+
+93
+00:07:09,880 --> 00:07:15,480
+But that is super, super hard, especially with so much news happening all the time.
+
+94
+00:07:15,480 --> 00:07:25,640
+It would take a ton of time to curate all of that information and digest it and turn it
+
+95
+00:07:25,640 --> 00:07:28,360
+into stories as you're saying.
+
+96
+00:07:28,360 --> 00:07:29,360
+Exactly.
+
+97
+00:07:29,360 --> 00:07:33,000
+And so, like you face several problems, and what we're trying to do at Primer is break
+
+98
+00:07:33,000 --> 00:07:36,720
+it down into reasonable problems that you can actually attack.
+
+99
+00:07:36,720 --> 00:07:40,880
+So one is, for example, what's relevant?
+
+100
+00:07:40,880 --> 00:07:43,000
+What are you telling a story about?
+
+101
+00:07:43,000 --> 00:07:47,240
+It's not enough to just say, I want to tell a story about last week's AI research.
+
+102
+00:07:47,240 --> 00:07:50,680
+It's like, okay, well, what documents are relevant?
+
+103
+00:07:50,680 --> 00:07:54,320
+Even if you could get the papers, then it's like, well, where do you get all the conversations
+
+104
+00:07:54,320 --> 00:07:55,640
+about those papers?
+
+105
+00:07:55,640 --> 00:07:58,040
+How do you figure out what those papers were about?
+
+106
+00:07:58,040 --> 00:08:01,720
+If there were a thousand papers published over the past several months and you wanted to
+
+107
+00:08:01,720 --> 00:08:06,400
+tell a story of a thousand papers, I don't know how a human would do that.
+
+108
+00:08:06,400 --> 00:08:08,800
+Well, actually, I can tell you, humans simply don't do that.
+
+109
+00:08:08,800 --> 00:08:11,600
+What we do is we take shortcuts.
+
+110
+00:08:11,600 --> 00:08:12,960
+We sort of fly blind.
+
+111
+00:08:12,960 --> 00:08:19,320
+We grab the zeitgeist, and that's kind of a random process.
+
+112
+00:08:19,320 --> 00:08:25,040
+It's like, well, I overheard some conversations, and this seems to be a hot topic, I'm going
+
+113
+00:08:25,040 --> 00:08:27,400
+to decide, and so I'm going to amplify it.
+
+114
+00:08:27,400 --> 00:08:33,800
+And what you end up with are coherent stories, but they're not necessarily what actually was
+
+115
+00:08:33,800 --> 00:08:35,840
+the most important thing that happened.
+
+116
+00:08:35,840 --> 00:08:40,920
+It's just some strange sampling of the space of all things that happened, and that's the
+
+117
+00:08:40,920 --> 00:08:41,920
+best you can do.
+
+118
+00:08:41,920 --> 00:08:47,360
+But what if you had a machine that could actually read everything and show you, in some sense,
+
+119
+00:08:47,360 --> 00:08:48,760
+everything that happened?
+
+120
+00:08:48,760 --> 00:08:49,760
+That's the goal.
+
+121
+00:08:49,760 --> 00:08:56,200
+So you showed me a kind of a portal into research papers, is the idea to provide that
+
+122
+00:08:56,200 --> 00:09:01,760
+as a service or more of the platform that allows someone to create that thing.
+
+123
+00:09:01,760 --> 00:09:08,080
+So we're in a pretty privileged position, we're privileged in the sense that we've already
+
+124
+00:09:08,080 --> 00:09:09,920
+got some really big customers.
+
+125
+00:09:09,920 --> 00:09:18,720
+So the federal government, Walmart, Singapore's sovereign trust, with several others coming
+
+126
+00:09:18,720 --> 00:09:24,520
+online soon, those are the relationships that actually pay the bills.
+
+127
+00:09:24,520 --> 00:09:29,400
+And so we do things like if you have a portfolio manager who's trying to keep track of a ton
+
+128
+00:09:29,400 --> 00:09:37,000
+of companies, that portfolio manager needs to stay on top of all the relevant developments
+
+129
+00:09:37,000 --> 00:09:40,760
+in the space roughly defined by all those companies.
+
+130
+00:09:40,760 --> 00:09:48,560
+All the news about them, maybe SEC filings, if you want to assess changes in risk profile,
+
+131
+00:09:48,560 --> 00:09:50,960
+it's sort of an overwhelming task.
+
+132
+00:09:50,960 --> 00:09:57,720
+And so primer basically superpowers those analysts by automating all the things that are really
+
+133
+00:09:57,720 --> 00:10:03,480
+hard and tedious and time consuming, and it basically reduces the cost of curiosity.
+
+134
+00:10:03,480 --> 00:10:08,920
+It allows those analysts to not spend half their day reading a million things just to find
+
+135
+00:10:08,920 --> 00:10:17,760
+out what was worth reading, instead they can see summaries of 100 papers at once, get
+
+136
+00:10:17,760 --> 00:10:22,880
+a sense of whether it's worth diving deeper or look at another batch of 100 papers.
+
+137
+00:10:22,880 --> 00:10:32,320
+It also gives alerts with predefined conditions so that you don't lose a second if something
+
+138
+00:10:32,320 --> 00:10:37,440
+that you know in retrospect is going to be a situation worth knowing about, you'll get
+
+139
+00:10:37,440 --> 00:10:38,760
+a heads up.
+
+140
+00:10:38,760 --> 00:10:44,000
+So meanwhile though, you can use the same machinery that does reading and writing and
+
+141
+00:10:44,000 --> 00:10:49,360
+summarization to do things like the thing I sent you, like read all of archive.
+
+142
+00:10:49,360 --> 00:10:56,040
+So we do have a business model for this system going forward, we're going to be developing
+
+143
+00:10:56,040 --> 00:11:00,920
+it into products for, for example, the pharmaceutical industry.
+
+144
+00:11:00,920 --> 00:11:07,040
+But for the time being, we just have this beautiful laboratory where we get to really push the
+
+145
+00:11:07,040 --> 00:11:09,960
+edge of natural language processing.
+
+146
+00:11:09,960 --> 00:11:14,840
+Tell us more about this archive project that you've built.
+
+147
+00:11:14,840 --> 00:11:20,440
+Yeah, archive is a really good illustration of this problem that we all face of too much
+
+148
+00:11:20,440 --> 00:11:21,760
+information.
+
+149
+00:11:21,760 --> 00:11:28,520
+If you ever go to the archive website, you basically see a fire hose of research coming in.
+
+150
+00:11:28,520 --> 00:11:37,120
+Archive is amazing because it is literally the place where research gets debuted.
+
+151
+00:11:37,120 --> 00:11:44,800
+It's the first place you'll see a paper coming out from Google or Microsoft or MIT on
+
+152
+00:11:44,800 --> 00:11:52,600
+topics that are basically going to define machine learning progress over the next 10 years.
+
+153
+00:11:52,600 --> 00:11:59,440
+In retrospect, you can look back and you can see the timeline of this amazing scientific
+
+154
+00:11:59,440 --> 00:12:01,960
+revolution unfolding.
+
+155
+00:12:01,960 --> 00:12:04,400
+But it's not at all human readable.
+
+156
+00:12:04,400 --> 00:12:11,040
+Even if you are an expert, even if you have a PhD in machine learning, you just can't
+
+157
+00:12:11,040 --> 00:12:13,000
+make sense of all of archive.
+
+158
+00:12:13,000 --> 00:12:18,480
+You might be able to make sense of the papers in your own subdomain, but even there, it's
+
+159
+00:12:18,480 --> 00:12:19,480
+tough.
+
+160
+00:12:19,480 --> 00:12:20,480
+You've got to find them.
+
+161
+00:12:20,480 --> 00:12:23,480
+Archive isn't designed for humans in a way.
+
+162
+00:12:23,480 --> 00:12:29,720
+I mean, it is, but it's just not user friendly.
+
+163
+00:12:29,720 --> 00:12:34,120
+Primer science is a stab at making sense of that.
+
+164
+00:12:34,120 --> 00:12:40,880
+Basically, it's a really hard problem that's well-scoped.
+
+165
+00:12:40,880 --> 00:12:48,720
+But what it does is it harvests all these papers and it does unsupervised learning on the
+
+166
+00:12:48,720 --> 00:12:53,400
+content of the papers to try and figure out what are the topics that this naturally falls
+
+167
+00:12:53,400 --> 00:12:54,400
+into.
+
+168
+00:12:54,400 --> 00:12:59,160
+Within machine learning, for example, I'm just looking now at some of the latest.
+
+169
+00:12:59,160 --> 00:13:04,800
+The system has discovered that there are not only image reconstruction papers.
+
+170
+00:13:04,800 --> 00:13:09,920
+There's like 58 papers actually in this bag that are on that theme, but it has discovered
+
+171
+00:13:09,920 --> 00:13:15,880
+that there's a whole bunch of research on traffic and temporal analysis.
+
+172
+00:13:15,880 --> 00:13:18,080
+There's something on mathematical optimization.
+
+173
+00:13:18,080 --> 00:13:23,720
+There's a whole bunch of papers about semantic segmentation.
+
+174
+00:13:23,720 --> 00:13:28,640
+All of this is happening without an ontology or a knowledge base.
+
+175
+00:13:28,640 --> 00:13:35,600
+You're going to have to have such a system if you want it to work on any corpus of papers.
+
+176
+00:13:35,600 --> 00:13:41,840
+You could imagine building some super ontology that captures everything there is to know
+
+177
+00:13:41,840 --> 00:13:47,200
+about science, but then it's going to be out of date next month.
+
+178
+00:13:47,200 --> 00:13:51,320
+I wouldn't want to build that thing because maintaining it would be a nightmare.
+
+179
+00:13:51,320 --> 00:13:55,320
+Instead, you need a system that does more or less what humans do on a smaller scale.
+
+180
+00:13:55,320 --> 00:13:59,840
+What we do is we look at things and we just sort of eyeball it and say, these are kind
+
+181
+00:13:59,840 --> 00:14:07,200
+of about this and these are about that, so you get a natural segmentation of the space.
+
+182
+00:14:07,200 --> 00:14:13,120
+Within each of these topics, it does a time series analysis and it tries to figure out,
+
+183
+00:14:13,120 --> 00:14:19,720
+if I take all the news and the social media signal, all the tweets about this research
+
+184
+00:14:19,720 --> 00:14:27,880
+as it was published and afterwards, all the commentary, all the real-time online critique,
+
+185
+00:14:27,880 --> 00:14:35,440
+sort of the peer review that's happening in real time out in the open, can I detect events?
+
+186
+00:14:35,440 --> 00:14:39,360
+And so an event can be more than just the publication of a paper.
+
+187
+00:14:39,360 --> 00:14:47,560
+It could be that, for example, a self-driving car crashes somewhere and suddenly the world
+
+188
+00:14:47,560 --> 00:14:55,840
+is looking intensely at an issue related to what we do and don't know about these systems.
+
+189
+00:14:55,840 --> 00:14:58,960
+And some of this research may get pulled into that.
+
+190
+00:14:58,960 --> 00:15:04,920
+If you want to detect that real-world event, you need a system that can actually divide
+
+191
+00:15:04,920 --> 00:15:09,800
+all those documents, all those tweets, all those things that are relevant to the same thing
+
+192
+00:15:09,800 --> 00:15:12,800
+and figure out how to segment them in time.
+
+193
+00:15:12,800 --> 00:15:14,080
+And so it does that too.
+
+194
+00:15:14,080 --> 00:15:17,280
+It tries to figure out, essentially, what were the big events in this space?
+
+195
+00:15:17,280 --> 00:15:24,680
+How was human attention in the world divided in relation to this corpus of papers?
+
+196
+00:15:24,680 --> 00:15:30,760
+And then it does some other cute tricks to make it useful to you as you dive into all
+
+197
+00:15:30,760 --> 00:15:32,480
+of this information.
+
+198
+00:15:32,480 --> 00:15:36,760
+It pulls out all the people and tries to tell you what it knows about them, just based
+
+199
+00:15:36,760 --> 00:15:38,880
+on the corpus, mind you.
+
+200
+00:15:38,880 --> 00:15:42,560
+We're also developing a version of this that is building a knowledge base and actually
+
+201
+00:15:42,560 --> 00:15:47,040
+learning about people as it reads the news and as papers are published.
+
+202
+00:15:47,040 --> 00:15:55,400
+And what I sent you this morning is just, essentially, out of the box, I don't know anything about
+
+203
+00:15:55,400 --> 00:15:59,360
+the world, but I know this group of thousands of papers you sent me.
+
+204
+00:15:59,360 --> 00:16:01,680
+And this is what I can tell you about them.
+
+205
+00:16:01,680 --> 00:16:03,840
+These are all the people.
+
+206
+00:16:03,840 --> 00:16:05,600
+These are all the topics.
+
+207
+00:16:05,600 --> 00:16:10,360
+These are the events that seem to all of this information seems to be pointing at out
+
+208
+00:16:10,360 --> 00:16:12,280
+in the real world.
+
+209
+00:16:12,280 --> 00:16:18,360
+And another cute one is, if you're finding the jargon really hard to understand, I've
+
+210
+00:16:18,360 --> 00:16:23,560
+generated a dictionary for you that is kind of a magical dictionary where if you click
+
+211
+00:16:23,560 --> 00:16:30,800
+on a technical term, it actually shows you who coined that term, how is it defined?
+
+212
+00:16:30,800 --> 00:16:34,960
+Give me some context about how to use this kind of like a Oxford English dictionary on
+
+213
+00:16:34,960 --> 00:16:35,960
+steroids.
+
+214
+00:16:35,960 --> 00:16:36,960
+Nice.
+
+215
+00:16:36,960 --> 00:16:37,960
+Nice.
+
+216
+00:16:37,960 --> 00:16:42,240
+I'm finding this interview more challenging than most because as you're speaking, I've
+
+217
+00:16:42,240 --> 00:16:49,920
+got the tool in the background and I keep seeing papers that look really interesting.
+
+218
+00:16:49,920 --> 00:16:51,560
+It's working.
+
+219
+00:16:51,560 --> 00:16:53,400
+Super, super distracting.
+
+220
+00:16:53,400 --> 00:16:59,400
+So maybe can you tell us a little bit about the technology that's making it all happen?
+
+221
+00:16:59,400 --> 00:17:00,400
+Yeah.
+
+222
+00:17:00,400 --> 00:17:02,840
+You know, what does the stack look like?
+
+223
+00:17:02,840 --> 00:17:04,560
+What does the pipeline look like?
+
+224
+00:17:04,560 --> 00:17:08,560
+How are you approaching the unsupervised learning piece?
+
+225
+00:17:08,560 --> 00:17:14,080
+So it all begins with a gigantic elastic search index.
+
+226
+00:17:14,080 --> 00:17:15,080
+Okay.
+
+227
+00:17:15,080 --> 00:17:21,800
+I think if you talk to a lot of the people that you've interviewed, even already about what's
+
+228
+00:17:21,800 --> 00:17:27,320
+at the bottom of this whole stack, there's often like some massive index of documents.
+
+229
+00:17:27,320 --> 00:17:35,480
+So we're ingesting the news and blogs and tweets and scientific papers every day.
+
+230
+00:17:35,480 --> 00:17:37,400
+And that's the starting point of this whole system.
+
+231
+00:17:37,400 --> 00:17:40,280
+It has this growing corpus.
+
+232
+00:17:40,280 --> 00:17:48,280
+And so if you query, as we've done today on artificial intelligence, for example, the
+
+233
+00:17:48,280 --> 00:17:53,280
+first thing it has to do is retrieve all the information that is relevant.
+
+234
+00:17:53,280 --> 00:18:02,480
+And then kicks off this pipeline where basically the first thing it does is it tries with unsupervised
+
+235
+00:18:02,480 --> 00:18:09,640
+learning plus several other steps to divide all the information up into natural topics.
+
+236
+00:18:09,640 --> 00:18:18,200
+So within each topic, it then tries to detect the events in the real world that any of these
+
+237
+00:18:18,200 --> 00:18:20,640
+documents might be referring to.
+
+238
+00:18:20,640 --> 00:18:26,880
+So if you've got like 100 documents that might be news documents and scientific papers
+
+239
+00:18:26,880 --> 00:18:32,400
+and social media signal about all the above, you do a time series analysis.
+
+240
+00:18:32,400 --> 00:18:37,920
+And you try and figure out, are there real world events?
+
+241
+00:18:37,920 --> 00:18:39,320
+It's trying to make an inference here.
+
+242
+00:18:39,320 --> 00:18:46,120
+Are there real world events that all of this information is pointing at and describing?
+
+243
+00:18:46,120 --> 00:18:52,080
+It looks at events basically from the perspective of news articles, is that right?
+
+244
+00:18:52,080 --> 00:19:00,840
+The system you're looking at does, yeah, but you can imagine any document that has a meaningful
+
+245
+00:19:00,840 --> 00:19:07,680
+publication timestamp and includes a description or commentary about something that happened
+
+246
+00:19:07,680 --> 00:19:09,040
+in the real world.
+
+247
+00:19:09,040 --> 00:19:12,920
+It could in principle be mapped to something called an event.
+
+248
+00:19:12,920 --> 00:19:19,520
+The concept of an event is bigger than what a human intuitively would call event.
+
+249
+00:19:19,520 --> 00:19:25,840
+It might actually be, for example, an explosion of discussion around an issue.
+
+250
+00:19:25,840 --> 00:19:31,760
+For example, the Me Too movement is not just an event, right? It's made up of many events.
+
+251
+00:19:31,760 --> 00:19:35,320
+And some of these events might not even be something that could have been observed in
+
+252
+00:19:35,320 --> 00:19:41,160
+one place at one time, but there is a natural segmentation of all the things happening
+
+253
+00:19:41,160 --> 00:19:44,560
+in the world into something that we call events.
+
+254
+00:19:44,560 --> 00:19:47,960
+So that's the theory behind this.
+
+255
+00:19:47,960 --> 00:19:58,240
+Then if you click over to overview, sorry to distract you again, then it tries to tell
+
+256
+00:19:58,240 --> 00:19:59,240
+you a story.
+
+257
+00:19:59,240 --> 00:20:01,880
+So we've got many versions of this.
+
+258
+00:20:01,880 --> 00:20:07,840
+What you're looking at is basically the one of the earliest versions of this.
+
+259
+00:20:07,840 --> 00:20:14,960
+But basically, if you asked a machine to go and read thousands of things and you give
+
+260
+00:20:14,960 --> 00:20:21,200
+it a budget of one page to tell you what it learned, this is starting to get at what
+
+261
+00:20:21,200 --> 00:20:23,440
+you'd expect to come back.
+
+262
+00:20:23,440 --> 00:20:25,120
+This is what you get.
+
+263
+00:20:25,120 --> 00:20:34,040
+It's basically, and it's kind of like a technical report on these are things that I learned.
+
+264
+00:20:34,040 --> 00:20:35,040
+These are the big events.
+
+265
+00:20:35,040 --> 00:20:36,040
+These are the big papers.
+
+266
+00:20:36,040 --> 00:20:37,040
+This is what's getting us attention.
+
+267
+00:20:37,040 --> 00:20:44,680
+Oh, and then by the way, my topic analysis has revealed that there are some changes
+
+268
+00:20:44,680 --> 00:20:51,800
+of foot in artificial intelligence, and these are the things that seem to be trending
+
+269
+00:20:51,800 --> 00:20:53,520
+upwards and are really interesting.
+
+270
+00:20:53,520 --> 00:20:59,200
+And oh, by the way, I discovered there's this weird paper that seems to fall in this topic,
+
+271
+00:20:59,200 --> 00:21:03,520
+but it's deeply connected to this other topic, and that's statistically strange.
+
+272
+00:21:03,520 --> 00:21:05,640
+I need to tell you about it.
+
+273
+00:21:05,640 --> 00:21:11,520
+And by the way, here's some people who seem to be getting a ton of attention, and here's
+
+274
+00:21:11,520 --> 00:21:17,240
+another person who has collaborated with them on a high profile paper, and they've never
+
+275
+00:21:17,240 --> 00:21:18,640
+worked together before.
+
+276
+00:21:18,640 --> 00:21:19,640
+That's interesting.
+
+277
+00:21:19,640 --> 00:21:25,720
+So you can see what's going on here is the system has a model of what humans find interesting.
+
+278
+00:21:25,720 --> 00:21:29,440
+And of course, we humans at Primer built that in.
+
+279
+00:21:29,440 --> 00:21:32,000
+There's a story logic that I don't realize this.
+
+280
+00:21:32,000 --> 00:21:34,120
+You don't want a system to tell you everything it learned.
+
+281
+00:21:34,120 --> 00:21:36,640
+It's just going to be another fire hose.
+
+282
+00:21:36,640 --> 00:21:39,000
+You've made no progress.
+
+283
+00:21:39,000 --> 00:21:42,120
+A one-to-one map of the world is not a useful map.
+
+284
+00:21:42,120 --> 00:21:47,280
+So you need something that will compress the information and try and tell you a story.
+
+285
+00:21:47,280 --> 00:21:48,960
+So that's what the system does.
+
+286
+00:21:48,960 --> 00:21:54,640
+I think I interrupted you as you were about to start talking about the pipeline that you're
+
+287
+00:21:54,640 --> 00:21:58,040
+sending some of this stuff through.
+
+288
+00:21:58,040 --> 00:22:04,360
+And just going back to the beginning with archives, are you ingesting all of the archive
+
+289
+00:22:04,360 --> 00:22:07,920
+papers or crawling that site?
+
+290
+00:22:07,920 --> 00:22:08,920
+Yeah.
+
+291
+00:22:08,920 --> 00:22:16,400
+So Paul Ginsberg, who founded and still runs archive, is a friend of mine from a good
+
+292
+00:22:16,400 --> 00:22:18,600
+while back.
+
+293
+00:22:18,600 --> 00:22:21,040
+And he uses Primer Science as well.
+
+294
+00:22:21,040 --> 00:22:25,200
+I think actually he's the very first one I made a user account for.
+
+295
+00:22:25,200 --> 00:22:26,200
+Oh wow.
+
+296
+00:22:26,200 --> 00:22:27,200
+Yeah.
+
+297
+00:22:27,200 --> 00:22:34,080
+And so he's really helped out over the past year, making sure that we have direct access.
+
+298
+00:22:34,080 --> 00:22:37,760
+So we don't have to scrape the site.
+
+299
+00:22:37,760 --> 00:22:45,920
+We basically just pull down the entire day's new papers on one go.
+
+300
+00:22:45,920 --> 00:22:52,440
+And we do the same with news, except it arrives more or less in real time.
+
+301
+00:22:52,440 --> 00:22:59,880
+So we have a real-time stream, more or less, of the news with maybe a 10 minute delay.
+
+302
+00:22:59,880 --> 00:23:06,440
+And we've got a real-time stream of all the tweets that are relevant to the space.
+
+303
+00:23:06,440 --> 00:23:11,000
+Yeah, those via commercial APIs of some sort.
+
+304
+00:23:11,000 --> 00:23:13,080
+We get them directly from Twitter.
+
+305
+00:23:13,080 --> 00:23:14,080
+Okay.
+
+306
+00:23:14,080 --> 00:23:16,360
+So yeah, we have a data deal with them.
+
+307
+00:23:16,360 --> 00:23:17,360
+Okay.
+
+308
+00:23:17,360 --> 00:23:18,360
+And the news?
+
+309
+00:23:18,360 --> 00:23:21,720
+The news we actually have several sources of.
+
+310
+00:23:21,720 --> 00:23:24,040
+One of the most convenient is Lexus Nexus.
+
+311
+00:23:24,040 --> 00:23:26,000
+They have a service called Morover.
+
+312
+00:23:26,000 --> 00:23:29,840
+You can actually purchase a fire hose of news.
+
+313
+00:23:29,840 --> 00:23:31,480
+They do a really good job, actually.
+
+314
+00:23:31,480 --> 00:23:32,480
+Oh wow.
+
+315
+00:23:32,480 --> 00:23:33,480
+Okay.
+
+316
+00:23:33,480 --> 00:23:39,920
+So you pull all that into your Elasticsearch index and maybe talk a little bit about some
+
+317
+00:23:39,920 --> 00:23:44,200
+of the underlying NLP bits that are enabling all this.
+
+318
+00:23:44,200 --> 00:23:45,200
+Yeah.
+
+319
+00:23:45,200 --> 00:23:50,080
+So when you kick off a query, what's happening is you're making a lot of reading happening.
+
+320
+00:23:50,080 --> 00:23:57,240
+So for example, if you take a look at the topics that have been generated, text and word
+
+321
+00:23:57,240 --> 00:24:03,440
+embeddings, quantum, and all of those topic labels that is generated, it actually
+
+322
+00:24:03,440 --> 00:24:09,080
+discovered and chose those from the content of the articles themselves.
+
+323
+00:24:09,080 --> 00:24:18,640
+So the first step in any NLP task on documents is to tokenize the entire document.
+
+324
+00:24:18,640 --> 00:24:21,400
+So are you familiar with tokenizing?
+
+325
+00:24:21,400 --> 00:24:22,400
+Mm-hmm.
+
+326
+00:24:22,400 --> 00:24:23,400
+Yeah.
+
+327
+00:24:23,400 --> 00:24:28,760
+So you basically discover all the words and punctuation and you run an analysis that
+
+328
+00:24:28,760 --> 00:24:30,040
+gets you the parts of speech.
+
+329
+00:24:30,040 --> 00:24:35,200
+It's kind of like what you did in grade school when you made the sentence diagrams to try
+
+330
+00:24:35,200 --> 00:24:40,800
+and make sense of all the different parts of what someone says.
+
+331
+00:24:40,800 --> 00:24:44,000
+And then a whole bunch of things happen in parallel.
+
+332
+00:24:44,000 --> 00:24:51,360
+Basically, there's some things that are useful if you give it a bag of words so you can
+
+333
+00:24:51,360 --> 00:24:55,440
+take an entire scientific paper or even a thousand scientific papers.
+
+334
+00:24:55,440 --> 00:24:58,080
+They turn into bags of words.
+
+335
+00:24:58,080 --> 00:25:06,200
+And with that kind of analysis, you could, for example, discover the groups of words,
+
+336
+00:25:06,200 --> 00:25:13,440
+the Ngrams, that basically best describe this space and you can generate a label.
+
+337
+00:25:13,440 --> 00:25:20,520
+So if you go into any of those topics, it has decided to give that topic a name based
+
+338
+00:25:20,520 --> 00:25:25,000
+on the language within the documents themselves within the topic.
+
+339
+00:25:25,000 --> 00:25:29,880
+So I'm still amazed that it works, frankly.
+
+340
+00:25:29,880 --> 00:25:33,880
+NLP is kind of magical.
+
+341
+00:25:33,880 --> 00:25:37,520
+When something makes sense to a human, when there's a machine that didn't really understand
+
+342
+00:25:37,520 --> 00:25:42,200
+it in the same way you did, it's kind of magical.
+
+343
+00:25:42,200 --> 00:25:50,560
+Are you using kind of off-the-shelf NLP toolkits, NLTK-5000 stuff, or are you rolling your
+
+344
+00:25:50,560 --> 00:25:51,560
+arms off?
+
+345
+00:25:51,560 --> 00:25:54,040
+No, we started off that way.
+
+346
+00:25:54,040 --> 00:25:59,560
+So we've been using this tool Spacey from the very beginning.
+
+347
+00:25:59,560 --> 00:26:03,120
+It's free, it's open source, and it's really powerful.
+
+348
+00:26:03,120 --> 00:26:10,320
+And it's really what shocks me is that there are just two people at the heart of this project,
+
+349
+00:26:10,320 --> 00:26:14,720
+a fellow named Hannibal and a gal named Enis, who live in Berlin.
+
+350
+00:26:14,720 --> 00:26:18,200
+Not far from where I lived for a few years, and I've gotten to know them a little bit
+
+351
+00:26:18,200 --> 00:26:20,000
+just recently.
+
+352
+00:26:20,000 --> 00:26:24,640
+And it does the nuts and bolts NLP that you need.
+
+353
+00:26:24,640 --> 00:26:29,440
+So it will tokenize, but it'll also discover named entities.
+
+354
+00:26:29,440 --> 00:26:34,440
+It'll help you find the people and organizations and so forth.
+
+355
+00:26:34,440 --> 00:26:35,600
+But you need to train it.
+
+356
+00:26:35,600 --> 00:26:41,040
+That's something that we have discovered is just probably like everyone else.
+
+357
+00:26:41,040 --> 00:26:45,240
+It'll get you started, but then you need to solve your own problems.
+
+358
+00:26:45,240 --> 00:26:46,920
+It's only a starting point.
+
+359
+00:26:46,920 --> 00:26:55,200
+So for example, with the people and all the information that we can extract about them
+
+360
+00:26:55,200 --> 00:27:00,160
+and tell you a story based on the people in this space.
+
+361
+00:27:00,160 --> 00:27:05,200
+Spacey is one of the things that we use early in the pipeline, but then there's a ton
+
+362
+00:27:05,200 --> 00:27:12,280
+of custom code that we had to build to basically get the kind of information that Spacey can't
+
+363
+00:27:12,280 --> 00:27:20,840
+get to clean up the stuff that Spacey gets wrong to link it with all the other information
+
+364
+00:27:20,840 --> 00:27:23,960
+we're extracting by other means.
+
+365
+00:27:23,960 --> 00:27:29,840
+And it's a mixture of machine learning and good old fashioned regular expressions.
+
+366
+00:27:29,840 --> 00:27:36,000
+What I find so fun about being at an AI startup is the goal here is not to generate research
+
+367
+00:27:36,000 --> 00:27:37,000
+papers.
+
+368
+00:27:37,000 --> 00:27:41,600
+The goal is to just solve problems really well by whatever means you can.
+
+369
+00:27:41,600 --> 00:27:44,800
+So which I think is like the right motivation to have.
+
+370
+00:27:44,800 --> 00:27:52,840
+If you're just motivated to publish cutting-edge papers, you don't care if it works.
+
+371
+00:27:52,840 --> 00:27:58,840
+I went to this conference called NIPS, which is essentially where all this cutting-edge
+
+372
+00:27:58,840 --> 00:28:03,080
+research is being debuted, and something that really struck me is like half the stuff
+
+373
+00:28:03,080 --> 00:28:08,120
+that people are bragging about doesn't even really practically work.
+
+374
+00:28:08,120 --> 00:28:14,720
+Or works within such a narrowly constrained way of a problem that will work, but it's
+
+375
+00:28:14,720 --> 00:28:16,720
+computationally intractable.
+
+376
+00:28:16,720 --> 00:28:18,800
+That's fine.
+
+377
+00:28:18,800 --> 00:28:23,760
+That's the whole point is to debut tomorrow's technology, but it's frustrating when you're
+
+378
+00:28:23,760 --> 00:28:27,480
+trying to build something.
+
+379
+00:28:27,480 --> 00:28:33,240
+You get excited about some new idea and you chase it down, only to discover, oh, this
+
+380
+00:28:33,240 --> 00:28:36,680
+actually never could have worked.
+
+381
+00:28:36,680 --> 00:28:37,680
+I've had that experience.
+
+382
+00:28:37,680 --> 00:28:42,440
+I've found a paper using primer science, of course.
+
+383
+00:28:42,440 --> 00:28:45,800
+It's a pretty weird situation to have AI eating itself.
+
+384
+00:28:45,800 --> 00:28:50,160
+We basically have an AI system that reads AI papers, which we then used to try and improve
+
+385
+00:28:50,160 --> 00:28:55,520
+the AI that reads papers.
+
+386
+00:28:55,520 --> 00:29:01,880
+We came across a really exciting paper and fully replicated it, and it just doesn't work.
+
+387
+00:29:01,880 --> 00:29:02,880
+That's okay.
+
+388
+00:29:02,880 --> 00:29:08,000
+But how it goes in this space, when you're right at the edge of knowledge, it's not all
+
+389
+00:29:08,000 --> 00:29:09,800
+going to work.
+
+390
+00:29:09,800 --> 00:29:15,440
+We have this principle, a primer, of always trying to find the practical solution as quickly
+
+391
+00:29:15,440 --> 00:29:16,440
+as possible.
+
+392
+00:29:16,440 --> 00:29:21,880
+Don't get seduced by ideas that are sexy to talk about, but it's not actually solving
+
+393
+00:29:21,880 --> 00:29:22,880
+your problem.
+
+394
+00:29:22,880 --> 00:29:23,880
+Yeah.
+
+395
+00:29:23,880 --> 00:29:25,880
+I should throw in a plug for my newsletter.
+
+396
+00:29:25,880 --> 00:29:33,880
+I've recently written on this topic of reproducibility in both science and AI, drawing off of a
+
+397
+00:29:33,880 --> 00:29:40,360
+recent interview I did with Claire Galnick on this same topic.
+
+398
+00:29:40,360 --> 00:29:45,720
+But I really appreciate you owning up to that broader pipeline.
+
+399
+00:29:45,720 --> 00:29:54,640
+One of the questions I get a lot when talking with folks about their products or projects
+
+400
+00:29:54,640 --> 00:30:02,040
+is people want to know like, okay, granted you've applied some great cutting edge machine
+
+401
+00:30:02,040 --> 00:30:06,640
+learning AI stuff, but what else is there required to make it work?
+
+402
+00:30:06,640 --> 00:30:13,880
+What are the, how much heuristics are kind of in and around these tools to actually make
+
+403
+00:30:13,880 --> 00:30:14,880
+it work?
+
+404
+00:30:14,880 --> 00:30:23,960
+So to hear you note that, yeah, good old regular expressions are used liberally to make
+
+405
+00:30:23,960 --> 00:30:25,520
+sure that this all works.
+
+406
+00:30:25,520 --> 00:30:31,840
+I think it's important for, it's important to realize that and, oh, yeah, absolutely.
+
+407
+00:30:31,840 --> 00:30:38,720
+I guarantee you, you go into some of the biggest, most cutting edge groups at giant tech
+
+408
+00:30:38,720 --> 00:30:39,720
+companies.
+
+409
+00:30:39,720 --> 00:30:43,760
+You think that they're doing some kind of pristine AI that you just press a button and
+
+410
+00:30:43,760 --> 00:30:46,000
+it understands things.
+
+411
+00:30:46,000 --> 00:30:50,240
+I guarantee you look under the hood and there's just a ton of regular expressions.
+
+412
+00:30:50,240 --> 00:30:55,840
+Now, that's not to say that machine learning isn't the way forward, like it totally is,
+
+413
+00:30:55,840 --> 00:31:02,320
+but to make these things work on actual problems, it's still a labor of love.
+
+414
+00:31:02,320 --> 00:31:09,520
+So you're doing a lot with Spacey, are you also, which I'm assuming is more traditional
+
+415
+00:31:09,520 --> 00:31:12,320
+NLP technology approach?
+
+416
+00:31:12,320 --> 00:31:21,240
+Are you also doing things with, like, word-to-vec and deep learning based approaches?
+
+417
+00:31:21,240 --> 00:31:23,040
+Yeah.
+
+418
+00:31:23,040 --> 00:31:29,480
+In particular, as we've expanded into other languages beyond English, Spacey is just
+
+419
+00:31:29,480 --> 00:31:36,640
+not going to cut it when you want to make something that understands Russian and Chinese.
+
+420
+00:31:36,640 --> 00:31:45,480
+So we've actually had to pretty much make a bunch of tools from scratch, but it relies
+
+421
+00:31:45,480 --> 00:31:54,720
+on word vectors and word embeddings and where things get complicated is actually where
+
+422
+00:31:54,720 --> 00:31:59,040
+you try and pull this all together.
+
+423
+00:31:59,040 --> 00:32:10,320
+If you use deep learning to extract, for example, some pattern in a corpus of 10,000 documents,
+
+424
+00:32:10,320 --> 00:32:15,200
+the harder thing, once you've extracted, is knowing whether you're right and whether
+
+425
+00:32:15,200 --> 00:32:17,160
+it's worth saying.
+
+426
+00:32:17,160 --> 00:32:25,720
+I can find a bunch of patterns in text pretty easily, but the harder thing is assessing
+
+427
+00:32:25,720 --> 00:32:31,320
+how confident am I that I've found something that I haven't just misextracted.
+
+428
+00:32:31,320 --> 00:32:32,880
+It's not just a spurious pattern.
+
+429
+00:32:32,880 --> 00:32:37,800
+And then even harder than that, is it worth telling you, like, how do I square this with
+
+430
+00:32:37,800 --> 00:32:41,040
+my model of what humans are interested in?
+
+431
+00:32:41,040 --> 00:32:42,040
+Right.
+
+432
+00:32:42,040 --> 00:32:46,880
+Where we're headed with this is basically a model of stories, which ultimately is a model
+
+433
+00:32:46,880 --> 00:32:48,280
+of humans.
+
+434
+00:32:48,280 --> 00:32:49,440
+Humans are storytellers.
+
+435
+00:32:49,440 --> 00:32:51,600
+We've evolved to do this thing.
+
+436
+00:32:51,600 --> 00:32:53,080
+We just take it for granted.
+
+437
+00:32:53,080 --> 00:32:58,320
+What we're doing right now, this conversation, is incredibly high tech.
+
+438
+00:32:58,320 --> 00:33:02,400
+You and I, in real time, are gliding through a narrative that this is.
+
+439
+00:33:02,400 --> 00:33:04,400
+Many years of technology evolution.
+
+440
+00:33:04,400 --> 00:33:05,400
+It's amazing.
+
+441
+00:33:05,400 --> 00:33:06,400
+Yeah.
+
+442
+00:33:06,400 --> 00:33:07,400
+It's amazing.
+
+443
+00:33:07,400 --> 00:33:12,800
+So I think this is actually the next frontier of AI decoding what story is.
+
+444
+00:33:12,800 --> 00:33:13,800
+Yeah.
+
+445
+00:33:13,800 --> 00:33:15,640
+So what does that mean practically?
+
+446
+00:33:15,640 --> 00:33:18,560
+How are you approaching that?
+
+447
+00:33:18,560 --> 00:33:27,200
+Yeah, so here's a bite-sized example, if you make something that reads scientific papers
+
+448
+00:33:27,200 --> 00:33:34,880
+and tries to tell you what you need to know about AI research last week, for example.
+
+449
+00:33:34,880 --> 00:33:39,080
+It's not enough to just give you a dashboard of, here's the most shared paper.
+
+450
+00:33:39,080 --> 00:33:42,160
+Here's the paper that got the most news.
+
+451
+00:33:42,160 --> 00:33:45,360
+Here's the paper that currently has the most citations.
+
+452
+00:33:45,360 --> 00:33:49,040
+That's not doing much heavy lifting for you.
+
+453
+00:33:49,040 --> 00:33:54,760
+If you were to hire a thousand human analysts to just work for you, like imagine you had
+
+454
+00:33:54,760 --> 00:33:59,520
+that luxury, what would you ask them to do?
+
+455
+00:33:59,520 --> 00:34:06,360
+That's kind of the better guiding question and what sort of story would they tell you?
+
+456
+00:34:06,360 --> 00:34:07,360
+What would the format be?
+
+457
+00:34:07,360 --> 00:34:10,800
+I guarantee the humans wouldn't come back and give you a dashboard.
+
+458
+00:34:10,800 --> 00:34:19,640
+They would say, okay, the big deal last week is that a self-driving car crashed and it's
+
+459
+00:34:19,640 --> 00:34:26,160
+kicked off a huge discussion about quality control and where system errors are going to
+
+460
+00:34:26,160 --> 00:34:32,080
+creep in and how you can make machine learning systems understandable from an engineering
+
+461
+00:34:32,080 --> 00:34:33,080
+point of view.
+
+462
+00:34:33,080 --> 00:34:36,120
+How are we going to deal with this emerging problem?
+
+463
+00:34:36,120 --> 00:34:40,720
+The people who are weighing in on this are the following researchers in deep learning,
+
+464
+00:34:40,720 --> 00:34:45,720
+but here's some other people who are very knowledgeable, but they're in a adjacent domain.
+
+465
+00:34:45,720 --> 00:34:49,720
+We think this is really worth knowing, but meanwhile, by the way, we discovered a paper
+
+466
+00:34:49,720 --> 00:34:56,000
+published by a couple of researchers that you've rarely heard of, but it's getting a lot
+
+467
+00:34:56,000 --> 00:35:01,840
+of traction and it seems to be on a topic that is emerging and you're probably going to
+
+468
+00:35:01,840 --> 00:35:05,240
+care about this.
+
+469
+00:35:05,240 --> 00:35:10,520
+It's basically, it has to do with voice recognition and we know that that's an interesting topic,
+
+470
+00:35:10,520 --> 00:35:15,920
+but the more interesting thing is that this researcher is really well known in a totally
+
+471
+00:35:15,920 --> 00:35:20,240
+different field and is just like diving into this and that's unusual.
+
+472
+00:35:20,240 --> 00:35:21,240
+So check it out.
+
+473
+00:35:21,240 --> 00:35:22,240
+Here's the paper.
+
+474
+00:35:22,240 --> 00:35:25,600
+I'm just going to go out on a limb here and say, you really should read this paper.
+
+475
+00:35:25,600 --> 00:35:36,480
+By the way, here's basically a new concept that is creeping into the space and we haven't
+
+476
+00:35:36,480 --> 00:35:37,640
+seen it before.
+
+477
+00:35:37,640 --> 00:35:42,080
+This might be a fluke, but I think this is actually something that's worth knowing
+
+478
+00:35:42,080 --> 00:35:43,080
+about.
+
+479
+00:35:43,080 --> 00:35:45,760
+Here are five papers that you should read.
+
+480
+00:35:45,760 --> 00:35:48,760
+I'm working within your budget here.
+
+481
+00:35:48,760 --> 00:35:50,080
+That's what all the humans would do.
+
+482
+00:35:50,080 --> 00:35:56,360
+It's basically the one-to-two-page presidential intelligence briefing.
+
+483
+00:35:56,360 --> 00:35:57,960
+Ideally, that's what it would look like.
+
+484
+00:35:57,960 --> 00:36:04,200
+A ton of research has gone into boiling things down to a very tight story and that's all
+
+485
+00:36:04,200 --> 00:36:06,600
+you need to know.
+
+486
+00:36:06,600 --> 00:36:15,000
+The idea then is that you've got some kind of generative model for creating these, basically
+
+487
+00:36:15,000 --> 00:36:18,840
+you're briefing over and it has two steps.
+
+488
+00:36:18,840 --> 00:36:21,000
+Like at least two steps.
+
+489
+00:36:21,000 --> 00:36:26,880
+One is what information can I find that's truly relevant, the wrong ingredients of a story.
+
+490
+00:36:26,880 --> 00:36:30,720
+And then the next step is, well, how can I synthesize this into an actual story?
+
+491
+00:36:30,720 --> 00:36:34,560
+I have to do text generation, document planning.
+
+492
+00:36:34,560 --> 00:36:40,120
+You give me a budget, a page, a paragraph, maybe you just want a bullet point and I'll
+
+493
+00:36:40,120 --> 00:36:41,120
+work with it.
+
+494
+00:36:41,120 --> 00:36:46,320
+I'll be able to express this as a story given that constraint.
+
+495
+00:36:46,320 --> 00:36:54,840
+And so kind of going back to our earlier exchange about good old fashion heuristics, how to
+
+496
+00:36:54,840 --> 00:36:55,840
+what degree?
+
+497
+00:36:55,840 --> 00:37:03,680
+I haven't looked at compared one of these briefing pages versus another, but how much is
+
+498
+00:37:03,680 --> 00:37:10,200
+generation and how much is more templates and things like that?
+
+499
+00:37:10,200 --> 00:37:20,000
+Yeah, so the philosophy we followed is always start fast and doable, put another way.
+
+500
+00:37:20,000 --> 00:37:25,320
+You always want to start with a model that you can fully understand yourself and implement
+
+501
+00:37:25,320 --> 00:37:29,240
+quickly so that you have some baseline.
+
+502
+00:37:29,240 --> 00:37:37,520
+So yeah, we've always started with, first can you do it yourself as a human, maybe even
+
+503
+00:37:37,520 --> 00:37:40,080
+no computer involved.
+
+504
+00:37:40,080 --> 00:37:46,800
+If you were to read 10 papers and try and say something intelligent about them, for example,
+
+505
+00:37:46,800 --> 00:37:54,160
+tell me, tell me, for example, what, if you were to classify events and I gave you a
+
+506
+00:37:54,160 --> 00:38:00,840
+pile of papers and I said, how would you classify these events, kind of tags would you attach
+
+507
+00:38:00,840 --> 00:38:01,840
+to them?
+
+508
+00:38:01,840 --> 00:38:08,520
+Or if you were looking for a particular kind of event, could you divide papers into yes
+
+509
+00:38:08,520 --> 00:38:11,040
+and no?
+
+510
+00:38:11,040 --> 00:38:14,640
+Always start with yourself, you the engineer, can you yourself do it?
+
+511
+00:38:14,640 --> 00:38:18,000
+Because if you can't, you're probably going to have a hard time teaching a computer
+
+512
+00:38:18,000 --> 00:38:19,000
+do it.
+
+513
+00:38:19,000 --> 00:38:24,880
+And then if you get some other humans, probably the person just to chairs away from you,
+
+514
+00:38:24,880 --> 00:38:29,440
+if you can get someone else to do the same task independently and get the same ideally
+
+515
+00:38:29,440 --> 00:38:32,800
+or a similar answer, okay, now you're in good shape.
+
+516
+00:38:32,800 --> 00:38:39,360
+Only then do you start building a computational system to try and do this automatically.
+
+517
+00:38:39,360 --> 00:38:42,120
+And your first stab at that should be something's great forward.
+
+518
+00:38:42,120 --> 00:38:51,160
+A set of regular expressions, heuristics, can you actually find this yourself using rules
+
+519
+00:38:51,160 --> 00:38:53,000
+that you yourself devise?
+
+520
+00:38:53,000 --> 00:38:58,680
+And then if the only way really to get beyond that, to really tackle increasing complexity
+
+521
+00:38:58,680 --> 00:39:02,200
+is to have something that will learn on its own, you'll never do that with regular
+
+522
+00:39:02,200 --> 00:39:03,200
+expressions.
+
+523
+00:39:03,200 --> 00:39:09,520
+You have to use machine learning to have a system find patterns itself in a changing
+
+524
+00:39:09,520 --> 00:39:11,080
+world.
+
+525
+00:39:11,080 --> 00:39:17,200
+So I think you're saying then that there's, you know, you're somewhere on the spectrum
+
+526
+00:39:17,200 --> 00:39:20,320
+of templates and machine learning.
+
+527
+00:39:20,320 --> 00:39:21,720
+Oh yeah, always.
+
+528
+00:39:21,720 --> 00:39:28,160
+In fact, I think the best things out there are always somewhere in the middle.
+
+529
+00:39:28,160 --> 00:39:29,160
+Right.
+
+530
+00:39:29,160 --> 00:39:30,160
+Right.
+
+531
+00:39:30,160 --> 00:39:31,160
+I think by definition.
+
+532
+00:39:31,160 --> 00:39:34,480
+And essentially it becomes a race.
+
+533
+00:39:34,480 --> 00:39:42,840
+Can we build something that can learn faster and output better, smarter content than the
+
+534
+00:39:42,840 --> 00:39:44,440
+system we have?
+
+535
+00:39:44,440 --> 00:39:51,880
+We had a little race actually recently to try and build an event classifier and a brilliant
+
+536
+00:39:51,880 --> 00:39:58,640
+engineer named Leonard Appleton took a stab at just using regular expressions, no machine
+
+537
+00:39:58,640 --> 00:39:59,640
+learning.
+
+538
+00:39:59,640 --> 00:40:05,360
+And another brilliant engineer named Yash took on the task of solving the same problem
+
+539
+00:40:05,360 --> 00:40:14,600
+using a really complicated machine learning graphical model and sometimes John Henry wins
+
+540
+00:40:14,600 --> 00:40:15,600
+the race.
+
+541
+00:40:15,600 --> 00:40:24,360
+Frankly, Yash could not build a system at least last I checked that could do better than Leonard's
+
+542
+00:40:24,360 --> 00:40:29,360
+massive, complicated, regular expression, heuristic engine.
+
+543
+00:40:29,360 --> 00:40:33,480
+But eventually, eventually machine learning will win.
+
+544
+00:40:33,480 --> 00:40:36,000
+Like we all know that, right.
+
+545
+00:40:36,000 --> 00:40:43,160
+But that's the beauty of a practical approach when you're really driven by practical principles.
+
+546
+00:40:43,160 --> 00:40:47,560
+You're willing to say, well, we've got a better solution that's actually simpler and
+
+547
+00:40:47,560 --> 00:40:49,120
+easier to understand.
+
+548
+00:40:49,120 --> 00:40:51,160
+Let's use that for now.
+
+549
+00:40:51,160 --> 00:40:52,480
+Keep trying.
+
+550
+00:40:52,480 --> 00:40:57,440
+But it's never long before a machine learning based system does better.
+
+551
+00:40:57,440 --> 00:41:00,080
+It's just an incredibly powerful tool.
+
+552
+00:41:00,080 --> 00:41:06,920
+When you're using machine learning for tasks like summarization where you referenced earlier,
+
+553
+00:41:06,920 --> 00:41:11,560
+you know, first you do it, then you get someone else to do it and you compare them.
+
+554
+00:41:11,560 --> 00:41:17,000
+You know, your summary of a given paper or a given paragraph is likely to be very different
+
+555
+00:41:17,000 --> 00:41:18,000
+from mine.
+
+556
+00:41:18,000 --> 00:41:23,720
+What do you find ground truth so that you can train learning models?
+
+557
+00:41:23,720 --> 00:41:24,720
+Yeah.
+
+558
+00:41:24,720 --> 00:41:29,240
+You've really put your finger on the hardest problem.
+
+559
+00:41:29,240 --> 00:41:34,640
+Stories by their nature can be told infinite ways.
+
+560
+00:41:34,640 --> 00:41:39,800
+There are some automated techniques that have been around for a decade.
+
+561
+00:41:39,800 --> 00:41:41,280
+They have French color names.
+
+562
+00:41:41,280 --> 00:41:44,800
+I don't know how that came about, but there's something called russian, something called
+
+563
+00:41:44,800 --> 00:41:46,280
+blue.
+
+564
+00:41:46,280 --> 00:41:53,640
+What they do is they treat the output as bag of word problems and they try and find out
+
+565
+00:41:53,640 --> 00:41:55,640
+how much information overlap.
+
+566
+00:41:55,640 --> 00:42:00,240
+There is between a human summary and a computer summary.
+
+567
+00:42:00,240 --> 00:42:04,440
+As you can imagine, that's great if you're trying to measure whether you got it terribly
+
+568
+00:42:04,440 --> 00:42:05,440
+wrong.
+
+569
+00:42:05,440 --> 00:42:06,440
+Right.
+
+570
+00:42:06,440 --> 00:42:10,680
+If we make two summaries and they have nothing to do with each other, then they're probably
+
+571
+00:42:10,680 --> 00:42:13,000
+they're probably not talking about the same thing.
+
+572
+00:42:13,000 --> 00:42:14,000
+Maybe.
+
+573
+00:42:14,000 --> 00:42:15,000
+That's right.
+
+574
+00:42:15,000 --> 00:42:16,000
+That's right.
+
+575
+00:42:16,000 --> 00:42:22,680
+For summarizing fiction, we could be summarizing on two totally different levels and both be
+
+576
+00:42:22,680 --> 00:42:23,680
+right.
+
+577
+00:42:23,680 --> 00:42:24,680
+That's true.
+
+578
+00:42:24,680 --> 00:42:25,680
+That's absolutely true.
+
+579
+00:42:25,680 --> 00:42:29,320
+I think the same holds true for news.
+
+580
+00:42:29,320 --> 00:42:36,560
+I'll let you continue, but that seems like a very, very rudimentary metric.
+
+581
+00:42:36,560 --> 00:42:41,800
+Well, you'd be surprised then to learn that the latest greatest papers in this field are
+
+582
+00:42:41,800 --> 00:42:46,720
+still using those metrics, because they're easy.
+
+583
+00:42:46,720 --> 00:42:54,720
+It's a one click measurement, but it really doesn't help when you want to assess a subtle
+
+584
+00:42:54,720 --> 00:42:59,320
+output of a story that could be sliced and diced in sort of infinite ways.
+
+585
+00:42:59,320 --> 00:43:01,120
+Fortunately, it becomes a capture.
+
+586
+00:43:01,120 --> 00:43:06,560
+You need some human to read it and go, oh yeah, that makes sense, or that's crazy.
+
+587
+00:43:06,560 --> 00:43:15,520
+But there are some techniques you can use, so one is you can actually crowdsource assessment
+
+588
+00:43:15,520 --> 00:43:16,600
+of narrative.
+
+589
+00:43:16,600 --> 00:43:24,080
+You can give human annotators and scorers a system, a rigorous system, so like you can
+
+590
+00:43:24,080 --> 00:43:33,280
+measure the coherence, you can measure the sophistication, whether or not you've really
+
+591
+00:43:33,280 --> 00:43:36,240
+summarized the space well in various ways.
+
+592
+00:43:36,240 --> 00:43:40,480
+So those sounds like they would require a fairly sophisticated crowdsource.
+
+593
+00:43:40,480 --> 00:43:47,160
+Yeah, so that's right, like the more technical and sophisticated this task becomes, the less
+
+594
+00:43:47,160 --> 00:43:49,160
+you can rely on mechanical Turk.
+
+595
+00:43:49,160 --> 00:43:56,800
+In fact, eventually you've got your own engineers doing this, so it's definitely not scalable.
+
+596
+00:43:56,800 --> 00:44:02,800
+But there are some tricks that you can use.
+
+597
+00:44:02,800 --> 00:44:10,920
+So for example, if I generate a bunch of summaries on a topic that I've already summarized, for
+
+598
+00:44:10,920 --> 00:44:16,480
+example, if I have a Wikipedia article about it, I can at least find out if the most important
+
+599
+00:44:16,480 --> 00:44:20,120
+entities in the narrative have been represented.
+
+600
+00:44:20,120 --> 00:44:25,720
+And I can also turn the system around and do extraction on the summary.
+
+601
+00:44:25,720 --> 00:44:31,720
+You can even, I will suggest to make a generative adversarial network that generates stories
+
+602
+00:44:31,720 --> 00:44:33,640
+and critiques them.
+
+603
+00:44:33,640 --> 00:44:35,360
+You can see where this is going.
+
+604
+00:44:35,360 --> 00:44:42,400
+Eventually, you can have a system that tries to check off all the boxes of what counts
+
+605
+00:44:42,400 --> 00:44:46,560
+as a good story, like you've talked about the most important entities and you've expressed
+
+606
+00:44:46,560 --> 00:44:54,240
+their relationships, you've come in under budget in terms of space on the page.
+
+607
+00:44:54,240 --> 00:44:59,000
+But ultimately, you're going to need a human to assess whether it's a well-written story.
+
+608
+00:44:59,000 --> 00:45:06,880
+Until we can crack the code of text style transfer, where you can actually say, tell me the
+
+609
+00:45:06,880 --> 00:45:12,520
+story and the style of a New York Times reporter, or tell me the story and the style of a, you
+
+610
+00:45:12,520 --> 00:45:15,760
+know, a terse military briefing.
+
+611
+00:45:15,760 --> 00:45:18,560
+Send on my text in Hemingway style.
+
+612
+00:45:18,560 --> 00:45:19,560
+Exactly.
+
+613
+00:45:19,560 --> 00:45:27,640
+Until we can actually have networks that can both detect and reproduce narrative style.
+
+614
+00:45:27,640 --> 00:45:32,720
+I think we're for the time being stuck in a world where it's really hard to assess how
+
+615
+00:45:32,720 --> 00:45:34,760
+well our systems are doing.
+
+616
+00:45:34,760 --> 00:45:40,840
+Ultimately, you want to hook this up to your users and either passively or actively
+
+617
+00:45:40,840 --> 00:45:44,240
+harvest their feedback.
+
+618
+00:45:44,240 --> 00:45:47,040
+The simplest version of this, of course, is A-B testing.
+
+619
+00:45:47,040 --> 00:45:53,720
+If you write many versions of a summary and you expose a large number of humans to A versus
+
+620
+00:45:53,720 --> 00:45:57,560
+B, you can just find out what they think of it by, for example,
+
+621
+00:45:57,560 --> 00:45:59,800
+whether they click through and read it.
+
+622
+00:45:59,800 --> 00:46:01,800
+You can also make it active.
+
+623
+00:46:01,800 --> 00:46:05,560
+You can let users say, yeah, that was good or that was bad.
+
+624
+00:46:05,560 --> 00:46:10,240
+We're going back to my Hemingway text summaries.
+
+625
+00:46:10,240 --> 00:46:15,840
+Google inbox presenting you three choices for how to summarize the appropriate response
+
+626
+00:46:15,840 --> 00:46:16,840
+to an email.
+
+627
+00:46:16,840 --> 00:46:17,840
+Yep.
+
+628
+00:46:17,840 --> 00:46:19,720
+And we've played with that as well.
+
+629
+00:46:19,720 --> 00:46:26,720
+We generate alternative summaries to events, for example.
+
+630
+00:46:26,720 --> 00:46:32,440
+It's a really powerful way of real-time, effortless, quality checking.
+
+631
+00:46:32,440 --> 00:46:37,360
+You don't want to have to pause your whole engineering operation in order, all the time,
+
+632
+00:46:37,360 --> 00:46:38,720
+just to assess how well you're doing.
+
+633
+00:46:38,720 --> 00:46:40,920
+You really want it to be continual.
+
+634
+00:46:40,920 --> 00:46:45,880
+You want to always be reading the output of your own computational systems.
+
+635
+00:46:45,880 --> 00:46:47,680
+We call it dog fooding.
+
+636
+00:46:47,680 --> 00:46:50,200
+You've got to be real-time dog fooding.
+
+637
+00:46:50,200 --> 00:46:56,760
+The nice thing about primary science is this thing that I'm building is we use it to
+
+638
+00:46:56,760 --> 00:47:01,080
+discover the research that is going to help us make it better.
+
+639
+00:47:01,080 --> 00:47:06,160
+And so if you keep on using the thing, you are your own quality assessor.
+
+640
+00:47:06,160 --> 00:47:07,160
+That really helps.
+
+641
+00:47:07,160 --> 00:47:08,160
+Right.
+
+642
+00:47:08,160 --> 00:47:09,160
+But hard to scale.
+
+643
+00:47:09,160 --> 00:47:15,720
+I wish I could clone myself in some way to assess sort of at 1,000X.
+
+644
+00:47:15,720 --> 00:47:24,000
+Now one thing that I didn't see in what you've built, it seems like it is, it does a really
+
+645
+00:47:24,000 --> 00:47:32,720
+good job at this meta characterization of archive and what's happening in different categories.
+
+646
+00:47:32,720 --> 00:47:36,640
+But I didn't see it attempting to summarize individual papers.
+
+647
+00:47:36,640 --> 00:47:39,960
+Which is the thing that Jeff Dean and I were originally talking about.
+
+648
+00:47:39,960 --> 00:47:42,160
+Is it trying to do that somewhere?
+
+649
+00:47:42,160 --> 00:47:43,760
+Not in what you're looking at.
+
+650
+00:47:43,760 --> 00:47:48,200
+But we are actually working on that summarization problem.
+
+651
+00:47:48,200 --> 00:47:54,040
+Yeah, so we've taken two strategies and they're kind of running in parallel.
+
+652
+00:47:54,040 --> 00:48:02,680
+One is extractive summarization where you, the system is allowed to pull words and even
+
+653
+00:48:02,680 --> 00:48:07,400
+whole sentences directly from the text and then kind of pull them together into a summary.
+
+654
+00:48:07,400 --> 00:48:11,720
+That works extremely well when you have a large number of docs.
+
+655
+00:48:11,720 --> 00:48:18,320
+If you have 100 documents all about the same thing, extractive summarization is really powerful
+
+656
+00:48:18,320 --> 00:48:20,160
+and really efficient.
+
+657
+00:48:20,160 --> 00:48:25,120
+And then the alternative is abstractive summarization where the system is going to write its own words,
+
+658
+00:48:25,120 --> 00:48:28,400
+often character by character, out of thin air.
+
+659
+00:48:28,400 --> 00:48:29,680
+And it has a language model.
+
+660
+00:48:29,680 --> 00:48:35,520
+So it reads all these things and it basically makes a prediction about what it should say
+
+661
+00:48:35,520 --> 00:48:38,520
+next as it generates a summary.
+
+662
+00:48:38,520 --> 00:48:44,200
+A really nice bit of progress in this field that we've been using is abstractive summarization
+
+663
+00:48:44,200 --> 00:48:45,800
+with pointers.
+
+664
+00:48:45,800 --> 00:48:51,560
+So the idea here is you also have a sense of your confidence about whether the word or
+
+665
+00:48:51,560 --> 00:48:58,040
+phrase that you're putting into the summary at any given time is going to be a good choice.
+
+666
+00:48:58,040 --> 00:49:02,480
+And if you're not so confident, you point back to the text and you grab the thing itself.
+
+667
+00:49:02,480 --> 00:49:11,320
+So for example, if you had a sentence that said one of the most exciting areas of artificial
+
+668
+00:49:11,320 --> 00:49:17,280
+intelligence these days is generative adversarial networks.
+
+669
+00:49:17,280 --> 00:49:21,240
+If generative adversarial networks, that phrase is something that you haven't encountered
+
+670
+00:49:21,240 --> 00:49:27,520
+or your model basically says, I'm not sure if I can actually paraphrase that.
+
+671
+00:49:27,520 --> 00:49:29,680
+Then what you want to do is what a good human writer would do.
+
+672
+00:49:29,680 --> 00:49:31,920
+You just go back and you grab that thing.
+
+673
+00:49:31,920 --> 00:49:40,720
+So you can summarize while also having some of the advantages of extractive.
+
+674
+00:49:40,720 --> 00:49:47,640
+So summarizing basically around the entities that you aren't too sure about.
+
+675
+00:49:47,640 --> 00:49:48,640
+Exactly.
+
+676
+00:49:48,640 --> 00:49:52,200
+It basically becomes a sliding scale between abstractive and extractive.
+
+677
+00:49:52,200 --> 00:49:56,000
+The more confident it gets, the more abstractive it gets, the more flexible it gets, which
+
+678
+00:49:56,000 --> 00:50:01,880
+will allow you to summarize a single scientific paper, for example, in a couple of sentences.
+
+679
+00:50:01,880 --> 00:50:08,240
+And if you're not so sure, then it slides over to extractive and it will just pull out
+
+680
+00:50:08,240 --> 00:50:14,440
+the sentences that it deem and the phrases that it deems are the most central and informative.
+
+681
+00:50:14,440 --> 00:50:15,440
+Interesting.
+
+682
+00:50:15,440 --> 00:50:16,440
+It's a hard problem though.
+
+683
+00:50:16,440 --> 00:50:17,440
+It's a really hard problem.
+
+684
+00:50:17,440 --> 00:50:22,720
+Another thing that makes it hard when it comes to scientific papers is they already have
+
+685
+00:50:22,720 --> 00:50:23,720
+their own summaries.
+
+686
+00:50:23,720 --> 00:50:26,720
+They're called abstracts.
+
+687
+00:50:26,720 --> 00:50:32,760
+And you'd think that, oh, great, this job done, but as you know, abstracts themselves
+
+688
+00:50:32,760 --> 00:50:38,400
+can be so riddled with jargon and references to arcane things that it's hardly a summary
+
+689
+00:50:38,400 --> 00:50:39,400
+at all.
+
+690
+00:50:39,400 --> 00:50:42,200
+It's really only a summary for the authors of the paper.
+
+691
+00:50:42,200 --> 00:50:43,200
+Right.
+
+692
+00:50:43,200 --> 00:50:45,960
+So you really need a summary of the summary.
+
+693
+00:50:45,960 --> 00:50:46,960
+Right.
+
+694
+00:50:46,960 --> 00:50:48,440
+And that's what we're working on.
+
+695
+00:50:48,440 --> 00:50:52,000
+We're finding that you really do need to power this with an ontology and a knowledge base
+
+696
+00:50:52,000 --> 00:50:53,000
+though.
+
+697
+00:50:53,000 --> 00:50:54,360
+A library on that.
+
+698
+00:50:54,360 --> 00:51:00,680
+Okay, so let's take, for example, a problem that I'm just starting to work on.
+
+699
+00:51:00,680 --> 00:51:07,480
+How do you summarize and make sense of pharmaceutical research papers?
+
+700
+00:51:07,480 --> 00:51:15,720
+So there is an ontology that is available to everyone that basically the NIH paid for
+
+701
+00:51:15,720 --> 00:51:17,680
+called MASH.
+
+702
+00:51:17,680 --> 00:51:28,080
+And it's kind of like every jargon term in biochemistry and molecular biology, gene names and gene
+
+703
+00:51:28,080 --> 00:51:35,040
+types, all of that is captured in this very rich ontology that was hand-built by no
+
+704
+00:51:35,040 --> 00:51:40,160
+doubt by un thanked graduate students.
+
+705
+00:51:40,160 --> 00:51:45,240
+And something that's really nice about MASH is that it's actually a subset of wiki data.
+
+706
+00:51:45,240 --> 00:51:52,720
+And wiki data is the database that stands behind wikipedia.
+
+707
+00:51:52,720 --> 00:51:57,000
+Now I say that in an idealistic way because actually, in reality, that's the way it was
+
+708
+00:51:57,000 --> 00:51:58,000
+dreamed up.
+
+709
+00:51:58,000 --> 00:52:01,120
+Oh, wiki data is going to basically be the database that powers wikipedia.
+
+710
+00:52:01,120 --> 00:52:04,000
+But in fact, it's not there yet.
+
+711
+00:52:04,000 --> 00:52:13,080
+Humans vastly prefer to update wikipedia with content and wiki data basically plays catch-up.
+
+712
+00:52:13,080 --> 00:52:19,800
+Nonetheless, it is a huge powerful open source knowledge base and the MASH ontology is a
+
+713
+00:52:19,800 --> 00:52:21,640
+subset of it.
+
+714
+00:52:21,640 --> 00:52:28,480
+And so if you want to summarize a scientific paper, just a single scientific paper, the
+
+715
+00:52:28,480 --> 00:52:31,400
+first thing you need to do is make sense of it.
+
+716
+00:52:31,400 --> 00:52:36,600
+You need to map all of those words which to the computer or just, it could be random numbers
+
+717
+00:52:36,600 --> 00:52:39,200
+for all they cares, has no idea what it means.
+
+718
+00:52:39,200 --> 00:52:44,200
+You need to map them to concepts and that's what systems like MASH were designed to help
+
+719
+00:52:44,200 --> 00:52:45,440
+us do.
+
+720
+00:52:45,440 --> 00:52:52,160
+So the idea of being instead of what you're doing in science primer, and doing this in
+
+721
+00:52:52,160 --> 00:52:57,080
+a totally unsupervised manner, here you're using the additional information you're getting
+
+722
+00:52:57,080 --> 00:53:05,600
+from the pre-existing ontology to help the machine make sense of the various documents.
+
+723
+00:53:05,600 --> 00:53:06,920
+And to paraphrase it.
+
+724
+00:53:06,920 --> 00:53:12,600
+So like a good summary is something that doesn't just say less.
+
+725
+00:53:12,600 --> 00:53:17,200
+It also says just as much but in a compressed way.
+
+726
+00:53:17,200 --> 00:53:18,200
+Right.
+
+727
+00:53:18,200 --> 00:53:21,200
+If I just tell you the beginning of a story, I haven't really compressed that story for
+
+728
+00:53:21,200 --> 00:53:22,880
+you.
+
+729
+00:53:22,880 --> 00:53:26,720
+I need to give you the sense of the beginning, middle, and end and compress that all
+
+730
+00:53:26,720 --> 00:53:29,040
+down into three sentences.
+
+731
+00:53:29,040 --> 00:53:35,200
+And you're not going to be able to do that just using the standard NLP techniques on a
+
+732
+00:53:35,200 --> 00:53:36,200
+scientific paper.
+
+733
+00:53:36,200 --> 00:53:39,120
+You're just not going to be able to do it, no way.
+
+734
+00:53:39,120 --> 00:53:44,960
+You have to map that out to an ontology and say, oh, you know, this long sentence describing
+
+735
+00:53:44,960 --> 00:53:50,720
+this genetic pathway, I can boil that down to a single sentence that says, the genetic
+
+736
+00:53:50,720 --> 00:53:57,800
+pathway X, you know, interesting, but yeah, you need a lot of tacit knowledge to be able
+
+737
+00:53:57,800 --> 00:53:58,800
+to do that.
+
+738
+00:53:58,800 --> 00:54:01,440
+So that's what we're working on.
+
+739
+00:54:01,440 --> 00:54:02,440
+Awesome.
+
+740
+00:54:02,440 --> 00:54:03,440
+Well, John, this has been super interesting.
+
+741
+00:54:03,440 --> 00:54:06,120
+I really appreciate you taking the time.
+
+742
+00:54:06,120 --> 00:54:07,120
+Thank you.
+
+743
+00:54:07,120 --> 00:54:09,760
+Anything else you'd like to share with the audience?
+
+744
+00:54:09,760 --> 00:54:14,360
+Oh, just that I'd like to make a prediction.
+
+745
+00:54:14,360 --> 00:54:15,360
+Go ahead.
+
+746
+00:54:15,360 --> 00:54:25,680
+Well, I predict that the kind of stuff we're working on is going to accelerate artificial
+
+747
+00:54:25,680 --> 00:54:27,760
+intelligence research more than anything else.
+
+748
+00:54:27,760 --> 00:54:34,680
+I think building AI that can read the latest research on AI and help the engineers who
+
+749
+00:54:34,680 --> 00:54:42,240
+build it, build it faster is going to vastly accelerate the whole process.
+
+750
+00:54:42,240 --> 00:54:43,240
+Awesome.
+
+751
+00:54:43,240 --> 00:54:51,920
+Well, we will put your prediction on the blockchain and just to make sure we get all the jargon
+
+752
+00:54:51,920 --> 00:54:52,920
+in.
+
+753
+00:54:52,920 --> 00:54:53,920
+Exactly.
+
+754
+00:54:53,920 --> 00:54:54,920
+Then we'll do an ICU.
+
+755
+00:54:54,920 --> 00:54:57,520
+We'll do an ICU, right?
+
+756
+00:54:57,520 --> 00:54:58,520
+Awesome.
+
+757
+00:54:58,520 --> 00:55:00,320
+Thanks so much, John.
+
+758
+00:55:00,320 --> 00:55:01,320
+Thanks, Sam.
+
+759
+00:55:01,320 --> 00:55:06,560
+All right, everyone.
+
+760
+00:55:06,560 --> 00:55:08,600
+That's our show for today.
+
+761
+00:55:08,600 --> 00:55:13,560
+For more information on John or any of the topics covered in this episode, head on over
+
+762
+00:55:13,560 --> 00:55:19,360
+to twomolei.com slash talk slash one, three, six.
+
+763
+00:55:19,360 --> 00:55:37,000
+Thanks so much for listening and catch you next time.
+

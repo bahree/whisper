@@ -1,0 +1,1082 @@
+WEBVTT
+
+00:00.000 --> 00:05.860
+Hey everybody, Sam here. We've got some great news to share, and also a favorite
+
+00:05.860 --> 00:12.120
+to ask. We're in the running for this year's People's Choice Podcast Awards, in both the
+
+00:12.120 --> 00:17.680
+People's Choice and Technology categories, and we would really appreciate your support.
+
+00:17.680 --> 00:23.760
+To nominate us, you'll just head over to twimlai.com slash nominate, where we've linked to and
+
+00:23.760 --> 00:29.440
+embedded the nomination form from the award site. There, you'll need to input your information
+
+00:29.440 --> 00:35.200
+and create a listener nomination account. Once you get to the ballot, just find and select
+
+00:35.200 --> 00:41.280
+this week in machine learning and AI on the nomination list for both the Adam Curry People's
+
+00:41.280 --> 00:49.120
+Choice Award and the this week in tech technology category. As you know, we really, really appreciate
+
+00:49.120 --> 00:55.200
+each listener and would love to share in this accomplishment with you. Remember that url is
+
+00:55.200 --> 01:02.240
+twimlai.com slash nominate. Feel free to hit pause and take a moment to nominate us now.
+
+01:14.160 --> 01:20.240
+Hello and welcome to another episode of Twimletalk, the podcast why interview interesting people,
+
+01:20.240 --> 01:26.160
+doing interesting things in machine learning and artificial intelligence. I'm your host Sam
+
+01:26.160 --> 01:39.440
+Charrington. If you follow us on Twitter, you might have seen this announcement, but as of last week,
+
+01:39.440 --> 01:47.360
+the pod is available on both the new Google Podcast app and wait for it, Spotify. If you've
+
+01:47.360 --> 01:52.160
+been waiting on that update, make sure you give us a quick search and subscribe on either or both
+
+01:52.160 --> 01:58.640
+of these platforms. Spotify in particular was a long time in the works and ultimately required
+
+01:58.640 --> 02:04.240
+a big shift in the way the podcast is published, so you may notice other changes as well. Let us know
+
+02:04.240 --> 02:12.720
+if something seems amiss. In this episode, I'm joined by Ajibuso Zhang, PhD student in the Department
+
+02:12.720 --> 02:19.360
+of Statistics at Columbia University. In this interview, Ajie and I discuss two of her recent papers,
+
+02:19.360 --> 02:26.400
+the first and accepted paper from this year's ICML conference titled Noison, Unbiased Regularization
+
+02:26.400 --> 02:33.040
+for Recurrent Neural Networks, which as the name implies, presents a new way to regularize RNNs
+
+02:33.040 --> 02:40.960
+using noise injection. The second paper, an ICLR submission from last year titled Topic RNN,
+
+02:40.960 --> 02:46.880
+a recurrent neural network with long-range semantic dependency. They've used an RNN-based
+
+02:46.880 --> 02:52.160
+language model designed to capture the global semantic meaning relating words and a document
+
+02:52.160 --> 02:58.080
+via latent topics. We dive into the details behind both of these papers and I learn a ton
+
+02:58.080 --> 03:00.000
+along the way. Enjoy.
+
+03:00.000 --> 03:11.040
+All right, everyone. I am on the line with Ajibuso Zhang. Ajie is a PhD student in the Department
+
+03:11.040 --> 03:16.640
+of Statistics at Columbia University. Ajie, welcome to this weekend machine learning in AI.
+
+03:16.640 --> 03:23.680
+Hi, thanks for having me. Absolutely. So Ajie and I are actually catching up for the second time.
+
+03:23.680 --> 03:31.520
+We did have a chance to chat back in December at NIPS, but wanted to get caught up on all of her
+
+03:31.520 --> 03:38.080
+latest work, including a paper that she's got accepted to the ICML conference. So Ajie, before
+
+03:38.080 --> 03:43.840
+we dive in all that, why don't you talk a little bit about your background and how you got involved
+
+03:43.840 --> 03:48.720
+in machine learning research from a statistical perspective?
+
+03:48.720 --> 03:55.200
+Yeah. So I started with machine learning pretty early. I did my undergrad in France at Telecom
+
+03:55.200 --> 04:01.440
+Paritek, where I specialize in statistical learning theory. They call it a theoretical
+
+04:01.440 --> 04:10.240
+advantage statistic. So my background is in a mix of math and CS. After my second year at Telecom,
+
+04:10.240 --> 04:16.320
+I had the opportunity to go to Cornell for an exchange program, which I did and worked more
+
+04:16.320 --> 04:22.000
+on the staff side there. And after Cornell, I decided that I wanted to find a meaningful
+
+04:22.000 --> 04:28.640
+application of statistics. So I went to the World Bank and worked on building models for assessing
+
+04:28.640 --> 04:34.400
+market and counterparty risk, with the vision that if I do my job well, then the World Bank is
+
+04:34.400 --> 04:41.040
+going to keep it stripper a rating and poor countries will be able to get loans at very low rate
+
+04:41.040 --> 04:46.480
+because they don't have access to the market. So I did that for a bit more than a year. And then
+
+04:46.480 --> 04:54.800
+I started my PhD at Columbia around 2014, August 2014 to be more precise. And yeah, I've been
+
+04:54.800 --> 05:00.960
+working on the 36th department ever since. Okay. Can you talk a little bit more about that work
+
+05:00.960 --> 05:04.880
+at the World Bank and the types of models that you were building there?
+
+05:04.880 --> 05:12.560
+Yes, there's different ways we were using stats to assess risk. There's models for value
+
+05:12.560 --> 05:20.960
+at risk. There's model for potential future exposure. All these models basically tell the World Bank
+
+05:20.960 --> 05:28.640
+what are the risk if they enter in a financial agreement with a counterparty. Those counterparty
+
+05:28.640 --> 05:36.400
+are, for example, the ones in the financial market. And if they are able to assess the risk in
+
+05:36.400 --> 05:42.320
+entering into that financial transaction, then they'll be able to not incur any defaults from
+
+05:42.320 --> 05:47.200
+their counterparties. And they will be able to keep their triple a rating, which they are being
+
+05:47.200 --> 05:53.440
+evaluated on. I believe every year by standard imports and other like fish and more,
+
+05:53.440 --> 05:59.600
+there are different shops that assess rating for these types of institutions. And keeping the
+
+05:59.600 --> 06:05.680
+triple a rating is key because then they can get these rates at, they can get these money from the
+
+06:05.680 --> 06:12.480
+market at very low rates and also lend money to poor countries at even low rates. So they are
+
+06:12.480 --> 06:18.800
+acting like an intermediary between poor countries and the financial market. Okay. So my work was to
+
+06:18.800 --> 06:23.840
+assess value at risk and potential future exposure for the World Bank.
+
+06:24.800 --> 06:31.360
+What were some of the data sources upon which you were building those types of models?
+
+06:31.360 --> 06:40.160
+Those were internal internal data sets. Okay. So yeah, there is a repository where they store every
+
+06:40.880 --> 06:47.520
+every transaction they have, either with the poor countries that they lend money to and also to
+
+06:47.520 --> 06:54.320
+the transactions they have with the financial market institutions. Okay. Yeah. Interesting. Interesting.
+
+06:54.320 --> 07:06.160
+And so then you went over into your PhD program and what's the defining thread that is guiding
+
+07:06.160 --> 07:14.160
+your research on the PhD? I like working with probabilistic graphical models and I like also working
+
+07:14.160 --> 07:20.720
+with neural networks because I think they are very flexible. And I like applications involving
+
+07:20.720 --> 07:26.160
+sequential data because I think there's a lot of challenges in modeling sequential data. You need to
+
+07:26.160 --> 07:32.000
+account for the fact that they can be high dimensional. You need to account for all the dependencies
+
+07:32.000 --> 07:38.800
+in the data. And I find that interesting from a scientific point of view. So that's mainly what's
+
+07:38.800 --> 07:44.720
+guiding my research right now, finding ways to improve learning with sequential data.
+
+07:44.720 --> 07:51.280
+And I've looked at things like context representation, regularization, and scalable learning with
+
+07:51.280 --> 08:00.480
+variational inference. Okay. And the paper that you have accepted at ICML is focused on one of those
+
+08:00.480 --> 08:06.800
+areas regularization in particular. Maybe we can start by having you talk a little bit about
+
+08:06.800 --> 08:16.320
+regularization generally and different techniques for doing it and kind of what kind of results you've
+
+08:16.320 --> 08:23.520
+seen applying traditional regularization to RNNs. And then we can talk a little bit about this
+
+08:23.520 --> 08:30.800
+new technique. Yeah. So, recreational networks are the main family of models for sequential data.
+
+08:30.800 --> 08:36.400
+And they tend to be very flexible. They tend to have high capacity because when you have, for
+
+08:36.400 --> 08:44.080
+example, texts, you have the recreational network that represent text as using a hidden state.
+
+08:44.080 --> 08:50.960
+And basically you project each word in your data into that low dimensional space. And that low
+
+08:50.960 --> 08:56.240
+dimensional phase, you also use it to do prediction for the next word that you're going to observe.
+
+08:56.240 --> 09:02.320
+And those parameters, those weight matrices that you use to do these projections used to be
+
+09:02.320 --> 09:07.840
+very high dimensional. And so you end up easily with models that are that have very high capacity
+
+09:07.840 --> 09:15.200
+and that tend to memorize data. And so it becomes important to find ways to regularize those models.
+
+09:15.200 --> 09:22.160
+And the paper that I'm going to present at ICML lies in the line of work that used noise injection
+
+09:22.160 --> 09:28.480
+as a way to regularize these models. Dropout is one one very famous noise injection
+
+09:28.480 --> 09:34.800
+regularization technique. And what we are proposing with noisy is an alternative to dropout that
+
+09:34.800 --> 09:42.240
+does the noise injection in a different way. So maybe talk through how dropout works as a
+
+09:42.240 --> 09:48.560
+baseline for starting to think about this problem. So in dropout for recreational networks,
+
+09:48.560 --> 09:54.800
+you would let's take the LSTN. You would multiply, let's say you have your current observation,
+
+09:54.800 --> 10:01.120
+your current word, XT. You would have to multiply that observation with some Bernoulli noise.
+
+10:01.120 --> 10:08.000
+And you would also have to multiply your hidden state with some Bernoulli noise. And you will
+
+10:08.000 --> 10:13.760
+condition on that noise observation and noise hidden state to compute your new hidden state
+
+10:13.760 --> 10:19.040
+before predicting the next word. And then practically what that means is that you're
+
+10:19.040 --> 10:26.160
+essentially forgetting or not using some of the weights or zeroing out some of the weights,
+
+10:26.160 --> 10:31.360
+is that right? Yes, it's equivalent to basically, like you say, zeroing out some of the weights.
+
+10:31.360 --> 10:37.680
+So you are reducing the capacity of the network in doing that, which is essentially what regularization
+
+10:37.680 --> 10:45.040
+is. And so what's different about the approach you're proposing in the noise in paper?
+
+10:45.040 --> 10:52.480
+In the noise in paper, the motivation was that we want to do regularization while still keeping
+
+10:52.480 --> 10:58.880
+the properties of the model we are regularizing intact. In the sense that we want to regularize
+
+10:58.880 --> 11:07.440
+an LSTM while not altering the LSTM's properties. And we define that in with the term unbiased
+
+11:07.440 --> 11:14.320
+noise injection. And so the way unbiasedness works is that if you take the conditional expectation
+
+11:14.320 --> 11:21.200
+of any hidden state in your sequence, in your sequential representation, then you recover
+
+11:21.760 --> 11:26.640
+the hidden state of the underlying R and then you are regularizing. And you don't get that
+
+11:26.640 --> 11:34.640
+with dropout. And so what way does dropout in what way is it biased or does it not preserve this
+
+11:34.640 --> 11:43.040
+unbiased property? It's because of the way you are injecting the noise. So in noise in we compute
+
+11:43.040 --> 11:50.640
+the hidden state before doing prediction as usual, but we multiply the finite hidden state with noise.
+
+11:50.640 --> 11:56.800
+In dropout, you would multiply the noise with the data and the previous hidden state and you
+
+11:56.800 --> 12:02.480
+condition on those to compute your new hidden state, which uses some nonlinearities. So if you do
+
+12:02.480 --> 12:08.000
+expectation of that hidden state, you wouldn't recover the previous underlying hidden state because
+
+12:08.000 --> 12:14.320
+of the nonlinearities. Whereas in noise in we compute everything, we condition on the previous
+
+12:14.320 --> 12:19.520
+observation and the previous hidden state and compute the new hidden state. And before we use
+
+12:19.520 --> 12:25.680
+that hidden state for prediction, we multiply it or add some noise to it such that when you take
+
+12:25.680 --> 12:31.040
+its expectation, you recover the underlying hidden state. And we found that to be very useful
+
+12:31.040 --> 12:37.920
+in regularizing these LSTMs. Is it fair to simplify this as saying that dropout adds a noise
+
+12:37.920 --> 12:45.040
+before calculating the hidden state and noise and adds a noise after calculating the hidden state
+
+12:45.040 --> 12:52.080
+and doing that, it doesn't bias the network? Yes, that's a good summary of what the difference is.
+
+12:52.720 --> 13:00.560
+You talk about in your paper some performance improvements. I'm curious in your use of the term,
+
+13:00.560 --> 13:09.600
+you know, biased. Have you identified like more qualitative differences between the way these two
+
+13:09.600 --> 13:16.080
+regularization methods perform beyond just the performance? Are there observations you can make
+
+13:16.080 --> 13:21.840
+about the way dropout affects the results of a network? Yes, we have not we have not looked at
+
+13:21.840 --> 13:28.400
+the qualitative differences. But one thing that was interesting in that paper was that given
+
+13:28.400 --> 13:34.800
+under the unbiased noise injection definition, we can consider actually an LSTM that's
+
+13:34.800 --> 13:41.280
+regularized with dropout as a new model, as defining a new model class for sequential data.
+
+13:41.280 --> 13:47.760
+And we apply the noise in regularization on top of that. And we also found improvements.
+
+13:47.760 --> 13:54.000
+We didn't, we didn't unfortunately do any qualitative comparison between dropout and noise
+
+13:54.000 --> 13:58.480
+and I think that would be an interesting thing that I should look at next. Could you elaborate on
+
+13:58.480 --> 14:04.480
+that last comment you made though? On dropout as defining a model class? It sounds like what you're
+
+14:04.480 --> 14:12.800
+saying is that and you hinted at this earlier that dropout and maybe this is comes directly from
+
+14:12.800 --> 14:20.160
+changing the expectation of this hidden state, but you can think of LSTM with dropout as almost
+
+14:20.160 --> 14:27.520
+its own class of model where as noise in applied to an LSTM, it sounds like you're saying preserve
+
+14:27.520 --> 14:34.160
+some fundamental LSTMness or some fundamental thing? Yes, in the sense that the expectation of
+
+14:34.160 --> 14:38.720
+your noisy hidden state is the same as the hidden state of the thing you're regularizing
+
+14:38.720 --> 14:44.480
+under strong and biasness. Are there other things that you learned about applying regularization
+
+14:44.480 --> 14:52.160
+to LSTMs and RNNs in the process of exploring this noise and approach? Yeah, interesting.
+
+14:52.160 --> 14:58.240
+Usually when you want to regularize a model, you will have to basically use less parameters.
+
+14:59.360 --> 15:05.120
+So one way of doing that in iron and has been to tie the weights of your inputs,
+
+15:05.680 --> 15:10.320
+the embedding matrix from the input and the embedding matrix from the output right before you do
+
+15:10.320 --> 15:17.280
+prediction. That's an effective way of doing it, but another way is in using noise,
+
+15:17.280 --> 15:23.120
+but using noise wouldn't reduce the number of parameters. It would reduce the capacity of your
+
+15:23.120 --> 15:28.800
+network, not by reducing the number of parameters, but by reducing the amount that it encodes in the
+
+15:28.800 --> 15:36.240
+data using noise. So you have this network that has a very high capacity while also being regularized
+
+15:36.240 --> 15:42.400
+because you are injecting noise in the procedures such that the network doesn't try to memorize the
+
+15:42.400 --> 15:52.400
+data. No, I'm following you. So one question that occurs to me then is are there implications
+
+15:52.400 --> 16:02.320
+on the computational complexity here in applying a noise-based approach as opposed to tying your
+
+16:02.320 --> 16:09.760
+inputs and outputs in terms of the training time specifically? I'm responding primarily to the
+
+16:10.240 --> 16:15.920
+you saying that you have access to more parameters when you're using a noise-based approach
+
+16:15.920 --> 16:22.080
+than with the other approach you described. Yes, what I mean is that you don't have to reduce your
+
+16:22.080 --> 16:28.400
+number of parameters. All you have to do is use noise such that your weights will memorize less
+
+16:28.400 --> 16:35.440
+of the data than usual. So in terms of training time of course if you have if I give you two
+
+16:35.440 --> 16:42.240
+equivalent networks where they both have the same number of parameters but where one uses noise
+
+16:42.240 --> 16:47.840
+injection and the other one uses weight time but they both have the same number of parameters then
+
+16:47.840 --> 16:56.080
+the training time will will be comparable. Okay. Yeah, the only slight difference will be in the time
+
+16:56.080 --> 17:01.760
+you take to multiply a noise with the hidden state. Right. Yeah. No, it's not particularly significant.
+
+17:01.760 --> 17:09.600
+Yeah, yeah, yeah, exactly. To test this you tested it against a couple of benchmark data sets. Can
+
+17:09.600 --> 17:16.800
+you describe your evaluation process? Yes, we wanted to because it's a regularization method and
+
+17:16.800 --> 17:22.480
+because we applied it to language we used two benchmark data sets. In the literature we used
+
+17:22.480 --> 17:29.920
+the pantry bank and the week it takes two from Salesforce and so we wanted to assess the method
+
+17:29.920 --> 17:36.400
+as being a regularization method. So we compared it to the deterministic unregularized LSTM
+
+17:36.400 --> 17:42.400
+and which we so obviously that adding noise helps in regularizing so you get a better performance
+
+17:42.400 --> 17:50.800
+as defined by a perplexity but we also compared it to an LSTM regularized with dropout to assess the
+
+17:50.800 --> 17:57.280
+importance of having this unbiasedness and we found also that it does better when you ensure that
+
+17:57.280 --> 18:04.240
+your regularization method is unbiased and we also built on this unbiasedness notion that
+
+18:04.240 --> 18:09.600
+since dropout is biased we can consider it as a new model class for sequences and we also
+
+18:09.600 --> 18:16.240
+compared to an LSTM regularized with dropout only as the new model and an LSTM regularized with
+
+18:16.240 --> 18:21.600
+dropout augmented with this noise in regularization and we also found that that helps too.
+
+18:23.280 --> 18:34.480
+And so just to back up on the testing with these two data sets you basically created an RNN
+
+18:34.480 --> 18:39.840
+or trained an RNN on these data sets using these various regularization methods and then
+
+18:39.840 --> 18:45.920
+were you giving it a word and asking it to predict the next word and using that to
+
+18:46.640 --> 18:50.560
+you know that was your basis for evaluation or is it something else?
+
+18:50.560 --> 18:52.080
+Yes, next word prediction.
+
+18:52.080 --> 18:53.040
+Next word prediction.
+
+18:53.040 --> 18:59.280
+Okay, and then you get the perplexity as a measure of how good your language model is doing.
+
+18:59.280 --> 19:05.600
+In the paper you talk about you mentioned earlier Bernoulli noise but you tested this with
+
+19:05.600 --> 19:11.760
+a bunch of different noise distributions. Can you talk a little bit about what you saw there?
+
+19:11.760 --> 19:17.600
+Yes, what we wanted to assess there was let's not only restrict ourselves to Bernoulli and see
+
+19:18.240 --> 19:24.320
+what the effect is when you use any type of noise distributions because there are many and they
+
+19:24.320 --> 19:30.400
+all have different properties, some have heavy details and others some are more skewed and others
+
+19:30.400 --> 19:36.560
+and things like that so we wanted to assess how that would impact the effectiveness of noise in
+
+19:36.560 --> 19:42.560
+but what we found was that the only thing that matters from the noise distribution is its second
+
+19:42.560 --> 19:49.600
+moment so the variance and that you can use any noise distribution as long as you use the same
+
+19:49.600 --> 19:55.760
+variance you will get the same performance and we show that also theoretically in the paper
+
+19:55.760 --> 20:01.360
+by deriving the actual objective function and we found that it depends on yeah the second
+
+20:01.360 --> 20:11.440
+moment of the noise. Did you come to any conclusions as to specific either problems or properties
+
+20:11.440 --> 20:20.640
+of data sets or other characteristics where you know this performs better than you know say drop
+
+20:20.640 --> 20:27.520
+out or some other method or is it does it appear to be broadly applicable to you know whenever
+
+20:27.520 --> 20:34.560
+you're using an RNN? Yes actually yes it would be we only looked at text data but it's applicable
+
+20:34.560 --> 20:39.920
+to any that's a sequence data and I'm working on extending it on that I'm also working on
+
+20:39.920 --> 20:46.800
+extending it to other architectures because ultimately it's not only useful for RNNs because the
+
+20:46.800 --> 20:52.560
+procedure is applicable to any type of neural networks so you can use this with convolutional
+
+20:52.560 --> 20:58.640
+neural networks or also feed forward neural networks. Okay and how far have you gotten with that?
+
+20:58.640 --> 21:07.360
+How how easily does it apply to for example a CNN? There's actually there's actually work on
+
+21:07.360 --> 21:14.640
+at nips 2017 the past nips that had something similar to what we were doing in the feed forward
+
+21:14.640 --> 21:22.400
+context but there what they were using was this importance waiting procedure and they optimize
+
+21:22.400 --> 21:30.160
+the low bound we are not using any of that and and when I say no it is applicable to any type of
+
+21:30.160 --> 21:36.240
+neural network it's because what the only thing that it requires is that if you give me a hidden
+
+21:36.240 --> 21:41.840
+state which is a low dimensional representation of your data from any neural network then I can
+
+21:41.840 --> 21:47.120
+regularize this neural network by just multiplying that hidden state with noise before using it
+
+21:47.120 --> 21:54.800
+to do prediction so in CNNs it would be yes do your usual CNN hidden state computation and then
+
+21:54.800 --> 22:00.560
+once you hand me that I will regularize with noise in by just multiplying it with noise or adding
+
+22:00.560 --> 22:06.400
+it with noise so additive or multiplicative noise injection. Are there any challenges to applying
+
+22:06.400 --> 22:14.720
+this approach to any to RNNs in particular or to to any other extending it to other types of
+
+22:14.720 --> 22:22.480
+networks? No it's actually very it's actually very simple and we we didn't one thing is that you
+
+22:22.480 --> 22:28.400
+have to choose the variance of your noise distribution that's the only thing that it requires and so
+
+22:28.400 --> 22:33.840
+you will need to do grid search on that because it depends on that parameter you need to tune the
+
+22:33.840 --> 22:42.000
+variance of your distribution according to the data you want to fit and so yes that's what the
+
+22:42.000 --> 22:46.480
+one one disadvantage might be that you will need to do grid search on that parameter.
+
+22:47.520 --> 22:54.400
+Yeah okay one thing that I also wanted to mention is that it has a an ensemble interpretation
+
+22:54.400 --> 23:02.240
+like dropout dropout is usually interpreted as getting predictions from an infinite number of
+
+23:02.240 --> 23:08.640
+neural networks we also found that interpretation is the method. Can you explain that elaborate on
+
+23:08.640 --> 23:15.920
+that interpretation? Basically when you inject noise and you want to maximize the likelihood you
+
+23:15.920 --> 23:23.760
+are basically marginalizing out all the noise you've injected into the network and that marginalization
+
+23:23.760 --> 23:30.080
+you can look at it as averaging the prediction of many neural network and that's basically what
+
+23:30.080 --> 23:37.280
+ensemble is and it's been known traditionally to actually have regularization effect which is
+
+23:37.280 --> 23:43.280
+another explanation explanation for why noise injection does regularization. Right we also talked
+
+23:43.280 --> 23:51.840
+about another paper this one you presented at ICLR last year on topic RNNs what was that one about?
+
+23:51.840 --> 24:01.200
+It was about combining recurrent networks and topic models for better sequence model in the sense
+
+24:01.200 --> 24:08.080
+that you are able to get the right context at each time step when doing prediction. The motivation
+
+24:08.080 --> 24:15.280
+for that work was that we found that RNNs and topic models were very complimentary RNNs are very
+
+24:15.280 --> 24:23.200
+good at encoding the local dependencies in the sequence so in language that would be syntax so RNNs
+
+24:23.200 --> 24:29.760
+are very good at detecting syntax and modeling syntax but they have a problem when you go further
+
+24:29.760 --> 24:34.160
+back in the sequence they have problems with long term dependencies because of the usual
+
+24:34.160 --> 24:41.680
+vanishing exploding gradients and what we noticed was that actually we don't need to have an RNN
+
+24:41.680 --> 24:49.440
+with many time steps because as you go further the dependencies in text are not sequential dependencies
+
+24:49.440 --> 24:55.680
+they are semantic dependencies and these words in the document are related semantically with
+
+24:56.960 --> 25:03.120
+because they belong to the same team and topic models are known as these probabilistic
+
+25:03.120 --> 25:08.960
+probabilistic models that can detect teams in data and so it made sense to use topic models
+
+25:08.960 --> 25:13.680
+to get the teams and then condition on those when doing prediction with the RNN.
+
+25:13.680 --> 25:20.720
+And so when you say topic models are you referring to things like embedding spaces and word
+
+25:20.720 --> 25:28.560
+to veck and the like or something else? I'm referring to something else. So what is a topic model?
+
+25:28.560 --> 25:35.360
+A topic model is like a family of graphical model that takes a bunch of documents and tells you
+
+25:35.360 --> 25:42.320
+the teams that they discuss. It tells you each document which topics they discuss in which
+
+25:42.320 --> 25:48.320
+proportion and it tells you what these topics are. So a topic in the topic model literature is
+
+25:48.320 --> 25:57.600
+defined as a distribution of a word of a word and each document is expressed as a distribution
+
+25:57.600 --> 26:06.720
+over those topics. And so what you end up with is a distribution of a word that's your topic matrix
+
+26:06.720 --> 26:12.080
+at least of distribution of a word and you also end up with a distribution of a topic for each
+
+26:12.080 --> 26:18.800
+document. Is your distribution of words is this I guess what comes to mind is LDA is this
+
+26:18.800 --> 26:26.320
+something that you might use in LDA to do exactly what it is? There's LDA and there's approximations
+
+26:26.320 --> 26:32.640
+to LDA using neural networks. So these are neural topic models and use that version in the topic
+
+26:32.640 --> 26:38.560
+ironing paper. We use the neural topic model where you basically represent your document as a
+
+26:38.560 --> 26:46.560
+bag of word as in LDA and project that high dimensional bag of word representation using an MLP
+
+26:46.560 --> 26:54.160
+to get a distribution to get a document distribution. Now what I do in topic ironing is I represent that
+
+26:54.160 --> 27:02.480
+document distribution with a Gaussian and I condition on that in the softmax as an additional
+
+27:02.480 --> 27:08.960
+by-ster depending on whether I need to predict the word that needs this topic content or a word
+
+27:08.960 --> 27:14.960
+that does not need the topic content. And how do you determine for a given word whether you need
+
+27:14.960 --> 27:20.400
+to use the topic content or not? I let the iron and because they are highly flexible I let the
+
+27:20.400 --> 27:25.760
+iron and tell me whether the next word should be a quote-unquote stop words. Those are words that
+
+27:25.760 --> 27:32.080
+don't need any that don't have any semantic meaning. Okay so based on stop words. Yes. Okay.
+
+27:32.080 --> 27:37.440
+So the iron and will tell me whether that the next word needs the topic content or not. Yeah binary
+
+27:37.440 --> 27:49.680
+classification. Got it. So this is interesting to me and that it seems like a an NLP type of
+
+27:49.680 --> 27:55.760
+application of the idea of I guess this theme that I've seen in other places where hey we've got
+
+27:55.760 --> 28:02.800
+these RNN or we've got these neural networks they're great for you know basically approximating
+
+28:02.800 --> 28:09.440
+any relationship if we throw enough data at them but you know hey there are also these more
+
+28:09.440 --> 28:17.440
+traditionally determined relationships that we've figured out. So for example it strikes me as
+
+28:17.440 --> 28:27.840
+analogous to in robotics you know using a strict neural network approach to go from visual input
+
+28:27.840 --> 28:35.360
+to motor output you know or an approach that combines the neural network with traditional
+
+28:35.360 --> 28:40.640
+like control system modeling or something like that. It seems like it's very much thematically
+
+28:40.640 --> 28:48.080
+uh in those kind of along those lines and that's exactly what it is there's this line of work of
+
+28:48.080 --> 28:54.000
+planning to combine privacy grabs for modeling and neural networks and and I think that's an
+
+28:54.000 --> 28:59.760
+interesting line of work which I'm working on because they're very complimentary like when we are
+
+28:59.760 --> 29:05.360
+using ease of these frameworks we are trying to learn from high dimension of data and neural networks
+
+29:05.360 --> 29:12.080
+give you a way to design these highly flexible likelihood whereas graphical models allow you to
+
+29:12.080 --> 29:17.040
+basically represent the hidden structure you want to learn from data in an interpretable way
+
+29:17.600 --> 29:24.000
+so you can combine the two together to benefit from the best of both worlds. Right right and uh
+
+29:24.000 --> 29:32.640
+that approach is always um I always find that uh compelling you know but then I I've also talked
+
+29:32.640 --> 29:40.320
+to folks that you know we might describe as deep learning purists that say you know it's ultimately
+
+29:40.320 --> 29:45.520
+a waste of time the neural networks configure everything out if you throw enough data and compute
+
+29:45.520 --> 29:50.160
+at them and I'm just curious how like if you thought about it like that and how you might respond to
+
+29:50.160 --> 29:56.880
+that. There are still there's that might be true in some context if you have too much compute and you
+
+29:56.880 --> 30:04.000
+have too much data but that's not the case for many people and and there are times where you
+
+30:04.000 --> 30:09.280
+actually care about uh these latent variables there are times where you want to look at them
+
+30:09.280 --> 30:16.000
+and say oh this uh this is how these things depend together and most of the time when you say
+
+30:16.000 --> 30:21.040
+I can just use a neural net and throw compute and data at it and it will give me what I want that's
+
+30:21.040 --> 30:27.120
+when you only care about performance about getting the state of the art number but there are times
+
+30:27.120 --> 30:31.840
+where you actually use this model to better understand the data you're dealing with to
+
+30:32.640 --> 30:39.280
+encode uncertainty to make help people in decision-making understand better their data and
+
+30:39.280 --> 30:44.400
+everything and they're just using a neural network to get better performance wouldn't mean much.
+
+30:44.400 --> 30:52.720
+So for you the the two counter arguments are limited resource scenarios and
+
+30:53.680 --> 30:58.240
+you know broadly speaking explainability and insight that you're able to get from this train
+
+30:58.240 --> 31:06.240
+system. Yes exactly. Continuing on in the topic RNN work was there any interesting insights in
+
+31:06.240 --> 31:11.680
+the way that you combine the topic models and the RNNs where there are different ways that you
+
+31:11.680 --> 31:18.560
+could have done that but you you know went down a specific path or yes there are different ways
+
+31:18.560 --> 31:24.800
+you can combine that. Actually the topic RNN worked you can look at it in a more general way and
+
+31:24.800 --> 31:29.840
+say that what we are trying to do is at the end of the two model sequence data you need to have
+
+31:29.840 --> 31:35.520
+a model to capture the local dependencies so that's that will be your syntactic model and then you
+
+31:35.520 --> 31:41.840
+will have a model that will capture the global dependencies and that would be your semantic model
+
+31:41.840 --> 31:47.840
+and you have also to decide on how you want to combine them so you have three degrees of freedom
+
+31:47.840 --> 31:52.480
+with it you have how to decide on the same tactic how to decide on the semantic how you decide
+
+31:52.480 --> 32:00.000
+on combining them. In topic RNN the idea was so cool and motivating to me that I tried
+
+32:00.000 --> 32:06.400
+in for any of those three things I tried the simplest thing so for the syntactic model I tried
+
+32:06.400 --> 32:12.080
+an RNN which was the main thing that was used for sequences and for the topic model I used the
+
+32:12.080 --> 32:17.040
+neural topic model version because those are efficient to learn ways you just project a bag of
+
+32:17.040 --> 32:21.680
+what representation for a neural network to get a latent representation of the document distribution
+
+32:21.680 --> 32:28.320
+and in combining them I just said let me use the usual software max but add this topic information
+
+32:28.320 --> 32:34.000
+as an additional biester but you can actually use all these three things in different ways
+
+32:34.000 --> 32:39.360
+and that's what's cool about it because it somehow defines a new class of models for dealing with
+
+32:39.360 --> 32:45.280
+these sequences. Did you train these simultaneously or did you train your semantic model and your
+
+32:45.280 --> 32:51.520
+syntactic model separately? Yes the cool thing is that you want to define all these three things
+
+32:51.520 --> 32:58.000
+in the way you combine them in such a way that you can afford joint training. I always prefer
+
+32:58.000 --> 33:04.000
+joint training because then you are letting your model also the ability to decide what
+
+33:04.000 --> 33:09.680
+what it want to use from each component so we did joint training from the topic model and the
+
+33:10.240 --> 33:15.680
+RNN we trained the two things together because the whole pipeline is fully differentiable.
+
+33:15.680 --> 33:22.560
+And how did you evaluate the performance of this approach? The first thing we tried it as a
+
+33:22.560 --> 33:28.240
+language model so we say let's see how it improves on existing language models so we did for next
+
+33:28.240 --> 33:36.880
+word prediction where we got good results but we also said let's see this as a feature extractor
+
+33:36.880 --> 33:42.560
+and we applied it to document classification more specifically we applied it to sentiment analysis
+
+33:42.560 --> 33:48.560
+so we use the IMDB dataset which is a bunch of reviews and labels of those reviews whether they
+
+33:48.560 --> 33:55.520
+are negative or positive and we use topic RNN to extract features from the reviews and use
+
+33:55.520 --> 34:02.160
+those features in a binary classification model and we achieved a very nice results not only
+
+34:02.160 --> 34:08.720
+in terms of classification error rate but also in how it managed to discover the features for
+
+34:08.720 --> 34:14.960
+the negative reviews and the positive reviews so we had this nice clustering of the features from
+
+34:14.960 --> 34:19.360
+the topic RNN of the negative reviews and the positive reviews and that was very exciting.
+
+34:19.360 --> 34:26.800
+Interesting and the features in this context would be words like you know stinks horrible
+
+34:26.800 --> 34:32.880
+that kind of thing or something else. The features we learned was that we use the because
+
+34:32.880 --> 34:38.640
+topic RNN is a generative model for tech for for any sequence data we use the reviews alone
+
+34:38.640 --> 34:45.520
+and trained that as a language model as usual and we derived the features by taking the last hidden
+
+34:45.520 --> 34:51.680
+state of the RNN component of topic RNN and the document distribution output by the topic model
+
+34:51.680 --> 34:57.200
+component of topic RNN and we concatenated them together to say this represents the future for
+
+34:57.200 --> 35:06.960
+this document. The last hidden state of the topic model RNN and the so you're trying to get the kind
+
+35:06.960 --> 35:14.080
+of your latent state of both your semantic and syntactic models and kind of smush them together
+
+35:14.080 --> 35:21.440
+to represent some feature. Yes exactly. Okay. Yeah. Interesting. That turned out to be effective at
+
+35:21.440 --> 35:27.600
+telling you where the negative reviews and the positive reviews lie in this data manifold.
+
+35:28.640 --> 35:33.920
+I don't know if if this makes sense given like dimensionality and stuff like that but
+
+35:33.920 --> 35:42.480
+qualitatively what did those features look like? Did they look like in terms of visualization?
+
+35:42.480 --> 35:49.600
+Visualization or like is it a one hot encoded you know an encoded vector of like where negative
+
+35:49.600 --> 35:55.840
+words were identified for negative features and positive words were identified for positive
+
+35:55.840 --> 36:00.240
+features or something like that or is it something totally different? It's something it's at the
+
+36:00.240 --> 36:07.200
+document level not at the word level. Okay. Yeah. It's at the document level when you concatenate
+
+36:07.200 --> 36:13.600
+these two things and project them in two dimension then you will see a nice clustering of negative
+
+36:13.600 --> 36:19.840
+documents and positive documents together. We don't go at the word level. One thing that's
+
+36:19.840 --> 36:26.720
+interesting is that the IMDB has a lot of sarcasm on it so it's actually it's actually very hard
+
+36:26.720 --> 36:33.360
+to capture the sentiment just using the review because of that. So this was this was a cool encouraging
+
+36:33.360 --> 36:39.760
+result. And so why do you think that this worked better for presumably it did capture some of
+
+36:39.760 --> 36:48.560
+that sarcasm? I think the way we use the features, the way we we said let's combine the document
+
+36:48.560 --> 36:54.800
+distributions as given by the neural topic model and the final hidden state of the RNN. That final
+
+36:54.800 --> 37:02.320
+hidden state usually captures you know how when you when you write a review say oh this movie was
+
+37:02.320 --> 37:11.120
+was the actors were great then and then but it sucked because of it. Right. So the whole sentiment is
+
+37:11.120 --> 37:16.800
+actually captured in that last part. Okay. So I am guessing that's why it did well because
+
+37:16.800 --> 37:25.040
+because you exploit that sarcasm when you actually just look at the most recent information. How do
+
+37:25.040 --> 37:30.880
+you see this work being applied? I think it can be used for any we looked on their sentiment
+
+37:30.880 --> 37:36.160
+classification. The word prediction thing is not a real task. We were just using it to evaluate
+
+37:36.160 --> 37:41.680
+it as a language model. But I think it can be used for any document classification task in
+
+37:41.680 --> 37:47.920
+there are many applications to that. Not only sentiment analysis but yeah any document classification
+
+37:47.920 --> 37:53.200
+you can use Topikarin and to get to get features it proved to be very effective in the case of
+
+37:53.200 --> 37:58.880
+sentiment but you can use it for any document classification task. Say you wanted to classify
+
+37:58.880 --> 38:07.600
+documents or like tag documents based on content. Would you have to come up with your own feature
+
+38:07.600 --> 38:14.560
+representation or would you use this concatenation that you've described but then do something else
+
+38:14.560 --> 38:20.960
+to get at the last mile of how you want to classify? Where does the customization have to take
+
+38:20.960 --> 38:26.480
+place in order to apply this to another type of classification problem? The general thing is that
+
+38:26.480 --> 38:32.720
+you will have to use both the global representation and the local representation you need both.
+
+38:32.720 --> 38:38.320
+And from the local representation side you can decide to use the last hidden state but you can do
+
+38:38.320 --> 38:43.840
+anything you want there. You can use an averaging of the different hidden state or you can use a
+
+38:44.480 --> 38:50.800
+I don't know like attention. It depends on what you can do. You can build a classifier on top
+
+38:50.800 --> 38:57.440
+of Topikarin and I did that actually for medical data and we found again there a nice clustering
+
+38:57.440 --> 39:06.160
+of patients according to their diseases. And so yes the customization is in how you use the
+
+39:06.160 --> 39:12.800
+hidden state of the RNN part. Okay. Yeah. Well you're working on some really interesting things and
+
+39:12.800 --> 39:18.160
+I appreciate you taking the time to share some of them with us. Are there any other things you
+
+39:18.160 --> 39:32.480
+wanted to touch on? That would be it. Thank you for taking the time. Thank you for having me.
+
+39:35.920 --> 39:42.160
+All right everyone that's our show for today. For more information on Ajay or any of the topics
+
+39:42.160 --> 39:49.600
+covered in this episode head on over to twomlai.com slash talk slash 160. If you didn't hit pause
+
+39:49.600 --> 39:54.400
+and nominate us for the podcast people's choice awards at the beginning of the show I'd like to
+
+39:54.400 --> 40:01.680
+encourage you to jump over to twomlai.com slash nominate right now and send us your love and your vote.
+
+40:01.680 --> 40:12.960
+So as always thanks so much for listening and catch you next time.
+

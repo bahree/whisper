@@ -1,0 +1,788 @@
+WEBVTT
+
+00:00.000 --> 00:05.360
+All right everyone, I am here in Vancouver at NURPS 2019 and I've got the pleasure of being
+
+00:05.360 --> 00:12.000
+seated with Josh Tobin. Josh here is a former research scientist at OpenAI and a co-organizer
+
+00:12.000 --> 00:17.040
+of full-stack deep learning. Josh, welcome to the Trauma AI podcast. Thanks, happy to be here.
+
+00:17.040 --> 00:24.880
+Awesome, so let's maybe jump into a little bit of your background. Do you spend some time at OpenAI
+
+00:24.880 --> 00:30.400
+and you did your PhD at Berkeley advised by Peter Abil, who's been on the podcast before?
+
+00:30.400 --> 00:36.480
+Great, yeah. So I got into the field about four years ago. Okay. Really I started at Berkeley
+
+00:36.480 --> 00:42.000
+in the applied math program and then you know kind of on a whim took a class with Professor Abil
+
+00:42.000 --> 00:47.920
+who ended up becoming my advisor and I was just kind of blown away by the potential of AI to
+
+00:47.920 --> 00:53.440
+make robotics work better and so you know through that I ended up working with Peter and spending
+
+00:53.440 --> 01:00.240
+a bunch of time at OpenAI and so what are you currently up to? Yeah so I left OpenAI a few months
+
+01:00.240 --> 01:05.840
+ago and I'm in the process of exploring kind of what to dive into next. Figuring out what's next.
+
+01:05.840 --> 01:13.440
+Yeah exactly. Nice, nice. And so your talk here actually later this afternoon is on geometry
+
+01:13.440 --> 01:18.320
+aware neural rendering. What's that? Is that something you worked on at OpenAI or kind of personal
+
+01:18.320 --> 01:24.880
+interest? Yeah that's something I worked on at OpenAI also through like during my PhD at Berkeley
+
+01:24.880 --> 01:31.520
+kind of while I was spending time in both places. Okay and so the kind of the core problem that I'm
+
+01:31.520 --> 01:37.760
+working on there is you know how do we like in robotics you know in order to to act robots need
+
+01:37.760 --> 01:41.520
+to first understand what's happening in the world and so typically the way that you'll do that in
+
+01:41.520 --> 01:47.280
+robotics is you'll kind of take your sensor observations about the world and you'll map them to
+
+01:47.280 --> 01:53.040
+some way of representing the state of the world right so where are all the objects what poses are
+
+01:53.040 --> 02:00.000
+they in you know what configuration is the robot in etc but the challenge is that as you move to
+
+02:00.000 --> 02:05.760
+more and more complex scenes then it becomes hard to write down a concrete representation of
+
+02:05.760 --> 02:12.080
+the state of the world and so the kind of the focus of this work is on implicit scene understanding
+
+02:12.080 --> 02:17.440
+so can we can we take some sensor observations about a scene and then use that to create a
+
+02:17.440 --> 02:22.240
+representation of the world that kind of implicitly has an understanding of what's happening in the scene
+
+02:23.280 --> 02:29.520
+and so what's can you be more concrete than that or is there an example that that you use to
+
+02:29.520 --> 02:35.200
+describe that? Yeah absolutely so that concretely the way that you formulate the problem is you take
+
+02:35.200 --> 02:39.360
+one or more observations of the scene so think about like cameras imaging the same scene from
+
+02:39.360 --> 02:42.880
+different viewpoints and then you train a model and the goal of that model is to
+
+02:43.760 --> 02:48.480
+give in some arbitrary other viewpoint that could be you know any other viewpoint of the scene
+
+02:49.120 --> 02:53.200
+the model's goal is to render what it thinks the scene looks like from that viewpoint
+
+02:54.560 --> 02:59.760
+and so the and thus if it can do that then it has an accurate kind of implied or implicit
+
+02:59.760 --> 03:05.360
+representation of what's happening in the scene yeah that's the intuition right it's if the model
+
+03:05.360 --> 03:10.560
+can do that task well it has to have some sort of representation internally that understands what's
+
+03:10.560 --> 03:16.000
+going on in the scene practically when you do this a how many cameras are we talking about yeah
+
+03:16.000 --> 03:21.120
+it's a handful I mean it's the formulation can really extent any number in practice I usually
+
+03:21.120 --> 03:26.240
+use three cameras to image the scene and then and so then the fourth viewpoint is the one that the
+
+03:26.240 --> 03:33.520
+the model is trying to predict that is the the neural rendering part of the the talk geometry
+
+03:33.520 --> 03:39.840
+aware implies that it's kind of a model-based approach in some sense yeah I mean so the geometry
+
+03:39.840 --> 03:47.200
+of where part is so the kind of the the inspiration for the work that I did and what I built on was
+
+03:48.080 --> 03:54.880
+this paper from DeepMind called GQN generative query networks okay and so the the extension that
+
+03:54.880 --> 04:00.320
+I added to that is the geometry of where part and so what it refers to is you know if you
+
+04:00.320 --> 04:06.720
+if you know the geometry of the scene so where the cameras are relative to one another then that
+
+04:06.720 --> 04:14.000
+allows you to constrain the process of of searching what pixels are most relevant to rendering a
+
+04:14.000 --> 04:19.120
+particular pixel so you know if you're rendering a particular viewpoint and you want to know you
+
+04:19.120 --> 04:24.160
+know okay what should I image in this pixel somewhere somewhere in the image that I'm rendering
+
+04:24.800 --> 04:28.320
+then what you want to do is you want to go back and look at all the images that you've been given
+
+04:28.320 --> 04:35.200
+as context and sort of search over those images for relevant information and it turns out if you
+
+04:35.200 --> 04:41.280
+use the geometry of the scene this thing from classical computer vision called the epipolar geometry
+
+04:41.280 --> 04:48.640
+then you can constrain that search to align in each of the context viewpoints and so maybe as context
+
+04:48.640 --> 04:55.760
+kind of walk us through GQN and what that paper is talking about yeah so in GQN they're taking this
+
+04:55.760 --> 05:00.400
+problem of neural rendering right so looking at a looking at a scene for multiple viewpoints and
+
+05:00.400 --> 05:05.440
+rendering from an arbitrary other viewpoint and then they set up a model structure and the way
+
+05:05.440 --> 05:10.640
+that model structure works is it's basically an encoder decoder architecture so the encoder
+
+05:11.680 --> 05:16.480
+takes each of the viewpoints and maps them through a convolutional neural network independently
+
+05:16.480 --> 05:21.840
+and so then you get a representation for each of those viewpoints those representations are summed
+
+05:21.840 --> 05:26.720
+and then you get sort of one representation for the entire scene so that's kind of the encoder part
+
+05:27.280 --> 05:32.960
+so like element-wise or concatenated more yeah some element-wise okay yeah so then you take that
+
+05:32.960 --> 05:37.600
+that representation for the scene and you pass that to the decoder and then the decoder's job is to
+
+05:37.600 --> 05:42.880
+take that representation and sort of go through this multi-step process of turning it into the
+
+05:42.880 --> 05:47.280
+what it thinks the image from that viewpoint should look like okay and is there any particular
+
+05:47.280 --> 05:53.760
+intuition for the element-wise sum versus keeping everything around you know I think the main
+
+05:53.760 --> 05:58.400
+intuition is that you want it to be you don't want it to depend on the order that you present the
+
+05:58.400 --> 06:04.800
+camera's in so if you can coordinate then order matters some then it doesn't okay and so they
+
+06:05.600 --> 06:13.360
+their results were kind of purely based on this just the camera angles and the kind of encoder
+
+06:13.360 --> 06:21.920
+decoder architecture and so that what you added was a constraint to the search base that is based
+
+06:21.920 --> 06:30.240
+on what we know about the geometry epipolar geometry epipolar geometry yeah so so basically the
+
+06:30.800 --> 06:36.960
+the contribution of our paper is you know there's this this sort of bottleneck in the GQN formulation
+
+06:36.960 --> 06:42.000
+where you know you've taken the encoder and that's given you representation of the scene and then
+
+06:42.000 --> 06:47.920
+you pass that to a decoder but what we do instead is instead of having this representation of the
+
+06:47.920 --> 06:53.680
+scene instead we have an attention mechanism so that attention mechanism allows you to when
+
+06:53.680 --> 07:00.000
+you're generating a new image to attend over all the information in the in the representations
+
+07:00.000 --> 07:05.440
+of the context images that you've been given and the way that attention mechanism works is by
+
+07:05.440 --> 07:12.400
+taking advantage of this you know this sort of fact of 3D geometry called the the the epipolar
+
+07:12.400 --> 07:18.480
+geometry is calling it an attention mechanism is it is it like attention like or is it
+
+07:18.480 --> 07:24.160
+implemented the way attention is often implemented in these kinds of networks yeah so it's
+
+07:24.160 --> 07:29.760
+implemented exactly like like kind of like a scaled dot product attention mechanism but the way
+
+07:29.760 --> 07:35.440
+that you have to do that is you know you have for every pixel you know you're searching over a line
+
+07:35.440 --> 07:40.160
+so you need to create you need to sort of construct the right representation so that you can do
+
+07:40.160 --> 07:45.760
+attention in the normal way okay so you're you're kind of constructing a vector that represents
+
+07:45.760 --> 07:51.040
+this line that you're doing the dot product and your dot producting that with everything yeah okay
+
+07:51.040 --> 07:56.480
+so for each pixel we're constructing this vector that represents a line and so when you aggregate
+
+07:56.480 --> 08:01.520
+all of those right so you have two spatial dimensions for the image and then you have this line
+
+08:01.520 --> 08:08.000
+and so you get this sort of 3D tensor and then your dot producting the image that you're trying to
+
+08:08.000 --> 08:13.280
+render the current representation of that with this 3D tensor and then that's kind of the attention
+
+08:13.280 --> 08:18.640
+mechanism cool cool and so tell us a little bit about the results of the paper is it kind of
+
+08:18.640 --> 08:25.040
+trying to get at you know better accuracy in rendering the scene or computational efficiency all
+
+08:25.040 --> 08:29.600
+of the above yeah so it's nice to me that both of the above would be would follow from what you're
+
+08:29.600 --> 08:34.400
+doing sure yeah I mean there's definitely data efficiency gains but really the main goal was
+
+08:35.280 --> 08:39.840
+sort of coming back to the motivation for working on this I you know I primarily work in robotics
+
+08:39.840 --> 08:45.200
+and so the you know the reason I started working on this was to construct better representations
+
+08:45.200 --> 08:52.400
+for robotic scenes and so the thing I really wanted to do was to extend GQN to you know more complex
+
+08:52.400 --> 08:57.920
+more realistic scenes so higher dimensional images more like higher dimensional sort of robot
+
+08:57.920 --> 09:04.960
+morphologies and more complex objects and so the the kind of main result of the paper is we
+
+09:04.960 --> 09:10.240
+introduced a few new data sets that capture some of those properties and then we showed that our
+
+09:10.240 --> 09:16.400
+attention mechanism produces like kind of qualitatively and quantitatively much better results on
+
+09:16.400 --> 09:22.080
+those sort of newer more complex data sets there also the results are also better on the
+
+09:22.080 --> 09:26.800
+old data sets as well but you know I think really the interesting thing is how much better they work
+
+09:26.800 --> 09:31.280
+on on these newer data sets so tell us a little about the newer data sets and how they were
+
+09:31.280 --> 09:37.600
+constructed yeah so there's three new data sets one is a data set that's based on the
+
+09:38.480 --> 09:45.200
+in-hand block manipulation work from open AI and so it's you know related to the Rubik's Cube
+
+09:45.200 --> 09:50.000
+yeah so the precursor to the Rubik's Cube works so before the Rubik's Cube work there was the
+
+09:50.000 --> 09:53.680
+block manipulation work that was you know I guess a little more than a year ago at this point
+
+09:54.720 --> 09:59.600
+and so yeah we hadn't we hadn't released the Rubik's Cube work yet at the time I was working on
+
+09:59.600 --> 10:05.360
+this so I worked on the older data set okay and yeah so you know you have a bunch of cameras looking
+
+10:05.360 --> 10:12.240
+at a robot hand that's holding a block and the sort of colors of the cube in the background
+
+10:12.240 --> 10:17.280
+and the hand are randomized and the hand and the cube can be in any pose so that's one of the
+
+10:17.280 --> 10:22.080
+data sets okay and so that's kind of meant to capture sort of a like what a quite realistic sort of
+
+10:22.080 --> 10:28.640
+robotic task could look like right the second data set is what I call disco humanoid and so this
+
+10:28.640 --> 10:35.840
+is like you know the he the classic mojoco humanoid model but the poses of all the joints are
+
+10:35.840 --> 10:41.520
+completely randomized and the colors of everything are randomized as well the lighting so what it
+
+10:41.520 --> 10:46.720
+looks like is this sort of humanoid model that's like doing this like crazy jumping in the air dance
+
+10:46.720 --> 10:52.240
+moves okay and so that's kind of the second data set and that's meant to capture you know whether
+
+10:52.240 --> 10:57.200
+you can model robots that have complex internal states right so this high-dimensional robot
+
+10:57.200 --> 11:03.520
+needing to model it in any pose now is this the starting position randomized or is it kind of
+
+11:03.520 --> 11:09.520
+randomized in time at every time step or yeah so just one time step okay it's just a single frame
+
+11:09.520 --> 11:15.680
+yeah a single frame a single scene and then multiple viewpoints of that scene right got it okay
+
+11:15.680 --> 11:22.560
+but then each each each scene has different parameters for randomizing everything about the scene
+
+11:22.560 --> 11:29.200
+so the the humanoid is in a different pose the colors and lighting are all different okay and so
+
+11:29.200 --> 11:34.080
+the third data set the third data set the third data set is I think the most challenging one so
+
+11:34.080 --> 11:39.520
+it's basically a room and then in that room are placed a few objects but those objects are sampled
+
+11:39.520 --> 11:46.080
+from the shape net object data set okay so there's something like 60,000 possible object models
+
+11:47.120 --> 11:54.640
+and so each in each of the kind of million scenes that we generated there's a different set of
+
+11:54.640 --> 11:58.720
+objects that are placed in that scene and so it's really challenging because you know the
+
+11:58.720 --> 12:03.840
+the model needs to understand how to render sort of you know essentially any type of object
+
+12:03.840 --> 12:07.600
+interesting at least in the the first couple of those examples maybe in the third
+
+12:07.600 --> 12:16.000
+what kind of jumped out at me is not so much the like the complexity of the scene you know of
+
+12:16.000 --> 12:22.960
+course that that that's there but also the attempts to you know randomize colors and things like
+
+12:22.960 --> 12:30.160
+that I often refer back to one of Peter's videos of like the robot doing rope tying and like it
+
+12:30.160 --> 12:34.000
+can figure it out on a green table but then if you change the table to red it like totally fails
+
+12:34.000 --> 12:42.240
+yeah so now you know it's a part of what you're doing explicitly trying to make the model more
+
+12:42.240 --> 12:48.640
+generalizable or yeah I mean so we didn't explore how generalizable the model could be in this work
+
+12:48.640 --> 12:54.400
+okay but I think you know a lot of my earlier work was on like this idea of domain randomization
+
+12:54.400 --> 12:59.840
+right so if you want to train a model in simulation that generalizes the real world kind of the
+
+12:59.840 --> 13:04.800
+one of the most effective ways of doing that is to sort of massively randomize every aspect of
+
+13:04.800 --> 13:09.520
+the simulator so there's some background that you brought into this task exactly okay so I'm
+
+13:09.520 --> 13:14.240
+interested in realistic robotics tasks and so to me if you're working on realistic robotics tasks
+
+13:14.240 --> 13:20.240
+in simulation you need to randomize everything okay and you know I think exciting future work
+
+13:20.240 --> 13:25.760
+could be to see how well these models transfer from simulation to the real world uh-huh and so
+
+13:25.760 --> 13:33.520
+when you're evaluating the performance of these models are you is it kind of like pixel wise
+
+13:33.520 --> 13:37.840
+differences or distortions and an error rate that you're kind of looking at or what's what are
+
+13:37.840 --> 13:42.320
+the metrics that you're looking at yeah so the way that these I sort of gloss over how the models
+
+13:42.320 --> 13:49.600
+are trained but it's essentially like the the easiest thing to compare to is to a VAE
+
+13:49.600 --> 13:55.920
+okay so you have a lower bound on the log likelihood and that's a variational autoencoder that's
+
+13:55.920 --> 14:01.760
+right yeah and so that's kind of the main way that you can compare the differences is by is by
+
+14:01.760 --> 14:05.440
+comparing the number of that lower bound and then you can also look at things we also look at
+
+14:05.440 --> 14:10.560
+things like you know L1 and L2 pixel wise differences between the images and so that's where our
+
+14:10.560 --> 14:17.040
+quantitative results come from it sounds like you have not applied this to a real world you didn't
+
+14:17.040 --> 14:26.480
+uh apply it to the Rubik's cube uh robot or any uh robots uh not not yet not yet yeah okay okay
+
+14:27.200 --> 14:31.840
+so what are some of the other things that you're working on or have worked on or are interested in
+
+14:31.840 --> 14:37.440
+yeah um so I think as I mentioned a lot like the sort of big chunk of my the early part of my
+
+14:37.440 --> 14:42.880
+PhD was working on demand randomization so you know really the sort of core question I got
+
+14:42.880 --> 14:47.200
+interested in early on when I started working robotics is if we believe that reinforcement learning
+
+14:47.200 --> 14:53.840
+is going to have a big impact in robotics then um sort of the the main challenge is that most
+
+14:53.840 --> 14:57.920
+reinforcement learning methods are super data and efficient right and so there's you know
+
+14:57.920 --> 15:01.600
+different ways that you could think about dealing with that you know one is just to make reinforcement
+
+15:01.600 --> 15:06.720
+learning methods themselves more data efficient um so that's like a lot of work from uh surgae
+
+15:06.720 --> 15:11.360
+Levine's group at Berkeley um pushes in that direction um but I kind of became interested in this
+
+15:11.360 --> 15:16.960
+question of you know can we just assume that our algorithms are always going to be data inefficient
+
+15:16.960 --> 15:21.040
+and then figure out how to generate data much more efficiently so that that kind of led me to work
+
+15:21.040 --> 15:27.120
+on simulation the thing that I've realized recently is that I think domain randomization and um
+
+15:27.120 --> 15:31.920
+you know other simple real techniques work actually surprisingly well other what techniques um
+
+15:31.920 --> 15:36.160
+other uh simple real techniques okay some transferring simulation in the real world domain
+
+15:36.160 --> 15:43.280
+adaptation and things like that um but so I I think are still like very um under explored
+
+15:43.280 --> 15:48.880
+techniques in robotics but the challenge if you want to apply those techniques has become that
+
+15:48.880 --> 15:54.320
+it's actually quite difficult to build physics simulators and so in practice that often becomes
+
+15:54.320 --> 15:58.880
+the bottleneck is you have some new robotics task you want to solve maybe you want to use Sim to
+
+15:58.880 --> 16:05.760
+real to solve it but um then you have to go and do this manual process of um you know constructing
+
+16:05.760 --> 16:11.360
+and uh randomizing the simulator that you use to generate the training data um and so that's
+
+16:11.360 --> 16:16.000
+kind of what started to get me interested in 3d scene understanding is thinking about the question
+
+16:16.000 --> 16:21.040
+of is it possible to automate part of that process um or at least to augment augment people
+
+16:21.040 --> 16:26.000
+in um the process of creating synthetic training datasets does that goal tie to the work we just
+
+16:26.000 --> 16:29.760
+talked about what's the connection there yeah or are you not trying to say that I think uh
+
+16:29.760 --> 16:34.800
+I think it loosely ties to that goal okay right so I think um you know that like in my mind
+
+16:34.800 --> 16:41.600
+sort of the end state for Sim to real is um you know is you have like real to Sim to real right so
+
+16:41.600 --> 16:47.520
+you have you collect some data in the real world you use that data to generate a simulation
+
+16:47.520 --> 16:53.360
+mm-hmm and that simulation is sort of richer than the real world it's highly randomized
+
+16:53.360 --> 16:59.120
+um you train a model in that simulation and you transfer that model back to the real world um
+
+16:59.120 --> 17:03.360
+use that model to collect more data in the real world and then feed it back into the simulation
+
+17:03.360 --> 17:07.520
+mm-hmm right so I think and then I think you iterate over that process and I think that um
+
+17:07.520 --> 17:12.320
+if you have the right algorithms for that then I think that process or that um those types of
+
+17:12.320 --> 17:17.520
+algorithms will be really powerful um and so you know that the the main sort of missing piece
+
+17:17.520 --> 17:23.360
+there is um going from you know a small amount of data about the real world right so a small number
+
+17:23.360 --> 17:27.200
+of observations about you know the scene that the robot is going to be interacting with
+
+17:27.200 --> 17:34.400
+and then turning that into a simulation mm-hmm right and so um the this work on neural rendering is
+
+17:35.120 --> 17:39.840
+um kind of I think like a conceptual cause of that because um we're not directly trying to create
+
+17:39.840 --> 17:44.960
+a simulation but we're trying to create a um like sort of an implicit version of a simulation
+
+17:44.960 --> 17:49.040
+mm-hmm um and so right now it only captures 3d structure it doesn't capture um
+
+17:49.040 --> 17:53.760
+semantics or dynamics or anything like that but I think it's kind of like an early step along that path
+
+17:53.760 --> 17:59.360
+mm-hmm what's the the state of research in the real to sim
+
+18:00.240 --> 18:05.360
+part of that flow like how far along are we yeah I think it's I think it's pretty early there's
+
+18:05.360 --> 18:10.800
+been a number of papers that have come out on it you know 2018 2019 what what are the main things
+
+18:10.800 --> 18:16.960
+the way that researchers are approaching the the problem right now yeah I think um so I think
+
+18:16.960 --> 18:21.440
+like the general problem is very challenging and this is the general problem is inverse graphics
+
+18:21.440 --> 18:26.880
+which um it's super super hard to do mm-hmm and so I think the main way that people are
+
+18:26.880 --> 18:30.800
+approaching the problem right now is to sort of create a frame in first graphics being like I've
+
+18:30.800 --> 18:37.680
+got some set of images create the representation yeah create the um create a world that would generate
+
+18:37.680 --> 18:41.840
+those images right and so I think like the main way that I've seen people approach this right
+
+18:41.840 --> 18:47.440
+now is um instead of trying to solve the entire inverse graphics problem mm-hmm um instead sort of
+
+18:47.440 --> 18:53.040
+manually create a parameterized simulator so a simulator that kind of in principle should capture
+
+18:53.040 --> 18:56.880
+the things about the real world that you care about mm-hmm and then using the real data to optimize
+
+18:56.880 --> 19:02.640
+the parameters of that simulator yeah yeah um and so then you you know the hope would be at least
+
+19:02.640 --> 19:09.520
+you can use the real data to choose the distribution of parameters that allows you to best transfer
+
+19:09.520 --> 19:13.200
+your model from simulation to the real world um and so there's a bunch of work in that direction
+
+19:13.200 --> 19:19.360
+so for example in the case of trying to use Grand Theft Auto as a simulator take a picture of a
+
+19:19.360 --> 19:24.640
+road and try to generate something that looks like that road within the constraints of GT Auto
+
+19:24.640 --> 19:31.520
+exactly yeah yeah yeah and so it sounds like folks are starting the kind of poke at that
+
+19:31.520 --> 19:35.920
+direction how far you know what do you do you have a sense or do you know off the top of your
+
+19:35.920 --> 19:41.200
+head kind of some of the results that folks have seen there yeah I think uh I don't want to point
+
+19:41.200 --> 19:45.920
+to any specific results because I don't want to get them wrong but um yeah let's see we're
+
+19:45.920 --> 19:51.760
+even going to find this qualitatively like are we at doing this with Grand Theft Auto or are we
+
+19:51.760 --> 19:58.880
+more doing this with like simple rooms with shape library pictures like how sophisticated are the
+
+19:58.880 --> 20:03.120
+simulation environments that we're even able to do this kind of thing with yeah I mean so there
+
+20:03.120 --> 20:07.280
+are some results doing this kind of thing um I think like the primary results come out of
+
+20:07.280 --> 20:12.960
+Nvidia um doing this kind of thing with self driving car data okay um and uh the results there
+
+20:12.960 --> 20:20.000
+seem to be promising um I think um it's not clear to me how much effort still goes into the manual
+
+20:20.000 --> 20:24.880
+sort of creation of the parameterized simulation yeah um versus that being more automated um that's
+
+20:24.880 --> 20:30.240
+kind of the big question mark I think also although I'm not going to remember the the specific papers
+
+20:30.240 --> 20:36.480
+off the top of my head um I wrote kind of a a guide to some seem to real um transfer for robotics
+
+20:36.480 --> 20:41.600
+and I cited a bunch of the kind of relevant work in this direction there um so I'm happy to
+
+20:41.600 --> 20:47.440
+share a link to that yeah please do and we'll include it in the show notes you mentioned a few times
+
+20:47.440 --> 20:54.240
+domain randomization as a way to drive kind of generalizability and the the you know more
+
+20:54.240 --> 21:02.640
+effective seem to real are you or are there folks looking at more of it maybe kind of stretching
+
+21:02.640 --> 21:07.440
+the term too far but like active learning type of approaches like should the domains actually be
+
+21:07.440 --> 21:13.440
+randomized or should they be you know more carefully constructed so as to drive generalization
+
+21:14.240 --> 21:19.760
+yeah it's a great question um I think there's not really a simple answer to it I think in a lot of
+
+21:19.760 --> 21:24.560
+cases what I've found is that the simplest thing that you can do which is just randomizing your
+
+21:24.560 --> 21:31.200
+simulation as much as possible um tends to give you like closed optimal results um so you might
+
+21:31.200 --> 21:36.640
+as well just do a simple thing but for a lot of problems that's not that's not true I think like
+
+21:36.640 --> 21:41.760
+one of the main cases where that's not true is where um randomizing your simulator too much
+
+21:41.760 --> 21:46.640
+actually hurts performance in simulation right so and if your performance in simulation gets worse
+
+21:46.640 --> 21:52.160
+than your performance in real gets worse as well um and so I think in those types of cases
+
+21:52.800 --> 21:56.880
+so that's like a lot of the dynamics randomization type stuff as an example of where where that happens
+
+21:56.880 --> 22:02.880
+okay and so in a lot of those cases you know choosing not just randomizing everything but
+
+22:02.880 --> 22:08.240
+choosing the right randomizations become super important and so there's also some work in that
+
+22:08.240 --> 22:13.920
+direction there's a there's a paper from an Nvidia for example where they kind of do an iterative
+
+22:13.920 --> 22:20.560
+process um where they you know at each step in the iteration they um take real data and then they
+
+22:20.560 --> 22:26.080
+use that real data to optimize the parameters of the simulator so that the the distribution of
+
+22:26.080 --> 22:31.200
+simulations is as similar as possible to the real data um they go back and collect more real data
+
+22:31.200 --> 22:35.520
+and then continue to iterate between those two things um so there's some work in that direction
+
+22:35.520 --> 22:43.440
+yeah you describe so you describe the the scenario where the simulator you over-randomize and you
+
+22:44.800 --> 22:52.880
+drop performance in your sim um that seems like the easier of the you know problems relative to
+
+22:52.880 --> 22:58.560
+over-randomize your simulator does great but you drop performance in real does that happen also
+
+22:58.560 --> 23:03.760
+I've not really seen that happen okay usually more randomization tends to help generalization
+
+23:03.760 --> 23:07.920
+okay yeah yeah unless it hurts performance on the original task it's in principle possible
+
+23:07.920 --> 23:12.320
+that that could happen but it's not something I've seen much in practice so I described earlier
+
+23:12.320 --> 23:19.040
+the geometric aware approach that you presented is kind of a model based on model aware approach
+
+23:19.600 --> 23:26.560
+do you have ideas or other types of models that you might want to combine with a neural
+
+23:27.440 --> 23:33.280
+rendering that you know would help it yeah it's a good question um an interesting
+
+23:33.280 --> 23:41.600
+direction for this type of work is um we right now model static scenes so we you know um
+
+23:41.600 --> 23:46.960
+we're taking like we're freezing a single time frame of a robotic task and we're saying
+
+23:46.960 --> 23:52.800
+you know can we understand what this what the scene would look like from another angle um but
+
+23:52.800 --> 23:58.240
+also super relevant is to um is to look at entire tasks and try to you know compress those
+
+23:58.240 --> 24:05.200
+and understand those um and so um what that would require you you to do is also understand
+
+24:05.200 --> 24:11.600
+things like how um objects interact with one another how robots interact with objects how physics
+
+24:11.600 --> 24:20.400
+works um and I think there you can I think there are certainly other kind of concepts from physics
+
+24:20.400 --> 24:25.920
+that you could encode into a neural network architecture that would allow you to um to do those
+
+24:25.920 --> 24:31.920
+tasks more data efficiently cool well it sounds like really interesting uh really interesting work
+
+24:31.920 --> 24:37.120
+and best of luck in the presentation thanks a lot yeah you know do you want to kind of
+
+24:37.680 --> 24:43.200
+give a pitch for your next job or something like that well uh no I don't think so um I think
+
+24:43.200 --> 24:47.520
+people just have to wait and see yeah yeah so it sounds like you've got something something brewing
+
+24:48.320 --> 24:53.440
+uh yeah we could call it that yeah yeah nice nice awesome well Josh thanks so much for
+
+24:53.440 --> 25:03.600
+taking some time uh chat with us about what you're up to yeah thanks so much for having me thanks
+

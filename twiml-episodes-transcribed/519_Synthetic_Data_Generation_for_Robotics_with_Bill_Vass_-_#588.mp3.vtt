@@ -1,0 +1,1169 @@
+WEBVTT
+
+00:00.000 --> 00:10.940
+All right, everyone. Welcome to another episode of the Twimmel AI podcast. I am of course
+
+00:10.940 --> 00:16.960
+your host Sam Charrington. And today I'm joined by Bill Bass, VP of Engineering at Amazon
+
+00:16.960 --> 00:21.480
+Web Services. Before we get going, be sure to take a moment to hit that subscribe button
+
+00:21.480 --> 00:25.880
+wherever you're listening to today's show. Bill, welcome to the podcast.
+
+00:25.880 --> 00:27.680
+Happy to be here, Sam. Thanks for having me.
+
+00:27.680 --> 00:31.480
+Absolutely. I'm looking forward to digging into our conversation. We'll be talking about
+
+00:31.480 --> 00:35.640
+all things synthetic data. But before we dive into that, I'd love to have you share
+
+00:35.640 --> 00:40.600
+a little bit about your background, your role at AWS and kind of how you came into all
+
+00:40.600 --> 00:41.600
+this ML stuff.
+
+00:41.600 --> 00:47.720
+Yeah. So, so I run about 42 services here at AWS, but I have the advantage of being the
+
+00:47.720 --> 00:51.880
+AWS for, for about, almost eight years now and have run many different things, whether
+
+00:51.880 --> 00:57.440
+it be things like S3 and Kinesis and other things like that or CloudWatch. Our team really
+
+00:57.440 --> 01:01.840
+focuses right now on emerging technologies like quantum computing, robotics, autonomous
+
+01:01.840 --> 01:10.920
+systems, high performance computing, gaming simulation, mapping, IoT edge computing, connected
+
+01:10.920 --> 01:16.880
+car, those kinds of things. My background, I've been a software engineer, Michael,
+
+01:16.880 --> 01:24.240
+life basically started working in 1978 as an engineer working on actually on autonomous
+
+01:24.240 --> 01:31.760
+systems back then, interesting enough in ocean-going autonomous systems. And then worked a lot
+
+01:31.760 --> 01:36.200
+of different places. I was a CIO, the Pentagon and the CTO for the Army and CIO at some
+
+01:36.200 --> 01:41.600
+microsystems. And I ran a robotics and autonomous system company called Liquid Robotics before
+
+01:41.600 --> 01:45.800
+I came to AWS. So, a pretty diverse background.
+
+01:45.800 --> 01:52.000
+Oh, that's awesome. That's awesome. Was Liquid Robotics the company that had the small submarine
+
+01:52.000 --> 01:57.360
+that they used to check undersea cables? No, no. Liquid Robotics did long-term surface
+
+01:57.360 --> 02:02.920
+vehicles, right? So, we won the Guinness record for the first autonomous surface vehicle
+
+02:02.920 --> 02:07.200
+to cross the Pacific. Oh, wow. Which was a big accomplishment for you.
+
+02:07.200 --> 02:12.640
+That sounds like quite a fun experience vehicle. Yeah, it went through two typhoons on its
+
+02:12.640 --> 02:25.120
+way between San Francisco and Australia. That was exciting as well. Interesting. I'm wanting
+
+02:25.120 --> 02:34.320
+to ask you about the relative complexity of this one complex system versus the very distributed
+
+02:34.320 --> 02:40.840
+types of systems that you work on now at AWS. Does that question resonate? Do you have any
+
+02:40.840 --> 02:48.440
+thoughts on that? Yeah, it does. So, the robots were, they generated their energy for
+
+02:48.440 --> 02:53.400
+a motive force with waves and they got their electrical energy from the sun. So, every
+
+02:53.400 --> 02:59.360
+millawatt mattered. So, they basically were a little arm server racks and arm because it
+
+02:59.360 --> 03:06.000
+used a lot less power. And they could also swarm. So, they would operate in swarms. And
+
+03:06.000 --> 03:13.200
+you can imagine a diamond shape swarm of a bunch of robots moving together and changing
+
+03:13.200 --> 03:20.960
+direction together, sweeping the ocean floor or doing searching for things. At one point,
+
+03:20.960 --> 03:28.240
+we also tracked sharks and icebergs and also did oil and gas exploration and a lot of
+
+03:28.240 --> 03:33.480
+work for the military as well. So, these were very long-duration vehicles. The ability
+
+03:33.480 --> 03:41.200
+to operate for a year at a time on its own offshore, which is really hard because you combine
+
+03:41.200 --> 03:45.960
+electricity, salt, water, and metal along with biofowling or like the three worst things
+
+03:45.960 --> 03:52.760
+you can put together. And really rough environments. It's interesting. We had a number of people who'd
+
+03:52.760 --> 03:58.600
+worked on the Mars rover on the team and they just talked about how much harder it was to
+
+03:58.600 --> 04:04.680
+deal with the ocean than Mars. So, it's a very different environment. But that company is
+
+04:04.680 --> 04:10.760
+still around. It's called Liquid Robotics. It was purchased by Boeing to do defense operations
+
+04:10.760 --> 04:15.720
+and things like that. So, it's a... And then I left that to come here. We were kind of building...
+
+04:15.720 --> 04:19.960
+We kind of looked at it as the AWS of drones, if you like, because you could get them as a
+
+04:19.960 --> 04:24.520
+service in swarms and they're a lot cheaper than operating a ship with people on it. So,
+
+04:24.520 --> 04:30.600
+next to out for really long times and go through, I think before I left, we'd been through about
+
+04:30.600 --> 04:36.440
+30 hurricanes. And so, the ability to have a vehicle operate through hurricanes is really unusual.
+
+04:36.440 --> 04:42.520
+Most ships don't do that, at least intentionally. So, awesome, awesome. Now, our conversation
+
+04:42.520 --> 04:52.200
+comes on the heels of the AWS Remars conference where you made several interesting announcements.
+
+04:52.200 --> 04:56.760
+The ones that come to mind is interesting context for our conversation were
+
+04:57.960 --> 05:03.000
+Astro, this home robot that kind of runs around your house. I'm sure that will come up.
+
+05:04.440 --> 05:13.320
+But also some new synthetic data generation capabilities. And as we were talking about this beforehand,
+
+05:13.960 --> 05:20.280
+one of the terms that jumped out is really key to the way you think about this need for synthetic
+
+05:20.280 --> 05:27.320
+data is the idea of data density or dense data. And machine learning and deep learning,
+
+05:27.320 --> 05:34.120
+we often think about just more data. But dense data seems to suggest that it's not just more data,
+
+05:34.120 --> 05:40.120
+it's about some kind of quality of the data. Why don't you elaborate a bit on that?
+
+05:40.120 --> 05:47.240
+Yeah, so if you kind of look back to what I was doing in 1978, we were doing undersea
+
+05:47.240 --> 05:52.280
+autonomous robots. These are the ones I used to do at Liberty Robot for Surface robots in the ocean.
+
+05:53.320 --> 05:59.160
+And we used Neuron Network to help it navigate. And back then, this was before GPS, this was
+
+05:59.160 --> 06:04.760
+using Laurence when it was on the surface, but when it was under the surface, it was using differential
+
+06:04.760 --> 06:13.480
+sonar and compass to navigate. And the robots got lost all the time. My boss used to call it artificial
+
+06:13.480 --> 06:18.440
+stupidity instead of artificial intelligence. He was a mechanical engineer, so he didn't
+
+06:18.440 --> 06:22.280
+respect software engineers at all. So this was one of those back and forth things.
+
+06:23.320 --> 06:28.520
+And the reality is a lot of the way we build these Neuron Networks hasn't really changed that much.
+
+06:28.520 --> 06:33.720
+I mean, there's certainly been advancements in deep learning so that markers can be automatically
+
+06:33.720 --> 06:38.520
+identified and created and the different types of models and things like that have improved
+
+06:38.520 --> 06:45.000
+significantly. But the thing that really makes it different from 1978 to today is the massive
+
+06:45.000 --> 06:49.560
+amount of compute and storage that you can apply to the problem. That's what's made, you know,
+
+06:49.560 --> 06:55.480
+Alexa's work, that's what's made, you know, autonomous vehicles work. All these things is the
+
+06:55.480 --> 07:01.720
+amount of density of storage data and the amount of GPUs that you can apply and CPUs you can
+
+07:01.720 --> 07:07.320
+apply to building your models and training models. And so one of the big challenges in that is
+
+07:07.320 --> 07:13.960
+getting enough high quality data to train. And so starting early in our fulfillment centers,
+
+07:13.960 --> 07:19.080
+you'd think that we would have enough volume of packages and pictures of packages to train
+
+07:19.080 --> 07:25.240
+robots to be able to identify packages along with being able to do a grass plan on packages and
+
+07:25.240 --> 07:31.080
+items. But even with all of the packages that we have a grass plan, yeah. So basically,
+
+07:31.080 --> 07:42.040
+to do a plan, I mean, each time a robot does a movement, it has to initiate a plan on how it's
+
+07:42.040 --> 07:49.080
+going to use its actuators or move around a room or where it happens to be. That's my
+
+07:49.080 --> 07:56.600
+Astro in the background. He's listening. Yeah, he's looking at me right now. Anyway,
+
+07:56.600 --> 08:02.520
+yeah, I'm a little bit fascinated watching him navigate around the house, too. But the these
+
+08:02.520 --> 08:10.200
+plans require, you know, the more data and high quality that you can provide, the more accurate
+
+08:10.200 --> 08:15.000
+the planning becomes in your models. And so even with all the billions of packages we ship,
+
+08:15.000 --> 08:19.720
+we still don't have enough pictures of packages in enough random positions and items in enough
+
+08:19.720 --> 08:27.000
+random positions. So for Amazon Robotics, we initially built a product. It was codenamed B12.
+
+08:28.120 --> 08:35.000
+I can go into why it was codenamed B12. Yeah, well, it started. So a Robo maker was codenamed
+
+08:35.000 --> 08:40.760
+B9. And the reason for that was if you know anything about robotics, you'll know that's the
+
+08:40.760 --> 08:46.760
+Lost in Space robot, which is, which is this robot. If you remember, the danger will arrive
+
+08:46.760 --> 08:52.680
+as a robot. Anyway, that was that was the codenamed for for Robo maker. And so the
+
+08:55.960 --> 09:00.680
+you know, this B12 was just here. We did B10 and B12, whatever. And so we
+
+09:03.640 --> 09:11.800
+started this need to generate enough data to train grasping plans for picking things up. And
+
+09:11.800 --> 09:17.560
+so the way we ended up doing is first we tried taking a lot of pictures, right? That's generally
+
+09:17.560 --> 09:21.640
+what you do is you take pictures with the same density of sensors because you need your
+
+09:22.520 --> 09:27.960
+sensor resolution to match the pictures, right? If you don't have the sensor resolution matched,
+
+09:27.960 --> 09:35.080
+then then you get a mismatch in the the training models. And so are you saying are you referring to
+
+09:35.080 --> 09:43.160
+matching the sensor and the when you say sensor, are you talking about cameras and you're talking
+
+09:43.160 --> 09:49.880
+about matching the image dimensions and other characteristics with what you're using to train on
+
+09:49.880 --> 09:55.400
+or are you referring to some other sensor? Yeah, so you want to have, for example, if you're training
+
+09:56.360 --> 10:02.840
+an iRobot to go around a house, which they do with WorldForge, they wrote, they generate that
+
+10:02.840 --> 10:13.720
+resolution at 720 DPI because that's their cameras, right? So our cameras are 1020 or 4K
+
+10:14.440 --> 10:19.880
+on our robots. And so we train with those and then you have to take the same training that you
+
+10:19.880 --> 10:25.160
+would use with LiDAR or same training you use with radar, you need to match the sensor, right? If
+
+10:25.160 --> 10:30.280
+you don't match the sensor, again, you're not going to have the right training model. Robots get
+
+10:30.280 --> 10:36.680
+very, our computer vision gets very sensitive to the sensor in the loop, if you like. So we have
+
+10:36.680 --> 10:42.040
+another product called Kinesis Video Streams or KVS that we use all over Amazon,
+
+10:43.000 --> 10:50.040
+and it will stream any frame series time data, radar, LiDAR or video data. It's how we
+
+10:50.040 --> 10:54.520
+use security in all our data centers is how the Amazon Go stores work, which is, you know,
+
+10:54.520 --> 11:00.360
+all object computer vision as well. It's how we stream the data off our robots and things like that.
+
+11:00.600 --> 11:06.360
+And so what we ended up with is just not having enough data to do very good grass
+
+11:06.360 --> 11:11.000
+plants. And so we sat around thinking about, well, how could we generate enough data that's
+
+11:11.000 --> 11:17.080
+very high quality? And so we ended up with this idea of starting to do synthetic data generation.
+
+11:18.040 --> 11:23.320
+And then we found out a lot of customers had this problem of not having that data. We had one
+
+11:23.320 --> 11:32.680
+customer who was trying to detect defects in their engines, car automotive engines. And they
+
+11:32.680 --> 11:37.160
+were training with 300 photos. It's the most number of defect photos they could generate.
+
+11:38.040 --> 11:43.320
+And they kept complaining that their models were only about 80 or 90% accurate in detecting
+
+11:43.320 --> 11:48.120
+defect. And a lot of defects were going through. And we realized that you really need about 30 or
+
+11:48.120 --> 11:54.120
+40,000 pictures of each defect to really have a dense model training. And you need to have that
+
+11:54.120 --> 12:00.120
+picture in all different lighting conditions from all different directions. So you could hire someone
+
+12:00.120 --> 12:08.120
+to sit around for three years taking all those pictures. I'm trying to kind of correlate the
+
+12:09.000 --> 12:14.920
+example that you just gave this kind of a fault detection kind of example where you've got,
+
+12:14.920 --> 12:23.560
+you've got kind of this clear long tail of defects where you just don't see them very often. They're
+
+12:23.560 --> 12:31.160
+infrequent that kind of thing. And I'm trying to refer that relate that back to your warehouse example
+
+12:31.160 --> 12:36.200
+where you've got kind of these billions of packages and you can take pictures of all these
+
+12:36.200 --> 12:41.880
+packages. Is it the same kind of long tail effect but just at a much bigger scale or is there
+
+12:41.880 --> 12:46.280
+something slightly different happening there that's causing you to not have the images you need to
+
+12:46.280 --> 12:52.040
+train? Yeah, it's the same issue because even with all those images, you only get a certain number
+
+12:52.040 --> 12:57.720
+of images of the package in each position, right? If you imagine a package falling and it falls,
+
+12:57.720 --> 13:03.800
+it can fall in many different positions. And you just don't get enough images of a single package
+
+13:03.800 --> 13:10.920
+of a specific size in every possible combination, right? And so those outliers where it would fall
+
+13:10.920 --> 13:15.480
+in a strange way, it almost never happens. And then when it does happen, the robot doesn't know what
+
+13:15.480 --> 13:21.880
+to do, right? So in this case, with the engine blocks, you're taking a look at the engine blocks as
+
+13:21.880 --> 13:27.320
+they go by and you just don't have enough defects physically you can create with enough images
+
+13:27.320 --> 13:34.440
+to recognize defects, right? So what we did is we took the CAD, the AutoCAD of the model,
+
+13:34.440 --> 13:43.400
+and then we used a game engine, actually we used Unreal to generate photo-realistic synthetic data
+
+13:43.400 --> 13:50.360
+that matched the camera resolutions for those engine block detectors and then trained it
+
+13:50.360 --> 13:56.920
+successfully to identify defects. And then in our packaging, grasping plans, we're generating
+
+13:56.920 --> 14:03.480
+the same thing. We are taking all the packages as they drop. We actually put physics in it so you
+
+14:03.480 --> 14:08.440
+can see if you watch the videos from re-invent them bouncing on the conveyor belt and they look
+
+14:08.440 --> 14:12.520
+like packages. I mean if a human watch is that they think that it's really packages but it's just
+
+14:12.520 --> 14:17.560
+the images of packages, right? And it's a synthetically generated conveyor belt and synthetically
+
+14:17.560 --> 14:26.520
+generated package images. And then what we do is we start with the CAD, the AutoCAD for those,
+
+14:26.520 --> 14:31.240
+and we actually do have an artist in the loop that does the initial work and then the
+
+14:31.240 --> 14:38.520
+we roll through an algorithm of an infinite series of combinations that we generate. So we generate
+
+14:38.520 --> 14:43.000
+literally tens of thousands of pictures of each package falling in each different
+
+14:43.800 --> 14:49.560
+possible direction. And then from that those images are then set into the machine learning
+
+14:49.560 --> 14:56.120
+model which allow the robot to learn. And then we do the same thing with, and that's the
+
+14:56.120 --> 15:05.480
+astro again when you heard robot. Anyway, and so when you have the the grasping plans for all the
+
+15:05.480 --> 15:12.520
+items that you want, so the the arm to pick up, you do the same thing. You take you know like a
+
+15:12.520 --> 15:19.480
+a coat bottle and you take photographs of it from all different directions and with all different
+
+15:19.480 --> 15:23.400
+amounts of Coca-Cola and it let's say and with its sweating and not sweating and with different
+
+15:23.400 --> 15:28.440
+lighting and all that other stuff. And you just it would take you you know a huge amount of time
+
+15:28.440 --> 15:35.880
+and effort to do that manually. With SageMaker synthetics you can just create the initial model and
+
+15:35.880 --> 15:44.120
+say generate you know 30, 40,000 photos if you like using the machine learning. I mean using
+
+15:44.120 --> 15:51.080
+the the game engine generation and then you just feed that into the model. And so this gets you
+
+15:51.080 --> 15:58.360
+much a much denser model with a lot more interconnects and allows you to more accurately execute your
+
+15:58.360 --> 16:04.840
+machine learning. So it's it's it's pretty amazing how much how low it works. You know that there
+
+16:04.840 --> 16:08.920
+are certain things you have to worry about as far as drift from reality right that you have to worry
+
+16:08.920 --> 16:16.600
+about things like that. And then we sort of extend that with our world simulations as well. So so
+
+16:16.600 --> 16:26.280
+so SageMaker synthetics is very much about generating both defect or non-defect individual objects
+
+16:26.280 --> 16:33.800
+for both grass plan and defect detection. And then WorldForge is for generating synthetic worlds.
+
+16:34.520 --> 16:41.080
+So it's the same idea is just expanded into a 3D synthetic world and it's being generated also
+
+16:41.080 --> 16:47.640
+by a game engine. You can pick your different game engines for it. And so for this case with
+
+16:48.920 --> 16:55.560
+with Astro and or IROAT with it they're robots and things like that what you do is you choose to
+
+16:55.560 --> 17:03.160
+generate synthetic houses. So so what what they do is they'll generate a whole bunch of synthetic
+
+17:03.160 --> 17:10.280
+houses and then they'll do years worth of testing in those synthetic houses and do their
+
+17:10.280 --> 17:15.880
+machine learning models and training there. And we do the same thing with Astro we will will
+
+17:15.880 --> 17:20.920
+generate these synthetic houses as well. And that's what WorldForge is about. Again if you had to
+
+17:20.920 --> 17:25.640
+hire an artist to do it it would cost a lot of money. You can define all the parameters for the
+
+17:25.640 --> 17:31.000
+houses like you can define different types of furniture different types of textures how many
+
+17:31.000 --> 17:36.760
+bedrooms how many bathrooms how many kitchens. And it will spawn out and guarantee that each
+
+17:36.760 --> 17:46.600
+house is unique. And then you can do an accelerated test where you know you can test say 100 houses
+
+17:46.600 --> 17:53.800
+and do a year or worth of driving around the houses in an hour. Right. And do training on that
+
+17:53.800 --> 17:58.520
+or also do testing on it to make sure if they get stuck in a corner or something like that.
+
+17:58.520 --> 18:06.440
+In the case of generating the houses do you is there an off-the-shelf kind of house generation
+
+18:07.080 --> 18:11.880
+like you want some kind of parametric thing like you describe number of bedrooms number bathrooms
+
+18:11.880 --> 18:19.240
+floor types you know and then you populate it with objects does that that framework for generating
+
+18:20.280 --> 18:25.160
+house structures virtually does that exist or did you have to build that. Yeah we had to build it
+
+18:25.160 --> 18:32.040
+it's it's part of it's a procedural generation system that is built into a world forage.
+
+18:32.040 --> 18:37.000
+And so you can go out and generate generate different houses it's you can say a one bedroom
+
+18:37.000 --> 18:43.800
+or studio or a three bedroom two bath or whatever you want and then you can pick from
+
+18:43.800 --> 18:50.200
+assortments of furniture and you can pick for assortments of items to be on the floor and you can
+
+18:50.200 --> 18:57.960
+pick different wall coverings you can pick different floor coverings and then the the
+
+18:57.960 --> 19:02.360
+procedural generation is smart enough to do things like not put a table in front of a doorway
+
+19:03.000 --> 19:08.280
+for example and things like that but it'll you know populate bedrooms it'll populate
+
+19:08.280 --> 19:13.400
+living rooms dining rooms all of those kinds of things for you and then you have these synthetic
+
+19:13.400 --> 19:20.440
+houses that you then drop your robotic model into and then you run your synthetic training in it.
+
+19:21.160 --> 19:28.920
+It's quite effective I mean when the first thing the astro did when when I got it home was to
+
+19:28.920 --> 19:36.440
+map my house. What sensors does the astro have on it? Is it just cameras or does it have some other
+
+19:36.440 --> 19:44.440
+sensor? It's got a whole suite of sensors it's got an infrared sensor system an acoustic
+
+19:44.440 --> 19:52.440
+sensor system and cameras on it so it's basically so that way you can see in the dark with the
+
+19:52.440 --> 19:59.480
+infrared it also has a camera on a a I don't know how you describe it basically a pole that can
+
+19:59.480 --> 20:06.680
+be raised up so if if it needs to look over something that it can't see over it can raise the
+
+20:06.680 --> 20:13.800
+camera up and look around and put down again or you have a mobile app where you can you know tell
+
+20:13.800 --> 20:19.080
+it to go different places and it'll go different places in the house or if you're your remote you
+
+20:19.080 --> 20:26.040
+can say you know go look see if I left the stove on or go look you know it says it heard something
+
+20:26.040 --> 20:30.760
+go check it out that sounds like glass break and go check it out and then you can point where
+
+20:30.760 --> 20:35.400
+you want it to go and it'll drive there and you can watch it on your phone it's it's pretty neat
+
+20:35.400 --> 20:41.800
+yeah that uh that I just left or you know I'm in another you know on a trip and oh man that I
+
+20:41.800 --> 20:47.800
+leave the stove on that that one resonated maybe to go a little bit further into the the astro
+
+20:47.800 --> 20:57.560
+uh direction um is it running it's like a local slam type of model for mapping the house or
+
+20:57.560 --> 21:03.880
+what's the relationship between the the robot and the the cloud for that yeah so it runs both it
+
+21:03.880 --> 21:10.280
+uh so the first thing it does when you when you uh after you pair it to your phone and connected
+
+21:10.280 --> 21:15.800
+to your network uh the first thing it will do is it will start mapping the house and so we'll go
+
+21:15.800 --> 21:20.920
+through a really interesting pattern where it will start at its docking station and go to the first
+
+21:20.920 --> 21:25.160
+room return to its docking station go to the second room return to its and it'll just keep doing
+
+21:25.160 --> 21:32.120
+that until it maps out the entire house um and then it'll ask you to go on a tour and so it'll
+
+21:32.120 --> 21:37.000
+follow you around because well actually before that it does a facial recognition system so it can
+
+21:37.000 --> 21:41.320
+recognize you so you go through and do your face from different angles uh and your voice so it
+
+21:41.320 --> 21:46.360
+does voice and face recognition for you and now it can follow you and then it asks to go on a tour
+
+21:46.360 --> 21:51.160
+of the house so then it goes to each room and then you say this is the living room or this is the
+
+21:51.160 --> 21:57.320
+kitchen or this is the dining room or in this case this is the office and then um uh you can then
+
+21:57.320 --> 22:02.280
+tell it to go to those rooms and it'll navigate there on its own even you know with my dogs running
+
+22:02.280 --> 22:07.400
+around other things like that it'll recognize staircases to not accidentally drive down a staircase
+
+22:07.400 --> 22:13.160
+and things like that uh it's got a uh a vertical sensor as well to make sure it can't do doesn't
+
+22:13.160 --> 22:19.160
+drive downstairs um and um you know the wheels are quite large so it can go over carpets and floor
+
+22:19.160 --> 22:25.400
+carpets and things like that that pretty easily it weighs about 27 pounds um and then it's got a
+
+22:26.600 --> 22:31.480
+battery last all day it can go find its charging station and so I'm in charge itself
+
+22:31.480 --> 22:37.320
+um too as well and it can you know you can tell it to go places it's got actually a drink carrier
+
+22:37.320 --> 22:41.400
+in it so you can have it like bring drinks to people from the kitchen and stuff like that but
+
+22:41.400 --> 22:45.640
+but I'm betting no grasping plan for opening the fridge and getting the drink
+
+22:46.200 --> 22:51.320
+no not yet yeah well you know I think the you know these things you have to kind of take them in
+
+22:51.320 --> 23:00.360
+stages so um I was actually amazingly impressed with how good a job the team did in making sure
+
+23:00.360 --> 23:04.840
+that it could figure out how to navigate on its own and and even with obstacles moving around
+
+23:04.840 --> 23:08.600
+in front of it the dogs moving around in front of it it would still uh it wouldn't freeze it would
+
+23:08.600 --> 23:13.320
+uh it would and not hit things right that was another thing but you can actually see it doing
+
+23:13.320 --> 23:20.520
+it's uh the same kind of thing as a grasping plan you can see it do it's it's plan uh to navigate
+
+23:20.520 --> 23:24.760
+around something you can watch it stop for a second and almost see this software running as it
+
+23:24.760 --> 23:31.800
+says okay how am I going to navigate this um and uh and then that gets stored in the cloud there's
+
+23:31.800 --> 23:38.840
+a map that it produces of your house as you can look at on the on your phone um and uh and and so it's
+
+23:38.840 --> 23:43.800
+constantly going back and forth and when you talk to it of course it selects and poly interface uh
+
+23:44.680 --> 23:51.080
+lambda lexin poly interface that goes back to the cloud to to do like when when I I mentioned
+
+23:51.080 --> 23:56.280
+the robotic company it looked it up for me as you heard but I thought it'd be interesting to have
+
+23:56.280 --> 24:00.040
+it here with us in the interview I've been having it it's been in here all day with me for other
+
+24:00.040 --> 24:08.680
+things too so going back to the warehouse and the defect detection example yeah I think of this
+
+24:08.680 --> 24:12.600
+you know running into the kinds of problems that you ran into you and the customer ran into I
+
+24:12.600 --> 24:18.360
+think of there being a uh series of steps that you might take to try to overcome that you know
+
+24:18.360 --> 24:25.000
+on one end is maybe the synthetic data um maybe somewhere in the middle is more of a traditional
+
+24:25.000 --> 24:29.880
+data augmentation uh I'm curious did you you know to what extent did you try that what kind of
+
+24:29.880 --> 24:37.800
+results you you saw with that um it is as a precursor to going to full synthetic data to continue
+
+24:37.800 --> 24:42.760
+to augment you you really just add still adding more images right I mean that that's really
+
+24:42.760 --> 24:47.880
+what you're kind of adding more images of the stuff that you of the the fat tail as opposed to
+
+24:47.880 --> 24:55.240
+the long tail yeah yeah yeah or another one of our customers basically has a robot looking at
+
+24:55.240 --> 25:02.280
+conveyor belts and picking off bad chicken nuggets so we had to generate a bunch of
+
+25:02.280 --> 25:08.440
+bad chicken nuggets and good chicken nuggets with synthetics right or another examples another
+
+25:08.440 --> 25:15.000
+customer that's uh looking for a distressed uh parts that are being manufactured in titanium for
+
+25:15.000 --> 25:20.760
+airplanes and the the way they had done that try to do that in the past is they would take
+
+25:20.760 --> 25:26.520
+these thirty thousand dollar parts and beat them up with a hammer and then take pictures of them
+
+25:26.520 --> 25:32.920
+right um and now what they do is they go into the CAD model and beat it up virtually and they
+
+25:32.920 --> 25:37.400
+can do it a lot of different ways uh and then generate those synthetically and then train on
+
+25:37.400 --> 25:43.640
+those synthetically so I think um I think it's going to be quite a boom for accelerating model
+
+25:43.640 --> 25:51.240
+training specifically for defect detection and for object recognition and grasp plans um and then
+
+25:51.240 --> 25:57.720
+I think uh world forage uh as it continues to accelerate and have more options in there
+
+25:57.720 --> 26:02.040
+is going to be a huge accelerator for anyone who wants to build something that has an
+
+26:02.040 --> 26:08.040
+navigate around a house and then in the future we'll do warehouses we did a hospital setting
+
+26:08.040 --> 26:15.400
+so the ability to build hospitals offices warehouses uh and then uh extending it to outside spaces
+
+26:15.400 --> 26:20.440
+as well to pursue or generate outside spaces intersections and other things like that so
+
+26:20.440 --> 26:26.200
+you talked a little bit about this just now they the in the case of the titanium
+
+26:26.200 --> 26:39.080
+part manufacturer they created the defects via CAD what um in the case of the um the other part
+
+26:39.080 --> 26:45.800
+manufacturer creating those deep like how do you characterize a defect and like what does that
+
+26:45.800 --> 26:53.400
+process look like in the in the general case yeah so what they do imagine like in a a sand mold
+
+26:53.400 --> 27:01.080
+for a uh an engine block um that uh you could take each cylinder and show gaps in the cylinders
+
+27:01.080 --> 27:05.880
+or anything that that causes the cylinder not look round before it goes into the machine process
+
+27:06.840 --> 27:14.200
+or any you know they they basically go through and create these defects manually which they
+
+27:14.200 --> 27:23.560
+used to have to do very so you just never get enough defects usually uh fortunately uh to train a
+
+27:23.560 --> 27:28.760
+model on and that that's been the challenge and so but it sounds like that it sounds like there's
+
+27:28.760 --> 27:34.520
+some subject matter expert there you know maybe an engineer or something that kind of understands
+
+27:34.520 --> 27:42.200
+the generation process behind defects and can produce them via is it always via CAD or is it
+
+27:42.200 --> 27:49.080
+well um you can also use things like Maya and Blender you know the the other 3D tools uh so
+
+27:49.080 --> 27:54.760
+so we offer it as kind of a complete service so if you have an engineer slash artist that can
+
+27:54.760 --> 28:00.760
+generate the defects for you you can do that and then upload the models and then generate
+
+28:00.760 --> 28:06.760
+synthetics a few clicks of a button but we also offer sort of these artists and engineers that
+
+28:06.760 --> 28:13.720
+are available on demand if you like to do it for you so if you don't have the the artist who knows
+
+28:13.720 --> 28:19.960
+how to do the defect track creations uh you sit with one of your engineers and the artist will
+
+28:19.960 --> 28:23.640
+sit say well it looks like this it looks like that and they'll have an interactive session
+
+28:24.440 --> 28:31.800
+of creating those and is that artist generating or the engineers in the the case the the user
+
+28:31.800 --> 28:38.920
+uh is doing it are they generating uh kind of static examples of defects or are they
+
+28:39.400 --> 28:46.280
+generating some parameterized thing that's a defect generator um that's part of this the process
+
+28:46.840 --> 28:52.600
+yeah it's both it's both so so you can generate them uh procedurally after you've defined them
+
+28:53.560 --> 28:58.920
+uh or you can generate them you know manually if you like saying here's the the different
+
+28:58.920 --> 29:05.080
+different defects I want to have on my on my uh uh you know you can imagine you could create a dent
+
+29:05.080 --> 29:10.840
+and move it around randomly right under different surfaces but you need you know the algorithms
+
+29:10.840 --> 29:18.760
+to do that properly um and then after you've generated those models then then the uh it goes into
+
+29:19.720 --> 29:25.640
+synthetics and it generates you know images at all different lighting that match your sensors
+
+29:25.640 --> 29:31.560
+uh from all different angles um and then and then that that's how it goes it just starts mass
+
+29:31.560 --> 29:36.360
+generating of the images so that that way you get this sort of mass generation and then then then
+
+29:36.360 --> 29:43.640
+you have now a library of 30,000 or 100,000 images that you then can feed into your training model
+
+29:43.640 --> 29:48.680
+yeah and and of course that's that's combined combined with real images as well so you you know you've
+
+29:48.680 --> 29:55.320
+got your like in that engine block example they had about 300 images that they'd made um to start
+
+29:55.320 --> 30:03.960
+but now they have 30, 40,000 images plus the 300 so for those folks that want to do the procedural
+
+30:03.960 --> 30:08.760
+generation of these defects what's the what what kind of tools are you using or what's the
+
+30:08.760 --> 30:18.440
+interface uh for creating that yeah so they can log into uh sage maker synthetics um and uh
+
+30:18.440 --> 30:23.160
+describe you know that there's there's there's choices right there on the console on what they're
+
+30:23.160 --> 30:29.560
+interested in doing um and in that case uh we you know through the console you get connected to an
+
+30:29.560 --> 30:35.000
+artist if you have the artists or the engineer and you just want to upload your 3D models and say
+
+30:35.000 --> 30:40.280
+generate and then you set the parameterization just like with world fours you'd be saying I want
+
+30:40.280 --> 30:45.000
+this furniture and and these services and this many bedrooms and this many houses and it will
+
+30:45.000 --> 30:50.760
+procedurally generate it once you have your models in there uh and you describe your sensor
+
+30:50.760 --> 30:54.840
+suites and you can choose from existing sensor suites because there's a lot of common sensor suites
+
+30:54.840 --> 31:01.000
+or or specifically setting up your sensor suites then you automatically generate it from there um so
+
+31:01.000 --> 31:07.080
+we you you have all this uh synthetically generated data defect data and the examples that we talked
+
+31:07.080 --> 31:17.160
+about you combine that with your kind of regular uh images um and the sounds like the next step
+
+31:17.160 --> 31:23.080
+and uh at least some of these cases is simulation can you talk a little bit about you know how and
+
+31:23.080 --> 31:29.560
+where you see simulation coming into play yeah so so certainly if you take a look at the videos from
+
+31:29.560 --> 31:35.160
+from re-invent you'll see the simulation of the packages falling on the conveyor belt as it's
+
+31:35.160 --> 31:41.960
+moving right and so um and then the packages there's actually in that uh simulation there's
+
+31:41.960 --> 31:47.080
+physics as well so the packages bounce and so you're defining your you know part part of the setting
+
+31:47.080 --> 31:53.000
+up the simulation is you're defining the physics of it right um in in world forage when you're
+
+31:53.000 --> 32:00.040
+generating worlds or in roblemaker you're defining uh with world forage the you know the the houses
+
+32:00.040 --> 32:07.960
+that you want to do and the physics is earth physics right um we worked with uh JPL on the Mars
+
+32:07.960 --> 32:14.680
+rover for example with roblemaker in that case we made a Mars landscape and you've got Mars physics
+
+32:14.680 --> 32:21.960
+involved in that landscape with roblemaker and then we're currently working on the uh the lunar
+
+32:21.960 --> 32:30.600
+outpost uh training the lunar rover to to drive all over the moon and so we've built uh moon
+
+32:30.600 --> 32:37.640
+landscapes right we have another company that uses roblemaker uh actually it's a it's a a UV
+
+32:37.640 --> 32:43.800
+sterilization robot that goes around hospitals UV sterilizing surfaces so it's got to not do that
+
+32:43.800 --> 32:49.800
+when people are around because UV lights are dead for your eyes uh and it has to know how to
+
+32:49.800 --> 32:54.840
+for example call an elevator going inside the elevator sterilize it go to the next floor sterilize
+
+32:54.840 --> 33:01.800
+the floor you know call an elevator go to the next floor and so uh what we did there is we uh created
+
+33:01.800 --> 33:07.560
+a simulation of the hospital all the floors in in different hospitals uh that were randomly generated
+
+33:07.560 --> 33:16.040
+for for the robot to learn that um and then there's also a um a space simulator uh for simulating um
+
+33:16.920 --> 33:23.480
+space vehicles right so you know zero g maneuvers with thrusters and those kinds of things uh
+
+33:23.480 --> 33:27.480
+so you can simulate say for example a docking procedure of those kinds of things and so all of those
+
+33:27.480 --> 33:34.600
+are available as different models inside roblemaker or there's a um uh a drone simulation system
+
+33:34.600 --> 33:39.560
+so to train drones to fly between buildings and things like that and land the specific places or
+
+33:39.560 --> 33:45.720
+there's a uh an eight-ass simulator um to use some of the core eight-ass models where you can take
+
+33:45.720 --> 33:52.200
+it a bit further and and and generates synthetic simulations for eight-ass training for autonomous
+
+33:52.200 --> 33:57.640
+vehicles and so it's a pretty broad range and and what we're working with worldforges and
+
+33:57.640 --> 34:02.520
+and roblemakers just make it simpler and simpler and simpler to do that right so that you can
+
+34:02.520 --> 34:10.120
+you don't have to be uh an ML expert to run a simulation and and train your ML models right uh or
+
+34:10.120 --> 34:14.600
+you don't have to be an HPC high performance computing expert to do that right in a lot of cases
+
+34:15.320 --> 34:20.840
+today you need to be an HPC expert and understand how to set up clusters and and and you know how
+
+34:20.840 --> 34:26.120
+how to load batches of your simulation out and spawn them out and manage them and all those other
+
+34:26.120 --> 34:33.960
+things our goal would be that uh you know uh the ML experts could concentrate on the ML model on the
+
+34:33.960 --> 34:43.400
+compute right and and so it's getting being able to import in a 3D map of a city uh synthetically
+
+34:43.400 --> 34:51.560
+generate uh uh say 10,000 intersections with with items you know people walking and cars going um
+
+34:51.560 --> 34:56.920
+and then simulate you know driving through that city uh and simulate going through all those
+
+34:56.920 --> 35:02.600
+intersections with a few clicks of a button it would be our goal and then um you can use that
+
+35:02.600 --> 35:07.320
+to train your models synthetically and you can use it to test your models and test your your
+
+35:07.320 --> 35:12.520
+algorithms out in these virtual worlds and then when you're happy with them then you can use our
+
+35:12.520 --> 35:18.200
+over-their update push it out to the vehicles or the robots or the drones or whatever it
+
+35:18.200 --> 35:26.600
+where whatever is your you're working with are the simulations are you using uh or interfacing with
+
+35:26.600 --> 35:31.640
+off-the-shelf simulators it's some one might already use for robotics or is it kind of
+
+35:32.360 --> 35:38.680
+custom built stuff that's part of world forged in these other platforms yeah so so it's a little
+
+35:38.680 --> 35:49.640
+both um so for example um in uh robo maker you can choose unity or unreal or gazebo you know as
+
+35:49.640 --> 35:58.040
+you're as your engines right um and pretty soon oh 3de as well um and then uh for the robotic arms
+
+35:58.040 --> 36:03.240
+you could choose a Drake simulator for example and then you know there's a number of really good
+
+36:03.240 --> 36:09.240
+you know autonomous vehicle simulators that are already out there that you can choose from as well um
+
+36:09.240 --> 36:15.960
+so so uh you can choose your your rendering engine you can choose your simulator you can choose
+
+36:15.960 --> 36:22.120
+your physics engine um and then you can then you you choose your your environments like generate
+
+36:22.120 --> 36:26.680
+the houses or generate the streets or generate whatever is your you're interested in uh and then
+
+36:26.680 --> 36:34.280
+you can say things like well I want to do you know uh a hundred houses and I want to do a year's
+
+36:34.280 --> 36:38.520
+worth of training and then what it'll do is figure all all those parameters that it was just spawn
+
+36:38.520 --> 36:46.120
+out that amount of compute necessary to do it right and then and then if you have I have the robot
+
+36:46.120 --> 36:51.320
+for example get stuck in a corner uh you'll get a cloud watch alarm that it's stuck in a corner
+
+36:51.320 --> 36:55.800
+and then you can go physically watch that one simulation and see where your lines of code are
+
+36:55.800 --> 37:00.440
+are going through and what's wrong with your model for example uh and then you can make changes
+
+37:00.440 --> 37:04.920
+and then just do it again and do it again until you're happy with it so it gives you you know
+
+37:04.920 --> 37:10.920
+the a lot of flexibility to do that all automatically whereas we're we're sure you know right now
+
+37:10.920 --> 37:15.240
+people would actually build physical environments and they'd physically load stuff out on their
+
+37:15.240 --> 37:21.320
+their robot in the past and they'd physically um uh you know uh uh run the simulations and then
+
+37:21.320 --> 37:25.800
+they'd see the robot get stuck and then they you know so it would be clock time that they would do
+
+37:25.800 --> 37:30.360
+right and so clock time takes forever to do this you know you just can't you know if you look at
+
+37:30.360 --> 37:38.440
+like one of our customers or Rora uh who's doing an autonomous systems um eight-ass type applications
+
+37:38.440 --> 37:44.760
+you know they they drive tens of millions of miles every day in the simulation right and you
+
+37:44.760 --> 37:48.760
+just can't physically do that in the real world they're just you know you need you know
+
+37:48.760 --> 37:54.280
+thousands of cars driving thousands of miles every day to do that um which is just not practical
+
+37:54.280 --> 37:59.160
+or economic or anything so I think the only way we're going to get to the level of autonomy
+
+37:59.160 --> 38:03.560
+using machine learning that we need is these synthetic simulated environments and then
+
+38:04.520 --> 38:10.680
+it extends even further as you start people start looking at business simulations and machine learning
+
+38:10.680 --> 38:18.840
+related to that uh so training simulations of logistics systems so that you can train the models
+
+38:18.840 --> 38:24.040
+to adapt to changes in unpredictable changes in your logistics system uh you can imagine that
+
+38:24.040 --> 38:29.560
+it's also you know the factory digital twins like with our twin maker product where you can
+
+38:29.560 --> 38:34.840
+today you can simulate uh individual components and then you can apply machine learning to that
+
+38:34.840 --> 38:41.560
+like look out for equipment to look for anomalies um or you can apply say Siemens or ANSI simulations
+
+38:41.560 --> 38:46.360
+to each of those individual components where they have the the the local expertise or the manufacturer
+
+38:46.360 --> 38:51.400
+simulation for the compressor or the motor or whatever it is in your factory uh in the future you'll
+
+38:51.400 --> 38:55.800
+be able to to since we know the relationship between those and we have the real-time data coming
+
+38:55.800 --> 39:01.720
+into twin maker uh you'll be able to simulate the entire factory process to begin to optimize it
+
+39:01.720 --> 39:07.720
+uh and apply machine learning at a broad broader range uh than people do today I think and so
+
+39:08.440 --> 39:14.440
+um it's an exciting time it's like even you see in in high performance computing uh more and more in
+
+39:15.480 --> 39:20.680
+uh you know fluid dynamics calculations and things like that we're doing things like like
+
+39:20.680 --> 39:26.920
+training models on outcomes for different three-dimensional surfaces um and then not having to
+
+39:26.920 --> 39:33.000
+do the computational dynamics for it fluid dynamics for it uh we can skip that because the models
+
+39:33.000 --> 39:37.560
+can start to predict the outcome as you change the surface without having to recalculate everything
+
+39:37.560 --> 39:42.600
+and so that's going to be a transformation I think in combining high performance computing and
+
+39:42.600 --> 39:47.880
+machine learning and and these simulations I think it's it all begins to build on itself as we
+
+39:47.880 --> 39:55.560
+virtualize the world whether it be sage maker synthetics or or world forage or robo maker or or
+
+39:55.560 --> 40:03.080
+twin maker and all these ml models integrated with them um that's how things are going to continue
+
+40:03.080 --> 40:08.040
+to advance in my opinion all this 3d processing that's necessary to do that physics that are
+
+40:08.040 --> 40:13.880
+necessary to do that oh bill thanks so much for taking the time to share a bit about uh your
+
+40:13.880 --> 40:19.320
+recent news and what you've been up to uh very very fascinating stuff yeah well thank you thanks for
+
+40:19.320 --> 40:27.800
+having me
+

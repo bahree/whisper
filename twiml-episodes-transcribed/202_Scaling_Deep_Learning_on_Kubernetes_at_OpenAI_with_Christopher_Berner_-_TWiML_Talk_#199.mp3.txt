@@ -1,0 +1,675 @@
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+people, doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington.
+For those challenges with promoting the use of machine learning in an organization and
+making it more accessible, one key to success is supporting data scientists and machine
+learning engineers with modern processes, tooling and platforms.
+This is a topic we're super excited to address here on the podcast with the AI Platforms
+Podcast series that you're currently listening to, as well as a series of e-books that will
+be publishing on the topic.
+The first of these books takes a bottoms up look at AI Platforms and is focused on the
+open source Kubernetes project, which is used to deliver scalable machine learning infrastructure
+at places like Airbnb, booking.com and open AI.
+The second book in the series looks at scaling data science and machine learning engineering
+from the top down, exploring the internal platforms that companies like Airbnb, Facebook
+and Uber have built and what enterprises can learn from them.
+If these are topics you're interested in and especially if part of your job involves
+making machine learning more accessible, I'd encourage you to visit twimbleai.com slash
+AI platforms and sign up to be notified as soon as these books are published.
+If you found yourself saying, Cuba, what, Cuba, who, when listening to this intro, this
+is the show for you.
+In this episode of our AI Platforms series, we're joined by open AI's head of infrastructure,
+Christopher Burner.
+Chris has played a key role in overhauling open AI's deep learning infrastructure in the
+course of his two years with the company.
+In our conversation, we discussed the evolution of open AI's deep learning platform, the core
+principles which have guided that evolution and its current architecture.
+We dig deep into the use of Kubernetes and discuss various ecosystem players and projects
+that support running deep learning at scale.
+And now on to the show.
+All right, everyone.
+I am on the line with Christopher Burner.
+Chris is the head of infrastructure at open AI.
+Chris, welcome to this week in machine learning and AI.
+Thanks a lot.
+Awesome. So why don't we get started by having you tell us a little bit about your background.
+You are coming up on almost two years at open AI now.
+How did you get to open AI?
+Yeah.
+Well, let's see.
+So before open AI, I was at Facebook, I worked there for about four and a half years.
+And before that, I worked at a couple of startups at Facebook.
+I worked on the newsfeed ranking team for about a year.
+So it's got just a little bit of introductory experience in machine learning.
+And then I worked in the data infrastructure team, worked on a distributed SQL query engine
+called Presto, which is open source.
+So I have a fair bit of background and big data analytics and data warehousing.
+And that has certainly helped me get up to speed with all of the large scale infrastructure
+that's required for deep learning these days.
+And yeah, I've just been learning all about the infrastructure that you need for machine
+learning training and specialized infrastructure there.
+And so open AI is certainly doing machine learning at large scale.
+Maybe we can start out by having you, you know, we've, I've talked to several people
+from open AI on the podcast before, but maybe you can start by providing an overview of
+some of the larger projects that kind of stressed the need for a platform for machine learning
+at open AI.
+Yeah.
+Well, certainly our largest project is our data to research project.
+And in the past few months, we've announced a bunch of the results with open AI five
+there.
+And yeah, that's a very large system, trans on hundreds of GPUs and over 100,000 virtual
+CPU cores runs in one of our clusters in Google compute engine.
+And yeah, that's definitely our largest.
+We have several other projects that are also quite large though, our robotics team also
+does some very large scale training.
+I've actually done a little bit of work on large scale image net training.
+And yeah, that's like one or 200 GPUs, I'd say kind of all of our teams have things that
+are on the medium to large size, but data is definitely our largest.
+Nice.
+Nice.
+And I spoke to Christy not too long ago about the data project.
+So I'd refer anyone who wants to hear more about that to that interview.
+In terms of supporting these types of projects, when you started at open AI, was there much
+established or have you kind of had a hand in building it up from scratch?
+Yeah, some of both.
+So definitely we already had Kubernetes clusters set up when I joined.
+They were definitely architected differently than they are today.
+And yeah, I've been involved in changing the architecture of them to make them scale
+better and also isolate faults better.
+So that was in place.
+We've also made some changes in terms of our storage technologies and a bunch of the frameworks
+that we use for running experiments.
+I think that's actually one of the areas that we've seen the largest changes we had.
+Two or three different frameworks that existed when I joined and I don't think any of those
+are still around.
+We've moved on to completely different ones, so yeah, so a mix of things that still exist
+and a bunch that has changed.
+You mentioned that a big part of the change was driven around scalability and I think it
+was reliability.
+Those are a couple of things that have driven change, but taking a step back are there when
+you think about the characteristics that you're trying to be able to provide to the research
+teams from an infrastructure perspective.
+Those are the two or most important things or are there a set of things that you think
+that they require of you to be able to do their jobs effectively?
+Yeah, so those are definitely two very important ones.
+There's a couple others that I would add.
+One is access to cutting-edge hardware and we run some machines in our own data centers
+because we want access to hardware that's not available in the cloud and so yeah, that's
+another dimension and then yeah, I guess sort of another aspect, but it's more on the
+tooling side is just ease of use that people want to be able to launch their experiments
+quickly and interact quickly and so that's another important aspect of infrastructure.
+And it sounds like the support for the framework of choice for the researchers is another
+one in that you've already kind of gone through a transition on the framework side.
+You don't want to lock them into a specific choice there.
+Yeah, we try to provide as much flexibility as possible to our researchers.
+Like I mentioned, there were some old research tools that I don't think people are using
+now because they've invented new ones that are better and similarly we don't want to
+be limited to running experiments just in the cloud and that's one of the benefits that
+we see from Kubernetes is that it's very easy to port your experiments from the cloud
+to our on-premise clusters where we may have access to different hardware and it makes
+that transition pretty seamless and the so the frameworks that you mentioned that folks
+weren't using that folks that you transition from are those with those internal frameworks
+or these all open source frameworks, but you're just using different ones now.
+Are we talking about things like TensorFlow and PyTorch or are we talking about internal
+tools that have been developed at OpenAI?
+Yeah, so those particular ones were internal.
+Okay.
+It was a few different frameworks for running and managing experiments and visualizing the
+results from them and things like that and now I'd say like TensorFlow board is pretty
+popular.
+That's kind of replaced some of the need for our custom tooling in one particular area.
+But yeah, also TensorFlow, I'd say that's definitely our most popular sort of machine learning
+framework.
+I'd guess that 90% of our code is probably TensorFlow, but there's also starting to be
+significant contingent of people who are using PyTorch, so some amount of change in that
+area too.
+Okay.
+Before we dive into kind of an architectural overview of the platform that you've set
+up, can you walk us through kind of the level above that, like the workflow or the processes
+as you see it, that you're trying to support.
+So for example, you mentioned experiment management and how some of the tooling there is shifted
+from internal to tensor board.
+What are the ways in which you think about the functional requirements of the machine learning
+researchers that you're supporting?
+Yeah, certainly.
+Yeah, I guess at a really high level.
+Pretty much everything that we do is research and experimentation and training models.
+Which makes us a little bit different than a lot of other companies that are doing machine
+learning because they're often then going on to integrate those into a product and deploy
+that to all of their users, whereas we're really just focused on the research side of things.
+And so we try to optimize our tools for iterating quickly and exploring a lot of different research
+directions and providing the flexibility to do experiments in all different areas.
+So we've got a number of teams that do reinforcement learning.
+But we also have teams doing supervised learning and unsupervised learning.
+So a whole bunch of different types of problems that they're trying to solve.
+But kind of all of it comes back to training models and collecting the results from them
+and then being able to interact quickly on the next version of their research ideas.
+Okay.
+So whereas in a non-research enterprise, something, some of the front end work of integrating
+with data warehouses and things like that isn't so critical for you.
+And some of the backend model management tasks where you're trying to manage productionized
+models.
+It's also not as critical for you or not at all critical for you.
+The part in the middle, this experiment management piece is, that has to be done really well
+to make sure that the folks who are supporting are able to work most efficiently.
+Yeah, exactly.
+Because that's pretty much all that we do.
+And so that's really where we focus our effort.
+And when you think of that job from a quote unquote head of infrastructure perspective,
+are you thinking of it?
+I guess I have this picture on my head of infrastructure looking down like hardware
+and platforms and frameworks and infrastructure looking up like tools that manage that process
+of experiment management, for example.
+Are you kind of, you know, top to bottom there or are you, you know, just the bottom part
+or?
+Yeah, I would say that we do kind of a bit of everything, but for the most part, we're
+focused on providing the compute clusters.
+And yeah, I guess also running like the storage clusters and other things that are related,
+but to sort of providing, yeah, the bottom layers of making sure that everyone has access
+to the compute and the hardware that they need.
+We do also work a bit on the tooling side.
+Most of our experimentation management tools have been developed by our research teams,
+but we certainly help maintain a few of those and help support them with the new features.
+And so I think infrastructure's role has kind of expanded and actually in some ways,
+I suppose, contracted to, we used to have other tools that we ran and managed, and now
+it's said that those aren't so useful, so we no longer run those.
+But kind of the main focus of the team is on providing really big compute clusters, but
+then we've also got a lot of other responsibilities on tooling side and other places that we work
+on.
+One of the things that I found interesting when I look at what you're doing, you've
+published OpenAI as published quite a bit on its infrastructure and some of the things
+that it's done, and one of the things that I found really interesting is the very strong
+commitment to kind of this multi-cloud world.
+You've got experiments running on Google, you've got experiments running on Azure, you've
+got experiments running on AWS, and of course, on premises.
+Can you talk a little bit about the motivation there?
+And what's driven the need to support, it's got to be a more complex environment than
+just standardizing in one place?
+Yeah, for sure.
+I guess there's kind of a few different factors.
+So one, like I mentioned, is access to kind of a chartware, so we can get whatever we want
+in our on-prem clusters, but the cloud also has a lot of benefits, you can quickly scale
+things up.
+They've got lots of nice APIs and auxiliary services that you can take advantage of, and
+so we'd like to have a presence with all of the major cloud providers so that when they
+launch a new type of NVIDIA GPU, or when Google announces their new TPUs, we want to be
+sure that we have access to those and that we can use them.
+And so that's one thing that drives our multi-cloud strategy.
+Another part of it is strategic partnerships and economics.
+We want to be able to take advantage of whatever cloud we can get the best pricing in, and
+so that certainly has advantages to being able to move our workloads between clouds and
+our own cluster, of course.
+And so you've got these disparate research workloads.
+You've got these multiple infrastructure environments, clouds plus your on-premises cluster.
+And as we've alluded to, Kubernetes is a part of the platform that ties all this together.
+Taking a step back from that, when you describe the platform for machine learning and deep
+learning at OpenAI, how do you describe it?
+What are the major pieces?
+Do you have names for things?
+What kind of walk us through the platform?
+Yeah, for sure.
+Yeah, so Kubernetes is a big piece of it.
+We run three different production clusters.
+We name all of our production clusters, animals alphabetically.
+So the latest one, we're up to J now, which is Jaguar.
+So that's our newest one.
+We've got two others, Horus and Ibus.
+So each of those is a Kubernetes cluster limited to a specific cloud and geographic region
+or our on-prem cluster.
+And then sort of outside of that, we've got a number of tools.
+So the rapid experimentation tool is the one that our data research team developed.
+And that does sort of all of their experimentation management and provides a bunch of core building
+pieces for building their experiments as well.
+And that's one that our robotics team uses as well.
+And a couple other teams have experimented with.
+So that has really helped us, I'd say, move quickly and be able to launch new research
+experiments in the reinforcement learning space because that's what that tool is optimized
+for.
+Those core building pieces, can you give us some examples of what those are?
+Yeah, so they've got an implementation of the PPO algorithm of the what algorithm?
+PPO, proximal policy optimization.
+Got it.
+Okay.
+Yeah.
+They've got a special implementation for synchronizing multiple GPUs that are spread across
+machines to do distributed training, a bunch of infrastructure just kind of for tracking
+the experiments, managing optimizers, managing tiers of machines that are running the environment
+like the data to game or a physics simulator, streaming that experience back to the optimizer
+machines.
+So kind of managing the application level distributed system that has to do all the training.
+Is that tool used for multiple experiments and what's the I'm curious how customized
+that is for a specific application or experiment or if it's, you know, can it can a new experiment
+kind of plug into it pretty easily and take advantage of all the different sub components
+that it offers?
+Yeah.
+So it started out quite specialized for the data team and then has expanded into a more
+general research tool that we're now using in a number of teams across the company.
+So the robotics team was the second team that started using it and they've applied it
+to some of their robotic hand experiments and that kind of turned out to be actually a
+similar problem.
+You replace the data to game with a physics simulator and then a lot of the other components
+really fit together nicely.
+And now we've got at least one other team that's starting to use it and they also I believe
+we're able to get started really quickly, adapt it for their experiments.
+So I think a lot of our teams that are doing reinforcement learning are able to just
+move their experiments over to it really quickly.
+Okay.
+Cool.
+And so you mentioned you've got these three production clusters and just to clarify,
+those are the three clusters on prem and then you've got additional clusters in the
+cloud.
+Is that right?
+Oh no, those are our three Kubernetes clusters.
+So one of them is on prem, the other two are on the cloud.
+Okay.
+And do the three clusters support presumably different research workloads simultaneously
+or are they dedicated to a specific research workload at a time?
+Yeah.
+So it varies a bit.
+And because research projects can do the change in scope over time.
+And yeah, they kind of ebb and flow in terms of their compute needs.
+It changes over time.
+Right at the moment, I believe all three clusters are being shared.
+I don't think any of them are dedicated to a single team at the moment.
+But it tends to be that like two or three teams will share one cluster and that kind of
+makes it easier for them to know how much capacity they're going to be able to use.
+And it's just kind of easier for the infrastructure team also to know who it is.
+It tends to be using each cluster.
+But at the moment, we run all three of them, the shared cluster is where anyone is free
+to use the capacity.
+Taking a step back.
+So Kubernetes deals with containerized workloads.
+So the training workload, for example, needs to be containerized.
+That's not necessarily a skill that the typical data scientist has.
+One of the things that I read is that you've built some tooling that kind of does that
+for the researchers so they don't have to get into the weeds in terms of containerizing
+their workloads.
+Can you talk a little bit about that?
+Yeah.
+So one of the things that we try to do in general is provide a lot of flexibility in terms
+of tooling because different teams and different researchers may have a different level of comfort
+with different tool sets.
+And so yeah, people can use Kubernetes directly and build their Docker containers and there's
+a bunch of people who are comfortable with that.
+That's what they do.
+But then, yeah, there's also a set of people that prefer different types of interfaces
+and maybe something but abstracts way all of the container details.
+And so another tool that we have called ARCALL, it handles all of the Docker containers
+and, in fact, abstracts away sort of all of the Kubernetes details so that you just
+have your Python code in a directory and it knows where to find it, uploads it to the
+cluster, launches your containers, launches all your experiments, and then you can just
+focus on writing your TensorFlow and other Python code and not even need to necessarily
+know that it's running inside a Docker container or really that it's a Kubernetes cluster
+even.
+And are the researchers there typically working with like Git repositories?
+So are they checking in code and are you pulling from those Git repos when you're containerizing
+or is it all just slurping stuff up from directories on the desktop?
+Yeah, we use Git quite extensively here.
+And I guess, again, kind of a mix of things depending on the workflow that researchers
+and most convenient, yeah, some of them are launching their experiments from code that
+they have locally, although that's almost always in a Git repository just from their local
+checkout for other ones, yeah, maybe that it's built by a container, a build engine
+like QA, and then we're deploying a container from that registry.
+Earlier on you mentioned that your use of Kubernetes is kind of evolved from when you started
+to today, can you talk a little bit about that journey in general, how your use of Kubernetes
+has evolved as Kubernetes has evolved, what some of the big challenges with the different
+phases that you've gone through with your architecture has been and how you've overcome
+those?
+Yeah, it has changed in a number of ways.
+Certainly one is the scale, our clusters have gotten way bigger than when I first started
+but they've also sort of transitioned in their design.
+So when I first joined the design that we had was a single production Kubernetes cluster
+and it was a single multi-cloud cluster, so it spanned both AWS and Azure and it sort
+of led to some behavior that was difficult to reason about, I don't think for how many
+people run Kubernetes clusters where a single cluster is cross-cloud and especially when
+we wanted to scale that up significantly to thousands of machines, we switched over
+to a model where we have multiple Kubernetes clusters and each one is limited to a specific
+physical region, so either are on-prem clusters or availability zone in the cloud.
+And that made it a little easier to reason about some of the network aspects of it and
+not need to worry about some of the cross-cloud issues that we'd run into.
+So that really allowed us to scale more.
+Can you give me an example of some of the issues that you ran into that kind of led to that
+shift?
+What were the kinds of things that you'd see?
+Yeah, for sure.
+Also because we were needed to run this cross-cloud, we had the control plan in AWS and then we
+had a bunch of IP sect tunnels that connected to the other availability zones where the
+workers were running in.
+So we would have one set of workers running in like Azure's East Coast region and one
+West Coast region and all of these would talk back to the Kubernetes control plan over
+this IP sect tunnel back in AWS.
+But this meant that that IP sect tunnel was kind of a single point of failure if that went
+down.
+Not necessarily the entire cluster, but a large section of the cluster because that whole
+group of workers would now be cut off from the control plan.
+So yeah, there was that problem.
+Then there was also the problem of if you wanted to use something like Amazon's file system
+like in on the name right now, EFS, I think it's called EBS or S3.
+Yeah, S3 I guess was a little bit less problematic, but certainly EBS, that's something that you'd
+like to use.
+But now if some of your workers are in Azure, then you can only use it in half your cluster
+and then that's really confusing if you end up with sometimes you can use it and sometimes
+you can't and then I guess one of the most difficult to overcome problems was that if you
+scheduled your job into the cluster, it was possible for your job to get split so that
+half of it was in Azure and half of it was in AWS.
+And now if there was any network communication between them, that would just go very, very
+poorly.
+Right.
+Right.
+So you had to be very careful to specify that your job should only be in one cloud and
+not the other.
+Okay.
+But kind of all of that led to us just changing the model so that one Kubernetes cluster, one
+availability is out, then you don't have to worry about any of that.
+Right.
+Yeah, it's interesting.
+I think in the Kubernetes community, certainly there's a lot of talk about hybrid cloud and
+multi cloud and even the ability to run a single Kubernetes cluster spanning multiple
+clouds.
+It's actually document and not necessarily thoroughly, but it's there, but I don't get
+the impression that a lot of people do it for reasons like the ones that you're describing.
+Yeah.
+So some tough problems and we were trying to solve them pretty early in the development
+of Kubernetes.
+I imagine if we tried to do it now, the experience might be a little smoother, but some of those
+are just difficult problems to solve.
+And then I guess the other area that our Kubernetes clusters have evolved significantly
+since I joined is our on-prem cluster.
+So that did not exist when I joined.
+And as one that we've been continuing to scale up, just as we have more and more demand
+for cutting edge hardware that's not available in the clouds.
+And so with that particular motivation, front and center, in particular cutting edge hardware,
+for example, you have access to an Nvidia DGX, I'm sure you have access to all the latest
+and greatest GPUs.
+Are you able to utilize Kubernetes features like labels and things like that to target
+workloads to these specific cutting edge hardware or do you just kind of throw them all
+into the pool and let them land wherever they land and kind of each incremental hardware
+piece just adds what it can bring?
+Yeah, so we definitely do a bit of both.
+We use labels pretty extensively to provide finer grand control of exactly what hardware
+you get scheduled on as much as possible.
+We also try to keep our clusters homogeneous or mostly homogeneous so that you don't need
+to put too much thought into specifying exactly what you want, but yeah, it's a bit of
+both.
+Do you find in general that the out of the box Kubernetes scheduler does what you need
+for these types of workloads?
+Yeah, so we've made some various tweaks to it, although we're still using the upstream
+scheduler and I've just made like config changes and then sort of built some services on
+top of Kubernetes.
+We now have a system that uses the mutating webhooks feature along with a controller
+and taints that sort of manage the resources in our cluster so that certain groups of
+machines can be dedicated to a certain team.
+And then when members of that team submit their pods, those pods will receive a toleration
+that allows them to run on those reserved machines.
+Is that an alternative to using namespaces or is that something that works in conjunction
+with namespaces to provide that feature?
+Yeah, so it works in conjunction with namespaces.
+So here of every researcher their own namespace and then most teams also get their own namespace
+and they can have one if they ask for it, just kind of depends on how they like to structure
+their workflow.
+And then we integrate all of this back into our directory service so that it knows which
+people are on which team and then the pods in those namespaces can then be granted a
+toleration to run on capacity that's reserved for that team.
+So yeah, that's an area where we consider building all of this into a custom scheduler
+but it seemed much easier to support if we just built it as a feature on top of the Kubernetes
+APIs that could then interact with the scheduler in the normal way.
+And I guess the one significant config change that we've made to the default Kubernetes
+scheduler is that the default one prefers to spread out the pods in like a deployment
+or a job as much as possible, which is good for fault tolerance.
+But for us, we tend to want the opposite, it would actually like as many pods as possible
+to be packed into single machines so that it leaves other machines completely empty.
+And that's good for two reasons one is that if someone submits a bunch of small pods,
+we don't want them to fill up tiny pieces of every machine.
+We want them to packed into a few so that their whole machines available for people that
+want to use an entire machine.
+And then the other thing that it really helps us with is auto scaling.
+So in our cloud clusters, we auto scaled them up and down depending on demand.
+And so you want to have your machines utilized as heavily as possible so that you can scale
+in the unused machines.
+What does a small mean in that context is it's based on kind of a real time metric like utilization
+or is it something else?
+Oh, yeah.
+So yeah, in terms of small, I mean like how many resources are being requested.
+So I would consider it small if you were requesting only one GPU or maybe you're only requesting
+like half a dozen CPU cores, whereas like our bigger pods, those are usually requesting
+HGPUs or maybe four GPUs and then they're requesting dozens or maybe even 50 or 60 CPU
+cores.
+How do you manage if at all the issue of folks submitting jobs, IE pods and reserving
+essentially these resources, but the pods not actually, you know, being idle essentially.
+Is that something that you actively deal with?
+Yeah, so yeah, I guess there's kind of two parts of it.
+We just kind of trust all of our researchers to use the clusters resources well.
+And so we don't have any like checking of are you using the resources that you requested.
+So what we do have is a sort of internal billing system where we monitor how many pods you
+had running and how many resources they requested and how long those resources were requested
+for.
+And then it rolls up your billing every day.
+And you can see a report of this is how much money effectively you spent on experiments.
+And so yeah, if you were leaving a bunch of pods running the ride, it would show up in
+your bill.
+And is that something that you had to build or was that a project in the Kubernetes ecosystem
+that you were just able to kind of turn on and point to your clusters?
+Yeah, it's something that we built, although it's actually very little code will probably
+open source it if someone else doesn't open source a better solution that we end up switching
+to.
+But it's based on Prometheus, so Prometheus already monitors all of the metrics of what
+pods were running when were they running for how much did they request.
+And so really this is just a pretty simple Python script that query is Prometheus aggregates
+all of that data groups it by namespace and then integrates with our directory service
+to figure out which team and people's namespace is belong to and that rolls up all the cost
+by team.
+Okay, cool.
+And it sounds like you're running upstream and you mentioned Prometheus, what other tools
+are you running or projects in conjunction with your use of Kubernetes?
+Yeah, let's see.
+So we use the cluster auto-scaler, so we use that for scaling our clusters.
+It's Prometheus, we use Heapster, we use a flannel for an Overland network, we've got
+some deployments of the cluster, although that's sort of lusterfully related to Kubernetes.
+And I guess those are kind of the main ones.
+Okay, you mentioned Gluster.
+What are the different ways that you deal with storage in the context of these clusters?
+Yeah, so that's one of the areas that we're, I feel like we have an OK solution now, but
+I'd really like us to have a great solution.
+It's a tough problem.
+It is a very tough problem.
+So we've got Gluster deployed and it's been reasonably good.
+We haven't quite gotten the performance that we want out of it, but it's definitely convenient.
+And yeah, teams certainly have some data storage in S3 and Google Cloud Store and Azure's
+Blob Store.
+Yeah, so I spread out over those.
+For our Cloud Kubernetes clusters, we use whatever sort of EBS equivalent they have.
+Google, that's their persistent volumes, that's really convenient.
+For our on-prem cluster, I think what we're going to end up deploying is Saf, possibly through
+the REC project, but we haven't started on that yet.
+So it's a little bit hard to say what we're going to end up with, but that seems like
+it has a lot of promise.
+It sounds like then there's a strong inclination towards a distributed storage solution that
+kind of runs on the existing compute infrastructure as opposed to some standalone monolithic kind
+of NFS type of thing.
+Yeah, so I guess what we have found, so I guess Gluster sort of falls more into the single
+shared file system like NFS.
+And what we've found is that the performance hasn't been quite as good as what we want,
+although maybe that could be resolved by tuning some of the configuration settings or adding
+more hardware, but the other issue has been fault domains that when one team really starts
+hammering the storage, then it causes a disruption in service for everyone.
+And so one of the potential benefits that we see of something like Saf is hopefully better
+fault isolation where that won't happen because you'll have your separate or weblock devices.
+You mentioned a flannel for networking, how has that dealing with the networking been
+since you've gone away from the multi-cloud?
+Is that kind of addressed all your issues or is it still a challenge for you?
+Yeah, I'd say that that really simplified things and these days I don't worry too much
+about our networking.
+So flannel has worked out nicely, we have integrated all of our clusters together via VPN so the
+researchers can connect all of them very easily and that's worked out well.
+And with our on-prem cluster we've kind of figured out some of the performance aspects originally
+when we had deployed flannel, we had been deployed it in a way that wasn't as performant
+but when we switched over to, so we're now using their direct routing feature.
+And that really resolved the performance problems that we were seeing there.
+So yeah, it's pretty much been a non-issue since we made some re-architectures to our clusters.
+And one of the advantages of the single Kubernetes cluster as opposed to a federated would
+be that the researchers don't need to think about where a particular workload goes.
+Have you found another way to abstract that or do they just have to, you know, do they
+target a specific cluster when they're deploying workloads?
+Yeah, for sure.
+So our experimentation tools handle a little bit of that of trying to abstract it away so
+that the researchers don't need to worry about it so much.
+Longer term I've been sort of loosely following the upstream work that's being done in federated
+Kubernetes and how that all is going to work.
+I think at some point in the future, we're really hoping to switch over to a model like
+that where there is a federated control plane that can then handle a schedule length that
+looks like a single cluster, but yeah, not there yet.
+Right, right, right.
+Speaking of which, what's been your experience with Kubernetes as it evolves?
+How have changes on the Kubernetes side changed the way you use it?
+Maybe starting, was there any, did you run into any hurdles early on that you had to
+maybe develop around or hack or hound that Kubernetes eventually caught up with what
+your needs were, whether it's in terms of its operation or scalability or reliability
+or things like that, or how's that whole experience been for you?
+Yeah, definitely.
+So I'd say in general, super positive.
+The direction that Kubernetes has been going in has really just continued to address more
+and more of the pain points that we've seen.
+So yeah, I guess a few specific ones, and we were probably one of the first people using
+Kubernetes to schedule GPU devices, and so we were using the alpha feature that added support
+for that, I believe as soon as it was released, and so we did have to build up some additional
+tooling for handling that and making it work seamlessly, like in particular, the device
+drivers need to be mounted into your container.
+And so we had kind of a whole way of managing that with Simbling so that people could do
+it.
+Now that Nvidia has released their device plugin, that's kind of all been automated for
+us, and so we switched over to that in all of our clusters, and it has simplified all
+of the management of the GPU devices there, and also like on the scalability side, I think
+Kubernetes now officially has been tested up to like 5,000 nodes in the past.
+That was not as true, and we had to do something to work around various scalability issues,
+but now a lot of that has just been handled by upstream where they have optimized things.
+You mentioned in terms of things that you're looking forward to, you mentioned some of the
+work around federated Kubernetes, are there other things that you see on the horizon
+for Kubernetes or more broadly that ecosystem that you're excited about?
+Yeah, definitely federated Kubernetes.
+Yeah, earlier I mentioned the Ruck project, and that's definitely one that I've been
+following and have quite a bit of an interest in.
+It looks like it might make it really easy to run Seth at our on-prem clusters, so that
+would be really exciting for us.
+So I'm hoping that that project continues to get more traction.
+And beyond that, one of the things that we're looking at next is on the network side.
+We're planning to enable Rocky, the RDMA over-converged Ethernet protocol in our on-prem
+clusters, and so this is one of the things that we can't get in the cloud, that's why
+we have our on-prem cluster.
+So I'm not familiar with that one, you said Rocky, and RDMA would be for remote memory
+access.
+Yeah, exactly.
+Are you familiar with Infiniband?
+Oh, yeah, sure.
+Yeah, okay, so Rocky is basically the same thing as Infiniband, but it goes over Ethernet
+instead of the custom Infiniband protocol.
+Oh, cool.
+Yeah, so it's really cool, because then you can have all of your normal Ethernet workloads
+that are doing TCP or UDP or whatever.
+And then you can also have your RDMA applications that are going over exactly the same links.
+And yeah, so we're pretty excited about that.
+I think that's really going to improve both throughput that we can get, and also really
+cut down on latency.
+And Infiniband has become pretty standard for some of these high performance computing workloads,
+because of its performance.
+Are you able to, how close do you get to that?
+And this is over 100G Ethernet?
+Yeah, so we've done some testing on 100G Ethernet, and I believe have seen up to like
+97% like utilization, so.
+Oh, wow.
+Pretty awesome.
+If I remember correctly, on the Infiniband side, correct me if I'm mischaracterizing this,
+my impression is that it's been limited to kind of these niche use cases like HPC, because
+it requires that the applications need to be modified to take advantage of this memory
+access.
+Is that true?
+And will the same thing need to happen with Rocky?
+Yeah, so it is true.
+And yes, the same thing will need to happen.
+But at least you don't need a whole separate network infrastructure.
+Right.
+At least you don't need to buy completely new network cards and new switches and everything.
+So then it can just happen at the application level.
+And really, what I'm hoping will happen is that we can handle all of it in the framework.
+And then you'll just have like a, you know, op that you plug into your TensorFlow graph,
+which is the, you know, all reduce over our DMA operation.
+And then people that are doing research won't have to worry about any of that, but that's
+still to be seen how that works out and how all of this is going to integrate into the
+Kubernetes ecosystem.
+Nice.
+Nice.
+And you mentioned something that made me realize that one area that we skipped was how
+you're doing distributed training.
+Can you talk a little bit about that?
+There's a number of solutions for TensorFlow, for example, there's out of the box, there's
+porovod, there are some others like how have you approached distributed training?
+Yeah.
+So that's one where we have a number of different approaches.
+So we're definitely using porovod.
+I've used it a bit.
+I know a bunch of other teams are using it.
+It's worked out quite well for us.
+We have some people that are just like directly using MPI for Pi.
+I think that has also worked well.
+I believe there's at least one custom implementation of all reduce, and one of our teams has written.
+So yeah, kind of a few different solutions haven't converged on anything particular.
+And the idea is, in part, because everything is containerized, they just containerized
+those components of their distributed training, deploy them out via Kubernetes, and it all
+kind of works like anything else.
+Exactly.
+Cool.
+Well, any thoughts or words of wisdom for folks that are interested in Kubernetes as a platform
+for ML and DL and just getting started?
+Yeah.
+I'd say that the portability aspect of it and just the use of running it and scaling it is
+something that has really benefited us a lot.
+Especially if those are important factors that are recommended.
+And in terms of ease of running it, sometimes Kubernetes or at least early on Kubernetes had
+this reputation for not being particularly easy.
+What's the support burden on your team for supporting the cluster bin like or the clusters?
+Granted that you're already had a pretty tremendous scale.
+Yeah, well, and I would say that that early reputation did reflect our experience too.
+When I joined, we had a lot of problems that we were resulting.
+And there was a pretty non-trivial support burden.
+But both as Kubernetes has evolved and as we have evolved our way of managing it and
+understood some of the aspects they need to pay attention to, like EtsyD in particular,
+really want to make sure that you've provisioned enough IOPS and everything for that.
+Now we've gotten to a point where I would say there's a very, very little maintenance burden.
+We have an on-call rotation, of course, but in terms of critical issues, I'd say it's
+rare that we have even one problem a month.
+Oh, wow.
+So let me re-ask that last question about words of wisdom and light of all of the kind of
+revealed wisdom over the past coming up on two years now that's gone into allowing
+it to be easy to maintain.
+You mentioned, make sure you provision enough IOPS to your EtsyD.
+What are some of the other things that folks need to do in order to have a good experience
+managing Kubernetes for these kinds of workloads?
+Yeah.
+So we actually published a whole blog post back in January or February that talks about some
+of the top ones.
+So yeah, definitely, EtsyD is one of those.
+And most of these, there are really issues that you're only going to hit once you go
+beyond a few hundred machines.
+So you can run it at a pretty good scale and not have to worry about much of it.
+But yeah, once you get into the thousand or multiple thousands of machines, there's a bunch
+of stuff to be aware of.
+So, yeah, EtsyD was one of them ran into some funny network issues.
+I spent a good couple of days learning all about ARP caches and how those work.
+And it was predical that I had learned about back in college and figured out never needs
+to know about again.
+But very important to make sure that the ARP cache is big enough.
+The combination of using flannel means that you need a significant amount of space in
+your ARP cache.
+If you've got thousands of containers that are talking to each other or talking to a single
+one, like the CUBE DNS service.
+So there's a few other issues that we enumerated in that blog post, but it's really not stuff
+that you're going to hit until you've got many hundreds of machines.
+Well, we'll link to that in the show notes for sure.
+Chris, thanks so much for taking the time to chat with me about this super interesting
+stuff.
+Likewise, yeah, thanks so much for having me.
+Alright everyone, that's our show for today.
+For more information on Christopher or any of the topics covered in this episode, head
+on over to twimmelai.com slash talk slash 199.
+To learn more about our AI platform series or to get our e-books, visit twimmelai.com slash
+AI platforms.
+As always, thanks so much for listening and catch you next time.

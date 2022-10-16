@@ -1,0 +1,3524 @@
+WEBVTT
+
+00:00.000 --> 00:03.080
+All right, everyone. I'm on the line with Kelly Revoir.
+
+00:03.080 --> 00:06.080
+Kelly is an engineering manager at Stripe,
+
+00:06.080 --> 00:08.360
+working on machine learning infrastructure.
+
+00:08.360 --> 00:11.360
+Kelly, welcome to this week in machine learning and AI.
+
+00:11.360 --> 00:14.720
+Thanks for having me. I'm really excited to chat.
+
+00:14.720 --> 00:17.480
+Same here. Same here.
+
+00:17.480 --> 00:20.640
+We got in touch with you,
+
+00:20.640 --> 00:23.560
+kind of occasioned by a talk you're giving at
+
+00:23.560 --> 00:27.080
+Strata, which is actually happening as we speak.
+
+00:27.080 --> 00:32.160
+I'm not physically in SF for it this time, but your talk,
+
+00:32.160 --> 00:33.880
+which is going to be later today,
+
+00:33.880 --> 00:37.720
+is on scaling model training from flexible training APIs
+
+00:37.720 --> 00:40.520
+to resource management with Kubernetes.
+
+00:40.520 --> 00:42.760
+And of course, machine learning infrastructure and AI
+
+00:42.760 --> 00:46.960
+platforms is a very popular topic here on the podcast.
+
+00:46.960 --> 00:51.440
+And so I'm looking forward to digging into the way Stripe is
+
+00:51.440 --> 00:55.760
+platforming its machine learning processes and operations.
+
+00:55.760 --> 00:57.120
+But before we do that,
+
+00:57.120 --> 00:59.400
+I'd love to hear a little bit about your background
+
+00:59.400 --> 01:02.680
+and how you got started working in this space.
+
+01:02.680 --> 01:03.720
+Yeah, sounds great.
+
+01:03.720 --> 01:06.320
+Maybe I'll say a little bit about what I do now
+
+01:06.320 --> 01:08.800
+and then kind of work backward from that.
+
+01:08.800 --> 01:10.280
+Awesome.
+
+01:10.280 --> 01:13.080
+So right now, I'm an engineering manager at Stripe,
+
+01:13.080 --> 01:16.040
+and I work with our data infrastructure group,
+
+01:16.040 --> 01:19.640
+which is seven teams kind of at the lowest level things like
+
+01:19.640 --> 01:21.880
+our production databases or things like
+
+01:21.880 --> 01:26.280
+Elasticsearch clusters and then kind of working up through batch
+
+01:26.280 --> 01:31.640
+and streaming platforms, core ETL data pipelines and libraries,
+
+01:31.640 --> 01:34.600
+and also machine learning infrastructure.
+
+01:34.600 --> 01:38.880
+I've been at Stripe for very close to six years now
+
+01:38.880 --> 01:41.200
+from when the company was about 50 people
+
+01:41.200 --> 01:43.280
+and have basically worked on a bunch of different things
+
+01:43.280 --> 01:48.920
+in sort of like risk data and machine learning,
+
+01:48.920 --> 01:51.280
+both as an engineer and engineering manager
+
+01:51.280 --> 01:55.880
+and also initially more on kind of like the application side
+
+01:55.880 --> 01:59.560
+and then over time moving over to the infrastructure side.
+
+02:01.720 --> 02:06.440
+By training, I'm like a kind of research scientist person,
+
+02:06.440 --> 02:10.000
+so I studied physics and electrical engineering in school.
+
+02:10.000 --> 02:12.720
+Did my PhD at Stanford working on nanopatonics
+
+02:12.720 --> 02:15.720
+and then did a short postdoc at HP labs
+
+02:15.720 --> 02:17.760
+on nanopatonics?
+
+02:17.760 --> 02:19.320
+Yeah, I think you had,
+
+02:19.320 --> 02:22.160
+like I could have an oscanon recently who works on optics,
+
+02:22.160 --> 02:23.680
+which is not too far away,
+
+02:23.680 --> 02:25.720
+so maybe that gives you a little bit of an idea.
+
+02:27.560 --> 02:29.600
+And then yeah, I was at HP labs for a year
+
+02:29.600 --> 02:31.280
+so working on sort of similar things
+
+02:31.280 --> 02:33.240
+and also some 3D imaging.
+
+02:33.240 --> 02:36.000
+And I guess I like to call what I did,
+
+02:36.000 --> 02:38.360
+although I don't know that anyone else calls it that,
+
+02:38.360 --> 02:42.760
+sort of like full stack science where like you have an idea
+
+02:42.760 --> 02:45.880
+and then you do some theory or modeling or simulation
+
+02:45.880 --> 02:47.640
+and then you use that to design a device
+
+02:47.640 --> 02:48.800
+and then you actually go in the clean room
+
+02:48.800 --> 02:50.600
+and like make the device and then you actually go
+
+02:50.600 --> 02:53.280
+in the optics lab and like shoot a bunch of lasers
+
+02:53.280 --> 02:54.880
+at your device and measure it.
+
+02:54.880 --> 02:56.680
+And then you sort of like process the data
+
+02:56.680 --> 02:59.000
+and compare it to your theory and simulation.
+
+02:59.000 --> 03:02.280
+And I was like, I found like kind of the two ends the most,
+
+03:03.400 --> 03:07.120
+like sort of the magical moment where like, you know,
+
+03:07.120 --> 03:09.160
+the data that you collected like matches
+
+03:09.160 --> 03:12.400
+what you thought was gonna happen from your modeling.
+
+03:12.400 --> 03:14.680
+And I kind of decided that I wanted to do more of that
+
+03:14.680 --> 03:16.360
+and a little less of like fabrication
+
+03:16.360 --> 03:18.120
+or material science and I was kind of sitting
+
+03:18.120 --> 03:20.760
+in Silicon Valley and started looking around
+
+03:20.760 --> 03:24.800
+and like Stripe was super exciting in terms of its mission,
+
+03:24.800 --> 03:28.280
+like having interesting data and just like having amazing people.
+
+03:28.280 --> 03:30.240
+Awesome, awesome, Stripe sounds really interesting
+
+03:30.240 --> 03:34.800
+but shooting lasers at stuff also sounds really, really cool.
+
+03:34.800 --> 03:38.280
+Yeah, people get really excited when you tell them that.
+
+03:38.280 --> 03:40.640
+So that was fun for a while.
+
+03:40.640 --> 03:41.760
+Nice, nice.
+
+03:41.760 --> 03:46.760
+And so maybe tell us a little bit about Stripe's,
+
+03:49.160 --> 03:51.440
+kind of machine learning journey
+
+03:51.440 --> 03:54.120
+from an infrastructure perspective.
+
+03:55.120 --> 03:59.440
+How did it, it sounds like you're doing
+
+03:59.440 --> 04:00.920
+a bunch of interesting things
+
+04:00.920 --> 04:03.040
+both from a training perspective,
+
+04:03.040 --> 04:06.480
+from a data management perspective inference,
+
+04:06.480 --> 04:08.560
+but how did it evolve?
+
+04:08.560 --> 04:10.280
+Yeah, I think one thing that's interesting
+
+04:10.280 --> 04:12.320
+about machine learning at Stripe,
+
+04:12.320 --> 04:14.920
+like I think a lot of places you talk to machine learning
+
+04:14.920 --> 04:18.320
+kind of like started out as being for some,
+
+04:18.320 --> 04:20.560
+some kind of like offline analytics
+
+04:20.560 --> 04:23.600
+and more like internal business questions,
+
+04:23.600 --> 04:25.440
+like maybe like you're trying to calculate
+
+04:25.440 --> 04:27.240
+long-term value of your users.
+
+04:27.240 --> 04:28.680
+And we do stuff like that now,
+
+04:28.680 --> 04:31.160
+but we actually started like our kind of core uses
+
+04:31.160 --> 04:35.400
+have always been very much on kind of the production side,
+
+04:35.400 --> 04:37.720
+like our kind of most business critical
+
+04:37.720 --> 04:40.720
+and first machine learning use cases were things
+
+04:40.720 --> 04:44.000
+like scoring transactions in the charge flow
+
+04:44.000 --> 04:46.240
+to evaluate whether they're fraudulent or not.
+
+04:47.360 --> 04:50.080
+We're doing kind of like internal risk management
+
+04:50.080 --> 04:55.160
+of like making sure our users are selling things
+
+04:55.160 --> 04:57.080
+that we can support from our terms of service
+
+04:57.080 --> 04:59.560
+or that they're kind of like good users
+
+04:59.560 --> 05:01.320
+that we want to support.
+
+05:01.320 --> 05:04.280
+And so we started out from having kind of a lot
+
+05:04.280 --> 05:06.600
+of these more like production requirements
+
+05:06.600 --> 05:07.720
+but it needs to be this fast
+
+05:07.720 --> 05:09.040
+and it needs to be this reliable.
+
+05:09.040 --> 05:10.600
+And I think our machine learning platform
+
+05:10.600 --> 05:12.360
+kind of like evolved from that side
+
+05:13.840 --> 05:17.000
+where initially we had kind of like one machine learning team
+
+05:17.000 --> 05:19.040
+and then even just having a couple of applications
+
+05:19.040 --> 05:22.680
+we started seeing like here are some commonalities
+
+05:22.680 --> 05:24.800
+like everyone needs to be able to score models
+
+05:24.800 --> 05:28.880
+or even like having some notion of shared features
+
+05:28.880 --> 05:31.920
+could be really valuable across just a couple of applications.
+
+05:31.920 --> 05:34.240
+And then as we split our machine learning team,
+
+05:34.240 --> 05:38.320
+one piece of that became machine learning infrastructure
+
+05:38.320 --> 05:39.720
+which we've developed since then.
+
+05:39.720 --> 05:42.000
+And it's really important for that team to work
+
+05:42.000 --> 05:44.320
+both with the teams doing the business applications
+
+05:44.320 --> 05:46.400
+which now include a bunch of other things
+
+05:47.520 --> 05:49.560
+in our user-facing products like radar and billing
+
+05:49.560 --> 05:53.120
+as well as internally and also it's important
+
+05:53.120 --> 05:54.560
+for the machine learning infrastructure
+
+05:54.560 --> 05:56.600
+to build on the rest of your data infrastructure
+
+05:56.600 --> 05:59.120
+and really the rest of all of your infrastructure.
+
+05:59.120 --> 06:00.200
+And we've worked really closely
+
+06:00.200 --> 06:02.880
+with like our orchestration team on,
+
+06:02.880 --> 06:05.200
+as you said in chatting about my talk
+
+06:05.200 --> 06:07.320
+like getting training to run on Kubernetes.
+
+06:09.560 --> 06:12.040
+Yeah man, that's maybe an interesting place to start.
+
+06:13.880 --> 06:16.520
+You kind of alluded to the interfaces
+
+06:16.520 --> 06:20.120
+between machine learning infrastructure as a team
+
+06:20.120 --> 06:22.800
+and you know data infrastructure, you know,
+
+06:22.800 --> 06:24.280
+just infrastructure.
+
+06:27.120 --> 06:32.120
+How do they connect, you know, maybe even organizationally
+
+06:32.120 --> 06:36.400
+and how do they tend to work with them
+
+06:36.400 --> 06:37.400
+with one another.
+
+06:37.400 --> 06:41.160
+For example, you know, in, you know,
+
+06:41.160 --> 06:43.000
+training on Kubernetes, you know,
+
+06:43.000 --> 06:46.320
+where's the line between what the ML infrastructure team
+
+06:46.320 --> 06:49.800
+is doing and, you know, what it's requiring
+
+06:49.800 --> 06:54.160
+of some, you know, broader technology infrastructure group?
+
+06:54.160 --> 06:56.520
+Yeah, I think the Kubernetes case is really interesting
+
+06:56.520 --> 07:00.040
+and it's one that's been super successful for us.
+
+07:00.040 --> 07:03.160
+So I guess maybe like a year or two ago,
+
+07:03.160 --> 07:06.000
+we'd initially focused on the kind of scoring,
+
+07:06.000 --> 07:07.560
+like real-time inference part of models,
+
+07:07.560 --> 07:08.400
+because that's the hardest.
+
+07:08.400 --> 07:10.080
+And we'd sort of left people on their own.
+
+07:10.080 --> 07:12.160
+It's like, well, you figure out how to train a model
+
+07:12.160 --> 07:13.720
+and then, you know, if you manage to do that,
+
+07:13.720 --> 07:15.320
+we'll help you score it.
+
+07:15.320 --> 07:18.920
+And we realized that that wasn't like great, right?
+
+07:18.920 --> 07:21.000
+So we started thinking, you know, what can we do?
+
+07:21.000 --> 07:22.800
+And at first, we built some CLI tools
+
+07:22.800 --> 07:25.080
+to kind of like wrap the Python people were doing,
+
+07:25.080 --> 07:26.640
+but then we wanted to kind of do more.
+
+07:26.640 --> 07:28.000
+So eventually we built an API
+
+07:28.000 --> 07:30.760
+and then a big hassle had been the resource management.
+
+07:30.760 --> 07:33.480
+And we just kind of wanted to like abstract that all the way.
+
+07:33.480 --> 07:36.080
+And as it happened at that time, our orchestration team
+
+07:36.080 --> 07:38.520
+had gotten like really interested in Kubernetes.
+
+07:38.520 --> 07:41.040
+And I think they wrote a blog post like maybe a year
+
+07:41.040 --> 07:43.320
+and a half ago, they had kind of just
+
+07:43.320 --> 07:45.360
+moved our first application to Kubernetes,
+
+07:45.360 --> 07:46.880
+which was some of our conjobs that we
+
+07:46.880 --> 07:48.960
+used in our financial infrastructure.
+
+07:48.960 --> 07:50.440
+And so we ended up collaborating.
+
+07:50.440 --> 07:53.040
+This was kind of like a great next step
+
+07:53.040 --> 07:55.400
+of a second application they could work on.
+
+07:55.400 --> 08:00.200
+And we had some details, we had to work out,
+
+08:00.200 --> 08:03.360
+we had to figure out how do we package up all of our Python code
+
+08:03.360 --> 08:06.320
+and to some Docker file we can deploy.
+
+08:06.320 --> 08:10.280
+And it was really useful to be able to work with them on that.
+
+08:10.280 --> 08:12.240
+But I think we have found really good interfaces
+
+08:12.240 --> 08:14.760
+in working with them where we wrote a client
+
+08:14.760 --> 08:18.320
+for the community's API, but it's like anytime we need help
+
+08:18.320 --> 08:20.800
+or anytime there's management of the Kubernetes cluster,
+
+08:20.800 --> 08:22.320
+they take care of all of that.
+
+08:22.320 --> 08:24.520
+So it's kind of given us this flexibility
+
+08:24.520 --> 08:27.080
+where we can define different instance and resource types
+
+08:27.080 --> 08:29.920
+and swap them out really easily if we need CPUs or GPUs
+
+08:29.920 --> 08:31.680
+or we need to expand the cluster.
+
+08:31.680 --> 08:34.160
+But we as machine learning infrastructure
+
+08:34.160 --> 08:36.880
+kind of don't have to deal with managing Kubernetes
+
+08:36.880 --> 08:38.560
+or updating it, we have this amazing team
+
+08:38.560 --> 08:42.000
+of people who are totally focused on that for Stripe.
+
+08:42.000 --> 08:43.800
+Awesome, awesome.
+
+08:43.800 --> 08:52.920
+And then actually let's maybe stay on this topic for a moment.
+
+08:52.920 --> 08:58.720
+So your talk at Strato was focused on this area.
+
+08:58.720 --> 09:00.560
+What was kind of the flow of your talk?
+
+09:00.560 --> 09:04.280
+What were the main points that you're planning
+
+09:04.280 --> 09:07.600
+to go through with the audience there?
+
+09:07.600 --> 09:09.640
+Yeah, great question.
+
+09:09.640 --> 09:12.360
+So we kind of think about this in two pieces.
+
+09:12.360 --> 09:15.880
+And maybe that's because that's how we actually did it.
+
+09:15.880 --> 09:18.400
+So one piece was the resource management
+
+09:18.400 --> 09:21.800
+that I talked about was getting things to run on Kubernetes.
+
+09:21.800 --> 09:24.520
+That was actually kind of the second piece for us.
+
+09:24.520 --> 09:29.320
+The first piece was figuring out how should the user interact
+
+09:29.320 --> 09:32.440
+with things and where should we give them flexibility
+
+09:32.440 --> 09:34.960
+and where should we constrain things.
+
+09:34.960 --> 09:37.280
+And so we ended up building what we call internally
+
+09:37.280 --> 09:40.400
+rail yard, which is a model training API.
+
+09:40.400 --> 09:42.600
+And it goes with, there's two pieces.
+
+09:42.600 --> 09:45.000
+There's what you put in the API request.
+
+09:45.000 --> 09:47.080
+And then there's what we call a workflow.
+
+09:47.080 --> 09:49.800
+And the API request is a little bit more constrained.
+
+09:49.800 --> 09:52.400
+You have to say you're meta data for who's training
+
+09:52.400 --> 09:53.480
+so we can track it.
+
+09:53.480 --> 09:56.400
+You have to tell us where your data is,
+
+09:56.400 --> 09:58.760
+how you're doing things like hold out.
+
+09:58.760 --> 10:00.840
+Just kind of basic things that you'll always need.
+
+10:00.840 --> 10:02.560
+But then we have this workflow piece
+
+10:02.560 --> 10:06.920
+that people can write whatever Python they want
+
+10:06.920 --> 10:08.760
+as long as they define a train method in it
+
+10:08.760 --> 10:12.440
+that will hand us back the fitted model.
+
+10:12.440 --> 10:14.600
+And we definitely have found that initially,
+
+10:14.600 --> 10:17.240
+we were very focused on binary classifiers for things
+
+10:17.240 --> 10:20.640
+fraud, but people have done things like word embeddings.
+
+10:20.640 --> 10:23.480
+We have people doing time series forecasting.
+
+10:23.480 --> 10:26.800
+We're using things like psychic learn,
+
+10:26.800 --> 10:29.680
+actually used fast text, PyTorch profit.
+
+10:29.680 --> 10:32.520
+So this has worked pretty well in terms of providing enough
+
+10:32.520 --> 10:34.800
+flexibility that people can do things that we actually
+
+10:34.800 --> 10:37.840
+didn't anticipate originally, but it's constrained enough
+
+10:37.840 --> 10:43.120
+that we can run it and sort of track what's going on.
+
+10:43.120 --> 10:46.320
+And give them what they need and be able to automate the things
+
+10:46.320 --> 10:48.040
+that we need to automate.
+
+10:48.040 --> 10:51.040
+OK, and so your interface you're describing
+
+10:51.040 --> 10:56.040
+is this kind of Python and this train method.
+
+10:56.040 --> 11:03.720
+Are you expecting the, well, actually that's maybe a question.
+
+11:03.720 --> 11:06.360
+Are the users, do you think of your users
+
+11:06.360 --> 11:09.640
+as more kind of the data science type of user
+
+11:09.640 --> 11:11.920
+or machine learning engineer type of user,
+
+11:11.920 --> 11:17.680
+or is there a mix of those two types of backgrounds?
+
+11:17.680 --> 11:20.040
+Yeah, it's a mix, which has been really interesting.
+
+11:20.040 --> 11:22.560
+And I think coming back to what I said earlier,
+
+11:22.560 --> 11:26.320
+because we initially focused on these critical production
+
+11:26.320 --> 11:29.800
+use cases, we started out where the team's users were really
+
+11:29.800 --> 11:31.600
+pretty much all machine learning engineers
+
+11:31.600 --> 11:33.880
+and very highly skilled machine learning engineers,
+
+11:33.880 --> 11:36.240
+like people who are excellent programmers
+
+11:36.240 --> 11:41.200
+and they know stats in ML and they're the unicorns to hire.
+
+11:41.200 --> 11:43.880
+And over time, we've been able to broaden that
+
+11:43.880 --> 11:47.600
+and I think having things like this tooling
+
+11:47.600 --> 11:50.040
+has made that possible in our user survey
+
+11:50.040 --> 11:52.320
+right after we first shipped.
+
+11:52.320 --> 11:55.320
+Even just the API workflow piece, and we were actually
+
+11:55.320 --> 11:57.600
+just running it on some boxes of sidecar process
+
+11:57.600 --> 11:59.480
+we hadn't even done Kubernetes yet.
+
+11:59.480 --> 12:01.200
+But a lot of the feedback we got was like,
+
+12:01.200 --> 12:02.960
+oh, this new person started on my team,
+
+12:02.960 --> 12:06.120
+and I just pointed them to the directory where the workflows are.
+
+12:06.120 --> 12:07.520
+And I didn't have to think about how
+
+12:07.520 --> 12:10.240
+to split all these things out because you
+
+12:10.240 --> 12:11.960
+just pointed me in the right direction
+
+12:11.960 --> 12:14.040
+and I could point them in the right direction.
+
+12:14.040 --> 12:17.680
+So I think that having these common ways of doing things
+
+12:17.680 --> 12:20.200
+has been a way to broaden our user set.
+
+12:20.200 --> 12:22.920
+And as our data science team, which is more internally
+
+12:22.920 --> 12:26.560
+focused has grown, they've been able to start picking up
+
+12:26.560 --> 12:29.760
+increasingly large pieces of what we've
+
+12:29.760 --> 12:31.840
+built for the ML engineers as well.
+
+12:31.840 --> 12:34.600
+And we've been excited to see that and work with them.
+
+12:34.600 --> 12:36.080
+Awesome, awesome.
+
+12:36.080 --> 12:40.600
+And so the interface then is kind of Python code.
+
+12:40.600 --> 12:46.800
+And our is the platform containerizing that code?
+
+12:46.800 --> 12:48.960
+Or is the user expected to do it?
+
+12:48.960 --> 12:51.600
+Or is it integrated into some kind of workflow
+
+12:51.600 --> 12:53.240
+like they check it in?
+
+12:53.240 --> 12:58.520
+And then it becomes available to the platform via a check
+
+12:58.520 --> 13:00.880
+in or a CICD type of process.
+
+13:00.880 --> 13:05.160
+Yeah, so we still have the experimental flow
+
+13:05.160 --> 13:07.840
+where people can kind of try things out.
+
+13:07.840 --> 13:10.040
+But when you're ready to productionize your workflow,
+
+13:10.040 --> 13:13.080
+basically what you do is you get your code reviewed,
+
+13:13.080 --> 13:15.240
+you merge it.
+
+13:15.240 --> 13:17.120
+We ended up using Google's subpar library
+
+13:17.120 --> 13:18.840
+because it works really well with Bazel,
+
+13:18.840 --> 13:23.600
+which we use for a lot of our build tooling to be able to kind
+
+13:23.600 --> 13:26.000
+of, what are those two?
+
+13:26.000 --> 13:29.400
+Yeah, so subpar is a Google library
+
+13:29.400 --> 13:33.560
+that helps us package Python code into like a self-contained
+
+13:33.560 --> 13:36.600
+executable, both the source code and any dependencies
+
+13:36.600 --> 13:40.120
+like if you're running PyTorch and you need some CUDA stuff.
+
+13:40.120 --> 13:42.360
+And it works kind of out of the box with Bazel,
+
+13:42.360 --> 13:45.960
+which is the open source version of Google's build system,
+
+13:45.960 --> 13:49.200
+which we have started to use at Stripe a few years ago
+
+13:49.200 --> 13:50.960
+and have expanded since.
+
+13:50.960 --> 13:54.000
+It's really nice for like speed, reproducibility,
+
+13:54.000 --> 13:56.920
+and working with multiple languages.
+
+13:56.920 --> 13:59.960
+So this is where our ML info team kind of worked with our
+
+13:59.960 --> 14:02.960
+orchestration team to figure out the details here,
+
+14:02.960 --> 14:05.320
+to be able to kind of like package up all this Python code
+
+14:05.320 --> 14:07.840
+and have it so that basically, almost like a service
+
+14:07.840 --> 14:10.800
+deploy, you can kind of like have it turn into a Docker image
+
+14:10.800 --> 14:14.360
+that you can deploy to like Amazon's ECR.
+
+14:14.360 --> 14:17.360
+And then Kubernetes will kind of like know how to pull that
+
+14:17.360 --> 14:19.000
+down and be able to run it.
+
+14:19.000 --> 14:21.760
+So the ML engineer, the data scientist,
+
+14:21.760 --> 14:23.440
+doesn't really have to think about any of that.
+
+14:23.440 --> 14:25.760
+It just kind of works as part of the, you know,
+
+14:25.760 --> 14:27.920
+you get your PR emerged and you deploy something
+
+14:27.920 --> 14:29.840
+if you need to change the workflow.
+
+14:29.840 --> 14:34.320
+OK, but earlier on in the process, when you're experimenting,
+
+14:34.320 --> 14:39.040
+the currency is a, you know, some Python code.
+
+14:39.040 --> 14:48.840
+Are you, um, does the, are you, like what kind of tooling
+
+14:48.840 --> 14:52.200
+have you built up around experiment management
+
+14:52.200 --> 14:56.920
+and automatically tracking various experiment parameters
+
+14:56.920 --> 15:01.120
+or hyper parameters, hyper parameter optimization,
+
+15:01.120 --> 15:02.720
+that kind of thing, are you doing all that
+
+15:02.720 --> 15:06.480
+or is that all on the, the user to, to do?
+
+15:06.480 --> 15:08.920
+Yeah, that's a really good question.
+
+15:08.920 --> 15:12.360
+So one of the things that we added in our API for training
+
+15:12.360 --> 15:14.040
+is we found it was really useful to have
+
+15:14.040 --> 15:17.680
+this like custom prams field, especially
+
+15:17.680 --> 15:19.480
+because we eventually people ended up
+
+15:19.480 --> 15:21.280
+and, you know, we have some shared services
+
+15:21.280 --> 15:23.400
+to support this, like sort of a retraining service
+
+15:23.400 --> 15:26.720
+that can automate your training requests.
+
+15:26.720 --> 15:27.640
+OK.
+
+15:27.640 --> 15:30.480
+And so one of the things that people, from the beginning,
+
+15:30.480 --> 15:34.080
+used the custom programs for was hyper parameter optimization.
+
+15:34.080 --> 15:35.960
+We are kind of working toward building that out
+
+15:35.960 --> 15:37.120
+as a first class thing.
+
+15:37.120 --> 15:40.560
+Like, we now have like evaluation workflows
+
+15:40.560 --> 15:42.720
+that can be integrated with all of this as well.
+
+15:42.720 --> 15:44.040
+And that's kind of like the first step
+
+15:44.040 --> 15:45.840
+you need for hyper parameter optimization
+
+15:45.840 --> 15:47.600
+if you want to do it as a service is like,
+
+15:47.600 --> 15:48.600
+what are you optimizing?
+
+15:48.600 --> 15:51.600
+If you don't know what metrics people are looking at.
+
+15:51.600 --> 15:53.640
+So that's something we hope to do like over the next,
+
+15:53.640 --> 15:55.400
+you know, three to six months is to make that
+
+15:55.400 --> 15:58.560
+like a little bit more of first class support.
+
+15:58.560 --> 16:03.280
+And you mentioned this directory of workflows.
+
+16:03.280 --> 16:06.000
+Elaborate on that a little bit.
+
+16:06.000 --> 16:06.520
+Yeah.
+
+16:06.520 --> 16:08.920
+So one of the nice things is, you know,
+
+16:08.920 --> 16:10.120
+when you're writing your workflow,
+
+16:10.120 --> 16:14.120
+if you put it in the right place, then our, like,
+
+16:14.120 --> 16:17.280
+our Scala service really will know where to find it.
+
+16:17.280 --> 16:19.000
+But one of the side benefits has also
+
+16:19.000 --> 16:22.960
+just been that there is one place where people's workflows are.
+
+16:22.960 --> 16:25.000
+And so that's been kind of like a nice place
+
+16:25.000 --> 16:26.880
+for people to get started and see like,
+
+16:26.880 --> 16:28.840
+you know, what models are other people using
+
+16:28.840 --> 16:31.760
+or like what preprocessing or kind of what other things
+
+16:31.760 --> 16:35.760
+are they doing or what types of parameters,
+
+16:35.760 --> 16:38.480
+like estimator parameters, are they looking at changing
+
+16:38.480 --> 16:40.720
+to just kind of, you know,
+
+16:40.720 --> 16:42.760
+have that be like a little bit more available
+
+16:42.760 --> 16:44.880
+to our users or internal users.
+
+16:44.880 --> 16:45.840
+Mm-hmm.
+
+16:45.840 --> 16:50.840
+And the workflow element of this is it,
+
+16:50.840 --> 16:55.280
+uh, is it graph-based? Is it something like Airflow?
+
+16:55.280 --> 16:57.320
+Um, how's that implemented?
+
+16:57.320 --> 16:59.360
+Yeah. So in this case, by workflow,
+
+16:59.360 --> 17:02.680
+all I mean is just like Python code that, you know,
+
+17:02.680 --> 17:04.680
+you give it, like, we're actually,
+
+17:04.680 --> 17:08.200
+Rayard, our API passes to it, um,
+
+17:08.200 --> 17:10.640
+like, what are your features or what are your labels?
+
+17:10.640 --> 17:13.600
+And then your Python code returns, like,
+
+17:13.600 --> 17:16.120
+here is the fitted pipeline or model.
+
+17:16.120 --> 17:20.200
+And, um, like, usually something like the evaluation data set
+
+17:20.200 --> 17:24.800
+that we can pass back, um, we have had,
+
+17:24.800 --> 17:27.880
+so we've, people have kind of built us and users,
+
+17:27.880 --> 17:31.720
+like, interesting things on top of having a training API.
+
+17:31.720 --> 17:33.640
+So some of our users built out, um,
+
+17:33.640 --> 17:35.080
+actually the folks working on radar,
+
+17:35.080 --> 17:37.400
+our fraud product built out like an auto retraining service
+
+17:37.400 --> 17:40.040
+that we've since kind of taken over and generalized,
+
+17:40.040 --> 17:42.600
+um, where they schedule like,
+
+17:42.600 --> 17:45.880
+nightly retraining of all the tens and hundreds of models,
+
+17:45.880 --> 17:49.440
+um, and, you know, that's integrated to be able to even like,
+
+17:49.440 --> 17:52.480
+if the evaluation looks better, like potentially automatically
+
+17:52.480 --> 17:56.080
+to play them, um, we do also have people who have put like,
+
+17:56.080 --> 17:59.840
+training models via our service into like air flow decks.
+
+17:59.840 --> 18:02.000
+If they have, um, you know, some,
+
+18:02.000 --> 18:05.920
+some slightly more complicated set of things that they want to run, um,
+
+18:05.920 --> 18:07.760
+so we're definitely seeing that as well.
+
+18:07.760 --> 18:10.360
+Okay. And you've mentioned radar a couple of times.
+
+18:10.360 --> 18:12.520
+Is that a, uh, uh, product that stripe,
+
+18:12.520 --> 18:13.800
+or an internal project?
+
+18:13.800 --> 18:18.280
+Yeah, radar is our, um, like user facing fraud product.
+
+18:18.280 --> 18:22.520
+It, um, runs on all of our machine learning infrastructure.
+
+18:22.520 --> 18:26.520
+And, you know, every charge that goes through stripe within,
+
+18:26.520 --> 18:28.280
+usually a hundred milliseconds or so,
+
+18:28.280 --> 18:31.000
+we've kind of like done a bunch of real time feature generation
+
+18:31.000 --> 18:35.560
+and evaluated, um, like kind of all of the models that are appropriate.
+
+18:35.560 --> 18:38.840
+And, um, in addition to sort of the machine learning piece,
+
+18:38.840 --> 18:41.000
+there's also a product piece for it,
+
+18:41.000 --> 18:44.920
+where users can get more visibility into what our ML has done.
+
+18:44.920 --> 18:47.960
+They can kind of like write their own rules, um,
+
+18:47.960 --> 18:49.640
+and like set block thresholds on them.
+
+18:49.640 --> 18:53.160
+And there's, there's sort of like a manual review functionality.
+
+18:53.160 --> 18:55.160
+So they're kind of some more product pieces
+
+18:55.160 --> 18:57.880
+that are complimentary to the underlying machine learning.
+
+18:57.880 --> 19:00.240
+Okay. Interesting.
+
+19:00.240 --> 19:02.040
+And so the, uh,
+
+19:04.280 --> 19:06.440
+just trying to complete the picture here,
+
+19:06.440 --> 19:08.880
+you've got these workflows,
+
+19:08.880 --> 19:10.520
+which are essentially Python.
+
+19:10.520 --> 19:14.600
+They expose a train, uh, entry point.
+
+19:14.600 --> 19:18.920
+And do you, um,
+
+19:19.960 --> 19:23.400
+are they, you mentioned as directory of workflows,
+
+19:23.400 --> 19:26.120
+is that like a directory like on a server somewhere,
+
+19:26.120 --> 19:27.640
+with just like dot py files,
+
+19:27.640 --> 19:31.640
+or is that, are they, do you require that they be versioned?
+
+19:31.640 --> 19:34.840
+Um, and are you kind of managing those versions?
+
+19:35.560 --> 19:37.880
+Yeah. So that, that's just like actually like,
+
+19:37.880 --> 19:39.320
+in a code, basically.
+
+19:39.320 --> 19:42.200
+So that's like, yeah, the workflows live together in code.
+
+19:42.200 --> 19:47.160
+As part of, um, as part of, um, kind of our training API,
+
+19:47.160 --> 19:48.440
+it's like, when you submit,
+
+19:48.440 --> 19:50.920
+here's my training request, which has, you know,
+
+19:50.920 --> 19:53.320
+here's my data, here's my metadata.
+
+19:53.320 --> 19:55.400
+This is the workflow I want you to run.
+
+19:55.400 --> 19:57.880
+We give you back, um, a job ID,
+
+19:57.880 --> 19:59.640
+which then you can check the status of,
+
+19:59.640 --> 20:00.840
+you can check the result.
+
+20:00.840 --> 20:02.600
+The result will have things in it like,
+
+20:02.600 --> 20:05.000
+what was the getcha, um,
+
+20:05.000 --> 20:07.480
+and so that's like something that we can track as well.
+
+20:08.360 --> 20:12.040
+Got it. So you're submitting the job,
+
+20:12.040 --> 20:14.920
+with the code itself as opposed to a getcha.
+
+20:17.240 --> 20:19.160
+Um, so I guess it depends a little bit,
+
+20:19.160 --> 20:21.000
+which workflow you're running through,
+
+20:21.000 --> 20:24.760
+like, um, in the case where you're running on Kubernetes,
+
+20:24.760 --> 20:26.440
+you've merged your code to master.
+
+20:27.320 --> 20:29.320
+Um, and then we kind of package up all this code
+
+20:29.320 --> 20:31.240
+and, um, deploy the Docker image.
+
+20:31.240 --> 20:34.200
+And then from there, you can kind of make requests to our service,
+
+20:35.000 --> 20:37.480
+um, which will run the job on Kubernetes.
+
+20:37.480 --> 20:39.800
+So at that point, your code, it's, you know,
+
+20:39.800 --> 20:41.400
+whatever's on master for the workflow,
+
+20:41.400 --> 20:43.240
+plus whatever you've put in the request.
+
+20:43.240 --> 20:44.360
+Oh, got it.
+
+20:45.160 --> 20:52.280
+Okay. Um, and so that's the, the kind of the,
+
+20:52.280 --> 20:54.520
+the shape of the training infrastructure.
+
+20:54.520 --> 20:57.320
+You've mentioned a couple of times that you,
+
+20:57.320 --> 21:00.920
+it sounds like there's some degree to which,
+
+21:00.920 --> 21:01.800
+actually, I'm not sure.
+
+21:01.800 --> 21:04.600
+Maybe I'm, um, uh, inferring a lot here.
+
+21:04.600 --> 21:06.680
+But, uh, let's talk about the,
+
+21:06.680 --> 21:11.000
+where the, the data comes from for training and what kind of, uh,
+
+21:11.000 --> 21:14.200
+uh, you know, platform support your offering folks.
+
+21:14.200 --> 21:16.840
+Yeah, that, that's a really interesting question.
+
+21:16.840 --> 21:20.200
+Um, kind of within the framework of like,
+
+21:20.200 --> 21:24.440
+what do you need for a, um, like really RDPI request,
+
+21:24.440 --> 21:27.240
+we support two different types of data sources.
+
+21:27.240 --> 21:31.000
+Um, one is more for experimentation,
+
+21:31.000 --> 21:33.720
+which is like, you can kind of tell us how to make
+
+21:33.720 --> 21:35.480
+this equal to query the data warehouse.
+
+21:35.480 --> 21:39.000
+Um, and that's kind of nice for experimentation,
+
+21:39.000 --> 21:41.080
+but not so nice for production.
+
+21:41.080 --> 21:44.120
+Um, what pretty much everyone uses for production is,
+
+21:44.120 --> 21:46.120
+um, the other data source we support,
+
+21:46.120 --> 21:48.840
+which is parquet, um, from S3.
+
+21:48.840 --> 21:51.080
+So it's like, you tell us, you know,
+
+21:51.080 --> 21:54.200
+where to find that and what your future names are.
+
+21:54.200 --> 21:57.160
+And usually that's generated by, um,
+
+21:57.160 --> 21:59.560
+our features framework that we call semblance,
+
+21:59.560 --> 22:04.760
+which is basically, um, like a DSL that helps,
+
+22:04.760 --> 22:07.320
+you know, gives you a lot of ways to write complex features.
+
+22:07.320 --> 22:09.880
+Like, think, have things like counters,
+
+22:09.880 --> 22:11.320
+be able to do things like joins,
+
+22:11.320 --> 22:13.240
+do a lot of transformations,
+
+22:13.240 --> 22:14.920
+and then, um, you know,
+
+22:14.920 --> 22:17.320
+the ML infrastructure team figures out like,
+
+22:17.320 --> 22:19.720
+how to run that code in batch,
+
+22:19.720 --> 22:22.680
+if you are doing training or, um,
+
+22:22.680 --> 22:25.800
+like, there's a way to run it in real time,
+
+22:25.800 --> 22:27.960
+basically, and kind of like a Kafka consumer setup.
+
+22:28.600 --> 22:30.440
+Um, but you only have to write your code,
+
+22:30.440 --> 22:31.720
+future code, like once.
+
+22:33.400 --> 22:34.200
+Okay, and so,
+
+22:34.200 --> 22:39.080
+um, do you, are you also,
+
+22:39.080 --> 22:43.640
+is it the user that's only writing a future code once,
+
+22:43.640 --> 22:46.760
+or are you going after kind of sharing features
+
+22:46.760 --> 22:49.000
+across the user based to what extent,
+
+22:49.000 --> 22:52.600
+or are you seeing, uh, shared features?
+
+22:52.600 --> 22:55.720
+Yeah, that's like a really excellent question.
+
+22:55.720 --> 22:58.920
+Um, yeah, so the user writes their code once,
+
+22:58.920 --> 23:01.000
+and like also, I think having a framework
+
+23:01.000 --> 23:02.440
+similar to the training workflows,
+
+23:02.440 --> 23:03.880
+where people can see what other people
+
+23:03.880 --> 23:05.400
+have done has been really powerful.
+
+23:06.200 --> 23:09.720
+Um, so we do have people who are, like,
+
+23:09.720 --> 23:11.640
+definitely kind of sharing features
+
+23:11.640 --> 23:13.000
+across applications,
+
+23:13.000 --> 23:14.440
+and there's, there's a little bit of a trade-off,
+
+23:14.440 --> 23:15.880
+like it's like a huge amount of leverage
+
+23:15.880 --> 23:17.720
+if you don't have to rewrite some complicated
+
+23:17.720 --> 23:18.840
+business logic.
+
+23:18.840 --> 23:20.680
+Um, you do have to manage a little bit of
+
+23:20.680 --> 23:22.920
+making sure that, um, you know,
+
+23:22.920 --> 23:24.120
+everything is versioned,
+
+23:24.120 --> 23:25.880
+and that you're paying attention to, like,
+
+23:25.880 --> 23:28.200
+not deprecate someone else is using,
+
+23:28.200 --> 23:29.720
+and that you're not, like,
+
+23:29.720 --> 23:31.880
+just like changing a definition in place,
+
+23:31.880 --> 23:34.440
+and that you are kind of like creating a new version
+
+23:34.440 --> 23:36.040
+every time you are changing something.
+
+23:36.040 --> 23:36.440
+Right.
+
+23:36.440 --> 23:38.280
+So there's a little bit more management there,
+
+23:38.280 --> 23:39.240
+and hopefully over time,
+
+23:39.240 --> 23:41.000
+we can improve our tooling around that.
+
+23:41.000 --> 23:42.920
+But I think it's, you know, even,
+
+23:42.920 --> 23:44.520
+even since before we had a feature streamwork,
+
+23:44.520 --> 23:46.840
+like being able to kind of share some of that stuff,
+
+23:46.840 --> 23:48.680
+has been, like, hugely valuable for us.
+
+23:50.680 --> 23:52.040
+And are you,
+
+23:54.280 --> 23:58.600
+so what, uh, is the features framework,
+
+23:58.600 --> 24:02.280
+is that, uh, is that a set of APIs,
+
+24:02.280 --> 24:05.560
+or is that, uh, kind of a runtime,
+
+24:06.520 --> 24:09.320
+uh, thing, like, what, what exactly is it?
+
+24:09.320 --> 24:10.760
+Yeah, there's kind of two pieces.
+
+24:10.760 --> 24:14.040
+So, um, which is basically sort of what you said,
+
+24:14.040 --> 24:17.400
+like, you know, one is more like the API, um,
+
+24:17.400 --> 24:18.760
+like, what are, what are the things we,
+
+24:18.760 --> 24:20.360
+you know, let users express?
+
+24:20.360 --> 24:22.360
+And one thing we've tried to do there
+
+24:22.360 --> 24:24.520
+is actually constrain not a little bit.
+
+24:24.520 --> 24:26.920
+So we like, you have to use events for everything,
+
+24:26.920 --> 24:29.160
+and we don't really let you express notions of time,
+
+24:29.160 --> 24:32.040
+so you kind of can't mess up that time machine
+
+24:32.040 --> 24:34.280
+of, like, what was the state of the features
+
+24:34.280 --> 24:35.720
+at some time in the past,
+
+24:35.720 --> 24:37.000
+where you want to be training your model,
+
+24:37.000 --> 24:38.680
+we kind of, like, take care of that for you.
+
+24:39.480 --> 24:41.480
+Um, so that's kind of one piece,
+
+24:41.480 --> 24:43.480
+and then, you know, we kind of compile that
+
+24:43.480 --> 24:45.080
+into, like, an AST,
+
+24:45.080 --> 24:47.160
+and then we use that to essentially write,
+
+24:47.160 --> 24:49.800
+like, a compiler to be able to run it on different backends.
+
+24:50.520 --> 24:51.880
+And then we can kind of, like, you know,
+
+24:51.880 --> 24:53.240
+write tests and try and check,
+
+24:53.240 --> 24:56.760
+um, at the framework level that, that things are going to be
+
+24:56.760 --> 24:59.880
+as close as possible to the same across those different backends.
+
+24:59.880 --> 25:02.200
+So backend could be, um,
+
+25:02.200 --> 25:04.200
+something for training where you're going to materialize,
+
+25:04.200 --> 25:06.200
+like, what was the value of the features
+
+25:06.200 --> 25:08.040
+at each point in time in the past
+
+25:08.040 --> 25:10.040
+that you want as inputs to training your model,
+
+25:10.040 --> 25:12.280
+um, or another backend could be, like,
+
+25:12.280 --> 25:13.640
+I mentioned, we have kind of this
+
+25:13.640 --> 25:15.640
+cock consumer-based backend that we use,
+
+25:15.640 --> 25:17.400
+like, for example, um,
+
+25:17.400 --> 25:18.920
+for radar to be able to, like,
+
+25:18.920 --> 25:20.040
+evaluate these features,
+
+25:20.040 --> 25:21.320
+like, as a charge is happening?
+
+25:21.320 --> 25:27.480
+Uh, and so, to what extent do you find that, um,
+
+25:27.480 --> 25:31.080
+that, that limitation of everything being event-based
+
+25:31.080 --> 25:33.640
+gets in the way of what folks want to do?
+
+25:33.640 --> 25:36.280
+Yeah, that, that's a really good question to you.
+
+25:36.280 --> 25:38.040
+Um, it's definitely, uh,
+
+25:38.040 --> 25:40.840
+was originally a little bit of a paradigm shift for people,
+
+25:40.840 --> 25:41.640
+because they were like, oh,
+
+25:41.640 --> 25:43.480
+I just want to use this thing from the database,
+
+25:43.480 --> 25:43.800
+right?
+
+25:43.800 --> 25:49.480
+But we found that actually it's worked out pretty well,
+
+25:49.480 --> 25:52.120
+and that, especially when you have users who are ML engineers,
+
+25:52.120 --> 25:54.520
+like, they do really understand the value of,
+
+25:54.520 --> 25:57.000
+like, why you want to have things be event-based,
+
+25:57.000 --> 26:00.200
+and, like, the sort of gotchas that that helps prevent,
+
+26:00.200 --> 26:02.600
+um, because I think everyone has their story
+
+26:02.600 --> 26:04.120
+about how you were just looking something up
+
+26:04.120 --> 26:06.280
+in the database, but then, you know,
+
+26:06.280 --> 26:07.880
+the value changed, uh,
+
+26:07.880 --> 26:08.840
+and you didn't realize it,
+
+26:08.840 --> 26:09.480
+so it's kind of like,
+
+26:09.480 --> 26:12.600
+you're leaking future information into your training data,
+
+26:12.600 --> 26:14.120
+and then your model is not going to do
+
+26:14.120 --> 26:15.320
+as well as you thought it did.
+
+26:15.320 --> 26:20.440
+Um, uh, so, like, I think moving to a more event-based world,
+
+26:20.440 --> 26:21.960
+and, I mean, I think in general,
+
+26:21.960 --> 26:24.920
+shape has also kind of been doing more streaming work,
+
+26:24.920 --> 26:27.720
+and, um, more having, like, good support.
+
+26:27.720 --> 26:29.160
+Also, as, as, uh,
+
+26:29.160 --> 26:30.200
+at the infrastructure level,
+
+26:30.200 --> 26:32.200
+with Kafka has been really helpful with that.
+
+26:33.480 --> 26:35.160
+And so does that mean that the, uh,
+
+26:36.520 --> 26:39.160
+the models that they're building
+
+26:40.600 --> 26:43.960
+need to be aware of kind of this streaming paradigm
+
+26:43.960 --> 26:45.480
+during training?
+
+26:46.280 --> 26:49.000
+Or did they get a static data set to train?
+
+26:49.000 --> 26:51.000
+Yeah, so basically, um,
+
+26:51.000 --> 26:53.240
+you can kind of use our future's framework to just generate,
+
+26:53.240 --> 26:56.360
+like, per K and S3 that has materialized,
+
+26:56.360 --> 26:58.280
+like, all of the information you want
+
+26:58.280 --> 27:00.200
+of what was the value of each of the features
+
+27:00.200 --> 27:03.160
+that you want at all the points in time that you want,
+
+27:03.160 --> 27:06.200
+and then, yeah, your input to the training API is,
+
+27:06.200 --> 27:08.280
+like, please use this per K from S3.
+
+27:09.000 --> 27:10.920
+We could make it a little more seamless than that,
+
+27:10.920 --> 27:12.120
+but that's worked pretty well.
+
+27:12.120 --> 27:15.000
+Um, in part, it's just like a, uh,
+
+27:15.000 --> 27:17.160
+serialized, like, a file format.
+
+27:17.160 --> 27:18.440
+Yeah, it's pretty efficient.
+
+27:18.440 --> 27:22.680
+Um, you know, I think it's used in a lot of kind of big data uses.
+
+27:22.680 --> 27:25.240
+Um, you can also do things like predicate pushdown,
+
+27:25.240 --> 27:27.000
+and we have, like, a way in the training API
+
+27:27.000 --> 27:28.680
+to kind of specify some filters there,
+
+27:28.680 --> 27:31.320
+um, to just kind of, like, save, save some effort.
+
+27:31.320 --> 27:34.200
+Uh, use a predicate pushdown?
+
+27:34.200 --> 27:37.000
+Yeah, so if you know you only need certain columns
+
+27:37.000 --> 27:38.600
+or something, like, you know, you can,
+
+27:38.600 --> 27:40.280
+you can load it a little bit more efficiently
+
+27:40.280 --> 27:42.600
+and not have to carry around a lot of extra data.
+
+27:42.600 --> 27:43.320
+Got it. Okay.
+
+27:44.440 --> 27:49.000
+Um, the other interesting thing that you talked about
+
+27:49.000 --> 27:51.960
+in the context of this event,
+
+27:51.960 --> 27:55.880
+base framework is the whole, um, you know,
+
+27:55.880 --> 27:57.880
+time machine is the way you said it.
+
+27:57.880 --> 28:01.640
+Kind of alluding to the point and time correctness
+
+28:01.640 --> 28:05.640
+of, uh, you know, a feature snapshot.
+
+28:05.640 --> 28:07.240
+Can you elaborate a little bit on?
+
+28:07.240 --> 28:10.360
+Um, um, did you, did you start there
+
+28:10.360 --> 28:12.440
+or did you evolve to that?
+
+28:12.440 --> 28:16.360
+That seems to be in my conversations kind of, uh,
+
+28:16.360 --> 28:19.000
+I don't know, maybe you'd like one of the,
+
+28:19.000 --> 28:21.080
+the cutting edges or bleeding edges
+
+28:21.080 --> 28:24.040
+that people are trying to deal with as they scale up these,
+
+28:24.040 --> 28:27.240
+um, these data management systems for features.
+
+28:28.280 --> 28:31.320
+Yeah, for this particular project, um,
+
+28:31.320 --> 28:33.480
+in this version, we started there.
+
+28:33.480 --> 28:35.560
+Straight previously had kind of looked at something
+
+28:35.560 --> 28:38.440
+a little bit related a couple years before, um,
+
+28:38.440 --> 28:40.120
+and in a lot of ways, we kind of learned from that.
+
+28:40.120 --> 28:42.200
+So we ended up with something that was more,
+
+28:42.200 --> 28:45.080
+more powerful and sort of solved some of these issues
+
+28:45.080 --> 28:46.120
+at the platform level.
+
+28:46.920 --> 28:49.240
+Um, we did, you know, at that point,
+
+28:49.240 --> 28:50.920
+we had been running machine learning applications
+
+28:50.920 --> 28:52.440
+in production for a few years.
+
+28:52.440 --> 28:55.240
+So I think everyone has their horror stories, right?
+
+28:55.240 --> 28:58.520
+Of like all the things that can go wrong, um,
+
+28:58.520 --> 29:00.440
+especially kind of at a correctness level,
+
+29:00.440 --> 29:01.720
+and like everyone has their story
+
+29:01.720 --> 29:03.080
+about like re-implementing features
+
+29:03.080 --> 29:04.040
+in different languages,
+
+29:04.040 --> 29:05.960
+which we, we did for a while too,
+
+29:05.960 --> 29:08.200
+and kind of like all the things that can go wrong there.
+
+29:08.200 --> 29:10.680
+So, um, you know, I think we,
+
+29:10.680 --> 29:13.080
+we really tried to learn from both like,
+
+29:13.080 --> 29:14.840
+what are all the things we'd seen go well
+
+29:14.840 --> 29:17.480
+or go wrong in individual applications,
+
+29:17.480 --> 29:20.120
+and then also from kind of like our previous attempts,
+
+29:20.120 --> 29:21.960
+um, at some of this type of thing,
+
+29:21.960 --> 29:23.480
+like what, what was good,
+
+29:23.480 --> 29:24.920
+and you know, what could still be better?
+
+29:24.920 --> 29:25.800
+Mm-hmm.
+
+29:26.840 --> 29:28.600
+And, uh, out of curiosity,
+
+29:28.600 --> 29:31.000
+what do you use for data warehouse,
+
+29:31.000 --> 29:32.120
+and are there multiple,
+
+29:32.120 --> 29:33.640
+or is it, is there just one?
+
+29:34.680 --> 29:37.160
+Um, we've used a combination of Redshift and Presto,
+
+29:37.160 --> 29:39.800
+um, over the past couple of years,
+
+29:39.800 --> 29:43.640
+um, you know, they have a little bit of sort of like,
+
+29:43.640 --> 29:45.160
+different abilities and strengths,
+
+29:45.160 --> 29:46.760
+um, and those are,
+
+29:46.760 --> 29:48.840
+those are things that people like to use
+
+29:48.840 --> 29:50.200
+to experiment with machine learning,
+
+29:50.200 --> 29:51.240
+although like, you know,
+
+29:51.240 --> 29:53.480
+we generally don't use them in our production flows,
+
+29:53.480 --> 29:55.560
+because we kind of prefer the event-based model.
+
+29:55.560 --> 29:56.760
+Mm-hmm.
+
+29:56.760 --> 29:59.960
+And so as the event-based model,
+
+29:59.960 --> 30:03.640
+uh, is it kind of parallel,
+
+30:03.640 --> 30:06.760
+or orthogonal to Redshift or Presto,
+
+30:06.760 --> 30:10.200
+is there, or is it a front end to either of these two systems?
+
+30:12.520 --> 30:13.720
+Yeah, I guess we have,
+
+30:13.720 --> 30:15.320
+we actually have a front end that we've built
+
+30:15.320 --> 30:17.400
+for Redshift and Presto, um,
+
+30:18.520 --> 30:20.360
+you know, separately from machine learning,
+
+30:20.360 --> 30:21.160
+that's really nice,
+
+30:21.160 --> 30:22.760
+and lets people like, um,
+
+30:22.760 --> 30:26.280
+you know, to the extent they have permissions to do so,
+
+30:26.280 --> 30:27.880
+like explore tables,
+
+30:27.880 --> 30:29.480
+or put annotations on tables.
+
+30:29.480 --> 30:30.280
+Mm-hmm.
+
+30:30.280 --> 30:32.600
+Um, we haven't integrated our,
+
+30:32.600 --> 30:35.400
+in general, I would say we could do some work on our UIs
+
+30:35.400 --> 30:37.080
+for, for our ML stuff.
+
+30:37.080 --> 30:38.760
+We've definitely focused more on the back end,
+
+30:38.760 --> 30:40.280
+and in front of an API side,
+
+30:40.280 --> 30:41.400
+although we do have some things,
+
+30:41.400 --> 30:43.240
+like our auto-retreating service has a UI,
+
+30:43.240 --> 30:45.080
+where you can see like, um,
+
+30:45.080 --> 30:46.440
+what's the status of my job?
+
+30:46.440 --> 30:48.200
+Like, was it, you know,
+
+30:48.200 --> 30:49.800
+did it finish, um,
+
+30:49.800 --> 30:52.280
+did it produce a model that was better than the previous model?
+
+30:52.280 --> 30:53.720
+Mm-hmm.
+
+30:53.720 --> 30:56.360
+I think I'm just trying to wrap my head around
+
+30:56.360 --> 30:58.840
+the, the event-based model here,
+
+30:58.840 --> 31:02.680
+uh, you know, as an example of a question that's coming to mind,
+
+31:02.680 --> 31:05.240
+uh, in an event-based world,
+
+31:05.240 --> 31:08.440
+are you regenerating the features,
+
+31:08.440 --> 31:10.200
+you know, every time,
+
+31:10.200 --> 31:11.720
+and if you've got, you know,
+
+31:11.720 --> 31:15.160
+some complex feature that involves a lot of transformation,
+
+31:15.160 --> 31:17.160
+or you have the backfill of ton of data,
+
+31:17.160 --> 31:20.200
+like, what does that even mean in an event-based world,
+
+31:20.200 --> 31:21.080
+where I think of, like,
+
+31:21.080 --> 31:22.600
+you have events, and they go away.
+
+31:22.600 --> 31:23.560
+Yeah.
+
+31:23.560 --> 31:25.720
+If there's some kind of store for all that,
+
+31:25.720 --> 31:27.640
+that isn't Redshift or Presto?
+
+31:27.640 --> 31:30.280
+Um, well, whenever we say event,
+
+31:30.280 --> 31:32.280
+you know, we're publishing something to Kafka,
+
+31:32.280 --> 31:34.280
+and then we're archiving it to S3,
+
+31:34.280 --> 31:36.760
+uh, then that persists, like, you know,
+
+31:36.760 --> 31:37.960
+as long as we want it to,
+
+31:37.960 --> 31:40.600
+um, in some cases, basically, forever.
+
+31:40.600 --> 31:43.800
+Um, and so that is available.
+
+31:43.800 --> 31:45.880
+We do, do, end up doing, um,
+
+31:45.880 --> 31:49.160
+a decent amount of backfilling of kind of,
+
+31:49.160 --> 31:51.640
+like, you know, you define the transform features you want,
+
+31:51.640 --> 31:53.720
+but then, um, you need, you know,
+
+31:53.720 --> 31:55.400
+you need to run that back over all the data,
+
+31:55.400 --> 31:56.680
+you'll need for your training set.
+
+31:56.680 --> 31:58.600
+That's something that we've actually done a lot of
+
+31:58.600 --> 32:01.320
+from the beginning, partly because of our applications,
+
+32:01.320 --> 32:04.280
+like, when you're looking at fraud, um,
+
+32:04.280 --> 32:06.520
+you know, the way you find out if you were right or not,
+
+32:06.520 --> 32:09.560
+is that, like, in some time period,
+
+32:09.560 --> 32:10.920
+usually within 90 days,
+
+32:10.920 --> 32:12.200
+but sometimes longer than that,
+
+32:12.200 --> 32:13.640
+the cardholder decides,
+
+32:13.640 --> 32:15.720
+um, whether they're going to dispute something
+
+32:15.720 --> 32:18.840
+as fragile or not, um,
+
+32:18.840 --> 32:20.680
+and that's compared to, like, you know,
+
+32:20.680 --> 32:22.440
+if you're doing ads or trying to get clicks,
+
+32:22.440 --> 32:24.120
+like, you kind of get the result right away,
+
+32:24.120 --> 32:27.160
+um, and we, you know,
+
+32:27.160 --> 32:28.600
+so I think we've always, like,
+
+32:28.600 --> 32:30.200
+been interested in kind of, like,
+
+32:30.200 --> 32:31.800
+being able to backfill so that,
+
+32:31.800 --> 32:33.560
+is, you know, you can log things forward,
+
+32:33.560 --> 32:35.000
+but then it's like, you'll probably have to wait
+
+32:35.000 --> 32:37.080
+a little bit of time before you have enough of the data set
+
+32:37.080 --> 32:38.120
+that you can train on it.
+
+32:40.840 --> 32:42.040
+Okay. Um,
+
+32:42.040 --> 32:44.600
+cool, so we talked about the data,
+
+32:44.600 --> 32:46.600
+uh, side of things we talked about,
+
+32:46.600 --> 32:48.200
+training and experiments,
+
+32:48.200 --> 32:49.720
+uh, how about inference?
+
+32:49.720 --> 32:53.480
+Yeah, that's, that's a really great question,
+
+32:53.480 --> 32:55.640
+and that's, that's kind of like the first thing
+
+32:55.640 --> 32:59.560
+that we built infrastructure support for, um,
+
+32:59.560 --> 33:01.480
+at first, a decent number of years ago,
+
+33:01.480 --> 33:03.640
+like, I think even before things like TensorFlow
+
+33:03.640 --> 33:06.440
+were really popular, um,
+
+33:06.440 --> 33:08.920
+and so we have, um,
+
+33:08.920 --> 33:10.840
+like our own Scala service that we use
+
+33:10.840 --> 33:14.520
+to do our production real-time inference,
+
+33:14.520 --> 33:17.080
+um, and, you know, we started out,
+
+33:17.080 --> 33:18.120
+especially because we have, like,
+
+33:18.120 --> 33:19.320
+mostly transactional data.
+
+33:19.320 --> 33:20.360
+We don't have a lot of things,
+
+33:20.360 --> 33:23.320
+like images, at least as our most critical applications,
+
+33:23.320 --> 33:24.760
+at this point, um,
+
+33:24.760 --> 33:25.960
+a lot of our early models,
+
+33:25.960 --> 33:28.200
+and even still today, like most of our production models
+
+33:28.200 --> 33:29.480
+are kind of like tree-based models,
+
+33:29.480 --> 33:31.080
+like initially things like random forest,
+
+33:31.080 --> 33:32.680
+and now things more like XG boost.
+
+33:33.400 --> 33:36.120
+Um, and so, you know, we've kind of like, um,
+
+33:37.000 --> 33:38.680
+we have the serialization for that,
+
+33:38.680 --> 33:40.680
+built into our training workflows,
+
+33:40.680 --> 33:42.520
+and, um, we've optimized that to run
+
+33:42.520 --> 33:45.080
+pretty efficiently in our Scala inference service,
+
+33:45.080 --> 33:47.240
+and then we've built some kind of nice layers
+
+33:47.240 --> 33:49.080
+on top of that, um,
+
+33:49.080 --> 33:51.160
+for things like model composition,
+
+33:51.160 --> 33:52.840
+kind of what we call meta models,
+
+33:52.840 --> 33:54.440
+where, you know, you can kind of, like,
+
+33:54.440 --> 33:56.040
+take your machine learning model,
+
+33:56.040 --> 33:58.440
+and, um, kind of, like, almost, like,
+
+33:58.440 --> 33:59.400
+within the model, sort of,
+
+33:59.400 --> 34:00.760
+compose something, like,
+
+34:00.760 --> 34:02.920
+add a threshold to it, um,
+
+34:02.920 --> 34:04.440
+or, like, for radar,
+
+34:04.440 --> 34:05.800
+we train, you know,
+
+34:05.800 --> 34:06.840
+some array of, like,
+
+34:06.840 --> 34:07.480
+in some cases,
+
+34:07.480 --> 34:08.680
+user-specific models,
+
+34:08.680 --> 34:09.480
+along with, like,
+
+34:09.480 --> 34:11.560
+maybe more of some global models,
+
+34:11.560 --> 34:13.240
+and so, you can kind of incorporate
+
+34:13.240 --> 34:14.520
+in the framework of a model,
+
+34:15.240 --> 34:16.840
+doing that dispatch for your kind of,
+
+34:16.840 --> 34:18.360
+like, if it matches these conditions
+
+34:18.360 --> 34:20.040
+that score with these models,
+
+34:20.040 --> 34:21.640
+otherwise score with this model,
+
+34:21.640 --> 34:23.240
+and, like, here's how you combine it.
+
+34:23.240 --> 34:24.440
+Um,
+
+34:24.440 --> 34:26.840
+and then the way that interfaces with your application,
+
+34:26.840 --> 34:28.680
+is that each application has,
+
+34:29.480 --> 34:30.840
+uh, what we call a tag,
+
+34:30.840 --> 34:33.720
+and basically the tag points to the model identifier,
+
+34:33.720 --> 34:35.480
+which is kind of, like, immutable,
+
+34:35.480 --> 34:36.920
+and then whenever you have a new model,
+
+34:36.920 --> 34:37.720
+or you're ready to ship,
+
+34:37.720 --> 34:38.600
+you just, like, update,
+
+34:38.600 --> 34:39.960
+what does that tag point to?
+
+34:40.600 --> 34:42.280
+Um, and then, you know,
+
+34:42.280 --> 34:43.080
+in production,
+
+34:43.080 --> 34:44.040
+you're just saying, like,
+
+34:44.040 --> 34:45.560
+score the model for this tag.
+
+34:47.480 --> 34:50.120
+Okay, and that
+
+34:50.120 --> 34:52.360
+I think that's pretty similar to, like,
+
+34:52.360 --> 34:53.880
+you know, if you read about Uber's Michelangelo
+
+34:53.880 --> 34:54.680
+and things like that,
+
+34:54.680 --> 34:55.240
+sometimes we're like,
+
+34:55.240 --> 34:57.000
+oh, we all came up with the same thing.
+
+34:57.000 --> 34:58.680
+I think that's pretty odd.
+
+34:58.680 --> 34:59.080
+I think that's pretty good.
+
+34:59.080 --> 35:00.360
+We had also sounds a little bit like,
+
+35:00.360 --> 35:02.680
+uh, sorry, say that again.
+
+35:02.680 --> 35:04.200
+Yeah, I think that, like,
+
+35:04.200 --> 35:05.720
+a lot of people have kind of come up
+
+35:05.720 --> 35:06.600
+with some of these,
+
+35:06.600 --> 35:07.720
+these ways of doing things
+
+35:07.720 --> 35:08.760
+that just kind of make sense.
+
+35:08.760 --> 35:09.720
+Mm-hmm.
+
+35:09.720 --> 35:10.680
+Mm-hmm.
+
+35:10.680 --> 35:12.120
+It also sounds a little bit like,
+
+35:12.120 --> 35:13.880
+uh, some of what,
+
+35:13.880 --> 35:14.840
+uh,
+
+35:14.840 --> 35:16.200
+seldom is trying to capture
+
+35:16.200 --> 35:17.720
+in a Kubernetes environment.
+
+35:17.720 --> 35:19.080
+Um,
+
+35:19.080 --> 35:21.480
+uh, which I guess brings you to is the
+
+35:22.200 --> 35:24.680
+inference running in Kubernetes
+
+35:24.680 --> 35:26.680
+or is that a separate, um,
+
+35:27.720 --> 35:29.000
+separate infrastructure?
+
+35:29.000 --> 35:30.040
+It's not right now,
+
+35:30.040 --> 35:31.640
+but I think that's mostly like a matter
+
+35:31.640 --> 35:33.160
+of time and prioritization.
+
+35:33.160 --> 35:35.000
+Um, like, the first thing we move to
+
+35:35.000 --> 35:36.920
+Kubernetes was, uh,
+
+35:36.920 --> 35:37.720
+the training piece
+
+35:37.720 --> 35:39.320
+because the workflow management piece
+
+35:39.320 --> 35:40.120
+was so powerful,
+
+35:40.120 --> 35:41.560
+or sorry, the resource management piece
+
+35:41.560 --> 35:42.680
+was so powerful,
+
+35:42.680 --> 35:44.360
+like being able to swap out CPU,
+
+35:44.360 --> 35:45.400
+GPU, high memory.
+
+35:45.400 --> 35:46.120
+Mm-hmm.
+
+35:46.120 --> 35:48.920
+Um, we've moved some of our
+
+35:48.920 --> 35:49.880
+like, um,
+
+35:49.880 --> 35:51.720
+sort of real-time feature evaluation
+
+35:51.720 --> 35:52.440
+to Kubernetes,
+
+35:52.440 --> 35:53.720
+which has, um,
+
+35:53.720 --> 35:55.400
+been really great and made it like a lot
+
+35:55.400 --> 35:56.920
+less toil to kind of deploy
+
+35:56.920 --> 35:58.200
+new feature versions.
+
+35:58.200 --> 35:58.760
+At some point,
+
+35:58.760 --> 36:00.360
+we will probably also move
+
+36:00.360 --> 36:01.880
+the inference service to Kubernetes.
+
+36:01.880 --> 36:03.320
+We just kind of haven't gotten there yet
+
+36:03.320 --> 36:05.000
+because it is still some work to do that.
+
+36:05.000 --> 36:05.720
+Mm-hmm.
+
+36:06.760 --> 36:07.640
+Um,
+
+36:07.640 --> 36:08.600
+and is
+
+36:09.960 --> 36:11.160
+the, uh,
+
+36:11.160 --> 36:14.040
+the inferences happening on AWS as well,
+
+36:14.040 --> 36:16.200
+and are you using kind of standard
+
+36:16.200 --> 36:17.480
+CPU instances
+
+36:17.480 --> 36:19.560
+or are you doing anything fancy there?
+
+36:20.520 --> 36:22.120
+Yeah, so, um,
+
+36:23.000 --> 36:24.520
+we ran on cloud
+
+36:25.080 --> 36:26.360
+for pretty much everything,
+
+36:26.360 --> 36:27.320
+and, um,
+
+36:27.320 --> 36:29.240
+definitely use a lot of AWS.
+
+36:29.640 --> 36:30.680
+Um,
+
+36:30.680 --> 36:32.360
+for the real-time inference
+
+36:32.360 --> 36:33.640
+of the most sensitive,
+
+36:33.640 --> 36:35.320
+like production use cases,
+
+36:35.320 --> 36:38.200
+um, we're definitely mostly using, um,
+
+36:38.200 --> 36:38.920
+CPU,
+
+36:38.920 --> 36:41.320
+and we've done a lot of optimization work,
+
+36:41.320 --> 36:41.880
+um,
+
+36:41.880 --> 36:43.480
+so that has worked pretty well for us.
+
+36:43.480 --> 36:44.280
+Um,
+
+36:44.280 --> 36:45.400
+I think we do have some folks
+
+36:45.400 --> 36:46.840
+who've kind of experimented
+
+36:46.840 --> 36:48.600
+a little bit with, like,
+
+36:48.600 --> 36:50.600
+hourly or batch scoring, um,
+
+36:51.480 --> 36:52.600
+using some other things.
+
+36:52.600 --> 36:53.480
+So I think that's something
+
+36:53.480 --> 36:54.680
+that we're definitely thinking about
+
+36:54.680 --> 36:56.920
+as we have more people productionizing,
+
+36:56.920 --> 36:57.800
+um,
+
+36:57.800 --> 36:59.720
+kind of like more complex types of models
+
+36:59.720 --> 37:01.560
+where, you know, we might want something different.
+
+37:03.000 --> 37:04.760
+You mentioned a lot of optimization
+
+37:04.760 --> 37:06.840
+that you've done is that, uh,
+
+37:06.840 --> 37:10.040
+on a model by model-by-model basis
+
+37:10.040 --> 37:12.600
+or are there, uh,
+
+37:12.600 --> 37:14.040
+platform, uh,
+
+37:14.040 --> 37:17.160
+things that you've done that, um,
+
+37:17.160 --> 37:19.720
+help optimize across the various models
+
+37:19.720 --> 37:21.000
+that you're deploying, uh,
+
+37:21.000 --> 37:22.200
+for instance.
+
+37:22.200 --> 37:23.320
+Yeah, definitely.
+
+37:23.320 --> 37:24.840
+A lot of things at the platform level,
+
+37:24.840 --> 37:26.520
+like, I think the first models
+
+37:26.520 --> 37:27.560
+that we ever,
+
+37:27.560 --> 37:29.480
+ever scored in our inference service,
+
+37:29.480 --> 37:30.920
+um, were serialized with YAML,
+
+37:31.640 --> 37:33.320
+and they were like really huge,
+
+37:33.320 --> 37:34.200
+and, um,
+
+37:34.200 --> 37:35.320
+they caused a lot of garbage
+
+37:35.320 --> 37:36.920
+when we tried to load them,
+
+37:36.920 --> 37:37.720
+and so, like,
+
+37:37.720 --> 37:38.600
+we did some work there
+
+37:38.600 --> 37:40.120
+for kind of tree-based models,
+
+37:40.120 --> 37:41.640
+um,
+
+37:41.640 --> 37:43.800
+to be able to load things
+
+37:43.800 --> 37:45.560
+from disk to memory really quickly
+
+37:45.560 --> 37:47.480
+and, like, not producing much garbage.
+
+37:47.480 --> 37:48.280
+Um, so that,
+
+37:48.280 --> 37:48.920
+that kind of thing
+
+37:48.920 --> 37:49.640
+are things that we did,
+
+37:49.640 --> 37:50.360
+especially, kind of,
+
+37:50.360 --> 37:51.320
+like, in the earlier days.
+
+37:52.280 --> 37:52.760
+Okay.
+
+37:52.760 --> 37:53.480
+And are you,
+
+37:54.680 --> 37:55.400
+what are you using
+
+37:55.400 --> 37:57.240
+for querying the models?
+
+37:57.240 --> 37:58.440
+Are you doing rest
+
+37:58.440 --> 38:00.040
+or GRPC
+
+38:00.040 --> 38:01.320
+or, uh,
+
+38:01.320 --> 38:03.480
+something altogether different?
+
+38:03.480 --> 38:05.800
+Yeah, we use rest right now, um,
+
+38:06.920 --> 38:08.040
+I think GRPC is, like,
+
+38:08.040 --> 38:09.480
+something that we're interested in,
+
+38:09.480 --> 38:11.000
+um, but we haven't done yet.
+
+38:11.000 --> 38:11.320
+Okay.
+
+38:11.320 --> 38:12.840
+Uh,
+
+38:12.840 --> 38:13.880
+and are you,
+
+38:14.840 --> 38:15.800
+is all of your,
+
+38:16.360 --> 38:18.280
+all of the inference done
+
+38:19.240 --> 38:20.200
+via, um,
+
+38:21.720 --> 38:23.160
+kind of via rest and, like,
+
+38:23.160 --> 38:24.600
+a kind of microservice style,
+
+38:24.600 --> 38:26.680
+or do you also do, um,
+
+38:26.680 --> 38:27.080
+more,
+
+38:27.960 --> 38:29.560
+I guess, embedded types of,
+
+38:30.360 --> 38:31.640
+uh, inference for,
+
+38:31.640 --> 38:34.600
+like, where you need to have super low latency requirements.
+
+38:34.600 --> 38:36.200
+Does rest kind of meet the need
+
+38:36.200 --> 38:38.520
+across the application portfolio?
+
+38:38.520 --> 38:40.520
+Yeah, um,
+
+38:40.520 --> 38:42.360
+even for our most critical applications,
+
+38:42.360 --> 38:43.880
+like, shield things have worked pretty well.
+
+38:43.880 --> 38:45.960
+One other thing our orchestration team has done
+
+38:45.960 --> 38:47.320
+that's worked really well for us
+
+38:47.320 --> 38:47.880
+is, um,
+
+38:47.880 --> 38:49.480
+migrating a lot of things to OnVoy.
+
+38:49.480 --> 38:50.680
+Um,
+
+38:50.680 --> 38:51.880
+so we've seen some,
+
+38:51.880 --> 38:52.760
+some things where, like,
+
+38:52.760 --> 38:54.760
+we didn't understand why there was some delay,
+
+38:54.760 --> 38:55.880
+like, in what we measured
+
+38:55.880 --> 38:56.920
+for how long things tricks,
+
+38:56.920 --> 38:58.440
+versus, like, what it took to the user.
+
+38:58.440 --> 39:00.120
+There's just kind of one away,
+
+39:00.120 --> 39:01.320
+as we move to OnVoy.
+
+39:01.320 --> 39:02.680
+Um,
+
+39:02.680 --> 39:03.560
+and what is OnVoy?
+
+39:03.560 --> 39:05.240
+Uh,
+
+39:05.240 --> 39:05.960
+OnVoy is, like,
+
+39:05.960 --> 39:07.880
+a service service networking mesh
+
+39:07.880 --> 39:09.320
+that was developed by Lyft,
+
+39:09.320 --> 39:09.880
+um,
+
+39:09.880 --> 39:11.880
+and is kind of like an open source,
+
+39:11.880 --> 39:12.920
+open source library.
+
+39:13.640 --> 39:14.120
+Um,
+
+39:14.120 --> 39:15.560
+and so it handles a lot of,
+
+39:15.560 --> 39:16.520
+it can handle a lot of things,
+
+39:16.520 --> 39:18.360
+like service to service communication.
+
+39:18.360 --> 39:19.560
+Okay.
+
+39:19.560 --> 39:21.400
+Cool. Um,
+
+39:21.400 --> 39:23.400
+and so the,
+
+39:23.400 --> 39:24.200
+the inference,
+
+39:26.360 --> 39:27.720
+the inference environment,
+
+39:27.720 --> 39:28.680
+does it,
+
+39:28.680 --> 39:30.520
+is it doing,
+
+39:31.160 --> 39:32.200
+absent of Kubernetes,
+
+39:32.200 --> 39:34.200
+all the things that you'd expect Kubernetes to do
+
+39:34.200 --> 39:35.320
+in terms of, like,
+
+39:35.320 --> 39:36.440
+auto scaling,
+
+39:36.440 --> 39:37.800
+and, um,
+
+39:37.800 --> 39:38.440
+you know,
+
+39:38.440 --> 39:39.400
+load balancing,
+
+39:39.400 --> 39:40.520
+uh,
+
+39:40.520 --> 39:43.000
+across the different service instances,
+
+39:43.000 --> 39:43.880
+or,
+
+39:43.880 --> 39:45.320
+is that stuff all done,
+
+39:45.320 --> 39:46.440
+um,
+
+39:46.440 --> 39:47.080
+statically?
+
+39:47.080 --> 39:48.680
+Um,
+
+39:48.680 --> 39:50.440
+we take care of the routing,
+
+39:50.440 --> 39:51.320
+um,
+
+39:51.320 --> 39:52.280
+ourselves,
+
+39:52.280 --> 39:53.880
+and we also, at this point,
+
+39:53.880 --> 39:54.520
+have kind of, like,
+
+39:54.520 --> 39:55.640
+charted our inference service,
+
+39:55.640 --> 39:57.400
+so not all models are stored
+
+39:57.400 --> 39:58.920
+on every host,
+
+39:58.920 --> 39:59.560
+so that, you know,
+
+39:59.560 --> 40:00.280
+we don't need hosts
+
+40:00.280 --> 40:01.480
+with, like, infinite memory.
+
+40:01.480 --> 40:03.160
+Um,
+
+40:03.160 --> 40:05.080
+and so that we take care of ourselves,
+
+40:05.080 --> 40:06.120
+um,
+
+40:06.120 --> 40:08.200
+the scaling, we,
+
+40:08.200 --> 40:09.800
+is not fully automated at this point.
+
+40:09.800 --> 40:10.760
+We do, we have kind of, like,
+
+40:10.760 --> 40:11.640
+quality of service,
+
+40:11.640 --> 40:12.200
+so we have, like,
+
+40:12.200 --> 40:13.240
+multiple,
+
+40:13.240 --> 40:14.680
+kind of clusters of machines,
+
+40:14.680 --> 40:16.760
+and we tear a little bit by, like,
+
+40:16.760 --> 40:17.080
+you know,
+
+40:17.080 --> 40:18.600
+how sensitive your application is
+
+40:18.600 --> 40:19.720
+and what you need from it,
+
+40:19.720 --> 40:20.520
+um,
+
+40:20.520 --> 40:21.880
+so that we can be a little bit more
+
+40:21.880 --> 40:22.680
+relaxed with people
+
+40:22.680 --> 40:23.480
+who are developing
+
+40:23.480 --> 40:24.200
+and want to test
+
+40:24.200 --> 40:25.160
+and not have that,
+
+40:25.160 --> 40:25.640
+like,
+
+40:25.640 --> 40:26.840
+potentially have any impact
+
+40:26.840 --> 40:28.280
+on more critical applications,
+
+40:28.280 --> 40:29.080
+um,
+
+40:29.080 --> 40:30.280
+but we haven't done, like,
+
+40:30.280 --> 40:31.480
+totally automated scaling,
+
+40:31.480 --> 40:32.360
+that's something we kind of
+
+40:32.360 --> 40:33.880
+still look at a little bit ourselves.
+
+40:33.880 --> 40:35.720
+Awesome. Awesome.
+
+40:35.720 --> 40:36.600
+Um,
+
+40:36.600 --> 40:39.240
+so if you were kind of just starting
+
+40:39.240 --> 40:41.080
+down this journey,
+
+40:41.080 --> 40:42.760
+uh, without having done all the,
+
+40:42.760 --> 40:43.640
+the things that,
+
+40:43.640 --> 40:45.400
+that you've done at Stripe,
+
+40:45.400 --> 40:46.680
+where do you think you would start?
+
+40:46.680 --> 40:48.680
+If you just, um,
+
+40:48.680 --> 40:50.120
+you know,
+
+40:50.120 --> 40:51.480
+you're, you're at an organization
+
+40:51.480 --> 40:53.880
+that's kind of increasingly invested in
+
+40:53.880 --> 40:55.880
+or investing in machine learning
+
+40:55.880 --> 40:57.160
+and, you know,
+
+40:57.160 --> 40:58.120
+needs to try to,
+
+40:58.120 --> 40:59.400
+uh,
+
+40:59.400 --> 41:00.840
+you know, gain some efficiencies.
+
+41:03.320 --> 41:05.160
+Yeah, I mean, I think if you're just starting out,
+
+41:05.160 --> 41:06.520
+like, it's good to think about,
+
+41:06.520 --> 41:08.520
+like, what are your requirements, right?
+
+41:08.520 --> 41:09.720
+Um,
+
+41:09.720 --> 41:10.440
+and, you know,
+
+41:10.440 --> 41:11.880
+if you're just trying to iterate quickly,
+
+41:11.880 --> 41:12.280
+it's like,
+
+41:12.280 --> 41:14.040
+do the simplest thing possible, right?
+
+41:14.040 --> 41:15.400
+So, you know,
+
+41:15.400 --> 41:16.600
+if you can do things in batch,
+
+41:16.600 --> 41:18.120
+like, great, do things in batch,
+
+41:18.120 --> 41:19.160
+um,
+
+41:19.160 --> 41:19.960
+I think a lot of,
+
+41:19.960 --> 41:21.400
+there are a lot of both
+
+41:21.400 --> 41:22.440
+open-source libraries
+
+41:22.440 --> 41:24.200
+as well as managed solutions,
+
+41:24.680 --> 41:25.640
+um,
+
+41:25.640 --> 41:27.640
+like, on all the different cloud providers,
+
+41:27.640 --> 41:28.520
+so I think, you know,
+
+41:29.400 --> 41:30.280
+I don't know, you know,
+
+41:30.280 --> 41:31.640
+if you're only one person,
+
+41:31.640 --> 41:32.680
+then I think that those
+
+41:32.680 --> 41:33.720
+could make a lot of sense,
+
+41:33.720 --> 41:35.080
+also, for people starting out,
+
+41:35.080 --> 41:36.440
+because I think one of the interesting things
+
+41:36.440 --> 41:37.720
+with machine learning applications
+
+41:37.720 --> 41:38.920
+is that, um,
+
+41:38.920 --> 41:40.200
+it takes a little bit of work,
+
+41:41.080 --> 41:41.720
+like, usually,
+
+41:41.720 --> 41:43.000
+there's sort of this threshold
+
+41:43.000 --> 41:43.720
+of, like, your modeling
+
+41:43.720 --> 41:44.760
+has to be good enough
+
+41:44.760 --> 41:45.720
+for this to be, like,
+
+41:45.720 --> 41:47.480
+a useful thing for you to do,
+
+41:47.480 --> 41:48.440
+like, for fraud detection,
+
+41:48.440 --> 41:50.120
+that's, like, if we can't catch any fraud
+
+41:50.120 --> 41:50.840
+with our models,
+
+41:50.840 --> 41:51.640
+then, like, you know,
+
+41:51.640 --> 41:52.600
+we probably shouldn't have,
+
+41:52.600 --> 41:54.120
+like, a fraud detection product,
+
+41:54.600 --> 41:55.160
+um,
+
+41:55.160 --> 41:56.680
+so I think it is useful to kind of have,
+
+41:56.680 --> 41:58.280
+like, a quick iteration cycle
+
+41:58.280 --> 41:59.240
+to find out, like,
+
+41:59.240 --> 42:00.280
+is this a viable thing
+
+42:00.280 --> 42:01.800
+that you even want to pursue,
+
+42:01.800 --> 42:03.080
+and if you have an infrastructure team,
+
+42:03.080 --> 42:03.880
+they can kind of, like,
+
+42:03.880 --> 42:05.320
+help, um,
+
+42:05.320 --> 42:06.360
+lower the bar for that,
+
+42:06.360 --> 42:08.120
+but I think there are other ways to do that,
+
+42:08.120 --> 42:09.240
+especially as, you know,
+
+42:09.240 --> 42:09.640
+there's been, like,
+
+42:09.640 --> 42:10.760
+this Cambrian explosion
+
+42:10.760 --> 42:11.720
+in the ecosystem
+
+42:11.720 --> 42:13.160
+of different open source platforms,
+
+42:13.160 --> 42:14.760
+as well as different managed solutions.
+
+42:15.720 --> 42:16.360
+Yeah, how do you,
+
+42:16.360 --> 42:17.480
+how do you think
+
+42:17.480 --> 42:18.840
+an organization knows
+
+42:19.640 --> 42:21.000
+when they should have
+
+42:21.000 --> 42:21.960
+an infrastructure team,
+
+42:23.320 --> 42:24.440
+ML in particular?
+
+42:25.320 --> 42:27.480
+Yeah, I think that's a really interesting question,
+
+42:27.480 --> 42:29.720
+um, I guess, uh,
+
+42:29.720 --> 42:30.920
+in our case, I think, um,
+
+42:30.920 --> 42:32.040
+you know,
+
+42:32.040 --> 42:33.960
+the person who originally founded the,
+
+42:33.960 --> 42:35.400
+and she learning infrastructure team,
+
+42:36.120 --> 42:39.480
+um, had worked in this area before at Twitter,
+
+42:39.480 --> 42:41.000
+and kind of had a sense of, like,
+
+42:41.000 --> 42:41.880
+this is going to be a thing
+
+42:41.880 --> 42:43.560
+that we're really going to want to invest in,
+
+42:43.560 --> 42:45.480
+given how important it is for our business,
+
+42:45.480 --> 42:46.520
+and also that,
+
+42:46.520 --> 42:47.480
+if you don't kind of, like,
+
+42:47.480 --> 42:48.680
+dedicate some folks to it,
+
+42:48.680 --> 42:50.600
+it's easy for them to kind of get sucked up
+
+42:50.600 --> 42:51.400
+in other things,
+
+42:51.400 --> 42:52.920
+like, if you just have data infrastructure,
+
+42:52.920 --> 42:54.200
+that's undifferentiated.
+
+42:55.080 --> 42:56.040
+Um,
+
+42:56.040 --> 42:57.640
+so I think it's a really interesting question.
+
+42:58.360 --> 43:00.200
+There probably is this business piece, right,
+
+43:00.200 --> 43:00.520
+of, like,
+
+43:00.520 --> 43:02.040
+what are your ML applications?
+
+43:02.040 --> 43:04.520
+Like, how critical are they to your business?
+
+43:04.520 --> 43:07.400
+And, like, how difficult are your infrastructure
+
+43:07.400 --> 43:09.240
+requirements for them as well?
+
+43:09.240 --> 43:10.760
+I think a lot of companies develop
+
+43:10.760 --> 43:11.880
+their ML infrastructure,
+
+43:12.600 --> 43:13.960
+like, starting out with things,
+
+43:13.960 --> 43:15.800
+like, making the notebook experience really great,
+
+43:15.800 --> 43:16.680
+because they want to support,
+
+43:16.680 --> 43:17.880
+like, a lot of data scientists
+
+43:17.880 --> 43:19.640
+who are doing a lot of analysis.
+
+43:19.640 --> 43:21.480
+And so that's, like, a little bit of a different arc
+
+43:21.480 --> 43:23.080
+from the one that we've been on.
+
+43:23.080 --> 43:24.120
+And I think that's, like,
+
+43:24.120 --> 43:26.040
+actually a pretty business-dependent thing.
+
+43:26.440 --> 43:26.920
+Okay.
+
+43:28.440 --> 43:29.320
+Awesome. Awesome.
+
+43:29.320 --> 43:31.560
+Well, Kelly, thanks so much for taking the time
+
+43:31.560 --> 43:34.120
+to chat with me about this really interesting
+
+43:35.240 --> 43:37.080
+story, and I've enjoyed learning about it.
+
+43:37.800 --> 43:39.640
+Cool. Thanks so much for chatting.
+
+43:39.640 --> 43:40.760
+Really enjoyed it.
+
+43:40.760 --> 44:08.200
+Awesome.
+

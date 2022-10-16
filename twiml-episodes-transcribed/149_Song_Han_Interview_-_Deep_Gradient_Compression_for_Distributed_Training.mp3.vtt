@@ -1,0 +1,1820 @@
+WEBVTT
+
+00:00.000 --> 00:16.320
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+
+00:16.320 --> 00:21.480
+people, doing interesting things in machine learning and artificial intelligence.
+
+00:21.480 --> 00:31.600
+I'm your host Sam Charrington.
+
+00:31.600 --> 00:37.280
+On today's show I chat with Song Han, assistant professor and MIT's EECS department about
+
+00:37.280 --> 00:40.680
+his research on deep gradient compression.
+
+00:40.680 --> 00:44.800
+In our conversation, Song and I explore the challenge of distributed training for deep
+
+00:44.800 --> 00:49.680
+neural networks and the idea of compressing the gradient exchange to allow it to be done
+
+00:49.680 --> 00:51.880
+more efficiently.
+
+00:51.880 --> 00:56.240
+Song details the evolution of distributed training systems based on this idea and provides
+
+00:56.240 --> 01:01.280
+a few examples of centralized and decentralized distributed training architectures such
+
+01:01.280 --> 01:07.000
+as Uber's Horovod as well as the approaches native to PyTorch and TensorFlow.
+
+01:07.000 --> 01:11.640
+Song also addresses potential issues that arise when considering distributed training such
+
+01:11.640 --> 01:16.080
+as loss of accuracy and generalizability and much more.
+
+01:16.080 --> 01:19.680
+A couple of quick notes before we jump in.
+
+01:19.680 --> 01:24.000
+First, our next monthly meetup is taking place on Tuesday, June 12th.
+
+01:24.000 --> 01:28.400
+Cardiologist level arrhythmia detection with convolutional neural networks, which is
+
+01:28.400 --> 01:31.840
+work by researchers in Andrew Ng's lab at Stanford.
+
+01:31.840 --> 01:36.440
+For more information on the meetup, visit twimla.com slash meetup.
+
+01:36.440 --> 01:41.680
+Next, I've also posted some updated information about our fast.ai study group, which starts
+
+01:41.680 --> 01:42.680
+this week.
+
+01:42.680 --> 01:48.520
+We've had nearly 300 people sign up to do this together and the Slack group has been buzzing.
+
+01:48.520 --> 01:53.280
+To learn more, visit twimla.com slash fastai.
+
+01:53.280 --> 01:55.360
+All right, let's do it.
+
+01:55.360 --> 01:59.120
+All right, everyone.
+
+01:59.120 --> 02:01.720
+I am on the line with Song Han.
+
+02:01.720 --> 02:08.800
+Song is going to be starting in July 2018 as an assistant professor in the EECS department
+
+02:08.800 --> 02:14.920
+at MIT and recently received his PhD in doubly from Stanford University.
+
+02:14.920 --> 02:18.200
+Song, welcome to this week in machine learning and AI.
+
+02:18.200 --> 02:19.200
+My absolute pleasure.
+
+02:19.200 --> 02:22.600
+I'd like to be here to join this podcast.
+
+02:22.600 --> 02:23.600
+Absolutely.
+
+02:23.600 --> 02:28.240
+Tell us a little bit about your background and how you got interested in machine learning
+
+02:28.240 --> 02:29.240
+and AI.
+
+02:29.240 --> 02:30.840
+Okay, of course.
+
+02:30.840 --> 02:36.280
+So I recently graduated from Stanford University, advised by professor Bill Daddy.
+
+02:36.280 --> 02:43.400
+So initially, I was doing hardware architecture research and very, in my PhD, when I started
+
+02:43.400 --> 02:49.840
+my project, my usual goal was to do specialized hardware accelerators to accelerate different
+
+02:49.840 --> 02:56.320
+applications since the semiconductor industry has moved from single core, multi-core core,
+
+02:56.320 --> 03:00.280
+now it's the era of domain-specific accelerators.
+
+03:00.280 --> 03:08.440
+And then when I started my PhD in 2012, that's exactly when Alex and I came and then image
+
+03:08.440 --> 03:10.640
+not accuracy, just booming up.
+
+03:10.640 --> 03:15.680
+So I feel like that's a great opportunity to explore domain-specific architectures to
+
+03:15.680 --> 03:21.800
+accelerate the deep learning and particularly deep neural networks, which used to be pretty
+
+03:21.800 --> 03:25.520
+slow and takes a lot of computation, lots of memory.
+
+03:25.520 --> 03:31.880
+And I feel it is a perfect alignment between my previous expertise and computer architecture
+
+03:31.880 --> 03:41.600
+and also given the ripet progress of deep learning to bridge the gap between machine learning
+
+03:41.600 --> 03:43.280
+and computer systems.
+
+03:43.280 --> 03:46.360
+So that's how I got into this area.
+
+03:46.360 --> 03:47.360
+Fantastic.
+
+03:47.360 --> 03:57.360
+You've done some work around FPGA's but also beyond the silicon accelerators to distributed
+
+03:57.360 --> 03:59.360
+machine learning, is that right?
+
+03:59.360 --> 04:00.360
+Right.
+
+04:00.360 --> 04:01.360
+Right, exactly.
+
+04:01.360 --> 04:06.160
+So in my PhD thesis, I focused on most on inference.
+
+04:06.160 --> 04:10.920
+So focused on most on inference, building specialized architectures for inference and then
+
+04:10.920 --> 04:15.840
+prototype it on FPGA due to the low-budget of actually taking out a tube.
+
+04:15.840 --> 04:20.280
+And most recently, I've been working on not only inference but also training, since
+
+04:20.280 --> 04:25.920
+training in large scale deep neural networks take days or even weeks, which greatly limits
+
+04:25.920 --> 04:29.560
+the productivity of machine learning researchers.
+
+04:29.560 --> 04:35.360
+That's why I look into training to improve but the efficiency of training as well.
+
+04:35.360 --> 04:41.640
+And the technique that you've written about recently is one called deep gradient compression.
+
+04:41.640 --> 04:46.440
+Tell us a little bit about the motivation for that research.
+
+04:46.440 --> 04:53.880
+So deep gradient compression is a technique to compress the gradient exchange for distributed
+
+04:53.880 --> 04:54.880
+training.
+
+04:54.880 --> 04:57.120
+So why do we need to distribute the training?
+
+04:57.120 --> 05:03.600
+We want to have more parallelism so that we can try to finish the training in a shorter
+
+05:03.600 --> 05:04.600
+time.
+
+05:04.600 --> 05:08.960
+So previously, we trained immediately that it takes about a week.
+
+05:08.960 --> 05:14.720
+And there's work from, for example, visual training image net in one hour.
+
+05:14.720 --> 05:19.680
+So increasing the parallelism will decrease the training time.
+
+05:19.680 --> 05:27.320
+We can, through more GPUs and more computation, to decrease the time for computation, compute.
+
+05:27.320 --> 05:33.800
+But there is another factor that determines how much time it needs to train neural network
+
+05:33.800 --> 05:35.760
+that is communication.
+
+05:35.760 --> 05:39.760
+Because the more node you have, the more communication you want to have.
+
+05:39.760 --> 05:44.520
+Because different nodes, they have to exchange their gradient during distributed training,
+
+05:44.520 --> 05:48.760
+which will limit the scalability of distributed training.
+
+05:48.760 --> 05:54.600
+Scalability means with, say, with 64 node compared with one node, you ideally want to
+
+05:54.600 --> 06:02.000
+have 64 X speed up compared with using just one node, but usually due to the bottleneck
+
+06:02.000 --> 06:08.280
+of communication or networking, it's hard to achieve 64 X speed up.
+
+06:08.280 --> 06:14.720
+Some previous work has achieved super great scalability, for example, Ubers, Framework
+
+06:14.720 --> 06:19.720
+Card, PowerWord, and also PyTorch.
+
+06:19.720 --> 06:26.880
+So usually that require a great networking infrastructure, for example, Infinity Band
+
+06:26.880 --> 06:29.840
+or 40 gigabit Ethernet.
+
+06:29.840 --> 06:37.520
+And I was motivated by how can we enable such kind of distributed training with cheap commodity
+
+06:37.520 --> 06:39.160
+networking infrastructure.
+
+06:39.160 --> 06:46.720
+For example, I AWS on Amazon and AWS, for example, they have a 1 gigabit Ethernet, but
+
+06:46.720 --> 06:54.680
+still we want to benefit millions of machine learning practitioners who cannot afford those
+
+06:54.680 --> 07:01.920
+super expensive, dedicated network and infrastructure that Facebook researchers or Google researchers
+
+07:01.920 --> 07:03.400
+can use.
+
+07:03.400 --> 07:12.920
+So that motivates me to kind of democratize AI training, even on such commodity hardware.
+
+07:12.920 --> 07:17.160
+Yeah, that motivates me to work on this deep breathing compression.
+
+07:17.160 --> 07:18.160
+Okay.
+
+07:18.160 --> 07:24.720
+Let me take a step back and maybe have you walk through on the compute side when we're
+
+07:24.720 --> 07:33.560
+trying to distribute training, what the different elements of distributed training are.
+
+07:33.560 --> 07:39.960
+So you talked about the need to share gradients, where does that come from?
+
+07:39.960 --> 07:43.720
+So let's back up to talk about where the gradients come from.
+
+07:43.720 --> 07:50.680
+So training deep neural nets is using a basic algorithm called grid in descent or stochastic
+
+07:50.680 --> 07:52.800
+grid in descent most recently.
+
+07:52.800 --> 07:57.160
+So it's calculating the first order derivative of the weights.
+
+07:57.160 --> 08:03.960
+So first of all, it's using a convex optimization method to solve a large non-comax problem,
+
+08:03.960 --> 08:08.240
+which requires us to get the first order graded for each weight.
+
+08:08.240 --> 08:09.920
+So think about it as this.
+
+08:09.920 --> 08:16.480
+So we are climbing down a hill, for example, which is very similar to an optimization problem.
+
+08:16.480 --> 08:23.040
+So you have 360 degrees and you want to choose which direction would you go in order to climb
+
+08:23.040 --> 08:24.680
+down the hill.
+
+08:24.680 --> 08:32.880
+So a fastest way to go down the hill is to follow the direction that is steepest, right?
+
+08:32.880 --> 08:34.800
+That is analogy of the gradient.
+
+08:34.800 --> 08:41.240
+The gradient is very analogy to the finding which direction is the steepest.
+
+08:41.240 --> 08:46.480
+And then you follow the steepest path at each step, you follow the steepest step.
+
+08:46.480 --> 08:51.080
+And then you will go to the bottom of the valley, right?
+
+08:51.080 --> 08:54.640
+So that is for a single node.
+
+08:54.640 --> 09:00.960
+And when you have multiple nodes, each node will have a bunch of training images.
+
+09:00.960 --> 09:07.640
+Say we have four different nodes, and each one is finding their own direction, climbing
+
+09:07.640 --> 09:12.200
+up, up, going down the hill, and then how do you merge them together?
+
+09:12.200 --> 09:18.560
+So they need to communicate and exchange this gradient through networking.
+
+09:18.560 --> 09:21.600
+And exchanging the gradient can be pretty bulky.
+
+09:21.600 --> 09:29.560
+Say, Alexander, it has 240 megabytes of weights, so it's also 240 megabytes of gradient.
+
+09:29.560 --> 09:35.720
+For example, a resin 50, it has 100 megabytes.
+
+09:35.720 --> 09:42.400
+So every iteration, you have different nodes that have to exchange 100 megabytes of gradient
+
+09:42.400 --> 09:48.160
+to each other, which makes it a bottleneck for the networking infrastructure.
+
+09:48.160 --> 09:54.560
+And so does every node need to know all of the gradients that the other nodes have worked
+
+09:54.560 --> 09:55.560
+on?
+
+09:55.560 --> 09:58.000
+Is this for the updated zone weights?
+
+09:58.000 --> 10:05.320
+Yes, for synchronized training, it is required, and that's exactly why it requires so much
+
+10:05.320 --> 10:07.040
+networking bandwidth.
+
+10:07.040 --> 10:14.280
+Since each node synchronized with training, each node has to have all the gradient information
+
+10:14.280 --> 10:17.440
+for its neighboring nodes.
+
+10:17.440 --> 10:25.400
+How is the work distributed among the various nodes that are working on a problem?
+
+10:25.400 --> 10:29.800
+Is it, are they each given batches, for example, to work on?
+
+10:29.800 --> 10:35.760
+Or is there some other, is the gradients distributed randomly, or does that matter at all?
+
+10:35.760 --> 10:37.440
+Oh, that's a good question.
+
+10:37.440 --> 10:43.920
+So there are two ways, usually two ways of achieving such parallelism.
+
+10:43.920 --> 10:47.840
+One is data parallelism, the other is model parallelism.
+
+10:47.840 --> 10:54.160
+So data parallelism is having different chunks of training data to different nodes.
+
+10:54.160 --> 11:01.480
+And model parallelism is having different chunks of the model across different nodes.
+
+11:01.480 --> 11:07.040
+Data parallelism is a lot more easier, is a lot easier to implement than model parallelism.
+
+11:07.040 --> 11:10.920
+So in this case, I'm talking about data parallelism.
+
+11:10.920 --> 11:18.640
+And it's a specific, how data parallelism is achieved is by, we have the same model on
+
+11:18.640 --> 11:24.280
+sitting on each node, on each training node, the same model, model can be a convolution
+
+11:24.280 --> 11:26.760
+neural net or recurrent neural net.
+
+11:26.760 --> 11:34.040
+And then we feed different chunks of training data to each node, save the first node may
+
+11:34.040 --> 11:43.800
+have a batch of image 0 through 31, and then node 2 may have image 32 through 63, etc.
+
+11:43.800 --> 11:51.400
+So all the nodes are sharing the same model, but they are having, they are being fed with
+
+11:51.400 --> 11:54.160
+different chunks of training data.
+
+11:54.160 --> 12:00.400
+And they calculate their local gradients according to their own piece of data.
+
+12:00.400 --> 12:05.200
+And then they exchange the gradient to each other.
+
+12:05.200 --> 12:10.000
+So it's a, it can be implementing two ways, one is preemptive server, the other is
+
+12:10.000 --> 12:14.200
+more reduced, are reducing simpler, so I will talk about that.
+
+12:14.200 --> 12:21.880
+So are reduced is by every node after calculating their own gradient, it absorbs, it takes the
+
+12:21.880 --> 12:24.320
+gradient from all the other node.
+
+12:24.320 --> 12:29.480
+And in the meantime, it will also send its own gradient to all the other node.
+
+12:29.480 --> 12:36.680
+So everyone receives, everyone's all of the gradient and then sum it up and then calculate
+
+12:36.680 --> 12:37.680
+an average.
+
+12:37.680 --> 12:47.120
+So what's the architecture for doing this, for an implementation perspective, I can imagine
+
+12:47.120 --> 12:51.240
+a number of ways of doing this, putting them in some kind of shared storage and having
+
+12:51.240 --> 12:56.120
+all of the distributed workers pull from that shared storage or using some kind of message
+
+12:56.120 --> 13:02.200
+passing architecture, is that something that you've explored, the different ways that
+
+13:02.200 --> 13:04.000
+one could do this?
+
+13:04.000 --> 13:07.720
+Yeah, there are in general two ways to do this.
+
+13:07.720 --> 13:13.960
+The first one is using a preemptive server, which is centralized, I think of it in that
+
+13:13.960 --> 13:14.960
+way.
+
+13:14.960 --> 13:21.120
+So everyone will send out all the training nodes, will send their local gradients to the
+
+13:21.120 --> 13:23.040
+preemptive server.
+
+13:23.040 --> 13:28.440
+And the preemptive server, by the name we know, it's storing the preemptive, storing
+
+13:28.440 --> 13:29.760
+the model.
+
+13:29.760 --> 13:39.200
+So it receives all the gradient from different node and then sum it together, sum it up and
+
+13:39.200 --> 13:48.320
+added to the shared decentralized preemptive server and update the model and then it broadcast
+
+13:48.320 --> 13:51.040
+the model to all the training node.
+
+13:51.040 --> 13:56.480
+So for example, if you have four training node, all the four nodes, we will send their own
+
+13:56.480 --> 14:02.040
+gradient to the centralized preemptive server to one update and then the preemptive server
+
+14:02.040 --> 14:08.320
+will broadcast the updated way to all the training node and then all the training node
+
+14:08.320 --> 14:13.000
+starting another iteration of gradient calculation.
+
+14:13.000 --> 14:15.000
+So it forms a cycle.
+
+14:15.000 --> 14:18.320
+So that's the first way using a preemptive server.
+
+14:18.320 --> 14:23.800
+And there's a second way using a decentralized way.
+
+14:23.800 --> 14:27.640
+So the preemptive server is a centralized way, right, you have a centralized preemptive
+
+14:27.640 --> 14:28.640
+server.
+
+14:28.640 --> 14:29.640
+What about a decentralized way?
+
+14:29.640 --> 14:34.960
+So a decentralized way, we really use this all-reduce operation.
+
+14:34.960 --> 14:41.880
+So for example, you have one, two, three, four, four training node and then still you have
+
+14:41.880 --> 14:47.680
+a master training node, for example, node one and then all the node will send their own
+
+14:47.680 --> 14:52.240
+gradient to node one, for example, node two, send it to node one, node four, send it
+
+14:52.240 --> 14:55.000
+to node three, node three, send it to node one.
+
+14:55.000 --> 15:00.680
+So in the end, node one will have the gradient information for all the node.
+
+15:00.680 --> 15:07.720
+And the next step is node one will broadcast updated model to node two, three, and four.
+
+15:07.720 --> 15:14.400
+So node one will first broadcast to node three and then node one will broadcast node two
+
+15:14.400 --> 15:16.720
+and node three will broadcast node four.
+
+15:16.720 --> 15:24.520
+So in this tree structure, everyone can get, everyone can get everyone's gradient
+
+15:24.520 --> 15:26.560
+information and update.
+
+15:26.560 --> 15:30.640
+So this is just one basic implementation using a tree structure.
+
+15:30.640 --> 15:34.760
+There is a more advanced implementation with using a butterfly structure.
+
+15:34.760 --> 15:42.360
+Yes, butterfly, everyone sends a portion of them to the neighboring.
+
+15:42.360 --> 15:47.120
+So the idea is still everyone should get everyone's gradient.
+
+15:47.120 --> 15:51.400
+But in that way, it's more efficient than a tree structure.
+
+15:51.400 --> 15:56.400
+So in summary, there are two ways, centralize the way using parameter server and decentralize
+
+15:56.400 --> 16:00.720
+the way using this all-reduced operation.
+
+16:00.720 --> 16:08.880
+Circling back to your work in particular around deep gradient compression, what you're
+
+16:08.880 --> 16:15.240
+trying to do is reduce the communication overhead of this last step that we've just been
+
+16:15.240 --> 16:16.240
+talking about.
+
+16:16.240 --> 16:18.240
+How do you do that?
+
+16:18.240 --> 16:25.600
+So the basic idea is to reduce the necessary amount of gradient that we need to send.
+
+16:25.600 --> 16:35.920
+So surprisingly, we find only 0.1%, only 0.1% of the gradient that is really needed to
+
+16:35.920 --> 16:38.280
+be sent out over the network.
+
+16:38.280 --> 16:42.360
+So the other 99.9%, you can hold it locally.
+
+16:42.360 --> 16:44.600
+You don't have to send it out.
+
+16:44.600 --> 16:53.560
+By 0.1%, is the idea that when we talk about these gradients, we're talking about vectors
+
+16:53.560 --> 16:58.240
+that need to be moved around, is the idea that these vectors are very sparse, that they're
+
+16:58.240 --> 17:06.840
+mostly consistent zeros and you're spending a lot of, using a lot of your time and effort
+
+17:06.840 --> 17:12.040
+moving around these zeros, essentially, that aren't adding information.
+
+17:12.040 --> 17:15.320
+Right, that's the key idea.
+
+17:15.320 --> 17:21.400
+Although initially, without any treatment, they are not sparse.
+
+17:21.400 --> 17:26.520
+Although some of the gradient are super small, they are not zero, but they're small.
+
+17:26.520 --> 17:36.640
+So the way we deal with it is to sort the gradient and zero away all those 99.9% the smallest
+
+17:36.640 --> 17:43.840
+and then only send out those 0.1% the largest gradient over the network.
+
+17:43.840 --> 17:51.600
+But simply not simply doing this, only by such kind of thresholding and making a dense
+
+17:51.600 --> 17:57.080
+gradient vector to make it sparse, we'll hurt the prediction accuracy.
+
+17:57.080 --> 18:04.600
+So we found those small gradients, although some of them may be noise, but if we don't
+
+18:04.600 --> 18:07.240
+send it out, it will hurt the accuracy.
+
+18:07.240 --> 18:15.160
+So what we do is to locally accumulate those small gradients for more iterations until it
+
+18:15.160 --> 18:16.760
+gets large.
+
+18:16.760 --> 18:19.600
+When it gets large enough, then we send it out.
+
+18:19.600 --> 18:24.560
+So in this way, we can recover a lot of accuracy.
+
+18:24.560 --> 18:25.560
+All right, interesting.
+
+18:25.560 --> 18:31.360
+So the idea there is that you've got your, you're training across, you know, some number
+
+18:31.360 --> 18:39.480
+of nodes, say 10 nodes, you've got each of these nodes is exchanging gradient information via
+
+18:39.480 --> 18:43.480
+one of the couple of ways that we've talked about.
+
+18:43.480 --> 18:48.920
+You found that most of that gradient information isn't useful, but it sounds like the key
+
+18:48.920 --> 18:55.200
+insight is that it may be useful in the future as that node continues to train.
+
+18:55.200 --> 19:02.200
+So you don't want to just kind of throw it all away, you know, at each training iteration,
+
+19:02.200 --> 19:15.160
+you want to continue to accumulate the other 99% of the, or 99.9% of the gradient information
+
+19:15.160 --> 19:16.160
+over time.
+
+19:16.160 --> 19:21.280
+And you find that some of that becomes useful later on.
+
+19:21.280 --> 19:26.040
+Yes, exactly, that's exactly the idea.
+
+19:26.040 --> 19:32.840
+So another way, that's one way to, another way, a mathematical way to interpret that
+
+19:32.840 --> 19:38.040
+is to increase the equivalent batch size of the gradient.
+
+19:38.040 --> 19:43.920
+For example, rather than calculated gradient and immediately send it out and do the update,
+
+19:43.920 --> 19:50.040
+we accumulate them locally for another iteration, maybe for third iteration until it reaches
+
+19:50.040 --> 19:51.560
+a threshold.
+
+19:51.560 --> 19:58.320
+It's equivalent, say you use three iterations, that is equivalent to increasing the batch size
+
+19:58.320 --> 19:59.320
+almost equivalent.
+
+19:59.320 --> 20:05.360
+It seems that the way that has changed a little bit, almost equivalent to increase the
+
+20:05.360 --> 20:07.240
+batch size by three times.
+
+20:07.240 --> 20:11.040
+That's another intuitive way to understand this.
+
+20:11.040 --> 20:19.080
+But it strikes me that that's a little different in the sense that in the initial way you
+
+20:19.080 --> 20:26.560
+described it, because you're always sorting and thresholding on the communication, but
+
+20:26.560 --> 20:33.440
+not on the internal state of a node, the information in a particular part of the gradient could
+
+20:33.440 --> 20:40.960
+stay around forever for, you know, much more than three iterations of the, or three batch
+
+20:40.960 --> 20:41.960
+iterations.
+
+20:41.960 --> 20:50.040
+It's highly possible you accumulated very long, even more than three iterations, say it
+
+20:50.040 --> 20:57.440
+can be a 10 iteration or 20 iterations, but you don't send it out until it reaches, it
+
+20:57.440 --> 21:04.640
+reaches top 0.1% of the total gradient magnitude of the gradient.
+
+21:04.640 --> 21:11.280
+So how do you reconcile that with the batch interpretation that you just mentioned?
+
+21:11.280 --> 21:17.640
+So that piece of gradient isn't sent out, it didn't do the update, it's just calculated
+
+21:17.640 --> 21:23.040
+and then accumulate across batches, it just accumulates the batches.
+
+21:23.040 --> 21:31.800
+So if you exchange the summation, if you exchange the summation, you are doing such calculation
+
+21:31.800 --> 21:34.720
+across key iterations.
+
+21:34.720 --> 21:44.440
+So if you put a key in the learning rate and also put a key in the denominator, it's
+
+21:44.440 --> 21:50.080
+equally to equal with increasing the learning rate by T times and also increase the batch
+
+21:50.080 --> 21:52.280
+size by T times.
+
+21:52.280 --> 21:53.280
+Okay.
+
+21:53.280 --> 22:03.640
+So this batch interpretation is more reflective of what's happening at the system level
+
+22:03.640 --> 22:08.680
+than what's happening at an individual node, is that fair?
+
+22:08.680 --> 22:15.080
+That's a fair interpretation, although it's not 100% mathematical equal, so it's in
+
+22:15.080 --> 22:21.200
+for each iteration, the weight guys changed.
+
+22:21.200 --> 22:27.120
+So it's using different weight for different iteration in real case.
+
+22:27.120 --> 22:28.120
+Okay.
+
+22:28.120 --> 22:34.680
+Yeah, so that's not the key idea, but that's not the only idea to recover the accuracy.
+
+22:34.680 --> 22:41.600
+So for example, on image classification, just with this local gradient accumulation, we
+
+22:41.600 --> 22:50.240
+still suffered from 1.6% loss of accuracy and on language modeling, we suffered 3.3% loss
+
+22:50.240 --> 22:51.240
+of accuracy.
+
+22:51.240 --> 22:57.640
+So we were thinking how do we, it's pretty close, like 1%, 3%, but not perfect.
+
+22:57.640 --> 23:04.080
+For context, what kind of loss of accuracy did you see with a more naive approach to gradient
+
+23:04.080 --> 23:05.080
+compression?
+
+23:05.080 --> 23:06.080
+What were you just mentioning?
+
+23:06.080 --> 23:07.080
+Pure, right.
+
+23:07.080 --> 23:13.600
+Pure stretch holding and not doing the locomotion locally doesn't converge on either image
+
+23:13.600 --> 23:18.800
+classification problem or the speed recognition.
+
+23:18.800 --> 23:21.920
+So it doesn't, it just doesn't work.
+
+23:21.920 --> 23:23.920
+No, it just doesn't work.
+
+23:23.920 --> 23:28.840
+But even so we added the local gradient accumulation, and then it covered it is.
+
+23:28.840 --> 23:37.600
+And from sci-fi 10 to 110, the original baseline accuracy is 92.9, now is 91.36, it's pretty
+
+23:37.600 --> 23:38.760
+close.
+
+23:38.760 --> 23:41.760
+And now let's see how can we further close the gap?
+
+23:41.760 --> 23:50.920
+Is there any loss of accuracy in moving to distributed training at all, or are we able
+
+23:50.920 --> 23:59.800
+to fully capture the accuracy of a single node solution in distributed training?
+
+23:59.800 --> 24:04.920
+Less using super large batch size, and people have already shown using large batch size
+
+24:04.920 --> 24:07.080
+nowadays, and converge really well.
+
+24:07.080 --> 24:11.720
+So it's almost a consensus that using a distributed training compared with a single node
+
+24:11.720 --> 24:15.480
+training, we can get very comparable accuracy.
+
+24:15.480 --> 24:20.800
+Although generalization ability is still under, under, under discussion, but the accuracy
+
+24:20.800 --> 24:25.600
+nowadays, it's almost solved the problem of distributed training using multiple node
+
+24:25.600 --> 24:29.320
+achieved by the same accuracy as using the same node.
+
+24:29.320 --> 24:30.320
+What does that mean?
+
+24:30.320 --> 24:38.760
+Why would generalization be different between single node and multi node training?
+
+24:38.760 --> 24:41.640
+That is an unsolved problem.
+
+24:41.640 --> 24:46.840
+Why using a large batch size and generalization ability from one training dataset and to
+
+24:46.840 --> 24:55.400
+another dataset can't be the same, so that is an unsolved problem to interpret why about
+
+24:55.400 --> 24:59.160
+the generalization ability using large batch training.
+
+24:59.160 --> 25:08.400
+But it's the generalization challenge with distributed training isn't so much relative
+
+25:08.400 --> 25:10.960
+to single node versus distributed.
+
+25:10.960 --> 25:15.840
+It's more because in order to do distributed, you increase the batch size than you introduce
+
+25:15.840 --> 25:18.000
+this issue around generalization.
+
+25:18.000 --> 25:19.000
+Right.
+
+25:19.000 --> 25:28.840
+It's only when the batch size is usually super large, say, more than, say, 8K or even more,
+
+25:28.840 --> 25:31.120
+then this problem begins to appear.
+
+25:31.120 --> 25:32.120
+Okay.
+
+25:32.120 --> 25:38.280
+Yeah, but it's not a problem of decreasing a decrease in the network environment.
+
+25:38.280 --> 25:39.280
+Okay.
+
+25:39.280 --> 25:42.320
+So shall we go back to the session?
+
+25:42.320 --> 25:43.320
+Okay.
+
+25:43.320 --> 25:47.800
+So how do we recover those 1%, 3% loss of accuracy?
+
+25:47.800 --> 25:51.600
+We find we need the momentum.
+
+25:51.600 --> 25:58.040
+Momentum SGD is usually dominant in current neural network training.
+
+25:58.040 --> 26:04.840
+We are not using the vanilla, the naive SGD, but we are using the momentum, which means
+
+26:04.840 --> 26:11.200
+we are using part of the previous gradient together with the current gradient.
+
+26:11.200 --> 26:17.160
+We do a weighted average having a discounting factor to avoid the noise.
+
+26:17.160 --> 26:21.040
+So say we are seeing, okay, we are going down the hill.
+
+26:21.040 --> 26:26.760
+We should go this direction is the steepest, but we don't go directly with this direction.
+
+26:26.760 --> 26:32.800
+But it's a, it's a sum of part of the previous gradient, part of the previous direction
+
+26:32.800 --> 26:39.880
+we have already gone through and together with the current, the current gradient.
+
+26:39.880 --> 26:42.320
+So that's called momentum.
+
+26:42.320 --> 26:47.560
+And with momentum, we are adding the sum, we are summing up the previous gradient with
+
+26:47.560 --> 26:53.040
+the current gradient, which give a new vector called the code velocity.
+
+26:53.040 --> 26:58.160
+And we are multiplying the velocity with the learning rate that subtracted from the original
+
+26:58.160 --> 26:59.160
+weight.
+
+26:59.160 --> 27:06.160
+And in this case, we found we should do local accumulation of the velocity rather than
+
+27:06.160 --> 27:09.040
+local accumulation of the gradient.
+
+27:09.040 --> 27:12.320
+So accumulate the velocity, not the gradient.
+
+27:12.320 --> 27:19.760
+Are you using momentum and the velocities throughout or are you uniquely using the velocities
+
+27:19.760 --> 27:27.400
+in the accumulation, but using vanilla gradient descent when you're doing the distributed
+
+27:27.400 --> 27:29.040
+part?
+
+27:29.040 --> 27:33.920
+We are using not the vanilla gradient descent, but momentum gradient descent.
+
+27:33.920 --> 27:43.760
+With momentum, with that, we used just because there's momentum term in the gradient descent,
+
+27:43.760 --> 27:49.200
+we need to add, we need to accumulate the velocity rather than the gradient.
+
+27:49.200 --> 27:50.200
+Okay.
+
+27:50.200 --> 27:51.200
+Got it.
+
+27:51.200 --> 27:52.200
+Right.
+
+27:52.200 --> 27:59.200
+And with this technique, there's a mathematical proof in the paper why we need to accumulate
+
+27:59.200 --> 28:06.200
+the velocity rather than the gradient, but you can feel free to check out the paper to
+
+28:06.200 --> 28:13.240
+read the math right here, just a very intuitive way to understand this is to take into account
+
+28:13.240 --> 28:20.240
+of the previous gradient, the momentum term, so that we need to accumulate the final summation
+
+28:20.240 --> 28:23.280
+of the gradient and the previous gradient.
+
+28:23.280 --> 28:28.640
+So we accumulate the velocity rather than the gradient.
+
+28:28.640 --> 28:37.240
+And with this method, we found the previous 1.5% loss of accuracy now is only 0.36% image
+
+28:37.240 --> 28:43.560
+classification, which is closer, but still is not the way we want.
+
+28:43.560 --> 28:51.000
+Still have 0.3% loss of accuracy, but for speech recognition, surprisingly, we found
+
+28:51.000 --> 28:55.160
+after using this momentum correction, it didn't converge.
+
+28:55.160 --> 28:59.360
+So there's still some problem we need to solve.
+
+28:59.360 --> 29:03.720
+So shall we move on to the third technique to recover the accuracy?
+
+29:03.720 --> 29:04.720
+Okay.
+
+29:04.720 --> 29:05.720
+Okay.
+
+29:05.720 --> 29:11.080
+So why particularly for speech recognition, the accuracy, even didn't converge using
+
+29:11.080 --> 29:16.600
+this other one's method because the gradient management problem.
+
+29:16.600 --> 29:22.240
+So previously, those hours, times and hours, we're having this technique called gradient
+
+29:22.240 --> 29:28.920
+clipping after doing the summing up the gradient for all the node to prevent from gradient
+
+29:28.920 --> 29:29.920
+explosion.
+
+29:29.920 --> 29:35.280
+As soon as the RSTM has backed propagation through time, it's very easy to suffer from
+
+29:35.280 --> 29:38.920
+either gradient management or gradient explosion.
+
+29:38.920 --> 29:41.360
+And now we are doing the clipping.
+
+29:41.360 --> 29:50.240
+So the denominator will be the square root of the summation of the sum of the sparsely
+
+29:50.240 --> 29:52.640
+lottery from all the node.
+
+29:52.640 --> 29:59.280
+So we found we need to exchange the sequence of sparselyplication and gradient clipping.
+
+29:59.280 --> 30:05.600
+We need to move the clip, so previously, do the pruning first, sparselycation first,
+
+30:05.600 --> 30:09.040
+and then do the summation and then do the clipping.
+
+30:09.040 --> 30:15.040
+Now what we need to do is do the sparselyplication and do local gradient clipping and then sum
+
+30:15.040 --> 30:23.280
+it up, so we exchange the sequence from between clipping and summation.
+
+30:23.280 --> 30:32.040
+And in this way, each gradient, even before they get summed up, they are clipped to the
+
+30:32.040 --> 30:33.120
+max value.
+
+30:33.120 --> 30:40.600
+So it's very unlikely to suffer from local gradient explosion problem.
+
+30:40.600 --> 30:47.880
+And with this technique, the RSTM for speech recognition finally converged, and the accuracy
+
+30:47.880 --> 30:52.400
+loss becomes 2% compared with previous, it is 3%.
+
+30:52.400 --> 30:58.440
+Did you then go back and apply that method to the computer vision problem?
+
+30:58.440 --> 31:05.600
+Yes, computer vision problem now, the, so for computer vision problem, it's a greeting
+
+31:05.600 --> 31:08.840
+explosion is a particular problem for RSTM.
+
+31:08.840 --> 31:09.840
+Right.
+
+31:09.840 --> 31:15.800
+It's not a problem, not usually a problem for used in computer vision tasks, convolution
+
+31:15.800 --> 31:17.480
+neural nets.
+
+31:17.480 --> 31:25.200
+And convolution neural nets already, it has very close accuracy, only 0.36% loss of accuracy.
+
+31:25.200 --> 31:27.400
+So that's not a problem.
+
+31:27.400 --> 31:28.400
+Right.
+
+31:28.400 --> 31:34.480
+I was thinking of it more from the perspective of, you know, are you moving towards a single
+
+31:34.480 --> 31:41.120
+approach that you can apply to, you know, both of these types of problems, or are you,
+
+31:41.120 --> 31:45.880
+you know, do you fork it, do you determine which problem and then you apply what we previously
+
+31:45.880 --> 31:52.680
+talked about for computer vision, and then you make some tweaks for the LSTM, RNN type
+
+31:52.680 --> 31:53.680
+of example.
+
+31:53.680 --> 32:01.440
+I would say it's a very general, seems, um, for seniors, they're not much balanced in
+
+32:01.440 --> 32:07.080
+resource, for example, there's greeting clipping is not needed for convolution neural
+
+32:07.080 --> 32:15.160
+nets, but this is really the inherent, inherently, the, um, the way we deal with RSTM, people
+
+32:15.160 --> 32:20.920
+usually have used this greeting clipping, then for greeting compression, we also need
+
+32:20.920 --> 32:24.640
+to apply, um, corresponding techniques.
+
+32:24.640 --> 32:25.640
+Okay.
+
+32:25.640 --> 32:29.120
+So it's not the new, um, trouble people have to deal with.
+
+32:29.120 --> 32:35.120
+It's all the trouble of people have to deal with the greeting explosion problem for RSTM,
+
+32:35.120 --> 32:39.080
+and then during greeting compression, we also have to take care of that part and I have
+
+32:39.080 --> 32:40.080
+a problem.
+
+32:40.080 --> 32:44.440
+So just to speak to the way you handle that problem previously.
+
+32:44.440 --> 32:45.440
+Exactly.
+
+32:45.440 --> 32:46.440
+Okay.
+
+32:46.440 --> 32:47.440
+Yeah.
+
+32:47.440 --> 32:54.440
+So we are very close to success only 0.36 loss of accuracy on the revision and 2.16 loss
+
+32:54.440 --> 32:58.600
+of accuracy on speech recognition, now we solve this problem.
+
+32:58.600 --> 33:04.800
+So we found, uh, as we mentioned, those, um, accumulating the velocity, it will take a
+
+33:04.800 --> 33:10.520
+long time, say 10 iterations, 20 iterations, even 100 iterations.
+
+33:10.520 --> 33:16.480
+So we did this profiling of exactly how many iterations are those accumulations and
+
+33:16.480 --> 33:17.480
+happens.
+
+33:17.480 --> 33:20.280
+And we found it's a really, it has a really long tail.
+
+33:20.280 --> 33:27.480
+Some of the velocity gets accumulated and broadcasted after a 2,000, 2,000 iterations.
+
+33:27.480 --> 33:32.720
+So you are 2,000 previous previously 2,000 iterations ahead of time.
+
+33:32.720 --> 33:36.240
+Now you apply this gradient, which is so obsolete.
+
+33:36.240 --> 33:43.560
+Then we found it's very necessary to cut or to throw away, to mask away these kind of
+
+33:43.560 --> 33:46.720
+obviously lead velocity terms.
+
+33:46.720 --> 33:51.760
+Just like a student, if he didn't turn in his homework for one week, then it's probably
+
+33:51.760 --> 33:52.760
+fine.
+
+33:52.760 --> 33:57.280
+But if he didn't turn out turning the homework for a whole semester, then just just fail
+
+33:57.280 --> 33:58.280
+him.
+
+33:58.280 --> 34:03.680
+Rather than continue giving him the challenge and interpreting, uh, and disturbing other,
+
+34:03.680 --> 34:06.920
+his estimate, for example.
+
+34:06.920 --> 34:14.200
+So by this momentum factor masking, we, uh, moved the loss of accuracy from 0.3% to
+
+34:14.200 --> 34:20.600
+0.1% in vision, and for speech recognition, it's from 2% to 0.5%.
+
+34:20.600 --> 34:25.040
+How do you do that in practice, you know, you're, uh, I guess the way I'm interpreting
+
+34:25.040 --> 34:31.800
+this is you've got this, uh, you're trying to get rid of contributions in a current
+
+34:31.800 --> 34:39.320
+time step from a momentum, a velocity vector, you know, that's too old.
+
+34:39.320 --> 34:43.680
+But you're, as I understand it, you're not really keeping around that much state.
+
+34:43.680 --> 34:46.080
+It's just kind of continual accumulation.
+
+34:46.080 --> 34:51.280
+How do you identify and get rid of the, the older velocity vectors?
+
+34:51.280 --> 34:54.960
+Uh, so the question is, how do we keep track?
+
+34:54.960 --> 35:01.520
+How long they still haven't turned in his homework and, and how old, uh, this, uh, how old
+
+35:01.520 --> 35:08.120
+it is, this stillness becomes, right, right, right, um, I forgot the detailed implementation
+
+35:08.120 --> 35:10.160
+about, about the tracking.
+
+35:10.160 --> 35:16.840
+Maybe we can turn it, uh, turn to the paper to, to see our details trying to, um, uh, keep
+
+35:16.840 --> 35:19.440
+track of how, how, how, how still it is.
+
+35:19.440 --> 35:20.440
+Yeah.
+
+35:20.440 --> 35:21.440
+Okay.
+
+35:21.440 --> 35:27.560
+To turn into the paper for that detail, but it, it sounds like then you, you are introducing
+
+35:27.560 --> 35:31.360
+some new kind of bookkeeping scheme to keep track of this.
+
+35:31.360 --> 35:37.480
+It's not something that, that falls out of the, the prior implementation very easily.
+
+35:37.480 --> 35:40.480
+Probably need some counterlocally to count that.
+
+35:40.480 --> 35:41.480
+Okay.
+
+35:41.480 --> 35:47.200
+And so the impression that I'm getting with this method is that, you know, it requires
+
+35:47.200 --> 35:54.240
+a lot of manual kind of massaging of the way that you might otherwise implement, uh, your
+
+35:54.240 --> 35:55.440
+training.
+
+35:55.440 --> 36:02.840
+Is that the case or, you know, is it possible to, uh, for example, to generically re-implement
+
+36:02.840 --> 36:07.120
+some libraries and like a tensor flow or something like that that would, uh, automatically
+
+36:07.120 --> 36:08.640
+do this for you?
+
+36:08.640 --> 36:13.800
+Oh, let me close up the last technique and then we talk about back question.
+
+36:13.800 --> 36:15.200
+I think that's a good question.
+
+36:15.200 --> 36:21.400
+Yeah, so we want to close the last small gap of 0.1% loss of accuracy.
+
+36:21.400 --> 36:25.360
+And we found that the technique to deal with that is by warm up training.
+
+36:25.360 --> 36:34.160
+So in the first 1% of the training, we don't use 99.9% of sparsity, but we use, um, uh,
+
+36:34.160 --> 36:41.680
+but we, but we use 75 and then 1995 and then exponentially increased sparsity in the
+
+36:41.680 --> 36:48.800
+first couple of epochs until it enriches 99.9% and then in this way, we can, we saw
+
+36:48.800 --> 36:57.160
+accuracy actually improved by 0.4% on image classification and then improved by 0.4% on
+
+36:57.160 --> 36:58.160
+speech recognition.
+
+36:58.160 --> 37:03.120
+So that's called as the whole story that we can fully recover the accuracy.
+
+37:03.120 --> 37:04.120
+Sorry.
+
+37:04.120 --> 37:05.840
+What was on the computer vision?
+
+37:05.840 --> 37:06.840
+What, where did you end up?
+
+37:06.840 --> 37:10.360
+I thought we were at 0.36 before previously.
+
+37:10.360 --> 37:16.160
+We were losing 0.36, okay, point accuracy.
+
+37:16.160 --> 37:18.760
+Now we are better.
+
+37:18.760 --> 37:25.360
+We are having a better accuracy by 0.37% on the baseline, okay, yeah, even better than
+
+37:25.360 --> 37:26.360
+the baseline.
+
+37:26.360 --> 37:29.920
+And see more of us speech recognition, even better than the baseline.
+
+37:29.920 --> 37:36.800
+Is this advantage of warm up training independent of the total number of training iterations?
+
+37:36.800 --> 37:46.360
+In other words, intuitively for me, uh, I get that the, that kind of backing off over time,
+
+37:46.360 --> 37:52.560
+the amount of information you're, you know, throwing away, so to speak, would accelerate
+
+37:52.560 --> 37:58.000
+training, um, but part of me thinks that, you know, if you let training go on long enough,
+
+37:58.000 --> 38:02.640
+you'd eventually make that up, uh, and then wouldn't be this big difference, you know,
+
+38:02.640 --> 38:04.480
+offered by warm up training.
+
+38:04.480 --> 38:07.960
+Uh, that's not completely, uh, what I meant.
+
+38:07.960 --> 38:12.840
+So warm up training, first of all, we are using the same amount of training iterations,
+
+38:12.840 --> 38:14.360
+same amount of training iterations.
+
+38:14.360 --> 38:19.880
+Warm up training is just saying for the first 1% of the training epochs, first 1% of
+
+38:19.880 --> 38:25.400
+the training epoch, we have a less sparsely enough in that part, but still we are having
+
+38:25.400 --> 38:30.080
+the same amount of iterations, we're not increasing the number of epochs.
+
+38:30.080 --> 38:38.120
+I understand, I guess the, the question was, if you could achieve the same level of accuracy
+
+38:38.120 --> 38:42.920
+with more training iterations as opposed to using warm up training.
+
+38:42.920 --> 38:48.720
+In other words, my intuition at least is that the warm up training would, you know, accelerate
+
+38:48.720 --> 38:53.920
+convergence, but not necessarily get you better accuracy, it just makes it take the
+
+38:53.920 --> 38:56.840
+last time because you're starting with more data.
+
+38:56.840 --> 39:03.640
+Uh, the reason we use warm up is due to the first couple of epochs, we need to allow those
+
+39:03.640 --> 39:08.080
+drastic changes of the gradient, which is everything has, has a lot of noise, which would
+
+39:08.080 --> 39:09.320
+encourage those noise.
+
+39:09.320 --> 39:10.320
+Right.
+
+39:10.320 --> 39:13.520
+Uh, but in the end, it's getting more and more stable.
+
+39:13.520 --> 39:16.320
+Um, we don't need those kind of noise.
+
+39:16.320 --> 39:21.520
+And manipulate just increasing the number of training epochs, it just begins to fluctuate
+
+39:21.520 --> 39:26.360
+of the accuracy begins to fluctuate in the later epochs, not necessarily increasing
+
+39:26.360 --> 39:27.360
+the accuracy.
+
+39:27.360 --> 39:28.360
+Okay.
+
+39:28.360 --> 39:29.360
+Interesting.
+
+39:29.360 --> 39:35.360
+So that's why we need to meet in the first couple epochs to allow a dramatic disturbance
+
+39:35.360 --> 39:37.360
+of the weight of the gradient.
+
+39:37.360 --> 39:38.360
+Okay.
+
+39:38.360 --> 39:42.400
+So presumably you're starting with some kind of randomized weights.
+
+39:42.400 --> 39:46.840
+Uh, so this is a way to kind of flush out those randomized weights a lot more quickly
+
+39:46.840 --> 39:47.840
+in a sense.
+
+39:47.840 --> 39:48.840
+Right.
+
+39:48.840 --> 39:49.840
+Exactly.
+
+39:49.840 --> 39:50.840
+Okay.
+
+39:50.840 --> 39:51.840
+Yeah.
+
+39:51.840 --> 39:54.360
+And then so now we have covered everything.
+
+39:54.360 --> 39:59.360
+We can go back to your previous question about, uh, how about a knob, so we need to tune
+
+39:59.360 --> 40:04.920
+and require lots of tuning on, not lots of knob tuning.
+
+40:04.920 --> 40:12.040
+So all the techniques we discovered these, uh, different techniques are due to original
+
+40:12.040 --> 40:18.880
+method requires such, um, for example, uh, momentum, SGD, you, you have another term
+
+40:18.880 --> 40:21.840
+of momentum, then we have a recipe to deal with that.
+
+40:21.840 --> 40:26.600
+If you don't have a momentum, then just, uh, just accumulate the gradient.
+
+40:26.600 --> 40:29.320
+Now we accumulate the velocity.
+
+40:29.320 --> 40:34.280
+And then recurrent neural nets has this local gradient clipping, which is now due to,
+
+40:34.280 --> 40:40.200
+due to us, but every people just use gradient and clipping for recurrent neural nets.
+
+40:40.200 --> 40:49.320
+So correspondingly, we, uh, find our counterpart to deal to, um, to make it compatible with
+
+40:49.320 --> 40:50.320
+gradient clipping.
+
+40:50.320 --> 40:52.720
+Then that's another technique.
+
+40:52.720 --> 40:58.360
+And then for warm up, similar, that's a common sense, uh, that during the first couple
+
+40:58.360 --> 41:06.960
+of iterations, either you use large batch training, you all need to allow a certain, um, warm
+
+41:06.960 --> 41:09.160
+up of the gradient.
+
+41:09.160 --> 41:14.640
+So we find just 1% of the training epoch works pretty well for different tasks.
+
+41:14.640 --> 41:18.280
+So no, don't need to tune the warm up period.
+
+41:18.280 --> 41:23.720
+Just give it 1% of the time, make it have a exponentially growth of the viscosity until
+
+41:23.720 --> 41:29.440
+99.99%, that works, uh, that works pretty well.
+
+41:29.440 --> 41:36.040
+So all these knobs and tricks are based on the original, uh, requirements of, uh, original
+
+41:36.040 --> 41:38.960
+different techniques requirement.
+
+41:38.960 --> 41:44.560
+The networks that you used for this, did you, um, presumably you kind of handcrafted
+
+41:44.560 --> 41:52.000
+these, you know, these tricks required for distributed use, uh, do you envision or plan
+
+41:52.000 --> 41:56.640
+to create standard implementations of this, or have you already done that?
+
+41:56.640 --> 42:01.840
+Oh, suddenly a place along me to suddenly jump to your previous question.
+
+42:01.840 --> 42:07.120
+I suddenly remembered how I implemented the graded mask, remember you mentioned, do we
+
+42:07.120 --> 42:10.040
+have to go to the keep, keeping, right?
+
+42:10.040 --> 42:18.840
+So no, we periodically, periodically clean up, clean up all the other, uh, gradient local,
+
+42:18.840 --> 42:20.680
+local velocities.
+
+42:20.680 --> 42:25.480
+So no matter who delayed by how many iterations, just clear up everything.
+
+42:25.480 --> 42:26.480
+Oh, okay.
+
+42:26.480 --> 42:29.600
+Just like, yeah, that means there's no bookkeeping required.
+
+42:29.600 --> 42:33.360
+Just like every, every year we have two semesters, right?
+
+42:33.360 --> 42:37.320
+One is in winter, one is in summer, and if you don't turn your homework by summer, then
+
+42:37.320 --> 42:38.320
+you fail.
+
+42:38.320 --> 42:40.320
+Yeah.
+
+42:40.320 --> 42:41.320
+Yeah.
+
+42:41.320 --> 42:47.520
+Any of your, uh, any of your future, any of your future MIT students might be getting
+
+42:47.520 --> 42:51.960
+a little scared listening to this podcast and how often you're talking about failing
+
+42:51.960 --> 42:52.960
+them.
+
+42:52.960 --> 43:00.760
+No, no, just an example, hopefully to help, uh, I usually use this kind of plan and analogy,
+
+43:00.760 --> 43:06.440
+but, uh, uh, I'm really pretty nice to students, actually, because the students are doing this
+
+43:06.440 --> 43:12.640
+work, we'll, uh, I made them an offer to MIT, uh, this, um, the collaborator, we worked
+
+43:12.640 --> 43:13.640
+on this project.
+
+43:13.640 --> 43:17.880
+His name is Yijun Lin, um, and then we're at it from Chinhua University, we worked together
+
+43:17.880 --> 43:24.800
+last summer, and, uh, I, uh, made him an offer to MIT, and also got him a fellowship.
+
+43:24.800 --> 43:26.880
+I'm really pretty nice to students.
+
+43:26.880 --> 43:27.880
+Awesome.
+
+43:27.880 --> 43:28.880
+Awesome.
+
+43:28.880 --> 43:29.880
+Yeah.
+
+43:29.880 --> 43:30.880
+Great.
+
+43:30.880 --> 43:36.400
+So I think we're coming up, uh, to the end of our time, is there any other element
+
+43:36.400 --> 43:39.240
+to this that you'd like to, to talk about?
+
+43:39.240 --> 43:40.240
+Yep.
+
+43:40.240 --> 43:45.240
+Um, yeah, just now you were mentioning whether to bring up it to a standard, uh, implementation.
+
+43:45.240 --> 43:52.280
+I'm really looking forward to collaborate with other researchers or companies, uh, to
+
+43:52.280 --> 43:59.760
+bring it to standardize this framework, say in Amazon EC2, or in Google Cloud, or NVIDIA
+
+43:59.760 --> 44:05.680
+Cloud, that would be something to benefit, to help democratize, uh, deep learning, uh, training
+
+44:05.680 --> 44:07.440
+in, uh, commodity hardware.
+
+44:07.440 --> 44:13.760
+So by, uh, compute, not networking, um, and actually, for example, in, uh, I feel there
+
+44:13.760 --> 44:19.920
+are a few candidates, um, for example, in Harvard, uh, distributed training framework, uh,
+
+44:19.920 --> 44:20.920
+done by Uber.
+
+44:20.920 --> 44:26.480
+That's a very good, uh, thing to start with, and if any students or any, uh, researchers
+
+44:26.480 --> 44:32.800
+are interested in exploring this, um, habit to collaborate, um, to work, uh, work together
+
+44:32.800 --> 44:39.360
+on, on this direction, and in general on this kind of in, in, uh, uh, improving the efficiency
+
+44:39.360 --> 44:44.280
+of large-scale distributed training to make it more, uh, scalable.
+
+44:44.280 --> 44:49.880
+And by the end of this talk, I would like to give a small advertisement of my future lab,
+
+44:49.880 --> 44:50.880
+if you allow.
+
+44:50.880 --> 44:51.880
+Absolutely.
+
+44:51.880 --> 44:52.880
+At MIT.
+
+44:52.880 --> 44:55.760
+So I will be finding the hands-like.
+
+44:55.760 --> 45:00.000
+So hand is my last name, and I also represent my research.
+
+45:00.000 --> 45:04.480
+So H stands for, uh, high performance, high energy efficiency hardware.
+
+45:04.480 --> 45:07.960
+Uh, so lots of hardware research going on in my lab.
+
+45:07.960 --> 45:15.440
+And A stands for, um, architectures and accelerators for, uh, artificial intelligence.
+
+45:15.440 --> 45:20.000
+So architecture means both the computer architecture and the neural network architecture.
+
+45:20.000 --> 45:26.000
+How do we design those smart, compact models that have the same accuracy, um, for neural,
+
+45:26.000 --> 45:28.240
+uh, for deep learning, for example?
+
+45:28.240 --> 45:34.000
+An instant for, uh, noble algorithms for neural networks, um, and deep learning.
+
+45:34.000 --> 45:38.000
+And S stands for, uh, small, machine learning models.
+
+45:38.000 --> 45:39.400
+How do we compress the models?
+
+45:39.400 --> 45:41.160
+How do we compress the gradients?
+
+45:41.160 --> 45:47.280
+Make it less memory footprint, less computation, more efficient, and also scalable systems.
+
+45:47.280 --> 45:52.320
+So how do we make deep learning large-scale training more scalable with the linear speed
+
+45:52.320 --> 45:53.800
+up as to go?
+
+45:53.800 --> 45:59.800
+So that's the vision or that's the mission of Hans Lab at MIT.
+
+45:59.800 --> 46:04.560
+And, um, welcome, hope, hope we can have more, uh, collaborators in the future.
+
+46:04.560 --> 46:05.560
+Yeah.
+
+46:05.560 --> 46:06.560
+Fantastic.
+
+46:06.560 --> 46:10.240
+Well, it sounds like, uh, you've got some really exciting things planned, and I'm looking
+
+46:10.240 --> 46:15.120
+forward to, um, touching base sometime in the future to, to, you know, check in on what
+
+46:15.120 --> 46:16.120
+you've been up to.
+
+46:16.120 --> 46:17.120
+Oh, definitely.
+
+46:17.120 --> 46:19.280
+That'll be, that'll be great.
+
+46:19.280 --> 46:20.280
+Awesome.
+
+46:20.280 --> 46:21.280
+Thanks, Song.
+
+46:21.280 --> 46:22.280
+All right.
+
+46:22.280 --> 46:23.280
+Thank you.
+
+46:23.280 --> 46:29.400
+All right, everyone, that's our show for today.
+
+46:29.400 --> 46:34.720
+For more information on Song or any of the topics covered in this episode, head on over
+
+46:34.720 --> 46:39.720
+to twimlai.com slash talk slash 146.
+
+46:39.720 --> 46:44.640
+If you're a meetup member, keep an eye on your inbox for some updates on all we've got
+
+46:44.640 --> 46:46.880
+going on with that program.
+
+46:46.880 --> 46:53.880
+Thanks so much for listening, and catch you next time.
+

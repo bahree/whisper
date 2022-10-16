@@ -1,0 +1,1448 @@
+WEBVTT
+
+00:00.000 --> 00:10.960
+All right, everyone. Welcome to another episode of the Twomble AI podcast. I'm your host,
+
+00:10.960 --> 00:17.600
+Sam Charrington. And today I'm joined by Bayon Bruce, a senior director of applied ML research
+
+00:17.600 --> 00:22.720
+at Capital One. Bayon, welcome to the podcast. Thanks, Sam. It's great to be here.
+
+00:23.760 --> 00:28.240
+It's great to have you on the show. I'm looking forward to digging into our conversation. We'll be
+
+00:28.240 --> 00:35.440
+talking about some of your work on deep learning for tabular data. Before we get to that subject,
+
+00:35.440 --> 00:40.400
+or to get us to that subject, I'd love to have you share a little bit about your background
+
+00:40.400 --> 00:45.840
+and how you came to work in the field. Sure, happy to. I'm really excited to be here. I love this
+
+00:45.840 --> 00:52.320
+podcast, by the way. I've learned a tremendous amount over the years. So in my current role,
+
+00:52.320 --> 00:57.760
+I lead applied machine learning research at Capital One. Capital One, of course, is a major
+
+00:57.760 --> 01:05.040
+financial institution in the United States and Canada and the UK. And we provide a broad range
+
+01:05.040 --> 01:11.040
+of financial services products to consumers. And within that, we use machine learning for a number
+
+01:11.040 --> 01:17.280
+of our applications in how we provide the services to our customers. And it's really embedded
+
+01:17.280 --> 01:23.520
+across the ecosystem, across the business. And when we stood up several years ago,
+
+01:23.520 --> 01:29.120
+a team of applied machine learning researchers, which I lead, with the goal of looking at the field
+
+01:29.120 --> 01:34.320
+of machine learning. And as we know, and as you've brought on many guests, the field itself is
+
+01:34.320 --> 01:40.400
+advancing quite rapidly. There's a major breakthrough. It feels like every six months.
+
+01:40.400 --> 01:46.000
+And so the idea behind applied research was, okay, what of that realm of all possible advancements?
+
+01:46.000 --> 01:51.680
+Is it all relevant to us as a financial services institution? How do we distill that down into
+
+01:51.680 --> 01:57.920
+something that is useful for the kinds of problems that we try to solve as a company? And then,
+
+01:57.920 --> 02:02.080
+you know, once you've kind of narrowed the focus a little bit, narrowed even further by saying
+
+02:03.360 --> 02:07.120
+which of those techniques, which of those breakthroughs actually work on our data,
+
+02:07.120 --> 02:14.080
+which of them actually work for specific use cases and problems within the within the company.
+
+02:14.080 --> 02:19.760
+And that's a, you know, that's a hard problem because a lot of the data that gets used in
+
+02:19.760 --> 02:23.600
+many of the publications is out there. You know, a lot of the benchmark data is very pristine.
+
+02:24.400 --> 02:30.880
+It's very static. It's used for, you know, time and time again in a variety of different experiments.
+
+02:30.880 --> 02:35.120
+And so it's been picked over by a number of different researchers. When you compare that to the
+
+02:35.120 --> 02:40.720
+kind of data that we use inside the company, it's messy, it's noisy, it's complicated.
+
+02:40.720 --> 02:47.120
+You may only have a few people that have really rolled up their sleeves and worked with it for a
+
+02:47.120 --> 02:52.960
+number of years. And so there's a big gap then between the breakthrough and then what actually
+
+02:52.960 --> 02:58.720
+works when you try it out on the noisy messy data. So our team's goal then is to narrow the
+
+02:58.720 --> 03:03.760
+scope down, figure out what actually works, test it on our use cases, and then take it a step
+
+03:03.760 --> 03:09.760
+further. Can we actually generalize that, build it into some of our production systems and tools
+
+03:09.760 --> 03:15.520
+and platforms and make it available for data scientists across the company to then use it in a
+
+03:15.520 --> 03:21.200
+variety of our use cases. And so the ultimate objective is to shrink the time from when something's
+
+03:21.200 --> 03:26.880
+discovered or some innovation or some breakthroughs made to when it can be used in servicing our
+
+03:26.880 --> 03:32.640
+customers in a unique way. And so that's that's kind of the mandate of my team. I've been with
+
+03:32.640 --> 03:37.600
+Capital One for five years now doing that. Before Capital One, I had a mixture of background in
+
+03:37.600 --> 03:48.800
+academia and startups and consulting. And when we look at the areas that we could be focused on,
+
+03:48.800 --> 03:56.000
+I mean, there's obviously quite a lot of the space of machine learning is fairly massive.
+
+03:57.360 --> 04:04.080
+Just fairly. It's just fairly. I mean, I can hardly read everything. If you spent all your time
+
+04:04.080 --> 04:08.960
+just reading all the papers that were out there, but we try to like organize ourselves thematically
+
+04:08.960 --> 04:13.440
+around topic areas within machine learning. And then that changes over time depending on,
+
+04:13.440 --> 04:17.120
+you know, whether there's something, you know, some new advancement that's really exciting and
+
+04:17.120 --> 04:23.280
+we're like, okay, we need to really focus on this. But they at the moment, what they are for us is
+
+04:25.120 --> 04:31.120
+we have a very strong interest in graph machine learning as a company. As a financial services
+
+04:31.120 --> 04:38.560
+company, we basically work with data that is derived from financial networks. When you swipe a
+
+04:38.560 --> 04:45.440
+credit card, you are establishing an edge between yourself and emergent. And so every time our
+
+04:45.440 --> 04:51.680
+customers process a payment, they are doing so on a network, a financial network at a, you know,
+
+04:51.680 --> 04:57.920
+national global scale. And so that network then becomes quite useful in a lot of our applications
+
+04:57.920 --> 05:03.120
+if you can have machine learning that can handle the kind of cardinality and sparsity that comes
+
+05:03.120 --> 05:08.720
+with that kind of network. And so we've been working for a number of years on taking a lot of the
+
+05:08.720 --> 05:13.680
+advancements that we've seen in graph convolutional networks and even other more traditional graph
+
+05:13.680 --> 05:19.120
+mining algorithms and applying them to some of our financial services applications. So that's one
+
+05:19.120 --> 05:24.560
+of the topic areas that's kind of been a long time for us and continues to be of high interest.
+
+05:24.560 --> 05:31.200
+Another one is explainability and interpretability. As a, you know,
+
+05:31.760 --> 05:38.800
+highly regulated financial institution, we have a very high bar for understanding the soundness of
+
+05:38.800 --> 05:46.240
+our models, understanding the way that our models are making decisions. And so as we use more
+
+05:46.240 --> 05:52.800
+machine learning across the company, we've thought it very important to invest in figuring out
+
+05:52.800 --> 05:58.240
+of all the advancements in model explainability and interpretability, which ones can be most useful
+
+05:58.240 --> 06:04.080
+in helping us manage our risks and manage the way we deploy models as a company better.
+
+06:06.240 --> 06:15.440
+A third one is anomaly detection. So, you know, financial services, we are kind of under attack
+
+06:15.440 --> 06:22.400
+from fraudsters on a daily basis. Those attacks are extremely creative. We have a lot of
+
+06:22.400 --> 06:26.720
+different ways of defending against those attacks. Some of those include supervised machine learning
+
+06:26.720 --> 06:31.600
+where we've built these massive models that look at all of our credit card transaction data and
+
+06:31.600 --> 06:36.560
+and can predict with fairly high accuracy whether a given transaction is fraudulent or not.
+
+06:37.200 --> 06:42.080
+Sometimes they're, they're rule-based systems, a combination of, of both of these and in
+
+06:42.080 --> 06:48.160
+heuristics. But in addition to that, you know, we realize that there's a broad range of
+
+06:48.160 --> 06:53.440
+anomaly detection algorithms and advancements, particularly as you start to look at how do you
+
+06:53.440 --> 06:58.960
+scale anomaly detection to the kinds of scale that we're working with that would allow us to
+
+06:58.960 --> 07:05.840
+capture emerging trends of fraudulent behavior or other kinds of nefarious behavior that might be
+
+07:05.840 --> 07:10.880
+escaping what a supervised model has seen in the past, right? Your supervised models can only
+
+07:10.880 --> 07:15.600
+generalize based on what they know. And if it's a new attack pattern, you have to have something that
+
+07:15.600 --> 07:21.040
+is not conditioned on that distribution in order to to capture it and respond to it effectively.
+
+07:21.040 --> 07:26.880
+And so that's where we see the promise in anomaly detection. And then the final area that we're
+
+07:26.880 --> 07:35.760
+actively focused on kind of internally focused is around privacy. We've worked for a number of years
+
+07:35.760 --> 07:43.200
+in how do you generate synthetic data so that you can provide people with an understanding of the
+
+07:43.200 --> 07:46.960
+the data that might be in production without actually giving them access to that data.
+
+07:48.960 --> 07:54.320
+We have more recently started to explore federated learning as a domain where we could potentially
+
+07:54.320 --> 08:02.640
+train models at the edge. Now, beyond those four areas, which kind of are very like pressing
+
+08:02.640 --> 08:08.160
+and we're focused on at the moment, there's also some areas that we're looking out into the future
+
+08:08.160 --> 08:13.600
+and saying, okay, this could be a potential game changer. And oftentimes when we're looking at
+
+08:13.600 --> 08:21.520
+those areas, we partner with major academic institutions to help us flesh out the ideas,
+
+08:21.520 --> 08:29.120
+help do some of the more experimental research, publish papers, engage with the community.
+
+08:29.120 --> 08:34.480
+It has a couple of really nice benefits. One is that if it's an area that's under-explored
+
+08:34.480 --> 08:39.360
+in the research community by funding it and getting a community of researchers, it kind of has
+
+08:39.360 --> 08:44.000
+these like cascading effects where more researchers say, oh, that's actually an interesting topic.
+
+08:44.000 --> 08:48.640
+Let's do some more research. And then you fund one thing and three more papers come out of
+
+08:48.640 --> 08:53.360
+from others on the topic because it's become something of interest to the community. And so
+
+08:54.320 --> 09:00.800
+within that realm, and what we were going to talk about today is this domain of deep learning
+
+09:00.800 --> 09:05.680
+for tabular data. Tabular data, you know, as we look to our use cases as a financial services
+
+09:05.680 --> 09:11.840
+company, you know, many of our data problems are formulated within this realm of tabular data.
+
+09:11.840 --> 09:17.920
+So, you know, and for those who don't know, tabular data is essentially structured data as
+
+09:17.920 --> 09:23.840
+another term for it. It's a data that comes in a table as opposed to an image which, you know,
+
+09:23.840 --> 09:29.680
+you have a grid or text where you have a sequence. Tabular data is, you can think of it as this
+
+09:29.680 --> 09:36.080
+mixed type data set where you have some numerical features, some categorical features,
+
+09:36.960 --> 09:46.080
+some discrete integers. And usually they're like compiled from a variety of source systems into a
+
+09:46.080 --> 09:50.720
+single snapshot of the population you're trying to build a model on top of. And then you,
+
+09:51.360 --> 09:55.520
+and then you build and train a machine learning model to make some kind of prediction.
+
+09:55.520 --> 10:00.880
+You mentioned earlier kind of this flood of innovation that's been happening in the field.
+
+10:02.080 --> 10:06.080
+A lot of the flashiest innovations in machine learning have been focused on
+
+10:07.120 --> 10:12.160
+images and NLP to name a couple of examples of graphs as well.
+
+10:14.080 --> 10:20.720
+There's been a bit of work on tabular data, but it doesn't seem like nearly as much,
+
+10:20.720 --> 10:28.480
+especially considering its prevalence in the broader industry, right? Banks run on tabular data,
+
+10:28.480 --> 10:33.680
+most businesses run on tabular data. Any takes on why that is?
+
+10:33.680 --> 10:38.080
+I think there's a couple of reasons. And it really boils down to the quality of the baselines.
+
+10:38.080 --> 10:42.960
+I think if you look back two decades ago, the quality of the baselines in language,
+
+10:43.600 --> 10:47.520
+and then not to disparage the language researchers from 20 years ago, like they just weren't
+
+10:47.520 --> 10:58.080
+that great or computer vision. The room for growth was humongous. And so then when you're
+
+10:58.080 --> 11:03.760
+starting at a very low performing model, and you can see every year exponential improvement,
+
+11:03.760 --> 11:07.920
+well, that gets everybody excited and more research and funding goes towards that.
+
+11:08.720 --> 11:15.840
+Whereas if we look at the evolution of machine learning for tabular data, you start with
+
+11:15.840 --> 11:23.200
+very simple linear and logistic models, and then you kind of advance into your support vector
+
+11:23.200 --> 11:29.280
+machines. And then you see these non-parametric tree-based models and ensembles of tree-based
+
+11:29.280 --> 11:38.240
+models like random forests and gradient booster machines. Those have, they do really well.
+
+11:38.240 --> 11:42.640
+And it's hard to beat them. And there's another piece to it, which is that not only do they do well,
+
+11:42.640 --> 11:48.240
+they do well on a wide variety of problems. And the tooling ecosystem that's been built around them,
+
+11:48.240 --> 11:55.040
+tools like XG Boost, and the whole ecosystem of Python for data science has really exploded
+
+11:55.040 --> 12:01.600
+in the last decade. Make it really, really easy to use those techniques. And so there's not a whole
+
+12:01.600 --> 12:11.280
+lot of incentive to ask, well, what's outside of that paradigm? And I think there's a third factor
+
+12:11.280 --> 12:16.880
+in it. And that's primarily that like a lot of the big public benchmark data sets are in computer
+
+12:16.880 --> 12:25.040
+vision and in NLP. There hasn't historically existed kind of these big challenge type data sets
+
+12:25.040 --> 12:32.400
+for tabular data, where you can see that benchmark improvement year over year at, you know,
+
+12:32.400 --> 12:37.200
+some of the big conferences like CVPR. It's the other piece that's missing, I think, from the field.
+
+12:37.200 --> 12:42.240
+I think the biggest one is the fact that they just, they're really good models. But what you've seen
+
+12:42.240 --> 12:48.000
+as a result of that, as you said, like all of this research has focused on computer vision NLP
+
+12:48.000 --> 12:55.360
+and more recently graphs, leaving a huge application space of tabular models outside of the main line
+
+12:55.360 --> 13:00.240
+of machine learning research. Still a ton of research that happens in the statistical literature,
+
+13:00.240 --> 13:07.280
+but the kind of the stuff you see at ICLR and NUREPs and ICML hasn't primarily focused on tabular
+
+13:07.280 --> 13:11.920
+data for the last few years with some research here and there. But a couple of things that are
+
+13:11.920 --> 13:18.240
+interesting. One is that we haven't fully explored how the advances that we see in computer vision
+
+13:18.240 --> 13:24.160
+and NLP apply to tabular data. I think historically we would have said, oh, there's no, there's no
+
+13:24.160 --> 13:28.480
+relationship, right? It's a completely different domain. There's no way to reuse those components.
+
+13:28.480 --> 13:34.080
+That was actually originally said between computer vision and NLP, right? Like, there was this
+
+13:34.080 --> 13:39.840
+page. You couldn't use language models for vision and vice versa. And then more recently,
+
+13:39.840 --> 13:45.200
+we've seen, yeah, exactly. Transformers can be used for everything. You can also, you know,
+
+13:45.200 --> 13:53.200
+certain instances of language can be modeled quite well with, you know, image, image models.
+
+13:53.200 --> 13:59.280
+And so I think the same thing could be said for tabular data. It's just a matter of, you know,
+
+13:59.280 --> 14:04.400
+asking the questions and doing the research and doing the exploration. The other piece that
+
+14:04.400 --> 14:11.280
+is really, really critical is that, you know, all of the research that surrounds
+
+14:13.680 --> 14:19.360
+computer vision and NLP models, primarily around answering questions of how do we make these
+
+14:19.360 --> 14:25.120
+models robust? How do we make these models interpretable and explainable? All of those are often
+
+14:25.120 --> 14:31.600
+predicated on the model itself being a deep learning model, right? Many of these techniques require
+
+14:31.600 --> 14:38.000
+a differentiable model. And so in a lot of cases, we can't take those techniques and then apply them
+
+14:38.000 --> 14:45.680
+to your XGBoost model. You've created this bifurcation in what is possible if you use a neural network
+
+14:45.680 --> 14:53.280
+and what is possible if you don't. And by maybe closing that gap and asking, can we do the
+
+14:53.280 --> 14:58.480
+tabular data in the same paradigm as we're using for computer vision and NLP? Can we then take all
+
+14:58.480 --> 15:04.240
+of that, you know, support that's been built around those deep learning models in computer vision
+
+15:04.240 --> 15:10.640
+and NLP and use them for our tabular data? And so that's one of the exciting things about bridging
+
+15:10.640 --> 15:19.440
+the gap between the two fields. I think, like, candidly, because the baselines are so strong in
+
+15:21.120 --> 15:28.800
+for methods like graded boosted trees and random forests, it's that ecosystem of functionality
+
+15:29.520 --> 15:35.280
+that makes it compelling more than, you know, incremental improvements, marginal gains in the
+
+15:35.280 --> 15:41.120
+in the overall performance. I mean, everybody gets excited when you have a table where you're
+
+15:41.120 --> 15:45.840
+you're performing the best on all the data sets you're testing on. But you know, from a practitioner's
+
+15:45.840 --> 15:52.800
+perspective, it's much more exciting to be able to use, you know, the broad suite of capabilities
+
+15:52.800 --> 15:57.520
+that come with deep learning. I'm curious, are there specific things that come to mind there?
+
+15:57.520 --> 16:08.800
+I generally get the idea of, hey, we've got, you know, this broad set of tooling that, you know,
+
+16:08.800 --> 16:17.360
+has been built up around deep learning. And some of that, some of that I can see, for example,
+
+16:17.920 --> 16:23.600
+you know, hey, you use TensorFlow or PyTorch, you want to use the same tool chain for everything,
+
+16:23.600 --> 16:28.800
+just for efficiencies and, you know, learning curves, all that kind of stuff. But some of the other
+
+16:28.800 --> 16:33.440
+things that I'm not sure if you specifically mentioned, like some of the explainability methods
+
+16:33.440 --> 16:41.760
+that are based around deep learning do, kind of strike a little bit of, you know, hey, we've got
+
+16:41.760 --> 16:46.240
+these tools to solve these problems that were created by the methods that we're using to solve
+
+16:46.240 --> 16:52.160
+problems that, you know, we can solve otherwise with better performance that don't have the same
+
+16:52.160 --> 16:59.440
+opacity. Yeah, that's a good point. Many of these tools were developed to, as you say,
+
+17:00.640 --> 17:08.400
+solve some of the problems that come with deep learning. However, many of the models that you will
+
+17:08.400 --> 17:18.240
+find used in large industrial systems will be equally opaque. You know, there's, it's just as hard
+
+17:18.240 --> 17:25.920
+to interpret or understand a tree-based model that has, you know, 10 splits per tree and that
+
+17:25.920 --> 17:34.160
+has several thousand trees and that has several thousand features that's being used. It's
+
+17:34.160 --> 17:40.320
+equally hard to explain a single decision of that type of model as it is to explain a neural network.
+
+17:40.320 --> 17:47.840
+It's no less complex a model. It's not capturing any fewer interactions. It's just modeling the
+
+17:47.840 --> 17:52.640
+data in a different way. And so I think we're seeing a growth and complexity of machine learning
+
+17:52.640 --> 17:59.680
+models, regardless of what you're using, whether it's a deep learning model or a tree-based model,
+
+17:59.680 --> 18:06.080
+but I think what we're seeing is that for deep learning, there's just been this huge investment
+
+18:06.080 --> 18:12.240
+in trying to understand how they work because I think maybe partially because they've been so
+
+18:12.240 --> 18:15.760
+effective and people want to know why. They want to know what they're learning. You know, as we
+
+18:15.760 --> 18:23.760
+start to make claims about intelligence, people want to pinpoint factors in the decisioning of
+
+18:23.760 --> 18:29.600
+these systems. And so that spurred all of this research. It's available. It just doesn't work for
+
+18:29.600 --> 18:37.360
+this other tools, for these other tools that we use. But I think that it's really, really,
+
+18:39.840 --> 18:43.600
+I mean, it's important not to just say like, oh, because it's good for deep learning, it'll work
+
+18:43.600 --> 18:50.480
+for these other systems, but there are certain problems that we've been able to see the methods
+
+18:50.480 --> 18:58.000
+that were developed for deep learning to be very, very powerful for tabular data. If, particularly
+
+18:58.000 --> 19:03.120
+in the realm of explainability, and I'll give you an example, there's a subdomain of model
+
+19:03.120 --> 19:07.600
+explanations, local explanations called counterfactual explanations. I don't know if you're familiar
+
+19:07.600 --> 19:14.160
+with counterfactual explanations. Sure, counterfactual explanation essentially is asking the question for
+
+19:14.160 --> 19:19.600
+a given input to a model. What would have had to have been different about this input in order for
+
+19:19.600 --> 19:25.360
+the model to have made a different prediction? And so you think about a binary classification task,
+
+19:26.800 --> 19:32.640
+like whether or not a credit card transaction is fraudulent. Well, we can say, okay,
+
+19:32.640 --> 19:36.560
+given that this transaction was classified fraudulent by this model, what would have had been
+
+19:36.560 --> 19:41.040
+different about that transaction for this model to not have thought that would have fraudulent.
+
+19:41.040 --> 19:46.880
+So what feature changes would you need? And those feature changes, the difference between
+
+19:47.520 --> 19:52.160
+the actual features and what would have had to have been different becomes the explanation
+
+19:52.160 --> 19:58.000
+of why that model made a decision. And there's a lot of different ways you can do this, and there's been,
+
+19:58.000 --> 20:05.360
+you know, many, many papers on the different techniques to do this. A very, very simple way to do
+
+20:05.360 --> 20:11.920
+this is to take the inputs to your model and project them into a lower dimensional space.
+
+20:12.960 --> 20:18.080
+And then search within that lower dimensional space, which is now a continuous space, right?
+
+20:18.080 --> 20:26.800
+This is the standard way that a neural network works. The shortest path to another data point
+
+20:27.440 --> 20:33.760
+where the prediction is different. And then come back out from that lower dimensional space
+
+20:33.760 --> 20:45.040
+using like a decoder to original feature space. And now you have input to a model in the original
+
+20:45.040 --> 20:50.480
+feature space that if you had used the original model to predict it would have resulted in a
+
+20:50.480 --> 20:54.720
+different classification. Now, in order to do that, you need a, you need a differentiable model.
+
+20:54.720 --> 20:58.480
+You need to have the ability to train a model such that it can project into that lower dimensional
+
+20:58.480 --> 21:07.280
+space and use the, use the gradients with respect to the model prediction in order to do that.
+
+21:08.000 --> 21:12.080
+There are other ways to solve that problem. There are ways that don't require you to
+
+21:13.200 --> 21:19.280
+use the differentiable model in order to come up with the counterfactual. But that's a very simple
+
+21:19.280 --> 21:23.520
+and very efficient way to do it. And if you had a deep learning model, you'd be able to do that.
+
+21:23.520 --> 21:28.000
+So that's an example where there are solutions out there. You don't have to use deep learning,
+
+21:28.000 --> 21:38.800
+but a lot of the paradigm makes it a lot simpler once you adopt it.
+
+21:58.960 --> 22:10.160
+I do. I do. I think that's one of the really exciting things is this
+
+22:12.080 --> 22:18.400
+deep learning is compositional, right? You can take pieces of deep learning systems and build
+
+22:18.400 --> 22:24.400
+them together and then train them in an end to end fashion. Multimodality allows us to do that
+
+22:24.400 --> 22:30.800
+in ways that we would never be able to do or we would have to do in very, very complex ways
+
+22:30.800 --> 22:37.840
+historically. A good example of that would be within the domain of graph machine learning.
+
+22:37.840 --> 22:42.720
+So we have these complex financial networks. We want to build models that help us predict
+
+22:42.720 --> 22:52.560
+individual entities, status within that network. Those individual nodes will often have a lot
+
+22:52.560 --> 22:57.520
+of tabular data associated with them in addition to the edges that connect them on the graph.
+
+22:57.520 --> 23:03.520
+And so knowing what the right way to encode that tabular data is and how to build that into
+
+23:04.560 --> 23:09.200
+broader, differentiable model, a deep learning model on the entirety of the graph,
+
+23:09.200 --> 23:15.360
+it becomes really, really powerful. And I think the things that are most exciting that we're all
+
+23:15.360 --> 23:22.800
+getting very excited about things like Dolly and stable diffusion are situations where people
+
+23:22.800 --> 23:30.720
+have figured out how do we fuse together different domains of data in ways that allow us to
+
+23:30.720 --> 23:35.680
+interact with that data in entirely new ways. And quite frankly, I'm not entirely certain.
+
+23:35.680 --> 23:40.320
+All the different ways we're going to be able to use multi-modality within financial services,
+
+23:40.320 --> 23:45.600
+but I think once we've proven how you can do it, we're going to see a lot of really exciting
+
+24:10.320 --> 24:15.600
+ways to do it.
+
+24:24.640 --> 24:28.000
+Yeah.
+
+24:28.000 --> 24:34.480
+I think fundamentally the data is different. The data tends to come
+
+24:34.480 --> 24:43.360
+from the process that generates the data is usually not actually a single process.
+
+24:43.360 --> 24:48.560
+Oftentimes, in tabular domains, it's multiple processes. You might be looking at
+
+24:49.920 --> 25:00.720
+some combination of customers' payment history along with information about where they spend
+
+25:00.720 --> 25:05.120
+their money. And so those are two completely different systems. They're not actually fundamentally
+
+25:05.120 --> 25:11.200
+related in any other way other than their with regards to a specific customer. You take those
+
+25:11.200 --> 25:16.080
+data sets, you engineer the features, you combine them together, and now you have a tabular data set.
+
+25:16.080 --> 25:23.840
+Unlike an image where you have this continuous distribution, at least within a specific domain,
+
+25:23.840 --> 25:31.600
+all the images come from the same distribution. They are fairly well structured in the fact that
+
+25:31.600 --> 25:39.280
+there's strong local correlations within an image. Nearby pixels are very highly likely to be
+
+25:39.280 --> 25:44.880
+similar to the one next to them. Columns in a data set have no inherent structure to them.
+
+25:45.680 --> 25:52.400
+There's nothing other than the peculiarities of the data scientists who put that column
+
+25:52.400 --> 25:55.440
+next to the other column that determine their proximity to one another.
+
+25:57.600 --> 26:01.440
+A lot of that inherent structure is missing, which is one of the reasons why
+
+26:02.560 --> 26:07.920
+transformers are starting to be the thing that's bridging that gap, because transformers can
+
+26:08.640 --> 26:13.360
+look across the entirety of the data set and determine what context is important. They don't have
+
+26:13.360 --> 26:18.240
+to rely on individual proximities that are hard-coded into the architecture to figure that out.
+
+26:18.240 --> 26:27.680
+That's one is the mixed type and the lack of inherent structure. I think there's been some
+
+26:27.680 --> 26:34.160
+really interesting work. It's primarily been focused on not necessarily
+
+26:35.440 --> 26:41.600
+architecturally how do we handle tabular data, but it's focused on even a level before that,
+
+26:41.600 --> 26:48.720
+which is how do we encode the data in a way that a deep learning model can utilize that
+
+26:48.720 --> 26:56.320
+information more effectively? A number of researchers have started to point out that varying
+
+26:56.320 --> 27:04.480
+encoding schemes have a tremendous impact on the quality of a deep learning model for tabular
+
+27:04.480 --> 27:13.920
+data. These encoding schemes can be anything from simple linear projections. Yeah, exactly,
+
+27:13.920 --> 27:23.360
+exactly, piecewise, linear projections, binning, etc. All of those have a very strong effect.
+
+27:28.720 --> 27:33.200
+I think there's going to be more research just into how do we encode data better.
+
+27:33.200 --> 27:37.520
+I would also be very curious, and I don't know if anybody's done this yet. If those encoding
+
+27:37.520 --> 27:44.800
+strategies also benefit models like XGBoost and random forest models, it might be that rather than
+
+27:45.440 --> 27:50.640
+doing simple one-hot encoding, like some of these more complex encoding, both for numerical
+
+27:50.640 --> 27:57.520
+and categorical features, benefits, all models. That would be great. Another thing that's been
+
+27:57.520 --> 28:03.520
+really profound and some of the researchers that have pointed this out, I think doing great work,
+
+28:04.160 --> 28:10.480
+is that the way that you regularize the model has a profound impact, and that's not surprising.
+
+28:10.480 --> 28:17.040
+Regularization kind of rules everything in machine learning, and that goes back to computer vision
+
+28:17.040 --> 28:23.840
+and LP as well. Interestingly enough, if you go back and look at the original research online,
+
+28:23.840 --> 28:29.200
+XGBoost, one of the key things they introduced in that model was novel ways of regularizing
+
+28:30.400 --> 28:35.520
+the decision trees. So regularization is kind of one of those foundation steps that if you're
+
+28:35.520 --> 28:40.400
+ever going to walk into a new domain of machine learning, you have to figure out what regularization
+
+28:40.400 --> 28:50.160
+works for this particular domain. It was a paper a while ago that just found that
+
+28:50.160 --> 28:58.560
+if you did hyperparameter search over a group of possible regularization techniques
+
+28:59.040 --> 29:04.640
+for any given model, and you selected the optimal subset of regularization techniques,
+
+29:05.440 --> 29:11.120
+very simple models like MLPs could perform outstanding on tabular data. It was just the right,
+
+29:11.120 --> 29:17.760
+they called it a cocktail of regularization techniques. I think that's a really interesting
+
+29:17.760 --> 29:25.040
+approach. Interestingly, they also included in what they're calling regularizing a variety of
+
+29:25.040 --> 29:34.080
+data augmentation methodologies. This is an area where NLP and more recently computer vision
+
+29:34.080 --> 29:41.360
+have seen really interesting research, which is how do we augment the data and use it for self-supervised
+
+29:41.360 --> 29:47.120
+pre-training in a way that makes our downstream models more robust. And that is, this data augmentation
+
+29:47.920 --> 29:54.480
+is an area that is almost completely lacking in the tabular data domain. We don't know what works
+
+29:56.320 --> 30:05.680
+exactly synthetic data. Yeah, but we don't know what the right techniques are. I think
+
+30:05.680 --> 30:12.400
+something like cut mix might work well on an image, but do you just apply cut mix to a tabular
+
+30:12.400 --> 30:18.400
+data set? Now you have to define a scheme of data augmentation that actually makes sense for
+
+30:18.400 --> 30:25.920
+this mixed type domain in tabular data. And so I think that's an area that's really interesting.
+
+30:25.920 --> 30:32.240
+There's a final area, so we have encoding, we have regularization, and then there's finally
+
+30:32.240 --> 30:38.080
+architecture. What architecture really impacts? And we've been looking at this for a while now,
+
+30:38.080 --> 30:42.240
+and we've been partnering with Tom Goldstein at University of Maryland, his grad student,
+
+30:42.240 --> 30:49.120
+Gautamie Somapeli, wrote a paper a few years ago called Saint, that looked to take a lot of what
+
+30:49.120 --> 30:56.480
+we've learned in transformer architectures and apply them to tabular data. And this is one of the
+
+30:56.480 --> 31:05.120
+first papers in this area, and kicked off a lot of the subsequent research. And kind of the novelty
+
+31:05.120 --> 31:11.840
+of that research was twofold. One was one of the first papers to look at transformer architecture
+
+31:12.560 --> 31:20.320
+across a row within a given data set. So the goal of a model like that is to ask for all of the
+
+31:20.320 --> 31:27.760
+features that I'm using to predict this particular outcome, attend to the ones that matter the most
+
+31:27.760 --> 31:33.600
+for this particular goal. And that seems fairly straightforward. Transformer architectures are
+
+31:33.600 --> 31:41.360
+designed to do that. Interestingly, Saint also uses this notion of intersample attention. And so it
+
+31:41.360 --> 31:48.160
+takes subsamples of the training data, and it asks not just to attend to the individual row that
+
+31:48.160 --> 31:54.400
+is for a specific data point, but of all the other data points in that sample, which one is most
+
+31:54.400 --> 32:01.600
+useful to this prediction task. And so it almost brings together a transformer architecture with
+
+32:01.600 --> 32:06.400
+like a canierous neighbor classifier. So you're not just attending to data points that I'm
+
+32:06.400 --> 32:11.920
+interested in. You're also attending to similar data points, or maybe even dissimilar data points
+
+32:11.920 --> 32:18.880
+depending on what's most useful to the task at hand. And Saint was a very foundational paper in
+
+32:18.880 --> 32:24.320
+this space. Since then, there's been a number of different transformer papers that have looked at
+
+32:24.320 --> 32:30.400
+how do we apply these architectures. As I mentioned, some people have pointed out that, you know,
+
+32:30.400 --> 32:35.600
+given good encodings and good regularization, maybe you don't need a transformer. I think the
+
+32:35.600 --> 32:40.960
+question of architecture is still an open question as much as the question of regularization and
+
+32:40.960 --> 32:47.200
+encoding is an open question. But I ultimately think that the combination of these three
+
+32:48.400 --> 32:54.880
+in whatever the final state will be will be a powerful new new tool system for deep learning
+
+32:54.880 --> 33:04.400
+on tabular data. And so how where are we like this? How far does Saint get us or how close does
+
+33:04.400 --> 33:11.600
+Saint get us to solving the problem? Is it just kind of demonstrating a particular, you know, a direction?
+
+33:11.600 --> 33:16.640
+That's a good question. It far depends on the journey that you're on.
+
+33:18.880 --> 33:25.440
+I think if, right, like it all depends on the end destination. If you look at some of the research
+
+33:25.440 --> 33:33.040
+recent survey papers on the field, what they found is that on small data sets anywhere from zero to
+
+33:33.040 --> 33:42.560
+50,000 training samples, it's hard to beat, you know, a well-trained extibus model to NIPER parameters.
+
+33:42.560 --> 33:48.960
+Like that still is the dominant paradigm. You start to see some of these deep learning
+
+33:48.960 --> 33:56.880
+methods exceed that when you get above 50,000. And so I think for a while, we're going to see a gap
+
+33:56.880 --> 34:03.760
+between small data sets and large data sets in much in the way that for many years we saw within
+
+34:03.760 --> 34:12.080
+the field of NLP. If you're working with a small data set, for instance, for sentiment analysis,
+
+34:12.960 --> 34:18.720
+it was much more effective to do a TF IDF encoding and a logistic regression model
+
+34:18.720 --> 34:22.480
+than it was to use a big language model if you only had 10,000 training samples.
+
+34:22.480 --> 34:29.920
+I think we're in that paradigm where NLP eventually went was if you had a large language model
+
+34:29.920 --> 34:36.320
+that was trained in an unsupervised way, you could use it on small data sets and fine-tune it
+
+34:36.320 --> 34:40.960
+quite effectively. So maybe we'll get there with tabular data. Maybe there will be this notion of
+
+34:41.680 --> 34:48.080
+you know, large pre-trained tabular data models that can then be used on small data sets and
+
+34:48.080 --> 34:55.680
+effectively transfer there encoding. What does that actually mean? What is the underlying
+
+34:56.800 --> 35:01.680
+the underlying relationship between all tabular data that such a thing would exploit?
+
+35:02.240 --> 35:09.120
+Yeah, that's a great question. We're starting to make progress on that. I don't have an answer
+
+35:09.120 --> 35:15.600
+to your specific question, but we're starting to make progress very simply. We recently submitted a
+
+35:15.600 --> 35:23.440
+paper with Roman Levin and also Tom Goldstein, Michael Goldblum, Andrew Gordon Wilson at NYU
+
+35:24.160 --> 35:28.640
+and a number of other grad students where we're looking at transfer learning within the realm of
+
+35:28.640 --> 35:41.840
+tabular data and the idea there is if you have a high level overlap between the feature space
+
+35:41.840 --> 35:50.320
+of any given task. So in that case, we're looking at medical predictions. So we have a variety
+
+35:50.320 --> 35:54.720
+of tabular data sets. A lot of them contain a lot of the similar features and some of them contain
+
+35:54.720 --> 36:04.480
+distinct features. They're all trying to predict different diseases. And so the idea was can you
+
+36:04.480 --> 36:13.200
+pre-train a tabular data set on maybe one of the larger data sets and the predictions for that
+
+36:13.840 --> 36:19.280
+for that given disease and then transfer that. Maybe the feature set is slightly different
+
+36:19.280 --> 36:26.160
+and we had to come up with a novel way of how do you adjust the feature set within this
+
+36:26.160 --> 36:31.600
+pre-training scheme. But then can you use the learning from that much larger data set into that
+
+36:31.600 --> 36:38.400
+smaller one. Now again, that that is very different than a foundation model which basically
+
+36:38.400 --> 36:43.760
+gobbles up all of the language on the internet pre-trains and then can be used for anything
+
+36:44.560 --> 36:49.600
+that is transfer learning in a much smaller scope. But I think it's a starting point to say that
+
+36:49.600 --> 36:59.760
+yes, you can use a generic feature encoder from a tabular data set and extend it to other tasks
+
+36:59.760 --> 37:06.160
+in a way that retains the original structures that you've learned. I do think that we would have
+
+37:06.160 --> 37:11.920
+to answer the fundamental question which you asked, which I think is still not clear in my head,
+
+37:11.920 --> 37:19.520
+which is what does it mean if you were to go and build a model that included every tabular data
+
+37:19.520 --> 37:23.920
+set in the world? Like what would it mean for a combination of a healthcare data set with a
+
+37:23.920 --> 37:29.120
+financial services data set with like a wine classification data set. And when we've seen all
+
+37:29.120 --> 37:32.800
+of the data sets that are out there, they're fundamentally different. So what is it learning?
+
+37:33.600 --> 37:37.200
+On the other hand, maybe kind of rolling back a little bit of my
+
+37:38.720 --> 37:48.000
+disbelief. I think we're interested in tabular data because tabular data is kind of this fundamental
+
+37:48.000 --> 37:57.600
+currency of business like it's all over the place. But I suspect that there's a lot of the same
+
+37:57.600 --> 38:02.640
+thing happening in lots of places. Like there are a lot of churn models, like there are a lot of
+
+38:02.640 --> 38:09.680
+fraud models, like there's, you know, you can, I don't know how many kind of super classes, you know,
+
+38:09.680 --> 38:14.880
+if we were to try to taxonomize, you know, all of the tabular data sets, what that looks like. But,
+
+38:15.680 --> 38:23.440
+you know, if you could get access to a whole bunch of, you know, churn,
+
+38:23.440 --> 38:32.800
+you have data sets that related to churn models, I could envision like some kind of foundational
+
+38:32.800 --> 38:40.960
+churn model that, you know, understands propensities to do something based on other things.
+
+38:40.960 --> 38:47.040
+I don't know. I think that's right. I think that's right. Even if the, even if the inputs are
+
+38:47.040 --> 38:54.160
+fairly heterogeneous, I think that is, and luckily within industry, you know, there's not, they're
+
+38:54.160 --> 39:00.560
+not, there are not very many companies that like span multiple distinct domains where, you know,
+
+39:00.560 --> 39:06.000
+they're trying to predict credit card fraud and disease outcomes at the same time. Like you don't
+
+39:06.000 --> 39:12.160
+see that kind of conglomeration. So yes, within an individual company is this notion of transfer
+
+39:12.160 --> 39:17.680
+learning or even kind of industry-specific foundation models actually do potentially make sense,
+
+39:18.400 --> 39:26.720
+globally across all data sets. That's maybe a little bit extreme. But yeah, I think within
+
+39:26.720 --> 39:32.640
+specific domain, specific applications, we could, we could certainly think about how you bring
+
+39:32.640 --> 39:37.440
+together all those different types of data sets and tasks into a single modeling framework.
+
+39:37.440 --> 39:44.960
+Of course, the task of pulling those data sets together is a very different one from collecting
+
+39:44.960 --> 39:50.480
+images or text off of the internet. Yeah, it's not as easy as just like many just the political,
+
+39:51.200 --> 39:57.440
+you know, the, you know, the access to the data itself. That's right. And many tabular data sets
+
+39:59.040 --> 40:05.200
+because they are collected within company walls are actually quite sensitive. They contain private
+
+40:05.200 --> 40:11.200
+customer information that rightly so those companies don't want to share publicly and make
+
+40:11.200 --> 40:19.280
+available. Very little exists the way that text and images just exist free, free to grab on the
+
+40:19.280 --> 40:25.120
+internet within the domain of tabular data sets. But within specific industries, there might be
+
+40:25.120 --> 40:34.400
+some consortiums that emerge to, you know, start to bring together groupings of those types of
+
+40:34.400 --> 40:40.720
+data sets if this, if this paradigm seems to be the one that people find promising. Certainly,
+
+40:40.720 --> 40:48.800
+I think, you know, when we look internally at some of these, as you said, you know, you're,
+
+40:49.680 --> 40:54.240
+whether it's churn or it's marketing or fraud detection a lot of times, you're using,
+
+40:54.240 --> 40:59.680
+you know, similar overlapping data sets and variations on a theme when you're talking about your
+
+40:59.680 --> 41:06.160
+task. And, you know, traditional industry would build a separate model for each one of those
+
+41:06.160 --> 41:11.760
+use cases. And when you're first getting started as a company in machine learning, having a
+
+41:11.760 --> 41:17.040
+separate model for every single thing is probably not that big of a deal. You've got 10, 15, 20
+
+41:17.040 --> 41:23.040
+models that you're maintaining. When you become a full-fledged adopter of machine learning and
+
+41:23.040 --> 41:27.760
+you have hundreds of models that you're running in production and interacting with each other in
+
+41:27.760 --> 41:33.520
+ways that you didn't anticipate and they're relying on each other in stacked ways, managing
+
+41:33.520 --> 41:39.280
+that overall system complexity becomes really, really critical and a very big challenge. And so
+
+41:40.320 --> 41:48.400
+rethinking it as a, you know, a single pre-trained model with a lot of smaller fine tuning, you know,
+
+41:48.400 --> 41:52.960
+that actually changes how you do business, that changes the tech stack that you work with,
+
+41:52.960 --> 41:58.000
+that changes how you think about the overall machine learning ecosystem. And so I do think like
+
+41:58.000 --> 42:02.160
+long-term it could potentially help a lot of companies reduce their overall machine learning
+
+42:02.160 --> 42:08.000
+complexity if they think about it that way. What do we know about solving tabular data problems?
+
+42:08.000 --> 42:18.800
+How do you, what's most important there? And how do you think about approaching them today for,
+
+42:18.800 --> 42:23.120
+you know, for the real problems that you're trying to solve today? Yeah, I think that the, the
+
+42:24.160 --> 42:29.920
+biggest gap right now if it's standing there between some of this research that we've been
+
+42:29.920 --> 42:35.200
+talking about and deep learning for tabular data and what we've actually used internally is not
+
+42:35.200 --> 42:41.680
+necessarily kind of at this point a novel architecture, a novel encoding scheme or novel
+
+42:41.680 --> 42:46.560
+regularization technique. I think each of those has more research and there's going to be some more
+
+42:46.560 --> 42:50.720
+work that figures out like which is the best or which are the sets of best. I think the biggest
+
+42:50.720 --> 42:59.040
+gap is tooling is do we have, you know, tools that are as easy to use as scikit-learn or XG boost
+
+42:59.680 --> 43:06.400
+that you can fit and deploy a tabular data model using, you know, using deep learning as you can
+
+43:06.400 --> 43:14.000
+for a tree-based methodologies. And when I say easy to use it's, you know, everything from
+
+43:14.000 --> 43:20.240
+not having to configure a thousand hyper parameters just to figure out what which one's going to work
+
+43:20.240 --> 43:30.240
+best to is it hardened and, you know, well documented does it have good logging like the whole
+
+43:30.240 --> 43:34.560
+software engineering side of it is actually I think what's missing at the moment. There's been a
+
+43:34.560 --> 43:38.720
+lot of great research but now there just needs to be some really good quality engineering that
+
+43:38.720 --> 43:44.800
+takes that and figures out, okay, can we build libraries or, you know, packages that make this
+
+43:46.320 --> 43:50.800
+so that it's not a data scientist figuring out how to apply research. It's a data scientist
+
+43:50.800 --> 43:56.960
+using a tool, right? Like that's that's the gap. That sounds like a fairly well-stated problem and
+
+43:56.960 --> 44:03.200
+I know Capital One loves open source. Like, is that, are you working on that? Yeah, that is that's
+
+44:03.200 --> 44:08.720
+most data problem because it's something that we're thinking about and working on, yes, but I do
+
+44:08.720 --> 44:15.680
+think that's the biggest gap at the moment. Maybe this is a tangent but you mentioned graph
+
+44:16.720 --> 44:25.760
+learning, deep learning on graphs that whole direction. Do you think that that plays
+
+44:25.760 --> 44:34.480
+into working with tabular data in a big way? Like, is each of the rows in a, you know, tabular
+
+44:34.480 --> 44:38.640
+data set kind of a node in a graph and, you know, that's going to help us figure all this out?
+
+44:39.600 --> 44:48.080
+Yeah, that's a really interesting question and I think one that's not well studied enough. I
+
+44:48.080 --> 44:55.440
+mentioned in saint how the saint architecture takes a transformer and applies it to each of the rows
+
+44:56.080 --> 45:05.200
+and then it takes that same transformer and looks across, across rows in a sub sample of the data.
+
+45:06.880 --> 45:11.280
+If you think about what that's doing is it's essentially treating the data set
+
+45:11.280 --> 45:18.080
+like a similarity graph. It's saying, okay, I've got all these data points. Each one of them is a
+
+45:18.080 --> 45:23.760
+node in this data set or at least within the sample of it. Attend to the neighborhood around me
+
+45:23.760 --> 45:30.000
+that is most useful for this task and so it transforms it into a graph but I don't think even when
+
+45:30.000 --> 45:36.000
+we worked on the paper, we didn't really dive into that element of it and looked at the connection
+
+45:36.000 --> 45:40.640
+between, okay, now that you've structured it as a graph or you're even thinking about as a graph,
+
+45:40.640 --> 45:47.360
+how does that change how you approach the learning task? I definitely think this question of
+
+45:47.840 --> 45:53.680
+how do we create graphs from tabular data as an important one? As we look to
+
+45:55.680 --> 46:01.520
+leverage more graph machine learning, there is a big question of how do we
+
+46:02.960 --> 46:07.440
+take and it's not always tabular in the sense of like features in a model. Sometimes it's just
+
+46:07.440 --> 46:13.680
+tabular data of records about a customer that we want to build into an actual network but there's
+
+46:13.680 --> 46:18.320
+a fundamental challenge and how do you go from that structure of a data table into something that
+
+46:18.320 --> 46:23.440
+you can use a graph convolutional network or even something simpler like belief propagation.
+
+46:23.440 --> 46:28.000
+It's a really hard problem oftentimes to go from data tables into graphs and I think that's one
+
+46:28.000 --> 46:33.840
+that we're actively looking at at the moment. Where would you say the kind of research frontier is and
+
+46:33.840 --> 46:41.360
+is kind of heading around this problem deep learning for our tabular data? I think
+
+46:42.400 --> 46:48.400
+when we mentioned, which is self-supervised pre-training, what are the transformers and so yeah.
+
+46:49.360 --> 46:59.040
+And particularly, what is the right way to augment data going into that? What's the right way to
+
+46:59.040 --> 47:10.640
+build a transformer backbones for tabular data? I think there's going to be continued study on
+
+47:10.640 --> 47:16.480
+encoders and regularizers and how you do the optimal combination of those. I don't think that's
+
+47:16.480 --> 47:26.720
+going away. And then I think from a theory perspective, we have to understand a little bit more
+
+47:26.720 --> 47:31.680
+about particularly as you start to combine data sets and as those data sets get more and more
+
+47:31.680 --> 47:39.920
+heterogeneous, what exactly the architecture is doing in that domain that it makes it at all useful
+
+47:40.560 --> 47:46.080
+for any of the downstream tasks. So as we start to push into larger pre-training,
+
+47:47.760 --> 47:50.800
+maybe this idea of foundation models for tabular data,
+
+47:50.800 --> 47:58.000
+there's open questions not just on how do you do it, but what does it even mean? And why would
+
+47:58.000 --> 48:01.840
+you do it? Because I think most people, if you mention that to them, we'll have a very similar
+
+48:01.840 --> 48:06.480
+to response to the one you did, which is why would you even do that? That doesn't make any sense
+
+48:06.480 --> 48:12.880
+for tabular data. And I think that's a very reasonable response. It doesn't make any sense.
+
+48:12.880 --> 48:17.760
+And so if we're going to do that research, which I do believe we will, and we have to, because
+
+48:17.760 --> 48:21.600
+that's the direction of, that we're seeing many of the domains of machine learning research go,
+
+48:21.600 --> 48:26.640
+we need to answer that question. And what is doing that research mean? Is it just collecting more
+
+48:26.640 --> 48:30.160
+and more and more data sets and seeing what happens when we try to train models on them?
+
+48:30.880 --> 48:34.480
+Yeah, collecting more and more data sets, seeing what happens when we try to chain models on them,
+
+48:34.480 --> 48:43.840
+understanding how to combine those data sets, how to train across multiple domains, whether,
+
+48:43.840 --> 48:48.320
+I mean, we talked about multi-modality, but even how do you build a
+
+48:49.920 --> 48:54.960
+transformer architecture that can then take in a variety of different tabular data sets,
+
+48:54.960 --> 49:00.560
+some might combine a bunch of categorical features, some might be very, very small data sets,
+
+49:00.560 --> 49:06.960
+other might be very large data sets, the scale and complexity of the diversity within the
+
+49:06.960 --> 49:13.600
+tabular domain is much greater than it is in computer vision and LP. And so those are the
+
+49:13.600 --> 49:18.640
+kinds of questions we have to answer is, is how do we build things that can generalize using all
+
+49:18.640 --> 49:25.040
+of that diverse data? Yeah, so we kind of set this up in talking about there are all these benefits
+
+49:25.040 --> 49:34.960
+that you get from the deep learning ecosystem and tooling. The disadvantage is that you,
+
+49:36.800 --> 49:42.480
+you know, we're not kind of at performance parity with the, you know, established methods,
+
+49:42.480 --> 49:49.360
+XG boost and the like, but you've also kind of highlighted that there are key gaps in terms
+
+49:49.360 --> 49:58.480
+of the tooling. Do you need to get to performance parity in order for the benefits of the deep learning
+
+49:58.480 --> 50:05.680
+ecosystem to actually think that we are already at performance parity. If you look at a lot of the
+
+50:05.680 --> 50:10.080
+research, many of these models are performing as well. Sometimes we're sometimes better,
+
+50:10.080 --> 50:15.920
+but on average as well as XG boost. And so that's why I was suggesting that it's the tooling
+
+50:15.920 --> 50:25.360
+ecosystem that needs to improve. I think, you know, many data scientists love the benefit of
+
+50:27.200 --> 50:32.080
+well-defined APIs, like I could learn the next to boost and that they don't have to spend a lot
+
+50:32.080 --> 50:39.760
+of time thinking about how do I get this piece of software to work for me? They just know that the
+
+50:39.760 --> 50:45.440
+piece of software has a fit function and a predict function and maybe six or seven hyperparameters
+
+50:45.440 --> 50:48.800
+that they have to know about and they have to know what those six or seven hyperparameters do
+
+50:49.520 --> 50:56.640
+with respect to how well that model operates. Many data scientists aren't used to, particularly
+
+50:56.640 --> 51:02.480
+ones who aren't working on computer vision and NLP, having to answer 400 different questions around
+
+51:02.480 --> 51:07.600
+whether I use this particular type of encoder, whether I use these, these sets of regularizers,
+
+51:07.600 --> 51:13.600
+how deep does it need to be? What are the dimensions of each of my, you know, different encoder,
+
+51:14.400 --> 51:19.040
+transformer encoders, et cetera? You know, there's so many choices in deep learning.
+
+51:20.480 --> 51:26.080
+It makes it really, really hard to, you know, plug and play the way that you can plug and play with like
+
+51:28.720 --> 51:34.720
+an XG boost model or a random forest. And so I think as we start to learn what things work the
+
+51:34.720 --> 51:40.800
+best, we'll get to a place within the deep learning, uh, tabular data ecosystem in which
+
+51:40.800 --> 51:46.960
+there are some tools. They have very simple APIs and a lot of that decision-making has already
+
+51:46.960 --> 51:53.600
+been made in the way that the, the tool has been built. And it reduces the complexity and the
+
+51:53.600 --> 51:57.920
+decisions that the data scientist has to make when they're, when they're choosing to use that model.
+
+51:57.920 --> 52:03.360
+And I think that's when we'll finally see widespread adoption. And once that's in place,
+
+52:03.360 --> 52:08.160
+then all of the other stuff, like the explainability, the ability to quantify uncertainty,
+
+52:08.160 --> 52:13.200
+all the things that have been developed around deep learning will start to be added on top of that.
+
+52:13.200 --> 52:17.920
+But that, that very simple interface, that very simple API I think is the, is the major hurdle
+
+52:17.920 --> 52:22.320
+that a lot of people face when they try to start using deep learning for tabular data. There's
+
+52:22.320 --> 52:27.760
+just too much for them to figure out. Well, Bion, this is, this has been a wonderful chat.
+
+52:27.760 --> 52:33.680
+Um, it's been a while since I've, uh, had a guest on the show talking about the, the topic,
+
+52:33.680 --> 52:39.440
+surprising as important as it is. Um, but this has been a great chat to get caught up on it.
+
+52:39.440 --> 52:43.440
+Thank you so much. It was an absolute pleasure. I really enjoyed talking to you,
+
+52:43.440 --> 52:59.600
+Dave Sam. Uh, my pleasure. Thank you.
+

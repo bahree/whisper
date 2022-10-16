@@ -1,0 +1,645 @@
+Welcome to the Twimal AI Podcast.
+I'm your host, Sam Charrington.
+Alright everyone, I am on the line with David Duveno, David is an assistant professor
+at the University of Toronto.
+David, welcome back to the Twimal AI Podcast, thank you Sam, it's nice to be back.
+It is great to catch up with you, I'm really looking forward to this.
+You have been super busy since the last time we spoke, which was back in January of 2018.
+So just about two years ago, or at least that's when we published the show, we might have
+actually caught up a little bit before then, but that show was on composing graphical
+models with neural networks and you've been quite prolific since then and we will hopefully
+get a chance to talk about a bunch of what you've been up to.
+Our fur folks back to that show for your full background and how you got started in machine
+learning, but why don't we start out by having you share a little bit about your current
+research interests.
+So yeah, obviously one big thing that's happened since two years ago is that we started
+working on differential equations a lot.
+And we had the first paper, you know, at the neural ODE's paper and we've just actually
+released it.
+And I'll just interrupt you to say that was a huge paper last year.
+Yeah, it was, yeah, it was a, this was Neurf's 2018 where that paper was presented and
+you've been on my list.
+We actually did try to catch up around that time, but you were, you were super busy and
+we'll talk about it this time.
+Okay, great, great, great.
+There's a lot of, I think, pretty interesting follow ups.
+I'm trying to not let that take over all the research that happens here, or at least
+among my students, but we just published a follow up which I'm really happy about where
+we figured out how to train stochastic differential equations in a scalable way.
+And that was actually really surprising that it hadn't been worked up before.
+It was one of these things where I thought, oh, you know, when we looked at ordinary differential
+equations, the basic math for how to efficiently do backprop through them was already no one
+in the numeric community.
+So I assumed that, you know, SDEs have been around almost as long and it would have been
+worked out.
+But actually, it hadn't.
+And there was sort of a few, there was things called like backwards SDEs and a few other
+approaches for trying to build the same sorts of algorithms for doing a grading based training
+of SDEs.
+But none of them were scalable.
+And I think it's one of these things where the differential equations community typically
+hasn't been focused on computational efficiency.
+So the idea is that, you know, showing that there exists these dynamics is, that had
+been worked out with the dynamics where, but how to do these things efficiently hadn't
+been.
+So I teamed up with a probableist here at University Toronto, Leonard Wong, an amazing
+undergrad who's now a Google Brain resident, Joy Chen Lee.
+And we worked out all the details and, you know, they're the ones who really did the mathematical
+heavily lifting.
+And I just sort of convinced them that there had to exist a simple algorithm or rather
+an efficient algorithm because for everything else that people have looked at, there's always
+one.
+Backpropagation always has the same asymptotic time complexity as the forward pass.
+And this was one area where people sort of thought, oh, maybe it's not the case that there
+is such a efficient reverse algorithm and we eventually worked out what it was.
+So I'm really happy about that.
+I feel like we're just diving into the neural ODE stuff and we'll circle back to maybe
+how all of the different things your lab works on kind of connect together.
+But for the neural ODE stuff, let's just start from the beginning.
+I am sure there are folks that are listening that don't really understand what a differential
+equation is.
+So.
+Yeah.
+And the only thing is that I actually never learned these in undergrad.
+Like I never took one of these courses on ODE's.
+Oh, really?
+Yeah.
+I just kind of picked it up, you know, from talking to people who knew about them and
+reading about them.
+It's almost good.
+So if you take a course on ODE's, at least the ones that I've looked at, most of the material
+is based around solving them exactly for special cases.
+So if you have like linear ODE or some sort of structure in a second order ODE, there
+is this special case is where the answer is like sign or cosine or X or something like
+that.
+And most of I think most often, at least when I encountered them in undergrad, it was
+the context that were was provided was typically like physical systems, like physics or, you
+know, the relationships between things in the physical world or, you know, often governed
+by these differential equations.
+Yeah.
+Yeah.
+That's where they typically come from.
+And that's actually another big difference is that the numeric community is used to looking
+at differential equations that are given by nature.
+And they have to work out how am I going to solve these equations?
+I can't choose which ones I want to solve.
+I have to see all the ones that are there.
+And one thing I want to kind of talk about a bit later is that when we use neural networks
+to specify these differential equations, it's actually a pretty different game because
+we think that there's many different sets of dynamics that will encode the same or
+that will roughly solve the problem.
+So we can maybe try to choose dynamics that are easy to solve that give almost the same
+answer as like the very best dynamics that might be really hard to solve.
+How was frame out the problem that you're trying to solve with this line of work?
+Is it solving a differential equation?
+Like you have a given differential equation and you're trying to, what exactly are you
+trying to do?
+Sure.
+So that's a great question because there is some work on trying to use neural networks
+to solve differential equations.
+And we're not really doing that.
+Although I do want to mention that one place where I did learn a lot about these was actually
+when I visited Philip Henning, who's an amazing researcher at the Max Planck Institute.
+When I was a PhD student, I did an internship with him in Germany for one summer and we worked
+on a project where we were trying to, well, where he had worked out this correspondence
+between the standard ODE solvers called like Runga Kuda methods and probabilistic models
+that like, well, the ocean processes that would extrapolate what these functions would
+do in the future given observations about their gradients in the present.
+So basically people had come up with Runga Kuda algorithms by asking how could we extrapolate
+in such a way that all these errors cancel out and then he realized that actually you
+can drive these automatically by just putting a Gaussian process prior on these functions.
+And then if you ask what the predictive posterior looks like, it actually gives you these
+Runga Kuda algorithms for free.
+Anyway, but the point is that all this work on neural adhesives is not actually focused
+on building better solvers.
+We're saying let's inherit all these amazing solvers that the numeric community has built
+and just try to repurpose them to train even bigger models than people normally have before.
+And from a technical point of view, all the tricks in the neural adhes paper were already
+existed in the numeric literature, we just put them all together in one place.
+And so when you say train even bigger models, meaning you're trying to come up with algorithms
+that are either alternatives to gradient descent or enhancements to gradient descent
+that facilitate converging on different weights for neural networks that the networks themselves
+are solving arbitrary problems that don't necessarily have to do with differential
+equations.
+Oh, that's a great question.
+So what I mean specifically is let's find efficient ways to compute gradients of predictive
+loss or some sort of training lots with respect to all the parameters of some differential equations.
+And then use standard training algorithms like Adam or whatever in the standard ways on
+the standard losses.
+And so when we think of a gradient, the way that that's typically described is it's a slope
+which is a differential equation in a sense.
+And so you're applying these methods to identify these gradients more quickly.
+Well, yeah.
+So it's pretty good for me to be specifying because almost every question you ask about
+could we use ODE's to compute gradients or gradients to solve ODE's like the answer is
+always yes.
+So there's a lot of different ways that these tools combine and different people are working
+on different aspects of the problem.
+So to be precise, we're saying people have often like parameterized differential equations
+based on some few parameters and like simple functions to maybe specify like, you know,
+how planets evolve or how chemical concentrations change.
+And then they call ODE solvers to run these forward and find what the trajectories of these
+systems look like.
+And sometimes they want to fit those systems to data, which requires computing the gradient
+of the training loss like the mismatch between the predictions of your model and the data
+back through these ODE solutions to the parameters that specify them.
+So those were the in the neural ODE paper, we basically imported all the tricks from
+the numerical community into one algorithm and said, oh, this is a scalable way to compute
+gradients where we can use the like fanciest ODE solvers that also the numeric community
+developed.
+So it was really, it was really kind of just showcasing a bunch of things that the numeric
+community knew and putting them all together in such a way that it would scale to very
+large systems.
+Got it.
+And so what I heard you just say was that you kind of people have in the numeric community
+have, you know, long studied, you know, how to kind of do the, you know, forward projection
+of differential equations to trajectories of physical things.
+And then they want to do kind of the backwards reconciliation so that they can determine how
+accurate their predictions are.
+And there were a bunch of different techniques or are a bunch of different techniques for
+doing that.
+And what's the relationship between, you know, all of that and neural networks?
+Did you then pull those into like a deep learning or neural network framework or doing this
+backward gradient calculation?
+Yeah.
+So there's a few different ways we can use these tools.
+And one of them is to fit these physical systems that people have been doing.
+But what was I think most exciting to the whole deep learning community was to say, oh,
+there's also a potential that this sort of network, this sort of ODE network could replace
+some of the backbone of the neural networks that we used to train today.
+So in particular, residual networks is like the standard way you build a very deep network.
+And it's just adding together the contributions of a whole bunch of small neural network
+layers.
+And so the connection that we talked about in the neural ODE paper, which had been made
+before, was, oh, well, if you ask, if you look at how one of these ODE solvers solves
+or like confused one of these long trajectories, it also adds up many different calls to these
+smaller functions, the only thing that we really did knew was to sort of take this really
+seriously and say, OK, let's actually then use ODE solvers to solve or to compute the
+answer of our neural network.
+And then it can decide, you know, how many function evaluations to make and where.
+And yeah, so that was the new part.
+And so this has a few advantages.
+It's kind of a different way of formulating the problem, instead of saying, here's the
+algorithm for computing my residual network, which is like, you know, train together 100
+times.
+We say, here's the dynamics of this trajectory, ODE solver, it's your job to figure out how
+many times and we need to evaluate this function and where to tell me what the exact or to approximate
+what the exact trajectory would be.
+So the cool thing is that if the problem is easy, it might only need a few calls to the
+function and if it's hard, it might need a lot.
+But this is something that's sort of being determined adaptively on the fly, instead
+of at training time, where normally right now people have to just sort of try different
+steps.
+They say, oh, I tried into their neural network with, you know, 10 layers.
+It didn't do as good as one with 20.
+I, you know, it started doing better and better than where I added, but then everything
+was too expensive.
+So I had to cap it.
+The hope is that we can now say, oh, let's at training time, let the, like, just tell
+our optimizer, here's my tradeoff between accuracy and speed.
+It's up to you to figure out how to, like, trade these things off.
+So that was something we sort of said you might be able to do, or rather this idea of at
+training time, trading off accuracy and speed is something that we, you know, thought we
+could do, but we didn't really work out how to do it.
+And, but this is one of the papers that it was up late last night working on for somebody
+to ICML was me and my, since then, me and my student, Jesse Pettincourt also working with
+an undergrad, Jacob Kelly and my friend at Google, Matt Johnson, we were saying, oh, well,
+maybe we can add some sort of term, some sort of regularizing term to the loss that makes
+the dynamics easy to solve.
+And so we got that to work.
+And now we can see, oh, there's this tradeoff that we can explore between having, having
+training a ODE network that exactly minimizes our training loss versus one that is cheap
+to solve and sort of requires fewer layers.
+And so now, you know, if depending on your compute budget, you can just move along this
+pre-do front and trade these things off however you want.
+Nice.
+Nice.
+And that was the neural networks with, no, that's not the neural networks with cheap,
+this is unpublished stuff.
+This is an unpublished paper that was just submitted February 7th in the, we hours
+of the morning for the upcoming ICML conference.
+Exactly.
+It doesn't get any harder off the press than that, yeah.
+Nice.
+And is it already up on archive or?
+No, it's not an archive.
+Although Jesse gave a talk about it at the program transformation workshop at NRIPS, although
+it wasn't working at that point, we were just sort of saying, here's the math that we're
+going to try to implement.
+And so is this related to the cheap differential operator's paper?
+Sort of.
+So the cheap differential operator's paper, again, that was actually Ricky's idea.
+He just sort of came to me and said, hey, I think we can actually constrain the dynamics
+of our neural networks such that these quantities that we need to compute are cheap.
+So the motivation from that was there was a follow up to the neural ODE's paper called
+Fjord.
+Or the name of the method was Fjord, and it basically said, we can build normalizing
+flows out of a continuous time using ordinary differential equations.
+So normalizing flows are a family of density estimators, which just means, you know, a generic
+way to model any data in an unsupervised way that work by taking a simple density like
+a Gaussian and somehow warping it into some non-Gaussian complicated parametric density.
+And so one of the nice follow-ups from the neural ODE's stuff, we're saying, oh, it turns
+out that if you think of this transformation happening continuously, then the math that
+you need to compute the change in density is a little bit nicer.
+So it goes from having to compute the determinant of the Jacobian of the dynamics to just the
+trace of the Jacobian of the dynamics, and that's actually a lot easier to approximate.
+So it's still expensive, though, and it's still kind of a downside of this method.
+So Ricky worked out that actually if we constrain the architecture of these dynamics networks,
+we can give them exact trace, we can compute their traces exactly.
+And this is, I kind of like it, so I want to talk about engineering neural network architectures.
+So there's a lot of work that has been totally foundational to the field where people sort
+of do trial and error and they say, oh, what if I add more layers here?
+Or if I change the non-linearities of my network, what if I add noise here or there?
+And sometimes these are well-motivated theoretically, sometimes or not, sometimes it's just sort
+of the trial and error that we need to get any technology to work.
+Right.
+I think in the first year of my podcast, there was this period where many of my conversations
+were asking, okay, how is this done?
+How are people doing?
+And the answer that I finally came to understand was that it was just trial and error, and
+graduate student descent was the term thrown around, and a lot of the great models that
+we use to solve problems then and now, like came out of this just iterative exploratory
+process.
+Yeah.
+And there's nothing wrong with that.
+But it's more satisfying when we can say, oh, I want to have a network that's going
+to learn functions with this property.
+Therefore, I know that I need that my network has this architecture or that, or saying,
+if it has architecture, it'll definitely be able to learn functions that enforce this
+property, like maybe some sort of invariance.
+So there was some really nice work on this called deep sets, which said, what if I want
+to have a network that takes in a set of things and gives me an answer that doesn't depend
+on the order of the things in that set, because that's sort of what makes it a set is that
+the order shouldn't matter.
+But on a computer, you do have to give things in a particular order.
+So sometimes people just budget and they randomize the order, but these guys worked out the
+math to say, oh, here's the family of architectures that will always be invariant to the order
+of things in a set.
+So I really liked that work.
+And then I liked Ricky's idea because it was the same sort of thing saying, okay, well,
+we know we want our networks to have this property.
+Here is the general way.
+Here's the general trade-off where we can say we have to make this sacrifice, but then
+we will achieve this nice property.
+And we can actually interpolate between networks that are, let's say, very restricted, but
+we give you exact traces or ones that are less restricted, but then you have to approximate
+the trace.
+And the trace corresponds only to the cost of determining the weight source, the trace,
+more fundamental or have broader implications.
+Yeah, which we had a way forward, but when I say trace, I mean, the sum of the diagonal
+terms in the Jacobian of these networks, and the Jacobian is just the matrix that says,
+what is the gradient of all the outputs of the network with respect to all of its inputs?
+Yeah.
+So it's just one quantity that we sometimes need to evaluate, but it's actually quite expensive
+to evaluate it exactly from first standard neural networks.
+So you're able to, by fixing the network architecture, fixing the trace to be easier to compute,
+does, is characterizing the trace in that way?
+Is it just an issue of computational complexity, or does the trace have other implications
+on the network or its performance or its characteristics?
+It's an issue of computational complexity.
+Yeah, that's a great question.
+So I think one very valid question that people asked is basically saying, okay, how does
+the trade-off look empirically like where along this curve should I go?
+What does this restriction actually mean in practice?
+And in this initial paper, all we basically did was lay out the trick and show that it
+worked in a bunch of settings.
+But I think that's a great question.
+We know that this restriction hurts the expressive capacity of these networks, but we haven't
+characterized them exactly what way.
+So that's a great question, and I wish I knew the answer.
+All right, cool.
+And then another paper that you presented at or that your team worked on at this last
+nerve was the latent ODEs for a regularly sampled time series, how does that one tie into this
+body of work?
+Well, that one was kind of satisfying because the original motivation for looking at ODEs
+in the first place was Yulia, who's the first author of that paper and the, well, second
+but co-first author of the neural ODE's paper was working on some medical applications
+where we had some gene assays of people's tumors that were evaluated at like a week apart
+and then a month apart and then maybe another week apart and then a year apart.
+And it's not quite clear how to fit that sort of data into a standard recurrent neural
+network or something like that.
+So that made us look at these continuous time models in the first place.
+But then we wrote the neural ODEs paper, which didn't, it just had proof of concept.
+It just said, oh, here's something you can do, we look, we explore it on toy data.
+So I think academics, including myself, have a bad habit of taking an applied problem,
+saying, oh, if we did solve this theoretical thing, we could tackle this applied problem,
+write a paper about solving the theoretical thing and never go back to the problem.
+So we still haven't applied it to the original data set that Yulia was looking at, but
+we did apply it in that paper to a standard medical records data set where it's like people
+in the intensive care unit and there's also different measurements being made of them
+from different people at different times, like what is their temperature or their blood
+pressure or whatever, and being able to combine this all into one model is something that's
+not very natural for the discrete time models we normally use.
+So we sort of showcase that, yeah, once you have continuous time, here's a set of architectures
+you can explore in the advantages and yeah, it worked, it was satisfying paper to write.
+What is the role that this continuous time versus these regularly sample time series played
+in the original paper, was it a big motivator or just a side note, given this machinery,
+we can probably tackle this continuous time problem differently.
+Yeah, so it was the original thing that maybe started to revisit these models,
+but then in the paper it ended up being secondary.
+I think in most people's eyes who are just interested in supervised learning,
+right, like the bread and butter of the machine learning community is like I want to train a
+giant classifier or something, and so we put that front and center because we knew that would
+be a lot of broader interest, but the thing is that until we make noise faster or at least
+as fast as standard architectures, I don't think people are going to, I don't think people should
+use them, and so that's why that motivated the work with Jesse on regularizing them,
+regularizing them to be fast.
+We're still at the proof of concept stage there, we just got to working in some standard
+endless sort of things, but right now I am really excited about the time series setting
+for two reasons, so one is that it's really, right now, one of the main areas where you definitely
+do need a continuous time model, or rather you definitely need differential equations, if you
+start talking about continuous time, you're basically already said you're using differential
+equations, like I don't want to go and shoehorn differential equations in where they don't
+actually make sense empirically or practically just because it's like a cool thing, and so the other
+thing is that I think the...
+What is it about continuous time models or problems that necessitates differential equations?
+Oh, well you need to be able to say how the system changes for any arbitrarily small amount of time,
+and so once you've done that, the only way to do that is to basically describe the derivatives
+of the state. Like maybe you don't like discrete time, the relationship is between something
+happening at time n and something happening at time n plus one, whereas with continuous time,
+you need a continuous function to relate things happening at different times, and if that's the case,
+you hope that it's differentiable.
+Yeah, or rather, if it is a continuous function that says how the thing changes, then that meets the
+definition of a differential equation as far as like my turn. Like maybe there could be some...
+Yeah, I got it.
+But, and the funny thing is that I think the business community and like the medical community haven't,
+I think kind of hilariously underserved by the machine learning community in the sense that almost
+all the data sets that they... Like when I talk to the sponsors of vector or people at like
+big companies, they say, okay, so my data looks like I have a bunch of interactions with my
+customer that happen over years, and they're irregularly sampled and they're different types of
+observations, and I want to be able to predict... I'm going to be able to model this data and deal
+with the fact that it's like all missing... or almost all missing almost all the time.
+How do I do this? And I say, well, I mean, I guess you could kind of shoehorn it into an R&N maybe,
+like vending data. There's some nice work on deep common filters by David Santag and some other
+people at NYU and MIT that said, okay, if you move things to discrete time, here's how to deal with
+missing data. But it's really just like the bread and butter of like most of industry doesn't,
+like their data sets just don't fit with what's coming out of most machine learning labs,
+who are more focused on things like video or audio or text, where you really can't say that
+there's an observation at every time step. Well, a lot of times don't we just throw away the
+sequential nature of the problem and just treat each individual sample as, you know, unrelated
+training data drawn from a distribution? Oh, yeah, that's one of the ways that you can force the
+data to match your model. And I guess I'll just see, you know... But the point being that you,
+yeah, if actually there's some sequence there, you're throwing away information. And what this
+is doing is proposing a way to take advantage of that information yet still be tractable. Yeah,
+exactly. We want to meet the data where it lives. I think in the future, like statisticians
+should take some sort of Hippocratic oath where they swear not to just like destroy data.
+I mean, I mean, you know, a lot of data is not particularly valuable, but the point is I see
+oftentimes, including, you know, in my own work, if we don't have the tools, then you just say,
+okay, well, we have to throw away a bunch of data and we're already crippling our ability to make
+good predictions when you do that step. So that's kind of how I view, like maybe not just my recent
+research, but how the field moves in general is how do we get closer and closer to the raw sensors
+and put more and more of the modeling problem into the hands of one giant model that's jointly
+looking at everything instead of a sequence of people who are each looking at their little piece
+and throwing away what they think isn't necessary. So we've talked about the cheap differential
+operator's paper. We've talked about the irregularly sample time series paper. There's a paper
+residual flows for invertible generative modeling. Is that the residual flows paper that we talked
+about or is that a different residual flows paper? Yes, that's confusing. So that's a different
+residual flows paper. And it's kind of funny because so we had this follow up to the neural
+ods paper called fjord, which was the continuous time version. And the cool thing about that was
+that it let you use totally unrestricted neural network architectures. So I was talking before
+about how sometimes you can restrict the architecture to allow you to have some nice property. So
+that's what the normalizing flows community did from about 2015 to 2019. There's like real NDP,
+slow, all these big models where they said, oh, if we restrict our architecture, we can compute the
+change in density cheaply. But then it's kind of hard to figure out how to make these restrictions
+without requiring a whole bunch of layers. And these models end up being very deep and
+very expensive train. And so we said, oh, if you go to continuous time, you can just use any
+network architecture. And it's fine. But then a couple years ago, Yorne Jacobson and Jens
+Bareman came to the vector institute. And we're thinking about the same problems. And they said,
+okay, well, fjord is great. But you know, people don't like to have an odsolver inside of their
+model. And I think that's the reason of all thing to not want. Because now you have to fiddle,
+you have to worry about some numeric issues. You have to choose an error tolerance.
+There are similar issues with like floating point, but not as bad. Anyway, and they worked out,
+they said, okay, well, what if we use the same math, but for discrete time, could we come up with
+some version of fjord that actually used standard neural network architectures and fixed
+number of layers and the sort of standard way of setting things up that we that everyone's comfortable
+with, but inherited some of the nice mathematical properties. And then they did work it out and
+found and basically worked out over the course of these two papers. Another way to get an unbiased
+estimate of the change in density, but for finite time discrete flows. So it's kind of funny
+because it's like this detour into continuous time led to a better discrete time model.
+And that's the invertible generative modeling paper. Yeah, well, there's two. One of them,
+it was called the newer one was called residual flows. And then the first one was called invertible
+resonance. And maybe we were polluting the the namespace with all these like minor variations.
+I mean, Miss, that what is the review the invertible characteristic for me?
+Oh, well, so one thing. What is that saying?
+Yeah, so what that means is that if I have two different possible inputs to my network,
+they won't ever map to the same output. So if you want to use the change of variables formula,
+you need to make sure that you never take the original density and somehow like
+tear it or squish it into a point. All of these things cause sort of infinities in the in the
+likelihood. It makes me think of like a some kind of hash relationship. Is there anything interesting
+there? Yeah, maybe you could say we want to avoid we want to write a hash function that avoids
+collisions. I mean, the thing is we don't necessarily want to scramble our density.
+But yeah, we definitely do want to control when we lose information in these networks.
+Because if we ever lose this right information, then we can't use this this change of variable
+formula. And are you also saying that networks that are thus characterized if given a prediction,
+you can go back to the original inputs? Is it that invertible? Yeah, yeah. So it's the same,
+when we say an invertible function, it's the same like in one dimensional, like I say, for
+instance, f of x equals x. Okay, that's a silly example. Okay, f of x equals three times x square
+root and square, for example. Yeah, so square is not invertible. Well, that's not square
+invertible because of the signs. Right, right. But okay, square root is invertible on the positive
+reals square is not invertible because you can square the positive number or the negative number
+and get the same answer. Right, right. It's a little bit getting into the weeds, but basically
+the residual networks mean that we can use any architecture we want to train normalizing flows.
+And this is in contrast to the previous methods like glow and real MVP that had to restrict the
+architecture. And so the remaining of the four papers that you had at NURBS is efficient graph
+generation with graph for current attention networks. Yeah. Is that also related to this ODE thread
+or is that off on its own? No, and that was really, you know, one of the papers that,
+well, it was driven mainly by the first author, Renji Lau, who's amazing. And there's been a sort of
+race once people said, oh, you know, we could build generative models over graphs to try to make
+them scale. And again, it's related to this question of how do we enforce some invariance? So
+people are always trying to say, well, the funny thing about a graph is that the order of the
+nodes doesn't matter. And this is sort of the central, this makes a lot of things hard because
+if we like graph isomorphism is a standard sort of known to be harder than polynomial time. Oh,
+I think it might have just been recently shown to be in some sort of like quasi polynomial time.
+Anyway, it was thought to be hard for a long time. I forget the exact complexity classes in
+which is given to graphs like a list of nodes and edges determined whether the same graph that's
+that's not trivial. So we want to make sure that our models of graphs also don't care about the
+ordering. And so we were building up some work recently that said, oh, well, there was a lot of progress
+being made sort of by just ignoring the problem to some extent and saying, well, let's just choose
+unordering. And as long as we can assign high likelihood to like one of the many orderings that
+matches the data, that's probably good enough. And so people like Will Hamilton now at McGill was
+using recurrent neural networks to gradually iteratively add one node to the graph as we generate
+them. And he was sort of using recurrent networks both at each node addition. And then
+within each iteration of node addition, he went over the existing nodes in the graph and it fixed
+order with another RNN. So it was kind of like an RNN within an RNN. So completely breaking this
+order and variance like like twice over. And then we did that paper says, oh, we actually only
+have to bring it once. We have to choose an order. If we use graph neural networks, the great
+thing about graph neural networks is that their answer doesn't depend on the order of the nodes in
+the graph. Those were the papers that you had at Nureps more broadly. This neural ODE thing is
+just kind of one of many things that you're focused on in your lab. I've got a list of those here.
+Automatic chemical design using generative models. That is sounds more applied than anything that
+we've talked about thus far. Yeah, maybe that's a little old. I mean, that was stuff that I did mostly
+in my postdoc at Harvard. Oh, really? Working with the alumnus for music, who he's really
+taking the mantle on that one. And now he actually moved to Toronto. Yeah. Well, maybe I should just
+abandon this list and let you pop it up a level and tell us what are some of the other cool things
+you're excited about? Yeah. Where did you publish on everything you were excited about at Nureps?
+Oh, no, no. Yeah, still got. So we got lots of stuff. And the pipeline lots of stuff I still
+don't even understand well enough to publish on. But one thing I'm kind of starting to appreciate
+now as an academic in my like fourth year of being a professor is that once you're known for one
+thing, the incentive to just double down on that one thing are enormous. And it's kind of you know,
+like when a band like releases an album, but it has a different sound than the old one, everyone's
+like, well, wait, I thought you were going to talk about that other line of work. But I'm really
+trying to resist the incentives to pigeonhole myself just because in the really long run, you know,
+things change. We have to keep it up in mind. So the general area that I've been excited about
+for a few years, but it's really hard to make progress on is let's say learning to search.
+So I just thought a grad topic course on this last term. As a way, grad topic courses are a great
+way to get a feel for an area and several other recent papers and get some students to start projects.
+And it totally worked out. So actually, and a lot of people at DeepMind have been working on
+and are publishing similar ideas along this theme. It sounds like a kind of mash up between
+meta learning and neural architecture search. Is that kind of the direction? Yeah, maybe those
+are related things. I mean, the basic idea is that we have algorithms like Monte Carlo
+research that now we're starting to understand how to embed in other hard machine learning problems
+in particular inference and planning. So the idea is that most of what reinforcement learning has
+done or meta learning just says, oh, yeah, I'll just sort of brute sort brute force try to learn
+a policy that does the right thing in every situation. It has a giant lookup table of when you're
+in this situation, you should take this action. And that works if you can train the policy, but it's
+really expensive and it requires it puts a lot of strain on this one neural network, this policy.
+And, you know, I think most people agree that what humans do is they have this hybrid approach
+where they say, well, I know roughly what to do, but whenever I realize I'm in a tough or novel
+situation, I'm going to stop and plan and I'm going to think imagine a few steps ahead.
+What would happen if I did this, what would happen if I do that and then evaluate what I like
+that outcome. And so doing a little bit of search on the day when you need to make a decision in
+your mind takes a lot of pressure off the policy and makes you a much more powerful agent without
+having to in your head prepare for every possible contingency ahead of time. And so like nothing
+I'm saying is like new or groundbreaking. I'm just saying that now we finally have the tools
+to build such systems. And there's been a lot of work coming out of deep mind in this way.
+One paper that I feel like is waiting to be written is about intrinsic motivation or curiosity.
+So there's all these papers talking about, oh, you know, how is it that people somehow know not
+to not just pursue their goal directly, but also try to learn and do some exploration or stuff.
+Maybe something of something evolution, something something like the value of randomness.
+And it kind of so I think these papers are making sensible technical suggestions, but the
+philosophical sort of speculation about why is this curiosity necessary and making it sound
+like some serious thing bugs me because if you just say I am going to have to solve a task,
+but I don't know exactly what it is yet or I don't know exactly what the dynamics of my environment
+are, then the optimal plan will include doing some exploration, some learning, practicing skills.
+So in particular, if we formalize this as a Palm D.P. partially observable Markov decision
+process, this is like the bread and butter of reinforcement learning since like the 70s.
+We can't solve these because it's too expensive, but if we could, all these behaviors would
+emerge automatically. And it's not clear to me how much other people agree with me about this,
+because for a long time I thought I was the only one who thought this. But then when I started
+to talk to some other, and I thought that probably because the motivations of these curiosity papers
+didn't seem to understand this point. But then when I talk to some of the serious RL people that I
+know, they're like, oh yeah, of course, yes, that's I totally agree. So you know, it's that's
+reassuring. It's also kind of sad because you want to be the one guy with the idea that no one
+else realizes, right? So yeah, so right now we can't scale up these amortized planning algorithms
+to do effective exploration in really tricky domains. Like what you'd like is if you put your agent
+in a gym and you said, you know, you're going to have to play a game tomorrow. I'm not going to
+tell you what it would, you know, learn to dribble a basketball or like, you know, pick up the soccer
+ball and learn to kick it or, you know, just invent games that it might have to play and then
+invent practice drills for itself to learn the dynamics of how it could, how it should play them.
+And I think that's there's no remaining foundational problems there, but there's just a lot of
+engineering problems for which we have now promising tools to tackle those.
+Yeah, as a researcher, how do you approach engineering problems? And do you approach them differently
+than an engineer might or, you know, is it about framing them?
+Yeah, that's a great question. I mean, I would say the one of the blessings in the
+curse of this job that really feels like a blessing most of the time is that I don't spend a lot
+of time engineering. And I really like getting my hands dirty and coating up to the point of a
+proof of concept, but it is a bit of a slog to get these things to work. And my students are
+amazing at that. It's been said of my student, Will Graftwell, that he can get a potato to get
+state of the arts on C-Far 100 if he has to. I mean, and of course, you don't want the engineering
+skill to be the determiner of which method ends up looking best in your paper. You know, we take
+that seriously. I'm just saying, the students here are really amazing at finding, diagnosing
+these problems and getting them to work. It's still really fiddly. I feel like, you know,
+we're still in the dark ages of understanding what's happening when we're training or on that
+works or building models, even in, yeah. Is that something that you're focused on from our research
+perspective? Yeah. So actually, one of the other ICML submissions we published yesterday,
+or we didn't publish, we submitted yesterday, was a collaboration with Philip Henning trying
+to automate the step size selection during training. And the idea is that we said, oh, well,
+right now when we run stochastic gradient descent, we just, we, you know, if we'd have a
+momentum or we do atom, we kind of have a little bit of averaging of the previous gradients.
+But we actually know how to combine noisy observations of different things in, like,
+perfectly well on principle with common filters. And this is just like a simple,
+latent variable linear ocean model. And so Phil and his student Lucas were saying, oh, yeah,
+and one cool thing that we can do now that we couldn't do, at least for modern autodip systems,
+is get cheap hash and vector products and get them for every example in a mini batch.
+Anyway, I'm getting into the weeds here, but the point is we can look at all the statistics of
+the gradients within a mini batch that we're observing, put that in a really cheap and scalable model.
+And now when we're trying to choose which direction to go and how far to go, we have a lot more
+information available than normal. So our step size can trade off. You can say, okay, well,
+I know I'm this certain about the gradients. But I also think there's curvature in this direction.
+I also think there's, you know, I'm uncertain about the curvature. I think my future gradient
+observations are going to have this much noise. You can trade off all those things to ask, like, what
+direction and how far would give me the greatest expected improvement or probability of improvement
+or whatever else you want. So we kind of hope that is it fair to characterize this as using
+using a model within the machine learning training process in a place that you would otherwise
+kind of hard code, hard code a parameter like step size or do like cyclical step sizes or
+something like that. You got it exactly. And we just took a lot of care to make sure that there
+was no inner training leap. Like we don't have to train this model. All the updates are closed
+for them. So the algorithm looks like something like Adam where such a bunch of
+vectorized operations that don't have any training leaps. Yeah. And then the hope is that
+using this session information or this information that was always available, but we don't really
+use it, we can design optimizers that at least always make progress. Maybe they, you know,
+some fancy tuned hyper parameter schedule will be able to do better in principle. But if you could
+say I'm just going to run my optimizer for a really long time and it's never going to stop
+because the learning rate was stuck at being too high or too low. I hope we, you know,
+we hope that that will make this sort of engineering struggle that every deep learning student
+faces all day every day at least have one less hyper parameter. And you know, and it's a pretty
+important hyper parameter. Is there a way to combine this with other methods that have been worked out
+that, you know, it sounds like what you are fundamentally trying to solve or at least the result
+you presented is that you're less likely to get stuck in some kind of local optima. Is it also
+possible to to combine this with, you know, some kind of, you know, acceleration or momentum or
+something like that so that you can both converge faster and not get stuck in a optima?
+Yeah, that's a great question. And that's sort of where we left the research or that's how far
+we've gotten so far is that we got this method to work. We got the step size to work. But
+finding the enough, we've kind of found that it converges a little too well or rather that
+so we have this one experiment where if we just want our automatic step size selection,
+it makes a lot of progress really early and it ends up getting in stuck in a local optimum,
+which is normally not really okay. I thought that's what I thought that was the
+the opposite of what it was doing by the way you described it, you know, what it really does
+as well is, you know, eventually converge. Yeah, well, exactly. Well, when we say converge,
+though, you know, we can only talk, we only can guarantee local convergence. So these heuristics
+for saying, oh, what maximizes my probability of improvement or expected improvement, that only
+looks one step ahead. Yeah, in principle, we do need to somehow look ahead like multiple steps
+ahead, but in practice, that's just always going to be really hard. It's like as hard as actually
+solving the original problem. So, you know, we had some reason to believe that this might or to
+expect that this might be a problem. There's like Roger Gross, my colleague here has some nice work
+on the short horizon bias basically saying, if you optimize to do one, well, one step ahead, you won't
+make good long term progress. So the thing is that there's also reason to believe that this wouldn't
+be a problem because we think that the local optimum that we in training deep nets isn't such a big
+problem. So, you know, we're not totally sure if these are actually local optimum or just places where
+the optimizer can't make progress. But we did find that if we run for a fixed step size for a while
+and then switch to our adaptive step size, that works the best. So it's one of these things where
+we did get this thing to work better, but because it's myopic, like it only looks a few steps ahead,
+if you have a really long computational budget, just using fixed step sizes for a while and then
+switching works best. And so that's an unsatisfying answer. So I think that's the remaining question
+to get this to be really practical is it could be that if we just run this adaptive thing for
+long enough, it will be able to escape these local optimum. We haven't really looked into this
+in depth yet. But anyway, I mean, I'm impressed that you identified the the weakness in this whole
+story and just guessing it. Yeah, maybe taking a step back, you know, there's kind of a lot of
+contemporary debate around, you know, the role that deep learning plays in artificial intelligence,
+moving us to AGI. What kind of motivates you and where do you see this all going?
+Right. So as I said, I think from a practical point of view in the short term, just being able to
+meet the data where it is and deal with the actual huge piles of real problems and data sets that
+can't even really be touched by standard deep learning or at least supervised deep learning or
+discrete times here's models. That's like huge area of low hanging fruit. And there's a ton of
+people who are just saying, oh, you know, I was promised that AI would revolutionize my industry,
+but it's still kind of very bespoke and only can be applied here there. And then, but yeah,
+that's sort of partly why I'm also spending a lot of time thinking more about these
+amortized search and planning algorithms. Because I do think also that we are about to have a big
+improvement in the sort of general reasoning abilities of machines. And I think this is still
+going to be like mostly toy demos for a few years. And do you think that that mostly comes from a
+reinforcement learning type of problem formulation? Well, the thing is that reinforcement learning is
+such a vague word. And I guess I'll say model three reinforcement learning, you know, has it's like
+now no one's excited about it. And everyone was super hyped about it like, you know, three or four
+or even two years ago. I guess I would say right, like model-based planning or model-based control
+is really starting to become practical now for the first time. I think a lot of people have said,
+you know, been leaving in this for 40 years. There's this amazing book by Britsikis Neural
+Linguistic Programming that basically outlines most of the methods that people are excited about
+today. And I think it's from like the 80s. Yeah, but it's just that we now have a pile of
+or a set of tools that we have an idea of how to combine. We're starting to understand how they can
+be scaled up. So what I hear you saying is that you're mostly not placing bets on this kind of,
+you know, what's going to get us to AGI kind of question and you're focused on like, you know,
+how we can use this technology to solve current problems. Well, no, I guess I would say
+working backwards from what gets us AGI is a really fun research agenda, right? And I love all
+the papers of the Google machine. There's a recent work on logical inductors that try to sort of
+sketch out what these would look like. And then they always have a part where it's like, and now
+you do a search over all possible programs or something like that, which we don't know how to do.
+But I love the idea of working backwards in there. And I guess I'll just say we also have a huge
+amount of low-hanging fruit, like strong gradients saying, oh, if we combine these two tools that
+we have, we can figure out how to do that. We know we'll have a big step towards more general
+reasoning capabilities. So I think we don't even have to, we shouldn't think of you thinking hard,
+but for the near future, I think we can make a bunch of progress without even thinking that hard
+about the long term. Well, David, thanks so much for taking the time to update me on what you're
+up to and, you know, generally share with all of us what you're working on at your lab and with
+your students looking forward to catching your ICML papers. Oh, it's been a pleasure. Thank you, Sam.
+All right, everyone. That's our show for today. For more information on today's show,
+visit twomolai.com slash shows. As always, thanks so much for listening and catch you next time.

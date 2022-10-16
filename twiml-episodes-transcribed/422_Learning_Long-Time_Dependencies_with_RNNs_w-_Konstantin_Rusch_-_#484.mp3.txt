@@ -1,0 +1,347 @@
+All right, everyone. I am here with Constantine Rush. Constantine is a PhD student at ETH Zurich.
+Constantine, welcome to the podcast. Thanks for having me here, Sam.
+Hey, I'm really looking forward to digging into our conversation, which will focus on a couple of
+your recent papers, both of them focused on RNNs. But before we jump into that, I'd love to have
+you take a few minutes and kind of share your background. How did you get started working in
+machine learning? Yes, absolutely. So actually, my background is mathematics. So I did my
+bachelor's in pure mathematics in Germany at the University of Bonn, which is a kind of nice place
+for mathematics in Germany. Then I did applied mathematics for my masters in the UK.
+And now I'm at ETH. I'm actually affiliated with the mathematics department here.
+And I'm doing my PhD in applied mathematics. And I'm focusing mostly on machine learning,
+of course. And also not only on classical machine learning, but also on machine learning for
+scientific computing, you know, to solve physical systems and so on. And yeah, so how did I get
+interested in machine learning? I think actually two years ago, I didn't even really know what
+machine learning was. So I really was interested, you know, in this classical applied mathematics,
+like doing numerics, solving partial differential equation, equations,
+domestic differential equations, and so on. And I even worked for almost three years for the
+German aerospace center. And there I focused basically as a student researcher, and there I basically
+focused on this classical scientific computing problems, you know, as I said, solving PDE,
+and so on, and geometric problems. And then during my time in the UK, when I did my masters in
+applied mathematics, I did basically two really nice courses. The first one was about dynamical
+systems, so nonlinear dynamics and chaos. And the second one was computational cognitive neuroscience,
+which was super awesome. And there was actually some kind of connection because in this computational
+cognitive neuroscience course, we took a look at, you know, mathematical models from neurobiology.
+So for instance, at the Fitsunagumo model, maybe you heard of it, probably your audience had.
+So it's basically the mathematical model of the firing of the action potential of a single
+biological neuron. And you know, you can describe it more or less as a so-called relaxation oscillator,
+and you can do all this kind of mathematical theory around that. And it was just super interesting.
+And so far, it had nothing to do with classical machine learning, you know, like classifying
+endless digits and so on. But then I started a project and I was searching for some literature
+about this connection between neurobiology and dynamical systems. And then I found a lot of
+very recent papers about dynamical systems theory in actual classical machine learning,
+meaning, for instance, using dynamical systems to construct architectures, deep learning architectures,
+RNNs or feed forward neural networks and so on. And I was directly hooked and I really liked
+these papers. And then yeah, I just started to read more, read more. I had my own ideas. I tried a
+bit and here. So that's basically my background. Awesome. Awesome. We should maybe kind of establish
+the definitions. When you say dynamical systems, what exactly does that entail?
+Yeah. So it's basically systems, which are time dependent. So basically you have two kind of
+systems, a continuous time systems and discrete time systems. And mostly in physics and biology,
+we use continuous time systems where you know, your time parameter is actually an element of some
+interval 0 to capital T, for instance. And you look at so-called ordinary differential equations
+or systems of ordinary differential equations. And I think they're quite famous. I mean,
+they're also used already directly machine learning like this neural ODE stuff and so on.
+And then there's discrete time dynamical systems where your time is this is more like an
+iterator. It's not continuous anymore. And so you don't have an ordinary differential equation
+anymore, but you just have some recurrent update of your so-called hidden state. So of the one
+you're propagating forward and time basically. Cool. So you took these classes when you were
+working on your masters in the UK and your current work is focused on the same field. Did you
+come to the PhD with these ideas, with ideas for applying dynamical systems and oscillators to
+RNNs or is that something that you developed more recently? No, actually I already had this
+kind of ideas before I came to ETH. But I started more or less, I had to pause them for a bit
+because I came here and I first focused on some more mathematics based papers and problems. So we
+did some sampling related kind of problems which are only applied in scientific computing and not
+in classical machine learning. But it was all the time curious and I tried so many things in my
+free time on the weekend and I had really good results. And so I talked to my supervisor,
+C.D. Mischra, and we decided to go a bit deeper and really try to figure out what is the reason
+for these good results and what is it modeling at all and so on. Great. So let's start talking
+about the motivation for the paper. What's the broad problem that you are trying to solve here?
+Okay, here. So the motivation was that for recurrent neural networks, so all we do is we
+suggest a new RNN architecture, recurrent neural network architecture, and the big problem for
+recurrent models RNNs is that it's quite hard to learn very long time dependencies and that means
+okay, for RNNs, if you apply them to data, it's always sequential data. So there's some kind
+of sequential internal dependencies in your underlying data. And for instance, if you have
+internal dependencies for long range, so for instance at the beginning of your sequence,
+you have important information which is needed at the very end in order to classify the sequence
+for instance correctly, that we would call a long time dependency. And now it also depends on how
+long this dependency is of course, right? So RNNs are typically very, very good for sequence length
+of 100, 200. If you go to a thousand, it's already super hard and not mentioning doing 10,000
+or whatever. And the problem behind that is basically the way you train your recurrent neural
+network. So what you do is you use backpropagation through time where you basically unfold your RNN
+in time. And while you backpropagate the errors back in time more or less. And if you would write
+down the full gradient you're interested in computing, then you would see that there is one term,
+which is basically just the influence of a hidden state from a previous time, let's say at time k,
+on some hidden state at a later time, let's say a hidden state n. And so it's basically partial
+derivative of your hidden state with respect to this hidden state of the previous time. And now if
+you look at this term and you basically apply the chain will all over again, you will have a long
+product. And this product has basically n minus k plus one factors in it. And so if you imagine
+if on average these these factors are a bit less than one, let's say they're 0.9, then it's
+basically just 0.9 to the power of n minus k plus one. And if n minus k is very long, very big,
+then you just go to 0 exponentially fast or you go to infinity if it's a bit bigger than one
+on average, right? If it's like one dot one on average, then you explode. And so this is called
+the Wenishing and exploding gradient problem because exactly of that. And it may sound, well,
+okay, then just stabilize this gradient in some way. But it's actually not that easy. So of course,
+if for instance, if you consider your recurrent model as just the identity, right, then your
+gradient will just be the identity matrix. Great. Now we're super stable, right? But we learn
+nothing basically. And so that's the point. So basically it's twofolded. On the one hand side,
+you want to have gradient stability. So the gradient doesn't blow up or Wenishing. But at the same
+time, you also want to be expressive that you can learn actual interesting data, which the identity
+map won't be helpful for, right? So we have some success with tech architectures like LSTM's
+and GRUs and addressing this. Absolutely. Absolutely. So LSTMs, what they do, they use some kind of
+gating mechanism. And if you carefully write down the gradient there, you will see that you
+actually have a chance to mitigate the Wenishing gradient problem. However, the exploding
+gradient will might still happen. So the gradient can still explode for LSTMs and for GRUs.
+And there's a lot of papers where they have used LSTMs for long-range long-term dependencies.
+And they kind of start to fail at a few hundred like 1,000. So if the sequence has like a length
+of 1,000, it's kind of tricky for the LSTM to learn that. But LSTMs are super expressive,
+so that I can say already from my experience. And I think that's one of the reasons why LSTMs
+are still the most used are in an architecture. Maybe, I don't know, maybe the most used architecture
+at all, I don't know. They are quite popular. Absolutely. And so, so you've got this, this exploding
+vanishing gradient problem with long-term sequences. You know, there are things like LSTMs,
+but they're not perfect. And so your approach is inspired in some ways by the year, you know,
+what you learned about the neurons and the oscillators and the neurons. Tell us, you know,
+how it connects to what you observe there. Yeah, absolutely. So our approach was really
+inspired by neurobiology. As I said before, if you take a look at the dynamical systems,
+which model this kind of firing of the action potential, you have this kind of oscillatory
+behavior, right? It's actually a relaxation oscillator where you basically accumulate your
+stimulus. And then if you surpass a certain threshold, you just fire and then you relax.
+And so you have this periodically, this oscillatory behavior more or less. And you see also this kind
+of oscillatory behavior. If you, for instance, consider full parts of the brain, for instance,
+the hippocampus, they're people call it, I mean, I'm not a neurobiologist, I can just tell you
+what I read. And they call it also hippocampus oscillations. And you can, they're actually very
+beautiful papers where they measure these kind of oscillations in vivo and in vitro. And yeah,
+that was basically the motivation. So something which makes kind of sense in neurobiology,
+but we don't try to exactly mimic this kind of behavior, right? So that's just the abstract
+essence. And now we just forget about all this complicated underlying biological behavior.
+And we just take the message, okay, using oscillators might be a good idea.
+Yeah. Yeah. And that's what we did. And I think if you think about oscillators, I mean,
+this kind of harmonic oscillators where you have some linear combination of sine and cosine
+as a solution, it's super stable, right? If your amplitude of the oscillations doesn't blow up
+or vanish, it's it's perfectly stable. And also, I mean, if you take the gradient, you again
+have some kind of, if you take the credit of sine, you have cosine and vice versa, right?
+And so even the gradient is very nice behaved or you would expect that it's very nice behaved.
+And coming from this neurobiological background, we were also kind of hoping that, you know,
+it's the kind of expressive because if that's something you can find more or less in nature
+and in neurobiology, then why not try it, right? And so we came up with this coupled oscillatory
+RNN architecture, which is basically a system of ordinary of second order ordinary differential
+equations. So second order ODE's modeling these kind of coupled oscillators, where we also have
+two to additional controlling terms in there. So as I said before, if your amplitude goes to infinity
+or goes to zero, then we basically got nothing, right? So we have to make sure that they are also
+kind of nice behaved. And we can do that actually by adding some some controlling terms in there,
+controlling the damping. So that means like over time, how much do you, do you damp your oscillations?
+And and a controlling parameter for the frequency of the system. And yeah, in the end, it's it's
+really just just a damped controlled and coupled oscillator. And we discretize that with a so-called
+implicit explicit discretization scheme and IMAX scheme, just to make sure because we are not
+working with the continuous formulation of the system, but with the discrete time formulation of
+the system. And to make sure that we have all these structure preserving behavior in our discrete
+time system now, we use some kind of well-behaved numerical discretization scheme for ODE's,
+which is just this IMAX scheme. And then we come up with this discretized ODE, which we interpret
+as an RNN. And yeah. When you describe the oscillators as coupled, what exactly does that mean?
+Okay. Where are they coupled? Yeah. So the system has many dimensions, right? So basically,
+each dimension corresponds to one neuron in the recurrent titan state of the RNN. And so typically,
+for for normal problems, you use like 128 dimensions or 256 dimensions, which would mean you have in
+your, we are only talking for one layer RNNs right now, right? And so you typically have 128 hidden
+neurons or 256 hidden neurons. And coupled means that the information from one dimension can go
+also in the other dimension. So that means basically the hidden weight matrix we have is not
+sparse or has any any weird structure. It's it's it's a simple dance matrix visit.
+And you say you you have this system of of coupled oscillators. You write those as ODE's. And then you
+express those as an RNN. How does that last stage work? Is that a kind of straightforward
+expression of the ODE as RNN or is there, you know, are there work or tricks that you need to do to
+to be able to do that? Yeah, that's actually a really good question. So no, it's it's not
+so at least to me, it was not directly totally clear how to interpret that as an RNN. And there are
+different choices actually to do because for instance, you have something like a time step for
+your discretization scheme, right, some some kind of DT, which is just a small, small parameter.
+And the question is how to treat this parameter, for instance, is it a hyperparameter of your
+RNN architecture? Do you want to train it? You if you want to train it, you have to constrain it in
+some way because it shouldn't be too big and it shouldn't be negative because you don't have negative
+time, right? You want to be have something bigger than zero, but you also don't want to be too big.
+So there are actually many, many questions. And well, we went for the easiest first answer,
+I guess, we just treat them as a hyperparameter. And also our two controlling parameters I just
+mentioned are two hyperparameters. So in the end, we have an RNN with three hyperparameters,
+which you do not really need. So you can actually treat them as trainable parameters too,
+but you have to constrain them in certain ranges. As I said before, for instance, by using
+sigmodel activation function, or really you, because also this controlling parameters should be
+just non-negative or positive. Let's say they should be positive.
+So you have your system expresses an RNN and then what next? It sounds like maybe the next step
+was doing some benchmarking against existing approaches for RNNs.
+Yeah, not directly though. So first, all I said so far was some kind of intuition that it might
+be stable. Also, the credience might be well-behaved, but the key feature of our, or the key goal of
+our paper is actually to show, to mathematically prove now that this gradient is actually stable.
+So we have two to main propositions. You can also call them theorems if you want to,
+which we actually fully prove. And the first one is basically showing that the gradient can't
+explode, giving some assumptions. And now many people, I guess in the audience, will be like,
+okay, assumptions. Now it's not going to be met. And you know, everything was garbage. But in this
+case, we can actually check these assumptions that they are very mild. So we actually, we check
+them for each experiment we did. And they were always satisfied during the whole training procedure.
+So it's nothing crazy. It just means that your weights of your RNN are not too big. I mean,
+in the end, if they go to infinity, then what's the point of using this RNN? So that's a reasonable
+assumption. And with this assumption, we can actually show that the gradient is bounded from above.
+That's the first theorem. And the second theorem was maybe a bit harder even to show.
+It's some kind of asymptotic expansion of this gradient, which shows that we have some
+terms, some sort of asymptotic expansion means that we have some expansion in some orders.
+And we choose, in this case, to use the time step dt, which is quite small. And we had some
+expansion of orders in this small time step dt. And we can see that the leading order of this
+expansion is of order, I think time step to the power of three over two, something like this.
+And this is actually independent of your sequence length. So it doesn't matter anymore if you have
+a sequence of length 10 or of length 10,000. This leading order term will always be there and
+will always be of the same order. So that means that the wenshin gradient problem is actually
+mitigated and for all sequence lengths, basically. And so to recap that part,
+essentially, because you've got this specific form of RNN based on the coupled oscillators,
+you're then able to produce some closed form bounds on the, is it the convergence of the gradient?
+And that requires some assumptions that you make. And these are assumptions, they're not constraints,
+they're just assumptions. And by observation, you've not seen them being violated in kind of normal
+use of the RNN. Exactly. Yeah, absolutely. Yeah. And maybe one more point because it was actually
+quite interesting. So these two propositions, we proved in the full discrete case. So for the real
+RNN, because if you go discrete, some wild things can happen. So it's always a bit tougher to prove
+the discrete tastes and not only the continuous case. And so that's actually the case of the RNN.
+And interestingly, we also did the continuous case. And for that, we only can
+bound the gradient from above. So we can mitigate the exploding gradient problem. But because we
+had this expansion in this time step, right? And in the continuous case, you go with your time step
+to zero, because you want to be continuous in some way. We don't have this kind of feature anymore.
+So that's really the mitigation of the Wenzhen gradient problem is really a feature of the
+discretization and not of the oscillatory dynamics anymore, which I thought was quite interesting.
+And so I'm so very curious how this, what kind of result you saw and how it compares from a
+performance perspective? Yeah, that's yeah, that's even more interesting. That's true.
+Because if you have a good theory, okay, that's nice, but it also should work in real life, right?
+We have things like LSTMs that we know how to use and they work pretty well.
+And so the question is, we've got, like you said, you've got theories on the bounds of the gradients here,
+but is it useful? Yeah, absolutely. So we applied it to many long-term dependency benchmarks.
+So the typical benchmarks, for instance, the first one, which I really liked was, and it's already
+quite old, so it's the adding problem. And it was first proposed in the original LSTM paper, actually,
+and it's just a synthetic sequential, no, it's actually regression. And the idea here is that you
+have sequences of arbitrary length, and they're two-dimensional, and the first dimension are just
+uniform random numbers. And the second dimension are all zeros, except for two positions,
+they're set to one, and these positions are chosen randomly, also uniform randomly,
+and they are chosen in both half of the sequence. And now the goal of the RNN,
+especially to the output should be the two random uniform numbers of the first dimensions
+at the position indicated by the ones in the second dimension. And so it's just adding them
+together. So they call it adding, and the nice part here is that we can, you know, use sequence
+length of 100, we can use 1,000, and we can make it harder, harder, harder. And actually, we tried
+until a sequence length of 5,000. I think, actually, I've not seen that before in another paper,
+so normally what you do is you try 50, 100, 200, 500, something like this. Some people go up to 1,000,
+and you can see that, for instance, LSTMs, they already fail at 500, 750, so they are not
+able to converge anymore, so they can't effectively learn this kind of problem. And for corn,
+we actually had that, even in the case for 5,000, you get more or less direct convergence,
+which is really nice, yeah. Yeah, I really like it. Any interesting observations in terms of
+computational complexity with this approach? Yes. Yeah, so efficiency, yeah, the question is
+in this task, actually, how long do you try, so how long do you let the RNN model learn, right?
+So if I'm saying LSTM fails for 500, it doesn't mean if you do maybe a million iterations,
+learning steps, it might converge, who knows, right? And the interesting part really was here
+that you need maybe, I don't know, in terms of hundreds, we needed maybe 10 of them, and we tried
+LSTMs at least for 600 hundreds, so for 60,000 learning steps, and it did not converge at all,
+and also the other important architectures, like this exponential RNN, which is basically some
+kind of unitary RNN, which comes from the idea that you want to constrain your hidden to hidden
+structure, and all these kind of famous architectures, they did not work so well, especially in the
+very, very long case, so that was actually quite nice. But of course, it's just a synthetic
+test, right? It's just a synthetic benchmark, so maybe no one cares about this in the end,
+so you have to try more real world data, of course, and maybe a second one, which was quite interesting,
+was something like, and that's not a long-term dependency task anymore, because what I said
+at the very first beginning, that okay, you want to have credit instability, you want to learn
+long-term dependencies, but you also want to be expressive, right? You want to learn complicated
+problems, and so we tried this task from, it's basically human action recognition, it's
+basically on a smartphone with the sensors measured six different activities, like standing up,
+walking, running, something like this, and the idea is that you have some time series measured
+from your sensors over time on your Samsung S3, I guess, was it? And so in the end, you want to
+classify, based on these action, action time series, what the people have done, and even there,
+we got extremely good results. I mean, it's not a huge benchmark, so it's hard to say it was
+outperforming everything, what is out there, but it was at least outperforming everything we were
+aware of, so all the papers that have done that, we were outperforming them, which was quite nice.
+Awesome, awesome. You're working on a follow-on paper to the corn paper. Can you tell us a little
+bit about that one? Yeah, so the follow-up is called Unicorn, but with a double N in the end,
+so it's really like a neural network, and it stands for undamped independent controlled
+oscillatory RNNs. It was kind of chosen, such that we have this kind of nice Unicorn name,
+you know, but that's, so the idea here is that instead of using coupled oscillators,
+we first uncoupled them. And so basically, if you have heard of this independent RNN,
+where they instead having a hidden to hidden weight matrix, which is just the full,
+hidden dimensions, time-hidden dimensions, dense matrix, you just have a vector,
+and you just multiply it. So then you don't have any interconnection between the different
+neurons anymore, between the different hidden neurons, or in terms of dynamical systems,
+you don't have any interconnections between the different dimensions. So in the end,
+what you do is you just solve for each dimension, you solve an independent system, you don't even
+have to do it on the same computer. So that was one of the points, so you can solve one dimension
+on this computer and another dimension on the next computer. And because of this kind of
+independency, and we are undamped, so we don't have some damping term in there anymore,
+we can show that this system is actually a Hamiltonian system. And if you discretize these
+kind of systems with some symplectic integrators from Hamiltonian mechanics, also people in
+molecular simulations are very interested in that because they model basically everything
+with Hamiltonian systems. And so the numerics to use here is so-called symplectic integrators,
+and you can show that you more or less end up if you integrate them with the discrete time
+Hamiltonian, which is quite close to your actually continuous time Hamiltonian. And the nice feature
+of Hamiltonian systems is that they are invertible in time. And that means now that, for instance,
+if you train it with backpropagation through time, as I said, right at first you propagate
+forward in time your input, and then you have at the end some output, and then for backpropagating,
+you propagate this error back in time. And for that, you have to store each hidden state at every
+time. And so you can backpropagate, but in this case, because it's invertible in time, you can
+just store the last hidden state, and reconstruct these hidden states based on the last hidden state,
+because it's perfectly invertible in time. And so you know, you kind of have the same memory
+efficiency, like in neural ODEs, with the nice feature that you don't have to go continuous,
+because for standard neural ODEs, it's only true if you're going with your time step to zero,
+which can be very expensive. And I mean, on a digital computer, you can't go basically to zero,
+but you always have some rounding errors and so on. And here we don't have any problem anymore.
+We can even use the time step of 0.1, and it's still perfectly invertible. And so yeah,
+it scales just perfectly. It's very memory efficient. And on top, because we have this kind of
+independencies, as I said before, we don't have to train it on the same computer. And that makes a
+lot of sense if you use it on GPUs directly, where you basically have an independent thread,
+or you don't even need a thread, so it can be even threads of different blocks, which cannot
+communicate with each other. And you can just train each independent dimension on an independent
+thread, and just in the end, add everything together. And this is extremely fast. So
+I actually did an experiment, and we have some some really efficient code on GitHub already.
+You can check it out if you're interested in it. It's directly implemented in CUDA. So it's,
+of course, it's using PyTorch, but it's some CUDA extension, where we really do this kind of
+independent threading. And maybe it's interesting to hear, but on my local GPU, I had a speed up of
+one epoch on sequential amnesty took me like half a day on the GPU using PyTorch for a
+three layer unicorn, for instance. And with this CUDA extension, by really using this kind of
+independency, I got speed up from half a day to half a minute. And so how is the
+expressivity of the RNN impacted by the independence? Yeah, good question. We did some benchmarks,
+so one of them, the problem for for expressivity is that you know, for credit and stability,
+you can formulate it mathematically. You can say, okay, it should be in this in this range,
+and it shouldn't blow up or go to zero. You can write it down. There's no problem with that,
+but for expressivity, you know, what's the mathematical formulation of expressivity? So I don't
+know any, I think what's maybe the closest to it is some kind of universality, right? If you can
+prove universality, that's at least something you would need. It's absolutely not sufficient,
+but it's at least necessary. So if you can show some kind of universality, that's that's nice.
+But besides this, I'm not aware of any expressivity mathematical results. And so what you do is you
+classify it more or less by empirical data. So you use some some benchmark, which people think
+requires high expressivity. And if it performs well on that, you say, okay, it has high
+expressivity. At least that was my impression. I'm, you know, happy to learn, maybe I was wrong,
+and there's a nice mathematical formula for that, but I can't come up with one and I'm not aware
+of any. And so we tried it on one benchmark, which is called IMDB, which is basically just
+classifying its sentiment analysis. So you classify movie reviews from this IMDB database,
+exactly. And that can be long, and that can also have long-term dependencies, right? I mean,
+the front of the reviews would be, I don't know, some kind of irony thing. You know, I really love
+this film. And then in the end, or this movie and in the end, you say, I love it because it sucks.
+So you have some kind of long-term dependencies, but you also have high expressivity because
+you do natural language processing. I mean, they're way better benchmarks for that, I guess, but it's
+at least a start. And on that, we got quite good results. So it outperformed corn actually,
+but we have to say we are using two layers for that. And for corn, we're only using one layer.
+So it could also be a layer thing. But for this independent unicorn, you can't use one layer,
+because then you really have no interdependencies. And you also struggle a lot. So this interdependencies,
+you still have them, but they come from the input to hidden matrix. And so you basically
+delay them by one layer. Do you know more or less what I mean? So you need at least two layers to
+have some kind of interdependencies between the hidden neurons. Okay, awesome. Where do you see this
+research going next? Yeah, so my personal big goal is to, you know, so far what we did was we have
+some kind of great instability, which is great. We can learn long-term dependencies, but there's
+a reason why people use LSTMs all the time, because they are just so expressive. And for instance,
+if you if you try something like this PTB pantry bank language modeling task, where for instance,
+you have some some Wall Street articles, I guess. And the the chart level would be that you read
+in the sequence of the words of the characters. And you want to predict the next character,
+basically, in the sequence. I mean, as humans, we are quite good in that, I guess. I mean, if I would
+say to see the and then would say, okay, next comes an S to see this, for instance. So for us,
+it's it's quite quite easy to do maybe, but for RNNs, it's quite hard, especially if they're not
+expressive. And if you're honest and you try, you know, all these more or less famous long-term
+dependency RNNs, they are not performing very well. So if you if you take a look at the metric they use,
+then it's all the time way worse than LSTMs. So X, RNNs are worse, our corners worse or
+unique corners worse. All these kind of nice nice RNNs, they suffer from limited expressivity. I
+just want to be so honest, right? So I'm not saying that corn is like the best thing out there.
+It's a silver bullet, use it all the time. No, there's a real use case for this. This is long-term
+dependencies, but if you do like high crazy expressivity tasks where you don't require long-term
+dependencies, then don't use it basically. And so the idea is that LSTMs are very strong in that,
+but they suffer from not being very good at learning long-term dependencies to have something,
+you know, which kind of bridges these two things, which kind of connects these two things. So
+something which has good can learn long-term dependencies very efficiently, but at the same time
+has high expressivity. And actually we are working on something like this. We are working with
+the group in Berkeley right now, and maybe in a few months, you know, we will publish. Yeah,
+yeah, then there will be some good news. I'm really motivated. I'm really thrilled about this
+project. It's working really good. And yeah, that would be my ultimate goal in this kind of RNN
+community. Oh, that's great. That's great. Well, Constantine, thanks so much for taking the time to
+share a bit about what you're working on. Yeah, no worries. It was a pleasure being here. My pleasure.
+Thank you. Bye-bye.

@@ -1,0 +1,783 @@
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+people, doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington.
+I'd like to start out by thanking everyone who joined me last week at the Twimble AI Summit
+in Las Vegas.
+It was a great event.
+For a summary of the event and my key takeaways from each of the event sessions, sign up for
+my newsletter at twimbleai.com slash newsletter.
+I wrote about it right after returning from the event last week and when you sign up,
+you'll automatically get an email telling you how to get access to back issues.
+Again, that's twimbleai.com slash newsletter.
+Event season continues this week.
+Tomorrow I'm key noting at the Prepare AI event here in St. Louis and then making my
+way out to San Francisco for Figure H's Train AI Conference.
+The Train AI agenda looks awesome and I'll be on site all day podcasting so if you're
+in the Bay area, you should definitely plan to stop by.
+Of course, if you do, use the discount code Twimbleai for 30% off of registration.
+Be sure to give me a shout if you're planning to be around.
+In this episode, I'm joined by John Bohannon, Director of Science at AI Startup Primer.
+As you all may know, a few weeks ago, we released my interview with Google Legend, Jeff
+Dean, which by the way, you should definitely check out if you haven't already.
+Anyway, in that interview, Jeff mentions the recent explosion of machine learning papers
+on archive, which I responded to jokingly by asking whether Google had already developed
+the AI system to help them summarize and track all of them.
+While Jeff didn't have anything specific to offer, a listener reached out and let me
+know that John was in fact already working on this problem.
+In our conversation, John and I discuss his work on Primer Science, a tool that harvests
+content uploaded to archive, sorts it into natural topics using unsupervised learning,
+then gives relevant summaries of the activity happening in different innovation areas.
+We spend a good amount of time on the inner workings of Primer Science, including their
+data pipeline and some of the tools they use, how they determine ground truth for training
+their models, and the use of heuristics to supplement NLP in their processing.
+Alright, let's do it.
+Alright, everyone, I am on the line with John Bohannon.
+John is Director of Science at a startup called Primer.
+John, welcome to this week in machine learning and AI.
+Hey!
+So this conversation is an interesting one.
+They grew out of a listener response to a comment made in my recent interview with Jeff Dean.
+Jeff commented on the explosion of machine learning papers on archive, and I jokingly
+asked if Google had already developed the deep learning based summarization techniques
+to help us all keep up.
+And it turns out that one of your colleagues, John, reached out to let me know that you
+have been working on this and have built it.
+And I think just before we got started, you showed it to me and it's pretty cool.
+So here we are, but before we get into the details of that project, you've got an interesting
+background in molecular biology and data journalism.
+How did you find your way to AI?
+It's a long journey, but I think it started in computer camp when I was nine years old.
+So that's the kind of summer camp I went to.
+But yeah, as my studies progressed, I actually drifted away into biology in a PhD in molecular
+biology.
+And then before doing my next postdoc, I wanted to take a break and do something different.
+So I tried being a journalist, a science journalist, and fell in love with it and basically jumped
+off the academic track and became eventually a computational journalist, basically using
+data and code to find and tell stories that are impossible to tell otherwise.
+And a friend of mine named Sean Gorley, who did his PhD with me in England at the same
+time.
+I actually lived in the same house.
+Our fate eventually became intertwined again.
+I moved to the Bay area to do a visiting scholar stint at Berkeley and he's in San Francisco.
+He says, hey, John, I've got this startup called Primer.
+And you really should come by and check out what we're doing.
+I think you're going to find that the stuff we're working on really, really matches with
+the stuff you work on.
+And so eventually I had some time and I was like, okay, I'll pop over there for a week.
+And sure enough, within one day, it was clear that they were solving problems that I just
+find so hard and I wanted so badly to solve myself that, basically, if you can't be
+to join them.
+Nice.
+Nice.
+So maybe for context, you can tell us a little bit about what the company does and the
+kinds of problems that they're working on or you're working on.
+Yeah.
+So Primer at its core is an AI company that's trying to make machines that read and write.
+That's the fundamental problem that underlies all this.
+In terms of a business model, we, for example, automate a lot of the work that a junior analyst
+would do in, say, a bank or the intelligence community.
+Also, frankly, what a journalist does.
+I feel like I'm reverse engineering myself every day because a lot of what you have to
+do.
+It's also somewhat automating a lot of what you do, Sam, like all of our jobs, what we
+have in common is that we have to read a ton of stuff, often very technical stuff, and
+makes sense of it.
+And then tell stories.
+Like that is the fundamental unit of information.
+That's our data structure, a story.
+And that is really hard for computers to do.
+It's really hard for people to do.
+Exactly.
+Yeah, it's one of those things that's both, that's hard for everyone.
+So I think you're relatively new to this podcast, but those that have been around for a while
+from the beginning know that it started out as more of a news-oriented format as opposed
+to an interview format.
+And basically, my mission was to kind of summarize the most interesting AI and ML tidbits from
+the previous week's news.
+But that is super, super hard, especially with so much news happening all the time.
+It would take a ton of time to curate all of that information and digest it and turn it
+into stories as you're saying.
+Exactly.
+And so like you face several problems and what we're trying to do at Primer is break it down
+into reasonable problems that you can actually attack.
+So one is, for example, what's relevant?
+What are you telling a story about?
+It's not enough to just say, I want to tell a story about last week's AI research.
+It's like, okay, well, what documents are relevant?
+Even if you could get the papers, then it's like, well, where do you get all the conversations
+about those papers?
+How do you figure out what those papers were about?
+If there were a thousand papers published over the past several months and you wanted to
+tell a story of a thousand papers, I don't know how a human would do that.
+Well, actually, I can tell you, humans simply don't do that.
+What we do is we take shortcuts.
+We sort of fly blind.
+We grab the zeitgeist and that's kind of a random process.
+It's like, well, I overheard some conversations and this seems to be a hot topic.
+I'm going to decide and so I'm going to amplify it.
+And what you end up with are coherent stories, but they're not necessarily what actually
+was the most important thing that happened.
+It's just some strange sampling of the space of all things that happened and that's the
+best you can do.
+But what if you had a machine that could actually read everything and show you in some sense
+everything that happened?
+That's the goal.
+So you showed me a kind of a portal into research papers is the idea to provide that as
+a service or more of the platform that allows someone to create that thing.
+So we're in a pretty privileged position, we're privileged in the sense that we've already
+got some really big customers.
+So the federal government, Walmart, Singapore's sovereign trust, several others coming online
+soon, those are the relationships that actually pay the bills.
+And so we do things like if you have a portfolio manager who's trying to keep track of a ton
+of companies, that portfolio manager needs to stay on top of all the relevant developments
+in the space roughly defined by all those companies.
+All the news about them, maybe SEC filings, if you want to assess changes in risk profile,
+it's sort of an overwhelming task.
+And so primer basically superpowers those analysts by automating all the things that are really
+hard and tedious and time consuming, and it basically reduces the cost of curiosity.
+It allows those analysts to not spend half their day reading a million things just to find
+out what was worth reading, instead they can see summaries of 100 papers at once, get
+a sense of whether it's worth diving deeper or look at another batch of 100 papers.
+It also gives alerts with predefined conditions so that you don't lose a second if something
+that you know in retrospect is going to be a situation worth knowing about, you'll get
+a heads up.
+So meanwhile though, you can use the same machinery that does reading and writing and summarization
+to do things like the thing I sent you, like read all of archive.
+So we do have a business model for this system going forward.
+We're going to be developing it into products for, for example, the pharmaceutical industry.
+But for the time being, we just have this beautiful laboratory where we get to really push the
+edge of natural language processing.
+Tell us more about this archive project that you've built.
+Yeah, archive is a really good illustration of this problem that we all face of too much
+information.
+If you ever go to the archive website, you basically see a fire hose of research coming in.
+Archive is amazing because it is literally the place where research gets debuted.
+It's the first place you'll see a paper coming out from Google or Microsoft or MIT on
+the topics that are basically going to define the machine learning progress over the next
+10 years.
+In retrospect, you can look back and you can see the timeline of this amazing scientific
+revolution unfolding.
+But it's not at all human readable.
+Even if you are an expert, even if you have a PhD in machine learning, you just can't
+make sense of all of archive.
+You might be able to make sense of the papers in your own subdomain, but even there, it's
+tough.
+You've got to find them.
+Archive isn't designed for humans in a way.
+I mean, it is, but it's just not user-friendly.
+Primer science is a stab at making sense of that.
+Basically, it's a really hard problem that's well-scoped.
+What it does is it harvests all these papers and it does unsupervised learning on the content
+of the papers to try and figure out what are the topics that this naturally falls into.
+So within machine learning, for example, I'm just looking now at some of the latest.
+The system has discovered that there are not only image reconstruction papers, there's
+like 58 papers actually in this bag that are on that theme, but it has discovered that
+there's a whole bunch of research on traffic and temporal analysis.
+There's something on mathematical optimization.
+There's a whole bunch of papers about semantic segmentation.
+All of this is happening without an ontology or a knowledge base.
+You're going to have to have such a system if you want it to work on any corpus of papers.
+You could imagine building some super ontology that captures everything there is to know
+about science, but then it's going to be out of date next month.
+I wouldn't want to build that thing because maintaining it would be a nightmare.
+Instead, you need a system that does more or less what humans do on a smaller scale.
+What we do is we look at things and we just sort of eyeball it and say, oh, these are
+kind of about this and these are about that.
+You get a natural segmentation of the space.
+Within each of these topics, it does a time series analysis and it tries to figure out if
+I take all the news and the social media signal, all the tweets about this research as it
+was published and afterwards, all the commentary, all the real time online critique, sort of the
+peer review that's happening in real time out in the open, can I detect events?
+An event can be more than just the publication of a paper.
+It could be that, for example, a self-driving car crashes somewhere and suddenly the world
+is looking intensely at an issue related to what we do and don't know about these systems.
+Some of this research may get pulled into that.
+If you want to detect that real-world event, you need a system that can actually divide
+all those documents, all those tweets, all those things that are relevant to the same thing
+and figure out how to segment them in time.
+It does that too and it tries to figure out, essentially, what were the big events in
+this space?
+How was human attention in the world divided in relation to this corpus of papers?
+Then does some other cute tricks to make it useful to you as you dive into all of this
+information.
+It pulls out all the people and tries to tell you what it knows about them.
+Just based on the corpus, mind you, we're also developing a version of this that is building
+a knowledge base and actually learning about people as it reads the news and as papers are
+published.
+What I sent you this morning is just, essentially, out of the box, I don't know anything about
+the world, but I know this group of thousands of papers you sent me and this is what I can
+tell you about them.
+These are all the people.
+These are all the topics.
+These are the events that seem to all of this information seems to be pointing at out
+in the real world.
+One is, if you're finding the jargon really hard to understand, I've generated a dictionary
+for you that is kind of a magical dictionary where if you click on a technical term, it
+actually shows you who coined that term, how is it defined?
+Give me some context about how to use this kind of like a Oxford English dictionary on
+steroids.
+Nice.
+Nice.
+I'm finding this interview more challenging than most because as you're speaking, I've
+got the tool in the background and I keep seeing papers that look really interesting.
+It's working.
+Super, super distracting.
+Maybe can you tell us a little bit about the technology that's making it all happen?
+What does the stack look like?
+What does the pipeline look like?
+How are you approaching the unsupervised learning piece?
+It all begins with a gigantic elastic search index.
+I think if you talk to a lot of the people that you've interviewed even already about what's
+at the bottom of this whole stack, there's often some massive index of documents.
+We're ingesting the news and blogs and tweets and scientific papers every day and that's
+the starting point of this whole system and it has this growing corpus.
+If you query as we've done today on artificial intelligence, for example, the first thing
+it has to do is retrieve all the information that is relevant and then kicks off this pipeline
+where basically the first thing it does is it tries with unsupervised learning plus
+several other steps to divide all the information up into natural topics.
+Within each topic, it then tries to detect the events in the real world that any of these
+documents might be referring to.
+If you've got 100 documents that might be news documents and scientific papers and
+social media signal about all the above, you do a time series analysis on it and you try
+and figure out, are there real world events?
+It's trying to make an inference here.
+Are there real world events that all of this information is pointing at and describing?
+It looks at events basically from the perspective of news articles, is that right?
+The system you're looking at does, yeah, but you can imagine any document that has a meaningful
+publication timestamp and includes a description or commentary about something that happened
+in the real world.
+It could in principle be mapped to something called an event.
+The concept of an event is bigger than what a human intuitively would call event.
+It might actually be, for example, an explosion of discussion around an issue.
+For example, the Me Too movement is not just an event, it's made up of many events and
+some of these events might not even be something that could have been observed in one place
+at one time, but there is a natural segmentation of all the things happening in the world into
+something that we call events.
+So that's the theory behind this.
+Then if you click over to overview, sorry to distract you again, then it tries to tell
+you a story.
+So we've got many versions of this.
+What you're looking at is basically one of the earliest versions of this, but basically
+if you asked a machine to go and read thousands of things and you give it a budget of one
+page to tell you what it learned, this is starting to get at what you'd expect to come
+back.
+This is what you get.
+It's basically, and it's kind of like a technical report on these are things that I learned.
+These are the big events.
+These are the big papers.
+This is what's getting us attention.
+Oh, and then by the way, my topic analysis has revealed that there are some changes of
+the foot in artificial intelligence, and these are the things that seem to be trending upwards
+and are really interesting.
+And oh, by the way, I discovered there's this weird paper that seems to fall in this topic,
+but it's deeply connected to this other topic, and that's statistically strange.
+I need to tell you about it.
+And by the way, here's some people who seem to be getting a ton of attention, and here's
+another person who has collaborated with them on a high profile paper, and they've never
+worked together before.
+That's interesting.
+So you can see what's going on here is the system has a model of what humans find interesting.
+And of course, we humans at Primer built that in.
+There's a story logic that I don't realize this.
+You don't want a system to tell you everything it learned.
+It's just going to be another fire hose.
+You've made no progress.
+A one-to-one map of the world is not a useful map.
+So you need something that will compress the information and try and tell you a story.
+So that's what the system does.
+I think I interrupted you as you were about to start talking about the pipeline that you're
+sending some of this stuff through.
+And just going back to the beginning with archives, are you ingesting all of the archive
+papers or crawling that site?
+Yeah.
+So Paul Ginsberg, who founded and still runs archive, is a friend of mine from a good
+while back.
+And he uses Primer Science as well.
+I think actually he's the very first one I made a user account for.
+Oh wow.
+Yeah.
+And so he's really helped out over the past year, making sure that we have direct access.
+So we don't have to scrape the site.
+We basically just pull down the entire day's new papers on one go.
+And we do the same with news, except it arrives more or less in real time.
+So we have a real-time stream, more or less, of the news with maybe a 10 minute delay.
+And we've got a real-time stream of all the tweets that are relevant to the space.
+Yeah, those via commercial APIs of some sort.
+We get them directly from Twitter.
+Okay.
+So yeah, we have a day to deal with them.
+Okay.
+And the news?
+The news we actually have several sources of.
+One of the most convenient is Lexus Nexus.
+They have a service called Morover.
+You can actually purchase a fire hose of news.
+They do a really good job, actually.
+Oh wow.
+Okay.
+So you pull all that into your Elasticsearch index and maybe talk a little bit about some
+of the underlying NLP bits that are enabling all this.
+Yeah.
+So when you kick off a query, what's happening is you're making a lot of reading happening.
+So for example, if you take a look at the topics that have been generated, text and word
+embeddings, quantum, and all of those topic labels that is generated, it actually
+discovered and chose those from the content of the articles themselves.
+So the first step in any NLP task on documents is to tokenize the entire document.
+So are you familiar with tokenizing?
+Mm-hmm.
+Yeah.
+So you basically discover all the words and punctuation and you run an analysis that
+gets you the parts of speech.
+It's kind of like what you did in grade school when you made the sentence diagrams to try
+and make sense of all the different parts of what someone says.
+And then a whole bunch of things happen in parallel.
+Basically, there's some things that are useful if you give it a bag of words, so you can
+take an entire scientific paper or even a thousand scientific paper person.
+They turn into bags of words.
+And with that kind of analysis, you could, for example, discover the groups of words,
+the Ngrams, that basically best describe this space and you can generate a label.
+So if you go into any of those topics, it has decided to give that topic a name based
+on the language within the documents themselves within the topic.
+So I'm still amazed that it works, frankly.
+NLP is kind of magical.
+When something makes sense to a human, when there's a machine that didn't really understand
+it in the same way you did, it's kind of magical.
+Are you using kind of off-the-shelf NLP toolkits, NLTK-5000 stuff, or are you rolling your
+arms off?
+No, we started off that way.
+So we've been using this tool Spacey from the very beginning.
+It's free, it's open source, and it's really powerful.
+And it's really, what shocks me is that there are just two people at the heart of this project,
+a fellow named Hannibal and a gal named Enis, who live in Berlin.
+Not far from where I lived for a few years, and I've gotten to know them a little bit
+just recently.
+And it does the nuts and bolts NLP that you need.
+So it will tokenize, but it'll also discover named entities.
+It'll help you find the people and organizations, and so forth.
+But you need to train it.
+That's something that we have discovered is just probably like everyone else.
+It'll get you started, but then you need to solve your own problems.
+It's only a starting point.
+So for example, with the people and all the information that we can extract about them
+and tell you a story based on the people in this space, Spacey is one of the things
+that we use early in the pipeline, but then there's a ton of custom code that we had to
+build to basically get the kind of information that Spacey can't get to clean up the stuff
+that Spacey gets wrong to link it with all the other information we're extracting by
+other means.
+And it's a mixture of machine learning and good old fashioned regular expressions.
+What I find so fun about being at an AI startup is the goal here is not to generate research
+papers.
+The goal is to just solve problems really well by whatever means you can.
+So which I think is like the right motivation to have.
+Right.
+You're just motivated to publish cutting-edge papers.
+You don't care if it works.
+I went to this conference called NIPS, which is essentially where all this cutting-edge
+research is being debuted.
+And something that really struck me is half the stuff that people are bragging about
+doesn't even really practically work.
+Our works within such a narrowly constrained way.
+Exactly.
+With a point problem that'll work.
+It's computationally intractable or whatever.
+And that's fine.
+It's like that's the whole point is to debut tomorrow's technology, but it's frustrating
+when you're trying to build something.
+You get excited about some new idea and you chase it down, only to discover, oh, this
+actually never could have worked.
+Yeah.
+Yeah.
+I've had that experience.
+I've had that experience.
+I found a paper using primer science, of course.
+This is a pretty weird situation to have AI eating itself.
+We basically have an AI system that reads AI papers, which we then used to try and improve
+the AI that reads papers.
+But we came across a really exciting paper and fully replicated it and it just doesn't
+work.
+And that's okay.
+That's how it goes in this space.
+When you're right at the edge of knowledge, it's not all going to work.
+So we have this principle, a primer, of always trying to find the practical solution as
+quickly as possible.
+Don't get seduced by ideas that are sexy to talk about, but it's not actually solving
+your problem.
+Yeah.
+I should throw in a plug for my newsletter.
+I've recently written on this topic of reproducibility and both science and AI drawing off
+of a recent interview I did with Claire Galnick on this same topic.
+But I really appreciate you owning up to that broader pipeline.
+One of the questions I get a lot when talking with folks about their products or projects
+is people want to know like, okay, granted you've applied some great cutting edge machine
+learning AI stuff, but what else is there required to make it work?
+What are the, how much heuristics are kind of in and around these tools to actually make
+it work?
+So to hear you note that, yeah, you know, good old regular expressions are used liberally
+to make sure that this all works.
+I think it's important for, it's important to realize that.
+Oh, yeah, absolutely.
+I guarantee you, you go into some of the biggest, most cutting edge groups at giant tech
+companies.
+You think that they're doing some kind of pristine AI that you just press a button and
+it understands things.
+I guarantee you look under the hood and there's just a ton of regular expressions.
+Now, that's not to say that machine learning isn't the way forward.
+Like it totally is, but to make these things work on actual problems, it's still labor
+of love.
+So you're doing a lot with Spacey.
+Are you also, which I'm assuming is more traditional NLP technology approach?
+Are you also doing things with like word-to-vec and deep learning based approaches?
+Yeah.
+In particular, as we've expanded into other languages beyond English, Spacey is just
+not going to cut it when you want to make something that understands Russian and Chinese.
+So we've actually had to pretty much make a bunch of tools from scratch, but it relies
+on word vectors and word embeddings and where things get complicated is actually where
+you try and pull this all together.
+If you use deep learning to extract, for example, some pattern in a corpus of 10,000 documents,
+the harder thing, once you've extracted it, is knowing whether you're right and whether
+it's worth saying.
+I can find a bunch of patterns in text pretty easily, but the harder thing is assessing
+how confident am I that I've found something that I haven't just misextracted.
+It's not just a serious pattern.
+And then even harder than that, is it worth telling you, like, how do I square this with
+my model of what humans are interested in?
+Right.
+Where we're headed with this is basically a model of stories, which ultimately is a model
+of humans.
+Humans are storytellers.
+We've evolved to do this thing.
+We just take it for granted.
+What we're doing right now, this conversation, is incredibly high tech.
+You and I, in real time, are like gliding through a narrative that this is.
+Many years of technology evolution.
+It's amazing.
+Yeah, it's amazing.
+So I think this is actually the next frontier of AI, decoding what story is.
+Yeah.
+So what does that mean practically?
+How are you approaching that?
+Yeah, so here's a bite-sized example, if you make something that reads scientific papers
+and tries to tell you what you need to know about AI research last week, for example.
+It's not enough to just give you a dashboard of, here's the most shared paper.
+Here's the paper that got the most news.
+Here's the paper that currently has the most citations.
+That's not doing much heavy lifting for you.
+If you were to hire a thousand human analysts to just work for you, like imagine you had
+that luxury, what would you ask them to do?
+That's kind of the better guiding question and what sort of story would they tell you?
+What would the format be?
+I guarantee the humans wouldn't come back and give you a dashboard.
+They would say, okay, the big deal last week is that a self-driving car crashed and it's
+kicked off a huge discussion about quality control and where system errors are going to
+creep in and how you can make machine learning systems understandable from an engineering
+point of view.
+How are we going to deal with this emerging problem?
+The people who are weighing in on this are the following researchers in deep learning,
+but here's some other people who are very knowledgeable, but they're in a adjacent domain.
+We think this is really worth knowing, but meanwhile, by the way, we discovered a paper
+published by a couple of researchers that you've rarely heard of, but it's getting a lot
+of traction and it seems to be on a topic that is emerging and you're probably going to
+care about this.
+It's basically, it has to do with voice recognition and we know that that's an interesting topic,
+but the more interesting thing is that this researcher is really well known in a totally
+different field and is just like diving into this and that's unusual.
+So check it out.
+Here's the paper.
+I'm just going to go out on a limb here and say, you really should read this paper.
+By the way, here's basically a new concept that is creeping into the space and we haven't
+seen it before.
+This might be a fluke, but I think this is actually something that's worth knowing about.
+Here are five papers that you should read.
+I'm working within your budget here.
+That's what all the humans would do.
+It's basically the one-to-two-page presidential intelligence briefing.
+Ideally, that's what it would look like.
+A ton of research has gone into boiling things down to a very tight story and that's all
+you need to know.
+The idea then is that you've got some kind of generative model for creating these, basically
+you're briefing over and it has two steps.
+Like at least two steps.
+One is, what information can I find that's truly relevant, the raw ingredients of a story?
+And then the next step is, well, how can I synthesize this into an actual story?
+I have to do text generation, document planning.
+You give me a budget, a page, a paragraph, maybe you just want a bullet point and I'll
+work with it.
+I'll be able to express this as a story given that constraint.
+And so kind of going back to our earlier exchange about good old fashion heuristics, how to
+what degree?
+I haven't looked at compared one of these briefing pages versus another, but how much is
+generation and how much is more templates and things like that?
+Yeah, so the philosophy we followed is always start fast and doable, put another way.
+You always want to start with a model that you can fully understand yourself and implement
+quickly so that you have some baseline.
+Sure.
+Yeah, we've always started with, first can you do it yourself as a human, maybe even
+no computer involved.
+If you were to read 10 papers and try and say something intelligent about them, for example,
+tell me, tell me, for example, what, if you were to classify events, and I gave you a
+pile of papers and I said, how would you classify these events, kind of tags would you attach
+to them?
+Or if you were looking for a particular kind of event, could you divide papers into yes
+and no?
+Always start with yourself, you the engineer, can you yourself do it?
+Because if you can't, you're probably going to have a hard time teaching a computer
+do it.
+Then if you get some other humans, probably the person just two chairs away from you, if
+you can get someone else to do the same task independently and get the same ideally or
+a similar answer, okay, now you're in good shape.
+Only then do you start building a computational system to try and do this automatically.
+Your first stab at that should be something great forward, a set of regular expressions,
+heuristics.
+Can you actually find this yourself using rules that you yourself devise?
+Then the only way really to get beyond that, to really tackle increasing complexity, is
+to have something that will learn on its own.
+You'll never do that with regular expressions, you have to use machine learning to have
+a system find patterns itself in a changing world.
+So I think you're saying then that there's, you know, you're somewhere on the spectrum
+of templates and machine learning.
+Oh yeah, always.
+In fact, I think the best things out there are always somewhere in the middle.
+Right.
+I think by definition.
+Yeah, and essentially it becomes a race.
+Can we build something that can learn faster and output better, smarter content than the
+system we have?
+We had a little race actually recently to try and build an event classifier and a brilliant
+engineer named Leonard Appleton took a stab at just using regular expressions, no machine
+learning.
+And another brilliant engineer named Yash took on the task of solving the same problem
+using a really complicated machine learning graphical model.
+And sometimes John Henry wins the race.
+Frankly, Yash could not build a system, at least last I checked, that could do better
+than Leonard's massive, complicated, regular expression, heuristic engine.
+But you know, eventually, eventually machine learning will win.
+Like we all know that.
+Right.
+Right.
+But that's the beauty of a practical approach.
+When you're really driven by practical principles, you're willing to say, well, we've got
+a better solution that's actually simpler and easier to understand.
+Let's use that for now.
+Keep trying.
+But it's never long before a machine learning based system does better.
+It's just an incredibly powerful tool.
+When you're using machine learning for tasks like summarization where you referenced earlier,
+you know, first you do it, then you get someone else to do it and you compare them.
+You know, your summary of a given paper or a given paragraph is likely to be very different
+from mine.
+Like what do you, how do you find ground truth so that you can train learning models?
+Yeah, that you've really put your finger on the hardest problem.
+Stories by their nature can be told infinite ways.
+And there are some automated techniques that have been around for a decade.
+They have French color names.
+I don't know how that came about, but there's something called russian, something called
+blue.
+And what they do is they treat the output as bag of word problems.
+And they try and find out how much information overlap.
+There is between a human summary and a computer summary.
+As you can imagine, that's great if you're trying to measure whether you got it terribly
+wrong.
+Right.
+If we make two summaries and they have not going to do with each other, then they're probably
+they're probably not talking about the same thing.
+That may be.
+That's right.
+I mean, summarizing fiction, right, you could be we could be summarizing on two totally
+different levels and both be right.
+That's true.
+That's absolutely true.
+I mean, the same, I think the same holds true for news.
+I mean, you know, I, I'll let you continue, but that seems like a very, very rudimentary
+metric.
+Well, I mean, you'd be surprised then to learn that the latest, greatest papers in this
+field are still using those metrics because they're easy.
+You know, you can, it's, it's a one click measurement, right?
+But it, it, it really doesn't help when you want to assess a subtle output of a story
+that could be sliced and diced sort of infinite ways.
+Unfortunately, it becomes a capture.
+You need some human to read it and go, oh, yeah, that makes sense or that's crazy, right?
+But there are, there are some techniques you can use, so one is you can actually crowd
+source assessment of narrative, you can, you can give human annotators and scorers a
+system, a rigorous system.
+So like, you can measure the coherence.
+You can measure the, the sophistication, the, whether or not you've, you've really summarized
+the space well in various ways.
+Those, those sounds like they would require a fairly sophisticated crowdsource.
+Yeah.
+Yeah, so that's right, like the, the more technical and sophisticated this task becomes,
+the less you can rely on mechanical Turk.
+Uh, in fact, eventually you've got your own engineers doing this.
+So it's, it's definitely not scalable.
+Um, but, uh, there are, uh, there are some, some tricks that you can use.
+So for example, um, if I generate a bunch of summaries, uh, on a topic that I've already
+summarized, for example, if I have a Wikipedia article about it, I can at least find out
+if the most important entities in the narrative have been represented.
+And I can also, uh, turn the system around and do extraction on the summary.
+You can even, I will suggest to make a generative adversarial network that generates stories
+and critiques them.
+You can see where this is going.
+Uh, eventually you can, you can have a system that, uh, tries to check off all the boxes
+of what counts as a good story, like you've, you've talked about the most important entities
+and you've expressed their relationships, uh, you've come in under budget in terms of,
+uh, space on the age, um, but ultimately you're going to need a human to assess whether
+it's a well-written story until we can crack the code of text style transfer, um, where
+you can actually say, tell me the story and the style of a New York Times reporter or
+tell me the story in the, in the style of, uh, um, you know, a, uh, terse military briefing
+time.
+Send on my text in, uh, Hemingway style.
+Exactly.
+Until we can actually have, uh, networks that can both detect and reproduce, uh, narrative
+style.
+Um, I think we're, we're, for the time being stuck in a world where it's really hard
+to assess how well our systems are doing.
+Um, ultimately you want to hook this up to your, your users and, and either passively
+or actively harvest their feedback.
+So, um, the simplest version of this, of course, is A-B testing.
+If you write many versions of a summary, um, and you expose a large number of humans
+to A versus B, you can just find out, uh, what they think of it by, for example, whether
+they click through and read it.
+You can, you can also make it active.
+You can let users say, yeah, that was good or that was bad.
+We're going back to my, uh, Hemingway text summaries, uh, Google inbox presenting you
+three choices for how to summarize the response, the appropriate response to an email.
+Yep.
+And we've played with that as well.
+We, we generate alternative summaries, uh, to events, for example, um, it's, it's, it's
+a really powerful way of real time effortless quality checking.
+You don't, you don't want to have to sort of pause your whole engineering operation in
+order all the time, just to assess how well you're doing.
+You really want it to be sort of continual.
+You want to always be reading the output of your own, uh, computational systems.
+We call it dog fooding.
+Mm-hmm.
+If you, you got to be real time dog fooding.
+And so the nice thing about primary science is this thing that I'm building is we, uh,
+we use it to discover the research that is going to help us make it better.
+Right.
+And so if you keep on using the thing, you are your own quality assessor.
+That really helps.
+Right.
+Right.
+Right.
+But hard to scale.
+I, I wish I could clone myself in some way to, uh, assess sort of, uh, at a thousand
+X.
+Now one thing that I didn't see in what you've built it, it seems like it is, it does
+a really good job at kind of this meta characterization of archive and what's happening
+in, in different categories.
+But I didn't see it attempting to summarize individual papers, which is the thing that
+Jeff Dean and I were originally talking about.
+Is it trying to do that somewhere?
+Not in what you're looking at.
+We are, we are actually working on that, that summarization problem.
+Okay.
+Um, yeah.
+We've taken two strategies, uh, and they're kind of running, uh, in parallel.
+One is extractive summarization, where you, you, you, you're, the system is allowed to
+pull words and even whole sentences directly from the text and then kind of pull them together
+into a summary.
+That works extremely well when you have a large number of docs, like if you, if you have
+a hundred documents all on all about the same thing, uh, extractive summarizations really
+powerful.
+And really efficient, uh, and then the alternative is abstractive summarization, where the system
+is going to write its own words, often character by character, uh, out of thin air and it has
+a language model.
+So it reads all these things and it, it basically makes a prediction about, uh, what it should
+say next as it generates a summary, um, a, a really nice, uh, bit of progress in this
+field that we've been using is abstractive summarization with pointers.
+So the idea here is you also have a sense of your confidence about whether the word or
+phrase that you're putting, uh, into the summary at any given time is going to be a good choice.
+And if you're not so confident, you point back to the text and you grab the thing itself.
+So for example, if you had a sentence that said, um, uh, a, um, one of the most exciting
+areas of, uh, artificial intelligence these days is, um, generate, generative adversarial
+networks.
+Now, if, if, if generative adversarial networks, that phrase is something that you have
+an encountered or your model basically says, I'm, I'm not sure if that, if I can actually
+paraphrase that, then what you want to do is what a good human writer would do.
+You just go back and you grab that thing.
+So you can, you can summarize while also having some of the advantages of extractive.
+So summarizing basically around the, the entities that you aren't too sure about.
+Exactly.
+It basically becomes a sliding scale between abstractive and extractive.
+The more confident it gets, the more abstractive it gets, the more flexible it gets, which
+will allow you to summarize a single scientific paper, for example, uh, in a couple of sentences.
+Um, and if you're not so sure, then it slides over to extractive and it will just pull
+out the sentences that it deem and the phrases that it deems are the most central and informative.
+Interesting.
+It's a hard problem though.
+It's a really hard problem.
+Another thing, uh, that makes it hard when it comes to scientific papers is they already
+have their own summaries.
+They're called abstracts and you, and you'd, and you'd think that, oh, great, this, it,
+job done, but, uh, apps, as you know, abstracts themselves can be so riddled with jargon and
+references to arcane things that it's hardly a summary at all.
+It's really only a summary for the authors of the paper, right?
+Right.
+So you really need a summary of the summary, right?
+And that's what we're working on.
+We're finding that you really do need to power this with an ontology and a knowledge base
+though.
+A library on that.
+Okay.
+So let's take, for example, a problem that I'm just starting to work on.
+How do you, how do you summarize and make sense of, uh, pharmaceutical research papers?
+So, uh, there is an ontology that is available to everyone, uh, that basically the NIH, um,
+paid for called MASH.
+And, um, it's, it's, it's kind of like, uh, every, every jargon term in, in, uh, biochemistry
+and molecular biology, gene names and gene types, uh, all of that is captured in this very
+rich ontology that was hand-built by, no doubt, by, uh, un thanked graduate students.
+And something that's really nice about MASH is that it's actually a subset of wiki data.
+And wiki data is the database, uh, that stands behind wikipedia.
+Um, now I, I say that, uh, in an idealistic way because actually, in real, that's the way
+it was dreamed up.
+Oh, wiki data is going to basically be the database that powers wikipedia.
+But in fact, um, it's not there yet.
+Humans, humans, um, vastly prefer to, uh, update wikipedia with content and wiki data basically
+place catch up.
+Nonetheless, it is a huge powerful, uh, open source knowledge base, uh, and the MASH ontology
+is a subset of it.
+And so, um, if you want to summarize a scientific paper, just a single scientific paper, the
+first thing you need to do is, is make sense of it.
+You need to map all of those words, which to the computer or just, it could be random
+numbers for all they cares has no idea what it means.
+We need to map them to concepts and that's what systems like MASH were designed to help
+us do.
+So the idea of being instead of what you're doing in science, primer, uh, and doing this
+in a totally unsupervised manner, here you're using the additional information you're getting
+from the, uh, pre-existing ontology to help the machine make sense of the various documents
+and to paraphrase it.
+So like a good summary is something that doesn't just like say less, uh, it also says, just
+as much but in a, in a compressed way, right, right, you know, if I just tell you the beginning
+of a story, I haven't really compressed that story for you, um, I need to like give you
+the sense of the beginning, middle and end and compress that all down into three sentences.
+And, um, you're not going to be able to do that just using a, uh, the standard NLP techniques
+on a scientific paper, you're just not going to be able to do it.
+No way.
+Right.
+You have to, uh, map that out to an ontology and say, oh, you know, this long sentence describing
+this, uh, genetic pathway, I can boil that down to a single sentence that says, um, the
+genetic pathway X, you know, interesting.
+But yeah, you, you need a lot of tacit knowledge to be able to do that.
+So that's what we're working on.
+Awesome.
+Well, John, this has been super interesting.
+I really appreciate you taking the time.
+Thank you.
+Anything else you'd like to share with the audience?
+Oh, just, uh, that, uh, I'd like to make a prediction.
+Go ahead.
+Well, I predict that the kind of stuff we're working on is going to accelerate artificial
+intelligence research more than anything else.
+I think building AI that can read the latest research on AI and help the engineers who
+build it, build it faster is going to, uh, vastly accelerate the whole process.
+Awesome.
+Well, we will put your prediction on the blockchain and, uh, just to make sure we get all the
+jargon in.
+Uh, exactly.
+Then we'll do an ICU.
+Awesome, thanks so much, John.
+Thanks, Sam.
+All right, everyone, that's our show for today.
+For more information on John or any of the topics covered in this episode, head on over
+to twimmaleye.com slash talk slash one, three, six.
+Thanks so much for listening and catch you next time.

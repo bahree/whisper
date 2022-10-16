@@ -1,0 +1,2543 @@
+WEBVTT
+
+00:00.000 --> 00:16.000
+Hello and welcome to another episode of Swimultalk, the podcast where I interview interesting
+
+00:16.000 --> 00:20.920
+people doing interesting things in machine learning and artificial intelligence.
+
+00:20.920 --> 00:23.440
+I'm your host Sam Charrington.
+
+00:23.440 --> 00:29.320
+The show you're about to hear is part four of our five part O'Reilly AI New York series,
+
+00:29.320 --> 00:31.800
+sponsored by Intel Nirvana.
+
+00:31.800 --> 00:36.880
+As I've mentioned before, I am super grateful to Intel for helping make this series possible,
+
+00:36.880 --> 00:41.480
+and I'm excited about the cool stuff they launched at the O'Reilly AI conference, including
+
+00:41.480 --> 00:46.520
+version 2.0 of their neon framework and their new Nirvana Graph project.
+
+00:46.520 --> 00:50.960
+Be sure to check them out at intonirvana.com if you haven't already listened to the first
+
+00:50.960 --> 00:57.040
+show in this series, where I interview Naveen Rao, who leads Intel's AI products group
+
+00:57.040 --> 01:00.600
+and Hanlon Tang and algorithms engineer on that team.
+
+01:00.600 --> 01:04.680
+It's Swimultalk number 31, and you definitely want to start there.
+
+01:04.680 --> 01:07.840
+My guess for this show is Reza Zade.
+
+01:07.840 --> 01:13.360
+Reza is an adjunct professor of computational mathematics at Stanford University and founder
+
+01:13.360 --> 01:16.760
+and CEO of the startup Matroid.
+
+01:16.760 --> 01:21.280
+Our conversation focused on some of the challenges and approaches to scaling deep learning, both
+
+01:21.280 --> 01:26.400
+in general and in the context of his company's video object detection service.
+
+01:26.400 --> 01:28.560
+All right, on to the show.
+
+01:28.560 --> 01:41.720
+All right, hey everyone, I am here with Reza Zade from Stanford University and Matroid.
+
+01:41.720 --> 01:48.800
+Reza gave a presentation earlier today at the O'Reilly AI conference, and I'm excited
+
+01:48.800 --> 01:50.320
+to catch up with him here.
+
+01:50.320 --> 01:51.320
+Hi Reza.
+
+01:51.320 --> 01:52.880
+Hey Sam, thanks for having me.
+
+01:52.880 --> 01:54.640
+It's great to be here in New York.
+
+01:54.640 --> 02:00.400
+I appreciate the time you're taking to talk about machine learning AI and the stuff
+
+02:00.400 --> 02:01.400
+I love.
+
+02:01.400 --> 02:02.880
+Absolutely, I love it too.
+
+02:02.880 --> 02:07.760
+And I've been having a bunch of fun talking to folks over the past couple of days.
+
+02:07.760 --> 02:11.000
+Why don't we start with a little bit of introduction?
+
+02:11.000 --> 02:14.920
+Tell us a little bit about your background and how you ended up doing what you're doing
+
+02:14.920 --> 02:15.920
+in AI.
+
+02:15.920 --> 02:16.920
+Sure thing.
+
+02:16.920 --> 02:22.320
+So I've been working on machine learning for around 12 years now, since I was 18, started
+
+02:22.320 --> 02:28.960
+at Google working on machine translation, language modeling, and word alignments for machine
+
+02:28.960 --> 02:29.960
+translation.
+
+02:29.960 --> 02:36.080
+Back when it wasn't neural in any way, more traditional phrase-based models, transitioned
+
+02:36.080 --> 02:42.200
+into distributed machine learning as a tool, so how do you take, say, 100 machines in
+
+02:42.200 --> 02:47.840
+training machine learning model that is either scaled across large model, large data, or
+
+02:47.840 --> 02:48.840
+many models?
+
+02:48.840 --> 02:49.840
+Okay.
+
+02:49.840 --> 02:53.720
+And that manifested itself in the machine learning library in Apache Spark, so that's
+
+02:53.720 --> 02:57.200
+one of the projects that I've worked on heavily.
+
+02:57.200 --> 03:02.040
+More recently, the Twitter who to follow suggestions, the recommendation algorithms on
+
+03:02.040 --> 03:03.040
+there.
+
+03:03.040 --> 03:05.880
+So if you go on to twitter.com, there are a lot of things on there.
+
+03:05.880 --> 03:09.280
+And one of the things you'll notice is the recommendation pane, it says, who do you
+
+03:09.280 --> 03:10.520
+want to follow?
+
+03:10.520 --> 03:15.400
+And the algorithm is behind that, we're actually part of a chapter of my PhD thesis.
+
+03:15.400 --> 03:21.880
+And then after graduating from Stanford, I got hired by my department to do a distributed
+
+03:21.880 --> 03:27.680
+machine learning class, as well as a more data science oriented class with graph theory
+
+03:27.680 --> 03:28.680
+in it.
+
+03:28.680 --> 03:29.680
+Okay.
+
+03:29.680 --> 03:34.680
+And while an adjunct professor at Stanford, I started matroid.
+
+03:34.680 --> 03:39.000
+The computer vision has been completely taken over with machine learning.
+
+03:39.000 --> 03:41.720
+And I've been working on machine learning my whole career.
+
+03:41.720 --> 03:45.880
+So ever since I've had a job, it's been about machine learning.
+
+03:45.880 --> 03:51.000
+And because the computer vision is so overtaken with it now, it was the perfect time for
+
+03:51.000 --> 03:55.560
+me to get into it, especially since computer vision also went through a revolution.
+
+03:55.560 --> 03:58.400
+Many problems that weren't possible before became possible.
+
+03:58.400 --> 04:00.560
+It seemed like the perfect opportunity.
+
+04:00.560 --> 04:05.200
+And so now, most of my time goes into matroid, the computer vision company, and that was
+
+04:05.200 --> 04:06.200
+a talk today.
+
+04:06.200 --> 04:07.200
+I gave a talk about matroid.
+
+04:07.200 --> 04:10.040
+We recently released matroid.com as their website.
+
+04:10.040 --> 04:15.640
+And I'm currently thinking hard about deep learning and computer vision on a day-to-day
+
+04:15.640 --> 04:16.640
+basis.
+
+04:16.640 --> 04:17.640
+Okay.
+
+04:17.640 --> 04:23.400
+Your talks span both the distributed machine learning, scaling machine learning, and matroid
+
+04:23.400 --> 04:26.600
+there, kind of in a role conversations, is that right?
+
+04:26.600 --> 04:27.600
+That's right.
+
+04:27.600 --> 04:31.600
+And matroid is a studio for creating and using detectors.
+
+04:31.600 --> 04:37.040
+Now, these detectors are a very heavy duty in terms of computational cost.
+
+04:37.040 --> 04:44.280
+And to be able to scale such a system to many detectors and many users and many streams,
+
+04:44.280 --> 04:51.440
+we have to build an entire cluster of commodity machines with fancy hardware GPUs in particular,
+
+04:51.440 --> 04:53.240
+and scale them up and down dynamically.
+
+04:53.240 --> 04:58.920
+So as more people use our system, we need to scale up, scale down so that we're not wasting
+
+04:58.920 --> 05:00.560
+resources.
+
+05:00.560 --> 05:05.480
+And the way we do that is, essentially, all of it is new.
+
+05:05.480 --> 05:10.120
+And we are particularly good at making sure it's also fault tolerant so that if, so just
+
+05:10.120 --> 05:14.640
+a little background, as a service, we provide the ability to monitor a stream of media.
+
+05:14.640 --> 05:19.360
+So let's say you're watching a TV channel and you want to see when there's a Coca-Cola
+
+05:19.360 --> 05:22.360
+logo show up on this TV channel.
+
+05:22.360 --> 05:25.480
+And then you can, of course, multiply that by all the TV channels in the world, which
+
+05:25.480 --> 05:28.600
+is my very hard to do for an intern in a production studio.
+
+05:28.600 --> 05:32.480
+But that's the kind of thing that's possible now when we provide as a service.
+
+05:32.480 --> 05:36.920
+That, the fact that there are thousands of streams that could come at us and some of them
+
+05:36.920 --> 05:38.920
+could go down and they could come up.
+
+05:38.920 --> 05:39.920
+And that could be our fault.
+
+05:39.920 --> 05:40.920
+We have to deal with that.
+
+05:40.920 --> 05:45.320
+It has to be computational ability to run these models.
+
+05:45.320 --> 05:48.080
+There has to be RAM to run these models.
+
+05:48.080 --> 05:54.160
+These are, these models have to fit into smaller GPUs.
+
+05:54.160 --> 05:59.800
+These GPUs have small amounts of RAM, not smaller GPUs, GPUs with small amounts of RAM.
+
+05:59.800 --> 06:03.760
+These are all challenges that have to be solved at the same time to be able to provide a service
+
+06:03.760 --> 06:05.360
+that we provide.
+
+06:05.360 --> 06:07.680
+On top of that, there's a UI components.
+
+06:07.680 --> 06:13.840
+We have our own video player, the video player lets you have a poor man's reinforcement
+
+06:13.840 --> 06:15.320
+learning happening.
+
+06:15.320 --> 06:19.480
+And all of that tightly integrated provided as a service is matroid.
+
+06:19.480 --> 06:22.480
+I don't know how much you want to go into matroid itself as a product.
+
+06:22.480 --> 06:27.480
+I'm happy to talk about either the distributed machine learning aspect of more general
+
+06:27.480 --> 06:30.720
+distributed machine learning or the distributed machine learning aspect of matroid or machine
+
+06:30.720 --> 06:33.800
+learning in general up to you where we go with that.
+
+06:33.800 --> 06:38.160
+So one immediate question that I had was, and you describing what matroid is doing, it
+
+06:38.160 --> 06:44.360
+made me think of Google's recent, in fact, I think just today they put this, their video
+
+06:44.360 --> 06:47.680
+object detection offering into beta.
+
+06:47.680 --> 06:52.960
+Are you doing similar things or tell me a little bit about matroid in the context of
+
+06:52.960 --> 06:53.960
+that?
+
+06:53.960 --> 06:58.160
+So the Google offering is primarily focused towards developers.
+
+06:58.160 --> 07:03.480
+So the Google customer or the Microsoft or the other customers, there would be people
+
+07:03.480 --> 07:10.640
+who can code, people who are already somewhat familiar with machine learning.
+
+07:10.640 --> 07:11.640
+Right.
+
+07:11.640 --> 07:12.640
+They're providing APIs.
+
+07:12.640 --> 07:16.040
+And the reason the Google sells this is because they want people to come to Google Cloud
+
+07:16.040 --> 07:18.440
+Platform and spread and compute.
+
+07:18.440 --> 07:20.720
+That is something that is totally not our customer.
+
+07:20.720 --> 07:24.080
+Our customer is someone who has a need to watch media.
+
+07:24.080 --> 07:29.200
+And that happens where it's the production internet agency or a brand monitoring company.
+
+07:29.200 --> 07:30.200
+That's right.
+
+07:30.200 --> 07:31.200
+That's right.
+
+07:31.200 --> 07:32.200
+So these people who can't code.
+
+07:32.200 --> 07:33.200
+Right.
+
+07:33.200 --> 07:34.200
+And there's a very different question.
+
+07:34.200 --> 07:38.480
+So you're offering a solution as opposed to a set of APIs and yes, that's right.
+
+07:38.480 --> 07:39.480
+Okay.
+
+07:39.480 --> 07:42.440
+Although there is overlap in the technologies used for sure, we're using convolutional
+
+07:42.440 --> 07:43.440
+neural networks.
+
+07:43.440 --> 07:46.240
+For sure, we're both scaling machine learning in some way.
+
+07:46.240 --> 07:48.240
+But the customer is actually very different.
+
+07:48.240 --> 07:50.240
+The UI is very different.
+
+07:50.240 --> 07:51.760
+And that's the differentiation.
+
+07:51.760 --> 07:56.640
+We don't directly sell to developers, although we have an API that developers can use
+
+07:56.640 --> 07:58.400
+and if they're sophisticated enough.
+
+07:58.400 --> 08:01.320
+But we're essentially like a Photoshop for computer vision.
+
+08:01.320 --> 08:06.400
+You just have to be determined at clicking and pointing.
+
+08:06.400 --> 08:09.720
+You don't need to learn programming to use this.
+
+08:09.720 --> 08:13.600
+And then the other thing you said that was interesting was poor man's reinforcement
+
+08:13.600 --> 08:14.600
+learning.
+
+08:14.600 --> 08:15.600
+Yes.
+
+08:15.600 --> 08:17.280
+Tell me about that analogy and what that means in your world.
+
+08:17.280 --> 08:18.280
+Sure thing.
+
+08:18.280 --> 08:22.480
+So we have this whole detector creation flow within matroid.
+
+08:22.480 --> 08:26.000
+So if you go to matroid.com, you can create a detector for whatever you want.
+
+08:26.000 --> 08:29.680
+And in fact, during the talk today, I made some examples of whatever I want.
+
+08:29.680 --> 08:30.680
+Right.
+
+08:30.680 --> 08:33.280
+So in the talk today, I made a detector for cars.
+
+08:33.280 --> 08:34.280
+Okay.
+
+08:34.280 --> 08:35.280
+Like a live demo.
+
+08:35.280 --> 08:36.280
+Yeah.
+
+08:36.280 --> 08:37.280
+Absolutely.
+
+08:37.280 --> 08:42.280
+And most I never I use like five slides and the rest of the 40 minutes was in on matroid.com.
+
+08:42.280 --> 08:43.280
+Okay.
+
+08:43.280 --> 08:47.080
+So it was almost entirely a live demo that you can do if you make an account on there yourself
+
+08:47.080 --> 08:49.800
+now and do everything I did.
+
+08:49.800 --> 08:51.680
+There's a flow there to create a detector.
+
+08:51.680 --> 08:56.360
+And this detector once it's once it's created, it takes three or four minutes to create.
+
+08:56.360 --> 09:01.280
+Once it's created, you can immediately see how well it's performing by running videos
+
+09:01.280 --> 09:02.960
+through the video player.
+
+09:02.960 --> 09:06.880
+And immediately see, okay, with the video player, you see, okay, it's working on these areas
+
+09:06.880 --> 09:07.880
+of the video.
+
+09:07.880 --> 09:10.120
+It's not working on these areas of the video.
+
+09:10.120 --> 09:14.480
+And because we have our own video player, you go in and you can tag where that, where
+
+09:14.480 --> 09:21.520
+those mistakes happen, where you want to reinforce correct attitude and where you want to guess,
+
+09:21.520 --> 09:24.760
+give negative examples and say, no, this is incorrect.
+
+09:24.760 --> 09:27.400
+You can do that very quickly with our with our video player.
+
+09:27.400 --> 09:32.240
+And then that goes back into reinforcing correct attitude in the model.
+
+09:32.240 --> 09:35.560
+So then the model can be retrained then and now you have a better model.
+
+09:35.560 --> 09:39.800
+That's why I said it's a poor man's reinforcement learning because it's not traditional reinforcement
+
+09:39.800 --> 09:45.240
+learning where we have the whole loop right, taking care of, you have to provide us with
+
+09:45.240 --> 09:47.520
+examples through the video player.
+
+09:47.520 --> 09:54.160
+But it's exactly the same spirit of reinforcement learning that an agent is essentially exploring.
+
+09:54.160 --> 09:57.880
+So you create a model, you have some, some policy you think is right.
+
+09:57.880 --> 10:01.640
+You run a video through, you observe how the detector is working.
+
+10:01.640 --> 10:03.040
+If it's working well enough, you're done.
+
+10:03.040 --> 10:04.960
+You go to town, you use that detector.
+
+10:04.960 --> 10:10.040
+If it's not working well enough, you can you can iterate on it and reinforce correct behavior.
+
+10:10.040 --> 10:14.720
+And the UI is essentially what allows a human to become the reinforcement learner.
+
+10:14.720 --> 10:21.400
+And the fact that the training and the training for computer vision, strictly for computer vision,
+
+10:21.400 --> 10:22.720
+not for general reinforcement learning.
+
+10:22.720 --> 10:24.640
+We are not a deep learning as a service company.
+
+10:24.640 --> 10:27.400
+We are not a machine learning as a service company.
+
+10:27.400 --> 10:28.400
+Right.
+
+10:28.400 --> 10:29.400
+Right.
+
+10:29.400 --> 10:30.920
+And is it primarily video or also still images?
+
+10:30.920 --> 10:32.440
+Of course, it's also still images.
+
+10:32.440 --> 10:33.440
+Okay.
+
+10:33.440 --> 10:38.760
+There's something that is in terms of the use cases and like where most of our customers
+
+10:38.760 --> 10:42.720
+care about video, because if you remember that value proposition, the value proposition
+
+10:42.720 --> 10:46.400
+is you're hiring someone to look at vast amounts of media, right?
+
+10:46.400 --> 10:48.120
+You're hiring someone to look at vast amounts of media.
+
+10:48.120 --> 10:51.200
+Sure that vast amount of media could be a very large image collection.
+
+10:51.200 --> 10:52.200
+Yeah.
+
+10:52.200 --> 10:56.400
+But more often than not, you would hire someone to watch very long videos, because then
+
+10:56.400 --> 10:59.160
+you would have a need for it to hire a person.
+
+10:59.160 --> 11:02.040
+If you have a hundred pictures, chances are you still wouldn't hire a person.
+
+11:02.040 --> 11:05.560
+If you have a thousand pictures, chances are you still wouldn't hire a person.
+
+11:05.560 --> 11:10.160
+If you have millions of images and photos, yeah, sure, you would hire a person at that
+
+11:10.160 --> 11:11.160
+point.
+
+11:11.160 --> 11:14.320
+But there are way fewer of those cases than there are people who have asked amounts of
+
+11:14.320 --> 11:15.320
+video.
+
+11:15.320 --> 11:16.320
+Right.
+
+11:16.320 --> 11:18.440
+It's very easy to have a camera on 24 seven.
+
+11:18.440 --> 11:22.400
+It's very easy to need to watch TV 24 seven.
+
+11:22.400 --> 11:27.120
+There are multiple streams of video ever going amounts of video streams in the world now
+
+11:27.120 --> 11:28.840
+with because cameras are cheap.
+
+11:28.840 --> 11:33.560
+And we expect them all to have the ability to have eyes on them with with matroid or other
+
+11:33.560 --> 11:35.360
+services.
+
+11:35.360 --> 11:39.720
+So we talked a little bit about branding use cases and envisioning surveillance style
+
+11:39.720 --> 11:41.480
+use cases as well.
+
+11:41.480 --> 11:43.680
+What are the kind of the major clusters of use?
+
+11:43.680 --> 11:46.760
+So we have we have two big industries that were focused on it.
+
+11:46.760 --> 11:50.280
+One is TV and the other is a security.
+
+11:50.280 --> 11:51.280
+Okay.
+
+11:51.280 --> 11:52.280
+So those are the two.
+
+11:52.280 --> 11:53.280
+That's it.
+
+11:53.280 --> 11:56.880
+As a startup, we can't be too sure broad, right?
+
+11:56.880 --> 12:01.000
+And so yes, you can actually just take your home camera and integrate it with matroid
+
+12:01.000 --> 12:02.000
+as well.
+
+12:02.000 --> 12:06.920
+So if you want notifications when some particular person is at home, okay, you can set that
+
+12:06.920 --> 12:12.720
+up pretty easily to the level of person, person A versus person B versus person C or more
+
+12:12.720 --> 12:14.960
+interesting things that that could be funny.
+
+12:14.960 --> 12:18.520
+Like, like, maybe you want a detector that just thinks you're whenever someone with a beard
+
+12:18.520 --> 12:19.520
+comes in.
+
+12:19.520 --> 12:20.520
+I'm being silly here.
+
+12:20.520 --> 12:22.520
+That's the level of customizability that we have there.
+
+12:22.520 --> 12:23.520
+Oh, that's interesting.
+
+12:23.520 --> 12:26.240
+So if someone with a beard walks in the room, you want a notification, it's kind of
+
+12:26.240 --> 12:27.240
+silly, right?
+
+12:27.240 --> 12:34.200
+But more interesting, you could do something like maybe a kid has a hand in a cookie jar.
+
+12:34.200 --> 12:35.200
+Yeah.
+
+12:35.200 --> 12:36.200
+That'd be pretty funny.
+
+12:36.200 --> 12:37.200
+Yeah.
+
+12:37.200 --> 12:40.760
+Or opening up, you know, your car and diet and you're opening up the fridge after a certain
+
+12:40.760 --> 12:41.760
+time at night or something.
+
+12:41.760 --> 12:42.760
+Oh, yeah.
+
+12:42.760 --> 12:46.880
+And you pick up the Coke instead of that's that's that's an answer to take use case, but
+
+12:46.880 --> 12:47.880
+absolutely possible.
+
+12:47.880 --> 12:51.120
+If you put a camera in front of your fridge, yeah, we'll be able to detect whether you're
+
+12:51.120 --> 12:53.920
+picking up a diet Coke or a regular Coke.
+
+12:53.920 --> 12:54.920
+Oh, wow.
+
+12:54.920 --> 13:00.800
+So it's interesting that the fact I bought a Pepsi and a Coke for the demo today, one
+
+13:00.800 --> 13:05.360
+of the how all cards downstairs in New York, I just put them in front of it and very easily
+
+13:05.360 --> 13:07.480
+figured out that one's a Pepsi, the other Coke.
+
+13:07.480 --> 13:11.960
+I didn't have diet versus regular, but that's that would be a new detector.
+
+13:11.960 --> 13:12.960
+Okay.
+
+13:12.960 --> 13:19.880
+It's interesting that video is becoming or a computer vision in general, I guess is
+
+13:19.880 --> 13:24.280
+becoming almost like, I don't like a lingua franca detector.
+
+13:24.280 --> 13:28.200
+The background thought here is, there's a point in time that I wanted to do like a home
+
+13:28.200 --> 13:33.280
+automation project and you know, the question was, how am I going to figure out, you know,
+
+13:33.280 --> 13:38.280
+who's in the house and who's not and that kind of thing and, you know, I, this was years
+
+13:38.280 --> 13:44.480
+ago and I got into, you know, walking around with like, you know, NFC going to work or
+
+13:44.480 --> 13:47.200
+Bluetooth tags or things like that.
+
+13:47.200 --> 13:51.840
+And the computer vision stuff is advanced so much that now you would just throw up a camera
+
+13:51.840 --> 13:56.600
+and use that and it's opened up like so many different avenues.
+
+13:56.600 --> 14:01.480
+You mentioned something, well, so another application that you're absolutely right.
+
+14:01.480 --> 14:05.240
+Computers are getting eyes and that's incredibly exciting.
+
+14:05.240 --> 14:10.280
+It used to be that it was a blob of numbers to the computer and now it can understand
+
+14:10.280 --> 14:13.800
+what's going on and to the point where it becomes the ultimate sensor.
+
+14:13.800 --> 14:19.280
+So instead of having all these weird sensors, we can just have cheap, really, really cheap
+
+14:19.280 --> 14:24.480
+cameras, I mean, these cameras are incredibly cheap and they are incredibly powerful and
+
+14:24.480 --> 14:26.600
+we want to give them more and more power.
+
+14:26.600 --> 14:28.120
+That's exactly what Matroid is.
+
+14:28.120 --> 14:33.400
+We think that the ability to sense things through your eyes is immensely powerful.
+
+14:33.400 --> 14:38.520
+When you think about it, a computer can take in our eyes, right, their eyes taken so much
+
+14:38.520 --> 14:39.520
+information, right?
+
+14:39.520 --> 14:40.840
+Absolutely.
+
+14:40.840 --> 14:44.680
+Megabytes and megabytes of information per second is going in through our eyes.
+
+14:44.680 --> 14:50.960
+But as humans, we only have the ability to type at like a very slow speed.
+
+14:50.960 --> 14:57.720
+So our eyes are giving us much more information than we could give a computer with clicking
+
+14:57.720 --> 15:00.440
+and with most sensors too, actually, I would say.
+
+15:00.440 --> 15:04.480
+So most sensors out there, they would give a computer a few bites of information per
+
+15:04.480 --> 15:06.080
+second.
+
+15:06.080 --> 15:08.400
+But cameras, it's not like that at all.
+
+15:08.400 --> 15:13.360
+It's tremendous amounts of information and it's been such an overwhelming task to
+
+15:13.360 --> 15:17.760
+sit through that until, until now, until deep learning and until CNN's.
+
+15:17.760 --> 15:22.080
+And then it's a matter of now taking this power and being able to make it flexible, putting
+
+15:22.080 --> 15:28.680
+it in the hands of everybody instead of just developers, going to town with it basically.
+
+15:28.680 --> 15:32.400
+It's incredibly exciting time for computer vision.
+
+15:32.400 --> 15:36.360
+A couple more questions, you know, I don't want to go too deep into Matroid, but a couple
+
+15:36.360 --> 15:43.160
+more questions that came up for me one is, do you have pre-established relationships
+
+15:43.160 --> 15:48.680
+with network supply, TV network suppliers so that like a brand agency can just click like
+
+15:48.680 --> 15:53.080
+I want to monitor ABC, CNN and that kind of thing or did they have to go find all that
+
+15:53.080 --> 15:54.080
+themselves?
+
+15:54.080 --> 15:55.080
+No, that's the hard.
+
+15:55.080 --> 16:00.120
+We actually have, we have the ability to search many TV channels.
+
+16:00.120 --> 16:04.120
+And the way we do that is by making sure that we don't impringe upon their copyright.
+
+16:04.120 --> 16:07.760
+So you can never watch these TV channels on our website.
+
+16:07.760 --> 16:12.120
+You can never even see much of what's going on on there.
+
+16:12.120 --> 16:17.360
+Other than the ability to get a notification when your detector figures out what's going
+
+16:17.360 --> 16:18.360
+on.
+
+16:18.360 --> 16:22.960
+And then you only get a notification and a really small blurry screenshot so that you
+
+16:22.960 --> 16:26.520
+can verify that that actually happened and that stays within fair use.
+
+16:26.520 --> 16:31.880
+So we are absolutely dedicated to making sure we don't step on anyone's toes here and
+
+16:31.880 --> 16:33.680
+that's something that we figure it out.
+
+16:33.680 --> 16:39.480
+So yes, you can essentially say, well, I want to watch these few channels for my product
+
+16:39.480 --> 16:40.480
+showing up.
+
+16:40.480 --> 16:43.520
+And answer questions like, well, when did this car show up next to this other car?
+
+16:43.520 --> 16:47.280
+Like when I don't want to pick out any particular bands here, but you let your imagination
+
+16:47.280 --> 16:52.120
+while like, when did car model number one show up next to car model number two or when
+
+16:52.120 --> 16:53.520
+did car model number one show up?
+
+16:53.520 --> 16:57.840
+And this would then look at all movies that have been playing, you know, movies of cars
+
+16:57.840 --> 16:58.840
+in them all the time.
+
+16:58.840 --> 17:02.040
+They have brands in them all the time, right?
+
+17:02.040 --> 17:06.360
+You can answer questions like when did a particular kind of laptop show up when to kind
+
+17:06.360 --> 17:10.800
+of brand show up and TV channels across the US across the world?
+
+17:10.800 --> 17:18.240
+And you also have an offer like a database of movies or someone, no, not movies, not
+
+17:18.240 --> 17:19.240
+movies.
+
+17:19.240 --> 17:24.320
+So we have streams of media and the streams are, the streams are TV channels.
+
+17:24.320 --> 17:27.120
+And you can have the ability to hook up your own streams.
+
+17:27.120 --> 17:29.440
+So we integrate with many cameras.
+
+17:29.440 --> 17:33.680
+You can search YouTube videos, you can search static videos that you own.
+
+17:33.680 --> 17:37.320
+We have not curated a large collection of movies.
+
+17:37.320 --> 17:38.320
+Okay.
+
+17:38.320 --> 17:44.360
+We only have so much resource, you know, and we just, we want to make it easy for people
+
+17:44.360 --> 17:45.920
+to search their own libraries.
+
+17:45.920 --> 17:49.960
+So we've built in tools to allow that.
+
+17:49.960 --> 17:55.040
+But we can't, we can't index all the videos in the world right now.
+
+17:55.040 --> 18:02.400
+That's not what we're focused on because that's a bit of a different role for us, you
+
+18:02.400 --> 18:03.400
+know?
+
+18:03.400 --> 18:09.040
+And if someone has a need to monitor a stream, usually they have the stream themselves,
+
+18:09.040 --> 18:12.240
+unless it's a very popular public stream like TV.
+
+18:12.240 --> 18:15.040
+If it's movies, that's a different story.
+
+18:15.040 --> 18:16.200
+We just haven't gone there yet.
+
+18:16.200 --> 18:21.920
+Well, in more general, it sounds like the core problem is one of monitoring and less
+
+18:21.920 --> 18:26.440
+of search, which requires kind of the broader database.
+
+18:26.440 --> 18:32.680
+So in doing all this, one of the key challenges that you faced is how do you scale all of it?
+
+18:32.680 --> 18:35.000
+And that was a big part of your talk today.
+
+18:35.000 --> 18:37.160
+Walk us through some of the things that you talked about.
+
+18:37.160 --> 18:38.160
+Sure thing.
+
+18:38.160 --> 18:42.560
+So these models, these machine learning models that have to decide whether something is
+
+18:42.560 --> 18:47.680
+happening in a scene or not are computationally very intensive.
+
+18:47.680 --> 18:55.680
+To monitor a stream of video, you have to essentially dedicate around an eighth of a typical
+
+18:55.680 --> 18:59.000
+GPU card these days, 24-7.
+
+18:59.000 --> 19:01.560
+So you can monitor eight streams with one GPU card.
+
+19:01.560 --> 19:02.560
+Okay.
+
+19:02.560 --> 19:03.560
+Yeah.
+
+19:03.560 --> 19:04.560
+That's a lot of compute.
+
+19:04.560 --> 19:08.280
+I mean, once you would expect that you could do a lot more, if that I'd been optimized,
+
+19:08.280 --> 19:10.120
+but that's where you can do it.
+
+19:10.120 --> 19:14.200
+And this is inference, which is typically much lighter on the GPU than...
+
+19:14.200 --> 19:18.880
+Oh, no, actually, we do inference on the GPU as well.
+
+19:18.880 --> 19:25.240
+Inference is, it's not typically lighter on the GPU for video, because it's just relative
+
+19:25.240 --> 19:27.640
+to training, I guess, is what I was.
+
+19:27.640 --> 19:32.520
+I mean, they're almost equally as difficult when video is involved.
+
+19:32.520 --> 19:37.240
+Because what's happening is we have a trained model, right?
+
+19:37.240 --> 19:38.240
+Training sure.
+
+19:38.240 --> 19:39.240
+Training takes...
+
+19:39.240 --> 19:40.680
+We do both training and inference on GPUs.
+
+19:40.680 --> 19:44.520
+So both of these are computationally intensive.
+
+19:44.520 --> 19:48.120
+The reality, though, is actually inference is more computationally intensive for us, because
+
+19:48.120 --> 19:53.760
+the training happens within a matter of a few minutes, because we have many, many pre-trained
+
+19:53.760 --> 19:59.120
+models, and we can build up a lot of work that has happened in the background, pre-trained
+
+19:59.120 --> 20:07.480
+models, in particular, the inference, however, you're just constantly running a CNN on
+
+20:07.480 --> 20:15.520
+a video stream, 24-7, and that's infinitely long, whereas training, at least, is finite,
+
+20:15.520 --> 20:16.520
+right?
+
+20:16.520 --> 20:20.760
+Training is going to take a week, you're done, and then you have a pre-trained model,
+
+20:20.760 --> 20:25.800
+you can use it, so inference, the way matroid deals with it, is infinitely long.
+
+20:25.800 --> 20:31.320
+So you always, you just have to dedicate an 8th of a GPU to inference for a stream.
+
+20:31.320 --> 20:35.080
+So that is something we have to deal with, as a company, we have to deal with that.
+
+20:35.080 --> 20:38.520
+So first of all, that is per stream, per detector, or you can't...
+
+20:38.520 --> 20:43.040
+Yeah, so it's per stream, per detector, per stream, per detector, yeah, so that makes it
+
+20:43.040 --> 20:44.040
+even worse, right?
+
+20:44.040 --> 20:45.760
+It's even more computationally intensive.
+
+20:45.760 --> 20:50.040
+It's not like you're just, you know, you can have multiple networks kind of peering into
+
+20:50.040 --> 20:52.640
+a stream or sharing...
+
+20:52.640 --> 20:54.960
+Sometimes, but not often enough.
+
+20:54.960 --> 20:58.800
+Sometimes that happens, and we do optimize for that, but it doesn't happen often enough,
+
+20:58.800 --> 21:01.960
+because the reason you're using matroid is because you want to customize a detector.
+
+21:01.960 --> 21:06.120
+You've made a detector for your own data, usually it's a detector that only you have,
+
+21:06.120 --> 21:10.600
+and it's a stream that only you have access to, and so it's a detector stream.
+
+21:10.600 --> 21:17.480
+And so we have a whole cluster dedicated for this, and the way it works is, so these models
+
+21:17.480 --> 21:21.480
+are quite large themselves too, the models are on order of 200 megabytes, and there are
+
+21:21.480 --> 21:22.480
+millions of them.
+
+21:22.480 --> 21:24.080
+It's a huge amount of data.
+
+21:24.080 --> 21:28.440
+And just storing the models, just storing the detectors, already needs a distributed
+
+21:28.440 --> 21:29.440
+file system.
+
+21:29.440 --> 21:30.440
+That's three.
+
+21:30.440 --> 21:34.400
+But then some of these models are less often used than others.
+
+21:34.400 --> 21:40.560
+And so we have this four layer cache that goes from the distributed file system to the
+
+21:40.560 --> 21:46.840
+local hard drive of a machine that's dedicated, then has a GPU, to regular RAM that a CPU can
+
+21:46.840 --> 21:52.080
+access, and then smaller GPU RAM, GPU memory.
+
+21:52.080 --> 21:57.200
+The hot models, the very hot models, sit in GPU memory for a long amount of time, and
+
+21:57.200 --> 22:00.520
+we deal with the whole cache infrastructure there.
+
+22:00.520 --> 22:05.960
+And that infrastructure, did you have to roll your own, or is there something that is pre-existent
+
+22:05.960 --> 22:07.920
+to manage that for you?
+
+22:07.920 --> 22:14.520
+There are tools for general distributed computing, for example, we use Kubernetes, and Kubernetes
+
+22:14.520 --> 22:19.600
+is at the level of resource management, resource allocation.
+
+22:19.600 --> 22:27.840
+You say to Kubernetes, hey, look, I need this many cores and this much memory and a GPU.
+
+22:27.840 --> 22:32.560
+And you set up Kubernetes to be able to get those resources from some cloud provider.
+
+22:32.560 --> 22:36.360
+And ideally, it's all from the same cloud provider, but we have the ability to go through
+
+22:36.360 --> 22:39.080
+multiple cloud providers.
+
+22:39.080 --> 22:45.000
+And then you get that resource, and you can run your workload on it.
+
+22:45.000 --> 22:51.040
+But the fact that Kubernetes doesn't know that we have millions of models, and that we
+
+22:51.040 --> 22:55.440
+have this whole caching strategy, it just gives you resources when you ask them for it.
+
+22:55.440 --> 22:58.760
+It handles some of the fault tolerance, and some of the logging, which is nice.
+
+22:58.760 --> 23:03.080
+But like any rollout of open source software, there's a tremendous amount of work that
+
+23:03.080 --> 23:08.120
+goes into actually productionizing it and making it good for a particular application.
+
+23:08.120 --> 23:11.880
+And there's the interface with TensorFlow that has to work out, and the interface to our
+
+23:11.880 --> 23:13.240
+web environment, which has to work out.
+
+23:13.240 --> 23:19.400
+So our web app is very complicated, it's the video player, it's constantly talking to
+
+23:19.400 --> 23:22.240
+the cluster and to other places.
+
+23:22.240 --> 23:26.040
+These are all, it's like a big symphony orchestra that comes together.
+
+23:26.040 --> 23:32.200
+Yeah, the specific question that I had was around the, I guess the analogy for me is
+
+23:32.200 --> 23:39.520
+in the storage arena, there's, you know, the whole idea of, you know, hot storage, cold
+
+23:39.520 --> 23:44.640
+storage, near line, all that kind of stuff as well established in there is tons of products
+
+23:44.640 --> 23:49.640
+and infrastructure and stuff that's off the shelf that you can put in place to do that.
+
+23:49.640 --> 23:58.680
+It sounds like what you're doing, shuffling data between GPU, CPU, local disk, or GPU memory,
+
+23:58.680 --> 24:05.320
+you know, RAM, local disk, and distributed storage, not a lot pre-existent to facilitate
+
+24:05.320 --> 24:07.440
+that, so you're kind of rolling your own there.
+
+24:07.440 --> 24:10.840
+Yeah, absolutely, we built that from the ground up.
+
+24:10.840 --> 24:15.000
+Using Kubernetes, I don't want to say we built the cluster management part, but the
+
+24:15.000 --> 24:19.200
+rest of it is all, is all around, in fact, my co-founder has a PhD in distributed systems.
+
+24:19.200 --> 24:20.200
+Okay.
+
+24:20.200 --> 24:25.560
+And, you know, we were, part of my research was the Apache Spark library, from the machine
+
+24:25.560 --> 24:29.440
+learning library, so if one of my papers is the ML lib library, which probably a lot
+
+24:29.440 --> 24:34.960
+of your listeners know about, and there it's, it's more about the JVM and Apache Spark.
+
+24:34.960 --> 24:37.680
+Well, let's definitely, let's come back to that.
+
+24:37.680 --> 24:40.720
+Yeah, that is something we've been working on for a very long time, and we understand
+
+24:40.720 --> 24:42.440
+those nuances very well.
+
+24:42.440 --> 24:48.440
+We did not pick up Apache's practice time because it's not a go-to tool for, for deep learning,
+
+24:48.440 --> 24:54.240
+exactly because it GPUs, it's access to GPUs is limited because it sits on the JVM.
+
+24:54.240 --> 25:01.600
+So yeah, dealing with the whole stack from customized hardware to having a distributed
+
+25:01.600 --> 25:06.840
+cluster, all of that isn't well managed by one tool right now, and so we had to roll
+
+25:06.840 --> 25:08.160
+our own.
+
+25:08.160 --> 25:11.960
+And a lot of it really does come to the fact that you have to be able to use customized
+
+25:11.960 --> 25:16.560
+hardware, like being able to manage a cluster where some of the machines have a GPU and
+
+25:16.560 --> 25:19.880
+some of them don't have a GPU, that also matters, right?
+
+25:19.880 --> 25:28.440
+So we will use CPUs when we have no GPU machines available, but it whole thing will be slower.
+
+25:28.440 --> 25:34.440
+Using that again is yet another corner case that we deal with in our setup.
+
+25:34.440 --> 25:41.640
+And are you running all of this on AWS, or do you run some of it on a local cluster, or
+
+25:41.640 --> 25:46.400
+right now everything is on AWS, but we've built everything with the mindset that we should
+
+25:46.400 --> 25:48.080
+be able to be cloud hybrid.
+
+25:48.080 --> 25:54.120
+So we should at the very least be able to access some custom processing power from other
+
+25:54.120 --> 25:55.120
+cloud providers.
+
+25:55.120 --> 25:59.160
+For example, we're looking forward to being able to use TPUs, intensive processing units
+
+25:59.160 --> 26:01.800
+from Google when they're available.
+
+26:01.800 --> 26:07.960
+There are multiple hardware providers who are competing on deep learning hardware and
+
+26:07.960 --> 26:12.680
+a multitude of startups in the space, is at least five startups that I've counted in
+
+26:12.680 --> 26:13.680
+this space.
+
+26:13.680 --> 26:19.840
+And all of the chip manufacturers want to get into it, Intel, Qualcomm, Google is not
+
+26:19.840 --> 26:24.680
+a traditional chip manufacturer that they will produce chips to rent on GCP.
+
+26:24.680 --> 26:27.320
+And of course, Nvidia leads the pack here, right?
+
+26:27.320 --> 26:32.760
+All of these folks are essentially reinventing computing from their ground up to use linear
+
+26:32.760 --> 26:37.360
+algebra on the specialized co-processors, if you want to call them that, or intensive
+
+26:37.360 --> 26:38.360
+processing units.
+
+26:38.360 --> 26:41.680
+I think the name is going to become tensor processing unit, instead of central processing
+
+26:41.680 --> 26:46.120
+unit, eventually we're just going to be using TPUs much more than CPUs.
+
+26:46.120 --> 26:52.800
+That chipset is evolving rapidly and it's changing all of computing with it.
+
+26:52.800 --> 26:57.840
+And that's another exciting side effect of deep learning.
+
+26:57.840 --> 27:03.400
+For a long time, we didn't know how computing should evolve to bypass the fact that we can't
+
+27:03.400 --> 27:05.320
+make clock speeds any faster.
+
+27:05.320 --> 27:08.480
+And now we've realized that linear algebra operations are the way to go, because linear
+
+27:08.480 --> 27:13.560
+algebra operations can be used in deep learning, they can be used in all of machine learning,
+
+27:13.560 --> 27:17.960
+they can be used in so many other applications, wherever linear algebra is useful, these
+
+27:17.960 --> 27:21.200
+operations can be made to be useful.
+
+27:21.200 --> 27:25.280
+That's yet another area that we can spend hours on, just like, what is the right hardware
+
+27:25.280 --> 27:31.480
+software interface between, just what is the right hardware software interface past
+
+27:31.480 --> 27:35.600
+the traditional X86 programming model?
+
+27:35.600 --> 27:38.600
+It doesn't make sense to have simple operations anymore.
+
+27:38.600 --> 27:43.280
+The hardware should make linear algebra a first-class operation, a first-class citizen,
+
+27:43.280 --> 27:44.280
+and that's been happening.
+
+27:44.280 --> 27:50.400
+It's interesting that you are projecting that TPU becomes the general term for this.
+
+27:50.400 --> 27:52.520
+I was talking to Navin.
+
+27:52.520 --> 27:57.520
+That's part of the reason I actually named matroid matroid is because I expect the term
+
+27:57.520 --> 28:01.560
+tensor to become more and more popular in computing vocabulary.
+
+28:01.560 --> 28:04.000
+TensorFlow definitely was a step in that direction.
+
+28:04.000 --> 28:09.080
+Even Nvidia now has the word tensor core in their products.
+
+28:09.080 --> 28:17.440
+So if the new Nvidia Volta has many tensor cores, which do small 4x4 matrix multiplies
+
+28:17.440 --> 28:19.400
+and accumulates.
+
+28:19.400 --> 28:24.240
+That word is creeping around, even in Nvidia, and Nvidia has all the reason in the world
+
+28:24.240 --> 28:27.080
+to market the term GPU, right?
+
+28:27.080 --> 28:31.640
+But even they are using the word tensor, tensor is all over the world in deep learning.
+
+28:31.640 --> 28:37.680
+I think that's the correct, more intuitive term for these processors.
+
+28:37.680 --> 28:40.840
+And then so this is why we named matroid as a generalization of tensor.
+
+28:40.840 --> 28:46.560
+It's also a domain name that sounds good and was available, so it's hard to find those
+
+28:46.560 --> 28:47.560
+days.
+
+28:47.560 --> 28:53.400
+And having your company named after a concept deep, deep mathematical concept is actually
+
+28:53.400 --> 28:54.400
+very heartwarming.
+
+28:54.400 --> 28:57.400
+And it excites a lot of my students to come help us.
+
+28:57.400 --> 28:58.720
+Awesome.
+
+28:58.720 --> 29:00.360
+So we were talking about scaling.
+
+29:00.360 --> 29:01.360
+Yes.
+
+29:01.360 --> 29:05.000
+We talked about infrastructure level concerns.
+
+29:05.000 --> 29:10.520
+Actually, random question, I keep hearing from a lot of folks talking about Kubernetes
+
+29:10.520 --> 29:15.000
+that it's actually kind of been a key to get up and running and working well on Amazon.
+
+29:15.000 --> 29:16.000
+It's been reasonable for us.
+
+29:16.000 --> 29:17.000
+It's been reasonable.
+
+29:17.000 --> 29:18.880
+It's been okay.
+
+29:18.880 --> 29:21.840
+So infrastructure stuff we've talked about.
+
+29:21.840 --> 29:28.680
+What about the kind of the modeling, training, inference, architecture?
+
+29:28.680 --> 29:35.840
+Has that evolved or it has to what degrees has that evolved specifically to enable distributed
+
+29:35.840 --> 29:38.560
+compute and scale?
+
+29:38.560 --> 29:41.440
+So that's a very loaded question.
+
+29:41.440 --> 29:49.360
+So how have models in computer vision evolved is a tremendous, long question to answer
+
+29:49.360 --> 29:50.360
+in itself?
+
+29:50.360 --> 29:55.800
+Well, more specifically, what you guys are doing, to what degree, clearly you're thinking
+
+29:55.800 --> 30:02.440
+about scale when you're building your systems above the layer of the infrastructure and all
+
+30:02.440 --> 30:06.000
+of the movement of bits and compute.
+
+30:06.000 --> 30:10.880
+For folks that are trying to build, that have, that are doing deep learning and need to
+
+30:10.880 --> 30:14.840
+make a scale or computer vision even more specifically, like what are the things that
+
+30:14.840 --> 30:21.440
+they need to be thinking about in the computer vision domain to enable scale?
+
+30:21.440 --> 30:26.800
+So even with computer vision, scaling can come in three ways, right?
+
+30:26.800 --> 30:28.480
+Scaling can come in having many models.
+
+30:28.480 --> 30:32.840
+It can come with having very large models and it can come with having large amounts of
+
+30:32.840 --> 30:33.840
+data, right?
+
+30:33.840 --> 30:38.680
+So I think we already talked pretty extensively about having many models, right?
+
+30:38.680 --> 30:40.480
+That was the caching system that I mentioned.
+
+30:40.480 --> 30:42.960
+So that's, let's leave that aside for a second.
+
+30:42.960 --> 30:49.120
+The other way that scaling can come into effect is having large amounts of data in training.
+
+30:49.120 --> 30:52.600
+So assuming that the model is still small, you have a large amount of training data.
+
+30:52.600 --> 30:53.600
+We do have that.
+
+30:53.600 --> 30:58.800
+So when, when we train, sometimes we train a pre-trained model for weeks, by that I mean,
+
+30:58.800 --> 31:02.520
+we train it, it starts out untrained and then it becomes one of our pre-trained models.
+
+31:02.520 --> 31:07.760
+Now that's, that's sort of well understood in, in literature and it's one of the reasons
+
+31:07.760 --> 31:13.280
+GPUs became really popular because AlexNet was one of these first neural network architectures
+
+31:13.280 --> 31:18.360
+that was trained with a ton of data from the ImageNet and that, that's sort of well understood
+
+31:18.360 --> 31:21.880
+and let's not talk about that too much right now.
+
+31:21.880 --> 31:27.560
+The other form of scaling when it comes to models is the model itself.
+
+31:27.560 --> 31:33.000
+So you should be able to add more and bells and whistles to the model and scale it up
+
+31:33.000 --> 31:36.600
+to learn more things as, as you like.
+
+31:36.600 --> 31:38.800
+And that's actually something that we focused on.
+
+31:38.800 --> 31:44.120
+It's because as new models come out in open source, we would like to be able to suck them
+
+31:44.120 --> 31:46.320
+in and make them part of our detector.
+
+31:46.320 --> 31:51.280
+So if there's a new TensorFlow model out there that can detect logos really well or if
+
+31:51.280 --> 31:55.760
+there's a new TensorFlow model out there that can detect the make and model of a car really
+
+31:55.760 --> 32:01.000
+well, we better be able to integrate that into our system within a matter of an hours.
+
+32:01.000 --> 32:02.720
+And that's where we are.
+
+32:02.720 --> 32:06.920
+We have built our setup so that if there's a pre-trained model, a subnet, we call them
+
+32:06.920 --> 32:14.480
+out there that is available to learn rapidly a large body of things, we can then hook
+
+32:14.480 --> 32:20.640
+it up into matroid so that it becomes a new set of features to use when creating a detector.
+
+32:20.640 --> 32:29.000
+So our detectors are essentially a cocktail of pre-trained subnets that some of which
+
+32:29.000 --> 32:30.560
+are proprietary to us.
+
+32:30.560 --> 32:37.520
+I have a team of three PhDs working on them non-stop building these cocktail of pre-trained
+
+32:37.520 --> 32:43.400
+models, taking them from whenever open source provides them and using whatever we can do
+
+32:43.400 --> 32:49.200
+to whatever our customers ask for and we don't have models for we build them ourselves.
+
+32:49.200 --> 32:55.440
+And all of these models are combined together at the end to build that one last detector
+
+32:55.440 --> 32:58.960
+and then detector is sort of statically available.
+
+32:58.960 --> 33:04.800
+So yeah, the short answer is the ability to morph a model, to give it more capabilities
+
+33:04.800 --> 33:11.000
+by adding subnets to it is something that is very valuable if done right.
+
+33:11.000 --> 33:13.600
+And that's something that we've focused on.
+
+33:13.600 --> 33:18.240
+And I haven't talked about too much because I guess that ties into a little bit of our
+
+33:18.240 --> 33:21.800
+proprietary architectures and so we haven't really released much of that.
+
+33:21.800 --> 33:22.800
+Okay.
+
+33:22.800 --> 33:29.000
+But it does sound like if your goal is to be able to use off-the-shelf pre-trained models
+
+33:29.000 --> 33:32.040
+then that's not our goal.
+
+33:32.040 --> 33:33.680
+That's not my goal, right?
+
+33:33.680 --> 33:38.200
+It's to have that be a small part of our system, to be able to essentially have a super
+
+33:38.200 --> 33:40.240
+set of the capabilities of pre-trained models.
+
+33:40.240 --> 33:45.280
+Okay, but be able to quickly take advantage of innovations outside of your company.
+
+33:45.280 --> 33:46.280
+Exactly.
+
+33:46.280 --> 33:47.280
+That's the key there.
+
+33:47.280 --> 33:48.960
+We don't think we can take on the open source community.
+
+33:48.960 --> 33:50.520
+It would be foolish, right?
+
+33:50.520 --> 33:54.160
+We think that the open source community is, first of all, we contribute back.
+
+33:54.160 --> 33:58.920
+We commit to Kubernetes and we submit bugs and we're actually running a book on TensorFlow
+
+33:58.920 --> 34:01.160
+and so on.
+
+34:01.160 --> 34:05.800
+There is no point in not embracing open source wholeheartedly.
+
+34:05.800 --> 34:10.000
+So then the question is how do you build a product that can both give back and receive
+
+34:10.000 --> 34:11.000
+from open source?
+
+34:11.000 --> 34:15.000
+And we think this is the way is to be able to integrate what the open source community
+
+34:15.000 --> 34:19.000
+finds and discovers as quickly as possible.
+
+34:19.000 --> 34:22.600
+But in doing that, those are pre-trained pre-existing models.
+
+34:22.600 --> 34:28.440
+You're not changing, changing the model architecture can't be kind of how you scale, right?
+
+34:28.440 --> 34:34.560
+It's your, or it can't be, or to what extent can that be a part of, or is that a part
+
+34:34.560 --> 34:36.480
+of the way you scale?
+
+34:36.480 --> 34:41.480
+It is a core part of how we scale to detect more things.
+
+34:41.480 --> 34:46.640
+So right now we have a Coca-Cola logo detector, say.
+
+34:46.640 --> 34:54.400
+If I wanted to create a detector for Coca-Cola on a t-shirt detector, not Coca-Cola in general,
+
+34:54.400 --> 35:00.760
+like not on a can, not a side of a truck, but only on t-shirts, I'd probably have to create
+
+35:00.760 --> 35:03.480
+a custom neural network architecture for that.
+
+35:03.480 --> 35:08.560
+Let's say I create that and I better have an easy way to add that into the matroid model
+
+35:08.560 --> 35:12.040
+detection scheme and that's the key that we have already.
+
+35:12.040 --> 35:16.880
+So that little subnet can go into matroid without much effort.
+
+35:16.880 --> 35:20.920
+And if that subnet happens to be available on an open source, we would pick it out of
+
+35:20.920 --> 35:22.640
+there and put it in.
+
+35:22.640 --> 35:26.080
+And that's, I mean, if you want to call that scaling, or if you don't want to call that
+
+35:26.080 --> 35:32.120
+scaling, it seems like we're having a vocabulary thing here, is that we're increasing a number
+
+35:32.120 --> 35:39.000
+of things that can be detected by adding subnets to what is being trained.
+
+35:39.000 --> 35:40.480
+I don't know if you want to call that scaling.
+
+35:40.480 --> 35:46.320
+Now, I think, you know, that I think the background for this conversation is maybe an interview
+
+35:46.320 --> 35:50.600
+I did with Shubos and Gupta at Baidu Labs.
+
+35:50.600 --> 35:57.280
+And we were talking about the Baidu net research they did for audio and machine translation
+
+35:57.280 --> 35:59.080
+and things like that.
+
+35:59.080 --> 36:03.360
+The conversation was around, like, some of the same types of issues, like systems challenges
+
+36:03.360 --> 36:07.760
+and he went through, you know, a lot of low-level things like we've talked about, but he also
+
+36:07.760 --> 36:13.920
+talked a little bit about how, you know, the model architecture, some of the decisions
+
+36:13.920 --> 36:22.360
+they made in architecting their neural nets were made in light of the computational limitations
+
+36:22.360 --> 36:23.680
+that they had.
+
+36:23.680 --> 36:28.080
+And I was just curious whether you experienced similar things and whether you adapted
+
+36:28.080 --> 36:35.800
+model architecture in light of computational network, storage constraints, memory constraints,
+
+36:35.800 --> 36:36.800
+things like that.
+
+36:36.800 --> 36:44.480
+So for some of our customers who have severe memory restraints and custom hardware that
+
+36:44.480 --> 36:50.480
+they would like to run a matroid detector on, we have compresses, yes, exactly.
+
+36:50.480 --> 36:57.640
+Essentially, you know, one customer who wants to run detectors on their own camera.
+
+36:57.640 --> 37:04.080
+For them, we've had to compress and remove a large number of the subnets that we use
+
+37:04.080 --> 37:06.400
+when training a matroid detector.
+
+37:06.400 --> 37:09.440
+But that is something that we don't do lightly.
+
+37:09.440 --> 37:13.040
+There was a lot of engineering effort there and the client wanted this so much that they
+
+37:13.040 --> 37:15.800
+were willing to pay us for that engineering effort.
+
+37:15.800 --> 37:19.640
+Part of the reason that we run in the cloud is so that we can afford to have slightly larger
+
+37:19.640 --> 37:20.800
+models.
+
+37:20.800 --> 37:25.120
+It's a privilege there in that environment to be able to run larger models.
+
+37:25.120 --> 37:31.080
+We have, in some cases, had to compress the models and remove the parts that weren't
+
+37:31.080 --> 37:36.440
+so relevant for competitions and we are, in some cases, using TensorFlow Lite for some
+
+37:36.440 --> 37:37.760
+of these.
+
+37:37.760 --> 37:43.400
+But we can be a little bit more lazy when it comes to model compression and more focused
+
+37:43.400 --> 37:49.040
+on model power and detecting many things as opposed to one or two things.
+
+37:49.040 --> 37:53.080
+Once again, even in model compression, the open source community has been better than
+
+37:53.080 --> 37:54.080
+us.
+
+37:54.080 --> 37:59.160
+And so the compressed models that we're using for this particular camera did come from
+
+37:59.160 --> 38:00.160
+open source.
+
+38:00.160 --> 38:05.440
+This one, I don't want to say that we've had an innovation in putting neural networks
+
+38:05.440 --> 38:08.360
+on cameras because we haven't.
+
+38:08.360 --> 38:12.720
+That innovation came from open source and we're essentially commercializing it.
+
+38:12.720 --> 38:17.760
+The things I worry about is how do we make sure that those innovations that are, first
+
+38:17.760 --> 38:23.080
+of all, how do we contribute back to open source and make sure that it's always alive
+
+38:23.080 --> 38:24.080
+and well?
+
+38:24.080 --> 38:28.800
+But then also, how can we make sure to be able to bring innovations there as quickly
+
+38:28.800 --> 38:29.800
+as possible?
+
+38:29.800 --> 38:36.800
+And the fact that we could bring that innovation in very quickly, this model that was very
+
+38:36.800 --> 38:43.320
+tight, very small, computationally efficient, but powerful enough for our user.
+
+38:43.320 --> 38:44.320
+That was very promising.
+
+38:44.320 --> 38:46.240
+It was the fact that we managed to do that.
+
+38:46.240 --> 38:50.920
+So quickly, as a small company, one speaks to the power group in source and two speaks
+
+38:50.920 --> 38:51.920
+to our planning.
+
+38:51.920 --> 38:52.920
+All right.
+
+38:52.920 --> 38:53.920
+All right.
+
+38:53.920 --> 38:57.040
+So maybe we can take that step back to talk a little bit about Spark.
+
+38:57.040 --> 38:58.040
+Let's do that.
+
+38:58.040 --> 39:01.240
+Spark extensively on Spark MLlib in particular.
+
+39:01.240 --> 39:02.240
+Yes.
+
+39:02.240 --> 39:05.800
+And it didn't choose it as the foundation for your architecture.
+
+39:05.800 --> 39:11.480
+Maybe talk a little bit about Spark and MLlib and some of the trade-offs that you looked
+
+39:11.480 --> 39:14.840
+at when you were choosing to build up your system.
+
+39:14.840 --> 39:19.520
+So we already talked about how the hardware landscape is changing.
+
+39:19.520 --> 39:23.680
+And it's definitely completely changed as far as machine learning goes.
+
+39:23.680 --> 39:29.040
+Its custom chips are the way to go when it comes to machine learning.
+
+39:29.040 --> 39:36.080
+And as you know, Spark, because of legacy reasons, runs on the Java virtual machine, the
+
+39:36.080 --> 39:37.080
+JVM.
+
+39:37.080 --> 39:43.040
+It runs there because of Hadoop running there initially when Hadoop was created out of Yahoo,
+
+39:43.040 --> 39:48.120
+they decided to run it on the JVM because at the time, Java was hot, there were a lot
+
+39:48.120 --> 39:49.120
+of developers.
+
+39:49.120 --> 39:50.880
+And so it was done.
+
+39:50.880 --> 39:55.000
+And the thing about Java is that it makes us promise that you don't have to know what
+
+39:55.000 --> 40:01.640
+hardware you're running on, which is an assumption that just totally goes out the window when
+
+40:01.640 --> 40:05.920
+a hardware software interface is so volatile right now.
+
+40:05.920 --> 40:11.440
+The hardware software interface is no longer an instruction set that is familiar to everybody.
+
+40:11.440 --> 40:17.080
+It is a vast number of different instruction sets for different chips that have not been
+
+40:17.080 --> 40:22.760
+standardized the way that the CPU has been.
+
+40:22.760 --> 40:32.920
+And as a result, the JVM cannot directly and easily make use of these fancy processors.
+
+40:32.920 --> 40:35.840
+Of course, there are ways to make native calls in Java.
+
+40:35.840 --> 40:40.840
+But those native calls in the libraries that allow you to do those native calls.
+
+40:40.840 --> 40:41.840
+Is that still JNI?
+
+40:41.840 --> 40:42.840
+Yes.
+
+40:42.840 --> 40:48.680
+Those are still usually a year or two behind the hardware coming out.
+
+40:48.680 --> 40:54.120
+And so you're in this bad situation where some new hardware is out.
+
+40:54.120 --> 40:58.840
+And the software that will let you use that hardware and really only still in the limited
+
+40:58.840 --> 41:03.560
+capacity, not the full instruction set, comes out in two years after the hardware.
+
+41:03.560 --> 41:04.560
+So you're already two years behind.
+
+41:04.560 --> 41:07.520
+And as a researcher, then, that's unacceptable.
+
+41:07.520 --> 41:09.360
+Well, it's a commercial user as well.
+
+41:09.360 --> 41:10.360
+That's right.
+
+41:10.360 --> 41:13.040
+So the hardware changes, it is absolutely unacceptable.
+
+41:13.040 --> 41:17.360
+It's the difference between being competitive or not, especially for a company like ours,
+
+41:17.360 --> 41:18.360
+right?
+
+41:18.360 --> 41:23.160
+Because, like I said, we have to dedicate an eighth of a GPU for infinity to a stream.
+
+41:23.160 --> 41:26.400
+Well, and if some new thing comes along that makes that a sixteenth, right?
+
+41:26.400 --> 41:27.400
+We better use it.
+
+41:27.400 --> 41:28.400
+Exactly.
+
+41:28.400 --> 41:29.400
+Exactly.
+
+41:29.400 --> 41:32.920
+And if our competitors do, then chances are we wouldn't be so happy and maybe even run
+
+41:32.920 --> 41:34.000
+out of business.
+
+41:34.000 --> 41:38.400
+So sadly, Spark lives on the JVM.
+
+41:38.400 --> 41:43.880
+And so the question is, how do you get all those benefits in the JVM?
+
+41:43.880 --> 41:46.040
+You can't easily.
+
+41:46.040 --> 41:54.120
+The way the Spark community is evolving is to be able to plug in the neural network frameworks
+
+41:54.120 --> 41:57.200
+that are actually not written in the JVM.
+
+41:57.200 --> 42:02.720
+So what is the case now, actually, we saw at the early talk right after mine, actually,
+
+42:02.720 --> 42:04.720
+was about how to run TensorFlow on Spark.
+
+42:04.720 --> 42:06.240
+Is that the Yahoo, folks?
+
+42:06.240 --> 42:07.240
+I know this.
+
+42:07.240 --> 42:08.240
+No.
+
+42:08.240 --> 42:14.080
+Yeah, there are many TensorFlow on Spark packages.
+
+42:14.080 --> 42:16.080
+I think I've counted four of them.
+
+42:16.080 --> 42:19.200
+It's a good idea, clearly, because so many people are working on it.
+
+42:19.200 --> 42:22.240
+And this particular talk that I mentioned was a Databricks talk, but actually, yes,
+
+42:22.240 --> 42:28.080
+Andy Fang and some folks who have also worked on putting TensorFlow on Spark in a different
+
+42:28.080 --> 42:29.080
+way.
+
+42:29.080 --> 42:30.080
+Yeah.
+
+42:30.080 --> 42:36.360
+And the various approaches to it, but almost all of them involve Spark handling the data
+
+42:36.360 --> 42:44.160
+munching and gringing, meaning ETL and just the distribution of data across many machines.
+
+42:44.160 --> 42:48.000
+And then when it comes time to learning, they spin up a TensorFlow process and just let
+
+42:48.000 --> 42:52.680
+the TensorFlow process go to town on the data for a long period of time, maybe 10, 20 minutes.
+
+42:52.680 --> 42:54.000
+It does its thing.
+
+42:54.000 --> 42:56.960
+And then eventually it gets picked out a new model, then Spark does some broadcasting
+
+42:56.960 --> 43:01.360
+and some communication between machines and then again, hands back to TensorFlow.
+
+43:01.360 --> 43:08.680
+So the majority of the time is spent inside a framework that is written not in the JVM,
+
+43:08.680 --> 43:11.600
+written in more closer to hardware.
+
+43:11.600 --> 43:13.600
+So then the question is, why do that?
+
+43:13.600 --> 43:19.880
+Why not just stick to something that's in, that's always in close to the hardware?
+
+43:19.880 --> 43:20.880
+Close to the hardware.
+
+43:20.880 --> 43:21.880
+And the answer is there is an integrated answer, right?
+
+43:21.880 --> 43:26.800
+So actually, there's this, the lab that Spark came out of at Berkeley is now moving away
+
+43:26.800 --> 43:27.800
+from the JVM2.
+
+43:27.800 --> 43:30.280
+So it used to be called the amp lab.
+
+43:30.280 --> 43:35.120
+The amp lab is, for the sake of creative destruction, they wound down the amp lab and replaced
+
+43:35.120 --> 43:37.680
+it now with the Ryze lab.
+
+43:37.680 --> 43:41.360
+The Ryze lab on Spark now, well, no, that's not true, Apache on Spark.
+
+43:41.360 --> 43:44.400
+But the Ryze lab has a lot of people who work on Spark, but also new projects.
+
+43:44.400 --> 43:47.960
+And the new projects are all using C++.
+
+43:47.960 --> 43:54.600
+Because we're back, computing has been reset essentially with the resetting of the hardware
+
+43:54.600 --> 43:55.600
+software interface.
+
+43:55.600 --> 43:56.600
+Computing has been reset.
+
+43:56.600 --> 43:59.880
+And so all these chip manufacturers are also worried now because they're a little bit
+
+43:59.880 --> 44:05.000
+closer to being competed out, because now that a large body of their moat has essentially
+
+44:05.000 --> 44:10.880
+been removed, and that is very powerful for people who are looking to innovate in that
+
+44:10.880 --> 44:11.880
+space.
+
+44:11.880 --> 44:17.480
+And machine learning engineers are one of them people who work on machine learning libraries
+
+44:17.480 --> 44:18.480
+are one of them.
+
+44:18.480 --> 44:22.160
+And TensorFlow does this quite well in that there is a, because TensorFlow has supposed to
+
+44:22.160 --> 44:27.040
+run on many different chipsets, it has a compiler dedicated to be able to compile TensorFlow
+
+44:27.040 --> 44:31.360
+graphs into many different chipsets, like the Qualcomm chipset and Intel chipset and of
+
+44:31.360 --> 44:34.080
+course, CUDA and CUDNN.
+
+44:34.080 --> 44:39.960
+I suspect what we'll see is after a long battle, maybe over the course of five to ten
+
+44:39.960 --> 44:46.800
+years, we'll eventually settle on a new hardware software interface that will look a lot like
+
+44:46.800 --> 44:47.880
+linear algebra.
+
+44:47.880 --> 44:48.880
+Okay.
+
+44:48.880 --> 44:56.480
+There will be a chipset that at its core supports many matrix multiplies, not just many
+
+44:56.480 --> 45:02.040
+matrix multiplies, many small matrix multiplies, but a few big matrix multiplies, so multiplying
+
+45:02.040 --> 45:08.280
+two very big matrices together, multiplying many small matrices together, which is essentially
+
+45:08.280 --> 45:12.400
+what the Nvidia Volta is, and then you know, matrix vector operations and vector operations
+
+45:12.400 --> 45:13.400
+as well.
+
+45:13.400 --> 45:17.800
+Those are actually reasonably well supported with Bloss, which has been around since the
+
+45:17.800 --> 45:18.800
+seventies.
+
+45:18.800 --> 45:24.280
+But the many, many small matrix multiplies is not well supported in the CPU and needs
+
+45:24.280 --> 45:30.240
+to be done in custom chips, and that's part of what will be this new language, this
+
+45:30.240 --> 45:35.640
+new instruction set for the CPU, for the, for the new processing unit, and I'm curious
+
+45:35.640 --> 45:36.640
+to see what that looks like.
+
+45:36.640 --> 45:43.120
+Once that settles down, then there's time for new JVMs to pop up.
+
+45:43.120 --> 45:44.120
+Interesting.
+
+45:44.120 --> 45:49.600
+So the audience didn't see me chuckling as you were describing how the Spark ecosystem,
+
+45:49.600 --> 45:55.440
+how Spark is running TensorFlow, but it struck me as funny because Spark is like the new
+
+45:55.440 --> 46:01.160
+yarn for TensorFlow workloads, and for some of these, in some ways, yes, workloads, which
+
+46:01.160 --> 46:02.880
+is somewhat ironic.
+
+46:02.880 --> 46:09.640
+At the same time, one would expect that Google expands kind of the landscape around TensorFlow
+
+46:09.640 --> 46:13.760
+to more natively support distributed compute.
+
+46:13.760 --> 46:18.480
+What's the, I'm not very familiar with the situation there.
+
+46:18.480 --> 46:22.880
+I was at trying to remember the name of this, the Google event that I was at where we had
+
+46:22.880 --> 46:29.200
+an extensive conversation around like integrating Kubernetes more natively with TensorFlow and
+
+46:29.200 --> 46:33.440
+making more easy to do distributed TensorFlow compute.
+
+46:33.440 --> 46:36.560
+What's the general landscape there?
+
+46:36.560 --> 46:41.400
+So Kubernetes and TensorFlow do play very, very nicely with each other, and TensorFlow
+
+46:41.400 --> 46:47.760
+does have a distributed mode where you can have TensorFlow running on many machines or
+
+46:47.760 --> 46:52.560
+many cores, many GPUs on a single machine.
+
+46:52.560 --> 46:56.160
+Both of those are supported reasonably well with TensorFlow, and it's that the reason
+
+46:56.160 --> 47:01.720
+people don't use that is because it's often the case that when they have a lot of data,
+
+47:01.720 --> 47:08.200
+they've already set up a Hadoop cluster or a yarn cluster, and so they don't want to
+
+47:08.200 --> 47:10.560
+just undo all that engineering.
+
+47:10.560 --> 47:12.960
+They just want to be able to use all that data.
+
+47:12.960 --> 47:16.360
+And sometimes fault tolerance matters a lot more for them.
+
+47:16.360 --> 47:20.320
+TensorFlow by default is not fault tolerant in a serious way.
+
+47:20.320 --> 47:26.080
+So if your machines go down, you have to restart the computation, also restart the machines
+
+47:26.080 --> 47:27.600
+and everything yourself.
+
+47:27.600 --> 47:31.080
+Whereas with Spark, you get the fault tolerance.
+
+47:31.080 --> 47:37.000
+But it's actually not clear whether fault tolerance is all that useful for machine learning.
+
+47:37.000 --> 47:42.840
+Because usually if you have a training job, it runs for two or three days maybe, and
+
+47:42.840 --> 47:46.560
+then it's done, and you may be using 10 machines or 100 machines.
+
+47:46.560 --> 47:49.240
+If it's 100 machines for two or three days, chances are one of them will go down.
+
+47:49.240 --> 47:52.360
+So there you will care about having fault tolerance.
+
+47:52.360 --> 47:56.200
+But then fault tolerance in machine learning can be as easy as just restarting the machine
+
+47:56.200 --> 48:00.400
+that died with a version of the models that the other machines had or a version of the
+
+48:00.400 --> 48:02.360
+model that is even random.
+
+48:02.360 --> 48:05.920
+And so it's actually not a big deal for machine learning for there to be failures.
+
+48:05.920 --> 48:09.200
+And so fault tolerance just doesn't seem like an important deal there.
+
+48:09.200 --> 48:11.760
+But it is an important deal for some people like us.
+
+48:11.760 --> 48:18.040
+If we guarantee to our customers that we're monitoring a stream, we better monitor that
+
+48:18.040 --> 48:20.040
+stream all the time.
+
+48:20.040 --> 48:22.520
+And so fault tolerance does matter too.
+
+48:22.520 --> 48:27.400
+So we actually have to set up our own fault tolerance mechanisms for the sake of making
+
+48:27.400 --> 48:32.440
+sure that we always have some detector on the stream.
+
+48:32.440 --> 48:35.600
+So the whole landscape is changing dramatically.
+
+48:35.600 --> 48:41.880
+And everyone is very interesting and big fight.
+
+48:41.880 --> 48:44.640
+Maybe I shouldn't call it a fight because there's not necessarily one winner.
+
+48:44.640 --> 48:51.680
+What will probably happen is data workloads, workloads that are of the form, joins, group
+
+48:51.680 --> 48:55.080
+buys, and selects and so on.
+
+48:55.080 --> 48:59.800
+I think those will forever stay in Spark because Spark doesn't really well.
+
+48:59.800 --> 49:02.360
+It doesn't matter that they're in the JVM at that point because the difference between
+
+49:02.360 --> 49:08.520
+the JVM and the difference there is much less the CPUs, well, does joins and group buys
+
+49:08.520 --> 49:10.520
+well enough.
+
+49:10.520 --> 49:15.200
+It's these machine learning operations that these newer network operations that I think
+
+49:15.200 --> 49:18.360
+are better suited to hardware, those will be run in TensorFlow.
+
+49:18.360 --> 49:23.600
+I don't think TensorFlow will ever evolve to a point where it does joins and group buys.
+
+49:23.600 --> 49:25.360
+So I don't think that'll ever happen.
+
+49:25.360 --> 49:29.160
+And you always need joins and group buys to manage data.
+
+49:29.160 --> 49:32.280
+And so Spark will always have that place.
+
+49:32.280 --> 49:36.400
+Not always, but some tool that does joins and group buys will always have that place.
+
+49:36.400 --> 49:39.160
+And there's no real serious competitor to Spark.
+
+49:39.160 --> 49:41.960
+Well, there are, but you know, there's none of them are popular.
+
+49:41.960 --> 49:48.120
+By extension, the general CPU will always have a place alongside the TPU, right?
+
+49:48.120 --> 49:56.080
+Yes, unless the instruction sets that the TPUs provide expand and slowly over maybe
+
+49:56.080 --> 50:01.120
+a decade take over what the CPU does to and then the CPU is obsolete.
+
+50:01.120 --> 50:03.520
+So I don't know if that's going to happen.
+
+50:03.520 --> 50:04.520
+Interesting.
+
+50:04.520 --> 50:08.440
+Yeah, I don't know if that's going to, it's not, I haven't seen it happening yet.
+
+50:08.440 --> 50:13.560
+But it might, one of these hardware manufacturers might decide, hey, I got a good lead in
+
+50:13.560 --> 50:15.200
+these co-processor units.
+
+50:15.200 --> 50:20.680
+Why don't I just put a little bit more semiconductor into my co-processor and make it a full-on
+
+50:20.680 --> 50:24.840
+processor as well as a co-processor or the other way around or the other way around.
+
+50:24.840 --> 50:29.040
+So yeah, it's going, it's definitely all of that is happening right now and we're watching
+
+50:29.040 --> 50:30.040
+it.
+
+50:30.040 --> 50:32.760
+And it seems as if the computing gets faster, computing gets more efficient, so I'm just
+
+50:32.760 --> 50:33.760
+happy that it's happening.
+
+50:33.760 --> 50:34.760
+Awesome.
+
+50:34.760 --> 50:35.760
+Awesome.
+
+50:35.760 --> 50:36.760
+Well, we've got to get you to a flight.
+
+50:36.760 --> 50:37.760
+Yes.
+
+50:37.760 --> 50:40.360
+How can folks find you, learn more about what you're up to, explore these topics more?
+
+50:40.360 --> 50:46.760
+I am very Googleable, so matroid.com is for matroid and just Google, Reza, Zadeh and my
+
+50:46.760 --> 50:48.840
+home page shows up very easy.
+
+50:48.840 --> 50:49.840
+Awesome.
+
+50:49.840 --> 50:50.840
+All right.
+
+50:50.840 --> 50:51.840
+Thank you for having me.
+
+50:51.840 --> 50:52.840
+Thanks so much.
+
+50:52.840 --> 50:53.840
+It was awesome.
+
+50:53.840 --> 50:54.840
+I enjoyed the conversation.
+
+50:54.840 --> 50:56.840
+Learned a ton and we'll be in touch.
+
+50:56.840 --> 50:57.840
+All right.
+
+50:57.840 --> 50:58.840
+Thanks.
+
+50:58.840 --> 51:05.360
+All right, everyone, that is our show.
+
+51:05.360 --> 51:10.360
+Thanks so much for listening and for your continued support, comments and feedback.
+
+51:10.360 --> 51:14.840
+A special thanks goes out to our series sponsor, Intel Nirvana.
+
+51:14.840 --> 51:19.040
+If you didn't catch the first show in this series where I talked to Naveen Rao, the head
+
+51:19.040 --> 51:23.720
+of Intel's AI product group about how they plan to leverage their leading position and
+
+51:23.720 --> 51:28.720
+proven history in Silicon innovation to transform the world of AI, you're going to
+
+51:28.720 --> 51:30.800
+want to check that out next.
+
+51:30.800 --> 51:37.360
+For more information about Intel Nirvana's AI platform, visit intelnervana.com.
+
+51:37.360 --> 51:43.960
+Remember that with this series, we've kicked off our giveaway for tickets to the AI conference.
+
+51:43.960 --> 51:49.120
+To enter, just let us know what you think about any of the podcasts in the series or post
+
+51:49.120 --> 51:54.280
+your favorite quote from any of them on the show notes page, on Twitter or via any of
+
+51:54.280 --> 51:56.200
+our social media channels.
+
+51:56.200 --> 52:04.360
+Make sure to mention at TwomoAI, at Intel AI, and at the AI come so that we know you want
+
+52:04.360 --> 52:06.600
+to enter the contest.
+
+52:06.600 --> 52:12.000
+Full details can be found on the series page and of course, all entrants get one of our
+
+52:12.000 --> 52:14.960
+slick Twomo laptop stickers.
+
+52:14.960 --> 52:20.080
+Speaking of the series page, you can find links to all of the individual show notes pages
+
+52:20.080 --> 52:25.640
+by visiting TwomoAI.com slash O'Reilly AINY.
+
+52:25.640 --> 52:28.640
+Thanks so much for listening and catch you next time.
+

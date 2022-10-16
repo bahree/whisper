@@ -1,0 +1,788 @@
+WEBVTT
+
+00:00.000 --> 00:21.400
+All right, everyone. I'm here with Lina Montoya. Lina is a post-doctoral researcher at the University of North Carolina, Chapel Hill. Lina, welcome to the Twoma AI podcast.
+
+00:21.400 --> 00:24.000
+Thank you so much. So great to be here.
+
+00:24.000 --> 00:39.000
+I'm really looking forward to digging into our conversation. You've had the pleasure of kind of sitting through a little bit of pre-interview setup as I am on the road for the recording of this interview. So thank you for your patience.
+
+00:39.000 --> 00:56.000
+It was fascinating. We had a good time with it. We're going to be talking about your recent ICML presentation that focuses on your work in causal inference and some of your research broadly.
+
+00:56.000 --> 01:04.000
+But before we do, I'd love to have you share a little bit about your background and how you came to work with machine learning.
+
+01:04.000 --> 01:18.000
+Yeah, yeah. So my background, I guess, I'll start actually an undergrad when I was a psychology major did not have machine learning or anything statistics oriented was not really on my radar.
+
+01:18.000 --> 01:38.000
+So psychology major, and then I worked a lot in research and started digging into the data and realized I got really excited by the data and just decided to apply to a biostatistics master's program and got in.
+
+01:38.000 --> 01:56.000
+And that was at UC Berkeley and did my masters in biostatistics and they're learned about causal inference, which opened up a world of ways that we can rigorously answer questions scientific questions.
+
+01:56.000 --> 02:08.000
+And then using causal inference kind of was introduced to machine learning methods that would allow us to answer these causal questions in very flexible ways.
+
+02:08.000 --> 02:14.000
+And yeah, completed my doctorate and now I'm doing a postdoc in biostatistics as well.
+
+02:14.000 --> 02:18.000
+Awesome. And what was the focus of your doctorate?
+
+02:18.000 --> 02:27.000
+Yeah, so it was in a lot of it was causal inference and it's specifically in methods within precision medicine.
+
+02:27.000 --> 02:43.000
+So specifically the optimal dynamic treatment regime. So that's basically a fancy way of saying that it's an algorithm that takes in patient or individual or participant covariates or characteristics.
+
+02:43.000 --> 03:01.000
+And then outputs the best treatment or intervention for that person. And so, yeah, during my doctorate, I spent a lot of time researching sort of methods that would get at estimating this optimal dynamic treatment rule or this individualized treatment rule.
+
+03:01.000 --> 03:13.000
+Another applied this method, these methods to it's a two big applied projects or the first one was within criminal justice, the criminal justice system.
+
+03:13.000 --> 03:23.000
+And the second one was within the HIV and patient care space.
+
+03:23.000 --> 03:34.000
+And in fact, this is the work that or this is the work that either you presented at ICML is related to the work that you presented at ICML.
+
+03:34.000 --> 03:47.000
+That's right. The former. Yeah, the first one that I just talked about is exactly it. So that's basically so I talk about the optimal dynamic treatment rule, a way of estimating it called the super learner algorithm.
+
+03:47.000 --> 04:05.000
+And then I present an application of this algorithm to basically defendants who have mental illness to see which defendants should get cognitive behavioral therapy or CBT versus treatment as usual based on their characteristics.
+
+04:05.000 --> 04:12.000
+So if we can find a way of administering either CBT or treatment as usual in an individualized way.
+
+04:12.000 --> 04:27.000
+Got it. Got it. We'll dig into all of that in more detail. But before we do the workshop that your talk, you were invited speaker at this workshop, it was called the neglected assumptions in causal inference workshop.
+
+04:27.000 --> 04:40.000
+And there's so much in that name, I'd love to have you riff a little bit on this idea of neglected assumptions and causal inference and kind of what it means, what some of the other presentations were at the workshop that kind of thing.
+
+04:40.000 --> 05:01.000
+Yeah, yeah. So I think the name kind of came out of maybe the idea that causal inference and machine learning of gaining this tremendous popularity and that sometimes when in machine learning or when we're trying to tackle a problem, a scientific question.
+
+05:01.000 --> 05:14.000
+Often there, we kind of turn to these causal methods or causal tools without sort of looking step by step methodically to see if we're missing any causal assumptions.
+
+05:14.000 --> 05:31.000
+For example, I'll give an example. So if you have a data set and you're trying to find the effect of a variable on an outcome and you throw in all of the possible covariates that you have to find that effect using some machine learning algorithm.
+
+05:31.000 --> 05:46.000
+You might be including in that set something that's called an instrumental variable or variable or collider variable, in which case, if you put those variables into your model, you're going to introduce some insignificant bias.
+
+05:46.000 --> 06:09.000
+I think the idea is that sometimes when we apply these causal methods to machine learning problems, we either kind of do it blindly, like without this sort of method or roadmap for doing so, or we might even at the other extreme just completely give up and say, oh, I can't infer any sort of causality because I don't have the proper causal assumptions.
+
+06:09.000 --> 06:32.000
+And so I think the purpose of this workshop was sort of to highlight what assumptions are needed to make causal inferences and also show the different assumptions are needed for different kinds of questions that there's not kind of a one size fits all of these are the standard sets of assumptions that are applied to every single causal problem.
+
+06:32.000 --> 06:47.000
+And also present different frameworks for answering causal questions or road maps to be as transparent as possible about the assumptions that we're making to answer scientific or causal questions.
+
+06:47.000 --> 07:04.000
+When you mentioned instrumented variables and collider variables, what are those of these relate I'm imagining the idea of correlated variables things like that.
+
+07:04.000 --> 07:25.000
+Yeah, yeah, so that's a great question. And this is yeah causal inference speak and this comes out of the pearl structural equations or directed a cyclic graph world. So basically instrumental variable and collider bias variable.
+
+07:25.000 --> 07:46.000
+So that comes out of these graphical equations if you were to kind of graph the relationship between each of those variables the instrumental variable is one that might affect an intervention, but not the outcome in a collider variable is a variable that's
+
+07:46.000 --> 08:04.000
+you have two covariates that affects that collider and those two variables as well affect the intervention and the outcome. So that's kind of, yeah, this is within the sort of pearl directed a cyclic graph two kinds of graphs that are out there.
+
+08:04.000 --> 08:23.000
+Can you make those more concrete with an example? Yeah, so let's see, let's see, okay, so let's take an example for example smoking is the intervention and the outcome is lung cancer.
+
+08:23.000 --> 08:38.000
+So if you were to toggle yes or no smoking then that's may have an effect on the outcome lung cancer. And so let's say I don't know a variable that affects smoking.
+
+08:38.000 --> 08:54.000
+It's socioeconomic status. And so that's, for example, a variable that might affect smoking, but that might not necessarily affect whether or not you get lung cancer directly. And so that's something that might be an instrumental variable.
+
+08:54.000 --> 09:12.000
+And actually in an economics it's used a lot, for example, if you were to randomize treatment, but you don't get perfect compliance of a treatment, then the instrumental variable could be the actual flip of a coin.
+
+09:12.000 --> 09:32.000
+And the intervention or the treatment is what the person actually got. So those are directly affected. And the outcome might be whatever outcome you're interested in. So it's kind of like a proxy of your of your intervention that you care about that doesn't directly affect your outcome.
+
+09:32.000 --> 09:45.000
+Okay, yeah, what's the connection between the work that you presented optimal dynamic treatment rule estimation and the neglected assumptions idea.
+
+09:45.000 --> 09:52.000
+Yeah, yeah, so I think this is a really great illustration the optimal dynamic treatment rule.
+
+09:52.000 --> 10:07.000
+So let me back up and say that so the optimal dynamic treatment rule can be considered a causal question. So the causal question is what is the best way of assigning an intervention.
+
+10:07.000 --> 10:26.000
+And even further you might ask, well, what are people's what would have happened had everyone received their optimal intervention, what what outcomes have looked like had everyone received their optimal intervention. So that is a causal question, which translates into a causal parameter.
+
+10:26.000 --> 10:47.000
+Now, the assumptions that are needed to estimate that causal parameter are not are different are very specific to that causal parameter versus, for example, just the average effect had we given everyone the exact same intervention or given the intervention in a non individualized way.
+
+10:47.000 --> 11:14.000
+So I think that this that the optimal dynamic treatment rule, the set of assumptions that go with estimating that the causal assumptions that go with that are unique to that question because it is a unique question versus, for example, the standard assumptions that we might all be taught of, for example, estimating that average effect of a non individualized treatment.
+
+11:14.000 --> 11:23.000
+Got it. So let's maybe dig in a little bit deeper into the specifics of the method.
+
+11:23.000 --> 11:28.000
+It's related to an idea that comes out of Berkeley called the causal roadmap.
+
+11:28.000 --> 11:33.000
+Can you talk a little bit about the causal roadmap and what that is and what the connections are?
+
+11:33.000 --> 11:56.000
+Yes, yes, and it's something very near and dear to my heart and something I'm quite passionate about. So it came out of this specific causal roadmap came out of Berkeley was developed by Maya Peterson and Mark Vanderlin, and it's really a way of going from a causal question or scientific question.
+
+11:56.000 --> 12:12.000
+And going all the way through it to see, okay, do I have in my data the sufficient conditions to answer this causal question and then do I have the tools for answering this causal question and finally with my data.
+
+12:12.000 --> 12:19.000
+Let's actually answer it with a certain parameter or let's get out a number that will actually answer that causal question.
+
+12:19.000 --> 12:33.000
+And so specifically the steps of the causal roadmap are, first of all, state your question, your research question, and that includes what's your population, what are your variables, what's your outcome.
+
+12:33.000 --> 12:54.000
+The second thing is to specify your model. So what I had just said before that sort of graph, the thing that relates all of your variables together, your intervention connecting to your outcome, your code, your, yeah, your features, for example, relating to your outcome and your intervention.
+
+12:54.000 --> 13:15.000
+A graph that sort of relates all of the variables that you have together. Third is to translate that question that you got that you made in step one into a causal parameter that's a function of counterfactuals of your counterfactual distribution.
+
+13:15.000 --> 13:29.000
+And fourth is to specify what data you actually have and the link between your causal model and your observed data distribution model.
+
+13:29.000 --> 13:51.000
+Fifth is to actually identify your causal parameter, which is a function again of counterfactuals. So that's those are things that you can't observe counterfactuals are, you know, outcomes had everyone receive the same exact thing and then you might say, OK, I want to turn back time and give everyone the opposite thing you can't do that in real life.
+
+13:51.000 --> 14:03.000
+And so this fifth step is to say, well, can I write my causal parameter as a function of what I can actually observe, so not counterfactual, not from the counterfactual distribution.
+
+14:03.000 --> 14:22.000
+And in that step, that step is one of the most important ones because that's the one that where the causal assumptions really come to light, what are the things that you need to assume, for example, that everyone was randomized in your in your study that there's no unmeasured confounding.
+
+14:22.000 --> 14:33.000
+Things like positivity, the positivity assumption, meaning that everyone has a positive probability of actually getting that intervention, so things like that.
+
+14:33.000 --> 14:45.000
+And then the sixth step is to actually estimate and the sixth step is maybe the thing that we think is causal inference, but it's just one of the steps of the causal roadmap.
+
+14:45.000 --> 14:55.000
+So estimation is going to include things like machine learning, you know, double robust estimation.
+
+14:55.000 --> 15:05.000
+Yeah, all of the machinery that takes your finite sample and tries to estimate that statistical parameter that you got in step five.
+
+15:05.000 --> 15:17.000
+And and of course, yeah, we want to, you know, use things like machine learning to flexibly get at this statistical or this estimator at this point.
+
+15:17.000 --> 15:34.000
+And then the last step is to actually interpret the results and whether or not you can actually interpret what you got in step six, your estimator as a causal quantity depends on what you what you've assumed in the previous steps.
+
+15:34.000 --> 15:58.000
+So, so yeah, I think this this roadmap, I think just kind of provides a way of really clearly seeing if you can actually go from a causal question to seeing, OK, is the number that I have actually answering the causal question that I made in step one.
+
+15:58.000 --> 16:08.000
+Yeah, just kind of well, on the one hand, not not making sort of biased claims and on the other hand, not just throwing up our hands in there and saying we can't ask for anything.
+
+16:08.000 --> 16:24.000
+Yeah, yeah, what's the difference between step three, which I believe was restating your question in terms of a causal parameter and step five, which is writing that as a function.
+
+16:24.000 --> 16:43.000
+Yeah, yeah, yeah, let me let me clarify that because it's a really important and subtle point. So, let me just say by start by saying that they they get so your causal parameter and your statistical estimand are going to get at the same exact thing they're going to get at the same exact number.
+
+16:43.000 --> 17:06.000
+The only difference is that that your causal parameter, which is what you get in step three is a function of your counterfactual distribution, meaning that you it might be, for example, if you're interested in the what's the effect had everyone received an intervention versus if no one had received an intervention.
+
+17:06.000 --> 17:19.000
+And your causal parameter is going to be the expected outcome had everyone received intervention minus the expected outcome had no one received the intervention and then that world.
+
+17:19.000 --> 17:27.000
+It's a hypothetical world because no one can receive both the intervention and not the intervention at the same time. So it's kind of like this.
+
+17:27.000 --> 17:44.000
+I would tell my students when I'm teaching causal efforts, it's like it's your magical world of the counterfactual distribution where you can, you know, toggle these things, intervene these things and look at outcomes under these different interventions, you can't see that in real life.
+
+17:44.000 --> 17:57.000
+That's different than step five, which is identifying your causal parameter, this thing that you got from the magical world as a function of what you can actually observe your observed data distribution.
+
+17:57.000 --> 18:24.000
+And so now your your statistical parameter as opposed to your causal parameter is going to be the expected outcome given that your intervention is to treat everyone to that your intervention is to treat given your covariates and then averaged over all of those minus, for example, the expected outcome given.
+
+18:24.000 --> 18:33.000
+Your intervention is to not treat and your covariates and then averaged over your the covariate distribution. So it's the difference between.
+
+18:33.000 --> 18:44.000
+Again, you're these parameters being a function of counterfactual things so like counterfactual outcomes versus things that we can actually observe.
+
+18:44.000 --> 18:56.000
+And step five, except three is your stating this question in terms of counterfactuals and five is your stating them in terms of things that you can actually observe.
+
+18:56.000 --> 18:57.000
+Yes, exactly.
+
+18:57.000 --> 19:00.000
+And importantly, I'm sorry.
+
+19:00.000 --> 19:15.000
+I was just going to ask is the statement of these things in terms of counterfactuals is that, you know, given that there it's this magical world is that is the function of that step.
+
+19:15.000 --> 19:29.000
+So to inform our understanding of the problem or can we kind of mathematically reason via these counterfactuals through the tools that, you know, we have with causal modeling and causality.
+
+19:29.000 --> 19:47.000
+Yeah, that's a really great question. So I would say that the reason for doing that for the reason to write it as a causal parameter is this is our moment to kind of to get creative and and take the question that we're actually interested in.
+
+19:47.000 --> 19:56.000
+And write it as something that's not realistic to do in real life, but it's kind of the thing that we would have wanted to do.
+
+19:56.000 --> 20:07.000
+I'm burdened by exactly exactly like we would have wanted to give everyone the treatment, look at the outcomes and then turn back the clock and give no one the treatment and look at the outcomes.
+
+20:07.000 --> 20:12.000
+So it's our way of sort of like really formally writing down, okay, this is what we would have wanted.
+
+20:12.000 --> 20:18.000
+And then in later steps, we're really examining to see, well, can we actually do that?
+
+20:18.000 --> 20:31.000
+And making that transparent. And that's that's kind of the magic of the causal roadmap. And I think the importance of it. And then getting back to the neglected assumptions, which sometimes not explicitly said.
+
+20:31.000 --> 20:39.000
+Got it, got it. And so the optimal dynamic treatment rule that fits in that step six, the actual estimator.
+
+20:39.000 --> 20:53.000
+Yeah, yeah, okay. There are a lot of steps in this. So I can, yeah, I can try to, you know, go through the roadmap and sort of apply it to this optimal dynamic treatment rule.
+
+20:53.000 --> 20:59.000
+To this, yeah, the treatment rule problem. And my presentation kind of kind of.
+
+20:59.000 --> 21:10.000
+If you can, like, when I give longer versions of that presentation, it actually goes through the, like the outline are the different steps. But yeah, I can, I can kind of step through.
+
+21:10.000 --> 21:28.000
+So, so yeah, the research question is, so I think there's two research, two causal questions here. So the first one is what's the rule or way of assigning treatment that yields the highest expected outcome.
+
+21:28.000 --> 21:40.000
+That's, that's the causal question. What's the, what's the rule or algorithm that uses individual variables to assign the best treatment possible.
+
+21:40.000 --> 21:49.000
+The second question is what would have happened, what would have outcomes look like had everyone gotten their optimal intervention.
+
+21:49.000 --> 21:55.000
+So that's in contrast to what would have outcomes look like had everyone gotten the same treatment.
+
+21:55.000 --> 22:00.000
+So, yeah, so that's, so that's the, that's the question.
+
+22:00.000 --> 22:07.000
+The causal model, in the case that I presented, it's an architecture.
+
+22:07.000 --> 22:18.000
+If I could jump in, are there assumptions that we're making about the, there have to be assumptions that we're making about the nature of treatments.
+
+22:18.000 --> 22:27.000
+And, you know, whether they're continuous versus discrete like, you know, dosages or whether the options were making, how does all that come into play.
+
+22:27.000 --> 22:33.000
+Yeah, yeah, that completely comes into play and should be encoded in our model.
+
+22:33.000 --> 22:41.000
+And so I think that perfectly segues into step two, which is specifying our causal model, which is the model in this case.
+
+22:41.000 --> 22:50.000
+So I'm, the example I presented is a randomized control trial setting. It's not observational. It's an experimental setting.
+
+22:50.000 --> 23:05.000
+So in that case, my model is that I have a set of covariates and those affect the outcome, but those covariates do not affect the treatment, which is CBT.
+
+23:05.000 --> 23:12.000
+So CBT being cognitively starting behavioral therapy.
+
+23:12.000 --> 23:28.000
+So I have these covariates that may affect the outcome, but those covariates, I'm saying I'm encoding because it's an experiment that they don't affect whether or not a person was given CBT because it was randomly given.
+
+23:28.000 --> 23:36.000
+And so the thing that does affect whether or not a person gets CBT is a flip of a coin because it was an experiment.
+
+23:36.000 --> 23:45.000
+And then I'm also saying that CBT versus treatment as usual may affect the outcome, which is recidivism at one year.
+
+23:45.000 --> 23:58.000
+And so you can imagine this graph of as like a triangle, but without an edge on one side, so that the covariates affect the outcome, but doesn't affect the treatment yet or the intervention.
+
+23:58.000 --> 24:02.000
+Okay, so that is my causal model.
+
+24:02.000 --> 24:20.000
+And so in that way, I'm encoding that the data were generating, this is what I know about the real world that the data were generated in this way, and so that might be somewhere where you would make strong assumptions if you actually know how the data were generated.
+
+24:20.000 --> 24:33.000
+So for example, I know that was that CBT was given with a flip of a coin with 0.5 probability of getting CBT. And so, okay, so yeah, that's step two.
+
+24:33.000 --> 24:40.000
+And then step three is to translate the research question into a causal parameter.
+
+24:40.000 --> 24:54.000
+So that the first question that I talked about was the question about the optimal rule. So what's the best way of treating an individual person with the treatment that they should get.
+
+24:54.000 --> 25:16.000
+So we so the causal parameter in that case is an indicator that the conditional average treatment effect is bigger than zero. So the conditional average treatment effect is a causal parameter because it's a function of it has counterfactual outcomes in it.
+
+25:16.000 --> 25:27.000
+Specifically, that's the average treatment outcome given something given covariates. Yeah, given a specific kind of person got it.
+
+25:27.000 --> 25:40.000
+Yeah, exactly. So it's the expected expected outcome under treatment minus the expected outcome under control all conditional on a kind of person on your covariate distribution.
+
+25:40.000 --> 25:48.000
+So we're going to define the optimal rule as an indicator that that conditional average treatment effect is bigger than zero.
+
+25:48.000 --> 26:02.000
+So in other words, if my effect, if I'm, you know, 31 year old woman with data on my profile and my treatment effect is bigger than zero, then treat me if not don't treat me.
+
+26:02.000 --> 26:08.000
+And that's going to be the rule, which is this causal parameter got it.
+
+26:08.000 --> 26:21.000
+So that's that causal parameter. And then I talked about also another one, which is the value of that rule. So what would have happened had everyone in the population gotten the optimal rule.
+
+26:21.000 --> 26:37.000
+So what's the expected outcome under the optimal rule. So in that way, you can kind of see that I took the first question and created two causal parameters out of those two questions.
+
+26:37.000 --> 26:49.000
+And then step four is to specify what data are available and the link between the causal and statistical model. And so, so what we often say is that.
+
+26:49.000 --> 27:15.000
+So in this case, this in this RCT that I'm talking about, I can say that my dead, my data, my covariate treatment and outcome were generated by sampling 720 ID times independent identically distributed times from a model, a distribution compatible with the causal model that I described above.
+
+27:15.000 --> 27:20.000
+And 720 because that's the sample that was used in the study.
+
+27:20.000 --> 27:21.000
+Sure.
+
+27:21.000 --> 27:33.000
+And in that, in that step, you know, if you have dependence between people, you might encode that assumption in there as well. But in this case, we're going to assume that it's ID.
+
+27:33.000 --> 27:45.000
+And you mentioned, you know, kind of a, you have verbal small print compatibility between the assumptions and the model.
+
+27:45.000 --> 27:57.000
+I'm sorry, the distribution and the model is that, is that challenging to enforce and to what degree does that limit, you know, your choice of distributions or things like that.
+
+27:57.000 --> 28:06.000
+Yeah, yeah. Well, in this case, it's not very, we haven't made very strong assumptions. We haven't really said anything.
+
+28:06.000 --> 28:17.000
+We've only said how the variables are related to each other. We haven't said anything about the functional form like the outcome is a linear function of the covariates and the intervention.
+
+28:17.000 --> 28:39.000
+We haven't imposed anything. So at this point, I would say it's quite easy to make that link from the observed data, the observed distribution to the counterfactual distribution because really the only thing we've imposed at this point is that that relationship between the variables, which we know we observe to, you know, that's how things actually happened.
+
+28:39.000 --> 28:57.000
+So I think that's kind of the beauty of this too is like the flexibility of this and also the ability to make things transparent. Like maybe you do know that it's a linear, that there's a linear relationship between the variables somewhere, but at this point, we have not said anything about that.
+
+28:57.000 --> 29:13.000
+Yeah, great question. Yeah. And then, okay, so then the next step is to actually identify the, the causal parameters of function of the observed data distribution and the first.
+
+29:13.000 --> 29:21.000
+So to get at the optimal rule, we can identify the conditional average treatment effect as something that's called the blip function.
+
+29:21.000 --> 29:27.000
+And so that's, yes, the blip function.
+
+29:27.000 --> 29:43.000
+And I think, I think the blip function got its name because, so this is back of Robbins, Jamie Robbins paper, and I think the idea was it's kind of like a blip in the treatment effect for an individual kind of person.
+
+29:43.000 --> 30:10.000
+And so we can identify it. And let me actually let me back up for a second. So the assumptions that are needed to identify these two parameters are first, the randomization assumption, so no unmeasured confounders and the positivity assumption, which says that for every kind of person in your covariates that there's a positive probability of getting treatment or CVT in this case.
+
+30:10.000 --> 30:22.000
+And because we're in the experimental setting, we're in the RCT setting, those actually both hold by design. And so we can assume those to be true.
+
+30:22.000 --> 30:42.000
+And so now that we have, we've kind of explicitly stated that and, you know, in the observational setting, you can explicitly kind of make transparent what you don't think to be true. I think that's that that's the beauty of the roadmap is that you can actually.
+
+30:42.000 --> 30:56.000
+Yeah, be transparent about where you think your assumptions might not hold. Okay. And so, yeah, so then we can finally identify it as this blip function.
+
+30:56.000 --> 31:15.000
+The blip function being the outcome regression, so the expected outcome given your treatment equals CVT and your covariates minus the expected outcome given treatment as usual and the covariates.
+
+31:15.000 --> 31:35.000
+And now if that's bigger than zero, if that indicator of that is bigger than zero, then treat that person, if not, don't treat that person. So now we've identified it that as a function of what can we can actually observe as opposed to counterfactuals, which is what we did in the third step.
+
+31:35.000 --> 31:38.000
+If that makes sense.
+
+31:38.000 --> 31:46.000
+And it sounds like a fairly straightforward encoding of what you want to see.
+
+31:46.000 --> 31:58.000
+Exactly. Exactly. Yeah. And so, so we've, and then we can additionally identify the value of the rule as well in a similar way.
+
+31:58.000 --> 32:18.000
+And the next step is to estimate and a lot of my talk goes through that as well. And so specifically to estimate the optimal rule, we use the super learner algorithm, which is this ensemble machine learning method that takes into account different kinds of ways to estimate the optimal rule.
+
+32:18.000 --> 32:32.000
+There's been an explosion of methods in the literature of ways to estimate the individualized treatment rule or optimal dynamic treatment rule and also an explosion of different names for the same exact thing.
+
+32:32.000 --> 32:36.000
+What are some other names that we may have come across for similar ideas?
+
+32:36.000 --> 32:51.000
+Yeah. Okay. So optimal dynamic treatment rule, optimal dynamic treatment regime individualized treatment rule or regime personalized intervention.
+
+32:51.000 --> 32:56.000
+Yeah, the list kind of goes on depending on your discipline.
+
+32:56.000 --> 33:08.000
+Yeah, there's been an explosion of methods for basically algorithms that get at ways to personalize what people, what interventions people should get.
+
+33:08.000 --> 33:18.000
+And so the super learner algorithm has this philosophy of well, why there's so many great algorithms out there, why not combine them in a smart way.
+
+33:18.000 --> 33:34.000
+And the original super learner was actually came out of prediction. And so the original super learner, what it does aim to estimate the outcome regression really well. So the expected outcome, you know, given some features.
+
+33:34.000 --> 33:49.000
+And then the same way kind of takes all of the amazing algorithms out there for pure prediction and combines them using, yeah, and it's an ensemble machine learning algorithm.
+
+33:49.000 --> 34:05.000
+So specifically, the super learner for the optimal rule, combines different optimal rule algorithms using three different ingredients. So the first ingredient is your library. So what are, you know, the different algorithms that you might have in there.
+
+34:05.000 --> 34:24.000
+You have, you know, regression approaches that estimate the blip or you might have outcome weighted learning or residual weighted learning or there's one called Earl, there's a lot of different ones out there.
+
+34:24.000 --> 34:39.000
+And so, yeah, so you define kind of your, and let me also say that you might have optimal rule, so these algorithms that kind of take in patient covariates or people's covariates and take and spit out a treatment decision.
+
+34:39.000 --> 34:56.000
+And you may also include in your library static rules, meaning rules that don't take into account individual characteristics at all. So for example, the rule, give everyone CBT or give everyone treatment regardless of who you are.
+
+34:56.000 --> 35:16.000
+So in your library, you can, you know, have whatever algorithms at your disposal that you that you may want to have, ranging from, for example, really simple linear parametric regressions to really, you know, aggressive, flexible machine learning algorithms, you can have a diversity of these algorithms.
+
+35:16.000 --> 35:35.000
+The second step that you need is a metal learning step. And so that's basically the way that you combine your machine learning out your optimal rule algorithms. And so you may combine them. So, for example, if you're rules all estimate the blip function.
+
+35:35.000 --> 35:49.000
+This function is going to spit out a continuous number. You may just take a convex combination of all of your blip predictions and combine all of your algorithms in that way.
+
+35:49.000 --> 36:08.000
+The library has, they all kind of output decision rule, you may take a majority vote or weighted majority vote of your algorithms. So that's step two is a way to combine all of your algorithms together.
+
+36:08.000 --> 36:25.000
+Step step is that you need a loss function or a risk function to choose the best way to combination or choose the best algorithm. And so there's different options for that. So if, again, if you have algorithms that all output blip.
+
+36:25.000 --> 36:40.000
+So, which is going to be a continuous number, you may use the mean squared error as your risk. Or you may use the value of the rule, meaning the expected outcome of each of the candidates.
+
+36:40.000 --> 36:56.000
+Because in that way, I mean, that's ultimately what you're trying to maximize right is the mean outcome. So you can, you know, make sense to use the mean outcome as the sort of way of evaluating each of the candidate algorithms.
+
+36:56.000 --> 37:21.000
+And is there a methodology specified as part of super learner for if you've got, if your model library includes both these, you know, blip functions, for example, and classifiers for creating a loss function that is appropriate that incorporates all of these different functions or like structuring your loss function or something.
+
+37:21.000 --> 37:40.000
+That's a great question. So I would say the only sort of way of choosing that is really for practical purposes is if your library has only so the way that it's currently implemented right now is that you have to specify it yourself.
+
+37:40.000 --> 37:53.000
+And if you have a library with algorithms that only output a decision rule, but you say that you want to use MSI, it's just going to throw an error won't let you do that.
+
+37:53.000 --> 38:08.000
+So maybe another way to state the question is practically speaking, do you have to either choose between a decision rule, an hour predictor for a decision or a predictor of, you know, whatever the number is like a bloop number.
+
+38:08.000 --> 38:19.000
+Right. Right. Yeah. Yeah. Good question. Okay. So that really depends on what you want out of it. So if you just want out of it, yes or no treat or not treat.
+
+38:19.000 --> 38:29.000
+Then you may go with the library that, you know, includes the static rules, the blip, the ones that output a yes or no to treat, no treat.
+
+38:29.000 --> 38:42.000
+It might be of interest to actually see what the estimate, the distribution of the estimated blip looks like. And so in that case, you would want to restrict your library to algorithms that estimate the blip.
+
+38:42.000 --> 38:55.000
+And so yeah, you would only want in your library to have algorithms that would that would let you do that because it is informative to see that the distribution of the conditional average treatment effect for your sample.
+
+38:55.000 --> 38:57.000
+Yeah.
+
+38:57.000 --> 39:18.000
+Yeah. So those, those are the three things that that should go in your super learner. I also just want to mention that the, this method. So the theory and the methods were, were developed also at Berkeley by Mark Vandolin and Alex Lutke, and they really were the ones who kind of paved the way for it with the theory.
+
+39:18.000 --> 39:29.000
+And the methods for, for doing this optimal rule, super learner and kind of, yeah, very, very groundbreaking method, I would say.
+
+39:29.000 --> 39:31.000
+Yeah.
+
+39:31.000 --> 39:49.000
+The super learner, the, the models that you're working with are, they're not like pre train models, you have to then train your super learner, right, and how is that done.
+
+39:49.000 --> 39:58.000
+So, yeah, so through, that's a great question through cross validation. So yeah, all of this is within the cross validation scheme. And so,
+
+39:58.000 --> 40:08.000
+I'm thinking, I'm thinking like in the strictly causal formulation of this problem, you don't have experimental or observational data.
+
+40:08.000 --> 40:18.000
+Do you, is that created through simulation, or do you, are you training your model based on observed data later?
+
+40:18.000 --> 40:35.000
+Yeah, I, I, I guess I'm thinking of it as like a supervised learning kind of problem where you have like an observation and a label or observation output and your, your training is like correlating the two essentially or training based on the two and that may not be the case here.
+
+40:35.000 --> 40:58.000
+Yeah, yeah, so it's, yeah, so it's super va, it is supervised learning in the sense that you, so it's interesting because you're basically trying to find the, the rule that maximizes the outcome that, so you're trying to find the candidate rule that maximizes the expected outcome.
+
+40:58.000 --> 41:21.000
+So, how you do it is that you, through cross validation scheme is you, on the training set, you fit a candidate rule, and on the validation set, you look at the value of the rule and see how well it performs that candidate rule on that validation set using either of the
+
+41:21.000 --> 41:29.000
+functions that I mentioned that you kind of circle around. Yeah, so I think my question is maybe where does the training set come from.
+
+41:29.000 --> 41:39.000
+Oh, okay, so the way that we've done it so far is just, yeah, the, the sample that we have at hand and just sample splitting.
+
+41:39.000 --> 41:57.000
+So earlier when you mentioned that you, you kind of emphasize that this is not observational, I took that to me, you didn't have actual outcomes, but you do actually have that, but you're using that early in your causal formulation of the problem.
+
+41:57.000 --> 42:10.000
+So what I meant by it's not observational is that it's, so this is again, like terminologies, like very epidemiology sort of public health or my training is.
+
+42:10.000 --> 42:25.000
+So observational in the sense that it's not experimental data and that the treatment was that the treatment was randomized in this case, it wasn't like we just collected the data.
+
+42:25.000 --> 42:30.000
+Right, without, yeah, but you did observe an actual.
+
+42:30.000 --> 42:35.000
+The application of the intervention and outcome and all that stuff and you have that data.
+
+42:35.000 --> 42:45.000
+Yes, yes, it's just the study design and I know like, yeah, this is just like a terminology thing and exactly why we need to have these conversations because it's.
+
+42:45.000 --> 42:55.000
+The preparation of your context would be there are just some people I got them and I'm looking at what happened as opposed to my design and experiment with.
+
+42:55.000 --> 43:05.000
+Exactly, exactly, yeah, it's it's not that people just got CBT and I have no idea or I have some sense of how they got it, but it wasn't like I randomly assigned people to get CBT.
+
+43:05.000 --> 43:08.000
+Yeah, makes total sense.
+
+43:08.000 --> 43:18.000
+So you've got this step six is you've got this model, yeah, you trained this model using super learner.
+
+43:18.000 --> 43:34.000
+The do I do I understand the relationship between your directed graph from step two and your model in step six.
+
+43:34.000 --> 43:39.000
+And we talked about that yeah, okay, so I can.
+
+43:39.000 --> 43:47.000
+So the model in step two allowed us to.
+
+43:47.000 --> 44:03.000
+To pair yeah, that model with the question that we actually wanted to ask the optimal rule question and say that okay, in fact, we can estimate like if when we're estimating it, it's a valid estimate of the optimal rule.
+
+44:03.000 --> 44:12.000
+Yeah, the model is another name you have model in step two is like about problem formulation and understanding the problem and the relationships and then.
+
+44:12.000 --> 44:22.000
+Yes, the model in step six is a machine learning model that does prediction estimation, the things that we usually think of, you know, context models.
+
+44:22.000 --> 44:32.000
+Yeah, yeah, so it's a model how I use it is it's a collection of distributions and so.
+
+44:32.000 --> 44:44.000
+And in that step in that step to when I talk about causal model, it's kind of like formalizing the relationship between the different variables and not imposing any sort of distributional assumptions on those variables.
+
+44:44.000 --> 45:07.000
+So step six, which is to estimate it's to take all of these optimal dynamic treatment rule algorithms that are within that are within all of this these models that I talked about before to actually say, okay, we can get valid estimates of the optimal dynamic treatment rule.
+
+45:07.000 --> 45:21.000
+Further, we can evaluate the rule so get the expected outcome under under everyone received the optimal rule and we can do that in different way, so.
+
+45:21.000 --> 45:28.000
+What I guess our thought of is like the standard causal estimators.
+
+45:28.000 --> 45:44.000
+Things like the G computation formula inverse probability treatment waiting targeted maximum likelihood estimation, so those are all sort of ways of estimating this expected outcome under the optimal rule or the value of the optimal rule.
+
+45:44.000 --> 45:52.000
+Okay, and that's separate from your the original estimator that we talked about the super learner.
+
+45:52.000 --> 46:09.000
+Yes, yes, one relates to kind of this first question like what is a person's optimal treatment and the other is how do we measure the average expected outcome if everyone got their optimal treatment.
+
+46:09.000 --> 46:31.000
+Yeah, yeah, and that is key because I think it's like the thing it's what's most clinically clinically relevant most policy relevant is the value of that optimal rule like is it in fact better to give people CBT and a more individualized way.
+
+46:31.000 --> 46:44.000
+Which outcomes better under this individualized way of giving interventions that might be more costly to administer or it might be costly to get these variables.
+
+46:44.000 --> 46:58.000
+Or it might be more complicated to kind of give people treatment in a more individualized way versus non individualized way, which is simply give everyone CBT or give no one CBT.
+
+46:58.000 --> 47:10.000
+And that's part of the in this estimation step sort of make those contrasts between the expected outcome under this individualized rule.
+
+47:10.000 --> 47:22.000
+Minus, for example, the expected outcome had we given everyone CBT, for example, and in that way we can see kind of the added value of giving treatment in an individualized way.
+
+47:22.000 --> 47:28.000
+Right. And that gets us to step seven, which is your evaluation of your model.
+
+47:28.000 --> 47:50.000
+Yeah, exactly so interpretation of what does this actually mean? So that's something that you might infer, OK, giving CBT in a more individualized way might be significantly more effective than not giving CBT in an individualized way, meaning that some people benefit more from CBT versus treatment as usual.
+
+47:50.000 --> 47:55.000
+You know, I think important and interesting from a policy and clinical perspective.
+
+47:55.000 --> 47:58.000
+And is that ultimately what you found?
+
+47:58.000 --> 48:02.000
+Yeah, so good question.
+
+48:02.000 --> 48:16.000
+So let me just say that with a big, big, big disclaimer that what I presented at the conference was with half of the sample size or don't want to make any.
+
+48:16.000 --> 48:21.000
+So we've been conclusions or any conclusion definitive conclusions at all.
+
+48:21.000 --> 48:40.000
+But really, interestingly, what we saw was that the optimal rule said that people with high substance use levels should get treatment as usual and people with low substance use levels should get cognitive behavioral therapy.
+
+48:40.000 --> 49:04.000
+So that's what the rule said that said when we did this contrast when we said, OK, what if we had applied this rule and looked at the expected outcomes, there doesn't seem to be a significant difference of doing this individualized way of giving CBT versus, for example, giving everyone CBT or giving no one CBT.
+
+49:04.000 --> 49:15.000
+It might be that there's an absence of treatment effect heterogeneity and might be that we're underpowered still that we don't have the entire sample size.
+
+49:15.000 --> 49:22.000
+But yeah, at the moment, we don't see any significant differences between the three groups.
+
+49:22.000 --> 49:34.000
+It could be that CBT could only help and it doesn't hurt for these folks that are further along. It's not going to help them, but it's not going to hurt them.
+
+49:34.000 --> 49:36.000
+So the average outcome is going to be the same.
+
+49:36.000 --> 49:55.000
+That's right. That's right. Yeah, there's no right that it's not it doesn't really in other words, one another way to say is that the conditional average treatment effect for that kind of person is close to zero that the effect for that kind of person is actually it's not huge.
+
+49:55.000 --> 50:06.000
+And it seems like a next step you could go with this research direction is to try to incorporate the notion of a fixed resource in terms of cost.
+
+50:06.000 --> 50:23.000
+CBT is going to cost for those people that you apply to so you've got some fixed budget, you know, do you have, it seems like you could have greater overall outcomes given a fixed constraint if you gave CBT to those people who actually benefited from it.
+
+50:23.000 --> 50:30.000
+That might be a way, am I this is just me testing and putting all this together.
+
+50:30.000 --> 50:52.000
+Absolutely, I love that question. And that's that's totally one of the next steps is asking the question, what if we had a finite amount of resources, let's say, for example, only 60% of the population can get CBT just because we don't have, we can't give CBT to everyone.
+
+50:52.000 --> 51:21.000
+There's work out there, also, Alex Ludgenmark Vendelhead, who developed this resource constraint optimal rule method that further says, you know, with this constraint constraint of 60% can only get CBT, who should be getting CBT out of those 60% so basically get the people who are going to benefit the most from CBT and allocate CBT for them.
+
+51:21.000 --> 51:28.000
+So with that constraint of only the cap is 60% of the people can get CBT.
+
+51:28.000 --> 51:45.000
+And is the optimal dynamic treatment rule is it, you know, in some way like a fundamental fundamentally causal rule or is it a rule that sometime applied, you know, you know, an unknown causal setting and part of what you've done here is apply it in a causal setting.
+
+51:45.000 --> 52:13.000
+And I guess what I mean by that is it a rule that, you know, is typically applied and was developed, you know, in the context of all of the tooling and machinery and methodologies of causal inference or, you know, is it, you know, it could be applied using, you know, some other type of statistics, but, you know, it can also be applied causally and it has all these benefits, you know, that come from the causal approach.
+
+52:13.000 --> 52:31.000
+Yeah, yeah, I think, I think for one to actually interpret it as how we want to interpret it as an individualized treatment rule, like the true interpretation of what we want from this as the optimal way to give treatment.
+
+52:31.000 --> 52:49.000
+It is fundamentally a causal parameter and for us to actually get at what we want, what we actually want, which is this causal parameter, it's important that we think about the assumptions for getting the rule.
+
+52:49.000 --> 53:04.000
+Yes, I think it is fundamentally a causal parameter and if those assumptions are an exam and that it could lead to bias and not really us interpreting it as what it actually isn't.
+
+53:04.000 --> 53:07.000
+Yeah.
+
+53:07.000 --> 53:30.000
+Future directions in terms of your research on this. Yeah, in terms of my research on this, so exactly what you mentioned, the resource constraints to see if, you know, if certain percent of the population was to was allowed to get CBT, what would expected outcomes look like.
+
+53:30.000 --> 53:39.000
+Of course, we want to do this on the entire sample and I think we're almost wrapped up data collection, which is very exciting.
+
+53:39.000 --> 53:52.000
+I've also been implementing this method on a smart trial, so that's a sequential multiple assignment randomized trial.
+
+53:52.000 --> 54:05.000
+That wrapped up in Kenya and that was looking to see different kinds of interventions for people to stay in HIV care in rural Kenya.
+
+54:05.000 --> 54:27.000
+And so the design of a smart is quite interesting. So basically, people were initially randomized to get a low intensity intervention to stay in treatment. So, for example, SMS messages, standard of care or voucher.
+
+54:27.000 --> 54:38.000
+That was at the beginning randomized to one of those three treatments. If a person missed a visit in their first year of care, they were re randomized to a more intensive treatment.
+
+54:38.000 --> 54:46.000
+So SMS plus voucher or appear navigator or this more intensive standard of care.
+
+54:46.000 --> 54:59.000
+If a person stayed in care in the first year, then they were randomized to either stay on their initial treatment, their initial low intensity treatment or not stay on their initial will intensity treatment.
+
+54:59.000 --> 55:18.000
+So the smart design is really awesome because it basically in the design by design, you're allowed to answer these sequential optimal dynamic treatment rules.
+
+55:18.000 --> 55:41.000
+So yeah, by design, you kind of have the causal assumptions baked into in there to be able to get at a sequential optimal dynamic treatment rule, meaning what's the best way to assign this, this initial intervention and secondary intervention in the most optimal way to, for example, maximize people's time and care.
+
+55:41.000 --> 55:52.000
+And not have people drop out of their HIV care and going back to step two in our causality causal roadmap.
+
+55:52.000 --> 56:10.000
+Are you applying the optimal decision optimal dynamic treatment rule at each of these steps separately, or do you have a larger, more expressive graph that you formulate around this problem that.
+
+56:10.000 --> 56:15.000
+So you're kind of solving all of the steps at once.
+
+56:15.000 --> 56:30.000
+Okay, awesome question. So so within this smart design, we can ask actually all different kinds of optimal rule questions. We may ask the question, what's the best way to assign that initial intervention.
+
+56:30.000 --> 56:45.000
+But ask the question, what's the best way to assign the secondary intervention among people who are lost to follow up. We could do it among people who actually stayed in care, what's the best way to give or take away that second that initial intervention.
+
+56:45.000 --> 57:00.000
+So there's those kind of like point treatment, optimal rule questions that we can ask. So in that case, those three would have kind of a simple model of just those three variables that I talked about at the beginning.
+
+57:00.000 --> 57:20.000
+So we were to look at the sequential optimal rule. So if now our causal question is what's the best way to give the primary and secondary intervention in sequence, then our causal model is going to be something very complex. It's going to have.
+
+57:20.000 --> 57:30.000
+The covariates at the beginning, time varying covariates, it's going to have two different interventions is going to have an indicator of lost follow up. It's going to have an outcome.
+
+57:30.000 --> 57:35.000
+And then all of the arrows either going into each other or not.
+
+57:35.000 --> 57:51.000
+And so, so yeah, again, like totally depends on whatever question you're asking. Are you asking about just one time point? Are you asking about the sequential intervention? And that's going to inform what kind of step to what kind of model you're going to have.
+
+57:51.000 --> 58:05.000
+Awesome. Thanks so much for taking the time to share with us a bit about what you're up to. Very fascinating stuff and appreciate it. Thank you so much for having me. Yeah, thanks so much.
+
+58:05.000 --> 58:23.000
+Thank you. Bye bye.
+

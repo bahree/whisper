@@ -1,0 +1,796 @@
+Hello and welcome to another episode of Twimal Talk, the podcast where I interview interesting
+people, doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington.
+This week we continue our industrial AI series with Sergei Levine, an assistant professor
+at UC Berkeley, whose research focus is deep robotic learning.
+Sergei is part of the same research team as a couple of our previous guests in the series,
+Chelsea Finn and Peter Rebel, and if the response we've seen to those shows is any indication,
+you're going to love this episode.
+Sergei's research interests and our discussion focus in on how robotic learning techniques
+can be used to allow machines to autonomously acquire complex behavioral skills.
+We really dig into some of the details of how this is done, and I found that my conversation
+with Sergei filled in a lot of gaps for me from the interviews with Peter and Chelsea.
+By the way, this is definitely a nerd alert episode.
+Before we jump into the show, I'd like to thank everyone who's taken the time to enter
+our AI conference giveaway.
+You all know that one of my favorite things to do is to give away free stuff to listeners,
+and we've been fortunate to be able to give away tickets to the O'Reilly AI conference,
+to lucky Twomo listeners since the very first event in the series last year.
+Well, we've got a couple of exciting updates for those of you who want in on this opportunity.
+First, we're making it even easier to enter our ticket giveaway for the San Francisco event,
+and second, we're giving away two tickets now, not just one.
+To enter the contest in 30 seconds or less, just hit pause right now, and visit TwomoAI.com
+slash AISF right from your phone.
+Finally, a quick thank you to our sponsors for the Industrial AI series, Banzai, and
+Wise.io at GE Digital.
+By now, you know a bit about Banzai, right?
+You've heard me mention their AI platform, which lets enterprises build and deploy intelligent
+systems.
+Well I actually spent some time in the Banzai offices in Berkeley last week learning more
+about that platform and recording an interview with their co-founder and CEO Mark Hammond.
+It was a great conversation and I'm really looking forward to getting it up on the
+podcast in a few weeks.
+In the meantime, I'll reiterate that if you're trying to build AI-powered applications
+focused on optimizing and controlling the physical systems in your enterprise, whether robots,
+or HVAC systems, or supply chains, you should take a look at what they're up to.
+They've got a unique approach to building AI models that lets you model the real world
+concepts in your application, automatically generate, train, and evaluate low level
+models for your project using technologies like reinforcement learning, and easily integrate
+those models into your applications and systems using APIs.
+You can check them out at Banz.ai slash TwomoAI, and definitely let them know you appreciate
+their support of the podcast and this series.
+Last week, I announced wise.io at GE Digital as a sponsor for this series as well.
+Wise.io was among the first companies I began following in what I call the machine learning
+platform space back in 2012-2013.
+I've since interviewed co-founder Josh Bloom here on the show and mentioned the company's
+subsequent acquisition by GE Digital.
+At GE Digital, the wise.io team is focused on creating technology and solutions that enable
+advanced capabilities for the industrial internet of things, making infrastructure more intelligent
+and advancing the industry's critical to the world we live in.
+I want to give a hearty thanks and shout out to the team at wise.io at GE Digital for
+supporting my industrial AI research and this podcast series.
+Of course, you can check them out at wise.io.
+And now onto the show.
+Hey everyone, I am on the line with Sergei Levine.
+Sergei is an assistant professor at UC Berkeley in the EECS department and I'm super excited
+to have him on the show.
+Hi Sergei.
+Hello.
+How are you doing?
+I'm doing well.
+Wonderful.
+How about we start by having you introduce yourself and talk a little bit about your background
+and how you got interested in your current area of research and what that is?
+Sure.
+So I actually started off in graduate school working on computer graphics and particularly
+in computer graphics.
+I was really interested in simulating virtual humans, simulating virtual characters.
+And the trouble is that if you want to simulate very realistic virtual humans, one of the
+things you have to do is you have to simulate intelligence because humans are intelligent
+and machines by default aren't.
+So a lot of my work turned out to be essentially artificial intelligence work in computer graphics
+to get these virtual characters to behave in ways that look plausible.
+So from there, I decided that, well, if I have some methods that work reasonably well
+in computer graphics, I can create some plausibly realistic virtual humans, perhaps those are methods
+that are also applicable, for example, to robotics.
+So I did a postdoc after that in robotics, turns out that a lot of the stuff works well
+for robots as well.
+And a lot of that led to my current work in reinforcement learning and deep learning.
+Fantastic.
+I noticed on your website that you've got a paper, except that you're speaking at a computer
+animation conference, are you still fairly active in the video domain?
+Not as much in recent years.
+So I think my last paper there was in 2012.
+I am giving a guess lecture this summer actually at SCA, that's a symposium on computer
+animation to talk about some of the recent progress in deep reinforcement learning.
+So actually, since I moved to robotics, actually, a lot of this technology has made actually
+a big impact in graphics, and that's really right about now and this past year that's
+been registering a lot.
+So they invited me to come give a talk to them about how some of this stuff is going.
+Fantastic.
+Fantastic.
+So as you know, we recently had on the show Peter Rebel and Chelsea Finn, who are your
+colleagues there at Berkeley, and the conversations I had with those guys were really, really interesting.
+And let's maybe take a minute to talk about the research that you're doing in a little
+bit more detail and we can dive in deeper.
+Sure.
+So the area that I work in can be broadly categorized as robotic learning.
+So I'm interested in developing algorithms and models that can allow robots to autonomous
+who learn very large and complex repertoire of behaviors so that they can take on more
+and more of the functionality that we associate with intelligent human beings so that they
+can do all the things that are dangerous and pleasant or for other reasons undesirable
+for people to do themselves.
+And to me, this problem is not just a problem that has a lot of interesting practical implications,
+it's also something that I think can serve as a really valuable lens and artificial
+intelligence because in the end, we have only one proof of existence of true intelligence
+of human beings and human beings are embodied.
+So we don't just exist sort of in the ether thinking abstract thoughts, we actually have
+a body we interact with the world and the nature of that interaction is very central to
+shaping who we are and how and how we reason about things.
+So I think that dealing with systems that are embodied systems like robots gives us a very
+valuable perspective in understanding how we might be able to construct artificial intelligence.
+So more so than some of the non-physical applications of machine learning in AI, including other
+deep learning applications like gameplay.
+Well, so the thing about other applications of AI is that oftentimes, especially in
+things like computer vision, speech recognition, so on, we work with just the perception
+half the equation.
+So we think about how we can take in data and produce a particular answer.
+But the nature of intelligence is much more complex than that.
+It's about taking in information, reasoning about it, making decisions, thinking about
+the outcomes of those decisions and so on and so on.
+Now you mentioned game playing, which has some elements of this.
+But one thing that game playing won't let you do is it won't let you tackle the full
+complexity and diversity of the real world because the real world is characterized not
+just by sequential nature, but also by its diversity, by the sheer number of unexpected
+things that might happen in a natural interaction, which computer vision has dealt with for decades,
+but without handling the decision making and the game playing handles the decision making
+but without handling so much of diversity.
+So to what degree is your research and robotic learning kind of integrative across all
+these different fields?
+Are you specifically focused on pulling together some of the state of the art research from
+these various fields or is your domain within robotic learning kind of established and you're
+heading down a path that way?
+I don't know if that question makes any sense, but if you kind of get a sense from where
+I'm going.
+I think I see where you're going.
+This is actually a very good question and something that for robotics has been sort of
+one of these big tensions over the years is that it's often been very tempting for researchers
+to think of robotics as fundamentally a systems or integration exercise.
+So if you have, let's say, a very effective computer vision system and you have a very
+effective, let's say, planning system, well, maybe building an intelligent robot is just
+a matter of welding those species together, connecting up the wires and seeing it work.
+And a lot of people have hoped for exactly this that by making progress independently in
+different domains, we'll get closer and closer to intelligent robots.
+Unfortunately, reality hasn't quite panned out that way.
+And a lot of robotics will actually lament that if they take sort of the latest image
+net train model and put it on their robot and try to use it for object detection in the
+wild, it'll actually do a pretty terrible job because the biases that are present in
+the kind of data sets that those models are trained on don't really reflect what a robot
+will see from its cameras in natural environments.
+So I actually think that in order to really get this right, we need to draw on the lessons
+in the state of the art models in, you know, game playing, vision and so on.
+But at some point, we have to kind of do a lot of that ourselves.
+We have to take the lessons, but not necessarily the technical components themselves.
+And for that reason, I've actually been a really big advocate of end to end training for
+robotic learning where we set up models that include both perception and control and
+act to train together to perform the particular task the robot needs to handle instead of relying
+on integration of existing components.
+In taking a look at your research, I came across a really interesting example of the
+effect you're describing, the particular research was where you were training a robot arm.
+I think it was a backster robot to tie knots in a rope.
+And some of the comments associated with the research on the, I think there was a
+get-hud page about it was that, hey, we trained this system on a, I think it was a red
+rope.
+And, you know, we're working hard to make it work with a white rope also that's a little
+bit stiffer.
+And we trained it on a background that was a green background and, you know, that doesn't,
+we found that that doesn't generalize to other backgrounds.
+This is a conversation point that came up with Peter as well, this notion of mastery versus
+generalization.
+Can you talk a little bit about that and how your research is taking that issue on?
+Yeah, absolutely.
+So, the backster paper that you're referring to there, what we did is we actually had a robot
+practice tying knots, but of course, it was one robot and it was practicing tying knots
+in one particular rope.
+So the resulting system could do really well at tying knots in that rope, it could kind
+of tie knots in ropes that looked a little similar and it pretty much broke down if you
+gave it something, you know, a rope that was too thick or too thin or something like that.
+But here's the thing that in robotics, there's like oftentimes when we run experiments,
+the experiment is the entirety of the data collection process.
+So if you imagine an experiment in computer vision, you take all of ImageNet, you train
+your model on it and you show its performance.
+In robotics, an experiment basically amounts to generating an entire new data set, training
+your model on it and then observing its performance.
+So of course, if you're generating an entire data set every time, if you have one robot,
+just a little bit of time, it's not going to generalize very far.
+We did actually try to study at one point what would happen is if we scaled up the style
+of technique, we did this actually in partnership with Google, which has quite a
+bit more resources as far as deploying large numbers of robots.
+And we tried to see actually, like if we run data collection at the scale of something
+like ImageNet, can we actually get robotic skills that generalize effectively?
+So what we did there is we set up, we called this the ARM farm by analogy to server farm.
+We set up a cluster of about 14 robots and we had them basically working day and night
+to practice grasping objects.
+So we chose grasping because it's something they can do to pretty much any object and
+it's also very important for a lot of other robotic manipulation tasks.
+And we had them running day and night like this and they collected about 800,000 grasps,
+each grasped had maybe five to ten images.
+So the total size of the data set was about on the same order of magnitude as ImageNet.
+And there we did find that actually the resulting networks that you train on that really large
+data set, they do actually generalize effectively to new objects that are completely different
+than what they've seen before.
+In fact, when you do learning at this larger scale, you can observe some really interesting
+or emergent behavior.
+One of the things that we were thinking as we did this work as well, grasping is a very
+geometric behavior.
+So probably the first thing that these systems will learn about is the geometry of objects
+in the world still learn that you need to put the finger on one side, put the finger on
+the other side and so on.
+What we saw, which surprised us a little bit, is that in the earlier stages of training,
+when you have maybe 100,000 grasps before we collected the full data set of a million,
+in the early stages of training, the network actually didn't pay as much attention to geometry,
+but what it did do is it paid a lot of attention to material properties.
+It recognized right away that if something was really soft, then it could pinch it and
+pick it up really easily.
+But if something was rigid, then it couldn't do that.
+And this is completely different from how conventional, manually designed grasping systems
+tend to work because when you manually design a grasping system, you're going to use
+some sort of geometric motion planning and you're going to completely ignore the material
+properties.
+It's really interesting to us and that's sort of underscored, I think, the value that
+you get from using learning through trial and error because you actually learn about
+the patterns that are really present in the world rather than the ones that your analytic
+model thinks are important.
+Are there any other emergent behaviors that you observed in that set of experiments?
+Let me see.
+So that was the only one that we could pin down in the sense that we could actually measure
+it, like we could actually put different objects in front of it and quantify that, yes,
+it was really employing the strategy.
+And formally, there were a few things that it did tend to do pretty consistently that
+I can kind of speculate a little bit about.
+I just don't have the hard numbers for it.
+Intended to figure out, for example, that if you have something like a brush that you
+should pick up the brush by the stiff part rather than the flexible bristles, which is
+nice, it tended to figure out that center of masses of objects really matter, especially
+for awkwardly shaped objects.
+So those were some of the things that it picked up on.
+There were also a few mistakes that actually made that we're kind of amusing.
+So it just so happened that a lot of the soft things in our training objects were brightly
+colored because we bought, you know, we wanted to buy small items of clothing and small items
+of clothing, our children's clothing.
+And children's clothing.
+So we brightly colored.
+So it had this association of things that were brightly colored were soft.
+And in our test set of objects, we had a pink stapler.
+And that pink stapler was just impossible for it to pick up because it was just convinced
+that this pink stapler was a soft fuzzy thing and it could just pinch it.
+So that's a good example, actually, of the kind of funny data set biases that you can
+get that will actually affect you even in real world tasks like this.
+Interesting.
+Interesting.
+When I hear you describe the examples, an example like the pink stapler, it makes me wonder,
+you know, to what extent is it possible to layer the traditional object recognition types
+of technologies into a model like this, like, should it be able to recognize the stapler
+first and then have some higher level abstraction that we're also training on in addition to
+just the raw pixels?
+Is that something you look at?
+Yeah, that's a very good question.
+That's actually something that we've thought about a lot here.
+So one of the big things that you get out of traditional approaches to dog detection,
+it's not actually the models themselves.
+It's the data.
+There's very large and extremely diverse data sets, label data sets of objects with bounding
+boxes, segmentation, and so on.
+And it would be really nice to try to use that.
+But at the same time, you want to avoid losing the benefit of end-to-end training.
+So if you simply run a bounding box detector on what the robot is seeing and then ask
+it to pick things up, well, it's not just the bounding box that matters for the grasp,
+it has to also understand something about what's in that bounding box.
+So you don't want to lose the benefit of the end-to-end training, but at the same time,
+you want to somehow get more out of all these auxiliary sources of information.
+One of the things that we've been working on a little bit, and this isn't out yet,
+but this will be released in probably a couple of weeks, is some work on semi-supervised
+learning of robotic skills, where we combine experience from the robot's point of view that
+includes the actions that it took and the observations that it saw with kind of a weekly
+labeled image data set.
+And weekly labeled in the sense that that data set just tells you, does the image contain
+the object that the robot needs to use?
+If the robot is learning, for example, how to put a cap on a bottle, the weekly labels
+might say, does this image contain a bottle or not?
+And the idea is that the robot itself, when it's interacting with the world, maybe it
+only gets to interact with a few instances of those objects.
+So it can use those few instances to understand the physics of the behavior, but it's not
+really enough for it to really generalize to understand what the entire class of objects
+of this type looks like.
+So the weekly labeled data is there to basically show it, what can this skill be applied to?
+And the important thing when incorporating this weekly label data is not to lose the benefit
+of the intent training.
+So in this technique that we develop, we're actually including the weekly label data and
+the robot's own experience at the same time in a joint training procedure, rather than
+actually splitting things up into components and then trying to wire them up together as
+in the more kind of conventional systems approach.
+And that turns out to work very well.
+Under the hood, the method has kind of an intentional flavor to it, so it basically
+learns what kind of objects to pay attention to from the weekly label data and then uses
+that attentional mechanism to perform the task at test time.
+How do you express weakness in this model?
+Well, when I say weekly labeled, I just mean that the images have a label that only tells
+you whether the object you care about is present or not.
+So you can think of this as a person telling the robot, here are the things that you can
+execute this skill on.
+So here, lots of pictures of the thing that you can do this task too, and here are all
+the pictures of things that you cannot do this task too.
+Right.
+Right.
+And is there a general approach to incorporating in kind of higher level abstractions, higher
+level abstractions into models like this, meaning, you know, in the case of a, and going
+back to the stapler example, you know, we could do the object detection and determine that,
+hey, this is a stapler, but there's also, you know, there are other neural nets that or
+other examples that can do geometry detection and things like that and orientation detection.
+And I guess the question that I'm trying to get at is it sounds like the general approach
+to applying deep learning in this model is, you know, let's just collect a bunch of data
+and, you know, throw it at and train on a bunch of data.
+And if there are important features, you know, the model will figure it out, the network
+will figure it out.
+And what I'm curious about is, is that do you, hey, I guess what are the, you know, what's
+the, is there an analytical foundation to that assertion?
+And if not, are there other ways that folks are looking at incorporating in abstractions
+or features into, you know, these models to help them, you know, both generalize and train faster?
+So I think there's perhaps a little more to it than that.
+So it used to be that when we thought about kind of the, the previous generation, generational
+machine learning models, the way that we would imagine using them is exactly when you describe
+that we say, okay, we have some edge detector, we have a pose detector, we have some kind
+of thing that will analyze local geometry, we'll plug that into the downstream module and
+so on and so on.
+The thing about deep learning is that the model itself, you know, it's good for making
+predictions, but there's nothing kind of unique or special about it.
+You can actually have the same model perform multiple tasks.
+And that's often not actually that much harder than stapling together two models that each
+perform those tasks. So if you want a model that can, you know, segment an image and detect
+poses of objects, you could train two separate models and then combine their outputs or
+it can just train one model that does both of those tasks.
+And the latter is often not actually that much harder, but it has a substantial benefit
+which is when you train a single model to perform multiple tasks, it can actually learn
+internal representations that share the knowledge that's contained in those two tasks.
+So if you were to ask me how I would consider combining, let's say, a object pose detector
+and a grasping system, I would much rather train a single model that predicts both pose
+and grasp than to take a pose predictor and feed its output into a grasp predictor.
+And the reason for that is that the data already has all the information.
+There's nothing, you know, magical that's contained in the model that's not already contained
+in the data and it's possible to train these joint models.
+So I might as well take both data sets and train one model that'll benefit from the shared
+structure in both of those tasks, then train two completely destroyed models and then
+try to stable them together afterwards.
+Right.
+Right.
+Have you run into situations where there's there are pre-existing models trained on inaccessible
+data?
+I guess I'm maybe I'm kind of chasing the chasing the tail of the scenario a little bit,
+but it sounds like, you know, there may be some corner case where it makes sense to do
+that if you don't have access to the data, but you do have access to the model.
+But I get the point that in general, the data is the data and if you can train one model
+that can build these internal representations, it's much more efficient than trying to
+engineer one model that can solve part of the problem and another model that uses that
+to solve the thing that you're actually trying to do.
+Yeah.
+Basically, it's a lot easier for us to compose data sets than it is to compose models.
+Right.
+So, one of the challenges that comes up that you've spent some time looking at is the
+efficiency of training these deep learning models.
+Sample efficiency in particular is one of the ways you talk about that.
+Can you talk a little bit about that problem and the things you've done there?
+Right.
+So, I assume you're referring specifically to sample efficiency for deep reinforcement
+learning algorithms.
+That's correct.
+So, deep reinforcement learning algorithms are kind of a funny creature.
+Deep learning, like standard deep learning with gradient descent, it's a common perception
+that it's inefficient.
+And in some sense, it is like we can build very good object detectors, but we need maybe
+millions of images to train them, which might seem like a lot, but if you consider what
+that model is really doing, it's reasoning about pixels, edges, everything from those pixels
+and edges all the way to complex higher level concepts, that's actually pretty sophisticated.
+With deep reinforcement learning, though, things get a lot worse.
+So, if you look at the kind of sample complexity for learning to play, let's say, a simple
+video game like Pong, and there you're going to be looking at millions or even tens of
+millions of images for a task with visual diversity that's nowhere near where we see
+in conventional, let's say, computer vision data sets.
+So, visually it's very simple, physically it's very simple, but you need a lot of samples
+to learn that task, and those samples involve actively interacting with an environment.
+How it happens to be a simulated environment, so you can run it much faster than real
+time on a server, but still something here seems a little out of whack.
+Something here is a lot worse than perhaps it should be.
+And what's the intuition for why that is the case?
+There are a couple of reasons for it.
+The short version is that we don't fully understand, but the long version is that there are
+a few things that are being done that could perhaps be done differently.
+Now, if I knew exactly the answer to this, then of course, I would have a much more efficient
+algorithm to give you, but it's possible to guess a few things here.
+One of the things is that reinforcement learning provides a much weaker signal than supervised
+learning.
+So in reinforcement learning, even though it's gradient-based optimization, you don't
+really have gradients of the thing that you really care about.
+You're sort of estimating them in this very peculiar way, depending on the reinforcement
+learning algorithm that you use, so you essentially get a lot less information from every gradient
+step.
+A lot of reinforcement learning algorithms also tightly couple the collection of data in
+the environment and the updating of the model, which is very different from supervised
+learning.
+So in supervised learning, you first collect a large data set, and then you take many, many
+gradient steps on that large data set.
+In reinforcement learning, you often interleave collection of data and updating the model
+because you need to collect data that agrees with your model.
+So if you're learning a policy, you'd like to collect the kind of experience that that
+policy will actually see, and you want to do this iteratively.
+So that means that you're often throwing out lots of data from old policies that you
+can no longer use because your policy has changed, and that prevents you from reusing
+old data.
+So that can be very harmful for sample efficiency.
+In fact, some of the most inefficient methods, methods like policy gradient, that are very
+convenient to use in simulation, they're often the most inefficient in the real world
+because they can't reuse data.
+So we need to look at methods that can reuse old data, these are sometimes called off-policy
+algorithms.
+Before we go there, can you elaborate on the throwing out of the data?
+Is this something that the algorithm is doing as part of the way it's constructed, or
+is this something that we're doing manually to tell us a little bit more about what we
+mean by that?
+Oh, so that's just how a lot of on-policy, policy gradient algorithms work.
+So these algorithms will operate as following, they will collect experience from the current
+policy, they will compute a gradient descent direction on that experience, they will take
+that gradient step, update the policy, and now they need more data from the latest policy,
+which has not been updated.
+So they have to throw out all the old data and collect a new batch of data.
+So if you want a mental picture of what this looks like, if you have a robot that lets
+say it's learning to walk, it'll try to walk a couple of times, update its behavior, try
+to walk a couple more times, and so on and so on, and that's the reinforcement learning
+process.
+But you have to remember that each time it changes the behavior like that, it has to
+basically collect new experience because you need to understand how well its current
+policy is really doing.
+Right.
+So that can get really, really expensive in terms of the amount of time it needs to spend
+collecting experience.
+So if you're running stuff in a simulator on a server farm somewhere, then it's okay
+you can paralyze all that and everything is reasonable.
+But if that's a real physical system that's actually executing those trials, that can
+get extremely tight consuming.
+Mm-hmm.
+Okay, and you're about to talk about some of the ways we can get beyond this.
+Right.
+So one of the things we can do is we can look at off-policy algorithms.
+So these are algorithms that can supplement their training with data from other policies.
+So what can you learn from other policies?
+Well, intuitively, one of the things that you can learn is you can learn about predicting
+future events because the rules of physics and so on, they will hold true regardless
+of which policy you're executing.
+And the kind of future events that you can predict can range all the way from very detailed
+where you're actually predicting, let's say, the entirety of your future observations.
+And this is sometimes called model-based reinforcement learning.
+Or all the way to something fairly abstract, like the future rewards that you will see.
+And this is actually a type of model-free reinforcement learning that's sometimes referred
+to as value function estimation or Q-learning that also falls up this category.
+But they're all kind of prediction-style methods.
+So on the one extreme, you're predicting the entirety of your future sensory observations
+and on the other extreme, you're predicting something very abstract, like rewards that
+you will see in the future.
+And that tends to be more efficient because that allows you to incorporate data from other
+policies, including your own past policies.
+Hmm. And so, can you talk a little bit about those policies and how they differ from
+one another?
+Yeah.
+So I can talk a little bit about the model-based reinforcement learning because I feel
+like this is something that perhaps hasn't gotten quite as much attention in the research
+community in recent years because there's been a lot of excitement about model-free reinforcement
+learning.
+The model-based reinforcement learning, it's perhaps not as far along because the prediction
+problem that is trying to solve is a lot harder, but it has a lot of problems for dramatically
+improving sample efficiency for two reasons.
+The first reason is the one I mentioned that you can use data from other policies.
+But the second reason, which is perhaps a little more subtle, is that a model-based reinforcement
+learning, every sample has a lot more bits of supervision.
+So if you imagine what you're doing when you're, let's say, predicting a value function,
+you're predicting one scalar value that's a function of your current observation or state.
+When you're predicting everything that will happen in the future, maybe you're predicting
+future images that you will see, there are many more bits of supervision in that prediction
+problem.
+So every single sample actually carries a lot more bits of supervision, and that means
+that your model can learn a lot more from each of those samples.
+Now the flip side of the coin is that your model is now trying to solve a much harder problem.
+It doesn't have to predict just a single scalar value, just a predict an entire image.
+So it's sort of a little bit unclear how that shakes out, but potentially the benefit
+in sample complexity can actually be quite substantial there.
+We've done a little bit of work on model-based reinforcement learning for vision-based tasks,
+section on real physical robots, and this is some work that we did that also involved
+actually paralyzing data collection across multiple robots, but at a much smaller scale.
+So with the grasping, I mentioned that we needed about 800,000 grasped attempts.
+For the model-based reinforcement learning, we actually trained a video prediction model
+for pushing objects around on a table with about 50,000 pushes.
+And that was actually effective for generalizing to new objects and pushing them in new directions
+and so on.
+Simply by predicting what the robot will see in the future, and then taking the actions
+for which that model predicts the kind of outcomes that you want.
+So that was already a lot more efficient and it ran on real physical systems.
+Now the downside is that because the prediction problem there is so hard, the predictions
+were very short range.
+So the robot could only execute behaviors maybe with a horizon of two to three seconds.
+So these weren't complex behaviors.
+And that's because the prediction problem is so hard, but hopefully as we get better
+and better video prediction models, which is a very active area of research right now,
+these methods will get better and better.
+Is that the inverse reinforcement learning problem?
+No, this is the model-based reinforcement learning problem.
+So when I looked at the, again going back to the backster robot video, it talked a little
+bit about this inverse RL where you are, it sounded like you're doing the same thing.
+You've got your rope in one state, you have the human move it to another state, and then
+you're looking at the action, the robot action that it would take to get it from one state
+to another and producing the inverse of that.
+Or that becomes the action that the robot takes to move the rope into the rope to a position
+that's required to imitate what the human did.
+So that's the inverse RL, how are what you just described sounded very similar to that.
+So I think what you mean is actually inverse dynamics.
+Inverse dynamics.
+Okay.
+So when you have a model-based reinforcement learning problem, there's actually different
+ways that you can represent your predictive model.
+The most common way is to build what's called a forward dynamics model.
+So forward dynamics means that you're predicting from the present to the future.
+So you're looking at your current observation, your current action, and you're predicting
+what the next observation will look like.
+Inverse dynamics means you're predicting from the future to the action.
+So that means that you're looking at your current observation, your future observation,
+and you're predicting what action will get you from one to the other.
+Right.
+So I've got the rope in position A, I've got the rope in position B, what's the action
+that's required to get it from A to B?
+Exactly.
+So it's just another kind of predictive model and they have different pros and cons.
+So with a forward model, you can run it forward many steps because you can basically
+recursively apply it to its own predictions, but you have to work a little harder to get
+the action.
+With the inverse model, the action comes right out of the model, but it's difficult to
+chain it together because you don't know what the following observation will be because
+the model has some predictive observations and predictive actions.
+So inverse models are perhaps a little easier to use, they're a little easier to train,
+but they're a little harder to use for longer term planning.
+Okay.
+Okay.
+So in the discussion about sample efficiency, one of the things that I came across was
+mirror descent, guided policy search, can you talk a little bit about that and where
+that fits in?
+Sure.
+So mirror descent, guided policy search is a technique for optimizing a very complex policies
+like deep neural network policies by only using supervised learning to train the policy
+itself.
+And that sounds a little bit funny because if we're doing reinforcement learning, well,
+that's not supervised learning.
+So mirror descent, guided policy search sort of plays this game where it tries to figure
+out what is the supervision that I can give to a supervised learning algorithm such that
+when it trains some complex policy, that policy will do the right thing.
+So it's like if you know that you're that only supervised learning is ever allowed to
+touch the neural net, what can you give to the supervised learning algorithm so that it
+does the right thing for solving a reinforcement learning problem?
+And the way that the algorithm works is something like this that you're going to basically
+have a model based teacher that's going to generate training data for your supervised
+learning algorithm, so that model based teacher is, it's a kind of model based URL method,
+but it's not a deep model based URL method.
+It's just a, you can think of it almost like a, like a non-parametric algorithm.
+So it'll look at a few different trajectories that you took, figure out how to improve each
+of those individual trajectories by themselves without reasoning about any policies.
+And then that will generate training data so that your neural network can be trained
+with supervised learning to do better.
+So instead of reinforcement learning, which looks at you at the parameters of your model
+and says, how do I change these parameters to be better, in this mirror to send guided
+policy search, it actually looks at the trajectories that you executed, fit some model figures
+out how those trajectories should be improved, and then as those improvements as training
+data for regular supervised learning.
+That way the neural net is only ever trained with supervised learning and standard back
+problem.
+Okay.
+But at a very high level, the reason that this procedure is efficient has a lot to do with
+why model based our algorithms are efficient, because it really is a kind of model based
+on real algorithms, it's just one that, under the hood, uses standard supervised learning
+to train the policy neural network.
+So there's another interesting paper I came across, and that was the one on policy sketches.
+Can you talk a little bit about that work and what the goals are and what the results
+were?
+Yeah, I'd be happy to talk about that.
+So that was worked by a student named Jacob Andreas, together with Professor Dan Klein,
+who's another professor here at UC Berkeley, Jacob and Dan, they both worked on natural
+language processing.
+So the premise in that paper is that we'd like to see how symbolic descriptions of tasks,
+you can think of these as very, very simplified natural language, how symbolic descriptions
+of tasks can be used to improve learning.
+And the key ingredient there is that we'd like to basically see how symbolic descriptions
+can improve learning without assuming that those symbolic descriptions are grounded.
+So without assuming that the agent already understands what the symbols mean.
+So if you, let's say go to a foreign country, let's say you don't speak French and you go
+to France, and someone tells you, in French, how to, let's say, make a piece of furniture
+out of wood.
+And then they tell her how to make another piece of furniture out of wood, and then they
+tell you how to make a bench out of wood.
+Well, listening to those descriptions, you'll probably notice some common patterns.
+You'll probably notice that some words repeat, and if you hear enough of these descriptions
+and you actually perform those tasks and you kind of understand physically what it means,
+you'll find those patterns, even if you don't actually speak the language, and eventually
+when you hear a new phrase describing new items that you can construct out of wood, for
+example, you might be able to put the pieces together and figure that out more quickly.
+So that was kind of the idea that we were working with.
+So what Jacob did is he constructed this sort of simplified version of a Minecraft video
+game.
+So it's like a little crafting video game.
+It was simplified because we didn't want to deal with vision, we just wanted to deal
+with kind of simple kind of top-down navigation problems.
+And it had these tasks that were like, you know, pick up the wood, or chop it on the
+tree, pick up the wood, make the chest, for example, chop it on the tree, get the wood,
+make a boat, or, you know, grab the coal, put it in the oven, and so on.
+And there was a long list of these different tasks that the agent could perform that were
+constructed out of these symbolic verbs, essentially.
+And the agent would be given a set of these tasks, it would learn them.
+And the symbolic descriptions would just be given as an additional input.
+So they would result in some decomposition of the neural net, but there's actually
+different ways you could do that.
+But essentially they would be provided as an input to the agent without telling it what
+those symbols really mean.
+And just by learning the different tasks with the different symbolic descriptions, it
+could actually figure out how to then use new symbolic descriptions to solve new tasks
+more quickly.
+Interesting.
+It's funny when we talk about learning objects, object detection, and images, you know,
+the amount of data that is required to train a neural network to figure out what an object
+represents seems so large compared to our ability as humans to do it.
+This is an example where I would need at least a million examples of the French sentence.
+So not knowing if I didn't know French, you know, I can imagine needing a ton of examples
+of training examples for myself to be able to figure out the language and then how to
+put that together to make some furniture.
+But you know, if you spoke Spanish, you'd probably figure it out much more quickly.
+And that's true.
+Ah, this is true.
+And I think that actually there's something to that as far as how the learning-based systems
+can work better.
+I talked before about multitask learning.
+And one of the things that distinguishes humans from these learned models that humans
+are actually always doing multitask learning, we're always doing multiple things at once.
+We're looking for things in our environment, doing something, we're worrying about we're
+going to have for dinner, we're worrying about some other stuff, we're observing some
+interesting, you know, car that we see on the road over there, we're always doing many,
+many things.
+And perhaps a lot of our efficiencies actually down to this fact that we're never learning
+anything truly from scratch.
+Because we're learning so many things all at once, any new thing that we have to do,
+we get a broad basis of knowledge in which to draw to figure out that new thing.
+So in a sense, perhaps what we're doing is we're actually extremely broad kind of multitask
+learners.
+And maybe that's a big part of how we get that efficiency.
+And what's the relationship between multitask and transfer learning?
+Well, monthly task learning is one of the ways to get transfer learning.
+Right, so in multitask learning, we're learning multiple things in parallel.
+And in transfer learning, we are transfer learning is a broader idea that includes taking
+pre-trained models and using them, applying them to other things.
+I guess the direction that, you know, the curiosity that has been peaked is like, how do
+we combine all of these things to, you know, make our ability to train these models even
+faster?
+Right, well, so one of the things we've been looking at quite a bit actually is how we
+can use past experience to accelerate future learning so that we've worked on this in the
+context of reinforcement learning, supervised learning, and so on.
+There are a number of ways you can approach that problem, but they all sort of boil down
+to some version of looking at your past experience, breaking it up into, you know, little
+pieces of training data, little pieces of validation data, trying to build your model
+such that when it sees that little training data, it'll do well in that little validation
+data and do this many, many, many times so that you get a model that's basically good at
+quickly adapting to small training sets.
+There are different ways that you can construct these types of models that, you know, many
+other groups and end us have looked at, but that's sort of the big picture setup.
+These are sometimes called metal learning algorithms.
+I think that's actually an extremely promising direction for the future to really take deep
+learning methods beyond this regime of always relying on really gigantic data sets.
+And I think it goes hand in hand with multitask learning that basically that the way that we
+can get to the kind of efficiency that we've seen humans is by solving many tasks, solving
+those tasks in a metal learning context so that we're using the our past experience of
+solving old tasks to accelerate the solving of new tasks.
+And then when we encounter new tasks that we hadn't seen before, we'll generalize and
+quickly adapt to them.
+And does multitask learning necessarily imply a single network across all of the tasks or
+are there variations there?
+There are definitely variations.
+So one of the things that we've studied actually as well as several other groups is how we
+can construct actually modular networks.
+So networks that will have some components that are shared and some components that are
+distinct between tasks.
+And the nice thing when you build modular networks, actually the policy sketches paper you
+mentioned is an instance of this that also had modular networks.
+And you have modular networks.
+One of the things that you can observe is that there will actually be kind of interfaces
+that emerge naturally between different modules.
+So in a robotic context, let's say you might have a module for perception and maybe you
+have one module for a color camera and a different module for LiDAR.
+And then you have a module for actuation for a robot with four links and a different module
+for actuation for robot with three links.
+And you can mix and match any combination of these.
+You can say, OK, here's a LiDAR robot with four links.
+Here's a RGB camera robot with three links.
+Train different combinations of these modules.
+And then you can actually find that you might get generalization to new combinations of
+sensors and robots.
+And you can figure out that bottleneck between the two modules actually constitutes a kind
+of a learned interface.
+Because different modules, they have to basically adopt the common interface because they don't
+know who's going to be downstream from them or who's going to be upstream.
+And at the systems level, what are the implications of that?
+Is it then easy to take one of these modules and drop it into another system or does it
+not quite work like that?
+Well, I think that's part of the hope.
+So I think we haven't seen that yet.
+But in the long run, that's, I think, one of the really interesting things about modular
+network designs is that perhaps it could actually be possible to use this as a way to combine
+the benefit of intent learning with the benefit of modularity to be able to actually train
+up some component, let's say, if you're doing autonomous driving, you train up a particular
+vision component on one car, maybe supplement it with image net data, and then you just drop
+it into a different car.
+But then that different car has its own modules for, let's say, controlling the acceleration
+or something like that.
+So I think that that's part of the hope we're not quite there yet.
+This work is still in fairly early stages, but I think that's definitely a really exciting
+place that this kind of stuff could go.
+The scenarios you just described were all end-to-end trained, at least in the initial system,
+they're end-to-end trained as opposed to training module at a time, is that, right?
+Right.
+So that's actually the, that's the nice thing about modular neural networks as opposed
+to modular anything else is that neural networks can be composed.
+So if you have a modular neural network, you can still train the whole thing, a combination
+of multiple modules end-to-end.
+Now when I say end-to-end, there could be different ends, so end-to-end could mean that your
+vision system is simultaneously trained on image net recognition and feeding the right
+visual representation to a downstream control module to perform some task.
+Yeah, it's interesting.
+So the general question that I want to get out here is, I think the basis that you've
+laid out for end-to-end robotic learning makes a ton of sense.
+At the same time, when I talk to folks in industry about how they're using neural networks
+in deep learning, and I present this vision of, hey, we're just going to have this one
+uber neural network that can figure everything out, invariably, I get back some reaction
+that's like, no, no, no, we don't do it like that at all.
+It doesn't work.
+It's too hard.
+How do you account for the gap there?
+Do you see similar things, I guess, for one, and how do you account for that gap?
+Well, I think one way to look at it is it's a little bit like the difference between gasoline
+cars and electric cars.
+So it's very difficult to, right now, or maybe even like five years ago, to make the case
+that, well, everybody should have electric cars because gasoline cars are really good.
+We've been designing them and improving them for almost a century.
+So of course, you build the first electric car that's not going to be as nice as a gasoline
+car that's benefiting from all those decades of engineering, but I think the technology
+is progressing.
+So I think the reason that you hear, especially, you know, it's certainly in robotics that
+we get this a lot, that you'd like to be able to use something like a manually designed
+motion planner on top of your learned computer vision system because that motion planner is
+really good, like it's benefited from decades of development.
+So that's, I think, maybe the explanation.
+Now, the solution, I'm not sure.
+I think there are a couple of possible solutions.
+One solution is that, well, maybe we should see what makes that really nice, manually designed
+component work so well.
+Can we incorporate that into a learning system or can we use it as part of an intent system?
+So can we use that manually designed, let's say, controller, differentiate through it,
+compute gradients and use those to improve our vision system?
+Or maybe we just need to make a little more progress in reinforcement learning to the
+point where we can replace that component without a loss of capability.
+Right.
+Right.
+Great.
+Any other things that you wanted to cover?
+No, I think that's everything on my hand.
+Fantastic.
+Fantastic.
+Well, what's the best way for folks to catch up with you to learn more about what you're
+up to?
+I know you've got a webpage on the Berkeley site that will include a link to in the show
+notes.
+Are there any other ways for folks that you'd like folks to get in touch with you?
+I think my website is a good place to start.
+Also for anybody who is interested in learning about deep reinforcement learning, we do have
+a course that I and Chelsea and our colleague John Showman taught at UC Berkeley, and that
+all that material is online.
+So if you search for Berkeley deep reinforcement learning course, you can find all those
+lectures.
+That can also be a good resource.
+But yeah, for getting in touch with me, definitely my website will be a place to start.
+Fantastic.
+Well, I'll make sure I include the link to the course in the show notes as well.
+And thank you so much for being on the show.
+Thank you.
+Thanks, sir.
+All right, everyone.
+That's our show for today.
+Thanks so much for listening and for your continued feedback and support.
+For the notes for this episode, to ask any questions or to let us know how you like the
+show, leave a comment on the show notes page at twomolai.com slash talk slash 37.
+For more information on industrial AI, my report on the topic or the industrial AI podcast
+series, visit twomolai.com slash industrial AI.
+The report is complete and it's beautiful.
+And I'll be notifying folks who sign up at that page.
+How they can receive a copy of it shortly.
+Once you're done with this show, take 30 seconds to head over to twomolai.com slash AISF
+to enter our giveaway for a free ticket to the AI conference in San Francisco in September.
+You could be one of two lucky winners.
+Thanks again for listening and catch you next time.

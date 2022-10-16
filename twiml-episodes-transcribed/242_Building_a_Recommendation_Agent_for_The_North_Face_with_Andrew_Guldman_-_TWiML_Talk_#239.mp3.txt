@@ -1,0 +1,601 @@
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+people, doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington.
+Today we're joined by Andrew Goldman, vice president of product engineering and research
+and development at Fluid.
+Andrew and I caught up a while back to discuss Fluid XPS, a user experience built to help
+the casual shopper decide on the best product choices during online retail interactions.
+The XPS has expanded since we recorded this interview, we specifically discuss its origins
+as a product to assist out-of-wear retailer the North Face.
+In our conversation, we discussed their use of heat sink algorithms and graph databases,
+their use of chat and other interfaces, and the challenges associated with staying on
+top of a constantly changing technology landscape.
+This was a fun interview.
+Before we jump into the episode, I'd like to join Pegasystems, this episode's sponsor
+and inviting you to meet me this June at Pegasworld, the company's annual digital transformation
+conference, so that it optimizes every customer touchpoint on every channel in real time.
+That way each interaction is relevant and timely to each individual customer, no matter
+if it's a sales call, a digital marketing campaign, or a customer service chat, either
+online or in-store, and the system is always learning in real time to make the next interaction
+better.
+Pegas Customers are the real stars at Pegasworld.
+There, you'll hear great stories of AI applied to the customer experience at real Pegas
+Customers.
+The event is a great way to learn from a who's who of the Fortune 500, and of course, I'll
+be there and speaking as well.
+To register, visit Pegasworld.com and enter the promo code Twimble19 when you sign up.
+Again, that's Twimble19, it's as easy as that.
+Hope to see you there, and now on to the show.
+All right, everyone.
+I am on the line with Andrew Goldman.
+Andrew is VP of Product Engineering and R&D at Fluid.
+Andrew, welcome to this weekend machine learning and AI.
+Thank you very much.
+Great to be here.
+So you've been at Fluid for about 18 years, not counting a brief hiatus that you can
+describe, but why don't you tell us about Fluid and the kind of work that you've done
+there over the past 18 years?
+Great.
+Thank you.
+So in general, Fluid focuses on providing excellent user experience for online retail,
+and Fluid has agency and software as a service divisions, and within both of those addressed
+engineering design, user experience and strategy, Fluid's clients include the North Face,
+and we'll be talking about shortly, Puma, Vans, Benefit, Cosmetics, and many, many others
+with offices in New York and in Oakland.
+So that's Fluid as a whole.
+My particular role at Fluid has been focused on engineering leadership, so I've worked
+in both the agency and software as a service side of the business.
+For the last several years, I've worked primarily on two big projects.
+One of them, Fluid Configure, online product configuration platform, and the other XPS,
+which we'll talk about in more detail.
+XPS stands for Expert Personal Shopper, applying AI technology to online retail.
+And XPS was a product or XPS was a project that Fluid created for and with the North Face.
+Is that right?
+Initially, yeah, they were our first customer with XPS.
+It's expanded a little beyond that, but they were the initial focus, yeah.
+Let's jump into that.
+Tell us about the general problem that you're trying to help these retailers solve.
+Sure, sure.
+Absolutely.
+We'll first just really brief encapsulation of the North Face in case people are unfamiliar
+with them.
+They provide top quality gear that's really designed and targeted towards climbers, runners
+and skiers.
+And of course, a good jacket for runners is also great for hikers and is also good for
+lifestyle and so on, but they're really targeted towards technical high quality gear.
+So what we were trying to do for the North Face, the genesis of XPS, was to help the more
+casual users figure out what to get from the North Face, you know, the really technical
+like the expert climber would probably know what they need in a jacket.
+But somebody who's going back backing for the first time might not really know quite
+what to get.
+And so we wanted to help them sort of help them sort of emulate the experience of working
+with a knowledgeable sales associate in a scalable online venue.
+I can relate very personally to that need right now.
+I am in the process of planning my first bike packing trip, which is basically camping,
+but kind of carrying your gear on a bike that's going to be later this month.
+And the array of stuff that the lists say that I need is immense and then kind of sorting
+through all of the different options for each of the various components is just, there's
+a lot of work that one needs to do to at least if you're like me and you want to kind of
+get the right thing, it's a lot of work.
+So I can definitely see why an online tool in particular one that's powered by some
+element of AI would be super helpful to folks.
+But exactly, so you're trying to build this tool, what is the, what is XPS provide?
+How does it kind of emulate this assistant?
+How does it emulate like a sales person at a store?
+In format, we adhere fairly closely to what would happen with the sales associate.
+You have a conversation, you know, there's questions and answers going back and forth.
+And through that conversation, the sales associate is accumulating important information, you
+know.
+And then as that information accumulates, that sales person's recommendation gets better
+and better.
+So what that means in the more technical world of XPS is that we have, we actually used
+graph database technology to represent the, we called them facts, just to be a fairly generic
+term that could be used across, to me, in different things at different times, you know,
+but like, you'd have this directed acyclic graph of facts that could be hierarchical that
+eventually connected to products and the edges in the graph had weight associated with
+them.
+So as a session with XPS proceeds, you're parsing XPS would parse the responses from the user
+if they came in via free text, or it could also work with button clicks if the answers
+were a little more directed.
+But either however they came in, it would result in weight being placed on nodes in the
+graph and then the directed graph, we used a heat sink algorithm to accumulate weight
+on the products and thereby derive the recommendations.
+What specifically is a heat sink algorithm?
+So a heat sink algorithm, if you have, you know, a directional graph where things, an
+acyclic graph where things point in a direction, just to look at a simple example without getting
+into hierarchy, you can consider product characteristics.
+So we're looking at North Face Jackets and you could say, okay, this jacket has color,
+right?
+So it can be red or it can be blue or it can be green or whatever.
+So you'd have an association sometimes people would have color preferences so you'd have
+an association, directed association from green to this particular jacket.
+So then if it comes out that I'm looking for a green jacket, I'd put weight on the green
+node in my session specifically and then that weight traverses the edge of the graph and
+ends up on, well, the multiple jackets that could be green, right?
+So green would be associated with an array of different jackets, all of which would receive
+weight from green.
+Then simultaneously, I'm looking for a waterproof jacket.
+So I put weight on waterproof.
+Waterproof is similarly associated with a collection of jackets.
+The weight derives from, or it travels from waterproof to all of those waterproof jackets.
+So we have some jackets that have accumulated heat or weight from green and others that
+have accumulated heat from waterproof.
+And so some jackets are hotter than others.
+The jackets that are both green and waterproof are the hottest ones.
+And so you have like multiple sources of heat, you know, the nodes that have been activated
+and then that heat accumulates on products.
+Where does AI come in in this project?
+What requirements did you have for artificial intelligence as you were building us out?
+Well, the artificial intelligence requirements were pretty high level.
+The initial genesis of the product was a partnership between IBM and Fluid for the benefit of
+the North Face.
+So the original idea was to use Watson to create this technology.
+But that's pretty broad, right?
+So as we dug in to implementing what I was describing there, the first attempt was just
+to use Watson as is.
+At the time though, this is way back at the beginning of Watson.
+This was, you know, a little bit after Watson had been used in the Jeopardy game show.
+Okay.
+And we have a lot of notoriety there.
+Right.
+But at the time it was a single API, it was this question and answer API that was really
+targeted towards the Jeopardy use case where it didn't, it didn't have the idea of context
+like I was describing where you accumulate knowledge through a conversation that really
+wasn't part of the game.
+And it also was designed to come back with a single answer, you know, because in Jeopardy,
+you don't say, oh, well, it could be this or that or that or that, it's just one answer.
+Right.
+Right.
+So the question answer API didn't really fit our use case.
+So that was when we started getting into this graph database business.
+So in the context of the solution I was describing, we initially used AI technology for natural
+language processing to try to make sense out of the utterances that users would provide
+to us.
+That was the initial piece.
+You know, what I was describing with the graph and everything was basically a content
+based recommendation engine that really doesn't use a lot of sophisticated AI techniques.
+We'd always had in mind to get to machine learning sort of collaborative filtering type
+techniques to improve the recommendations.
+But you know, as of now we're still, we're still waiting to get there.
+So it's been a little more focused on content based recommendations.
+The interface for XPS, is it a chat, I'm assuming it's a chatbot type of interface?
+And if so, are you using a platform technology to manage the chat interactions, you know,
+parse out the intents and all that kind of stuff, are you doing that manually?
+So at the highest level it is a chat interface and it's super compatible with things like
+Facebook Messenger and we have implemented it on Facebook Messenger, but it doesn't
+require a dedicated chat platform like that.
+It runs just fine in a standard browser as well.
+So it's pretty flexible in how it can be deployed.
+We initially, when we were building this out, the supporting technology to manage the
+conversation for us was not super satisfactory.
+So we sort of built our own deal.
+In the meantime, since then, we've evaluated other technologies like IDM Assistant, which
+do a lot of the same things that we've been doing and have a lot of advantages, just
+the training capabilities they have, the ability to understand intents as well as entities,
+the ability to impact the behavior of the conversation, you know, to change the flow,
+the conversation, have it work better without having to do any coding, it was really attractive.
+So what we're sort of in the process now of incorporating watts and Assistant into
+XPS, sort of as complimentary pieces, if you want to go into a little more detail about
+how XPS guides a conversation relative to how watts and Assistant does, they have fundamentally
+different approaches, which can work well together.
+Sure.
+Had that direction?
+All right.
+No, that's interesting, because you mentioned using them in conjunction with one another
+and I was starting to form a question around how that's going to work, so to start with
+watts and Assistant, I mean, that's fairly, there's a whole sort of family of technologies
+that operate in fairly similar ways.
+And they parse intents based on the intent that's been identified, can parse out entities,
+and so you can do things, you know, a customer service, it can understand that you're trying
+to track and order to be your intent, for example, and then it can know that in order
+to track and order, it needs to have an order number, right?
+And so it can try to parse the order number from what you've said, or if it doesn't get
+it, it can solicit the order number, once it has that, then it can move forward.
+And so you've got this sort of structure of intents with related entities, and it can
+guide a conversation that way, it can solicit what it needs based on what the intent is.
+So that's kind of the watts and Assistant approach.
+XPS, on the other hand, is much more, is intended to be much more sort of directive and focused
+and purposeful and flexible in what it's doing, like its sole purpose is to recommend products.
+So you've got a potentially confusing collection of products, you know, like all these jackets,
+so many jackets, there's like 20 kinds of ski jackets, what the hell, you know, right?
+So there's all these products with the intention of recommending the right ones.
+And the watts and Assistant approach tends to lead the order in which information is solicited,
+is somewhat fixed.
+You know, if you're looking for an order, you get the order number.
+Whereas within the jacket recommendation world, there's a lot of different things that
+you could be soliciting.
+You know, there's how it behaves in certain types of weather, you know, how it does relative
+to wind and rain and temperature, there's color, there's breathability, you know, on and
+on and on, like the number of questions that could potentially be asked is big.
+And if you ask them in the wrong order, it doesn't appear very intelligent.
+So our one of probably our core challenges of XPS was guiding the dialogue in a way that
+would allow it to make the best recommendations the quickest.
+So we incorporated kind of a taking that heat sink idea that I was talking about earlier
+where you figure out what price recommend based on the information, you know, we kind
+of flip that on its head and use like a complementary idea of hypothetically saying, well, if we
+knew this, how helpful would it be?
+If we knew that, how helpful would it be?
+Combining that with the natural collections, you know, natural groupings of these facts,
+you know, like if you're saying like, is it, is it good in mild wind or high wind or calm
+or whatever, if you're looking at the wind speed collection of facts, well, that condenses
+nicely to a single question.
+You don't have to ask three separate questions, you know, it's like, how windy is it going
+to be?
+And perhaps your answers are buttons if you want or it could be free text, whatever, whatever
+you want, right?
+But if we've decided based on analyzing all of these different facts and running them
+through these scenarios, we decide we care about wind is the most important thing to
+influence our recommendation.
+And we ask about wind, you know, if we get to another point in a different conversation
+with a different user, maybe based on what they've told us, it's more important to ask
+about color to differentiate the candidate product set.
+The way I would describe the algorithm that you're describing is along the lines of it's
+trying to maximize information gain per question asked or something like that.
+Basically, I mean, the way that we phrase it is differentiating the candidate product
+set, you know, like we have based on what we currently know, we know that there's a set
+of products that are suitable.
+And what we really want to do with the next question is chop that set in half and be more
+confident about half of it.
+You know what I mean?
+We kind of simplified the challenge to try to make it more consistent.
+We found that taking that approach worked pretty well.
+So that's how we scored each one of these potential questions to ask, did how much does
+it split the results set in half and how much does it increase the confidence of one
+of those halves?
+How complex is the algorithm excited that is there a pre-existing algorithm that's known
+to solve that kind of problem or did you have to kind of invent something from scratch?
+We invented stuff.
+We invented stuff.
+We were working.
+This was logic that ran in the graph database.
+We were using TinkerPop APIs.
+It's TinkerPop APIs.
+Yes.
+Yeah, I don't know where they came up with that name.
+It's standardizing the way that you can interact with graph databases.
+It's sort of like JDBC is to relational databases.
+TinkerPop is to graph databases.
+So it's a set of standardized APIs.
+We were initially working with Neo4j and we moved over to Titan.
+The graph database space is quite volatile.
+It was nice to have this sort of standard API to work with.
+We were writing Java code that used TinkerPop APIs to interact with the graph.
+It was sort of like streaming APIs.
+If you work with Java collections and you start streaming them and then you do one thing
+to them and then you get a stream back and you do another thing to them and you kind
+of chain these calls together.
+It's just sort of typical sort of a Lambda type flow within Java.
+So you do things like you get your set of facts and then you filter it based on the ones
+that have weight and then you see where they point and what the edge weights are and you
+calculate the accumulated weight and you filter again.
+Anyway, all these sort of traversals and streaming stuff in Java.
+So yeah, we had to write this code.
+We basically would look at the, you take the original set of recommended products, then
+you'd apply hypothetical weight to a single fact and then you'd see what the result of
+that was in this new result set and then you'd just repeat that process for any of the facts
+that you could consider asking about and then you'd just compare the sort of the weighting
+of the results, the recommended products and see which one had the profile that most
+closely matched, chopping the original set in half and increasing its confidence.
+And so was your product catalog space or there are the intersection of your product catalog
+space and the characteristic space such that you could do that calculation all in real time
+or did you have to pre-compute some of it or could you pre-compute some of it?
+It was all real time, yeah, the graph database ran quickly, I mean that was one of the reasons
+we chose that technology.
+The traversals are really, really fast and the accumulation of calculations as you navigate
+as you traverse through the graph could happen really, really quickly too.
+You build this algorithm that allows you to direct questioning in a way that helps a
+user kind of iterate as quickly as possible to a single product or a small set of products
+that they're interested in but you still see their opportunities to use that in parallel
+with the Watson platform, how would those work together?
+Yeah, yeah, good, yeah, that was what I was supposed to be describing before, right?
+I was describing these different mechanisms for driving a conversation with Watson Assistant
+having this intent and entities approach versus what I was describing with XPS and so
+the way they fit together nicely is that if you have, if the utterance can be, if Watson
+Assistant can get some traction with the user's utterance, then you let it do its thing.
+So if it says, oh, this is customer service, I got this, then XPS isn't going to be able
+to handle that, no, that's not what XPS does.
+And so if Watson Assistant was able to figure out that it could do some with it, then it
+does some with it.
+So Watson Assistant is kind of the initial recipient of the request.
+And then if Watson Assistant either identifies that it's not an XPS could deal with or it
+just doesn't know what the heck is going on, then XPS takes a cut at it.
+Yeah, it sounds like if you walk into a store, there's a greeter there that greeter is
+Watson Assistant.
+If you have a customer service question, they'll walk you over to the CS desk and kind of figure
+that out.
+But if you want to buy something, they'll kind of direct you to a salesperson and that's
+XPS.
+Exactly, exactly.
+Because what we found, I mean, this is pretty obvious if you think about it really, but
+you know, when people come into like a chatbot experience, they don't all want to do
+what you want them to do, you know, they're like, they're checking it out.
+They're like, oh, what is this thing?
+And XPS was really not very good at handling this broad array of things that were coming
+up.
+People just chatting.
+People were like, hi, you know, an XPS didn't really know what to do with hi, you know.
+Right.
+Right.
+Right.
+I'm curious about the software development process and specifically the idea of incorporating
+in these, you know, external AI-centric APIs and any ways that maybe you had to think differently
+about the development process, you know, relative to other kinds of projects.
+Well, I think the big difference is that the, you know, the AI technologies we were using
+like Watson Assistant and to a lesser extent some of the NLP stuff we were using, it's
+not like, you know, talking to weather underground and getting back the weather, you know what
+I mean?
+You have to train them, you have to prep them up, you know.
+So there was this body of work that typically is best handled by experts to get the corpus,
+get the service ready to do what we needed it to do.
+And just needing that different skill set definitely presented challenges for us.
+You know, our team was really a team of software engineers and the idea of using APIs at runtime
+was super comfortable, but the idea of needing to train a service so that it would recognize
+certain intents was pretty foreign.
+And just because of staffing challenges, the engineers typically had to kind of step into
+that role of training these systems.
+And so did you have to build out specific processes and tooling to enable that to be done
+successfully?
+Um, I mean, I don't know if it was really that formal, it was basically like people were
+obligated to do it and so they did it and as they did it, they got better at it.
+You know, the tooling was already present, you know, like there's Watson Knowledge Studio
+comes as part of the package, which is, you know, great tooling sophisticated at this
+point.
+It's mature works really well.
+So we fortunately didn't didn't have to address that part of a puzzle.
+I mean, we were looking, we played around at different times with just manually using
+Watson Knowledge Studio to do the training versus trying to do it via APIs.
+You know, and we hit our heads on walls every once in a while when we would try to do our
+own automation is generally work better to like do it the way they sort of want you to
+do it, which is more manually or less or yeah, exactly a little bit more manually.
+In the case of WKS Watson Knowledge Studio, it was easier to just go into their UI, do
+their thing.
+I mean, that's continually progressing, which actually I think is another way that this
+type of work was a little different than the work that we were accustomed to doing.
+What's that?
+Well, like just this exact thing you were talking about, like trying to script, trying to
+interact programmatically with some of these services would change, it would change way
+more quickly than we were accustomed to.
+There'd be new vendors offering things that were better from one week to the next, you
+know, WKS would have a big iteration and things would change around and things that weren't
+possible previously were now possible.
+There'd be discontinued practice like, like Watson Assistant went from being Watson dialogue
+to Watson conversation to Watson Assistant and if through each step of that, there were
+major changes.
+So it's just such a like booming in a live field, sometimes it's just like ground is constantly
+shifting under us.
+And so we had to incorporate into our normal development process.
+This idea of sort of continually having spikes where we were doing research about things
+that we had already researched, you know, there had to be kind of a lot more time and energy
+put into staying abreast with the current technologies.
+And we also incorporated short, really short sprints.
+We're on a weekly sprint cycle on this project throughout throughout its whole life cycle.
+At the beginning, we thought it was going to be a temporarily short sprint cycle, but
+we found that we continuously were needing to like adjust course, you know, we'd learn
+something new, we get some new feedbacks, there'd be some new technology and we're continually
+just kind of let's say zigzagging because we were generally playing in the same direction
+of the significant, you know, adjustments to the approach on a almost on a weekly basis.
+Yeah, but at the same time, it sounds like you were able to successfully get this done
+with a traditional engineering team, whereas if you were, you know, needing to build all
+of the AI and LP conversational bits from scratch, it may have been a bit harder.
+Yeah, absolutely, absolutely.
+Yeah.
+And the degree of maturation in the space that we saw in the, you know, couple of years
+we spent building it was just amazing, you know, it would have been awesome if it could
+have been at the place it is now two years ago, it made our lives a lot easier, but we
+you know, perhaps gained a deeper appreciation of the advances.
+How did you address like the testing part of the development cycle and understanding, you
+know, did you try to create some kind of regression testing for the training process?
+So you knew if you kind of broke something in training, that kind of thing.
+Right.
+Great question.
+Kind of mapping this, you know, traditional dev process to this, you know, AI enhanced,
+let's say, dev process.
+Yeah.
+Yeah.
+Yeah.
+You know, I'm afraid my answer is going to be a little bit of a cop out here.
+We were looking at this, finding the right balance between delivering stuff quickly for
+a small number of customers in this constantly shifting space versus having a solution that
+was really solid and scalable and we'd be able to use for 50 customers, you know, there
+was this real tension between that.
+And as you say, it's directly attributable to applying sort of traditional web software
+development, multi tenant software as a service practices to this AI space.
+So, you know, we, we just kind of did the best we could, we had thorough regression tests
+around the more traditional parts of our code base.
+You know, we had thorough unit tests, test coverage metrics and all that kind of stuff
+around the express application and around our react front ends and stuff like that.
+And it came to the Watson assistant pieces and the NLP training, it was a little softer.
+It was a little softer.
+We were intending to button that up a little better as we move forward.
+And we're expecting, you know, given the pace of evolution of the tools, we're expecting
+that it's going to be easier to do that going forward.
+You know, it was like Watson knowledge studio advance, we're expecting to be able to script
+the training more thoroughly and tie that scripted training to testing the results of it
+more thoroughly.
+But it's really tricky because not only is potentially our training set changing, but
+also, you know, like Watson assistant is a service we're relying on that's constantly
+evolving.
+So it could be that our training data stays the same.
+But the results change, even though we can't change anything.
+And so we didn't get too obsessed with buttoning that up at this point in the process.
+Right.
+Embrace the chaos to a certain extent.
+You know, and I think an important sort of corollary to that is that, you know, we're
+not sending rockets into space, right?
+And we're not automating million dollars trading, right?
+We're recommending jackets.
+And so we, we kind of leveled the appropriate appetite for risk with the domain.
+You know, if something goes awry with the training of Watson assistant and it's not quite
+right, well, you know, we can tolerate that.
+So, you know, we, we do our best.
+Where did the training data come from?
+We have thorough analytics built into XPS so that we keep track of every step of every user's
+interaction with the service.
+And we're able to use the utterances that we captured from users throughout the process.
+So there's, there's a manual step to it in that the taking the data from our analytics
+system and feeding it in to Watson knowledge studio.
+There were some manual processing involved with it, especially around the ground truth.
+You know, like we could have automated feeding in all the utterances, but it would have
+been a little trickier to say what the correct responses should have been.
+But we did have the advantage of accumulating a large amount of real data and being able
+to use that throughout the process.
+And from the perspective of the engineers that were working on this, what was their experience
+like did they feel like they had to become data scientists in order to be successful
+with this project?
+Or, you know, was there a good balance between the APIs taking care of, you know, the deep
+algorithmic bits in them, you know, doing the higher level training stuff, the integration
+and the traditional engineering tasks?
+Yeah, a good question.
+You know, there was a, on the one hand, the engineering team were, were somewhat generalists
+who really enjoyed being exposed to new ideas and new technologies.
+You know, so like in the course of this project, some of the people on the team were learning
+react and redux for the first time, for example.
+Okay.
+But the entire team was learning about the Watts and APIs for the first time.
+And so being exposed to new technologies like that was awesome.
+And I think there's just the idea of understanding and being exposed to the role of a data scientist
+and how that compares to software engineering and being in a situation where they were forced
+to kind of be a little bit more immersed in that data science role than they ordinarily
+would have been.
+I think that was, that broadened horizons and was welcomed.
+At the same time, I think there were kind of, you know, they reached kind of a saturation
+point where like having to deal with the fact that it wasn't, you know, recognizing,
+you know, the difference between, you know, there are some examples of these things, you
+know, there are certain utterances that just cause problems like, yeah, just like negation
+is a simple one.
+You know, I want a jacket that's not green or you could say that anything but green,
+you know, and recognizing these negations correctly can involve some extensive training.
+Some of the language around that is fairly ambiguous to the untrained NLP system.
+And so like having to go back in and like, oh, anything but green, why isn't that working?
+How are we going to train that?
+Like that wasn't generally the developer's favorite part of the job, you know, yeah, so
+I think at the abstract level, the idea of understanding data science and how that fits
+into the process and how these AI technologies really work was awesome and they loved it,
+but they kind of had enough after a while.
+And kind of end of the day, how was the project received from the North Face's perspective,
+customer perspective?
+Well, it was certainly understood from the get go that this was kind of bleeding edge
+stuff, you know, that we were figuring this out on the fly and giving it a go.
+So the like the format and the vision of it, I think, was awesome, you know, they really
+like that.
+One of the challenges that we met with the North Face that honestly surprised me was
+the product attribution turned out to be surprisingly challenging.
+I had assumed that the North Face would have really thorough, like facets, faceted characteristics
+of their jackets that would provide us with all the raw material that we would need
+in order to differentiate them through a conversation, but we found two challenges in
+that.
+One is that the the existing faceted search capability that you see, you know, basically
+across the commerce landscape is really good, you know, like if, if you want to just sort
+of check boxes and say, I need a jacket that's waterproof, I need a jacket that's green,
+like you don't need this conversational interface to do that.
+You can just click, click, see it, you know, that's like, so that is so surprised you said
+is really good because in my head, as you were saying that I was thinking is really horrible
+I guess in some places it's implemented better than others is probably the best way to
+say that.
+I mean, I think of like kayak.com, you know, when you're searching for flights or
+hotels or something, you know, I'm like, to me, that's awesome, you know, just it's
+really nice, like, but you're absolutely, of course, you're right.
+I mean, it's not implemented well across the board, but the idea has been articulated
+successfully in certain cases.
+So we deliberately did not want this conversational experience to be perceived as like a watered
+down version of a faceted search.
+Right.
+And so part of that sort of necessitated that we have facets, you know, we have product
+attributes that are different, you know, there's kind of qualitatively different.
+And so we started looking, you know, experimented around with different things, you know, like
+more emotional type attributes where you'd say, like, I want an adventurous jacket.
+Well, like, what does that even mean on one, you know, but if you could, if you could
+somehow capture that and kind of represent that or, you know, like, like the personality
+of the shopper can translate into like finding jackets that match that personality, whether
+it's adventurous or studious or whatever it may be, you know, so we spent some time kind
+of exploring that in order to really maximize the conversational benefits.
+And that proved to be difficult.
+I can't say we hit, hit it out of a park with that piece.
+So there's, there's clearly room for more progress, like identifying what, how to make
+this more satisfyingly conversational and how to obtain the product attribution necessary
+to do that.
+All right.
+The challenges that you had with regard to the product attributes specific to these more
+emotional attributes that you were looking for or even some of the traditional attributes
+as well, like the kind of the, did you deal with challenges and just having the basic kinds
+of information you'd want to help customers make decisions?
+Yes, for sure, for sure.
+Take, take waterproofness, for example, like if you don't think about it too much, it seems
+really straightforward.
+The jacket's waterproof, it's not, right?
+But it's, no, it's not that simple.
+And there are some barely formally defined standards of waterproofness.
+You have water resistance versus waterproofness.
+And so you have the one challenge of like the interface with the human being, you know,
+with the person who's by this thing, right?
+And like trying to avoid jargon, but it was surprisingly difficult to avoid jargon.
+Same thing with windproofness, wind resistance and all that.
+So you've got kind of this sort of impedance mismatch between the technical characteristics
+of the jackets and the way a user might perceive them.
+And then sometimes too, there were just missing data, you know, you just, you would think
+that they would just all be there, but it's not, you know, like the systems that they
+use, sometimes all the dots don't connect all the way up to where we got the data.
+So it got to be sometimes a bit of a bottleneck, just getting data that they just must have,
+but it wasn't flowing to us.
+And how did you address that?
+Well, the scale that we were looking at with, that we were looking at with the North Face
+is relatively small, you know, we got a few hundred jackets.
+So we would just work, we were just working with the North Face product team and just working
+with people there and they help us resolve things that are missing.
+That's sort of a simple part.
+It's cumbersome, you know, it's not super ideal.
+And it raises questions around scalability, you know, like it's working okay, because
+we got, you know, 300 some jackets, but if we were to expand, that would be more problematic.
+With other customers, we've worked with, we've had larger numbers of products, which has
+made those problems more, more real, and we've had to resort to, well, not resort to,
+we've leveraged, there's actually another place where machine learning has come in, where
+you get information, the information that you have about a product, you know, things
+like its description and so on, can be used via machine learning to perform classifications
+and determine some of its attributes, limited, you know, it depends on what kind of description
+you have for that product, as to how well that will work, or if you're able to tap into
+supplementary sources like product reviews, but it's really helpful, but it doesn't
+truly solve the problem.
+We've also looked at crowd sourcing to help with it too, but it's just definitely a
+challenge.
+It really kind of opened my eyes to like a whole industry.
+I didn't really quite realize that there's like a whole industry around product attribution
+and it's tricky.
+Yeah, it's amazing.
+So you've some years back or some, at some point someone used some attributes to come
+up with a description, but you've lost connection to the attributes themselves and have to
+like infer them using ML from the descriptions that they wrote, basically, that's sort of
+what it seemed like, yeah, yeah, wow, wow, yep.
+And so this, the system is like, it's up on the northface.com slash XPS.
+How do you see it evolving over time?
+You've talked a little bit about, you know, some, some areas, but where does it go from
+here?
+What's the budget?
+I think that probably the most interesting place for it to go is machine learning.
+So we've got that whole heatsink business I was talking about to provide content based
+recommendations, but providing using machine, I see using machine learning in two ways
+to benefit system one is to help figure out which question to ask next.
+So you could be seeing based on the characteristics of a session in XPS, you could see which questions
+not based on this predictive stuff we've been doing, but you could just see based on like
+actual results of prior sessions, which questions delivered the most value.
+Right, right.
+And then, of course, you could also be using it to actually provide product recommendations.
+You could see, okay, based on how this session is progressing, you know, what products
+received positive feedback from similar sessions in the past and then bump those recommendations
+up.
+And like I had mentioned, the analytics tracking that we've been doing, you know, came up when
+we were talking about like, training the NLP system, well, that NLX system also will
+provide us with training data for both of those applications of machine learning.
+So we're positioned to make that happen, but all you have to do is listen to a couple
+of episodes of Twimmel to understand that it's a piece of work, you know, that's, you
+know, that, but I think that would be a great place for XPS to expand.
+Andrew, thanks so much for taking the time to chat with us about this project.
+It sounds like a ton of fun, and I'm looking forward to playing around with it and maybe
+seeing if I can find a jacket.
+Yeah.
+Yeah.
+Hopefully we can expand to give you advice about bike paniers and tents and stuff.
+Thanks a lot, Jim.
+Thanks, Andrew.
+All right, everyone, that's our show for today for more information on Andrew or any of
+the topics covered in this show, visit twimmelai.com slash talk slash 239.
+As always, thanks so much for listening and catch you next time.

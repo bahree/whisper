@@ -1,0 +1,466 @@
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+people, doing interesting things in machine learning and artificial intelligence.
+I'm your host, Sam Charrington. Before we dive into today's show, just a few quick
+meet up related announcements. First, let me say thanks to everyone who participated
+in this weekend's fast AI deep learning course study group. We had a great discussion
+about lesson one. If you missed it, the recap will be posted later this week, so be sure
+to subscribe to our YouTube channel or follow at Twimble AI on Twitter for updates.
+Also, this is your final reminder that the next Twimble online meet up will be tomorrow
+Tuesday June 12th at 5pm US Pacific time. Kelvin Ross will be reviewing the paper, cardiologist
+level arrhythmia detection with convolutional neural networks, which is worked by researchers
+and Andrew Ings lab at Stanford. For more information, visit twimbleai.com slash meetup.
+In this episode, I'm joined by Romero Salas, director of AI at LinkedIn. We begin with
+a discussion of graphical models and approximate probability inference, and he helps me make
+an important connection in the way I think about that topic. We then review some of the applications
+of machine learning at LinkedIn and how what Homer calls their holistic approach guides
+the evolution of machine learning projects at the company. This leads us into a really
+interesting discussion about problem formulation and selecting the right objective function
+for a given problem. We then talk through some of the tools LinkedIn has built to scale
+their data science efforts, including large scale constrained optimization solvers, online
+hyperparameter optimization, and more. This is a really fun conversation that I'm sure
+you'll enjoy. Let's go.
+All right, everyone. I am on the line with Romero Salas, who is director of artificial intelligence
+at LinkedIn. Romero, welcome to this week in machine learning and AI.
+Thank you, Sam. How are you? Glad to be here. Really excited to talk a little bit more
+about AI with you. I'm really a listener of your show in the past, and I really enjoy
+them. So looking forward to this. Awesome. That's great to hear, and I am doing great.
+And I'm excited to dig into our conversation, which as a listener, you know that I'll
+start by asking you how you got into artificial intelligence. Tell us a little bit about your
+background.
+OK, yes, so I guess my background as an undergraduate student is on something that is called informatics
+or informatics engineering. And this is something a term that is not used here in the States
+because I study in Venezuela for my undergrad. And that's kind of like a combination of math,
+computer science and stats or operations research. And, you know, looking back 20 years ago,
+this is exactly what you need to get into machine learning, right? So I was really interested
+in these topics from very long ago. And once I go into graduate school, I try to explore
+those more and more, first studying computer vision, which was kind of like my first subject
+area in graduate school. And then realizing that, you know, you could do a lot more in
+computer vision with the right sort of machine intelligence, right? And that got me more
+and more interested in AI. For example, I was looking at things like how do you recover
+the 3D structure of an object? And of course, the first thing you do in computer vision is
+you're going to the 3D geometry. And, you know, all of these things related to, you know,
+epipolar geometry or recovering the camera parameters. But then I try to approach the same
+type of problems using machine learning. And it just felt much more natural to me. And
+then I can go in in that direction and exploring a little bit more of a, you know, in-depth
+machine learning, did a couple of postdocs in the area, one in what I call image analysis
+and another one more related to how we scale inference in systems that are so large or
+so complicated that you cannot really do exact inference, but you have to go into approximate
+inference. So the area is really called approximate inference in graphical models.
+So, you know, that area really reinforces more and more, you know, what I really wanted
+to do in machine learning, which is to deal with these very large problems, large systems.
+And even if you cannot come up with an exact solution to all of these problems, to come
+up with a good approximations. So after that, I went to industry and I started working
+in the area of healthcare. So, which is a great area. It's a very, very meaningful area,
+which really needs, you see a lot of applications of artificial intelligence in this area. I
+spent about five or six years in the area of healthcare. And then I moved to Silicon
+Valley and right now I am here at LinkedIn. I think I'm very happy and I think I've been
+lucky to work on two areas that I consider that are pretty useful in general for the socially
+one is healthcare and the other one is my work here at LinkedIn, which is, as you know,
+deals with the subject of creating economic opportunity for everyone.
+Awesome. Well, I am curious about the work that you mentioned on approximate inference.
+Is that model specific?
+Yes. So approximate inference in graphical models is this area of machine learning where
+you know that if you really want to compute a posterior distribution, what we call, for
+a given random variable, given all the information that you know about the system around this
+random variable, they say you have a system of 100 random variables and you know a lot
+about 99 variables, but you don't, you want to know what those 99 variables tell you
+about these one variable, right? How do you compute the distribution over that random
+variable, right? So for example, you know, everything about the state of a patient, right,
+the result of many tests, how, how you can calculate the probability that this patient
+has a particular disease, for example, right? So we know that in complicated systems, depending
+on how these variables interact with each other, you can easily go into the field of, you
+know, such large computations that you cannot really compute is even if you have a very large
+computational resources. And you have to go and explore areas of approximations, right,
+of this posterior distribution. So basically approximate probability inference is the field
+of trying to come up with the best possible approximations to these very large problems
+that you cannot solve because they are either too large or simply because you don't
+have the time to wait for, for an answer. So anyway, that's a, that's in general what,
+what this area is. And you will surprise how quickly you go into these intractable models.
+For example, you have a, you have random variables that can take 10 values and you have a maybe
+50 of those, right? The number of possible states that the system could be in is already
+quite large. It approximates, I guess, in the number of particles in the, in the universe.
+So, wow, this is why you need this type of approximate algorithms and, and they actually
+very useful for a lot of the things that we do. Is the common theme between the work you've
+done in healthcare and the work you're doing at LinkedIn, this notion of graphical models,
+do you, do you use graphical models much at LinkedIn? Thinking in terms of graphical
+models is, is, to me, has been a really great way to think in terms of probability, a general
+way to think in terms, in terms of probability. And if you're in the field of machine learning,
+I think thinking in terms of probability, it's extremely useful. And even though you can
+do a lot of things, maybe without thinking directly in terms of probability, this, I
+think for most of the things that I have done in the past, the notion of probability,
+probability distribution, approximations have played a very important role. So, I think
+of graphical models as an excellent way to think in general about probability distributions
+and, and useful in, you know, many areas. In the healthcare field, for example, every
+time that you need to think about, well, what is the probability that this particular
+patient has this disease, given that we know the result of this test and this test and
+this other test, you know, it is court where everything we do, right? In the same way, in,
+in a large internet company like LinkedIn, understanding what is the probability that
+this member is going to really find value in this information that we are providing to
+him via the application, right? It's core to a lot of the things we do, right? So, we
+want to, at the end of the day, maximize the value that this member gets from interacting
+with LinkedIn and encoding this in terms of probabilities, right? Probability that the
+member is going to engage with this post or the probability that the member is going to
+invite a colleague to join LinkedIn or the probability that this member is going to maybe
+disable this notification because this notification wasn't the appropriate one to send, is something
+that we consider every day at my work. So, yes, I mean, thinking in terms of probabilities
+is, is at the core of everything we do. Graphical models provide a language to speaking in terms
+of probability that is very general and this is why, you know, I, I find it really useful
+and I, I was lucky to explore this field back when I was in academia and, you know, turns
+out that I'm using it every day, basically. It's really interesting. I've done a number
+of interviews on topic of graphical models and I've tended to think of them in the context
+of either computational graphs or like graph databases, things like that and always think
+of them visually. And it wasn't really until you just, until I heard your description
+that it really clicked, clicked for me that the, the graph we're really talking about
+is an application of baserol and conditional probabilities and that's really what their
+relationships are between these nodes and the graph. Is that the right way to think
+about this? You, you, you, you, you hit right on target, basically, approximate inference
+in graphical models is a way to efficiently apply Bayes rule. That's a, that is what
+this reduces to really, right? So, yeah, that's a, for example, algorithms like belief
+propagation, right? In a graph, right? It's an exact, exact way to apply Bayes rule, right?
+In some cases, you cannot apply the Bayes rule exactly, right? Because the computation
+is too large and these, they believe propagation algorithm becomes intractable, right? The exact
+one and approximating what belief propagation should do is, is basically core part of these
+algorithms for doing approximate inference in, in graphical models. So, yeah, I think
+that, that's another way to put it, right? So inference equates in these probabilistic
+systems as applying Bayes rule and when you cannot apply Bayes rule, you have to go into
+approximations, right? So, so now there is, that is not to say there are a lot of, there
+is a large field of machine learning that maybe you don't have to think directly in terms
+of probability, right? And for example, you know, I'll argue that even though it is useful,
+in many cases, thinking of when you need to use a neural network, let's say to address
+a classification task, you may or may not think in terms of probability and will be fine
+with it, right? But introducing probability in, in the thinking, in the reasoning about
+how machine learning works is, is super useful. And it's a, it's a great tool, right? Even
+if you are using, you know, neural networks or, or any of the things that on the surface
+don't require you to think in terms of probability directly, right? So, for example, in, in, you
+have a neural network trained to predict, let me use the same example in healthcare. The,
+you want to predict whether the patient is healthy or not, you can use as input the result
+of all the tests that you apply to this patient. And the output is going to be an activation
+of this normally referred to as a, as a neuron in the, in the, in the neural network that
+tells you whether the patient is sick or is not, right? Based on what he has learned from
+the past. And so far, I haven't brought up the term probability. But if you start thinking
+about how the activation of the neurons, right, relate to this, how certain the system
+is that the patient is sick or not, then you can translate that to, to a more probabilistic
+concept and start doing, you know, additional analysis on, let's say, the, how reliable
+the neural network is or how, how much it captures the true relationship between the inputs
+and outputs, right? So, anyway, that is kind of like my summary of why, you know, thinking
+in terms of probabilities is, to me, it's always helpful, even if you are not dealing with
+them directly, like in, like in some versions of neural networks.
+Yeah, I'm really glad we went down this path. I don't, you know, it seems so, so obvious
+in hindsight, but that way of thinking about graphical models is, is going to be helpful
+for me, I think. You know, maybe let's jump over to, to LinkedIn and, and what you're
+up to at LinkedIn. Can you talk a little bit about why AI at LinkedIn? I mean, some of
+that is going to be obvious, but maybe give us a lay of the land of how LinkedIn thinks
+about artificial intelligence and machine learning. So, basically, in everything you see
+on the LinkedIn app has, to a large extent, some form of machine learning in the background,
+right? Let's, let's start from the things that you normally see when you open the LinkedIn
+app, let's say the feet, right? The first thing you see normally is, is the LinkedIn
+feet, which ranks the conversations or updates or information that, in general, we believe
+is the most relevant to you. So, this, the reason why we rank things in, in that way, is
+because of the, how you have interacted with the LinkedIn application in the past, right?
+So we try to understand what interests you, what is relevant, right? You have a limited
+amount of time to invest on, using the LinkedIn app, we want to make sure that that's the
+most relevant that we can show you. In the same way, connection recommendations, who,
+who would you like to connect to? We try to infer from past activities and your past
+connections, you know, who you would be interested to connect with. Follows recommendation, who,
+would you like to follow? What topics do you like to follow? How to make messaging interactions
+simpler, right? How to, what to notify you off, right? So we know that notifications,
+too many notifications could be negative because we don't want to overwhelm anybody by sending
+too many notifications all the time, but so we want to really, really choose what is the
+best possible use of your time if we were to send you a notification. So machine learning
+plays a role there in trying to decide what is, what, what, what notification for all the
+notifications that we could send you has the high chance of providing value to you. And
+even in other areas that are not directly consumer or member focus, we use artificial intelligence
+a lot, for example, preventing some forms of abuse to the site, right? That's another
+area that understanding the patterns in the past that we have seen of abuse, let's say,
+to the site. I think we can prevent future problems with it, right? So jobs recommendations,
+right? So how to connect you with the right job, with the right company requires of understanding,
+you know, your skills. How do they, how they relate to certain types of jobs? What is your
+job title? So what type of jobs probably makes the most sense for us to recommend to you? And
+things like that, in addition to that, maybe your job requires you to know or to learn certain
+subject areas. So we can also recommend to you learning courses that you can also find in LinkedIn
+that will maximize the chances of you getting that next job, for example. In the same way,
+you know, in our search results, when you search for a particular topic or member or product or
+company in the app, we use artificial intelligence to show you what are the most likely matches to
+what you are intended to identify in the app. So, you know, I could, I could talk about all of
+these subjects for hours, right? But it's basically everywhere, yeah. I'm curious a lot of what you've
+described sounds common across internet companies and social types of applications, feeds,
+recommendations, things like that. I'm curious where LinkedIn's requirements and use cases might
+be different from some other companies in ways that are interesting. There are going to be things
+that are probably in common with other companies and things that are special to LinkedIn.
+One of the main things that we truly care at LinkedIn is that notion of, you know, are we providing
+the most possible value, right? The highest possible value to the member by showing the member
+a particular recommendation, for example, right? So, we think about this whole
+interaction with the application in a holistic way. And I think that's pretty interesting. I
+am not too familiar with other industries or companies thinking this holistically, right? So,
+and what do I mean by that, right? So, for example, recently, or maybe a couple of years ago,
+not so recently, we receive a lot of feedback that maybe LinkedIn was sending too much email,
+right, to people, right? And some of this feedback was public and that we have acknowledged this. So,
+what, we decided to think about, you know, what we need to do something about this, right? And
+why is it that, you know, we're sending so much email? And if you think short term, right?
+Well, you know, the more messages you send, the more email you send, in this case, you know,
+the higher the chances of engagement, right? So, if you want to maximize engagement, you know,
+sure, at least in the short term, send more email, right? And, well, that is a very, you know,
+short-sighted strategy, right? So, instead, what if you start thinking about if you want to improve
+the overall ecosystem of LinkedIn, right? And at the same time, the overall value that the member
+gets from using LinkedIn, then you start thinking much differently, right? And one of the
+early projects that we did in this area was, well, you know, engagement, you know, as a proxy for
+value is interesting, but we should also take into account negative signals, like, for example,
+is a member disabling or marking the email as spam, for example, right? So, so let's speak one
+email type and let's try to change the problem from trying to maximize engagement to a constraint
+optimization problem, where we think a little bit more holistically and say, well, let's try to
+maximize some form of engagement, which is a proxy to value, subject to some constraints on, let's
+say, negative feedback, like marking the email as spam. And, you know, that turns out, you know,
+that's that relatively simple optimization problem, you know, only one email type to utilities,
+one is related to engagement, one is related to negative feedback, had a huge impact on that
+particular type of notification or email that we were sending, right? And how do you characterize
+that impact? So, the way that we can address that impact is how many, how much negative feedback
+are we reducing? And so how much how much of a reduction negative feedback we can we can measure,
+right? How many fewer emails we can send at what level of engagement? So, it turns out that
+we could reduce the number of emails notification that we send by a pretty large amount. I think
+for that initial test that we run, it was at least 40% of email reduction with a equivalent
+percentage of negative feedback. And the engagement, the proxy to engagement that we were using
+at the time, which were sessions, right? We're almost unchanged, maybe negative 0.5 reduction
+in sessions. So, that's that's a great trade off to make, right? So, we we provide a much better
+experience at a very similar level of engagement and we actually could measure that there is a
+reduction in the negative feedback that we were getting, right? So, thinking holistically,
+basically gave us so many more insight into how we can do this across LinkedIn. So, so we didn't
+stop here. We said, well, you know, this is this is great. So, it may sound crazy, but what if we do
+this across all notifications that we're sending and at the time we were sending the primary
+form of notifications that we were sending were emails. So, let's say that we now instead of just
+why stop it at one email type, let's let's across all the possible emails that LinkedIn could send
+you. What if we apply a similar way of thinking, right? And then you you're running to scalability
+problems and having to work with an entire set of, you know, product managers within the company.
+And how do you deal with that, right? So, and this experience really gave us a lot of insights
+about how we approach future problems, right? But what we did basically was less, less formulate
+the problem again as a constraint optimization problem where you are less minimize the amount
+of messages that we send. Let's say that we want to really, you know, if we don't have to send any
+messages and provide the same amount of value to the members, then why not do that, right? So,
+the way that we formulated the problem was, well, less minimize the number of messages that we
+send in this case emails, subject to a maximum amount of negative feedback that we're willing to
+tolerate. We want, you know, less than 2% of negative feedback or 0.2% of negative feedback.
+And let's also make sure that there is certain level of engagement. So, we don't want to reduce the
+engagement too much because that's our proxy for for member value, right? So, let's let's play
+second strain on on the member value that we believe we are providing, right? And since we have
+maybe 20 different products or 30 different products across LinkedIn that are all sending some
+form of email or notification, let's make sure that we don't decrease the engagement that we are
+directing to those products more than a percentage, right? And then you see how we can we keep
+increasing the complexity of the problems and the number of constraints, right? So, this turnout
+to be a project that we, you know, decided to do and which enormously reduce the amount of emails
+that we sent to our members, all the product partners were positive about the impact that this
+was having across the product and basically address this very critical problem that we really,
+really wanted to solve, which is provide better member value while at the same time reducing the
+amount of notifications that we were sending, right? So, I believe that at the time the reduction
+of total messages sent to members was close to 65% or close to 50% overall without decreasing
+in negative feedback of 65% and less than 1% reduction in sessions overall, right? But,
+you know, we believe this is the right thing to do and we did it, right? This, even though
+this came at some cost, which is, you know, 1% reduction in sessions that in a large company that
+may be a large cost, but it was a right thing to do and it opened the door to a lot of other
+things that a lot of our future thinking about how to approach these problems. This is a really,
+really interesting story, a great story and really timely for me, I was just giving a talk
+earlier this week and talked about how the metric that you choose to optimize around, you know,
+has a huge impact in the way you can approach a machine learning problem, even if it's fundamentally
+the same kind of problem, you know, a recommendation problem, you could look at it from the perspective of
+revenue or profit or a lifetime customer value and there are all kinds of choices to make there
+that have different implications on the ultimate performance of your models, but also the user
+experience, the customer experience. So it's really interesting to hear how you've applied this.
+Are there other areas outside of this email domain that you've applied this kind of holistic thinking
+to? Yeah, so we're now using these to all the types of notifications as well, but I think
+one interesting example is also in the area of forming connections, right? So in LinkedIn,
+we have this product called BYNK or people you may know and this product is basically powered by
+machine learning algorithm that determines for a particular person. What are the connections that
+in the past, you know, we also think about what are the connections that are most likely to respond,
+yes, I want to connect with you, right? And when you then rethink the problem and think, well,
+you know, maybe we should think about the problem in terms of what are the most valuable connections,
+right? Or what are the connections that will in the future, you think of value as how much
+interaction you will have with these connections, then, you know, you start thinking about different
+objective functions and different ways to provide what we think is a better value to the members,
+right? So what we started to do was to instead of creating connections after connections,
+trying to maximize the number of connections that a person creates, try to maximize the
+valuable connections or the connections that are, that the connections that matter, right, or that
+we think that matter, right? So, so we reformulate the problem into less maximize the chances that
+you're going to really engage with this person, you connect with the person, subject to some constraints
+on, you know, I want you to be connected, right? I don't want the members to be all severely
+undreconnected because we are too picky about the type of connection we're recommending to
+this member, right? So, this had an interesting impact on, well, you know, the new connections
+that you're making are actually, you're actually interacting more with them because of the new,
+this new recommendation algorithm and it's probably of higher value to you, right? So,
+as another example where we were thinking about maybe the more of the ecosystem value, you know,
+or long-term value to the member, right? And another example is in the area of, so for example,
+on the feet, right, which is a core part of LinkedIn, you know, we want to make sure that everybody
+in the feet feels hurt, right? So, you know, when I post something in the feet, I want to make sure
+that people, you know, can see what I posted and I get feedback, right? You want to maximize
+click to rate, which is a usual metric that you will first think about. You will normally
+promote members that are very, very popular and get a lot of clicks, right? So, but you want to
+create a really a better sense of community and people, you want people to feel that they're
+hurt, right? You want to also take into account that maybe some members that are less active, right,
+will deserve the chance to get feedback as well, right? So, we want to maximize overall
+engagement, not just the gain of a few members, right, while other members feel that they are not
+hurt, right? So, that's another area. And so, what we did is we basically focused on a group of
+members that are new sharers or not very common sharers or contributors and decided to make a
+trade-off, basically. We want to have this, we want to have most members receiving feedback
+as compared to just a few members receiving a lot of feedback. And again, this had a very
+positive effect on the members who contributed and they were not necessarily the most popular
+members or heavy contributors, but because of the feedback they got, there was a considerable
+increase in how much these members contribute again and share another article or share their views
+again on the site. And again, this is something that maybe it is obvious once you think about it,
+but it is not how usually most companies start when they want to optimize something like the
+feed, for example, or connection recommendations. Usually, the tendency is to optimize for the
+metric that you can see the most now and hope that that is the metric that in the long term is
+going to be the best metric to optimize. And we have realized that that's not the case in many
+instances and instead you need to think a little bit more holistically and come up with a better
+proxy of what is the metric that is better for the overall good of the member and the
+engagement overall in the site. Now, this is not to say that we have solved the problem of what
+is the best long-term metric that you should optimize for. I think that's a really difficult
+problem and in many cases you get counterintuitive results into I want to optimize
+how much daily active users they are in the site in one year. What should I optimize more
+in the short term in order to get there? And I think that's a tougher question. That's a tougher
+question. Basically, this reflects our idea that you should try to optimize whatever is closer
+to the long-term metric you want to see change. As long as you have a way to more or less
+approximate that metric with something that you can measure in the short term. If we wanted
+to apply this idea, I would like to optimize the feed or LinkedIn overall for a metric that says
+how many people in the global workforce are employed and believe that have economic opportunity,
+right? But what is the, is that my objective function? What did you get pretty broad?
+Yeah, what is the derivative of that with respect to the variables that I can control? That is
+a, that is a problem. So that is trying to fill in the intermediate proxy objective functions
+that you think will get you to that overall ideal, right, is where there is so much
+interesting work and ideas in machine learning that this is such a broad subject. But this is
+more or less how we want to think about it. What is the true metric that you really want to go
+towards? So now that you have this experience, do you find that teams are starting with more
+holistic models from the beginning of a modeling process like for new features or do you find that
+it needs to be more of a crawl walk run and, you know, they should still start simple and
+evolve and mature over time? Yeah, so I think that definitely I always go for the, you know,
+try the simplest thing first, right? And try to understand from the simple approaches first,
+right? And, you know, for a new company that needs to grow very fast, right, in order to get
+that engagement going, especially say you're starting a new application for which the,
+the social aspect is very important, you know, perhaps trying to maximize the number of connections
+as much as possible is the best, right? Well, the cake and not the icing or the cherry.
+Exactly, right? So now, once you start learning and realizing that, you know, maybe, you know,
+our members have a limited amount of time and energy and attention, what is the next best thing
+that we could do to provide that value to them? Right? Then you probably start thinking into
+more sophisticated way to optimize for that. Also, you know, at the same time, when you are early,
+you know, when a company is an early in the early stages, you probably don't have a very
+large investment in machine learning, so you need to try simple things first, right? Because
+the ROI is this largest, right? At that stage, right? But once you have understood a lot about
+the members or people who use your application, it's really, it turns into an ethical question,
+you know, what is the best thing that we could do for our members, given that we have this level
+of maturity, you know, the standing, how to bring value, right? And this is what we are trying to do,
+right? We try to do the best we can, given, given all that we have learned throughout the many years
+at LinkedIn. There are certainly implicit, if not explicit, tones to, you know, fairness implications
+of some of the things that you describe, like, you know, particularly around the feed and what
+goes into the feed and that kind of thing. Yeah, exactly. I think that's something that
+we always keep in mind. I think that we always try to think about all of these considerations
+in terms of fairness, you know, reducing bias, and I'm members' privacy, of course, right? That
+go into all the things we do, but as long as all of those aspects are satisfied,
+they're thinking about how to think holistically to provide the best possible value, right?
+To the members is something that is now reflected in many of the things we do. So
+and I guess he helps that my team is responsible for a lot of the products that I mentioned earlier,
+so we really try to make sure that this this way of thinking permeates across the organization
+and it starts at that level instead of thinking too narrowly or too greedily in terms of maximizing
+one particular metric at the expense of all the things that we may be missing, right? That can
+be better for the overall ecosystem, right? So anyway, so that's just wanted to summarize
+maybe how how it is that we're thinking about all of these problems at a high level and maybe
+provide a few examples like the email example that where we could touch a little bit at the low level.
+Yeah, absolutely. I'm curious as your team takes on more of these constrained optimization
+types of problems, has it changed or to what degree has it changed? The tools that you use,
+the data pipelines, the modeling process, you know, the general approach to rolling these out.
+Okay. Yeah, that's a good question because we had to build tools for doing this more efficiently,
+right? And some of the tools, for example, that we had to build are this large scale
+constrained optimization solvers that can use, can take advantage of some level of distributed
+processing, right? And provide a result to the problem very quickly, right? Because a lot of
+these problems really, what something that is common about all of these problems is that you're
+normally computing a trade off across many different objectives, for example, you know,
+a number of negative feedback that you get, a number of sessions that we see, perhaps sessions
+to a particular product and so on, right? A number of connections that you make. So what is
+common across all of these kind of applications, or examples that I've given, is that you always
+end up with how do you set the right trade off across all of these possible objectives?
+Right? So in optimization, I think that's what's normally referred as the Pareto curve, right?
+What is the right point in the frontier where you want to operate, right? So in two dimensions,
+this is just a curve and two variables and, you know, usually an increase in the return that
+you're getting one variable implies that you will get a negative impact on the other variable,
+right? So, you know, and that's a, you know, that's a very large set of combinations of variables
+that you could get, right? In just in two dimensions, what if you have three different
+objectives, or we call it utilities, three different utilities that you need to balance,
+or four utilities? How do you quickly solve these problems? Now, one thing you could do is that
+you could solve these problems offline, right? And wait for your cube quadratic programming,
+or linear programming, a solver to give you the solution, and then put the solution into the
+system and, you know, a measure just to make sure that things are going the way you expect.
+So that's one way to deal with the problem, and we continue to build ways to scale these
+constraint optimization problems in our systems. Another way that you could think of of these problems
+is let's say I try to do this online, right? And this is an interesting problem that we're working
+on these days. Let's say we have three utilities, right? And I want to learn what is the best
+combination of those utilities that satisfy my constraints as I serve the traffic so that I
+can adjust these things as the traffic is being served, right? So there are working online,
+we call it online model selection methods that allow you to, well, you know, a member comes,
+we serve this with a particular combination of parameters, and we determine, you know,
+how well the response to that combination of parameters was, and then the system automatically
+says, you know, well, you know, based on all the information that I have collected in the past about
+how how members are interacting given this parameter setting, what is the next best set of
+parameter settings that I could try to improve my utilities and still satisfy the constraints,
+right? So there are actually ways that we are trying to adjust solve this optimization problem
+where you have a few, we call it hyperparameters, right? That determine how much importance
+each of the utilities has, right? And, you know, the process of trying to adjust this in real time
+as we see more and more data is one of the areas that I think is very exciting and we have seen
+quite a few positive results in this direction. Of course, this method may not be able to scale
+for a very large dimensions where you need, you probably will need to solve a full offline
+constraint optimization problem, but in many practical situations, being able to do this
+parameter tuning in the online form seems possible. And I think this is one of the areas where
+I think we are we're very excited to see positive results these days. So in this context of an
+online system, you mentioned the dynamic model selection, which makes me think of, you know,
+not so much updating hyperparameters or parameters in real time, but you have offline developed as
+opposed to one single model, multiple models, and you're trying to fit a given user to a model
+online and then use that model. But it also, it sounds like you're doing a bit of both. I guess
+I'm trying to get some confirmation of my hearing right that there are two different types of
+things that work as you're trying to make the system more dynamic. Yeah, I think the two examples
+you provided are very related problems. I was and I think one could approach them in a very
+similar way. I was referring mostly about the problem of fitting hyperparameters, right?
+Okay. Which is basically when you have a linear combination of utilities, you have that
+hyperparameter that that is specific is how much of each utility, you know, what is the weight
+for each utility, right? And how you should change the that weight to satisfy your constraints and
+to at the same time maximize an objective, right? So I just seen those parameters in real time is
+what mostly I was referring to. I got it. However, however, that is you are right on target when you
+when you relate this with the with the other problem of trying to decide in real time what is
+what is the best model variant, right? That you could use instead of having to run different
+AB tests separately. You may want to run just one AB test and let the AB test itself out to
+tune it, right? Self-tune it. So that you can decide what is the what is the best model variant.
+And yeah, those those two problems are very related and we are exploring these directions as well.
+Just in terms of the time check, we've had a really interesting conversation so far. There are
+other things that you would add in and around this topic of trying to approximate more holistic
+metrics in the way we model. No, I think I think that reflects at a high level. I think what
+how we're thinking about it. There are there are some papers that I can also share with you offline
+into that they're going to more details about these. We have a pretty active group of
+scientists, engineers, analysts that publish papers and attend conferences and pre-active in
+the research community. And you know, we have the data website at LinkedIn. You can search for
+a few blog posts and articles that we normally publish there to go into a lot more detail into
+what I just said. You know, we're pre-active overall in the research community. And you know,
+something that I found I guess that I think it's also probably interesting to mention here is that
+you know, I spent a lot of times many years in academia and I actually did several postdocs and
+you know, was very interested in co-research in this area. But you know, working in industry,
+you you you never run out of problems. That that that is no answer for and or that the answers
+are just not that great when you try them, right? That this creates a constant influx of problems
+that you wish you have more time to solve that that that are pretty advanced or research driven
+problems that you know, you can publish and make a lot of impact on. So I found the working in
+industry as one of the main sources of interesting problems that I can think of
+you know, for publishing or for you know, just personal satisfaction of of being able to to
+approach the problem for for a greater good, right? So I think that that's that's one message that
+I also wanted to share because it took me some time to realize this but once I realized it as well
+this is this is so obvious, right? So this is this is such a great place to think of, you know, to
+realize what are the really important problems that matter and if you solve them now, it will have
+a big impact not only on on on just core research but also on the impact that you can have to
+to society in general, right? Right. So I think I find it a great place to to do that and
+LinkedIn has a different initiative is also with academia. For example, we run this what we call
+the economic graph research program, right? Which is another way for us to share, hey, you know, he
+here is here is a data that has been of course properly, you know, to identify and this information
+has been properly processed to be shared with a certain group of people, right? And we work together
+with professors or people from academia and other parts of outside of LinkedIn to be able to
+share, hey, you know, this is the data, this is a problem we have. What are all the problems that you
+see that for which you can use this data and actually, you know, to research make a positive impact,
+right? So I just wanted to mention that as well as one of the things that I'm pretty excited about.
+What LinkedIn does overall and if anybody is interested, I think this is something that you can
+check out also in our web pages. Okay, great. Well, we will include links to those sites in our
+show notes as well as any papers that you want to send over. But Romeo, thank you so much for
+taking this time. It was really a pleasure to chat with you. Thank you very much. It's my pleasure.
+Talk to you later, Sam.
+All right, everyone, that's our show for today. For more information on the Romeo or any of the topics
+covered in this episode, head on over to twimmolai.com slash talk slash 149. For the details of our
+upcoming meetup for the fast AI study group we formed, visit twimmolai.com slash meetup.
+As always, thanks so much for listening and catch you next time.

@@ -1,0 +1,782 @@
+Hello and welcome to another episode of Twimble Talk, the podcast where I interview interesting
+people doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington.
+This past week, the conference finally came to me.
+Over the weekend, the great and not-so-little anymore strange loop conference graced downtown
+St. Louis.
+I got a chance to meet with a bunch of the speakers, including Sumeet Chintala, a Facebook,
+Allison Parish of NYU, and Sam Richie of Stripe.
+I had a ton of fun and I can't wait to share some of these great interviews from the conference.
+Before we move on to the show, speaking of conferences, we're going into conference
+giveaway mode for a few days.
+Next week, October 10th through 11th, I'll be in Montreal for the rework deep learning
+summit and one lucky listener will get a chance to join me there.
+Entering the contest is simple.
+Just head on over to twimlai.com slash dl summit and choose any of up to four methods
+of entry and voila.
+While there are only four ways to enter this time around, by sharing the contest with friends,
+each participant can get up to 14 entries.
+This giveaway will only be open until noon central time on Wednesday the 4th, so make
+sure you get your entries and ASAP.
+Good luck.
+This week, I'd like to introduce a new sponsor, Nexosis, and thank them for sponsoring
+this week's show.
+Nexosis is a company of developers focused on providing easy access to machine learning.
+The Nexosis machine learning API meet to developers where they're at, regardless of
+their mastery of data science, so they can start coding up predictive applications today
+and their preferred programming language.
+It's as simple as loading your data and selecting the type of problem you want to solve.
+Their automated platform trains and selects the best model fit for your data and then
+outputs predictions.
+Get your free API key and discover how to start leveraging machine learning in your next
+project at nexosis.com slash twimmel.
+That's n-e-x-o-s-i-s.com slash T-w-i-m-l.
+Head on over, check them out, and be sure to let them know who sent you.
+Finally, before we dive into the show, a reminder about the upcoming twimmel online meetup.
+On Wednesday, October 18th, at 3pm Pacific time, we'll discuss the paper visual attribute
+transfer through deep image analogy by Jing Liyao and others from Microsoft Research.
+The discussion will be led by Duncan Stothers.
+Thanks, Duncan.
+To join the meetup or to catch up on what you missed from the first two meetups, visit
+twimmelai.com slash meetup.
+As you all know, a few weeks ago, I spent some time in San Francisco at the Artificial
+Intelligence Conference by O'Reilly and Intel Nirvana.
+While I was there, I had just enough time to sneak away and catch up with Scott Clark,
+co-founder and CEO of Sigopt, a company whose software is focused on automatically tuning
+your model's parameters through Bayesian optimization.
+We dive pretty deeply into how they do that through the course of this discussion.
+I had a great time and learned a ton, but before warned, this is definitely a nerd alert
+show.
+And so without further ado, on to the show.
+Hey, everyone, I am here with Scott Clark.
+Scott is the founder and CEO of a company called Sigopt and he was gracious enough to spend
+some time with me this morning to talk about his background, the company, and the topic
+that I am very interested in learning more about Bayesian optimization.
+We're sitting in his office in San Francisco.
+I happen to be in town for the AI conference and I'm really looking forward to this interview.
+So welcome, Scott.
+Thank you so much for really looking forward to it as well.
+Awesome.
+Awesome.
+So let's just jump right in and have you tell us a little bit about your background and
+how you got involved in machine learning.
+Definitely.
+I first got really excited about this while I was in grad school.
+So I was pursuing a PhD in applied math at Cornell University.
+Go upstate New York.
+Yeah, exactly.
+Cornell is great because there's not a lot to do and it's super bad weather all the time.
+So you just focus on studying and you graduate as soon as possible.
+I went to RPI undergrad, also upstate New York and had the same experience.
+Nice.
+Nice.
+I highly recommend it for efficient degrees.
+RPI had the added advantage of it was hugely skewed towards Nell students and so they
+were even less distractions and that's excellent.
+So basically I was applying math to a variety of different things.
+One of the focuses of my degree was bioinformatics.
+So I had a fellowship from the Department of Energy.
+So the problem I was trying to attack was genome assembly and you can think of this as
+trying to solve a jigsaw puzzle on a supercomputer.
+So basically we have a bunch of DNA and we have to reassemble it into some genome and the
+Department of Energy cares about this because if you know the genome it might be a path towards
+more efficient biofuels or something like that.
+The problem was lots of tunable knobs and levers with these various systems and we had
+to configure those to get the best possible performance out of them.
+And you were the grunt in grad school exactly to tune all these levers.
+We jokingly call this graduate student descent.
+The idea being we just need to get to the best configuration and it doesn't matter how
+you get there.
+Yeah.
+There's a good way to attack this problem and a lot of get your field value for your
+paper.
+Something like that.
+Yeah.
+I mean academic incentives are a completely different topic.
+Yeah.
+I just thought I tossed it in there.
+Fair enough.
+But the idea is there's a couple standard ways people go about attacking a problem like
+this.
+You can try to brute force the problem.
+So just lay down a grade of all possible options for every configuration and try them all.
+This was intractable for us because it took 24 hours on a government supercomputer.
+Every single time we wanted to try a single configuration, randomized search has become
+very popular, especially in the deep learning literature for trying to come up with different
+configurations of hyper parameters and architectures and things like that.
+Turns out much more efficient than grid search, but this is still like trying to climb a mountain
+by jumping out of an airplane and hoping you land at the peak.
+Not necessarily the most intuitive way to go about optimizing something.
+A lot of the different algorithms we use randomized initialization.
+That's different from randomized search.
+Correct.
+So when you're building a neural network, you might use randomized initialization on the
+individual weights and then use some sort of secastic gradient descent optimizer within
+that underlying system.
+This is more of a black box parameter optimization problem I'm talking about where we're not
+introspecting the underlying model, but just tuning the higher level configuration parameters.
+So some of those configuration parameters might have to do with that random initialization
+or the secastic gradient descent parameters or something like that.
+You definitely need to be able to bootstrap efficiently from no data, but doing purely
+randomized search is not necessarily the most efficient thing you can do.
+So maybe before we move on, since I think we're going to be spending a lot of time talking
+about hyper parameter optimization here, maybe dig into grid search a little bit more so
+that we're all starting from the same place.
+Basically, as I understand it, the idea is you've got some set of hyper parameters, those
+form an n-dimensional, n-dimensional, not a cube, but a lattice, thank you.
+Grid search is basically systematically going from point to point, like if you were searching
+for someone in a forest, you'd form a grid and attack all those points.
+And random is you're basically picking points, and the idea is statistically, if you pick
+enough points, you'll get some level of coverage of all of the combinations of these hyper
+parameters.
+Exactly.
+So back to your searching and a forest analogy, this is jumping out of a helicopter and
+seeing if the person's there, getting back in and like continuing to do that over and
+over again.
+That's random search.
+That's randomized search.
+Another popular method is just manual today.
+So trying to do this in your head.
+And in the forest example, when there's only two dimensions, you might have a lot of intuition
+about maybe the person's going to be up on a hill or something like that, it can actually
+be somewhat effective.
+But once you start to look at 20-dimensional problems, a lot of human intuition starts
+to break down, and you might not be able to have some of that expert knowledge in the
+searching for a human and a forest setting, how to set stochastic gradient descent parameters
+and number of hidden layers and learning rates, and all these sorts of things, it starts
+to get very convoluted very quickly.
+And so manual search, well, it can be effective to kind of resolve very localized solutions
+is not a great global optimization strategy.
+And for the typical model that you are seeing, like, how many hyperparameters are there?
+Yeah, so it really depends on the underlying system.
+So something simple like a random forest might only have a couple that you care about,
+number of trees, number of samples needed to split a node, something like that.
+As you start to advance, maybe integrate in boosting methods and also you have learning rates
+and other sorts of parameters you can tune.
+But once you get into the deep learning and reinforcement learning regimes, there can
+be dozens of individual parameters, especially if you start to think of the system as a whole.
+So when you're doing an NLP or computer vision type problem, all of a sudden you have different
+ways you can parameterize the data as well.
+And so by looking at that system and its entirety, all of a sudden there can be dozens of parameters
+and something that grows exponentially like a grid search is completely intractable.
+The human manual intuition starts to break down and randomize search is just too slow to
+luck into a reasonable solution.
+Okay.
+Can you give an example of in the case of NLP how the way you look at the data set changes
+and increases your parameter space?
+Yeah.
+So how you tokenize the text itself.
+So do you look at different in-gram sizes?
+The idea being do you look at one word at a time, pairs of words, triples words, do you
+maybe do different thresholds for the frequency within the corpus itself?
+So maybe cut out words like the because they're too common and then also cut out words like
+bananza because they're too rare.
+And so you can kind of change the actual feature representation itself before you even feed
+it into the machine learning algorithm.
+But these are all tunable moms and lovers.
+Got it.
+Okay.
+So you were stuck in grad school like again, twiddling these lovers and you know as all
+innovation happened, you thought there's got to be a better way.
+Exactly.
+So went around the department and found that this was a very common problem.
+People in machine learning, people in financial engineering, like everybody were building
+these these expert systems, but they needed to be fine tuned.
+But everybody was using these kind of standard techniques.
+So expanded my search outside the department and eventually found who would become my PhD
+advisor in the operations research field.
+So they've been attacking this problem for decades.
+If you have a time consuming and expensive disamples system, how do you most efficiently
+get to the best configuration?
+So this crops up if you're tuning a particle accelerator, it crops up if you're trying
+to decide where to place a gold mine, which is where some of the original research came
+from in the 50s, but it maps extremely well on to a wide variety of computational problems.
+Okay.
+You have some input that comes in, some output that you care about.
+How do you get to the best output in as few input attempts as possible?
+So I started working in this field of optimal learning.
+This is called an operations research, or sequential model based optimization or Bayesian
+optimization.
+A lot of fields have different names for it, but the idea is, how do you do this as efficiently
+as you can?
+Ended up pivoting my PhD towards working on this problem, ended up being one of the chapters
+of my thesis.
+And after graduating, I realized that a lot of different people in a lot of different industries
+had this issue.
+So I spent two and a half years at Yelp working on their advertising team, applying these
+same techniques to help do more perform into advertising.
+Okay.
+The idea being, if you think about it mathematically, an advertising system is very similar
+to a genome assembly system, insofar as a lot of experts spend a lot of time building
+something.
+There's a bunch of inputs, and there's an output you care about.
+In genome assembly, it's better papers because you get a better genome.
+In advertising system, a bunch of money comes out the other end.
+I mean, clearly, there are tons of problems that fit the general exactly.
+Exactly.
+And so you started Sigopt.
+How long have you been at it here?
+Yeah.
+So immediately after Yelp started Sigopt about three years ago, went through a Y Combinator
+and Winter 15, raised a few rounds of funding.
+Most recently, a series A led by Andreessen Horowitz.
+And now we're 16 people in San Francisco.
+Perfect.
+That sounded like a steamboat.
+I swear it's not normally this bad.
+And so I guess I want to kind of jump into the main crux of this interview, which is
+around this Bayesian optimization.
+Walk me through the way, folks like Pedro Domingo also talk about the Bayesians as this
+one tribe within machine learning, and as opposed to others, walk me through, I guess
+what I'm trying to get at is I've had a couple of conversations with folks about different
+aspects of Bayesian program learning and other things, but I feel like there's still
+some ethos of what it means to be Bayesian and think about things from that perspective
+that we haven't fully captured on the podcast.
+So if we can start there and then get to the optimization, that would be pretty cool.
+Definitely.
+So the way a lot of those other techniques work like grid search or random search is there's
+no learning happening.
+And I think that's one of the major differences between the Bayesian optimization approach
+or the Bayesian approach to this problem and some of those more traditional techniques.
+The idea being every single time I evaluate this underlying machine learning pipeline
+or whatever it is, it's extremely time consuming and expensive.
+And I want to be able to leverage that data to decide what to do next.
+And so a lot of the Bayesian methods rely on this concept of trading off exploration versus
+exploitation.
+So we want to be able to learn as much as we can about that underlying response surface,
+how it varies, how all the parameters interact over what length scales, how certain we are
+about specific configurations and how well they'll perform and learn about that while
+also exploiting localized information to drive you to better results.
+And by constantly trading off these two facets, we're able to exponentially faster than
+something like an exhaustive grid search, arrive at better solutions.
+And the main difference here is the fact that we're learning from the past and using that
+to influence what we do in the future.
+And now when I think about this kind of explore, explore exploit trade off one of the things
+that jumps to mind for me is reinforcement learning.
+Is that coming in play here or maybe less so because the environment itself, the problem
+itself doesn't necessarily change in response to the inputs?
+So the underlying system can change pretty dramatically.
+So you can think of this as this larger system that fits around any underlying pipeline.
+That could be a reinforcement learning pipeline.
+It could be just a standard deep learning or it could be something as simple as a logistic
+regression or a random forest.
+And you can think about the fact that every single time we try a new configuration, we
+want to observe some sort of output at the end that the user defines.
+It could be something simple like accuracy, could be the sharp ratio of a back test of
+an algorithmic trading strategy or whatever it may be.
+And so we use that to kind of influence what we do next.
+You can think of this as this kind of reinforcement loop as a whole over that entire system.
+But we're agnostic to what the underlying method is.
+And so the underlying method could be reinforcement learning or any number of other things.
+But it also sounds, I guess what I was asking was, are you or could you do reinforcement
+learning at the top level to optimize the thing that you're optimizing, which could be reinforcement
+learning as well?
+So reinforcement learning on the hyperparameter space as opposed to the actual model itself?
+Yeah, definitely.
+And there's a lot of different approaches to this underlying problem.
+There's a lot of very cool papers that are all the top machine learning conferences
+for attacking this.
+The way that we attack it is via this consequential model based optimization.
+And this is a very Bayesian approach.
+And the idea is we're sequentially learning as much as we can about this underlying system.
+So once again, using the history to decide what to do in the future, it's model based
+in the sense that we're building up different surrogate models for how we think individual
+configurations are going to respond when we actually sample the underlying system.
+We can use various different things here like Gaussian processes or other kind of Bayesian
+regression type systems.
+And we want to be able to say, given what we think is going to happen, how do we sample
+as efficiently as possible?
+Then we want to say, what do we think is going to improve in expectation the most?
+What's the highest probability of improvement in terms of that new configuration to suggest?
+And then that loops back into the underlying system after you sample it.
+And we learn, update the posterior of these individual surrogate methods, optimize on them,
+and repeat that entire process.
+So how do you get to the proposed model for the model based piece of this?
+In general, in Bayesian optimization, usually you pick a specific type of model and go
+from there.
+So in some of the open source work I did at Yelp, it was kind of very cut and dry, use
+a Gaussian process, use expected improvement to optimize, and go through kind of extremely
+sequentially.
+This is very similar to Spearment, another popular library.
+Let's say that one again, Spearment, it was an open source library out of Harvard, very
+similar to the metric optimization engine, or MO, which I wrote at Yelp, also similar
+to like G-Pie opt, which is kind of a more recent one.
+This is kind of the bread and butter Bayesian optimization approach, Gaussian process
+is expected improvement.
+What SIGUP represents, though, is this ensemble based approach.
+So different surrogate models, different acquisition functions, different covariance
+kernels for learning how the parameters interact, as well as not just kind of that standard
+build us a single sequential surrogate model based approach, but really taking all of these
+different optimizers and optimizing and making it automatic.
+So you can select something ahead of time because you know you want to take a very specific
+approach, or you can take the more generalized approach and say, we're not necessarily going
+to say, we're going to use this specific surrogate model.
+We want to learn along the way it was the best possible thing for that underlying system
+that we're optimizing.
+Right.
+So to take a step back, you are in the former case where you're picking a model, a specific
+model.
+You know, let's say we're assuming a Gaussian distribution, then basically we've got this
+hyperparameter space, we are, I'm trying to get at like how, you know, so the parameters
+of your Gaussian distribution will be your meaning, your standard deviation, and how
+are we, like what's the process for identifying those that is then, you know, that we're
+doing sequentially?
+Gotcha.
+So the way that a Gaussian process works is that it's assuming that the response of that
+underlying system that we're sampling is going to be Gaussian distributed at any given
+point.
+So it's not a single Gaussian distribution or something similar to like a Gaussian mixture
+model, what it actually is is an infinite number of potential Gaussian responses for every
+potential input.
+And then the way the Gaussian processes are analytically defined, once you start to sample
+underlying points, you can explicitly build up what that distribution is at sample points
+or unsampled points.
+The main thing that controls this is what's called a covariance kernel.
+And what that is is how much information do I get from sampling point A about some
+other point B?
+So does it decay exponentially?
+Is there some sort of high variance or noise associated with it?
+What are the length scales over which all the different parameters interact?
+This becomes doubly complicated once you start to look at heterogeneous configuration spaces
+with integers and continuous variables and categorical variables and things like that.
+Is this covariance matrix?
+Is this something that you're learning as part of the process?
+It's not something that you know our priority.
+Exactly.
+So you can set it, but you can also learn as you go.
+So there are tunable parameters around these covariance curves.
+And so it's, yeah, it's turtles all the way down.
+But the idea here is, once you can analytically define, this is maybe a surrogate function.
+I may use a Gaussian process.
+Here's a specific class of covariance kernels, like an ARD kernel or something like that.
+Then you can explicitly say, OK, how good is the fit given what I've observed so far?
+And because you're defining the system analytically and you've effectively mapped the problem
+from this extremely sparse time-consuming, expensive underlying system that you're sampling,
+and now you've mapped it over to this surrogate space, you can start to throw kind of the
+kitchen sink of mathematics at the problem.
+And use that to kind of optimize the underlying covariance kernels, pick the correct ones, find
+the right surrogate functions, and then ultimately leverage that information to decide what's
+the point that has the highest probability of improvement or expected improvement or whatever
+it may be.
+So is the surrogate space, in this case, the covariance kernel or the kind of this vector,
+this infinite vector of the distributions?
+So the covariance kernel defines that infinite vector or that functional distribution.
+So there's two ways to think about Gaussian processing.
+So your covariance kernel is infinite by infinite dimensions or something on that order?
+Or I mean, it can, how do you, is part of the goal to kind of constrain the dimensionality
+of this covariance kernel?
+So the covariance kernel itself will take in inputs in the configuration space and basically
+say how much covariance can I expect between these two points.
+So it does map into a real number.
+Technically for various types of covariance kernels, there are these tunable parameters
+that are continuous.
+So like technically, yes, there's an infinite number of different ways you can parameterize
+that.
+But what we're able to do is say, given what we've observed so far, what's the most likely
+parameterization or what's a distribution of likely parameterizations and leverage that
+to decide, okay, this is what we think is a.
+A reasonable surrogate function and then once again, do that across a wide variety of
+them.
+Okay.
+I'm still not fully getting where the infinite distributions come in.
+Yeah.
+So there's two ways to think about a Gaussian process.
+One is from the point wise perspective.
+And so the idea is at every single point, we're going to assume the response from this underlying
+system that we're sampling is going to be Gaussian distribution.
+But every single potential configuration has a different potential Gaussian response to
+it.
+So there's some mean in this.
+So you've got an input point and then you've got the space of configurations and each
+of those configurations translates this input point to a different distribution.
+So the input point is a potential configuration.
+So maybe I'll take a step back and do an example here.
+So let's say we're tuning some neural network and we want to find the optimal learning
+rate.
+So maybe initially we try something like just point five or something like that and we
+get a response back.
+Okay.
+And we're optimizing for the accuracy of a fraud detection pipeline.
+And so we're like, okay, we get.7 cross validated AUC that looks all right.
+So the thing that we're optimizing for is our learning rate and the input is, you know,
+we're not talking about inputs to our neural network and our neural network.
+We're talking about an aggregate, the error.
+Well, so the inputs are, we're going to be tuning this machine learning pipeline.
+And so at this high like meta optimization layer, we're going to be saying, okay, we're
+going to put in a learning rate and then we're going to go through the training and cross
+validation and all sorts of things and come up with some metric that we care about.
+So maybe cross validated AUC.
+And our goal is to find the learning rate that tunes this entire pipeline in such a way
+that it maximizes that output.
+And so the way that this works in the sequential model based optimization framework is, okay,
+so we sampled.5 learning rate and got.7 out as the result.
+And maybe there's a little bit of uncertainty associated with that.
+So then let's say we want to model what we think is going to happen if we try.6.
+So we have a little bit of information because we've already sampled.5.
+So what we do is we build up this Gaussian process that says, okay, I'm pretty sure that
+it's going to pass near this point that I've already sampled, but then maybe the information
+decays pretty rapidly.
+So I expect to see maybe.6 plus or minus.1 if I were to sample a point further away
+from it.
+And what you can think of is every potential input learning rate to tune this pipeline
+has its own Gaussian response that we're expecting.
+Has its own mean, it has its own variance.
+And so we can explicitly build that up once we define the covariance kernel.
+And of course, as you expand this out into more dimensions.
+And so in this example, we're talking about what does the covariance kernel look like?
+Yeah.
+So we would explicitly set a covariance kernel like an ARD kernel that says, okay, we're
+expecting some sort of like squared exponential decay of this kind of information from sampling
+these different points.
+And so is the covariance kernel, again, in this particular case, it's going to be, it's
+going to describe the relationship between the learning rate and the output.
+So it's going to describe the relationship between like individual samples of that learning
+rate.
+So let's set that very where we expect wildly different results after 0.01 increments.
+Or is it 0.1 increments?
+Do we expect it to be an extremely noisy response, or do we expect it to be fairly well behaved?
+There's various different parameters of this covariance kernel that basically say, how
+much information effectively do I get after sampling point A about some other point B?
+Is the dimensionality of the covariance kernel fixed when we start or does it increase in
+dimensionality as we sample?
+So it takes in the input, which is the actual configurations.
+So in this case, it would just be a one-dimensional, just the learning rate, but you can imagine
+us extending this out.
+So it takes in a vector, which is a specific configuration, or two vectors actually, and
+says, OK, how much covariance is there between these two points, these two potential configurations?
+That being said, you can parameterize that covariance kernel in different ways, depending
+on which specific kernel you've picked.
+So in something like an ARD kernel, which is the squared exponential drop off, there's
+various length scales that you can tune.
+So maybe we know how many of these drop off is that kind of?
+Yeah, does it vary over 0.1, but then something like the number of hidden layers might vary
+over orders of magnitude larger.
+So like 100 hidden layers is very similar to 101, but very different than 200.
+I'm so not sure that I'm very clear on the kernel, in this specific example, the dimensionality
+of the kernel is 1 by 1, like is it a scalar, or is it takes in a single value, so that's
+just the learning rate.
+So I guess I'm thinking of it as a matrix.
+Is it a function, or is it something, or should I not be thinking of it as a matrix?
+So you can define it as a matrix, where it's every point, the pairwise covariance of
+every point you've sampled so far.
+Right.
+So as you sample the dimensionality of this thing is growing.
+Of the underlying covariance matrix, but the underlying covariance function is just a function,
+so there's no kind of dimensionality associated with it.
+Okay.
+So it's basically, if I've sampled 10 different points, then I could have a 10 by 10 matrix,
+which is the covariance matrix, where every single actual instance inside that matrix is,
+how does 0.7 covariance with 0.3, or whatever it may be?
+And this, as a whole, helps us define the Gaussian process, which then gives us this
+sarcastic, surrogate function for what we think is going to happen if we sample outside
+of the points that we've already explicitly observed.
+Okay.
+And it does that by way of defining the kernel.
+So how do we get from the kernel, from the matrix to the kernel?
+Is that done explicitly?
+Yeah, the way around.
+So you start with a kernel, and then the kernel defines the matrix.
+So every single individual value within that matrix is defined as, I got it.
+So we're specifying the kernel, in this case, you said ADR is ARD.
+So it's the, what is ARD sample?
+I said that.
+Blinking on that, all right.
+Okay.
+But it's the squared Gaussian falloff.
+Yeah.
+Yeah.
+So what's now unclear for me is if you've picked a sample in your input space, and you've
+run your underlying process, and you have an output value from that sample, is the covariance
+kernel used to build up like what you expected to see, and then you push that all through
+and you get what you actually saw.
+And then you can update the covariance kernel.
+And then that covariance matrix gets one more row and one more column.
+Because now we have how this new point varies with all of the previously observed points.
+And then we can use that to update our Gaussian process.
+And then we have this new posterior result that we can use to decide what we sample next.
+And what we're doing is we're not just kind of doing naive optimization on that Gaussian
+process response itself.
+We don't just want to find the point with highest mean or something like that.
+What we want to do is apply an acquisition function to it and say, given this is what
+I think is going to happen if I sample any of these potential input points, how do I find
+the point with the highest expected improvement or the highest probability of improvement?
+Or which one's going to give me the most knowledge about the eventual optimise, the knowledge
+gradient method?
+And so acquisition function is the new term that you just introduced.
+Is that something that is model based like the covariance kernel is model based on this
+ADR?
+Do you pick a model that you use for your acquisition function as well?
+Yeah.
+This is the optimization part of, so the sequential part of sequential model based optimization
+is leveraging the history to build up these surrogate models.
+The covariance kernel is keeping it updated and all that stuff.
+The model based part is actually deciding, okay, this is what we think the response is
+going to be in these unsampled configurations.
+So that's the Gaussian process.
+Then the optimization component is given that surrogate model, what do we actually optimise
+for sampling next, before we repeat this entire process?
+And so that particular piece is really focused on, you know, you've got this massive potential
+state space for your hyperparameters, you know, how do we, how do we choose a sample
+path through the hyperparameter space that minimises basically wasting time and not adding
+information to-
+Exactly.
+And this is what really controls that Explorer exploit trade off.
+So a popular acquisition function is expected improvement, and that is basically how much
+do I think I'm going to beat the best thing I've seen so far by?
+So if I've seen a pretty good AUC in my fraud detection pipeline, now all of a sudden
+I want to be able to do it as well as possible beyond that.
+We're playing King of the Hill effectively.
+Another popular one that's kind of maybe a little bit more intuitive to grasp is probability
+of improvement.
+If I were to sample this unsampled point, what's the probability that I beat the best
+thing I've seen so far?
+And so these have different exploration, exploitation trade-offs, you know, so far as probability
+improvement might be a little bit more conservative, like we're going to kind of keep edging it
+up slowly, whereas expected improvement kind of takes the magnitude of the gain into account.
+So it might try something far away because it thinks there could be something great that
+it has just never seen before.
+Yeah, yeah.
+And are there other common examples?
+Yeah.
+And unfortunately, they get a little bit more complicated to internalize, but another
+popular one is Knowledge Gradient.
+This is what my PhD advisor worked on during his PhD.
+The idea is...
+I'm imagining from the name like that's kind of based on information theory and like how
+much we're going to learn by checking this point.
+Exactly.
+And the goal is to learn as much as we can about that eventual best point.
+And so there's more information theoretic acquisition function.
+And then you can kind of define anything that you want with the goal of eventually getting
+to this best one.
+So these are probably the three most popular, but you could imagine doing composites of this
+or some sort of like upper confidence bound based acquisition function.
+And the idea is you want it to as efficiently as possible trade off exploration and exploitation
+because learning about that underlying system and how it performs and things like that's
+important.
+But at the end of the day, you just want the best performing model.
+Yeah.
+Yeah, I think turtles all the way down strikes me as app like you've got hyperparameters
+for your model.
+You've got hyperparameters for your pipeline.
+And then you've got hyperparameters for your optimization system.
+Yeah.
+And presumably, I'm imagining that you are also trying to optimize the hyperparameters at
+that top layer for your optimization system as well.
+And this is exactly why Stegopt exists because there's some incredible research out there.
+A lot of members of our team have contributed to the academic research and a lot of the
+open source out there.
+There's a lot of promise that Bayesian optimization has.
+But unfortunately, a lot of expert time is wasted optimizing the optimizer, figuring out
+the best way to tune all of these turtles all the way down.
+And I think that's one of the places where at least the open source that I released to
+the metric optimization engine, even though it was very popular on GitHub, it kind of failed
+to deliver on that promise because it required an expert to sit and fine tune all these
+different things.
+So the goal of a company like Stegopt is, can we optimize the optimizer for you and create
+this automatic ensemble that makes all of these trade-offs so that you as an expert can
+focus on fraud detection and we'll focus on black box optimization for you.
+And so we've described a bunch of different kind of variants in this process.
+Are there specific, you know, invariants for Stegopt in your process like, you know,
+like for example, you know, basing everything on a Bayesian process.
+That's one way of doing this is the product based around that and what other kind of
+invariants are there in the way you approach this.
+Yeah.
+So at the very highest level, we're just black box optimization.
+So there's inputs to a system.
+There's an output or set of outputs that we want to optimize.
+And we're going to try to come up with the best set of inputs.
+So Bayesian optimization is an extremely efficient way to do this, especially when it's time-consuming
+and expensive to sample that underlying system.
+There's lots of different variants of Bayesian optimization.
+So instead of using like a Gaussian process, we could use a Bayesian neural network for
+the underlying circuit function.
+Instead of using Bayesian optimization, we could use a genetic algorithm or particle swarm
+or simulated annealing or even just a convex gradient based method.
+The idea being, SIGUP takes care of that optimization of the optimizer and automatically
+selects the best one for you.
+Most of our methods or almost all of our methods are Bayesian in nature, but we're not constrained
+to that necessarily.
+Yeah.
+I guess that was the question that I was trying to get at.
+How far do you go?
+Do you also now or envision a future where, because you're providing this black box capability,
+you may do the Bayesian optimization, but also sample or test the results that you get
+from particle swarms and other types of methods.
+Definitely.
+In-house, we built this very robust evaluation framework for deciding whether or not specific
+algorithms fare well in different contexts.
+This is what we use when we integrate a new paper and want to make sure that with high
+statistical confidence, it actually outperforms what we're currently doing.
+We use this as our internal metric for deciding what to do.
+But we're agnostic to the underlying methods.
+We just want the best possible thing for our customers.
+It turns out for the types of problems that we're attacking, Bayesian optimization is an incredibly
+good fit and it's underutilized because it's so difficult to get up and running and
+optimized, but we have and will continue to employ whatever the best method is for the
+problems that we're attacking.
+Because we define this barrier in this way where it's just black box optimization, the underlying
+system is a black box to us, but we're also a black box to our customers.
+This allows us to hotswap in the best possible technique to solve their problem and not be
+constrained in that way.
+Okay.
+Okay.
+Cool.
+Can you talk a little bit about the model evaluation framework that you built?
+Yeah.
+There's some I-C-Mail workshop papers from 2016 that go into quite a bit more detail
+and are available on our website, but the idea is, I've just told you that we have an
+optimization framework that can solve any underlying black box function.
+The first response should be, I don't know whether or not it's working, so internally
+we built up the system where traditionally to publish papers, and I'm guilty of doing
+this, is you would come up with some strategy, pick three to six of your favorite functions,
+show that you can outperform some specific techniques on those functions, publish a paper,
+rinse and repeat.
+So when we built this up internally, we took the superset of all of those different functions
+from the academic literature.
+We took functions that look similar to our customer's data.
+We took a bunch of open machine learning data sets and strategies, and we basically piled
+them all together.
+So instead of comparing against three or four different response surfaces, now we're
+looking at hundreds or thousands of them.
+In addition to that, we wanted to make sure against all of these different open source
+methods and against all of these other kind of different global optimization strategies
+that we could very robustly outperform them.
+So what we do in the internal evaluation framework is we independently optimize these hundreds
+of different pathological and real world problems, many times with sigups and many times with
+another method, and that other method might be just a new version of sigopt.
+And then with high statistical confidence, we can say, which one got to the best value
+fastest, which one got to the ultimate best result, which one was the most robust, so it
+didn't have an inter-core tile ranges or all above a specific value.
+It sounds like to draw an analogy from software engineering, you've built a regression testing
+framework for optimizer.
+Yeah, so we do use it for regression testing, it's run nightly, but it's also a way to
+basically AB test optimizers as well.
+Right.
+And not using it to, or to what extent are you using it to inform model choices, or I
+guess the, you know, what I'm struggling a little bit with is, you know, so you've got
+this, you've got this, you know, this heap of data sets and functions and things like
+that.
+And if you were trying to optimize across all of those, then you've got a least common
+denominator kind of problem, right, or in a local maxima or something like that.
+Yeah.
+So we do have to be wary that we don't overfit to this data set.
+That's definitely true.
+One thing that we found though is the reason why we built an ensemble based approach.
+So let me just, just poke at that, like I'm not sure, is overfitting the right word for
+what I'm thinking of is, is that, you know, some of it strikes me as the opposite of overfitting,
+whereas like if I were to just look at, I don't really care about all this other data,
+I care about my problem, like if you're optimizing for this kind of broad spectrum and I can,
+you know, outperform you by just focusing on my problem, you know, I'd probably do that.
+Yeah.
+That makes it complete sense.
+I see where you're coming at here.
+So this is why we take this ensemble based approach, because it turns out like the most
+popular approach to invasion optimization, like Gaussian processes with aarity kernel with
+expected improvement actually doesn't do super well in a wide variety of different contexts.
+So by slotting in the right tool for the job, we can actually hit all of these different
+facets of different types of problems extremely well.
+That being said, the no free lunch theorem and computer science still applies here in
+so far as if you do have expert knowledge about your underlying system and you build a bespoke
+optimizer to solve that one specific problem, you are going to outperform a general technique.
+That being said, you would have to repeat that for the next problem that you attack and
+the next one and the next one.
+And so the idea is by having an ensemble of different optimizers, we use the right one
+for specific contexts and then a different one for a different context, et cetera.
+So instead of having like the lowest common denominator, like you said, just the one size
+fits all, what we're doing is actually putting in the right tool and automatically learning
+when we trade it off.
+So when you're tuning a gradient boosted method, you're getting the right tool, but when
+you tune a neural network, it's still the same API and stay interface, but you're getting
+the right optimizer out of it.
+So what I'm hearing is in response to my question, like a little bit of both, right?
+Like you're, you've built this model evaluation framework because fundamentally you're not
+necessarily trying to outperform a handcrafted model that 50 PhDs has been five years developing
+whatever you're trying to build a system that can deliver good performance on, you know,
+in general what someone throws at it.
+And so you want to test it against a bunch of, you know, hey, these are things that someone
+might throw at it and make sure that you get good performance.
+And the way that you do that is under the covers, you're not just relying on, you know,
+one specific set of choices, but you're taking an ensemble approach and your optimizer
+can swap in and out different decisions to produce a result that that's best.
+That's exactly it because what we find more often than not is that people don't assign
+50 PhDs for five years for every single optimization problem that they have more often than not.
+They're using grid search, random search, manual tuning, maybe an open source solution,
+maybe they have part of their team part time working on an internal optimizer or something
+like that.
+And those are the things that we can vastly outperform.
+If you know it's convex and you have gradient information and you have a bunch of expert knowledge,
+like there is specific tools that you can use to get there, and this is probably a little
+heavy handed to use in that situation, but more often than not what we're doing is we're
+coming and replacing these very exhaustive, very expensive, very domain expert intensive
+systems, and we can generally outperform those to a high degree.
+Yeah, now often like to think of the the tool space in general is like there's, you know,
+for many enterprises, there's such a huge potential opportunity to apply ML that their
+ability to staff up, you know, is far outpaced by the opportunity.
+So at a given staffing level, like you've got this choice, you can either like, you know,
+take only the biggest opportunity and apply all your resources to that in a very manual
+way, or you can, you know, utilize tools that allow folks to be more effective and
+light off some of these, you know, some of the, you know, it's like the, a lot of,
+you know, I'll talk to folks and they'll talk about it like we only go after home runs
+versus, you know, base hits, right, and this, it sounds like this is a tool for allowing
+people to, you know, both go after home runs as well as try to increase their hit rate
+for bases.
+Definitely.
+And what we find with a lot of the firms that we work with is how they differentiate
+themselves from their competitors is not by black box Bayesian optimization.
+It's by creating a great recommendation engine or a great algorithmic trading strategy.
+And if you can hire five more PhDs to work on that core differentiator or free up five
+PhDs to do that, and then just use SIGOP to tune it, they work very additively and hand
+in hand, we can accelerate that time to market, accelerate the results, getting to the best
+performance and all of these different things.
+And I think more and more companies are becoming aware of this and using the right tool for
+the job.
+Why rewrite TensorFlow when you can use it?
+Why write your own Bayesian optimizer when you can use a best in class, easy, rest API?
+Awesome.
+Awesome.
+So what's the, what's the best way for folks to learn more?
+I'm assuming the website.
+Yep.
+SIGOP.com or just contact at SIGOP.com if you want to shoot us an email, we run a complimentary
+proof of concept pilot like we can throw these peer reviewed papers at you to prove that
+we're as good as we say we are, but at the end of the day, we want to prove it with their
+underlying models themselves.
+So we can work with any enterprise, any underlying system, cloud agnostic, model agnostic.
+It's also free for students, so if there are any people at universities or researchers
+at national labs or whatever it is listening to the podcast, SIGOP.com slash EDU gets you
+a free enterprise account.
+I wasted way too much of my PhDs on this problem, don't want to do that for anybody else.
+And what about for folks that are interested in learning about the theoretical foundations
+of the work?
+Where would you point them?
+Are there like three canonical papers or something like that that they should look
+for?
+Yeah.
+So if you go to SIGOP.com slash research, those all of our papers, we also have a Bayesian
+optimization primer there that kind of goes into more detail about some of the things
+I said verbally sometimes is a little bit hard to describe the action processes and things
+like that.
+The math is there.
+There's references for all those papers as well, so that can kind of take you down the
+rabbit hole of all the different ways that this has been applied to the story.
+Okay.
+Awesome.
+Glad it's been a great conversation and I've learned a ton.
+Excellent.
+Thank you so much.
+I really appreciate it.
+Thanks.
+All right, everyone.
+That's our show for today.
+Thank you so much for listening and of course, for your continued feedback and support.
+For more information on Scott and the topics covered in this episode, head on over to twimmolaii.com
+slash talk slash 50.
+This week on Tuesday and Wednesday, October 3rd and 4th, I'll be at the Gartner Symposium
+in Orlando, where I'll be on a panel on how to get started with AI.
+If you'd like to meet up there, please send me a shout.
+The following week, I'll be in Montreal for the rework, deep learning summit, and hope
+to be joined by at least one lucky listener.
+Remember to visit twimmolaii.com slash dl summit to enter.
+It ends at noon central on October 4th.
+Thanks again for listening and catch you next time.

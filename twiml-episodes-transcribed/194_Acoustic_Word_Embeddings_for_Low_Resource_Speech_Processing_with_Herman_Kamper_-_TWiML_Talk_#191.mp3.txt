@@ -1,0 +1,595 @@
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+people, doing interesting things in machine learning and artificial intelligence.
+I'm your host, Sam Charrington. In this episode of our Deep Learning and Daba series, we're
+joined by Airman Kemper, lecturer in the Electrical and Electronics Engineering Department
+at Stellan Bosch University in South Africa, and the co-organizer of the endaba.
+Airman denied discuss his work on limited and zero resource speech recognition, how those
+differ from regular speech recognition and the tension between linguistic and statistical
+models in this space. We dive into the specifics of the methods being used and developed in Airman's
+lab as well, including how phoneme data is used for segmenting and processing speech.
+Before we jump in, I'd like to send a big shout out to our friends at Google AI, which
+recently opened up applications for its 2019 residency program.
+The Google AI Residency is a one year machine learning research training program with the
+goal of helping individuals from all over the world and with a diverse set of educational
+and professional backgrounds who come successful machine learning researchers. Find out more
+about the program at g.co slash AI Residency. And now on to the show.
+Alright everyone, I'm on the line with Airman Kemper. Airman is a lecturer in the Electrical
+and Electronics Engineering Department at Stellan Bosch University in South Africa and one
+of the organizers for the recent Deep Learning and Daba event. Airman, welcome to this week
+in machine learning and AI. Oh, thanks a lot for having me.
+I guess we should start with the endaba. The event just finished. I saw an incredible
+flow of tweets from the event. It looked amazing from your perspective as an organizer. How
+did it go?
+I think it went pretty well. I think obviously as the organizers were a lot more aware of
+the things that might break behind the scenes but overall it was really successful. I enjoyed
+it a lot and from everything I've heard from all the people that was here, I think that's
+where we got the biggest encouragement. Just people telling us how much they enjoyed
+it and how much they got from the event. So I think it went well.
+And the highlights from your perspective?
+That's very difficult. I think maybe three things that really stood out for me. It was
+two talks. The one was by King Yongchou. He led sessions on basically the fundamentals
+of building natural language processing systems and to me was just amazing. The amount of
+kind of dense content that he packed into a lecture but then also giving kind of his
+high level overview of kind of where the field is going. That was one big thing. The talk
+by Jeff Dean at the end, that was just amazing. And then the post decisions which was basically
+students from across Africa presenting their work and I've been lucky to be at international
+conferences. And this post decision at this African event was just amazing to see the
+quality of the work and that the students here are doing.
+That's fantastic. Before we dive into some of your research, why don't we have you introduce
+yourself to the audience? You are relatively new on the faculty at Stellan Bosch. Tell us
+a little bit about your background.
+Yeah. So I'm actually a Stellan Bosch boy kind of born and bred. I grew up here. I did
+my undergrad and a master's year. And then I also worked for a bit and then I went to
+Edinburgh to do my PhD there in the School of Informatics. And that was really amazing in
+Scotland. Really struggled with the weather there but other than that, it was an amazing
+experience. And then I did a postdoc in Chicago for relatively short time for about a year
+at Toyota Technological Institute. And I grew up here. So as soon as I left, I kind of
+was campaigning already to come back. I really saw my kind of long-term goals to come back.
+And yeah, while I was doing my postdoc, I was very happy to get the appointment here.
+Actually, I have a question about TTI Chicago. Is that relatively new? Or is it affiliated
+with another school? I lived in Chicago for many years and never heard of it.
+Yeah, so it's fairly new. It's really like an institute. It's kind of a lab. It was
+funded by Toyota initially, but now it's kind of on its own. And it's a lab that's affiliated
+with the University of Chicago. And it's kind of a research-only institution. So you can do
+PhD at TTI Chicago. And they do a bit of postgraduate teaching as well. It's actually an amazing
+place for specifically machine learning. It's quite a small group, but it's very tight net.
+So you have great people in kind of theoretical machine learning, theoretical learning theory,
+and then also speech processing, natural language processing, and computer vision.
+So Hermann, your research is focused on speech processing. In particular, you're concerned with
+how to do speech processing when you don't have a lot of resources. Tell us a little bit more
+about what that means. Yeah, so actually this already started while I was doing my masters.
+When you want to do, when you want to build speech processing systems, which I think can really
+improve people's lives, this works well for English and for German and for Spanish,
+because big companies are invested in these languages. And what they do is they collect a lot
+and a lot of annotated data. So they get people to say things and then they transcribe it as well.
+They give labels to basically the input speech. But there's so many languages on earth that
+it's basically impossible to do this for all the languages. So my research focus is really on
+very low resource languages, languages for which you just don't have that much data and annotate
+the data. So data with labels and actually languages for which you where it might actually be
+impossible to get these type of annotated resources. So there's a large proportion of the languages
+spoken on the earth that doesn't even have a written form. So you can't write them down.
+And if we want to build speech systems for these type of languages, or if you want to maybe kind
+of preserve or document these languages, a lot of these languages are dying out. And you want to
+build kind of speech processing systems that's able to look at these data sets, then you're in
+the setting where you basically don't have any labels at all. You just have a collection of speech
+audio. And what you're trying to do is kind of find this structure in the raw audio and to do this
+without any form of supervision, any signal. So we call this unsupervised learning. I think a lot
+of the listeners might know this. And kind of try to find the raw structure in the audio without
+without any guidance. And this really has application. It kind of has this double motivation.
+The one motivation is that if we can crack this problem, we can build speech systems in settings
+where it was just not possible before for languages that we just can't build systems for at the
+moment. And then the second motivation is that a lot of the people that's interested in these
+kind of unsupervised model are also interested in how humans learn language. Because human infants
+in a sense, they never see any texts labels. They don't get any hard supervision. They're kind of
+just bombarded with the stream of audio. And from that, it's kind of a miracle how they then
+start to learn language kind of automatically from just this raw sensory input. So people,
+they call it zero resource speech processing sometimes. And people that's interested in this
+area normally as this double motivation of either building speech systems, practical systems,
+or actually using these type of models to investigate language acquisition in humans.
+When I think about the trajectory of speech recognition systems over the years, there was this
+transition from kind of strongly linguistic based models to more statistical models.
+Does the fact that we don't have labeled data kind of push us back towards linguistic
+based models or are we still able to operate in the statistical domain? That is an extremely
+interesting question. I think a very, very good question because it's something that I think
+this unsupervised community, this unsupervised speech community is actually struggling with,
+is this question. And I think, so I can kind of say from a practical viewpoint, a lot of the
+systems are still very of the, how could it zero resource speech processing systems, although
+I might not like the term, but a lot of these zero resource systems still operate in the statistical
+domain. So you can think about that is if I give you a ton of data or a collection of data and I
+ask you to describe it statistically, then that's basically what it boils down to. At the same time,
+I think people in this field are becoming more and more interested in kind of what is the structures
+or what is the small things that you need to build into these systems in order for it to actually
+learn something. So you might have a statistical system, but you can put in specific cues
+that it can, can pick up on. And I think the reason this question is so interesting is,
+if we can figure out what type of cues, what type of extract structure, what type of biases
+we need to build into our unsupervised models for it to actually learn language, if we can answer
+those questions, what are kind of the minimal things that we need to put in, then that might tell
+us something about how the type of cues that humans, human infants use to do this. And it's really
+interesting because it's also the converse. So people actually are looking, people in this field,
+keep a close eye on cognitive studies, cognitive psychologists, who actually try to answer these
+questions on infants. So they, we try to read a lot of literature from that side, which tell us
+what type of cues do humans use. And in the cognitive literature, there's a lot of studies that
+look at what are the cues that infants use. And how can we use some of those ideas and build those
+into our systems. I think really what this community is doing is actually seeking the answer to
+that question. What are the things that we need to explicitly build in and what should we just
+let the model learn? Right. I think it sounds like in, in this field, as in some other areas in
+machine learning, there's kind of a pendulum that's swinging that, you know, we started with
+these very strongly, you know, physics-based or model-based approaches. And then we kind of swung
+hard to statistical-based approaches. And now folks that are kind of on the frontier or, or many,
+folks, not all are trying to figure out ways to incorporate the models back into the statistical
+approaches to kind of get the best of both worlds. And it sounds like that's what's happening
+here as well. Yeah, I think that's right. There's actually a very interesting kind of avenue that
+people are starting to explore in this area. And I'm also working on this a little bit.
+So infants, they're not just bombarded with raw audio. Of course, infants also have a lot of
+other senses, right? Touch and also vision. So there's a group of people, and we're also working
+on this, that kind of look at if you have, for example, a speech signal, but it's paired with the
+image. So you have a spoken signal. So it's not a written caption, it's a bit of speech, but it
+describes an image. Does that image actually allow you to more easily kind of learn the words that
+use them in the language? So you might have a picture of people skiing or something, and then
+someone describing that image in speech. And then you can kind of use that image to ground the
+things that you're discovering. So I think apart from thinking about kind of these linguistic
+insights, there's also just this general question of how can we glue different medalities and
+different signals together? And that very much operates in a statistical point of view. But again,
+we need to figure out what are the specific things that we need to build into these models
+for it to actually learn, because it's a very, very hard task if you don't have labels.
+It is really interesting how this pendulum actually sues. And I think in the supervised case,
+if you have a lot of labeled data, then following a kind of a very pureist, let's just learn from
+the raw data approach and learn to predict these labels that we know are important. I think that
+makes a lot of sense. But if we're kind of going to this low resource case and generally
+machine learning actually, I think there's a lot of evidence that shows that if you don't have
+so much labeled data, then building instructors actually helps you in the short term.
+You mentioned that the zero resource speech recognition community follows closely what's
+happening in the cognitive science community. Are there specific examples of insights from that
+community that have advanced the state of the art in your community? That is also a very good
+question. And I didn't say, we follow them. I said, we try to follow them. We should follow them
+a lot more. Actually, Emmanuel Depou is a researcher in France. And he really is at this intersection
+of these two communities. And my supervisor Sharon Goldwater in Edinburgh, she's also very close
+to the intersection of these communities. So there's definitely an overlap. I'm trying to think
+of concrete examples. I think from, I'll give two quick examples. So actually, and I might not
+do it completely justice, but I'll try. There's a lot of evidence that shows that infants can actually
+pick up things like syllables. Even before they understand a complete language, they are able to
+figure out these puffs, these little bursts of energy, which are syllables. Actually, if you
+listen to a language that you don't understand, you would probably, I don't know, maybe you speak
+Japanese, but if you listen to Japanese or African, so Tetsonga, you would probably be pretty good
+in figuring out where syllables start and end. And human infants are able to do this. So there's
+a number of researchers which have tried to explicitly build these things into their models
+to explicitly use syllables, or we can kind of use that to guide the systems. And that's one
+example. In our own work, what we've been doing is, so there's actually also a lot of evidence
+that even before infants can distinguish fine-grained phonemic categories, so this is like the
+minimal sound units, you know, vowels and consonants and so on, before they can actually distinguish
+these things, or while they're learning to distinguish these sound categories, they can already
+identify reoccurring word patterns in speech. So if they keep on hearing specific words,
+they can start to identify kind of larger spanning chunks that reoccur. And it's quite interesting
+how psychologists test these things in the lab, so they would teach children essentially,
+or human infants, like something like Klingon, which obviously the child hasn't heard before,
+hopefully. And then they would use eye-tracking experiments to figure out whether the child
+has actually learned a specific word. Now, we know from these lab experiments that children are
+able to figure out longer spanning word segments. And what we've done in our own work is we've said,
+well, okay, if a child can do this, can we actually build that into our model? So maybe you don't know
+everything that's going on in the language, but maybe you can run a kind of unsupervised system
+that identifies longer spanning words of phrases. You identify these and then you use these as a
+signal downstream in building a statistical model or a neural network model to kind of use that
+information. And that has proven to be very successful. So when you think about the approaches that
+are required to do the zero resource speech recognition, can you walk us through the various
+elements of it and how it differs from the way we might approach speech recognition traditionally?
+Yeah, that's also a good question. So it's quite of kind of interesting, because this is a
+fairly young community. When I started my PhD, there were maybe two groups working on this,
+and now all of a sudden, there's like, I don't know, 10, which doesn't sound like a lot, but
+in the speech community, that is actually a kind of a big growth. And it's kind of interesting.
+I just came back from just before the end of our, we had inter-speech in India, and there
+I went to a workshop, spoken language technologies for under-resourced languages. And it was kind of
+interesting there, if you look at the type of techniques that the zero resource community is using,
+it's a little bit all over the place. And I think it's because we're kind of trying to redefine
+the stream that you need to follow, the type of techniques that you need to use, because we're
+seeing that a lot of the standard supervised speech processing techniques are just not working.
+If you don't have label data, then the trends we're seeing is very different from when you have
+label data. To actually answer your question, you've asked just about kind of the little steps
+that we take. I think at the moment, it kind of seems like we're converging to maybe two big
+important problems that we need to crack first. If I just give you a corpus of audio and Yini's
+kind of process there, then the first step you need to do is figure out good what we call features
+at the fine grain level. So kind of standard supervised systems will always start in the same way.
+They kind of break a speech stream up into these small windows and you hope that the signal
+is stationary in that window. And in a supervised system, what we're seeing now is if you break the
+speech stream up in this way, and then you feed this into a deep neural network and you tell it that
+in this little window, this speech sound occurs, then what the system can do is it can kind of
+learn what should it extract from this little chunk of speech to identify a particular sound.
+And in the zero resource community, it's very similar. The first step is we need to break it up
+into these little overlapping windows. But then our challenge is we need an unsupervised method
+to kind of figure out what is it that makes these little speech sounds. And there people are
+kind of either using kind of classical echolag Gaussian mixture model based approaches, which
+kind of tries to identify these small acoustic units, these kind of sub word units. And then
+another group of people are using unsupervised neural networks. And then once you've got features
+at this kind of fine grain level, then you need a system on top of that to kind of try and
+glue these features together to find structures corresponding to bigger units, things like syllables,
+and then words, and then ultimately sentences. And for that, it's also mixed. Some people use
+kind of more classical Gaussian mixture based models and unsupervised heat and mark of models.
+And I think there's a big push to try and get these neural models, which are working so well
+in the supervised case, to also kind of work very well in the zero resource case,
+using neural models to discover these word units and sentences ultimately.
+Okay, so let me try to recap that to see what I was able to capture. So you've got the speech signals,
+and traditionally we'll like window those and try and within a given window, feed that into
+a neural network, let's say, along with the label, and then essentially train that neural network
+to match those labels to those little segments of speech. And that's more of this right. Yeah.
+In this world, we don't have the labels. So we're kind of capturing these windows. And we're using
+some number of techniques. Gaussian mixture models are one and the neural networks are another.
+But we're trying to identify patterns within these windows, but are we?
+So we're kind of comparing across windows in order to do this, is that right?
+Yeah, that's right. And I think you're stating three things very carefully. I think that's good.
+I think the ideal case what we want is in these kind of short windows,
+we want to find a representation which captures something like phonemes, kind of or at least
+the small set of units that's used in a particular language. So if I give you a big corpus of
+audio, what you want to find is, can I find features that tells me this language uses R,
+R, R, R, okay, and in some other language, they might not be the if distinction. And you want a
+method to kind of automatically figure out what are the kind of these basic building blocks. So
+if I take one window and I get I get a representation for that window and I get another window,
+maybe later on and I get a representation for that window, then I want to know that kind of
+the fine grain, the sub word unit used in these two windows, although the same or the not.
+That's kind of what it boils down to and in the supervised case,
+a neural network can kind of figure out exactly what should it look at in the speech stream
+to identify the speech sound because I'm telling it what speech sound to look for.
+But in the unsupervised case, how do you do this because you don't know?
+So you need to start to think about unsupervised models that can do something like
+clustering, so a Gaussian mixture model essentially. If I just give you a whole bunch of these
+like little windows and I tell you group them according to what you think are phonemes or speech
+sounds, then you can start to do that. You can train a Gaussian mixture model in an unsupervised way
+and then find these clusters of these groupings of speech sounds that you think are the units
+that used in the language. How do you even get the window sizing correct?
+I'm imagining that phonemes have different lengths and phonemes over some sample of speech.
+You know, maybe one of them is 2x the length of the other and so if you kind of choose a larger
+window, you end up with multiple phonemes in the window or at least maybe the end of one in the
+start of another. Is it kind of a sliding window approach and you're trying to maximize
+something that tells you that you've got a single phonem or are there variable windows?
+Like how does that that seems like pretty fundamental to this but also hard?
+Yes, it is hard. So actually, supervised systems also have this question like how do you
+choose a window? Because you need to, so just to answer your question, we always use a sliding
+window. So you kind of have this window that, okay, you need to click a length and then you slide
+it across the speech stream. And in the first, the first systems, you take a window and you take
+a Fourier transform, which tells you about the spectral content of that window and you just
+keep on doing this. So you just slide this across and you look at the spectral content and now
+you've got this question of the straight off. If I make the window long, then I've got a lot of
+data to kind of tell me what's going on in that window. If I make the window too short, okay,
+then I, if I've got a very short window, then I know that it's only going to be one phonem or
+part of a phonem, which is kind of fine. If I only get parts of phonemes that's also okay,
+I just need to model that. So I might take a very small window, which means that I know that this
+is only one speech sound in this window, but then you've got a lot less data to kind of figure
+to kind of estimate the content of that window. And this straight off is something that you don't
+just see in speech processing. You see it in any type of kind of signal processing task. And
+luckily, people in the 80s really fiddled with this and tried to figure out how long should the
+window be and how much should I move it. And I mean, I can just tell you the answer now because
+people have been trying to do this for 30 years. And so I think the community has a whole,
+including the supervised speech community has kind of settled on a relatively specific window
+length and then a frame skip. And then so in the supervised community, you kind of you don't
+care if it's if if you suite this window across and it's just predicting the same phonem for
+multiple windows, then you kind of know that you're in a phoning and then you transition to the
+next one. I kind of oversimplify that approach. So what they normally do is they take a window,
+you predict the label, then you shift the window, you predict the label, shift the window,
+predict the label. And now what you get is kind of the sequence of posteriors over labels.
+And that actually goes into another system, a decoder or something that you can train jointly,
+which kind of clues these things together and tells you I was in this phoning for this long,
+phonemes teach together to form words in this way, words teach together to form sentences in
+this way. And in the end, you get a speech recognizer. One question that that raises for me though,
+that we've kind of arrived at this answer for the window length and the the stride,
+essentially the the step length. But does that suffer from the same asymmetry in terms of
+the language that the language is that it's optimized for as speech recognition in general,
+like if you're trying to apply these techniques to a language that is under-resourced,
+it could be that these values that are traditionally used don't work as well,
+are they more properties of human speech than of a given language?
+That's a super cool question. Because I think if you read the original papers in the like late
+80s and early 90s describing these techniques, a lot of these things were inspired by the human
+perceptual system. So they were kind of hand designed initially, they were hand designed to match what
+they we know about the human perceptual system. So those papers say that these things are language
+universal and I think that's not something that people question a lot. But it is interesting if you
+look at supervised system performance on different languages, then if you use the same amount of
+data and you compare a English system and you use the same amount of data and you compare that
+to a Zulu system, the Zulu system will always perform worse even though it might be trained on
+the same amount of data. Now there's a lot of other reasons for that. There can be a lot of other
+reasons for that but it's a it's a very interesting question whether we should actually go back to
+those first hand engineered question research because they were all evaluated on English,
+although the claim was made at their language universe, so they were all evaluated on English
+or at least well resource languages. And now we apply these things to Zulu and SOMGA and other languages
+and we see that it's just very hard to get these systems to work as well as they do on English,
+even if the experiment is controlled. So this was actually I spoke to someone from MIT,
+I think it was Jennifer Drexler and she said, ask this question like, are these basic features,
+this kind of fundamental questions? Are they overtailer to English because the people that
+wrote the papers were English? And I think this euro resource community is starting to ask these
+questions or bring that up again because our systems are even more sensitive to these
+to these type of decisions. You mentioned that in the case of Zulu, which was the example,
+I think you just picked randomly of systems underperforming when trying to recognize that language
+that there are some lists of reasons why they do. What are those reasons? That's also difficult
+to answer. So I picked Zulu, but I can give you a list of reasons. Very often, so for example,
+Afrikans, I think it's SOMGA as well, and I'm not sure about Zulu, are basically languages
+that were if we write them down, we often glue words together, they're kind of written as one,
+right? So in English, if you have two concepts, then they're written as two separate words,
+but in Afrikans, when it's one thing, even though it might be composed of multiple things,
+then we write them as one word. Yeah, so it's something like narrow band speech processing,
+right? I just said the sentence narrow band speech processing will have a word narrow band speech
+processing, okay? But in Afrikans, or in German, you will just write it as one word. It will just
+be like one word. And for speech systems, that's something that's very, very tricky to get
+right, because you basically don't know when should I split a word and when should it be one.
+So that's just one example of a case where it's kind of obvious why the system doesn't perform
+as well. Another thing is, so in Sutu, for example, we have tones, which you also have in Mandarin,
+and sometimes that's not marked. So you can't see that there's a specific tone being used when
+you write something down. Speakers of the language know which tone to use based on the context,
+but you can't see it. If you're a non-native speaker, you won't know which tone is being used,
+and that might be one other reason why these systems don't perform as well as English. And this
+is all apart from the kind of what features do we actually put in that to begin with. Those
+were just two examples. Code switching is another big example, specifically in South Africa. So
+a lot of the time what we do is we switch between languages in a single sentence. So very often,
+you would switch between your native language and English and then switch back. So if you just
+look at the output of your speech recognizer, it just got all those words wrong. And a lot of
+corpora actually have this code switching in them. It just jumped out at me that even that code
+switching alone sounds like an interesting research area for these types of systems. Are there
+folks out there specializing in that? Yeah, there are. So actually in the lab downstairs,
+there's a whole bunch of people working on this. And there was a special session I think at
+Interspeech as well. And in here, just a while ago, focusing specifically on code switching,
+because it's something that happens a lot in South Africa because we have a live and official
+languages and they're kind of all spoken geographically in overlapping regions. But in other parts
+of Africa, it also happens. And then also in a lot of Asian countries and India, this happens a
+lot. So people are I think like over the last five years, maybe people have really started to work
+on this. And it's not just even in spoken language, also in written language. People, for example,
+in tweets would switch between different languages. And that really messes up these NLP systems,
+which are kind of tailored for specific language or speech recognition. You kind of build a system
+for language. And that really messes up the system. So there's a lot of interesting questions
+about how you build these models to kind of handle arbitrary switches between language.
+So I think I was trying to recap your representative flow for low resource speech processing.
+And I think I got to like the beginning of the first step. Right.
+So we talked about this windowing. We talked about this windowing thing and using Gaussian
+mixture models to try to determine what phonemes are spoken or in the case of unsupervised,
+you're trying to, well, I guess the same thing. You're trying to determine the, like the
+universe of phonemes and which ones are represented in an individual sample. And if that's close to
+correct, what's next? Yeah. Okay. So now let's say we figure that out. Now what I give you is,
+now I can take a bit of speech and then I can kind of pause it through this feature representation
+model. And that could just tell me this phonem is present, this phonem is present, this phonem,
+and you don't know whether it's a phonem. So it's more like pseudo phonem, or maybe just cluster.
+Okay. Now you've got the sequence of clusters or sequence of pseudo phonemes. And okay,
+that's helpful. Okay. Maybe you can use that if you're, if you're a language documenting a
+language, then that can maybe prove insightful. But if you actually want to build a speech processing
+system, you need to go from that to words or some higher level unit. And that in itself is quite
+tricky. And it's because of this reason that you already alluded to that one word can be three
+phonemes long. Another word can be five phonemes long. Another word can be two phonemes long. So how
+do you group these things according to words? And that's very, very difficult. So kind of the
+classic approach to doing this is kind of a type of compression model. So what you try and do
+is you try to say, okay, if I treat these three units, reoccurring units as a word, how much does
+that allow me to kind of compress these sequences? And so you, that's just, that's just one approach.
+So but essentially what you need to do is you now need to add a model on top of these unsupervised
+discovered phonemes to tell you how you group these clusters together to form words. And there's
+maybe I don't know a handful of techniques that you can use to do this. Should I talk through them?
+Please. Okay. Yeah. So people at MIT actually, when they started doing this, Jackie Lee and
+Jim Gloss, they had a hidden mark of model, which you can kind of train on top of these pseudo phonemes
+sequences. And they actually broke down their model. The whole thing is trained in kind of one
+go. So at the bottom, you've got a kind of a Gaussian mixture model, which you can interpret as
+finding these phone-like units. And then on top of that, now you've got the sequence of phone-like
+units. So you feed them into a hidden mark of model, which is kind of like a sequence Gaussian
+mixture model. And you treat that hidden mark of model that they are on top of that as syllables.
+And then on top of that, now you're getting out the sequence of syllables. And
+using the sequence of syllables, now you can train another hidden mark of model. I haven't
+had another hidden mark of model layer on top of these syllable layers to model words.
+And the whole thing is kind of trained in as one big. They used, I think,
+Gibbs sampling to train this whole thing from the bottom up to the top and so on.
+And that's one approach. And that seemed to work pretty well if you have single speakers,
+because that really messes things up. But if you go to multiple speakers, then that becomes
+much harder. I can tell you about our approach if you're interested.
+I am, but I guess it just occurred to me that there's...
+So, right, we'd ask this question. There's like a fundamental thing missing for me,
+and maybe I need to step back and ground out on the goal of this. We're talking about going
+from speech to text. Is that correct or no? No. You're basic? Okay. Okay. You're awesome.
+I was wondering where there's like a, you know, then the miracle occurs step in here,
+and I'm not seeing it. So what you want is impossible, right? So what you want is you want to
+ground this in some way. And if you don't have text, you just can't do this. You can't do it.
+Okay. So why do you want to do this? I'll give you two reasons, and then I'll ask your question
+of what even are we, do we want to do? Yeah. So what you want to do is if I give you a big
+corpus of audio, then what I want is I want you to figure out where words start and end in the
+speech stream. I want you to snap it up the speech into these things that look like words.
+Okay. And then if I, if I tell you, okay, these are the word boundaries, okay, which you've predicted.
+Then I want you to tell me this snippet. I don't know what word it is, but this snippet also reoccur
+is here and here and here and here and here and here in my speech corpus. So it's this combination
+of segmentation breaking it up into things that look like words. And then the second part,
+which is clustering, grouping these words together. Now, okay. So that's what we want to do. You
+want to know why this is useful? Sure. Okay. So I mean, I'm imagining that it's useful in that I
+could take that data and have a prioritized list of words to get someone to transcribe for me and
+then start to figure out texts. You know, if that's what I ultimately want, but why else would it be
+useful? Exactly. Okay. So that's a great use case that you've just described there. But the years
+to two more reasons. Okay. One, if you want, if you're interested in how infants do this,
+then having a model that can do this is useful. So then you can fiddle around with the model,
+check the type of mistakes that the model makes and see if then you can go and test in a lab if
+infants use the same type of cues and whether they make the same type of mistakes. And in that way,
+we can actually learn something about how humans learn language. Okay. I'm not a cognitive,
+a cognitive modeling person, cognitive scientist. So I probably didn't describe that well, but that
+is one motivation. A third motivation is, and this is actually a project that I'm working on
+with some of the colleagues here, is the following setting where this project is in Uganda.
+It's actually a project within United Nations. And they're really interested in
+very, very specific keywords. They have these systems that collect broadcast news.
+So it's basically servers that capture radio broadcasts. And then you've got the server full
+of speech data, but you don't have a speech recognizer in Uganda, the language that's spoken
+there. Okay. But now as the United Nations, you're really interested in figuring out what people
+are talking about in these local radio broadcasts. So what you can do is you can get a small number
+of people. And you can tell them, listen, I'm really interested in education. I'm really interested
+in maybe specific diseases, maybe in specific disasters, things like that. And I can get a small
+number of people to give me a bunch of keywords that I'm interested in. Okay. Now I've got my unsupervised
+model. I can label these keywords that a small number of people have given me. And then what I can
+do is I can go and search this big corpus of audio and find all the radio broadcasts that
+contains those keywords. And then maybe I can pass only those broadcasts to an analyst and ask
+them, please just translate these ones. I know they're important to me. And then we can, I don't know,
+figure out what people are talking about in Uganda. I hope that makes sense. Yeah, no, that does,
+that does make, that does make a lot of sense. And so you were about to describe the approach that
+you use in your lab to go from the phoning data to the segmenting. Yeah. So I actually want to
+answer another question first. Okay. Let me answer this question. And then I'll answer your other
+question, which was about grounding. How do you actually know what people are talking about when
+you don't have any labels? Okay. So I'll first answer the question about what we use. And this is
+really a technique that I developed and my PhD of my supervisors. So we basically argued that
+this idea of getting these fine grained units. And then, and then having a syllable layer on top
+of that and then a word layer on top of that, that becomes quite here. The whole thing becomes
+quite difficult. So what we've been doing is we've been thinking about this idea of something
+called acoustic word embeddings. So I think a lot of people know what word embeddings are. It's
+these kind of continuous vector representations of written words. And we wanted to take that same
+idea to speech. So when you're building these language discovery systems, inevitably what happens
+is you end up having to compare two snippets of speech with each other, but they're not of the
+same length. Okay. Two words are never the same length. Even if I say Apple and use Sam says Apple
+then these two apples will not have the same duration. So inevitably you end up comparing things
+that's of different duration, a half a second, one to one second. So what we started to develop
+was these acoustic word embeddings. And the idea behind these are basically you'd take a variable
+duration segment of any duration and you train them, you have a model that just maps that sequence
+that chunk of speech you map that to a single vector. Okay. Now if you could do this,
+what you could do is you can just embed basically all the sequences in your language. You can
+embed all of them, get vectors for each of them and now you can easily compare the different vectors.
+And in very short what we, what I developed in my PhD is something that kind of does this jointly.
+It starts by, it basically breaks the speech stream up into things that it thinks are words.
+It's random, it doesn't know. It embeds all of these. It classes those things into things that
+it now thinks are words and then it goes back and resegments and it has this kind of back and forth
+thing. I don't know if that makes sense and there was a 30 second discussion about something
+it took me four years to do. Are you kind of iteratively creating this embedding space and then
+performing some operations on it to try to determine the segments and then updating the embedding
+space and like kind of optimizing the embedding space or were you saying something else about this,
+I kind of picked up on an iterative cycle in there but I'm not sure what the, the iterations are.
+Yeah, you should have, you should have written the abstract for my thesis. So what you just said
+is exactly right. So you start with like a random segmentation of your input corpus and then
+on that random segmentation you build an embedding space. Now if I actually have an embedding space,
+okay, initially it's, it's going to be pretty bad, okay, but I have an embedding space.
+Then what you can do is you can say, given this embedding space, how should I split up my input
+stream to kind of have a higher score if you want under this embedding space? Okay, so you go back,
+you resegment. Let me pause you there. So yeah, you've got this embedding space and are you doing
+some kind of clustering within the embedding space? Exactly right. So I actually use a Gaussian
+mixture model. I also played a, a Bayesian Gaussian mixture model and I've also played around with
+some non parametric like infinite Gaussian mixture models to do that. So the idea behind these
+embeddings are that if you say Apple and I say Apple, then we're going to have two embeddings
+and we want all the instances of specific words that are acoustically the same
+to end up in similar regions in this embedding space. So that's really the goal.
+But when you start out, you don't know where words, whether words start an end, so you kind of
+start randomly. And then what you do is so you start randomly, you get all these embeddings
+and now you group them, okay, and you cluster them, I usually Gaussian mixture model to do the clustering.
+And the idea is that every cluster in the Gaussian mixture model should be hypothesized word.
+It should be something that you think or the model at the moment think that this thing,
+this group of embeddings, they all correspond to the same type of word, the same word, okay,
+initially that's wrong, but that's what you kind of hope where the model ends up.
+So you cluster, you start, you snap off your speech, you embed, you get this embedding space,
+you cluster in that embedding space using a Gaussian mixture model.
+Now, under this Gaussian mixture model, I can now say, go back to my inputs,
+pretend I don't know where the words came from. And under this Gaussian mixture model, how should
+I split up the speech stream so that I get a higher score under my current Gaussian mixture model
+or the embeddings that I would get if I split it up, okay. So then you break it up and then you
+re-embed and then you build your Gaussian mixture model again. Under that model, you go back and say,
+even these groupings of words, how should I chunk up my speech to get a higher score? And you just
+kind of iterate through this thing. Now, I describe it as this iterative process, but actually,
+it's implemented this one, Gibbs sampler. So it's this one model that kind of does things in one go.
+The projecting backwards step there where you are asking the question, given a set of groupings,
+how could you change the segmentation to improve the groupings? Is that a difficult piece in this
+or is that a pretty straightforward element? No, that is a difficult piece. So that's where I spend
+a lot of my time. Okay, also, there's two answers. It is a difficult piece, but it is also something
+that people have been looking at for a relatively long time. Meaning in the context of an embedding
+space or in other contexts and it carries over? No, in other contexts, kind of in computer science
+in general, but specifically in, actually, it came from the NLP literature. So it actually
+comes from a different part of literature. So in Chinese, you have this problem that we don't know
+where words start like Chinese than the way it's written. It's written with outward boundaries.
+So in that literature, people have started to look at, if I kind of know the words in my language,
+or I think I know the words in my language, how can I figure out where all the word boundaries
+in Chinese? And using that silent type of ideas, that's exactly what we used here, except that now
+we're doing it on this kind of continuous embedding space, but the mathematics for that is very,
+very similar to this question of, if I give you an unsegmented Chinese corpus, how do you figure
+out where there's words? So it ends up being like a dynamic programming procedure where you
+basically ask, okay, I'm going to start at the end of my sentence, and then what I'm going to do
+is I'm going to say, okay, words can be between 200 milliseconds and one second. Okay, so you're
+built in that constraint. And then what you do is you basically say, okay, I'll start at the end
+of my sentence. If the last word in my sentence is 200 milliseconds long, what's the score?
+If it's 250 milliseconds long, what's my score? If it's 300 milliseconds long, what's my score? Okay,
+and then you basically looking for all the possible word segmentations in this range,
+and then you kind of get an overall score using a dynamic programming method for figuring out where
+words started in the speech stream. And the score in this case is what? Yeah, so the score, if we're
+just looking at a single question of should I put a word boundary year or not, then the score is
+basically, if I chunked up this chunk of speech and I treated that as a word, how likely will that
+be? How close would that be to a cluster mean under my current plus string? Does that make sense?
+You're trying to set your segments up so that as many of the segments as possible are words
+basically? That's right. You can think about that. It's not really as many as possible. It's kind of like
+if I gave you, if I gave you an utterance, a whole sentence, and I told you big places that you
+want to put boundaries, big places that you want to put boundaries, that if I look at the overall
+okay, so now you put boundaries, now you have a whole bunch of different embeddings, right?
+And you want to look at the overall score for that utterance. Each of the embeddings gets a score
+and what you want to maximize is kind of the overall score for that specific utterance.
+One last piece you mentioned that as opposed to the multiple phases, you do everything in kind of
+one pass with Gibbs sampling. Can you give us kind of the high level overview of Gibbs sampling and
+how you apply it here? Yeah. Okay, so Gibbs sampling is this very cool technique where
+you basically try to get samples from a distribution and in general that's tricky, especially if your
+model is quite complicated. So what Gibbs sampling does is it basically keeps everything fixed
+and you want to know, you want to get a sample for a latent variable. So in our case, the latent
+variable might be something like which clause does this embedding get assigned to? Okay, so
+so in Gibbs sampling, how it works is you pick a specific latent variable and you keep all your
+other latent variables, you keep that fixed at previous samples. Okay, and then what you say is
+given that all the others are fixed, sample this thing from my distribution, this one that I'm
+interested in. Okay, after you sample that one, now you keep this guy fixed and you go to the next
+latent variable. Okay, you keep all the others fixed and now you sample from this guy,
+then you go on to the next latent variable and so forth. Does that make sense? Okay, so in our case,
+what we do is we basically say given we've got this entire corpus, the whole corpus have been
+segmented and they've been clustered already. Okay, everything is fixed and we pretend we know where
+words start and end and we know we pretend we know which clusters they should belong to.
+Okay, then what you do is you take one utterance in your dataset and you say now I'm going to
+take this utterance and I'm going to remove that from my model and I'm going to pretend that
+this is the only utterance that I don't know the segmentation and the clustering of.
+So you remove that utterance and then you say given the model which is now defined by all the
+rest of the utterances for which I know the word boundaries and the clusters, what is the best
+segmentation for this utterance? Okay, and then what you do is you segment the utterance according to
+all of the rest of the data that's been fixed and you clustered that utterance and then what you do
+is you fix the segmentation and the clustering for that utterance and you go to the next utterance
+and so basically your this utterance procedure that I kind of said was like segment cluster segment
+cluster and I kind of described it at the corpus level, it's really happening at kind of a per utterance
+level. Interesting. And I want to answer one question that you asked really early on or just a while
+ago, you asked if you're just going to do this right, you're never going to get to text, you're
+never going to figure out exactly what is the meaning in this utterance right, you're going to
+segment that and that that's exactly what's going to happen. I don't know if you saw this movie
+arrival. Yes. Yeah, some people loved it, some people hated it, I really liked it, but there's
+the scene where they go to her and they ask her, I mean they play her the snippet of audio,
+right? And she's a linguist, a linguist that documents languages, so they play her the snippet
+of audio and then asks her, listen, what is being said in this language? And she looks at them and
+tells them in a very, it's probably very unholy word, but tells them, I can't help you, right?
+I have no idea what this snippet of audio means because I don't have any context, I haven't seen
+the people that speak these things, I haven't seen when they use it, when they do not use it.
+And a lot of the research into the zero processing models is exactly like that. We just want to see
+how can you learn something from the raw audio and infants can do this to some extent and our
+models can do this to some extent and then there are these good use cases for these models,
+but ultimately you can never figure out what does this word actually mean. And this is why a lot
+of people in this space are moving to the setting where you have other signals that goes with the
+speech. So if you have a chunk of unlabeled speech but you have an image describing the context in
+which the speech is used, because if you can do that then you can segment your words hopefully
+and then figure out, okay, this word, I don't know what it is, but I can ground it because I have
+an image and I can try and figure out what is it in the image that calls this word to being said.
+So that's a very, very interesting avenue for feature work that a lot of people are looking at.
+Well, I was going to ask you, if you had some words on where you see this going, but that sounds
+like you anticipated that question there. Maybe final thoughts, again, circling back to
+where we started all this on the endaba and you know what you see for that community and more
+broadly machine learning and AI in Africa. Yeah, so this I think it's a super exciting time for
+machine learning and AI in Africa and the endaba is one part of that and that has really started
+I think to both communities and kind of bring people together and in Africa and kind of
+helped people to see that the stuff we're doing here is very, very relevant also at the broader
+scale. I was quite a broad question so I'll give a whole bunch of small answers.
+One thing that I'm very excited about is that in Africa we have very unique challenges
+and unique opportunities and so taking language as an example there's so many languages spoken
+here in the same geographical area and that's very, very unique and I think what's going to happen
+if we start to push this community forward and if people actually believe that they can do this
+because we can then what I think is going to start to happen and I hope for this is that we're going
+to start to develop unique solutions for our unique problems and I think if that happens it's
+not just going to be like we are users of machine learning tools that's being developed in Europe
+of course we need to be that as well we need to solve our problems using the tools that's being
+developed in Europe and in the US but I think if we start to solve the problems here then we
+are actually going to start to contribute to the global scene and we're going to start to say
+this and this is a unique solution and actually you guys can also use this in some other problem
+areas in machine learning so I think it's going to be a combination of developing exciting
+applications but then also contributing to foundational research in machine learning and AI
+and that's I think that's really what I hope will happen. Being Dava is growing a lot it's going
+to Kenya next year which is super exciting and then in Dava has this kind of dual motivation the
+one is to strengthen machine learning and AI in Africa but then also to fix the problems of
+diversity in ML and I hope that that is something that Africa can also contribute to because
+I mean Google can just start to hire a lot more African researchers right and from across the world
+I think that would be very exciting. For me personally the thing that excites me most is actually
+the in Dava spin-offs I'm very passionate about developing local communities because I think
+so in the Cape area for example there's a lot of people working on ML and we can learn a lot
+from each other but up until fairly recently a lot of people have worked in isolation so I'm very
+very passionate about building local things at universities and in regions and the in Dava X is
+a spin-off of the in Dava kind of funding these local regional little in Davas and I think that's
+that's really where we're going to see some some interesting things happening people starting to
+collaborate and and and working together and I'm very excited to see what will happen there.
+Fantastic fantastic well Erman thank you so much for taking the time to chat with us this
+morning it's really really interesting research you're doing and I enjoyed learning about it.
+Cool thanks so much for having me.
+All right everyone that's our show for today. For more information on Erman or any of the topics
+covered in this show visit twimmelai.com slash talk slash 191. For more information on the deep
+learning in Dava podcast series visit twimmelai.com slash in Dava 2018. Thanks again to Google
+for their sponsorship of this series be sure to check out the 2019 AI residency program at g.co
+slash AI residency as always thanks so much for listening and catch you next time.

@@ -1,0 +1,2000 @@
+WEBVTT
+
+00:00.000 --> 00:16.320
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+
+00:16.320 --> 00:21.480
+people, doing interesting things in machine learning and artificial intelligence.
+
+00:21.480 --> 00:31.400
+I'm your host Sam Charrington.
+
+00:31.400 --> 00:37.440
+In this episode we're joined by Kristi Denison, machine learning engineer at OpenAI.
+
+00:37.440 --> 00:42.000
+Since joining OpenAI earlier this year, Kristi's been working on OpenAI's efforts to build
+
+00:42.000 --> 00:46.680
+an AI-powered agent to play the Dota 2 video game.
+
+00:46.680 --> 00:52.160
+Our conversation begins with an overview of Dota 2 gameplay and the recent OpenAI 5 benchmark,
+
+00:52.160 --> 00:57.080
+which put the OpenAI agent up against the team of professional human players.
+
+00:57.080 --> 01:02.320
+We then dig into the underlying technology used to create OpenAI 5, including their use
+
+01:02.320 --> 01:07.680
+of deep reinforcement learning and LSTM recurrent neural networks and their liberal use of
+
+01:07.680 --> 01:11.640
+entity embeddings, plus some of the other tricks and techniques they used to train the
+
+01:11.640 --> 01:18.560
+model on 256 GPUs and 128,000 CPU cores.
+
+01:18.560 --> 01:21.600
+This was a fun interview and I hope you enjoy it.
+
+01:21.600 --> 01:22.600
+Let's go.
+
+01:22.600 --> 01:26.320
+All right everyone, I am on the line with Kristi Denison.
+
+01:26.320 --> 01:29.520
+Kristi is a machine learning engineer at OpenAI.
+
+01:29.520 --> 01:32.800
+Kristi, welcome to this week in machine learning and AI.
+
+01:32.800 --> 01:33.800
+Thank you.
+
+01:33.800 --> 01:34.800
+It's nice to be here.
+
+01:34.800 --> 01:35.800
+Fantastic.
+
+01:35.800 --> 01:38.840
+So you've been at OpenAI for coming up on a year now.
+
+01:38.840 --> 01:46.040
+I guess you started there in January and you've been working on Dota, the Dota 2 project
+
+01:46.040 --> 01:47.040
+there.
+
+01:47.040 --> 01:51.640
+And tell us about some of your experiences in joining that team.
+
+01:51.640 --> 01:54.560
+Yeah, it's been a lot of fun.
+
+01:54.560 --> 02:02.400
+I've gotten to learn everything from interfacing with the game to also our machine learning architecture.
+
+02:02.400 --> 02:05.920
+It's really, it's super interesting.
+
+02:05.920 --> 02:10.560
+As a machine learning engineer, I've gotten to add features so the model can observe different
+
+02:10.560 --> 02:15.720
+parts of the game and I've also gotten to learn about how you actually interface with
+
+02:15.720 --> 02:16.720
+the game.
+
+02:16.720 --> 02:24.000
+So I think like if you wanted to, you know, have a bot play in Dota, we do have an API,
+
+02:24.000 --> 02:27.000
+but there's a lot of things to understand there.
+
+02:27.000 --> 02:29.040
+It's not just, we don't look at pixels.
+
+02:29.040 --> 02:33.280
+So instead of pixels, you have to use the API and find ways to represent that in a way
+
+02:33.280 --> 02:35.800
+that our model can understand it.
+
+02:35.800 --> 02:38.760
+Are you a Dota player before joining OpenAI?
+
+02:38.760 --> 02:45.160
+I have to admit that I don't play Dota very well and I did not play beforehand or many
+
+02:45.160 --> 02:46.160
+games at all.
+
+02:46.160 --> 02:51.800
+But I hope by helping OpenAI 5 that it can play well for me.
+
+02:51.800 --> 02:56.720
+I think you and I both are in that same boat.
+
+02:56.720 --> 03:04.120
+In fact, I don't know much about the game at all or at least I didn't until learning about
+
+03:04.120 --> 03:09.160
+it in the context of what OpenAI is doing and I suspect that there are plenty of folks
+
+03:09.160 --> 03:11.680
+in our audience that don't know much about the game.
+
+03:11.680 --> 03:17.640
+So maybe you can tell us a little bit about Dota starting from, you know, why is it an
+
+03:17.640 --> 03:24.000
+interesting environment around which to experiment with AI?
+
+03:24.000 --> 03:25.000
+Sure.
+
+03:25.000 --> 03:27.640
+So again, this is a research company.
+
+03:27.640 --> 03:32.280
+So our, we don't just play games all day are one of the things we really are trying
+
+03:32.280 --> 03:38.040
+to do with Dota is use it as a test bed for these RL algorithms and that's a reinforcement
+
+03:38.040 --> 03:39.040
+learning.
+
+03:39.040 --> 03:41.160
+So why Dota?
+
+03:41.160 --> 03:46.120
+We've seen a lot of strides recently with or even actually not just recently for decades
+
+03:46.120 --> 03:51.720
+with Chast and Go and the real question is what do you do next, right?
+
+03:51.720 --> 03:56.520
+You want something that's close to the real world and that's the main application for
+
+03:56.520 --> 04:02.800
+a lot of AI's to the world like how well can you affect the real world?
+
+04:02.800 --> 04:08.760
+Dota is probably one of the most complex in terms of strategy games that are popular
+
+04:08.760 --> 04:10.200
+out there right now.
+
+04:10.200 --> 04:14.880
+So there's tons of people who have already been playing it for forever and or at least
+
+04:14.880 --> 04:21.880
+as long as it's existed and it's a complex game not just because of, oh well, it's not
+
+04:21.880 --> 04:25.200
+just an eight by eight board because the board does have a size, right?
+
+04:25.200 --> 04:31.000
+You have a map and Dota and you have two sides, two different teams that try to fight
+
+04:31.000 --> 04:35.080
+each other and there are these buildings you're trying to destroy and eventually there's
+
+04:35.080 --> 04:39.320
+one building and you destroy the call of the ancient if you destroyed this particular
+
+04:39.320 --> 04:45.560
+building you win the game and it's not as simple as just taking all your characters and
+
+04:45.560 --> 04:50.760
+charging right at that other building because there is this complex rule set that makes
+
+04:50.760 --> 04:55.520
+it so that you can't just simply win in one way and that's something that they do a
+
+04:55.520 --> 05:00.760
+really good job at at these, you know, multiplayer games is try to keep everything balanced.
+
+05:00.760 --> 05:04.560
+So there's lots of items you can use that can give you certain advantages at different
+
+05:04.560 --> 05:06.960
+parts in the game.
+
+05:06.960 --> 05:10.400
+They also have some downsides in some cases or they don't give you strength another or
+
+05:10.400 --> 05:14.320
+they cost money and you have to get money by killing these little minions that each side
+
+05:14.320 --> 05:22.160
+has. There's a ton of complexity behind Dota and I would take many of your episodes to
+
+05:22.160 --> 05:28.040
+get through it all, I think, but the core of the issue is that it's a great test bed
+
+05:28.040 --> 05:32.440
+for reinforcement learning because it's so complex because you can't understand it
+
+05:32.440 --> 05:35.600
+and it's simple an eight by eight board.
+
+05:35.600 --> 05:42.880
+Is there any one particular factoid or metric that kind of captures for you the complexity
+
+05:42.880 --> 05:43.880
+of the game?
+
+05:43.880 --> 05:48.320
+Well, okay, so I think the thing that really makes it interesting, I think, from a machine
+
+05:48.320 --> 05:52.680
+learning perspective is that there's partial information and that's all you work off of
+
+05:52.680 --> 05:55.320
+is partial information all day long.
+
+05:55.320 --> 06:02.560
+Each side has this what they call a fog of war and it covers your enemies team and unless
+
+06:02.560 --> 06:07.160
+you place certain items in certain spots, you can't see things and if you can't see
+
+06:07.160 --> 06:11.360
+how are you supposed to win, how are you supposed to attack the enemy.
+
+06:11.360 --> 06:17.200
+So this partial information is I think probably the reason that makes it the most complex
+
+06:17.200 --> 06:22.240
+is because if you did know where everyone was, it would be a lot easier game.
+
+06:22.240 --> 06:30.880
+So OpenAI recently held an event that was called the OpenAI 5 benchmark.
+
+06:30.880 --> 06:36.240
+What's the significance of this benchmark in OpenAI 5?
+
+06:36.240 --> 06:40.800
+Sure, so we've been, so actually, I should probably maybe give you a little bit of a
+
+06:40.800 --> 06:43.960
+timeline of what we've been going through so far.
+
+06:43.960 --> 06:50.560
+So last year we had our 1v1 bot and it beat some of the top players in the world at 1v1,
+
+06:50.560 --> 06:59.240
+but as many Dota players know, 1v1 has a restricted set of rules, it's only like kill the
+
+06:59.240 --> 07:05.040
+first tower, it's only mid lane, basically it's a much simpler game.
+
+07:05.040 --> 07:09.880
+And so in order to really do Dota and really do the full complexity again, you have to do
+
+07:09.880 --> 07:12.680
+5v5 with 5 players on each side.
+
+07:12.680 --> 07:17.600
+So that was last year and this last year we've been working really hard to, you know, bring
+
+07:17.600 --> 07:20.520
+you OpenAI 5 as it is today.
+
+07:20.520 --> 07:26.960
+And having 5 instead of 1 presents a lot more challenges than just adding 4 more bots,
+
+07:26.960 --> 07:33.680
+we had to allow, as I said before, like the game features, going back to this last May,
+
+07:33.680 --> 07:38.800
+we had an inhouse team and they were still, I mean, they're pretty good and probably
+
+07:38.800 --> 07:42.600
+average players were able to beat our OpenAI 5.
+
+07:42.600 --> 07:47.400
+And then in June, our OpenAI 5 was able to beat our inhouse team.
+
+07:47.400 --> 07:49.520
+And so we're like, well now what do we do, right?
+
+07:49.520 --> 07:52.720
+How do we figure out how good our OpenAI 5 is?
+
+07:52.720 --> 07:54.320
+We don't have a way of knowing.
+
+07:54.320 --> 08:02.960
+So we found some, you know, some very stronger test teams to test out OpenAI 5 and they were
+
+08:02.960 --> 08:03.960
+also winning.
+
+08:03.960 --> 08:06.480
+The OpenAI 5 was winning.
+
+08:06.480 --> 08:08.440
+So now we're like, well now what do we do, right?
+
+08:08.440 --> 08:12.640
+We need to find, how do you, how do you, like, for something that you can't measure in
+
+08:12.640 --> 08:17.080
+a scripted way, something this complex, how do you do the next thing?
+
+08:17.080 --> 08:24.440
+So that's the point of the benchmark match was to get some, you know, 99.95% out players
+
+08:24.440 --> 08:28.320
+and have them play OpenAI 5 to see how good is it.
+
+08:28.320 --> 08:29.320
+Like where are we?
+
+08:29.320 --> 08:30.720
+What do we need to do for TI?
+
+08:30.720 --> 08:35.400
+And TI is the big competition and at the end of August, it's coming up in a couple
+
+08:35.400 --> 08:36.400
+weeks.
+
+08:36.400 --> 08:41.400
+It's called the International and Dota players from around the world get together to compete.
+
+08:41.400 --> 08:43.400
+There's this large prize pool at the end.
+
+08:43.400 --> 08:47.200
+But the thing that we really want to know is, you know, is self-play?
+
+08:47.200 --> 08:51.800
+Does it work or do you have this thing we call strategy collapse where it learns only
+
+08:51.800 --> 08:54.160
+one strategy can't recover?
+
+08:54.160 --> 08:59.480
+It's a really interesting problem and I feel like the only way we can know if it's actually
+
+08:59.480 --> 09:05.280
+learning well is if by testing against these really strong teams.
+
+09:05.280 --> 09:11.120
+And now this prize pool for the TI, that's like $30 million or something like that.
+
+09:11.120 --> 09:12.120
+Something like that.
+
+09:12.120 --> 09:18.080
+I'm not too connected with the specifics, but yes, it's a pretty big prize pool.
+
+09:18.080 --> 09:27.520
+I vaguely remember from last year's 1v1 work around Dota that there was some controversy.
+
+09:27.520 --> 09:30.160
+Do you recall what that was?
+
+09:30.160 --> 09:34.120
+I maybe if you have more details on that, I mean.
+
+09:34.120 --> 09:38.480
+I remember there was dig into it in a lot of detail.
+
+09:38.480 --> 09:46.160
+But I recall at around the time that OpenAI published its 1v1 results, there were, I guess,
+
+09:46.160 --> 09:51.920
+the usual questions around kind of the applicability and the generality of the results, whether the
+
+09:51.920 --> 09:58.480
+system had, you know, some things that were, you know, hard-coded or, or, you know, rules
+
+09:58.480 --> 10:04.640
+that were baked in versus purely learned, whether, you know, it had access to more better
+
+10:04.640 --> 10:07.840
+information than a human might have that kind of thing.
+
+10:07.840 --> 10:13.000
+So I was not working here last year, but I can at least answer your questions about specifically
+
+10:13.000 --> 10:15.320
+doesn't have better information than a human.
+
+10:15.320 --> 10:20.440
+And the answer there is just, it doesn't have any extra information.
+
+10:20.440 --> 10:23.120
+And if anything, it actually has less.
+
+10:23.120 --> 10:28.520
+When you get all the information we get, we get from the official API, which gives us information
+
+10:28.520 --> 10:32.800
+of, like, where the hero is and what are your abilities that are available and can you
+
+10:32.800 --> 10:35.400
+use those abilities?
+
+10:35.400 --> 10:39.120
+And there's, in fact, one of the things we've realized is that as we've been adding more
+
+10:39.120 --> 10:43.880
+features, the, you know, OpenAI 5 has actually been doing really well, even when it doesn't
+
+10:43.880 --> 10:49.400
+have any vision into certain things, like for a long time, it didn't see a wooden
+
+10:49.400 --> 10:50.400
+zone.
+
+10:50.400 --> 10:51.400
+And it actually sort of did okay.
+
+10:51.400 --> 10:52.920
+It's a lot better now that I can't see them.
+
+10:52.920 --> 10:53.920
+It didn't see what?
+
+10:53.920 --> 10:54.920
+Oh, sorry.
+
+10:54.920 --> 10:58.800
+So there are these things called avoidant zones.
+
+10:58.800 --> 11:04.360
+One example is there's a character, they call them a heroes, called Sniper, who has this
+
+11:04.360 --> 11:08.080
+ability called, that's called Trapnel.
+
+11:08.080 --> 11:13.520
+And it's basically this area of effect spell that gives damage if you walk into it.
+
+11:13.520 --> 11:17.920
+And because OpenAI 5 didn't know where they were, they would walk in the middle and be
+
+11:17.920 --> 11:20.000
+like, I'm taking damage now what?
+
+11:20.000 --> 11:21.920
+And just kind of stand there and take it.
+
+11:21.920 --> 11:27.760
+So in some cases, it started to sort of learn how to get out of it, but it was a lot better
+
+11:27.760 --> 11:34.760
+when it had a map around itself indicating where it was so it knew how to get out.
+
+11:34.760 --> 11:40.360
+But so the thing is, even without that, it still was doing pretty well against Story
+
+11:40.360 --> 11:41.360
+and House team.
+
+11:41.360 --> 11:45.160
+So there's nothing that it had, no information, it has extra.
+
+11:45.160 --> 11:50.640
+The one advantage it does have, and I think this is just because, you know, you do have
+
+11:50.640 --> 11:55.120
+the API, you do have all the observations up front.
+
+11:55.120 --> 12:01.000
+Humans have to check other heroes manually, they have to do that switching, and pro players
+
+12:01.000 --> 12:02.360
+are very fast at it.
+
+12:02.360 --> 12:08.600
+But they do have, there's that delay of switching on the thing, whereas OpenAI 5 just can access
+
+12:08.600 --> 12:13.040
+it as it comes in.
+
+12:13.040 --> 12:16.720
+But I can't react instantly, that's another thing I think some people have been talking
+
+12:16.720 --> 12:18.800
+about.
+
+12:18.800 --> 12:24.560
+So originally, when we were doing this, we do this thing called FrameSkip, and it is
+
+12:24.560 --> 12:29.600
+that there's 30 frames in a second, and we could take an action on every frame, but it
+
+12:29.600 --> 12:33.360
+actually makes training super difficult too long to do.
+
+12:33.360 --> 12:38.520
+So we take an action every four frames and then collect observation and create an action.
+
+12:38.520 --> 12:43.840
+The problem with that is that means your reaction time is around 80 milliseconds, which seems
+
+12:43.840 --> 12:47.040
+on fair compared to even in top humans.
+
+12:47.040 --> 12:54.200
+So we actually slowed it down, although it had to admit, it wasn't because, necessarily,
+
+12:54.200 --> 12:59.120
+we were ready to take that step of, you know, making it even.
+
+12:59.120 --> 13:04.080
+We were just trying to speed up training, because the forward past time took so much time
+
+13:04.080 --> 13:09.120
+and doing the game time took so much time, made a lot of more sense to offset our actions.
+
+13:09.120 --> 13:14.200
+So it is now closer to 200 milliseconds, reaction time, which is closer to humans.
+
+13:14.200 --> 13:19.640
+I think a lot more fair, but other than that, other than the fact that it does get all
+
+13:19.640 --> 13:26.520
+the observations at once, it also the other thing too, is that the time to think is very
+
+13:26.520 --> 13:27.520
+different, right?
+
+13:27.520 --> 13:31.240
+Even if you have, you see an observation, and it's not until 200 milliseconds later, you
+
+13:31.240 --> 13:36.360
+can respond to it, you know, opening a five doesn't need time to think like a human
+
+13:36.360 --> 13:37.360
+does.
+
+13:37.360 --> 13:41.160
+A human, it's not just about need your reaction time, it's also about the thinking time,
+
+13:41.160 --> 13:46.400
+and you know, depending on how good you are, it might be like, involuntary or not, and
+
+13:46.400 --> 13:51.840
+that's another thing that humans don't, like, the opening a five doesn't really, there's
+
+13:51.840 --> 13:52.840
+not a good way.
+
+13:52.840 --> 13:57.240
+I mean, we could delay them, but it's just a disadvantage humans just naturally have.
+
+13:57.240 --> 14:05.000
+So you've mentioned some things like Shrapnel and some aspects of the heroes.
+
+14:05.000 --> 14:09.280
+It's kind of making me want to take a step back and talk about some, you know, nuances
+
+14:09.280 --> 14:11.440
+or details of the game that might help.
+
+14:11.440 --> 14:17.040
+Again, those of us who aren't really familiar with it fully understand, or at least not
+
+14:17.040 --> 14:21.280
+fully understand, but at least get a sense of, you know, what gameplay is like.
+
+14:21.280 --> 14:29.880
+So the standard game is five by five, or is it a game that you would have, you know, unlimited
+
+14:29.880 --> 14:33.440
+number of people playing simultaneously?
+
+14:33.440 --> 14:42.240
+Yeah, so the standard game is five by five, and again, you can play 1v1, but yes, that
+
+14:42.240 --> 14:43.240
+is a standard game.
+
+14:43.240 --> 14:47.440
+Sorry, so I should probably give a little more context about the game.
+
+14:47.440 --> 14:56.120
+So there are, I think, 100 and 100 something heroes, I think it's over 110, I think.
+
+14:56.120 --> 15:01.760
+And each of these heroes has, you know, like, at least for abilities that they have that
+
+15:01.760 --> 15:05.320
+each have a slightly different effect than every other ability.
+
+15:05.320 --> 15:08.360
+Some of them are similar, but some of them are very different.
+
+15:08.360 --> 15:12.560
+And that's part of the reason that for OpenA5 right now, we have a limited hero set.
+
+15:12.560 --> 15:17.400
+It's actually not because that we didn't want the, you know, OpenA5 to train on it.
+
+15:17.400 --> 15:21.240
+It's mainly just because there's just so many things to represent that like we have to
+
+15:21.240 --> 15:25.000
+do manual effort every single time we input a new feature of the model.
+
+15:25.000 --> 15:30.400
+And that is really where a lot of the complexity of this project exists.
+
+15:30.400 --> 15:36.720
+It's just in, like, how do you, you know, coerce all of these API inputs into something that
+
+15:36.720 --> 15:39.400
+this, you know, the LSTM can understand.
+
+15:39.400 --> 15:45.120
+So that's part of it, the other part of it too is that, I think I mentioned this a little
+
+15:45.120 --> 15:50.040
+bit before that, you know, we have a lot of, we have a lot of items and each of these
+
+15:50.040 --> 15:54.760
+items, there's probably like 100 plus items, something like that, I don't go beyond that
+
+15:54.760 --> 15:55.760
+number.
+
+15:55.760 --> 16:01.880
+I don't know exactly, but there are a bunch of items that the, you know, each have their
+
+16:01.880 --> 16:05.240
+own effect and their own caveats and everything.
+
+16:05.240 --> 16:09.080
+There's also other actions, there's an action called scan where you can point to the map.
+
+16:09.080 --> 16:13.680
+You can only use it every three minutes and it will tell you, oh, is there, you know,
+
+16:13.680 --> 16:18.040
+an enemy in this area, there are things called words and they give you vision.
+
+16:18.040 --> 16:24.280
+They also can give you, like, they also call them sentry words and they give you vision
+
+16:24.280 --> 16:26.280
+over invisible units.
+
+16:26.280 --> 16:31.360
+So there are a number of items that can make you invisible, but so you need these other
+
+16:31.360 --> 16:35.560
+type of words to see the invisible units.
+
+16:35.560 --> 16:37.040
+There's other items that can also help you with that.
+
+16:37.040 --> 16:41.200
+So there's like every single aspect of the game has either an item or an ability that
+
+16:41.200 --> 16:48.600
+you can, you can change it with and there's also a bunch of complex rules, like there's
+
+16:48.600 --> 16:53.960
+this thing called backdoor protection, which means that your towers will start healing
+
+16:53.960 --> 16:59.640
+if you try to just rush at them at the enemy's towers because they want to make sure that
+
+16:59.640 --> 17:04.040
+everything is even in fair so that, like, you actually have to have your little minions
+
+17:04.040 --> 17:10.440
+with you in order to actually get far enough to attack other enemy's towers.
+
+17:10.440 --> 17:14.080
+It's because otherwise people would just try to, like, you know, surge and run towards
+
+17:14.080 --> 17:17.520
+the asian, just kill the ancient and that wouldn't be a very interesting game.
+
+17:17.520 --> 17:23.640
+Like, the game developers valve has done a very good job of keeping it balanced and interesting.
+
+17:23.640 --> 17:27.760
+And then I also mentioned the fog of war before, which covers the enemy's map and even what
+
+17:27.760 --> 17:33.880
+you can see, you have this circle around your hero that is influenced by trees and other
+
+17:33.880 --> 17:38.560
+items and other, like, obstructions in the map that you can't see around.
+
+17:38.560 --> 17:44.560
+So like, all these things come together to really make it a complex, interesting game.
+
+17:44.560 --> 17:51.360
+And you mentioned that OpenAI currently supports a subset of the full number of heroes.
+
+17:51.360 --> 17:54.480
+How many heroes does it support?
+
+17:54.480 --> 18:02.200
+And I'm assuming that there are some limitations as a result of that in the 5x5 matches.
+
+18:02.200 --> 18:07.760
+Like, I think I read somewhere that it's in, like, a mirror mode, like both teams are playing
+
+18:07.760 --> 18:10.520
+the same five heroes, or is that right?
+
+18:10.520 --> 18:11.520
+So that's, yes.
+
+18:11.520 --> 18:13.720
+So we used to do mirror mode.
+
+18:13.720 --> 18:20.920
+And recently we've worked on a way to make it so they can play multiple, multiple sets
+
+18:20.920 --> 18:21.920
+of heroes.
+
+18:21.920 --> 18:25.160
+And we really did that with just adding this embedding that says, okay, this is the hero
+
+18:25.160 --> 18:30.120
+you're playing right now, so that the model can know, oh, I see, I have this thing.
+
+18:30.120 --> 18:34.680
+Now I use this different ability instead or is basically as aware of the different abilities
+
+18:34.680 --> 18:36.160
+it has to use.
+
+18:36.160 --> 18:37.640
+So yes, we have 18 heroes now.
+
+18:37.640 --> 18:39.920
+It doesn't have to be a mirror match.
+
+18:39.920 --> 18:46.280
+And if anyone was watching the benchmark saw, we actually introduced drafting as well.
+
+18:46.280 --> 18:53.520
+And the drafting is super interesting because our opening of 5 picks the heroes in the order
+
+18:53.520 --> 18:58.760
+that it thinks will have the best chance of success.
+
+18:58.760 --> 19:03.320
+So again, it's based on the strategy it has learned.
+
+19:03.320 --> 19:05.920
+And so what specifically is drafting?
+
+19:05.920 --> 19:10.200
+So drafting is picking the set of heroes you want to use in your team.
+
+19:10.200 --> 19:15.400
+So from 18 heroes, the two teams, so each side, one side is called Radiant, the other
+
+19:15.400 --> 19:20.920
+one's called dire, the two teams go back and forth picking heroes.
+
+19:20.920 --> 19:24.840
+There's actually a set up where you know, usually Radiant picks first and then dire picks
+
+19:24.840 --> 19:27.400
+two heroes and then Radiant picks two heroes.
+
+19:27.400 --> 19:29.520
+But those are just the specifics.
+
+19:29.520 --> 19:35.520
+The idea is that you get a chance to pick heroes that you want on your team.
+
+19:35.520 --> 19:40.440
+And that way it's not just a mirror match, everyone has the same heroes.
+
+19:40.440 --> 19:48.600
+It's just, we're trying very hard to make this as real Dota as we can because we want it
+
+19:48.600 --> 19:53.720
+to be like a honest evaluation of this research project.
+
+19:53.720 --> 19:58.400
+We want this to show like, can you actually make something superhuman for something that's
+
+19:58.400 --> 20:01.840
+more complex than games that we've already solved?
+
+20:01.840 --> 20:09.800
+So you've mentioned a few technical topics so far, reinforcement learning was one, embeddings
+
+20:09.800 --> 20:10.800
+or another.
+
+20:10.800 --> 20:16.440
+Can you talk a little bit about the technology that underlies the Open AI 5?
+
+20:16.440 --> 20:17.440
+For sure.
+
+20:17.440 --> 20:22.840
+So basically our model is just one enormous LSTM.
+
+20:22.840 --> 20:29.240
+And the rest of the complexity is just coercing these Dota API inputs into something that the
+
+20:29.240 --> 20:31.680
+LSTM can process.
+
+20:31.680 --> 20:40.200
+We have this model architecture diagram that's kind of overwhelming, but there's just so
+
+20:40.200 --> 20:41.680
+much to observing the game.
+
+20:41.680 --> 20:47.720
+So the different modifiers that are going to apply, the different abilities that you have
+
+20:47.720 --> 20:50.480
+and also what items you have in your backpack.
+
+20:50.480 --> 20:54.080
+But when it comes down to it, we have all these inputs.
+
+20:54.080 --> 20:59.120
+We try to put them in reasonable representations.
+
+20:59.120 --> 21:03.880
+One thing that I've worked on recently when I mentioned the avoidance zones before is
+
+21:03.880 --> 21:06.040
+making an embedding for the invoiting zones.
+
+21:06.040 --> 21:09.880
+So the idea is that before it didn't really matter if we just say, hey, there's an avoidance
+
+21:09.880 --> 21:10.880
+zone here.
+
+21:10.880 --> 21:13.560
+Just stay away because we were doing the mirror match and there were only two avoidance
+
+21:13.560 --> 21:15.320
+zones.
+
+21:15.320 --> 21:18.880
+Now that we have 18 heroes, there can be more.
+
+21:18.880 --> 21:24.080
+So what we want to do is actually tell it, okay, which type of avoidance zone are you
+
+21:24.080 --> 21:25.080
+dealing with?
+
+21:25.080 --> 21:27.160
+Because you might want to step out of it.
+
+21:27.160 --> 21:32.400
+Maybe you don't, maybe you'd rather take it so that you can, because you know how much
+
+21:32.400 --> 21:35.920
+damage you'll take, so you can get to this other goal.
+
+21:35.920 --> 21:44.200
+And that's basically implemented as a map around the hero itself and just see the different
+
+21:44.200 --> 21:48.520
+cells are how the embedding type in them.
+
+21:48.520 --> 21:51.520
+So how does the map get translated into an embedding?
+
+21:51.520 --> 21:59.720
+Oh, so it's literally like an 8-by-grid around the hero and we, if we see, oh, the avoidance
+
+21:59.720 --> 22:04.960
+zone covers the cell, you know, just by like, you know, distance detection from the center
+
+22:04.960 --> 22:10.200
+of the avoidance zone, we say, okay, this one is this type.
+
+22:10.200 --> 22:13.680
+And then we put it through the embedding and then feed it to the LSTM.
+
+22:13.680 --> 22:18.480
+So folks that are listening, that have been following along with the fast AI course with
+
+22:18.480 --> 22:24.960
+us, we've been doing a study group around this fast AI, practical deep learning course
+
+22:24.960 --> 22:35.200
+and embeddings has figured pretty prominently in that course as a way for us to capture
+
+22:35.200 --> 22:42.520
+a pretty broad variety of characteristics about different entities into deep learning models.
+
+22:42.520 --> 22:49.280
+So it's interesting to hear that they play so prominently in the Dota model as well.
+
+22:49.280 --> 22:50.800
+Oh, for sure.
+
+22:50.800 --> 22:56.720
+And we use them for, I mean, I can't show you the diagram, but like they are across the
+
+22:56.720 --> 23:00.600
+board here because there's just so many things that have different types.
+
+23:00.600 --> 23:06.680
+Like there are, I don't know, several hundred modifiers and modifiers are ways of knowing
+
+23:06.680 --> 23:11.080
+if there's a spell cast on you or something, something like that or if there's an ability
+
+23:11.080 --> 23:14.560
+to be using, there's so many different things that have different types.
+
+23:14.560 --> 23:20.200
+So it's, it's absolutely essential that so many things go through embeddings.
+
+23:20.200 --> 23:27.960
+And so the embeddings are you, are you training the embeddings separately or are you training
+
+23:27.960 --> 23:29.880
+all of this end to end?
+
+23:29.880 --> 23:30.880
+It's all end to end.
+
+23:30.880 --> 23:36.560
+And so you've got this gigantic LSTM, I think I read it was like a 1024 units, is that
+
+23:36.560 --> 23:37.560
+still accurate?
+
+23:37.560 --> 23:41.600
+I think, you know, that's been changing so much.
+
+23:41.600 --> 23:49.160
+I think we might have, it's actually 2048 now, because I think that 20, the 1024 was
+
+23:49.160 --> 23:54.880
+for 1v1 and so we figured it should probably raise it for five heroes.
+
+23:54.880 --> 24:02.320
+And is the, are the steps in the units in the LSTM are those time steps in the game?
+
+24:02.320 --> 24:06.800
+Like frames or are they some other unit?
+
+24:06.800 --> 24:10.640
+For each time step, we have all of these different inputs.
+
+24:10.640 --> 24:17.440
+I've not worked on that specific section, but the time step we look at right now, actually
+
+24:17.440 --> 24:23.720
+do not remember with, I think it's like 16, it changes based on like if we're doing local
+
+24:23.720 --> 24:27.160
+training or not, but I believe in when we're doing it training for an experiment, we're
+
+24:27.160 --> 24:30.120
+looking at 16 time steps at a time.
+
+24:30.120 --> 24:32.760
+And that's with the frame skip.
+
+24:32.760 --> 24:33.760
+Okay.
+
+24:33.760 --> 24:38.480
+Maybe like, I guess two seconds, something like that.
+
+24:38.480 --> 24:44.800
+You mentioned that you do a lot of different types of transformations to, that a big part
+
+24:44.800 --> 24:51.240
+of the challenge here is figuring out how to feed information into these LSTMs, sounds
+
+24:51.240 --> 24:55.400
+like a big part of that is using embeddings, but there's some other things that you're doing
+
+24:55.400 --> 25:00.520
+to, in terms of representations for making all of this tractable.
+
+25:00.520 --> 25:01.520
+Sure.
+
+25:01.520 --> 25:07.160
+And besides embeddings, well, so one other thing that I've worked on recently is adding
+
+25:07.160 --> 25:08.160
+a mini map.
+
+25:08.160 --> 25:13.760
+So this is a part of the game that everyone, all the humans get to see and opening up
+
+25:13.760 --> 25:14.760
+five never got to see.
+
+25:14.760 --> 25:19.280
+And it's just this high level view of like what vision you have, where are the enemy units
+
+25:19.280 --> 25:21.480
+are, things like that.
+
+25:21.480 --> 25:26.440
+And the way we handled this, because we couldn't talk to the client code, is just trying
+
+25:26.440 --> 25:28.320
+to recreate the vision.
+
+25:28.320 --> 25:34.000
+So what we have is this input, we start out with this large grid.
+
+25:34.000 --> 25:39.560
+It's 260 by 260, and we draw all of, where all the vision is on the map.
+
+25:39.560 --> 25:43.160
+So you get vision from towers, from heroes, and we overlay it.
+
+25:43.160 --> 25:45.520
+And so you've got this one nice vision channel.
+
+25:45.520 --> 25:49.520
+And then we add other channels, like, here's where your heroes are, and another channel
+
+25:49.520 --> 25:53.160
+for where your words are, and another channel for all these things.
+
+25:53.160 --> 25:59.280
+A channel for your creeps, the minions.
+
+25:59.280 --> 26:05.640
+So we add all these up, and then we actually put that through a confnet for the model
+
+26:05.640 --> 26:06.640
+to understand.
+
+26:06.640 --> 26:12.440
+And so far it has been helping with word placement, or so we think it's hard, word placement
+
+26:12.440 --> 26:18.240
+is really hard to figure out, because it's a, it's something that requires a lot of strategy.
+
+26:18.240 --> 26:22.600
+And not every single, word placement makes sense for every single part of the game.
+
+26:22.600 --> 26:23.600
+What's a word?
+
+26:23.600 --> 26:24.600
+Oh, sorry.
+
+26:24.600 --> 26:25.600
+So the word is something that gives you vision, remember?
+
+26:25.600 --> 26:28.600
+Just like the entire map is covered because it's all war.
+
+26:28.600 --> 26:34.000
+So what you really want to, like, you can't evaluate, that's the thing that makes this
+
+26:34.000 --> 26:37.440
+really complex, is that it's hard to evaluate good behavior.
+
+26:37.440 --> 26:42.680
+A lot of this behavior we can't see till really late in the game.
+
+26:42.680 --> 26:47.880
+So I guess for the word placement, like, it's, I'm sorry, but late in the game, I don't
+
+26:47.880 --> 26:52.120
+mean this actual game, I mean, late in training, like, and that's something we actually don't
+
+26:52.120 --> 26:58.640
+have a lot of, without comparing to agents that are similar skill levels.
+
+26:58.640 --> 27:01.040
+It's hard to tell, like, are you doing this well or not?
+
+27:01.040 --> 27:02.960
+And that's part of the reason we had this show match.
+
+27:02.960 --> 27:07.720
+But we have a scripted bot we made a year ago that, you know, it does okay.
+
+27:07.720 --> 27:10.320
+I think it beats me pretty consistently.
+
+27:10.320 --> 27:15.680
+But in an average play, I would probably be able to beat it, because you can't, you can't
+
+27:15.680 --> 27:17.800
+script these complex behaviors that well.
+
+27:17.800 --> 27:23.240
+That's the thing we ran into first, is you just, you can't create a, you know, a set
+
+27:23.240 --> 27:27.560
+of, you know, the open A5 with just scripting, you have to have something else that's learning
+
+27:27.560 --> 27:31.640
+that knows, can figure out these complex strategies, because you can't, you just, you can't
+
+27:31.640 --> 27:33.280
+code them up.
+
+27:33.280 --> 27:39.240
+You mentioned, I guess what I think of as kind of a reward attribution type of a problem,
+
+27:39.240 --> 27:48.800
+meaning things happen in the game, and if you're just measuring the agents progress on
+
+27:48.800 --> 27:55.680
+wins and loses, you don't really know until late in training.
+
+27:55.680 --> 28:01.560
+But I read something about how there's been some experimentation with that binary type
+
+28:01.560 --> 28:08.920
+of a reward relative to more incremental types of a reward, so looking at, you know, kills
+
+28:08.920 --> 28:16.880
+and hits and things like that, specifically some experiments that were done comparing
+
+28:16.880 --> 28:20.800
+like sparse rewards versus dense rewards.
+
+28:20.800 --> 28:26.440
+So yeah, this is something, actually, that interestingly enough, we have been, we have
+
+28:26.440 --> 28:27.840
+been doing some research on.
+
+28:27.840 --> 28:33.360
+So it, when we first started doing one V1 bot, one of the things that we really wanted
+
+28:33.360 --> 28:39.400
+it to learn was creep blocking, and it's the idea that just statistically, if your creeps
+
+28:39.400 --> 28:44.840
+end up in the middle of the map, sorry, slowly over, middle of the map, like into the enemy's
+
+28:44.840 --> 28:50.160
+territory, the enemy can start taking those creeps and killing them faster, and you tend
+
+28:50.160 --> 28:54.440
+to statistically do worse, and so a lot of people tend to creep block at the beginning
+
+28:54.440 --> 28:58.560
+of the game where they'll stand in front of their creeps and prevent them from running
+
+28:58.560 --> 29:04.360
+to the beginning of the map, and so if your opponent is not doing that, what they'll,
+
+29:04.360 --> 29:08.520
+they will end up getting their creeps on your side, your tower will try to take them
+
+29:08.520 --> 29:12.080
+out, and you generally do better that way.
+
+29:12.080 --> 29:15.240
+They couldn't even, with all the training they did, they never saw this happen for one
+
+29:15.240 --> 29:20.120
+V1, so they had to do this shaped reward, basically, you know, give a reward for blocking
+
+29:20.120 --> 29:22.400
+the creeps.
+
+29:22.400 --> 29:28.280
+So however, when we did let it run longer, and this was, I think, earlier this year, we
+
+29:28.280 --> 29:34.040
+actually did start seeing a little bit of that behavior, so I think when it comes to sparse
+
+29:34.040 --> 29:37.320
+or dense reward, and this is, again, this is just off of some of the experiments we've
+
+29:37.320 --> 29:43.720
+seen, you can sometimes see these, like, these good behaviors that you could get out of a
+
+29:43.720 --> 29:48.520
+dense reward, but you have to give it a lot more training time, and so it's really as
+
+29:48.520 --> 29:52.800
+a trade-off of, like, how much, like, how much training time do you need to give it?
+
+29:52.800 --> 29:58.840
+So we do give rewards for kills and things like that, but, you know, in taking towers,
+
+29:58.840 --> 30:02.960
+you get the gold reward, you have to do that, otherwise it would just, I think, it would
+
+30:02.960 --> 30:10.240
+just take too long to see any good results, and sort of interesting fact of this, and
+
+30:10.240 --> 30:15.120
+we saw, actually, in the recent benchmark, is the third game.
+
+30:15.120 --> 30:21.560
+And one of the things that happened is the crowd picked the draft, and so the draft was
+
+30:21.560 --> 30:23.560
+terrible for opening I-5.
+
+30:23.560 --> 30:24.560
+Absolutely terrible.
+
+30:24.560 --> 30:31.320
+It predicted a 2.9% chance of winning, which is pretty abysmal, so it did lose, but the
+
+30:31.320 --> 30:36.560
+interesting thing was, is that we started to see these behaviors where the heroes would
+
+30:36.560 --> 30:40.760
+sacrifice themselves to take a tower, which is kind of strange, like, why are you changing
+
+30:40.760 --> 30:46.440
+your behavior so much to do something like taking out of tower?
+
+30:46.440 --> 30:52.600
+And we realized, is that we've kept the rewards, you know, symmetric, you know, if you win,
+
+30:52.600 --> 30:59.000
+you get one, if you lose, you get negative one, and, but, you know, standard aisle practice,
+
+30:59.000 --> 31:03.120
+you generally have, you know, scam a term that is your horizon, right?
+
+31:03.120 --> 31:08.880
+And so you generally discount the rewards, positive and negative.
+
+31:08.880 --> 31:12.480
+And so if you think you're going to win, it makes sense, you're going to try to drag
+
+31:12.480 --> 31:17.240
+that game out as long as you can to make sure that that penalty is as low as possible.
+
+31:17.240 --> 31:21.880
+So I know, right, it's kind of hilarious.
+
+31:21.880 --> 31:22.880
+And this is what we saw.
+
+31:22.880 --> 31:26.400
+So now we're like, well, now some of that behavior makes sense.
+
+31:26.400 --> 31:29.520
+You sacrifice yourself because of the towers down.
+
+31:29.520 --> 31:32.560
+Then there's more time in the game, because now the enemy team is going to have to work
+
+31:32.560 --> 31:36.080
+harder to keep it balanced.
+
+31:36.080 --> 31:40.120
+And if you eventually lose, you're like, okay, well, now I, you know, got a much smaller
+
+31:40.120 --> 31:45.320
+penalty, but it's hard because you don't want the two teams collaborating, right?
+
+31:45.320 --> 31:50.200
+Yeah, like in general, asymmetrical words are not good.
+
+31:50.200 --> 31:55.000
+And we did try a little experiment so far, trying to see how that works, but like, it's
+
+31:55.000 --> 31:56.000
+tricky.
+
+31:56.000 --> 31:57.840
+It's really tricky to try to get these things right.
+
+31:57.840 --> 32:02.840
+Yeah, you end up with a lot of possibilities for unintended consequences and things that
+
+32:02.840 --> 32:06.520
+unfurl and unexpected ways, I would think.
+
+32:06.520 --> 32:07.520
+Oh, yeah.
+
+32:07.520 --> 32:09.040
+I mean, it's just so many tweaking.
+
+32:09.040 --> 32:12.920
+I think that's, and that's the reason we're doing the research, right, is to figure all
+
+32:12.920 --> 32:13.920
+these things out.
+
+32:13.920 --> 32:19.520
+But even like a few weeks ago, we were talking about how just changing our learning rate.
+
+32:19.520 --> 32:23.120
+We're just like, hey, why don't we explore an experiment with a lower learning rate?
+
+32:23.120 --> 32:24.120
+And oh, guess what?
+
+32:24.120 --> 32:25.120
+That helps.
+
+32:25.120 --> 32:26.720
+Like, there's just, there's so many.
+
+32:26.720 --> 32:30.480
+No, it's too, too bad we can't have the opening of five figure out how to do all these
+
+32:30.480 --> 32:31.480
+things, right?
+
+32:31.480 --> 32:37.000
+You've talked quite a bit about reinforcement learning and some of the papers that I've
+
+32:37.000 --> 32:47.040
+seen referred to in the context of the Open AI 5 and the previous versions were PPO and
+
+32:47.040 --> 32:49.520
+Rainbow and Observe and look further.
+
+32:49.520 --> 32:55.320
+Do you, can you talk a little bit about the roles that each of these plays and how they're
+
+32:55.320 --> 32:58.720
+used in the kind of the training regime?
+
+32:58.720 --> 32:59.720
+Sure.
+
+32:59.720 --> 33:04.720
+So we basically use a pretty scaled out version of PPO.
+
+33:04.720 --> 33:11.880
+We have our training setup, we call, I guess it's training framework, we call rapid, that
+
+33:11.880 --> 33:16.760
+allows us to scale out a lot of, like all of this training, because you know, with reinforcement
+
+33:16.760 --> 33:19.040
+learning, you need lots and lots of samples.
+
+33:19.040 --> 33:27.000
+So we have, I think in our recent blog post, we were talking about how we have 180 days,
+
+33:27.000 --> 33:31.120
+180, sorry, years of training every single day.
+
+33:31.120 --> 33:35.440
+And that's because we're running all of these games in parallel.
+
+33:35.440 --> 33:40.400
+So yeah, so again, it's just, it's basically scaled up PPO.
+
+33:40.400 --> 33:45.880
+One of our, our recent experiment had, so our recent large experiment that we used for
+
+33:45.880 --> 33:51.240
+the benchmark had 80,000 CPUs and 1000 GPUs.
+
+33:51.240 --> 33:55.680
+And about half of those were optimizers, the other half were just doing roll outs.
+
+33:55.680 --> 33:59.160
+And we also have infrastructure for doing evaluations, so that we have like this giant
+
+33:59.160 --> 34:02.840
+tensed word that tells us like how everything's going, we look at sample reuse, we look
+
+34:02.840 --> 34:07.760
+at the, you know, the mean reward, we look at all these different aspects of the training
+
+34:07.760 --> 34:10.520
+to figure out like, is this going well for us?
+
+34:10.520 --> 34:13.760
+Is it not like, what can we tweak, what can we not tweak?
+
+34:13.760 --> 34:17.160
+It's a really great framework for running experiments.
+
+34:17.160 --> 34:20.560
+And we use another teams at OpenAI as well.
+
+34:20.560 --> 34:23.040
+So there are two different types of nodes.
+
+34:23.040 --> 34:27.320
+One was for updates and the other was for something else, what were those two?
+
+34:27.320 --> 34:31.720
+So part of what Rapid does is it does, it handles a lot of like the scaling out.
+
+34:31.720 --> 34:36.680
+We have a whole, you know, different clusters and machines that are used for the whole training
+
+34:36.680 --> 34:37.680
+process.
+
+34:37.680 --> 34:43.160
+And one of those are the optimizers, the optimizers handle all the back prop, you know,
+
+34:43.160 --> 34:47.520
+it's, you know, taking the new parameters, spreading them out to the machines again, combining
+
+34:47.520 --> 34:48.520
+the parameters.
+
+34:48.520 --> 34:52.160
+And then the other half of the machines for the most part are the roll outs.
+
+34:52.160 --> 34:58.960
+And we have both GPU roll outs and non-GPU roll outs because you, so it's basically if you
+
+34:58.960 --> 35:03.600
+want your, as you're running the game, doing your forward passes, do you want to be run
+
+35:03.600 --> 35:04.600
+on GPU?
+
+35:04.600 --> 35:08.600
+And recently we've made that infrastructure change so that it can run on GPU.
+
+35:08.600 --> 35:14.800
+And that does help us not as much speed up training except when we've made the models
+
+35:14.800 --> 35:19.000
+sufficient size than it actually is faster to run it on a GPU.
+
+35:19.000 --> 35:20.480
+What is a roll out specifically?
+
+35:20.480 --> 35:24.440
+Oh, yeah, so roll out is just playing the game, right?
+
+35:24.440 --> 35:27.160
+So it's creating samples.
+
+35:27.160 --> 35:31.440
+So we have all these machines that are creating samples playing the game, you know, seeing
+
+35:31.440 --> 35:34.800
+here's an observation, here's the, you know, here's the next observation, next action,
+
+35:34.800 --> 35:35.800
+you know, your action.
+
+35:35.800 --> 35:39.120
+And then all that gets packaged up and sent to the optimizers.
+
+35:39.120 --> 35:43.160
+And, and then we also have a bunch of machines that do evaluations.
+
+35:43.160 --> 35:48.200
+And so the able to do is, you know, take a snapshot of the parameters and play again against
+
+35:48.200 --> 35:49.760
+our scripted bot.
+
+35:49.760 --> 35:51.640
+And then it will report the results.
+
+35:51.640 --> 35:56.240
+Of course, those, that's usually only useful for the very early part of training because
+
+35:56.240 --> 35:59.840
+again, the scripted bot can only do so much.
+
+35:59.840 --> 36:04.440
+So it's used for new experiments, but later on we have this other piece of infrastructure
+
+36:04.440 --> 36:10.920
+we call scoreboard where we can snapshot parameters played against other snapshots and see how
+
+36:10.920 --> 36:11.920
+they compare.
+
+36:11.920 --> 36:16.960
+And that's really how we decide, you know, coming up to a match if like what is really
+
+36:16.960 --> 36:20.280
+the best of something because otherwise you just can't tell.
+
+36:20.280 --> 36:26.120
+And at a certain point, like even with all these snapshots, we still need humans to evaluate
+
+36:26.120 --> 36:30.640
+because there are, there are probably, as I said, I mentioned this early before very
+
+36:30.640 --> 36:36.880
+quickly, the problem of strategy collapse is what we've been calling it where your opening
+
+36:36.880 --> 36:42.120
+of five might be learning only a small handful of strategies and maybe not learning everything
+
+36:42.120 --> 36:44.360
+just hasn't practiced that.
+
+36:44.360 --> 36:51.440
+So you have five different models that come from five different training iterations.
+
+36:51.440 --> 36:58.200
+Could each of those play a different hero in the same game on the same team?
+
+36:58.200 --> 36:59.200
+You could do that.
+
+36:59.200 --> 37:03.240
+It would require extra infrastructure work.
+
+37:03.240 --> 37:08.080
+Right now we're just sort of doing all of them in parallel with the same brain.
+
+37:08.080 --> 37:09.560
+So they all do have the same brain.
+
+37:09.560 --> 37:16.400
+They're just giving them different inputs and running all of the four passes in parallel.
+
+37:16.400 --> 37:19.920
+You've got these brains that you train for the heroes.
+
+37:19.920 --> 37:25.360
+They use these embedding so that they can, you know, the brain can control any of the heroes
+
+37:25.360 --> 37:30.800
+that open AI five supports at a given time.
+
+37:30.800 --> 37:36.880
+And then it sounds like you play different versions, one against the other to determine
+
+37:36.880 --> 37:40.320
+which ones are best, how long do you play them against?
+
+37:40.320 --> 37:45.720
+Is it a certain number of games or a certain number of quote unquote years, days of play
+
+37:45.720 --> 37:52.440
+to assess, you know, a given model versus against another model?
+
+37:52.440 --> 37:59.040
+So the way our scoreboard is set up right now is that it will try to find the like most
+
+37:59.040 --> 38:04.560
+recent agent that's been uploaded and played against other ones that have the same environment.
+
+38:04.560 --> 38:09.120
+The environment just basically means like we can set up an environment.
+
+38:09.120 --> 38:14.400
+So it's just like sniper versus sniper in which we've done a lot of tests for that.
+
+38:14.400 --> 38:19.080
+And then more recently we've had the ones where we have our 18 hero set.
+
+38:19.080 --> 38:24.080
+So scoreboard looks around and says, okay, like who are the new agents and tries to, you
+
+38:24.080 --> 38:31.120
+know, bias it so they get the most new games, but then other agents like also get games.
+
+38:31.120 --> 38:33.280
+I think it tops out around thing.
+
+38:33.280 --> 38:37.680
+I don't know the exact numbers, but something around maybe like 10,000 games, it'll start
+
+38:37.680 --> 38:42.880
+to ignore you entirely, because it's like, well, we've established what your skill level
+
+38:42.880 --> 38:44.480
+is.
+
+38:44.480 --> 38:49.240
+But other ones, yeah, it's just basically on a need basis, depending on the, because so
+
+38:49.240 --> 38:52.720
+many people are constantly uploading things for their individual experiment, because once
+
+38:52.720 --> 38:56.360
+you get past the scripted bot, you can't really tell very well.
+
+38:56.360 --> 38:57.360
+Okay.
+
+38:57.360 --> 39:03.080
+So it's kind of like a CICD system, you create this model, you experiment with it.
+
+39:03.080 --> 39:08.000
+And then you upload it into this testing infrastructure that basically just pits it against
+
+39:08.000 --> 39:14.600
+other models and determine how it fairs against them.
+
+39:14.600 --> 39:23.080
+Maybe jumping ahead to the actual benchmark match, can you give us the highlights of the
+
+39:23.080 --> 39:24.080
+benchmark match?
+
+39:24.080 --> 39:25.560
+First of all, what were the results?
+
+39:25.560 --> 39:26.560
+Yeah.
+
+39:26.560 --> 39:31.800
+So the results of the benchmark match were the first two games, opening a 5-1 against
+
+39:31.800 --> 39:33.040
+the humans.
+
+39:33.040 --> 39:38.160
+And just one thing you have to understand, like these humans have played for 10,000 hours
+
+39:38.160 --> 39:39.160
+against this game.
+
+39:39.160 --> 39:41.720
+These people are very good at what they do.
+
+39:41.720 --> 39:47.600
+The players we had at the game were like, were some were previous pros, but our casters,
+
+39:47.600 --> 39:52.440
+but they understand the game so well that they're able to talk to other people about it.
+
+39:52.440 --> 39:55.240
+And I think that's really a great demonstration of how well they know it.
+
+39:55.240 --> 40:01.960
+So they're excellent, 99.95% percentile players.
+
+40:01.960 --> 40:09.880
+And they lost the first two games, and the only reason they won the last game was because
+
+40:09.880 --> 40:17.880
+of this adversarial drafting that our audience and Twitch chat were able to assist with.
+
+40:17.880 --> 40:20.080
+So that's the big thing.
+
+40:20.080 --> 40:25.440
+And I think it's not as much, there's a couple things with the drafting results.
+
+40:25.440 --> 40:29.080
+I mean, so the first ones, for the first few minutes of the first two games, it was
+
+40:29.080 --> 40:31.920
+tracking pretty even, but that's how most games go.
+
+40:31.920 --> 40:36.000
+You don't really know if you're winning or not even if things are even like, well,
+
+40:36.000 --> 40:39.680
+opening five got a kill, they got a kill, it was sort of even, but then things changed
+
+40:39.680 --> 40:44.000
+because then opening five starts pushing and they push their lanes and pushing the lanes
+
+40:44.000 --> 40:49.000
+basically means going to the other side of the base and really trying to take the other
+
+40:49.000 --> 40:50.160
+side.
+
+40:50.160 --> 40:54.760
+So even humans had to sacrifice a lot to get some of their first towers.
+
+40:54.760 --> 40:57.760
+And so even though they were getting the towers, it didn't mean that they're really ahead
+
+40:57.760 --> 41:00.120
+because they had to sacrifice so much.
+
+41:00.120 --> 41:05.320
+And then after that, it just kind of went uphill for opening five.
+
+41:05.320 --> 41:10.520
+The fact that the game opens up late in the game is it have to do with that open AI is
+
+41:10.520 --> 41:16.560
+kind of figured out some the right time to start pushing or is it do you see like the
+
+41:16.560 --> 41:22.160
+culmination of some longer term strategy that open AI had been playing all along that,
+
+41:22.160 --> 41:25.680
+you know, either the humans were oblivious to or couldn't effectively counter or something
+
+41:25.680 --> 41:27.320
+like that.
+
+41:27.320 --> 41:31.960
+So I think it's both and it's again, because I think this is actually a complex problem
+
+41:31.960 --> 41:38.000
+because, you know, a lot of professional games even will be pretty even at the beginning
+
+41:38.000 --> 41:39.640
+or even just amateur games.
+
+41:39.640 --> 41:43.560
+So having a advantage at the very beginning does not mean you'll have an advantage later
+
+41:43.560 --> 41:47.120
+in the game, but it can, it's sort of a hard answer.
+
+41:47.120 --> 41:50.800
+I think the thing, how I was talking really about the asymmetric awards, we did start
+
+41:50.800 --> 41:55.920
+doing an experiment where we said, okay, fine, no penalties, right?
+
+41:55.920 --> 42:00.800
+And the games do finish faster because they're trying to maximize that reward.
+
+42:00.800 --> 42:05.120
+So it could be, I think it's a little above, if it's, you know, most games do start out
+
+42:05.120 --> 42:06.120
+even.
+
+42:06.120 --> 42:13.000
+But then also, I think, you know, open AI 5 is motivated to, you know, make it a little
+
+42:13.000 --> 42:14.960
+longer than normal.
+
+42:14.960 --> 42:17.760
+Hmm, where are the humans down?
+
+42:17.760 --> 42:20.720
+Yeah, there you go.
+
+42:20.720 --> 42:26.880
+So it's, yeah, it's all these things, this is why I think after TI certainly will be doing
+
+42:26.880 --> 42:31.280
+a lot more like ablation studies, things like that, to figure out exactly how much of a
+
+42:31.280 --> 42:34.720
+contribution each of these things make, because right now we're just sort of rushing to
+
+42:34.720 --> 42:39.680
+the end, trying to make the best open AI 5 we can, but we really want to understand more
+
+42:39.680 --> 42:45.240
+in depth how, how each of these little knobs affects the performance.
+
+42:45.240 --> 42:51.040
+Are there any other observations that are noteworthy coming out of the benchmark?
+
+42:51.040 --> 42:52.360
+I mean, certainly there are.
+
+42:52.360 --> 42:58.760
+What were some of the main things that, you know, either the open AI team or the audience
+
+42:58.760 --> 43:07.800
+or the commentators observed about the way open AI had learned to play relative to humans?
+
+43:07.800 --> 43:13.200
+Yeah, so I don't know too much about specific strategies.
+
+43:13.200 --> 43:18.200
+I feel like you have to have a certain level of Dota understanding to really understand
+
+43:18.200 --> 43:19.400
+how these things work.
+
+43:19.400 --> 43:25.600
+One thing the commentators did say is that they tend to go very much for pushing lanes,
+
+43:25.600 --> 43:27.920
+which means that like they'll just kind of go straight forward.
+
+43:27.920 --> 43:34.200
+There, again, there are numerous valid strategies in Dota because it is a very complex game.
+
+43:34.200 --> 43:41.480
+They tend to take on these more, I guess, hard fought strategies like where you just kind
+
+43:41.480 --> 43:46.520
+of go for it in some cases and they have the confidence to make it through most of the
+
+43:46.520 --> 43:47.840
+time.
+
+43:47.840 --> 43:50.920
+Not always, but they, and they also support each other.
+
+43:50.920 --> 43:55.000
+That's the other thing that we saw in the last even our internal games is that we have
+
+43:55.000 --> 44:01.560
+this, this Piper parameter called Team Spirit and what we do is, you know, if we turn it
+
+44:01.560 --> 44:03.360
+up, it's basically it's like a shared reward.
+
+44:03.360 --> 44:08.560
+So if the higher it is, the more reward you get for some of your teammates kills rather
+
+44:08.560 --> 44:11.240
+than just one of your kills.
+
+44:11.240 --> 44:15.760
+And interesting things as down at zero, they play terribly and if it's a one, they play
+
+44:15.760 --> 44:16.760
+terribly.
+
+44:16.760 --> 44:20.040
+So there is a mid-ground where you have to be a little bit selfish, but also care about
+
+44:20.040 --> 44:23.160
+your teammates enough to go help them when they're dying.
+
+44:23.160 --> 44:28.000
+But it does, it is interesting, they seem to play more collaboratively than humans at
+
+44:28.000 --> 44:29.000
+times.
+
+44:29.000 --> 44:31.280
+I'm seem to care about each other a little more.
+
+44:31.280 --> 44:35.080
+So I think that is part of the reason that they have done so well.
+
+44:35.080 --> 44:41.200
+You mentioned or I saw in a video somewhere, one of the commentators was talking about
+
+44:41.200 --> 44:44.760
+some strategy that he observed the bots playing.
+
+44:44.760 --> 44:48.600
+I think it was something like keeping the center of the board clear or something to that
+
+44:48.600 --> 44:52.440
+effect that, you know, it took him eight years to figure out or something.
+
+44:52.440 --> 44:53.440
+Yeah.
+
+44:53.440 --> 44:59.880
+So at our first, I think, so we had a, we published a video in a blog post a while back.
+
+44:59.880 --> 45:05.320
+And one of the interesting things about the Dota board is that it's not symmetrical.
+
+45:05.320 --> 45:08.280
+So I mean, it's sort of symmetrical, but there are some different parts.
+
+45:08.280 --> 45:16.360
+And so what Blitz, who was commentating that those games was saying is that there are,
+
+45:16.360 --> 45:21.200
+like, so bottom, the bottom towers on the radiant side are surrounded by forests.
+
+45:21.200 --> 45:25.360
+So it's actually really hard to defend those towers.
+
+45:25.360 --> 45:29.640
+And so his advice is like if you're playing radiant, don't even bother.
+
+45:29.640 --> 45:33.720
+Just let them take those towers because you have a much better chance of taking out the
+
+45:33.720 --> 45:37.560
+enemy and your mid towers and your top towers if you're radiant.
+
+45:37.560 --> 45:46.640
+So it just says, just said that it's like it's very hard to defend the ones in the weeds.
+
+45:46.640 --> 45:53.440
+So again, there's a lot of a lot of strategies there and it's I think the kind of the questions
+
+45:53.440 --> 45:55.440
+you're asking me is like one of these high level strategies.
+
+45:55.440 --> 46:01.040
+It's part of the reason we had these very well practice humans come look at these things
+
+46:01.040 --> 46:05.880
+because these are things that a lot of us just as, you know, as machine learning engineers
+
+46:05.880 --> 46:11.560
+and researchers, we can't spot ourselves because it requires so many hours of gameplay
+
+46:11.560 --> 46:15.720
+that we haven't done yet.
+
+46:15.720 --> 46:24.200
+So maybe to wrap up, can you talk a little bit about how this fits into the broader
+
+46:24.200 --> 46:27.200
+landscape of projects at OpenAI?
+
+46:27.200 --> 46:32.600
+You mentioned that the next big challenge is TI.
+
+46:32.600 --> 46:41.120
+Is this OpenAI 5 allowed to compete in TI like for the 30, 40 million or is it just a
+
+46:41.120 --> 46:46.040
+milestone or are you planning some additional benchmarking kind of there?
+
+46:46.040 --> 46:51.800
+Yeah, so we're just doing this for, I mean, again, OpenAI is a research organization.
+
+46:51.800 --> 47:01.400
+So we're not planning on being part of the human pool as we're not entering a human.
+
+47:01.400 --> 47:08.080
+But I think the main thing for us is really just to see how well we can get OpenAI 5 to work.
+
+47:08.080 --> 47:14.800
+That's our main and only goal is feeling to see, can we get super human performance from
+
+47:14.800 --> 47:16.640
+reinforcement learning and self play?
+
+47:16.640 --> 47:22.400
+Well, Chris, you thanks so much for taking the time to explain all this complicated stuff
+
+47:22.400 --> 47:29.760
+to us and help us understand what OpenAI is doing and why you're also excited about
+
+47:29.760 --> 47:31.760
+the OpenAI 5 playing Dota.
+
+47:31.760 --> 47:32.760
+Great.
+
+47:32.760 --> 47:33.760
+Well, thank you for having me.
+
+47:33.760 --> 47:36.760
+It's been a pleasure.
+
+47:36.760 --> 47:40.880
+All right, everyone, that's our show for today.
+
+47:40.880 --> 47:45.840
+For more information on Christie or any of the topics covered in this episode, head over
+
+47:45.840 --> 47:50.920
+to twimmelai.com slash talk slash 176.
+
+47:50.920 --> 47:54.560
+If you're a fan of the podcast, we'd like to encourage you to head to your Apple or
+
+47:54.560 --> 47:59.320
+Google podcast app and leave us a five-star rating and review.
+
+47:59.320 --> 48:03.600
+The reviews help inspire us to create more and better content and they help new listeners
+
+48:03.600 --> 48:06.040
+find and enjoy the show.
+
+48:06.040 --> 48:32.800
+As always, thanks so much for listening and catch you next time.
+
