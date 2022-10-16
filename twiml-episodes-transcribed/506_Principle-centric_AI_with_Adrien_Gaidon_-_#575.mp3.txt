@@ -1,0 +1,543 @@
+All right, everyone. Welcome to another episode of the Twemal AI podcast. I am, of course,
+your host, Sam Charrington. And today I'm joined by Adrian Gaden, head of machine learning
+research at TRI, the Toyota Research Institute. Before we get going, be sure to take a moment
+to hit that subscribe button wherever you're listening to today's show. Adrian, welcome
+back to the podcast. We last spoke in May of 2019, believe it or not. And we had a great
+conversation. I encourage everyone listening now to check back to episode 269 where we discussed
+advancing autonomous vehicle development using distributed deep learning, a lot of what
+you were doing around MLOPS and kind of productionalizing these large scale models. It was a great
+conversation, and I'm super excited to have you back on the show. Sam, it's really my pleasure,
+and it's been too long, so I'm really glad we get to chat. We're going to spend some time talking
+about among other things, data-centric AI and some of the things you're doing from a synthetic
+data perspective. But to get us started, why don't you introduce yourself, reintroduce yourself
+to our audience, and we can spend a bit of time talking about what's new since May 2019 for you.
+Yeah, okay, sounds good. Thanks, Sam. Yes, so hey everyone. My name is Adrian Guedon, but you can say
+it in the American way, Adrian Guedon. So I'm French, obviously, but I've been living in the Bay
+area for five years now. I've been working in computer vision and machine learning for almost
+14 years. Ten years in industry and five years at TRI as leading the machine learning research
+team there. One of the things that characterized my research is a lot about going beyond supervised
+learning. I have labeled data myself back in the day, a few people that know the Pascal VOC
+challenge, which kind of predated image nets. We're going to Oxford, a famous visual geometry group,
+and clicking on pixels, and then my hate for labeling started around that time, and so that guided
+a lot of my research, because I think clicking on pixels is not the way to AI. And so treating
+machine learning as a problem of really finding ways that machines can learn in a more
+efficient way without supervision. And so I did a lot of research on using synthetic data. I'm
+sure we're going to get to talk about today, but also self-supervised learning. Probably one of
+the things that we've been most well known for, especially in the autonomous driving space,
+is we've been doing a lot of self-supervised learning and monocular depth estimation,
+which has been actually deployed in production and is used in various applications, not just
+autonomy, but something that is near and dear to my heart, which is saving lives. As you know,
+there's 1.3 million fatalities on the road every year. And so that's something that keeps me up
+and motivated to work on this very important problem, in addition to deep learning and everything
+being super, super cool. So yeah, so basically that's who I am as a scientist and as a person,
+I love climbing my family and stuff like that. And with COVID, I got to spend a lot of time with
+my daughter and actually learn some things about how humans learn, which we're sure we could get
+to talk about that too. So yeah, happy to be here. Awesome, awesome. Let's maybe talk a little bit
+about your focus as a researcher at TRI and some of the main things that you think about. Yeah, for
+sure. So as I mentioned, going beyond supervised learning has been a big area of research for us,
+and it's always been a very interesting challenging position to work as a researcher in industry,
+because you have to focus on science, this big breakthroughs, have an impact and
+but at the same time, it needs to be useful. So we call this, you know, the pastor Quadrant,
+you know, it's like you have the curiosity-driven research, you have the problem solving kind of
+research, and then you have where we are at TRI, which is really nice, which is where use inspired.
+So we're not necessarily solving the problem that's right now for the next six months,
+but we're listening to all the people that have all these problems and all these products that
+they contribute to. And then we're trying to extrapolate a little bit beyond, in say like three
+years or something like that, to say, what is actually the problem that if we hit it at the base,
+if we work on the foundations, it's going to have a massive impact. You know, like you're talking
+about platforms regularly and things like that. It's a bit the same thing, but except with
+infrastructure, which, you know, was a topic of our podcast, and we talked about the platform
+of tooling and infrastructure to enable people to do machine learning. Now it's a bit more of
+the scientific foundations, the scientific platform. The ideas that are, again, going to be largely
+beneficial to, you know, for robotics applications. One of the big things we want to do is we want to
+make useful machines that amplify people, whether they be cars, whether they be robots, or whether
+they be just programs, you know, and virtualize. Although a lot of the research we do is about
+physical sensory motor machines. And that's something that is really exciting. I was writing in our
+car recently, you know, and we have robots in the office that move stuff around. And there's no
+avoiding gravity and reality and all the kind of problems. You know, your robot breaks or your
+car does something bad. It's something real, you know, it's not something you can avoid. So all
+these concepts of, you know, AI ethics, et cetera, they're rounding. Yeah, exactly grounding and
+embodiment. It's not about a game, you know, nothing leaves the Natari for us. Everything is real
+world. Everything is high stakes and safety critical. And we take things very seriously because
+they obviously matter, because they are made of matter. So that's what we do. And so the research-wise
+scale is kind of important, but we have a kind of a nuanced notion of scale. And maybe you can
+talk about the data-centric AI there and our positioning there, which is a bit contrarian, I would say.
+So we can talk about that a bit more tomorrow. Yeah, let's just jump right into that.
+So I think, you know, in talking to folks about data-centric AI, my first few conversations I've
+been asking folks to kind of define it. And I think everybody has similar definitions, mostly
+around, you know, to be frank, kind of the way Andrew has framed it, Andrew.
+Yeah. And, you know, when we spoke, as you alluded to, you of course, I think frame it in a similar
+way, but you also have some kind of contrarian viewpoints around it. Let's kind of start there.
+What's a contrarian viewpoint that you have around data-centric AI?
+Yes. So as a French and a scientist, I love contrarian viewpoints. So let me start with an opening
+counterintuitive hook, which is, I believe that in measuring, we had tremendous progress.
+And that's why there's so much excitement and really excited about it. And I believe now we know
+how machines learn, but we don't know how to teach them. And so I think that's what's kind of
+a bit contrarian and kind of interesting. So let me explain a little bit. I think I have a contrarian
+take that we don't actually know how machines learn. I will let you continue.
+You're even more contrarian than me. You're a honorary French member now.
+So what I mean by we know what machines learn is that the genius out of the bottle,
+deep learning works so well. In 2012, I had done my PhD in video analysis and using very hard
+core math, kernel methods and everything like that. And it had to become vex. It had to have
+statistical learning guarantees. And then Kuzewski arrived and then the whole world turned upside
+down and we entered the age of empiricism of things that we have good principles or hints
+intuitions for why things work. And we managed to make things work even when we don't fully understand
+or explain. But it does work and the evidence and empirical evidence is undeniable. And the benefits
+we received in industry from it, right? Computer vision went from a very interesting
+problem because it doesn't work to a very interesting problem because it works really well. And how
+we go beyond and again, beyond and again, beyond. We know how machines learn. I agree it's kind of
+a fairly bold statement, but there's very few people in machine learning right now that are
+questioning fundamentally SGD and back propagation and deep learning. Again, because the evidence
+is kind of overwhelming. So you want to make something work, you will use a overparatized model
+that you will learn on as much data as you can get with, you know, stochastic gradient descent,
+back propagation, all the tricks of the trade and this huge cookbook that we developed through
+empiricism, right? Through a lot of experimental evidence that we collected over the year that is
+open because it's open source that is reproducible. Many people, many different people from many
+different areas have been building on top of that. So that's what I mean by we know how machines
+learn. Maybe not the best way they can learn that for sure, but a way to make them learn we know.
+But in the framework of data centric AI, what I mean by we don't know how to teach them is that
+building data sets and efficiently building data sets and efficiently teaching machines is not
+at all what everybody is doing right now. Everybody is just following a simple recipe, which is
+under the name of the scaling hypothesis, which is bigger is better, right? And we know, I think
+some people know at least that bigger is not always better. And there's obviously a trade-off,
+a fundamental trade-off. I mean, it's a physical fundamental trade-off between scale and efficiency.
+And so a question is really like how do we find this trade-off? So there is the scaling loss,
+which are very interesting, right? It's very hard to estimate, you know, there's some kind of
+the dpt scaling law versus the tinchila scaling law and did with people tune the hyper parameters
+in the right way. No stuff we learn in a PhD, which is like make sure your experiments are clean,
+you study all the extra parameters. But we have limited computation again. So there's a trade-off
+between scale and efficiency. So you can't try all the combinatorial explosion, I have hyper parameters.
+And then in the end you make assumptions and then you have different scaling laws that says,
+oh, models are much more important. Increase your model size much more for a fixed data set.
+Versus maybe data size and model size is equally important with all this foundation model research
+that's going on. But when it takes tens of millions of dollars to do an experiment or train a model,
+you have to work off of first principles. And I think this is one other thing that characterizes
+our research is something that I like to call kind of like principle-centric AI versus it's a
+bit of a different way than the data-centric AI. Because my definition of data-centric AI is a bit
+more like focusing on increasing the data, which is, you know, I think what we've seen is not
+necessarily the best principle. Yeah, I don't want to spend too much time getting contrarian
+with your point. I don't know that data-centric AI necessarily implies increasing. I think a lot of
+times the idea is spending more time and investing more effort with your data and often the implication
+is that you're curating. You're making your increasing quality, you're reducing the size of the
+data set as opposed to increasing it. Like fundamentally, I think the contrast is, hey,
+traditional academic, you know, and Kaggle Machine Learning is like, hey, we want to solve this
+problem, get more data, label it, and throw it at the model, and, you know, stochastic grade
+into sense going to figure it out for us. And data-centric AI is kind of saying, well, yeah, maybe
+spend more time on the data, and that could involve changing the way you label. It could involve
+examples that are bad for your model. It could involve using machine learning to, you know,
+decrease the size of your data set. You know, I think that there's, I think I'm intrigued by
+principle-centric AI. Like I like, there's something compelling that the way we approach AI should
+be based on principles, and one of those principles is actually data-centric. I'm like, we should be
+thinking about our data. And so I'd love to hear you elaborate a little bit more about some of the
+other principles that drive the way you think about this. Perfect. Okay, that's great. I mean,
+you know really what you're talking about because we're getting to the subtle points. I love it.
+So, okay, let me give you a little bit of, you know, a good story has some characters. So,
+let me introduce some characters. So, what is not, like, I think, principles are, and it's
+not the best way. So, there's a couple of different people in the field right now. There's
+what I call the supervisors, okay? Okay. Big tech, you know, people that label a lot, you know,
+like more data, more labels and etc. Which, honestly, is most of the really big successes, right,
+in deep learning. So, let's call them the supervisors. Okay. So, they label as much as possible.
+Again, my idea for that is that I've been labeling things, I've, and in the open world,
+I think it's an endless pursuit, you know, you're going to label forever. And we want machines to
+work for us, not us to work for machines. So, I don't think the supervisors are necessarily,
+it's what it got us where we are now, but it's not what's going to get us to the next level.
+So, I'm not one of the supervisors. Then you have another area, which actually is kind of
+important for us in driving, which is called another type of characters, which are the Geofensers,
+right? And you know, probably two of them, very well-known, you know, Waymo Cruz and like companies
+that are doing amazing work in, you know, Robotaxi, right? So, that's what's they called, like,
+a Geofence. I don't know if you've probably heard of this before, but it's basically your
+designating an area and some conditions where your machine learning model, in this case, a robot,
+right? It's going to design to operate. And you know how it's going to operate. And you have a safety
+case around it. And so, in safety critical conditions, you build a fence and you describe inside
+this fence, inside this playpen, my robot is safe, you know? So, it's like, what I do with my
+daughter when I put her in a playpen, you know, it's a Geofence, it's safe, she can be autonomous
+there. And so, again, I think the Geofensers, they're autonomous in the playpen. And it's great,
+and the whole thing is making the world your playpen, but I think it's also a bit of a challenge
+because you're trying to turn an open world into a closed world. So, it has a lot of challenges.
+So, I'm also not a Geofenser because I want to work on autonomy. I want something that scales
+that learns autonomously, that adapts, and that can be deployed in the world, right? Not just in
+the playpen. So, you have the supervisors, you have the Geofensers, and you have the ones that are
+pretty cool. I call them magicians, but you got to spell the AGI, an uppercase in magicians,
+and AGI, itchians, right? And so, the magicians are obviously the people that believe in AGI,
+and that believe that all roads lead to AGI. So, this is the open AIs, the deep minds, and a lot of
+other folks. And especially now with foundation models, people get really excited about that,
+because of the power of language, right? As an API for almost everything. And so, the magicians,
+they believe in the scaling hypothesis. So, you're right that the story has multiple different
+characters that have different interpretations of data-centric AI, et cetera. The magicians,
+they really believe that scale is the way to go. And if I train on all of the internet,
+I'm going to have AGI. And if I train a big enough model on a big enough data set,
+and I have some safeguards in place, right? So, I'm not saying that people just do this
+recklessly, because people now are more wise, then I'm going to get to AGI. I'm also not an AGI
+person. I like autonomy more than intelligence, because I want robots to be useful. I don't want
+to sleep robots to be smart. I believe that to be useful, they need to be smart. But I don't want
+them to be smart for the sake of being smart. I want them to be useful, right? And to be useful,
+they have to be autonomous. If I have to click on every pixel for every frame of a robot, for
+all my life, for it to be able to help me with my chores at home, that's not very helpful.
+I think that the principle-centric AI that we're thinking about is more inspired by a fourth
+character, which is my daughter, Cassie. And there was something weird that happened during the
+pandemic I can talk about, which is I taught my daughter seven years old now how to bike.
+And I tried for a year before, and I tried it with reinforcement learning, basically,
+which is basically put her on the bike, try it, and I catch you. I catch you when you're about
+to do something, so that way she doesn't pay too bad of a negative reward. But encourage her when
+she does well and all these kinds of things. Add some safety guardrails with the little training
+wheels, etc. And I tried for one year to basically brute force the problem with reinforcement learning.
+And as we know, reinforcement learning is not really good at simple efficiency, so at learning
+efficiently. So after one year, not so much progress. And then I had a discussion with our CEO,
+Gil Pratt, the famous roboticist, etc. And he said, oh, check out this method, which is a method
+called pedal magic. You can find it online. And I'm not going to tell you details and stuff like
+this. We could talk about it if you want. But basically, it had some principles about how you learn
+how to bike some mechanical principles that actually relate to how Cheetahs take turns and use
+their tails. It's a bit kind of a bit wacky mechanically speaking, but it has some principles
+that are physically motivated, physically grounded. And it has an exercise that it derived from
+these principles, which is basically just a mini environment and a mini training set. And I run
+my few training samples with my daughter, five minutes in this small environment. And then
+10 minutes later, she was biking. And I was like, wow, after spending a year trying so much,
+like giving her so much data, so much guidance, so much supervision, I tried the supervisor's trick,
+I tried the geofancer's trick, I tried the magician's trick, I tried everything. And then
+something completely different that was not data centric AI, because I didn't give her examples
+that related directly to the task of biking. It was not model centric AI, because I didn't change
+the hardware, like you assume bike, same daughter, same dad, it was everything the same. And so
+something happened that she learned really, really quickly. And two years later, after thinking
+about it, basically the whole pandemic, and like, what happened? How do I make machine learning
+as good as this, as fast at learning and as robust at lit, because she learned on the parking lot,
+and then we've been biking everywhere. So she's been generalizing out of the main and all these
+kind of things that we hope machine learning eventually gets to. And so this idea of principle
+centric learning principle centric AI is kind of what emerged from there. And kind of explained
+also some of the stuff, you know, some of the research we've done has worked spectacularly well,
+like the same stuff, the self-supervised stuff. And eventually, you know, like, I mean, we made
+60 papers, but half of those papers ended up in production, useful in production. And you're
+wondering, why are the other ones used in production? What happened with these particular papers that
+actually made the difference in our robust real world? And so you're trying to backward explain,
+and I found some traces of the principles and how we use those principles to either design the
+data sets or design the learning objective, and that enabled like really robust learning,
+which includes in particular one thing, which is simple efficiency. I think like, like, you know,
+finding the right way to use compute and minimize compute, but at the same time,
+use enough compute to actually learn. So I'm not a, you know, an AI extremist, you know,
+neither maximalist nor a minimalist, you know, it's not about the biggest data set, but it's also
+not about, you know, short and sweet. There's a good trade-off between scale and efficiency and
+with disgust. And I believe that principles is the way to find this trade-off.
+That's such a great story. Is principle-centric AI the fourth character?
+Exactly. Is that what you call it or is there another name for that fourth character?
+Principle-centric AI is how I think about the research and what we're doing. If you want the name
+on the characters, I would call us the educators, you know? It's like what we said is that we want
+to find ways to teach machines, right? We know the mechanism by which, you know, we design
+architectures, we learn with SGD, backprop, etc. But what we don't know is how to make a course.
+It's interesting that you say educator and course because the thing that popped up for me was
+an element of pre-training, yeah, as well as an element of curriculum learning.
+Exactly. Yeah, yeah. And you know, these words, you know, they're used in teaching in schools,
+you know, I started to teach at Stanford computer vision and I hadn't taught a course in a long time
+and I co-teached this with Juan Carlos Nebles who's also a well-known computer vision guy in
+Faye Faze Lab. And so we worked a lot on the course. He has a lot of experience and so I kind of
+learned, relearned how to teach a course from him and we taught hundreds students and I taught
+geometry, computer vision with geometry, which is also a lot of the things we had success in our
+research for driving and robotics, which is self-supervised learning using geometric principles. And I
+found that all these parallels between my daughter, between teaching at Stanford, and between
+our research papers, and as kind of like was really kind of, wow, it kind of opened the new world
+for me of like, oh, how do we be the educators that use principle-centric AI to efficiently
+teach machines? This is super interesting. So when I think about these different characters,
+the supervisors think implicitly that the path to AGI, let's say that that's the goal for
+generalize. The path to AGI is through human labor. The geofensors think that the path to AGI
+or whatever the goal is is constraints. Yeah, maybe Amari can drop it in my dock and I'll
+remember the name of the episode, but I had a really interesting conversation or a couple recently
+about the role that constraints play in ML. The magicians think that it's some nebulous notion
+of scale, which is basically or another alternatively or complementarily self-supervision, maybe.
+I think self-supervision can see one way to unlock scale. It's because you remove the bottleneck
+to be able to train that scale. But it's really scale. It kind of emerges magically from all the
+data that you're feeding it. That's what people get. I'm amazed by Dali. I'm amazed by GPD3
+who isn't when you see the inferences. But that's the thing is that what I realize is why are we
+amazed? We are amazed because we don't know how it emerged from the data. And if you like listen
+to Ilya and all the smart people, that's the same. They're like it's working because we're feeding
+it more data and also because I mean there's a lot of secrets also in feeding the data. So I'm not
+saying like magicians magic doesn't exist. It's like people have these tricks, right? And so there's
+a lot of tricks to make it work. But so the magicians is really about how to unlock the powers of
+scale. That's what they're really really good at. I think that's where it's going. But I don't think
+that's the that's the panacea. That's the end game either. I guess the question that I'm trying to
+get to is like what is that kind of fundamental one word tool or currency of the educator? Like what
+is it that they have you know perfected that is going to be that path? It's principles. It's
+principles. And so basically okay there's two types of principles. Let's like answer your question
+you said like be more precise about the principles. So there's two types of principles. There is
+the principles you teach. And there's the principles you learn, right? So the principles you teach
+are things you principles, right? So some people call this inductive biases or inductive priors
+or you name it, right? But it's basically things you you know is true about the world. You know
+Newton existed, F equals M A existed. Maybe we don't have to reinvent it. Maybe we can use that
+prior knowledge, right? I think as some of the things that I've listened to and during talk about
+in data centric AI is a lot on that also on like how do we use expert knowledge? But in a data-driven
+way, right? So it's not like they're going back to expert systems, right? It's about like how do I
+if I know some principles and it can be ethical principles, it can be legal principles if you have
+compliance because you know there's the AI act and all these regulations that are coming in AI
+and including in you know robotic space. And so if you have some principles that you want your
+system to adhere to, right? Being compliance with or common sense, you know like when we talk about
+embodiment and grounding, you know, that's what we mean. So how do we inject those principles into
+data-driven learning processes? And then there's the principle we learn from the data. So that's where
+we train on the data set and it's not just we're building autonomous prediction machines, right?
+That are just there to automate the prediction at scale, basically because that's what machine
+learning does, right? But maybe what we want to extract is not a bazillion number of predictions,
+but we want to extract, we want to learn something from what the machine learned itself. And so there's
+all this cool area of machine learning about machine learning for sciences, et cetera, you know, where
+people are discovering new physical laws maybe or finding out understanding a bit better human
+behavior because if you want to assist and amplify humans, it's not about automation, right?
+Autonomous prediction machines are there to replace, but if you want to amplify, you got to understand.
+And so this is the principles that you want to understand from data. So it's a two-way street
+in a sense. And I can give you some examples of our research where actually this already is
+happened, right? This is not just principle-centric AI, it's not just a cool expression, you know,
+it's actually just a way that I use to kind of define a little bit our successes and what we're
+actually building at TRI. Yeah, I do want to transition to that because I think while this
+philosophical conversation is really interesting, I do want to kind of make it a bit more concrete
+and talk about some of the things you're doing around self-supervised and synthetic. Before I do
+that episode that I was thinking about was my conversation with David Ha, the benefit of bottlenecks
+and evolving AI that was really almost entirely focused on this idea of constraints, not in a
+geofencing sense, but in more broadly in AI in another context. So your research, where do you
+want to start there, self-supervised? Yeah, self-supervised I think is great. So I think one of the things
+that we know about the world really well, and especially what I'm teaching at Stanford,
+is geometry, right? When we see the world, when we perceive the world, we have a lot of really good
+equations. You know, actually some of the things dates back like 3,000 years, you know, back to,
+you know, Chinese philosopher, I think Mudzi, people knowing about, you know, the pinnacle camera model
+and all these kind of things. So there's a lot of knowledge we have about how the world works in
+terms of let's say just physics of light, right? And so when you want to do computer vision,
+how do you leverage that prior knowledge? And historically, it's been in the way of we hand
+design algorithms, right? We write algorithms that solve the problem based only on our prior knowledge.
+Now with machine learning, we want to be data driven. And so we've kind of like thrown the baby
+with the bathwater and say, well, it's all in the data. And so one of the thing again, as I said,
+we are always kind of in the moderate route, which is, of course, data is powerful, but of course,
+prior knowledge is powerful too. So we want to combine both. So self-supervised learning is
+actually a really good revolution that I'm really excited about because and that we've been doing
+a lot of papers over the year. I think they're probably like 15, 20 papers at CPR, etc. I think we're
+presenting four papers at Ikra in a couple of weeks and four papers at CPR and on related topics.
+And so self-supervised learning is the way where we use these constraints or these knowledge is
+prior knowledge about the world, let's say like, you know, the reproduction equations if you're
+using the panel camera model, and we use that to as a learning objective. So in self-supervised
+learning, you're not solving directly what you want, which is dog versus cat or, you know,
+detecting a pedestrian or things like that. But what instead you're doing is you're providing a
+pre-training objective. And so there's two big areas. One that I was mentioning now is geometry,
+where actually it turns out we can solve the task, which for instance, it's a lot about predicting
+depth how far objects are because we want to avoid collision with them or we want to grasp them
+if it's a robot hand and things like that. So predicting the depth of a scene turns out you can do
+that without ever having any supervision. And so this is self-supervised learning for monodef and
+something that we have open source code. You can go to GitHub, you know, a TRI page, a repo called
+Pactnet SFM, which has 1,000 GitHub stars. And so it's very popular. People use it for all kinds
+of crazy things because you can train it only from video. So you can just feed it raw videos and
+what it will learn. It will learn to output point clouds or death maps from there. And the way it's
+trained is just by using reconstruction, but not just a black box reconstruction of critical
+pixels. And I'll tell you if they look like the pixels you should predict. Instead, it's
+predict me death map. And then if you're right, if your network weights are correct, and your death
+map will be correct. And then knowing the equations of geometry, we can recreate a past frame
+from the current frame by warping geometrically using an equation. And then if the warping
+is correct, the pixels align. And if it's not correct, the pixels don't align. The colors are not
+the same. And you're wrong, not because geometry is wrong, not because 3,000 years of history,
+human history in science is wrong. But because your neural net weights are wrong. And then you can
+do back propagation as you do. So this is going back to what I said earlier. We know how machines
+learn. We don't know how to teach them. In this instance, we know how to teach them geometry. We
+teach them by reconstruction using geometry as an equation in the middle to get the prediction.
+And then we learn using SGD back prop and the way we do it. So we have a bunch of papers. We started
+from stereo setup with two cameras, to just a singular camera, to now all the crazy sensor
+suites. And actually, we can even, you know, because we've worked on the hardest problem first,
+which is monocular camera, the reason we've done that is because the common denominator behind
+almost any platform. You have it, you know, I have it in my phone. I actually have more than one
+camera. Everybody has cameras. Cameras are everywhere. But if you solve the problem
+well enough for a single camera to predict step, then you can use it to predict that for multiple
+cameras for cameras that are stereo or not stereo for a LiDAR for any kind of sensor suites.
+And that's what we've been doing. It's a very pragmatic approach. It's not to replace everything
+with a single camera. Some applications might work with a single camera. Some definitely won't.
+But it's to be solving the common denominator. Again, this idea of a platform that foundations
+and building on top of it, right? So self-supervised learning using geometric principles to teach
+geometry to deep nets is a big thing we've been doing. And I mentioned the second way that you can do
+self-supervised learning, just for pre-training, it's contrastive learning. If probably, you know,
+heard about this, had podcasts over this, it's very, very popular. One of the very cool things we've
+done in collaboration with a really, really good machine learning professor at Stanford is called
+Teng Yuma. We've had a couple of papers at Nurebs. We had iClear spotlights and a bunch of
+papers with them on trying to make sense of self-supervised learning, especially contrastive learning.
+Why does it work? Because there's all these bells and whistles and these tricks and these
+cookbooks. And going back to the philosophical discussion about empiricism, you know, we've
+built a lot of things that work. And obviously work, we show that it works, but we don't really
+understand why. And so understanding why is really important because you have to convince people
+that are not necessarily ML believers, crazy, woohoo, you know, let's use machine learning just because
+it's cool, but actually people that need to invest real money and take real risks and, you know,
+and putting, you know, say, if you want to save lives, you need to make sure that you have a
+really good justification that your system will do so. And so understanding things a bit more
+and the theory and garnering the principles out of the data driven is really important.
+And one of the things that I'll highlight there briefly is one of the principles we found
+from self-supervised learning, which is just learn, you know, contrastive learning. So you do
+data augmentations because you know that if you change the color of things, it shouldn't change
+your predictions. So you have all these kind of data augmentations that represent properties
+like principles of invariance and equivalence that you know hold true. And you want your system to
+just adhere to those constraints again, like in this idea of constraints you were talking about.
+So you train by just saying when you're out of the constraints, when you're out,
+when you're not grounded anymore, when you're making a very weird mistake, right?
+But you're not telling it what's the solution, you're just telling stop making weird mistakes.
+And if you see enough data, it will stop making weird mistakes and what's going to happen is
+going to have something that's this pretty good initialization for it made, you know,
+a few shot transfer and like small data kind of cases, maybe something that, you know,
+in data centric AI, you get your experts to label just the right amount, but if you have good
+pre-training, you don't need more than that. Necessary but sufficient. So what we found is why
+does self-surprise learning and particularly contrastive learning works so well? And and
+particular, a benefit that we found was very surprising is that it's robust because you would
+think if you're in the supervisors mindset that's okay, Adrian is saying supervisors is bad,
+but it's just a matter of cost. If you can pay the cost, you know, if you're return on investments,
+justifies labeling forever, just label forever and it's the best thing to do, right?
+Wrong. Because actually we know that if you just collect the, you know, data has bias,
+natural data has biases, right? And if you just label more and label more and label more,
+you're going to increase, you're going to create distortions, you're going to have human biases
+injected in the labels, mistakes or, you know, you're going to label more the mode and all these kind
+of things that yields issues. Yeah, particularly in your case in AV where you're collecting a lot of
+data of the usual thing happening. The problem is all about the corner cases that don't happen
+very frequently. Ding ding exactly right. Yep, absolutely. And so, and so self-surprise learning,
+what we found surprisingly is more robust to the imbalance. So if you, if you collect data at
+scale, it's very imbalance. You have this long tail of edge cases and rare conditions, rare
+events, as you mentioned. And, and some of them are noise, but some of them are really bad. Like,
+you really want to make sure they're very important for you to, to, to know and, and learn. And so,
+but you can't tell from just the data itself, it's just rare events, right? And so what we found is
+that self-supervised pre-training is actually better than training with labels because it's more robust
+to the, to the long tail to the imbalance. And we were like, okay, cool. Another empirical fact
+that self-supervised learning is a good idea, but why? And in this paper that we actually just
+present that I clear as a spotlight, we found the explanation and the principle for why. And it's
+a bit counterintuitive. So what we thought was that when you do self-supervised learning,
+you learn more from the tail. You learn richer features, better features from the tail.
+Because the label is not leading you astray. Take an example of driving, you drive mostly straight,
+and then you have all this kind of weird maneuvers, evasions, etc. And so when you drive straight,
+and you say, drive straight, drive straight, that's your label, basically, you're just, the model
+might just collapse on the mode, right? And might just say, all right, just drive straight all the time,
+that's enough to minimize my loss. The rest is just weird. There's no pattern, right? And so,
+and so if you just do supervised learning, this is what would happen. But if you do self-supervised
+learning, our assumption was it generalizes better, it's more robust because it's going to learn more,
+it's going to have to try to explain or reduce the loss on the rare things too. And so it's going
+to learn better features from the tail. But what we found out is that it's not true. It actually
+learns better, more diverse, and more generalizable features from the mode. And let me give you an
+example for, and so we have like very cool semi-synthetic experiments in the paper, a bit hard to
+explain, but you can look at it. So where we basically just probe this and verify this, both with
+theoretical explanation and with like controlled experiments to show that our principle,
+our explanation is correct, not just that the performance is good, but that's also we know why.
+But let me give you an example. If you want to do that, is the specific case you're referring to
+self-supervised by you've got some geometric relationship and you're projecting through that,
+or is it the data augmentation contrastive learning case? It's the contrastive case. So for this
+particular paper, we found that it's the contrastive case. Because for the first, the other case,
+we know the principle because we teach by principle, right? The contrastive one is more the other
+way around. I mean, there's this principle of invariance, but we wanted to know why does it work
+and get the principle out from the model after training and why it works, right? And so this
+principle is it learns better features from the mode, because like the example is, if you learn to
+drive straight, right, all the time, you say drive straight, you're basically ignoring things that
+happen behind you. So I don't know if you've, when I came here, you know, in Europe, we used to
+with J-walk, you know, it's like we cross the street whenever, you know, again, maybe the French,
+maybe that's just me, you know, we cross the street from New York, we also J-walk.
+There you go. But you typically don't J-walk right in front of a car, right? You typically wait
+for the car to go and then you just cross, right? So the J-walkers are always behind the driver.
+So when you're learning to drive, you're basically can safely ignore the pedestrian and the
+back, it's not gonna affect your policy. So if you're very focused in the supervisor's way or
+the geofancer's way, you're just saying, all right, just focus in front of you and just what
+matters is avoid collision in front of you. But in a self-supervised way, you will say, oh,
+something weird happened behind you. And I don't care about you learning the policy. I care about
+you satisfying the contrastive learning objective. So you have to understand the world. You have
+to explain what happened behind you. You have to verify your invariance and equivalence properties
+also on what happened behind you if it's if it's part of your of your input signal, right? And so
+then you will see basically J-walkers and you will have to learn features about these J-walkers
+even though they don't relate to directly optimizing your angle, which is in this case would be
+drive straight. And so now linking back to my daughter, Cassie, I tried to teach her biking by
+teaching her to bike. But when I teach her taught her the principles about biking, right, about how
+not to fall, basically, then she learned how to bike because she had internalized the principles.
+And it's basically the same thing here is that it internalized the principle of you have to
+explain what's happening around you because you might you never know someday that J-walkers that
+you've seen behind you, they might actually cross in front of you and you need to be able to
+represent them because if you don't represent them, if it's are not there in your feature representation,
+you're going to you're not going to be able to react to them. And so that's what we found. This
+counterintuous principle, which is it generalized better, self-supervised, contrastive learning,
+generalized better, not because it captured better features from the tail, from the rare events,
+but because it captured more diverse features from the mode. Because all kinds of things happen
+around you all the time. And in the mode, you have equal diversity because you're still
+experiencing the same crazy world is just that the long tail of actions, right, does not correspond
+to the long tail of events of things that happen in the world. Did you find a way to control for
+this idea that the reason why you had increased robustness isn't necessarily that the model was
+you know, learning about the things in a raviou mirror, but rather just that you gave it multiple
+things to do. And so in this, you know, based on kind of what we've learned about multitask,
+like just having the model, doing multiple things independent of what those things are,
+it creates some robustness. Yeah, I think I encourage people to have a look at the paper because
+there's a very cool visual experiment to that validates. So there's some theory, right? And uh,
+and I mean, of course with assumptions that not necessarily reflect all the practical applications
+and successes as usual, but under some consideration, some constraints might offer this,
+we know why and we can prove it. And then we have some visual experiments where we show that
+basically what you do is you have an image where you have the left side that has the category
+that you that corresponds to the label. And then the right side that has a confounder or even
+just a black, you know, like a black image. And so then what you do is you train on that. So you
+basically introduce the confounder and at a test time, you remove that confounder or you swap it.
+And then what you want to see is you want to see, well, at training time, the supervised way,
+it will have just focused on the half part of the image that corresponds to the labels because the
+rest is noise. But the self-supervised part, it trained on both sides and it learned features from
+both sides. And then when you apply it on the test time where you said, oh, now I changed the
+environment and the relevant part is not on the left. It's on the right now. Then the self-supervised
+feature says, no problem. It's still things I know how to represent. Whereas the supervised part is
+now very causally confused, right? And causal confusion is just one example of like,
+how spurious correlations affect very negatively supervised learning and the supervisor's way.
+And that's why it's the same thing as the supervisors and the geofensors. You're just running after
+a fact that the world, there's only one thing that's constant in the world is change.
+Which is why you just label forever and then you're growing your operational domain and the
+world changes and most likely your system has to change also. So this is why the self-supervised
+learning is all about learning from diverse data in a diverse way. This is the whole, the
+quality and diversity of data in the data centric realm, which is still a bit more art than
+science. And that's where our research is. It's like, like you said, data centric is not
+necessarily just about scale. It's about focusing on the data and being better about using the data,
+designing data sets and etc. But as you know, it's still very much more an art than a science and
+we're trying to make it more into a science by using principles. In the paper that you were describing
+was did synthetic, was there a synthetic data component to that or is that separate research?
+The synthetic data, it's a different set of research where the idea is there are certain sets of
+principles. We don't exactly know how to, you know, include them in the machine learning pipeline,
+right? Whether the data augmentation that I mentioned, like contrastive learning or whether
+the self-supervised objective that I was mentioning. And the big one is that relates to grounding
+and embodiment is physics, right? So we don't know how to have f equals m a into a deep net, right?
+We don't know how to, like, how do you make the connections? Which way do you, like,
+we don't know how to do that. But we know it's true. We know gravity and we want grounding
+into these systems. And that's the whole embodied AI area. And so, but what we know how to do
+is we know how to program it into simulators. And simulators are basically a huge opportunity
+for data set generators, something what we call programmable data. You write a program and this
+program generates you data sets. And these data sets are actually generated according to
+principles because they're actually generated according to a program that is written by humans
+that represents our prior knowledge. Again, f equals m a and all these kind of things.
+So a lot of the things we've been doing, which originally came out of necessity because
+sometimes you don't have the data, like for accidents or for things that are, you know,
+like things you want to react to and you want to anticipate. But collecting that data would be
+unethical or it's too rare or it's impossible. But yet, you want your system to be able to
+handle those cases. So synthetic data is a great, great way to do that because you can program
+those principles into the data set generator. And then you have basically built problem sets.
+You've built a curriculum. You've built a set of exercises, right, for your machine learning
+model to digest and internalize the principles in its own way, in its weights. So you program in human
+language or human code, f equals m a, generate a lot of images and videos that then you feed
+through the usual machinery. Again, we know how machines learn, SDD, backprop, etc. But this time,
+we know how to teach. We teach through a simulator that is a data set generator, essentially.
+Yeah. And a lot of ways this, there's kind of a unifying idea between that and the use of geometry
+that we're referencing before. It's, you know, we've got some set of knowledge or heuristics about
+the way the real world works. And we use that to generate data and then use SDD and the techniques
+that we've proven out. It's kind of interesting kind of reflecting on the evolution of the industry.
+And I've talked about this ad nauseam, folks who've listened to the show for a while, probably
+no one I'm going to say. But like, you know, we started out, you referenced your early work
+in computer vision. We had all of these, you know, ground up rules and, and, you know, equations
+that, you know, we built everything around and it wasn't statistical at all. We kind of swung
+the other end of the pendulum and everything we wanted to be statistical and, you know, throughout
+the rules, we get enough data and the system will, you know, learn the rules on its own. And,
+you know, in practice, you know, it doesn't really make sense to thought all the rules. And so
+you've had, I think, you know, some attempts at like, how do we fuse a real world-based model
+with a statistical model. But I think what, what, what in, in this conversation, both in terms of
+the use of geometry as well as the use of synthetic data, it's another approach, which is, well,
+let's just use the rules to create data or labels and then use the statistical approaches.
+Exactly. Yeah, I couldn't have put it that way. I mean, it's basically, we're in the age of
+reason now, you know, it's like there's always the pendulum swings one way or the other, you know,
+we know everything, we can program everything, logic, etc. Which, by the way, was doomed to fail,
+we knew it from theory, from Kurt Goddell, right? But then, then there is the other swing of
+the pendulum, like you said, it's like throw it all away, it's all in the data. And honestly,
+the reason is also because it's easy. It's, I mean, I mean, it's hard to make large-scale systems
+work, but conceptually, it's just scale things up, right? And now we're in this realm where
+how do we get the best of both worlds? Because nothing is all good or all bad, right? It's always
+these gray areas. And so finding the best of both worlds, as you said, which is how do we use our
+knowledge, how do we use the data-driven approach, and how do we combine them together? And what I was
+trying to explain is that there is the, using the rules to generate the data, as you said,
+using the rules to generate the supervision. And of course, there's all this prior knowledge that
+goes into the model architecture, although now we're kind of realizing that the model architecture,
+we have powerful, generic model architectures. So I believe that the data centric and the self-supervision
+side, I think those are, those are really where I'm excited the most about and most of our researches.
+Awesome, awesome. Well, we've been digging deeper and deeper, and I feel like we're still at a
+fairly high level, and there's so much more I'd love to talk through exactly how you're doing
+synthetic data and just go into a lot more detail. We don't have time for that this time,
+but maybe we'll be able to get you to Twilmokon, which would be in the fall, to share a lot more detail.
+But until then, or we need to speak more frequently than every three years. But all that, not with
+standing, it's been a pleasure having you on the show, Adrian and great chatting and learning
+about what you've been up to. Likewise, and yeah, it was very high level, but we have, I think,
+like 20 papers this year, and they're all on my website and etc. So people dig in, feel free to ping us,
+come to ICRA, come CPR, conferences are a thing again, looking forward to Twilmokon and chatting
+with people live. And yeah, looking forward to talking again, hopefully not in three years.
+Yeah, awesome. Thank you, Adrian. Thank you, Tom.

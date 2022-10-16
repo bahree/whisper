@@ -1,0 +1,647 @@
+Welcome to the Twomo AI Podcast.
+I'm your host Sam Charrington.
+Hey everyone, producer Amari here.
+As we mentioned on the podcast last week, we've got some exciting new additions to our
+Twomo community programs, including the IBM AI Enterprise Workflow Specialization
+Study Group, which will be hosted by Sam, and the causal modeling in machine learning
+study group hosted by Robert Osa-Zua-Ness, who you heard from earlier this week on the
+topic of causality.
+Today, I want to remind you that Sam and Robert are hosting a course and study group overview
+session this Saturday, February 1st, at 8 a.m. pacific time.
+To get signed up for this course, or to learn more about the other upcoming and ongoing
+Twomo community programs, visit TwomoAI.com slash community.
+And now on to the show.
+Alright everyone, I am here with Heitem Abul Fatou and Katen Umare from Lift, Heitem
+and Katen, welcome to the TwomoAI podcast.
+Thank you.
+Thank you.
+So, we're here in once again, sunny San Diego.
+We got the two days of like horrible, miserable rainy weather, you know, earlier in this
+week.
+And we're here to talk about some of what you're doing in Lift, namely the flight project
+that you just presented on yesterday, it's open sourced.
+And it's open sourced.
+And it's open sourced.
+We're going to dig deep into this, but before we do, I'd love to have each of you kind
+of introduce yourself, share a little bit about your background, how you got to work
+on ML and Fra and, you know, what's your story?
+Talk to us.
+Katen?
+Yeah.
+Hey, my name is Katen.
+I lead the flight team and probably one of the founding person of the flight at Lift.
+So my background is I work across different industries from hedge funds to retail, to logistics,
+to cloud.
+I'm mapping and now finally back in sort of transportation area.
+And one of the things I've been interested in is just large scale data processing and
+solving business problems where data and computation comes together and machine learning is
+a place where, you know, that's really, really important.
+I started Lift in 2016, but I started on flight close to the end of 2016.
+And it was mostly like, you know, I started working on this team.
+We were trying to get ETAs, which are, I'll explain what an ETA is.
+So when you open up and lift up and you see, hey, three minutes to get your driver or if
+you are in a car and you see like it will take 15 minutes to reach the airport, sometimes
+it's accurate.
+And it's accurate mostly because of a ton of machine learning models that go in the
+background and including understanding how the road traffic is and understanding all
+kinds of things that are happening on in the current conditions on the road.
+So using, so I was leading the team and which I joined the team, there was another engineer
+on it.
+He used to run the models all on his laptop and he was like, how are you running this?
+And he's like, I have this script, I've just run this and it just runs and it figures
+out.
+And you know, then I run this other script and then I run this other script and I do that's
+crazy.
+Yeah.
+So, and we, I'm trying to decide whether to interrupt you and just like dive deep into
+that.
+That sounds crazy.
+It is crazy.
+Like running a model that's doing like live prediction of ETAs on a platform, like training
+training the model, training the model or collecting the data for the model aren't
+things like that, right?
+And still reproducibility issues and stuff like that.
+A lot of issues.
+Yeah.
+But you wouldn't be surprised how many times this happens in the industry, right?
+It's just like the, and this is actually how we lead into it because this is the current
+state of the infrastructure for machine learning and especially productionizing models is,
+it didn't exist.
+We didn't think about retraining these models at that time and quickly we wanted to retrain
+them and then I'm the laptop's not going to scale.
+Now, the other story that happened, so this is just leading into flight, right?
+And the other story that happened is there was a research scientist on my team.
+He created a model and that model is pretty cool.
+It served live for many years.
+But he left the company and the model went with him probably, so we lost it.
+Like we had no idea where the model was and as leader, they told me, hey, let's recreate
+this model and I, I don't know how to and I, we knew the algorithm.
+So we just rewrote it and we got everything done.
+It would not give the same results.
+And it, like it literally took us three months to get like to the same level of accuracy.
+Wow.
+And we were like, okay, so he had done all of this extra work that we really kind of lost.
+We didn't waste too much effort on it because we knew the algorithm, we knew some of the
+tricks.
+But still, it's like wasted effort in trying something out and then going and trying
+out the accuracy and you're like, oh, it's time to say.
+Yeah.
+Yeah.
+It's not like one person spending all the three months, but it's still like, it's like,
+it's wasted effort.
+So at that time, I decided that this needs to be, this needs to change.
+And delivering new models became slower and slower.
+So that was the birth of flight.
+At that point, we used to call it a bad name.
+I'm not even going to put it on the podcast, but I used to, and we wrote, like I wrote
+like a first draft proposal internally and everybody was like, you are crazy.
+This thing is not, never going to work.
+But somehow in like a couple months, we erected a V zero, V one of this thing.
+And we got a team to try it out and this team was also struggling a lot with delivering
+their models.
+And the intersection where flight really fits in is when you have a lot of data and you
+want to reproduce, reproduce your models again and again, like maybe every day, every week
+or every hour.
+And you want like the trace of what happened and the lineage between everything.
+And this team actually fit the bill.
+And they, for the first time, they were able to deliver a model in like six months.
+And this was a gigantic model.
+It affected the bottom line of lift and it was really, really meaningful.
+And it was not without a lot of, you know, stress and working hard through the night.
+But that was the starting of flight and that was in 2017.
+And then we didn't stop like the use of the company just skyrocketed.
+And we at that point, we are like, hey, we should open source this thing because it's
+such a big problem to solve that a small team at lift can probably never solve it on
+their own.
+And if you open sources, we should be able to work with the community here, more ideas
+and improve it all the time.
+So we actually rewrote everything from scratch, made it Kubernetes native, took, took like
+the primitives that we understood from looking at all the various use cases.
+And that's the amazing part of lift, like it's a rich ground of amazing use cases.
+And we used all of that and put like basically distilled that information into flight.
+And that's our first cut into the world.
+Hi, Tom.
+Tell us about your background and what you do at lift.
+Sure.
+Yes.
+So my name is Haytan Abouhtou.
+I have worked previously at Microsoft, Google, and I had a journey up and down the stack.
+I worked in like enterprise, create applications in low-level storage, like Azure storage.
+And I, you know, at some point, wanted to try out ML and I kind of found this sweet spot
+in ML Infra to fit the bill kind of thing for me.
+I joined lift two years ago, January, and at that time, it was that we're still stabilizing
+the prior incarnation of flight, the unnamed product.
+It was great and teams loved it.
+As Keeta was saying, at that point, I joined in the midst of this discussion about what
+do we do next.
+So I got to be part of the decision-bidening, going Kubernetes native, and all the very
+I see as critical design decisions.
+We took in flight to virtual decisions, all the, like going with a very strong type system
+and very strong language specifications through Protobov, like there is a lot of things
+we view, we are like very opinionated about in flight, and a lot of things we are not.
+We like explicitly decided to leave open.
+Based on the experience we had, we think we found a good path for where we give you the
+learnings, like enforce the learnings we have had before, in how we ask you to write
+your code or deliver your models or did the processing tasks or whatever.
+At the same time, leave it open for a variety of different workloads that can run the system.
+And there we are, I'm very proud with how the product turned out to be in the launch and
+the reception we have had during the conference.
+And just a shout out to the team, we wouldn't have been possible, because our like just crazy
+amounts of effort with the team.
+It's an amazing team at Live.
+And we are proud of all our users also at Live, just they have stayed with us through
+bad times, good times, and thank you for all the support.
+That's awesome.
+So, Kate, then you've given us a little bit of an overview of flight.
+Maybe take a step back, and what's the core value proposition that flight is offering
+and how do you mention that it's Kubernetes native, like how does it relate to Qflow?
+Yeah, for example.
+Good question.
+Let me start with the motivation of like, or what is it that we think is missing and
+what we were trying to address?
+One of the things, as I said, we started in 2017, so the landscape was very different
+at that point, right?
+So we evolved from that point.
+And this is a V2, even though actually I think this is the real V1, but this is a V2,
+so that means we went through a process of like actually making something and failing
+and then redoing it, that has a lot of learnings with it.
+So one of the learnings is that we feel that there is this artificial divide that's happening
+between ML and data, but actually they go hand in hand, like you, it's not that these
+companies have amazing data systems, they're not the Google's Facebooks or the Amazon's
+of the world, right?
+They are smaller companies, nimble, and they want, they are basically building their data
+stack too.
+So, and the other thing that we realize is there are teams cross-collaborate quite a bit.
+Learning models are built, let's say, by A team, but the team B probably provides the
+data that builds that machine learning model.
+And actually the fallacy of separating them is that many times in production, we use machine
+learning models to predict, and that creates data that becomes a fact in the fact tables
+in the data world.
+And then many times you use machine learning models to convert that fact to a dimension,
+which trains other models.
+So there is this cyclic nature that's happening, and this needs to be captured at that granularity
+of saying that there is data and processing and machine learning all interacting together.
+So, that was the motivation behind flight that we need a single tool and a platform that
+allows for collaborating, sharing, and MLOPS along with definite focus on orchestration,
+and that's why the core of flight is a workflow engine that actually runs all of these pipelines.
+But from the idea point of view, it was built for collaboration and sharing across the
+company various aspects, as well as processing and machine learning on the same tool.
+And so maybe to make that more concrete, we can kind of compare contrast to what Q flow
+is trying to do.
+Right.
+Are they orthogonal, are they complementary, does flight use Q flow?
+That's a great question.
+So Q flow started a while ago, started as one thing, initially they had just the TensorFlow
+operator.
+And as the product started maturing, it became not just a product, it became a collection
+of products under the name Q flow, Q flow serving, Q flow pipelines, TensorFlow became its
+own thing, you can use it from its own and so on and so forth.
+So we don't see the comparison between flight and Q flow as a collection of tools or products
+that the fear comparison I would say is between flight and Q flow pipelines, which is like
+one segment of Q flow that sits on its own, in a way, and underlying engine, the workflow
+engine under Q flow pipelines is not actually a reason why Google, it's an open source
+product, a different product, right.
+So it's also swapable that way, as it's, you can think of it as like a puzzle kind
+of thing and these are just a few pieces of that puzzle.
+And flight does things slightly differently for those few pieces that are comparable, if
+that makes sense.
+So then, like saying that flight might be a swapable alternative to Argo under Q flow
+pipelines.
+Actually, yeah, we might, it might be more vertical than that, but I'll give you an example
+like a Q flow that is PyTarge and TensorFlow to absolutely opinionated distributed or
+not distributed or deep learning frameworks, they both exist, right.
+And it should be the user's choice of what they want to use.
+And that's how I feel about how flight and let's take you flow pipelines work.
+They might, they could interrelate and that absolutely, it's the number best interest
+to make all of these tools play very well with each other, but they could be like completely
+vertically available as two alternatives.
+And you could use Q flow serving to serve your models, but build those models on flight.
+This flight offers a great abstraction on, on compute and it gives you big data with
+it, right.
+So that's essentially our differentiator where we think like Q flow pipelines doesn't even
+try to do that.
+And then the lineage and the cataloging that we do is further on built on top of it, which
+is also the other bit that we should talk about, I guess later.
+Well, you mentioned that one of the aspects of flight is that it's strongly typed, makes
+me think most immediately to like FB learner and kind of its approach to typing and you're
+nodding your heads, maybe they think, yeah, can you talk a little bit about that kind
+of design decision and implications?
+I can actually tell you the first time I saw the FB learner blog.
+It's uncanny, but it's also unbelievable at some level, so we looked at it and I shared
+it with the team.
+I'm like, did you see this?
+This looks exactly like R. And this was around the same, about 2017, 2016, that time.
+And we had the same like the annotation decorators in Python and I'm like, is it like they're
+people thinking about like us, but I think that yeah, that helped us, you know, they
+were earlier than us.
+I'm not saying that, but it's just that that kind of helped us believe like more in that
+we were probably on the right path, and so, yeah, so we, in the version one of flight,
+we did not have a very, we had a type system, but the type system only existed on the SDK,
+because we call it in the Python, where you, maybe take a step back for folks that, you
+know, here type system, or some only type, and there's no context for that.
+What does that mean from the perspective of the user experience for flight?
+Yeah, so let's tell you right, a function in any language, you, you have some inputs
+and outputs to that function.
+There are languages like Python, where you do specify inputs and outputs, but you don't
+know what those types are, barring the new typing.
+Whether they're strings, or integers, or fields, or whatever, or more complex things.
+Could be typing in there, and so on.
+But if you go to a language like Go, or Jow, or C++, it's a really strong type, you have
+to say this is an int, and this is a string, and that's the order and whatever, right?
+There are benefits of having types in the system, and that's why people love them to
+use them in programming languages, because you get compiled time safety.
+When you build the function, if you pass in an int, and try to use it like a string, you
+get an error at compile time, so you don't have to wait for it to run for 10 days, and
+then figure out, oh shit, but in Python, actually, there was a, there's more of a movement
+to add these kind of typing, compile time type safety.
+We think that that is the same thing that should be done for, why not do it for all functions.
+Like in our RPC systems today, like services, microservices, and people are using, we have
+types, and we have APIs, and people talk to them, and then they receive outputs.
+In flight, that's how we've designed, every single function is a task, we call them,
+and these have inputs and outputs, and by strong typing, I mean, these inputs and outputs
+have a known set of types, but what are the known set of types that you need to use with
+machine learning?
+So we had to come up with a type system that allows you to specify the various types of
+types that users use when they are pilling models, like an example could be a structured
+schema, which is like a row vector, or could be a tensor, could be a blob, which could
+be a serialized model, and it could be various formats, could be on X, could be, and those
+could be annotations on top of that blob saying that this is a serialized with the TensorFlow
+serialization format.
+So that's the type system that we are referring to.
+So when you declare a task, if it's a model building task, and you use joblib to serialize
+it, you can output a model that says it is joblib.dat, and then the next task that actually
+consumes it knows that this is a type joblib, so I can just load it into using joblib.
+And if you try to now put these two tasks together, they will work, but if you try to
+put a task that does not understand joblib, only uses TensorFlow, it will fail at compile
+time.
+And that's what we wanted to achieve in a pipeline, try to fail earlier if possible.
+And one of the things that that enables for FB Learner cases that they can take all of
+these tasks that are strongly typed, kind of created dependency graph, and then execute
+them in parallel, like as one completes spin off its descendants, are you doing some more
+things?
+Exactly.
+I just remember something you wanted to add to the timing system, so one of the decisions
+we made there was using Protobov to declare the, to specify the types, and then that might
+be one of the distinctions between the existing systems you might see, even like FB Learner
+and others, and flight.
+And that makes it not, like takes it one step further, it doesn't only allow you to put
+Python tasks together, because after you declare the task in whatever language you choose to,
+using our spec, you can, you know, let's say right go, function becomes one step in your
+graph, the next step might be a Python task in a different container or, you know, what
+you have you.
+Because at the end of the day, they would compile to this standard spec that has standard
+set of types that are compatible with, you know, our SDK in any language.
+And yes, I guess back to your question, it does allow us to, we once you declare the graph
+in this spec, we have a compiler that looks at the graph and figures out dependency graph,
+and we can go as parallel as we, as the system would want, you know, pairing the dependencies
+and all of that into accounts.
+Yeah.
+And there are other advantages, like what I think, I just wanted to add one more thing is
+the reason why we did this is because we saw use cases within Lyft, where users were
+writing models in Scala for spark processing, right, like they just want to do spark processing
+Scala.
+They don't want to write this in Python.
+They do sometimes, but sometimes they want to use Scala for higher performance.
+And we are like, how do we move the data between these two different languages?
+And so that's why we came up with, so we also using arrow underneath, this is an open
+search project.
+But like we wanted to create a layer on top of it, so that it's easy to construct these
+polyglot pipelines, if I may.
+So we're talking about stuff like type systems and protobuffs and arrow and not language
+that the typical data scientist is about a lot, yeah, is it, you know, have you built
+abstractions that make it more acceptable to data scientists or do you just have a different
+audience?
+I think that's a very good question.
+And actually sometimes we do debate amongst ourselves, what's our audience, right?
+But we do want to appear in the beginning, at least, to the savvy engineer like us who
+wants to get his hands a little dirty.
+But as we are progressing, we are creating layers on top of them.
+So think about it, we are like, we built the foundation and now building layers on top
+is much easier.
+So for example, like we're just about to merge full notebook support, so you can write
+tasks in notebooks.
+So like we're just going to add like support for Jupyter notebooks.
+The way and the way we are thinking about Jupyter notebooks is users like data scientists
+and researchers love to use Jupyter notebooks.
+They write code in Jupyter notebooks in a very different way than how engineers write
+code on like using IDs, right?
+It's very different.
+And we want to keep and preserve that semantic of writing code.
+So we actually found a project called Paper Mill, which is pretty cool.
+We like that.
+That's pretty cool.
+There's only out of Netflix now in a background independent company.
+Yes.
+And so we decided to adopt it.
+And we take that and we convert a notebook into a function into our system with the
+same inputs and output.
+We do the magic of like passing the inputs and outputs.
+You just write your code as if you're writing a regular notebook.
+You can try it out to whatever, drop it into a container, give it to flight.
+And then it'll take care and execute it and actually record the output notebook and
+store it for you.
+So you can go back in time and look at it even if you want to.
+So yes, our audience is was engineers in the beginning because we do have that sort of
+audience at lift, but we are, we also have like data scientists and research scientists
+using more and more and we are improving every day for them.
+So if you start today, you might look at the Python flight kit and see that it's a little
+more suited for people who write with IDs, but with the notebook introduction and our demo
+we showed like how to use everything with the notebook.
+We are going more towards research scientists.
+And they will not even see some of the things that we do, like for example, I'll give an
+example, in a task, you can return a data frame, a pandas data frame and we understand
+that a pandas data frame is actually the throw vector that we do underneath which is converted
+to a prototype and arrow and it's just sent through.
+You don't even have to think about it.
+You just work with pandas data frame and hopefully we are thinking we're not yet implemented
+this, but that goes into spark data frame and the other side.
+So we created the abstraction layer for that.
+Does that introduce a lot of latency?
+I was having a conversation with someone who was talking about reason why they don't
+use TF serving is because they're primarily doing inferencing on images and it requires
+that you have to put everything into a data frame and there's a bunch of latency that
+that introduces.
+Do you run into these kinds of issues where your abstraction hides kind of some nimbleness
+and what the underlying data format is and you're doing conversions underneath the covers?
+So actually, arrow in that case is an extremely interesting project, according to me, aim
+is to make zero copy abstractions from one format to pandas data frame, to spark data
+frames and I think the founder is, I think it's Wes, who the guy who has been following
+that project and I think that's more of that is required, where we just should stop wasting
+CPU cycles on transforming data from one format or one language to another and more use
+the zero copy abstractions that we can create and that just makes the open source ecosystem
+much nicer.
+And that's why we chose arrow, but you don't have to, for example, if you're emitting
+out images, you don't have to have a data frame for it in flight.
+You can just say, I am emitting a directory of million images and we will take the million
+images and upload them and download them onto the other machines and use them.
+So yeah, so there is, you can use data frames, but you don't have to, and that's where
+the type system comes in.
+It needs to be more granular then.
+Okay.
+So we've talked a bunch about the type system and the workflow that that enables and kind
+of some of the user experience in introducing flight you mentioned.
+This important idea of kind of connecting back to the data and, you know, enabling things
+like end-to-end data providence and this, you know, kind of loop that you pointed out
+where your inference actually is, you know, data for your next train or a future train
+at least, talk more about kind of how that works like I'm thinking, the thing that comes
+to mind as I'm hearing that is Airbnb has a project that's kind of an adjacent project
+to their big head platform that is focused on, like doing, you know, point in time feature,
+mapping and management and feature repository, that kind of thing, is that the kind of thing
+we're talking about?
+That could be one of the things, but it's not like exactly what we're talking about,
+but like I think your, it's feature service is, well, let's call it like a generic name,
+feature service.
+Features as a service, right?
+What is an implementation on top of this potentially that allows you to pass the, like,
+consume the data back into the model and also build and send it to feature service.
+What we are referring to is the causal dependencies between the compute and the actual production
+of that data and then further consumption of data by the next compute layer and production.
+So now let's take an example.
+You get a map from OSM, OpenTreatMaps, if we consume it and you build a graph, the road
+network out of it, then some other team actually analyzes the road network in real time that's
+happening and creates the traffic pattern that's that are happening at the moment on the
+road and annotates the road network with some speed profiles, that's what we call them.
+And then the third team actually consumes these two things and creates the final road network
+that's deployed to production.
+So when we did a prediction on ETA, we would want to know which version of the map did
+I use and what was the speed profile at that point in time and what were the traffic
+conditions that were led to that speed profile?
+That's the type of question that we want to answer.
+So to go to that, you need to have a full trace in the system of how the data was generated,
+when did it get generated, when did it get passed under the next bit and then so we call
+this typically lineage or prominence as you said.
+And the way we track this is our type system was the other reason why we had our type system
+is to have the central engine automatically publish all of this data as it's generated
+by every single task execution to a central service that actually just records a unique
+signature of the execution and what did it generate with the inputs and the outputs.
+So now you have a relationship between what got generated by what and now you can create
+a graph because you know the graph that ran like flight knows intrinsically that how what
+was the computation graph.
+So you can go in and create the causal dependency structure across these data sets.
+We do this today, the exposed thing that you get in open source is not the full, we don't
+show the dependency tree that will come out soon at some point, but we are using this
+for memorization. So if you recompute the same data set, let's say you took some data set
+and you transformed it and it produced an output.
+Some other user goes in and takes the same data set and transforms it and produces the
+same output potentially because the code really has not changed.
+In the past people were like we would spend money.
+So then the solution would be let's create a intermediate high table or whatever, right?
+Things like that.
+But that's not really what it was for many artifacts that are like images, right?
+If you did luminon sampling on some set of images and you're not going to store them
+in high.
+I think we can do that, but we don't.
+But what we do is because we can identify the compute process and the set of inputs that
+were given, we create a unique signature of that.
+And so next time when we observe that the same thing is being run, flight just smartly
+replaces it with the existing outputs.
+Now you have to tell flight that this process is reproducible because if it has side effects
+or it is like, you know, if you're using random number, the generator or something, that
+might not work.
+So we, you have to tell us, but if you tell us then we just go and replace any execution
+of that on the platform across the company.
+So that saves money and time because the iteration time now, like if you're running something
+that's 10 steps, like a 10 step pipeline and you fail on the 10th step, you just fix
+the 10th step and rerun it.
+Right.
+And the 9 steps just are cached.
+So you just automatically fright will fast forward you to the 10 step and go, go, let's
+run that guy again.
+And so this is what we call it, memorization.
+So flight.
+I think you've described it as kind of a workflow engine, it's not a data store or something
+that is like creating snapshots or anything, it's more like, you can think of it more
+like metadata and pointers to, you know, existing training data and interim data, transform
+data, output data, et cetera.
+Exactly.
+Yeah.
+And or presumably you're also kind of tracking model versions as they're trained.
+Yes.
+Yeah, we have, that's one of the things we are a bit opinionated about flight is every
+artifact in the system, all the data produced, all the definitions, all the tasks and workflows
+are immutable.
+So we have versions, strict versions, versioning scheme that you can use your own versioning
+scheme, but it has to be strict as in you can't mutate something and try to register it
+or produce it with the same version again.
+So we, when we produce any metadata about tasks, outputs or whatnot, they are always unique
+and like the signature is always unique.
+And that allows us throughout the system to always refer to very consistently to like
+executions, past executions in the history and the produced artifacts and produced models
+and, you know, anything that went through the system with very confidence that, you know,
+we know exactly which even like piece of code produced that.
+So yeah.
+Yeah.
+And you should be able to fully re-run, re-produce it, but it'll cause a new version.
+We don't even have one single update API in the entire code list, because you have like
+a functional system.
+What's the smallest kind of use case that you can envision someone using this for?
+Does it make sense and is it kind of approachable enough for kind of a, you know, a single person,
+a kind of clone or repo and like actually get some value out of it or do you need a team
+of, you know, 10 MLN for people or that's a great question, great question, yes.
+We, and I will say like our work there is not done, but we have put a lot of effort to
+make the first time experience and the maintenance for small projects, as you mentioned, very
+approachable.
+We have written, we have written docs that, like I would say maybe most of the time, like
+the efforts we put in the docs, we're in the docs that tell people how to get started.
+So it's like me that easy, even sometimes we went back to like our architecture and what
+not to try to, you know, make that easy when like we looked at the docs and it's like that's
+a lot of steps.
+This is not okay.
+Let's go back and redo things, right?
+So that's one part of it.
+I would say the other part I think is we have seen that in a lot of cases, people when
+they get started in developing a model or even doing some transformation or whatnot, they
+don't think initially, unless they have done that before, they don't think that they will
+need a workflow for it.
+They think you know, we'll spawn off a notebook and do my thing and be happy, right?
+Which usually is the case in the beginning, right?
+Until you know, somebody leaves the company or you started, like you want to go back to
+a model that worked, but you don't know which version of the code produced that and so
+on and then you start realizing the problems and the need for such systems.
+But by trying to make it as easy to get started as approachable, we hope that at one point
+it becomes like a standard given that you always start there and the system, like the friction
+between I have nothing to the first task or the first execution is almost not there.
+Like more people would get into the happy love doing this as the first step before I think
+your first piece of code and it sets you up for success, leader.
+We are basically saying that every company should grow and become great and you know, start
+with what we think is like the bare minimum and it will evolve with you, right?
+So it's an evolveable system.
+The other bit that I want to add to that is that I think that one of the reasons why we
+move to Kubernetes is to make that first case experience and for small company experience
+really, really good.
+Kubernetes is great to get.
+You can go to any of the clouds and get one Kubernetes cluster and we use customized,
+I don't know if you know of that project, but that's a pretty interesting project.
+All of flight is really one YAMO and you can say, CUP, CTO, apply minus F, that YAMO
+and boom, you get a flying cluster, including all of the things that we just talked about.
+Wow.
+Okay.
+Yeah, you can even do that on the Docker for this top or Kubernetes.
+Like on your machine, you don't even have to go to a CUP provider to get started and
+set it up even with menu for storage.
+So you will get the full experience, your manual tasks and once you're ready to take it
+to the next level, run on in AWS or GCP or whatnot, that you don't have to change how you
+were doing things or how you wrote your tasks.
+They will just seamlessly run on the bigger cloud within lift and we talked about this
+in the presentation yesterday.
+We run a multi cluster set of flights, a single cluster, but of course you will not start
+there.
+Right?
+And we did not start there.
+We started with single cluster.
+We soon outgrew that and started, you know, deploying multiple cluster to flight.
+And the user's multi cluster.
+What's the multi tenancy models like a single user has stuff running on multi clusters
+or you just have multi clusters and you have some users among cluster and some on another.
+We have multiple clusters and we for the user though, it's one cluster.
+So we abstract that entire thing behind the service and the way we spun off the work
+depends on the load of the system or priority classes or things like that.
+Is that all stuff that's happening in the open source or this way that you're operating
+it?
+No, it's all open source.
+Interesting.
+Yeah, you don't need to do this.
+You don't have to use multi cluster, but let's see your company grows further beyond
+that single cluster.
+Yes, flight will evolve with you.
+Yeah.
+Yeah.
+Yeah, we basically open source everything that we do at lift.
+Yeah.
+Some other thing that I just talked about like the lineage or whatever, it will come soon.
+Yeah.
+But most of the things.
+What's exciting about this for me is that there are many, many companies that are doing
+this kind of thing internally.
+We talked about Facebook, Airbnb, Uber, obviously with Michelangelo.
+Some have talked about open sourcing, but I'm not sure I can think of any name brand
+company that is open source their internal platform outside of like TFX if you consider
+that Google open sourcing their internal platform.
+Yeah.
+So this.
+The TFX doesn't come with an execution portion of it, right?
+It's just basically the library at the moment.
+Right.
+Right.
+Right.
+And so this is the library that does all the type stuff.
+There's the execution piece, workflow engine, you know, after the step after the CUBE
+CTL, like is it spinning up a web front end that I can see stuff?
+Yeah.
+Our web front end is pretty snappy too.
+We show like errors in the UI and graphs and things like that.
+You can click you get log links in the UI and like inputs and outputs and the artifacts
+produced.
+All of that is in the UI too.
+Yep.
+And then the CLI too, of course.
+And tell me a little bit about the like the process of open sourcing it.
+Like, was that the size of it all?
+Yeah.
+All right.
+So I had a baby five months ago, five months ago, and I had another baby in a flight.
+So they think having literally having two babies at the same time.
+It's a twin, a twin, and I have not slept almost for five months probably.
+And so as the team, like, been a fantastic job.
+So yeah, that's why we took this long, actually.
+We started the process last year.
+We could have been.
+I mean, let's start with why?
+Very good question.
+They have to like, why?
+And we did debate that a lot, didn't they?
+We did a lot, right?
+Yeah.
+Especially that, right?
+The previous system wasn't going to be open sourced, was sift only.
+So like, when this came, this, when the new, when you started deciding to redo it, I
+remember, even hit them giant and when I was one of the question, why do you want to open
+sourcing?
+And I think what happened is there was interest from outside was one of the reasons, I don't
+need to name, like who, where it was, but there was some interest.
+The other thing is we realized this is such a big, like, big problem to solve.
+And I said this in the, I think, before, but a small 9 or 10 people team cannot do this.
+It needs to be an industry wide effort, hopefully, if not, at least like a few, few tens
+of people working on this.
+And, and all with like, if we do set the right primitives, then we can let it evolve into
+the, into the piece that it needs to be, right?
+And that gets great stuff for life, like if we, we get, for example, we don't, we currently
+only have a Python SDK, but I know there are other companies are saying that we want
+to add a scala SDK for this and we're like, awesome, we will use it, right?
+There is demand for this at least, but we don't have the time to build this.
+So that's one, a definite biggest reason that get, basically, leverage.
+Second is lift open source on why it was a foundational technology for lift two.
+And it's been, it's been, you know, amazing success, right?
+We're in this community.
+So we're not saying we are going to be even 10% of that weight, that's just much.
+But from that we learned that people actually, like, it's a great hiring tool.
+You are not working on a technology in the company that's, that now you have to hire
+engineers and teach them.
+You are going to work on a technology that they have probably used at their previous jobs
+and that's great for lift.
+So, and, yeah, answer and just wait for the team potential, right?
+So, and I would like to just add to all of this.
+I think we, as we talked throughout the conversation today, there are a few things we strongly believe
+in.
+And we wanted to have that debate in the open, because I think it will not only influence
+like this product or similar products, it will influence like the entire ecosystem,
+how it, how it interacts with each other, how, how you do serving even after like the
+all of that, even if you don't build these pieces, the concepts, like the underlying concepts.
+And I think it, like, we, we see that it does bring something to the table that isn't there
+yet.
+So, we wanted to make sure that, you know, we have that conversation, like it, it will,
+we think, advance like the entire, like the email, link for a community overall, to hopefully
+a slightly better place.
+Well, hi, Thom Ketan, thanks so much for taking the time to chat with us.
+Thank you, Sam.
+Thanks for having us.
+Yeah.
+Yeah.
+All right, everyone.
+That's our show for today to learn more about today's guests or the topics mentioned
+in the interview, visit twomelai.com slash shows.
+For more information on either of our new study group offerings, causal modeling and machine
+learning or the IBM Enterprise AI workflow, visit twomelai.com slash learn 2020.
+Of course, if you like what you hear on the podcast, be sure to subscribe, rate, and review
+the show on your favorite pod catcher.
+Thanks so much for listening and catch you next time.

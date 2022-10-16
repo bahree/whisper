@@ -1,0 +1,583 @@
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+people, doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington.
+This week we're celebrating the second anniversary of this podcast.
+If the pod has made a difference for you, please show us some love by letting us know how
+over on our second anniversary page at twimlai.com slash 2av.
+You want to hear the ways the podcast has helped you or your business, how it's enabled
+you to find or connect to resources you found valuable, or how it's educated you about
+new and interesting topics.
+Submit your written or audio comments via the page we've set up, and we'll be sharing
+a few of your stories with your permission of course, in a special podcast episode celebrating
+the Twimble community.
+In today's show, I sit down with David Van Veilin, assistant professor of bioengineering
+and biology at Caltech.
+David joined me after his talk at the Figure 8 train AI conference to chat about his research
+using image recognition and segmentation techniques in biological settings.
+In particular, we discuss his use of deep learning to automate the analysis of individual
+cells and live cell imaging experiments.
+We had a really interesting discussion around the various practicalities he's learned
+about training deep neural networks for image analysis, and he shares some awesome insights
+into which of the techniques from the deep learning research have worked for him and
+which haven't.
+If you're a fan of our nerd alert shows, you'll really like this one.
+Before we jump in, I'd like to send a shout out to our friends over at Figure 8 for their
+continued support of the show and their sponsorship of this week's series which all took place
+at train AI.
+Figure 8 is the essential human and loop AI platform for data science and machine learning teams.
+The Figure 8 software platform trains, tests, and tunes machine learning models to make
+AI work in the real world.
+Learn more at www.figure-8.com
+Just a reminder, this episode was recorded live on site so there's some unavoidable
+background noise.
+And now on to the show.
+All right everyone, I am here with David Van Bellen at the train AI conference.
+David is a system professor in the biology and bioengineering department at Caltech.
+David, welcome to this week in machine learning and AI.
+Thank you for having me.
+Awesome.
+Why don't we get started by having you tell us a little bit about your background and
+how you came into AI as a biologist?
+Yeah.
+So I can start from the beginning.
+So I was born in Los Angeles, grew up on the East Coast, upstate New York for middle school
+and West Virginia for high school, where upstate.
+So we lived in Liverpool, which is, I want to say like within like an hour of Syracuse.
+So it was very, it was upstate enough where things like like effects know were a very,
+is a reality.
+Yeah, I asked because I grew up in New York City and went to school, upstate it.
+Okay.
+Awesome.
+And that's our New York.
+Yeah.
+I'm familiar with RPI.
+They have very, very good students.
+Yeah.
+Yeah.
+And so I went to high school in West Virginia and graduated, went to college.
+So I went to MIT and I was a double major in math and physics.
+At the same time, I had the luxury of having like fresh and biology taught by like Eric
+Lander, who's, you know, big shot scientists who like runs like the Broad Institute, between
+like MIT and Harvard.
+You know, he was like one of the big early pioneers in like the human genome research project.
+And he was also as a background as a mathematician.
+And so the way he explained biology really resonated with me and made me want to like sort
+of continue that thread further.
+And so after I finished at MIT, I went to the MD PhD program at UCLA and Caltech.
+And so the way that program works is you spend two years, first two years, doing medical
+school, then you do your PhD and then you return for your clinical training.
+And I did my PhD at Caltech in the employee phase of the department with Rob Phillips.
+And there, it was a really great environment because there's exposure to sort of, you
+know, thinking about problems in biology, using like ideas from physics.
+But then there was also some very quantitative experiments that we're doing as well.
+And so there was a lot of imaging.
+There was a lot of image analysis.
+And there was a lot of image segmentation and so image segmentation, you know, figuring
+out what parts of your images correspond to like which objects you care about.
+We have to do a lot of that.
+So that was sort of like my first exposure to those sorts of problems.
+And there was sort of this given where if you were sort of the more mathy type and you
+could do the physics calculations, then people just assume that you're going to be good
+at doing the image segmentation and that you'd figure out how to get those tools to work
+to solve like your problems of interest.
+And by and large, like, you know, they're right, but it's still like a separate skill set
+that you have to learn.
+And yeah, and so that was probably like my first introduction to computer vision, to image
+segmentation, image recognition was during my graduate training.
+Finished my PhD on 2011, finished my MD 2013.
+So I went back to clinical training from 2011 to 2013 and you know, got like more exposure
+to problems in clinical medicine.
+And then after that, I went up to Stanford to continue training as a postdoctoral fellow.
+And so I was up at Stanford for about four or five years with Marcus Cover in the bioengineering
+department.
+And there there's when I started getting into sort of like the more machine learning
+slash AI space and so your initial exposure to computer vision was more traditional tools
+that are close to machine learning, so if you're doing edge finding filtering, thresholding,
+watershed transforms, you know, wavelets, all of that, you know, that was my first exposure.
+And so what you would usually end up doing is you, you know, you have an idea of like what
+these tools did and how each one worked.
+And then you'd basically bash some collection of these tools together to work on like your
+problem like of interest.
+And so the experiments that we were doing at the time, and so I think you probably saw
+some of it at the talk that I gave yesterday is, you know, we have these images of cells
+and so at the, so let me just give it back story of the talk for like your listeners.
+So part of the talk I was sort of showing like what I was doing during my graduate work.
+We were very interested in like the life cycle of these viruses and in particular how these
+viruses got their DNA from inside the viral capsid into like the bacterial cell.
+We didn't really have an idea of how it worked and so we had this idea to create an experiment
+to like let us watch.
+And so the challenge was, can you figure out a way to look at one piece of DNA being transferred
+from like inside the virus to inside the cell?
+The answer is yes you can, you have to use these very particular kind of dye that will
+stain the DNA while it's inside the viral capsid and then you can watch the dye molecules
+get transferred between the virus into the bacterial cell.
+So you get these gorgeous movies but we then have to do is quantify these movies so you
+can, you know, have some sense of the dynamics of this process.
+And to get a sense of the type of movie that we're looking at, like what's the field of
+view and in terms of how zoomed in this is this, is are you looking at one transfer, one
+organism or is it many, many that you have to figure out?
+For one paper's worth of data, there's roughly about 50 or so events that you're looking
+at.
+And it's not that often.
+So you're generally looking at maybe like a few hundreds of you live you, there might
+be, you know, somewhere between 20 to 100 is those cells within that field of view.
+And you know, all of those cells maybe like a couple will have like an infection event
+within what time period within the time period of about 30 minutes.
+So these movies were taken in roughly like one snapshot every 30 seconds to every minute.
+And you know, that's sort of like how the, that data was collected, granted it's been
+about seven years since I collected that data set.
+But from what I remember, that's, that's what we, that's what we did.
+And so you get these like, you get these gorgeous movies.
+And so what you need to then do is, you know, identify, okay, which part of the movie
+are which pixels within each frame correspond to like the cells, which ones correspond to
+background, which ones correspond to the virus, which ones correspond to the viruses that
+we actually care about.
+And then once you've done that, then you can go and quantify your images, right?
+And so you can ask, you know, how bright were the viruses over time, how bright were the
+cells over time and use that to generate, you know, some like quantitative curves of,
+here's how much DNA was being transferred as a function of time.
+And then once you have like that, those curves, then you can go and do your, you know, your
+fancy modeling, your physics and, you know, determine, okay, well, from this set of hypotheses
+for how I think this process is happening, you know, which ones are actually like consistent
+with like the data that we've generated.
+And so when you're trying to determine the, the brightness, which tells you how much DNA
+was transferred, is this, how much in terms of the length of the sequences transferred
+or some of the other.
+It's ideally like what you want to, that's ideally like what you want is like how many
+base pairs or how many nanometers worth of DNA has been transferred like over time.
+And so you kind of use a calibration curve.
+And so you know at the beginning of the event, you know, the virus has about 48 kilobase
+pairs of DNA at the end of the event, like it should have zero and use some like linear
+interpolation, you know, assuming that, you know, you know, linearly related, you know,
+brightness versus like how much DNA, and then you can like infer from the movies, go from
+brightness to like the amount of DNA.
+So where does machine learning and AI fit into all that?
+Yeah.
+So machine learning and AI fits in, and how do you do like the object, how do you do like
+the object recognition, the image segmentation?
+And, you know, that experiment was, you know, it was sort of like the classical computer
+vision approaches that we used to analyze that data.
+And when I started my postdoctoral fellowship at Stanford, I had ideas for experiments that
+I'd like to do.
+And basically what I wanted to do was, you know, look at genome scale knockout libraries
+with image them and then look at them with single cell resolution.
+So what's a genome scale knockout library?
+Genome scale knockout library is a collection of strains where in each strain, you have one
+gene that's been removed or inactivated.
+And so if you're interested in, you know, say like a particular like biological process.
+So the ones that the one that I was interested in at the time and that my lab is currently
+interested in are host virus interactions.
+And so you want to understand how do viruses and their host talk to each other and what
+parts of the host are important for that communication.
+There are experiments that you can do where if you have a way to look at the communication
+using imaging, then you can basically go one by one, remove a gene from like the host.
+And if that gene was important, then that's going to alter what the communication was
+or what like the outcome of the violent infection ended up being.
+And you know, that's what you know, the host in this case is the host in this case is not
+the virus, but the cell that's infecting.
+Right.
+Yeah.
+So moving that particular sequence prior to the infection, prior to the infection.
+And so you've got a control experiment, you've got a control where nothing's been removed
+and then you have a collection of strains where in each strain, one gene has been removed.
+And so there are collections that like this that exists for certain strains of E. coli,
+there are collections that exist for East.
+People at the Chan's upper initiative are creating collections like this that exist for, you
+know, mammalian cells.
+And these are really powerful tools because, you know, because they exist in like this
+array format where one well of additional have one strain that has one gene removed, then
+you can systematically go one by one and ask, okay, does this removal, does that influence
+what I was interested in studying?
+So in this case, does it influence the outcome of particular viral infection?
+So what we want to do is to be able to read out a screen of this library using imaging
+and imaging with single star resolution, there you're going from the case of where you're
+doing, you know, 50 or 100 or 1000 cells to doing millions.
+And there you don't have the luxury of being able to like go back and like manually correct
+like segmentation errors.
+You really need something that's going to work 99% of the time if not, if not better.
+And that's where the machine learning comes in.
+And so I remember when I was a medical student, I was sort of like browsing Facebook and
+I realized like, hey, you know, Facebook actually knows like where the faces are in, you know,
+in like all the images I'm uploading, not only that, but it has like ideas of like who's
+in these, who's in these pictures?
+Like, is it you? Is it like your, you know, like you're one of your three like best friends?
+And you know, just, you know, I've done like a lot of microscopy in my, um, over my
+career.
+And it's like, I know that the images that I collect on microscope are a lot simpler than
+the images of like me doing Brazilian Jiu-Jitsu or hanging out with my friends that like
+a part of your whatnot.
+Right.
+You know, what are those guys doing and can I steal it, um, or borrow or co-op, but, you
+know, rallies like, you know, blatant theft, you know, can I take those tools and then repurpose
+them to like work on our microscopy data?
+And so the answer was, you know, the answer was yes, um, and on the time that I started
+my postdoc and started like, think about these issues again, was literally right as the
+deep learning and fletch and curve, um, started to take off.
+Okay.
+And so it turned out, you know, yes, you can repurpose these tools and it, you know, it
+ends up working like really, really, really well.
+And so we had a paper that we did, um, and plus computation biology, um, basically showing
+that for the single cell image segmentation problem, the existing tools, um, work as
+well as a state of the art, um, for a cross a variety of different cell types.
+So whether you're imaging bacteria, whether you're imaging mammalian cells in cell culture,
+if you're looking at phase images, if you're looking at fluorescence, microscopy images,
+that, you know, the tools work really well and it's at a point that, you know, people
+in the cell biology community, you know, really need to start taking like a really close
+look at these tools and, you know, start thinking about like, how can these, um, how can
+these change the way that I do my experiments and what experiments will they let me do?
+That would previously have been like impossible.
+Okay.
+Yeah.
+And so did you use off the shelf CNNs and all the kind of stuff, or did you have to start?
+And yeah, so like I started at the beginning.
+And so yeah, so at the time, um, when I first started, um, Andre Carpathi put together
+and faithfully put together like their first CS231 end course, which I think is now kind
+of like iconic in the field.
+I got to sit on that for a couple of weeks, um, to like sort of like get, um, familiarize
+myself with the field, enough of the point where I can go and like, you know, hack some
+piece of code together, Karrist didn't really, um, was didn't really exist at the time.
+Um, cafe was like a new thing.
+Um, TensorFlow didn't exist and it was basically, you know, do you want to learn kuda?
+Or were you like, okay, like learning like piano?
+And so when I first started, um, I was programming in like naked piano, had to figure
+out how to pipe data into like, you know, simple like CNN, um, architectures.
+How do you like save models?
+How do you like, you know, once you like save parameters, like how do you load it?
+Like the really nice frameworks that exist today, like those didn't, um, those didn't
+exist at the time.
+And so, you know, sort of like had to like figure like all those things out, get some like
+hacky pieces of code that would work.
+But the first, like, basically like the very simplest, you know, CNN architectures that
+you could write down ended up working, um, really well.
+And so actually like, as far as this stuff that my lab uses, um, in production for the
+data that we analyze, um, the data that we analyze with, um, well, with our collaborators,
+um, we, you know, still use those like very simple, um, neural network architectures.
+Um, I would say like there's, um, there's a lot of like really cool stuff that people
+have done.
+Um, but I found it very useful to pay attention to what's going to generalize on small datasets,
+as opposed to, you know, what's the latest and greatest that are out there.
+And, you know, just from like my own personal experience, you know, some of the things that
+will perform like really well on image net, like say like residual networks, um, they have
+issues with overfitting.
+And if you don't have like that large corpus of data where your network can learn all
+of the edge cases, you'll still, you'll get more like practical utility from like, you
+know, the simpler neural networks trained, um, in an approach, in a way where you like,
+you're doing like the regularization, um, and the, you know, normalization and like the
+post processing, like correctly.
+And so was your, your training data, the datasets that you had traditionally created using
+manual segmentation or traditional computer vision?
+Yeah.
+So those were, so I would say like this is true and academia is true in life is that if
+you want to get people excited about something, like first you have to prove that it's going
+to work.
+Um, and so the first generation of training data, um, like I created like myself.
+And so I annotated a couple images of bacterial cells in image J and, you know, image J is
+a, um, Java, a Java program that people have labeling box bounding box tools.
+It's like a general, it's a general purpose, um, image visualization and also image analysis,
+um, toolkit that the NIH supports.
+Okay.
+So they have tools for annotating images.
+It's relatively clunky, but it worked then and it works now, um, for some cases like
+we, um, we still use it.
+Mm-hmm.
+But yeah, I generated it.
+It worked.
+You threw out a few different numbers when you said a couple of images.
+Yeah.
+Is this a couple of images with 50 things that need to be annotated or a couple of images
+with a million things that need to be annotated?
+A couple of images with a couple with about a hundred-ish things that need to be annotated.
+Okay.
+And we paid, um, for the plus computation biology paper and even now, we paid very close
+attention to data augmentation.
+We paid a lot of attention to normalizing images before they go into like the neural network.
+So you can account for like variations in image acquisition.
+And we paid a lot of a tent, we paid like a good amount of attention to post-processing
+what happens to like the output of the neural networks afterwards.
+And can you still leverage some of the, some of the classical tools that you use in computer
+vision, like the watershed transform, like active contours or whatnot to sort of refine
+like what the neural network produces to produce something that you can like actually like
+use on like real data.
+And we found that by like paying attention like those things, you know, you don't have to
+use like the latest and greatest, you know, stuff in the neural networks in the deep learning
+space, relatively simple things with those things like paid attention to work like really
+well.
+And did you iterate to paying attention to all those things?
+Or did you just kind of start there and that's what work?
+We were always iterating people create like really, really great pieces of work all the
+time.
+And like there's just an innately curious part of me wondering like how well will that
+stuff work on the data sets that we've generated and the other people have generated sort
+of like in this space.
+And now that I'm running my own group, I have people to sort of like help explore like
+that space.
+I will say that we're primarily interested in like the scientific questions that we can
+answer with these tools.
+And that curiosity kind of like drives our interest in the deep learning space.
+We're well, I find it like interesting and mathematically elegant.
+We're not necessarily like deep learning for like deep learning sake.
+It's more like deep learning, you know, because like we have like real problems that
+we're trying to, um, that we're trying to address.
+That's the way it should be.
+I think so.
+Yeah.
+I think so.
+So you mentioned a few kind of tricks and techniques that you paid attention to, data
+augmentation.
+Yeah.
+How did you go about that or what were some of the highlights or anything stand out in
+terms of, you know, doing this really made it work for us.
+Was it standard kind of, you know, rotating things around and changing brightness levels
+and that kind of thing?
+I would say like the things that like, the things that like we found that worked, um,
+is just like being like trying to be a systematic, um, as we could with the things that we tried.
+And so like we have tried, um, so I can like just go through the list of things that we
+tried for our plus computational, um, biology paper.
+The usual like data augmentation things that we've tried, um, so image rotations, image
+flipping, those things like really matter, um, I would say there were some things that
+we tried that didn't really make so much of an impact.
+So image sharing and so sharing is like another like another operation that you can, um, that
+you can do to augment your data.
+We found that that didn't really like impact like performance of like the neural networks
+that we got.
+Um, I would say paying attention to how you're doing the training, um, made an impact.
+And so we found that for us, the simpler, you know, simpler stochastic gradient is sent
+with, with Nesterov momentum that ended up being, um, better, roughly speaking than, you
+know, RMS prop, Adam, et cetera, et cetera.
+But that was also conditioned on like what networks that we were using and like what features
+we had within those networks.
+And so bash normalization, um, sort of influences like which one is going to work better, um,
+whether using like dropout or using like bash normalization, like with dropout, we tend
+not to do that.
+To not to use dropout or to not to use bash normalization, then we generally speaking,
+don't use dropout.
+And I would say like I, we generally speaking, don't use dropout that much.
+Uh, I don't know how general this quote unquote finding is.
+But one thing that we noticed was if you look at the, let me just take like a brief second
+to sort of like stay like how we do like our neural network training.
+And so we sort of repose.
+Yeah.
+So basically like the task that we're trying to do is instant segmentation.
+And so for your listeners who are sort of like familiar with this space, it's the same
+task that networks like mask our CNN, um, solve.
+We started working on this before mask our CNN came out.
+And so there's sort of like, you know, different ways of like slicing that up.
+Well, the way that, uh, we did it is, is a framework that Dan Cirisson posed in a paper,
+um, many years ago, which is recasting the instant segmentation problem as an image
+classification problem.
+And trying to classify like every pixel as either being, um, in interior, being inside
+a object, in this case, inside a single cell, being at the boundary of a single cell,
+or being as part of the background.
+And you can looking at things in that way, then, you know, it's basically like an image
+classification problem, um, we train using like sample wise, um, training.
+And so we basically have these, we have like these maps of what every pixel like should
+be, we crop like a small area around like each pixel, feed that into a deep convolutional
+neural network to do the classification.
+And once it's trained, um, we basically use dilated convolutions and dilated pooling
+kernels to run that classification neural network on entire image, um, to generate like
+dance predictions.
+What are the, what are dilated convolutions and dilated, um, so dilated convolutions
+are basically, if you take your convolutional kernel, um, dilations are basically just like
+inserting zeros in between, um, the weights of your, of your convolutional kernel.
+And there's a similar, um, there's a similar thing, um, in the pooling kernel.
+Yeah.
+And so it turns out you, you kind of have to do that because, because you're training
+this neural network, uh, to do pixel wise classification, once it's trained to do dance prediction, if
+you try to feed it in patch by patch, if you have two neighboring pixels, then basically
+all of the patches around it are essentially redundant computations.
+And so you need, um, you need to use like the dilated, um, kernels to, you know, get like
+a fully convolutional, um, execution instead of your, your dilation factor end up being
+like a hyper parameter.
+No, it's like, it's like mathematically like exact.
+If you dilate things in the right way, then it ends up being like mathematically the same
+as like running everything like, um, doing like patch wise, um, patch wise predict show.
+Okay.
+So I got like sidetracked on, on, on, on that.
+So like there's a reason, I mean, this happens to me like all the time as I'm getting, as
+I'm getting older, um, we were talking about the kind of various ways you've tweaked
+the process, and you mentioned that, um, you know, while there are some, uh, newer approaches
+to segmentation, you, um, kind of rolled your own based on a paper, yeah, and, uh, ended
+up using this dilation as a way to do the pixel by pixel.
+Yeah.
+Okay.
+Yeah.
+So, and we're all, I think we're also talking about like what parts did we find, or what
+authentic, and what wasn't.
+Yeah.
+So like the output of this, um, the output of like this approach is you get like probably
+maps for what's like inside of it, so what's the cell boundary, and what's like a background.
+Um, if you use drop, and so for the post processing, it's actually helpful to have like some notion
+of uncertainty.
+And so if the neural network is like not sure, it's easier for the post processing for, let's
+say, the picture was not, pixel where it's not sure.
+It's more useful to have that pixel value be like 0.5 instead of, you know, making a very
+certain like false call.
+And so what we found, uh, with some of our experiments with dropout is that it was essentially
+removing some of the uncertainty that was encoded in these probability maps, and that
+made it a little harder to do like the downstream, um, processing.
+That's why I, I kind of like shy away from dropout.
+Um, I don't know like how general this is, and, but this is like that was like one of
+the, um, empirical observations on that, um, you know, I've noted during like my, um,
+time-experiment of these things, um, other things that like really help, um, more, like
+more training data, the more data that you have to capture more and more edge cases, then
+like the better, um, the better the neural networks are going to perform, uh, we found that
+roughly if you have like standardized like acquisition, um, conditions, and you collect
+your training data on like the same acquisition conditions, then you really only need, I'd
+say like on the order of like a few hundred, um, to a thousand cells to get like neural
+networks and it'd be like good enough to analyze like subsequent experiments, but the more,
+the more training data that you get, then the better that it's going to be.
+And I think now we're getting to the point, I mean, we're getting the point we're having
+like more and more like data sets that are like publicly available.
+So when we published our paper in plus computational biology, we released like all the data sets
+we annotated, I think it was on the order of like maybe like, you know, 10 to 15-ish
+images, it was quite a bit of work to do, um, but you know, I'm a big fan of if you're
+publishing something, you know, make everything they're doing like openly available, um, and
+I think like as we're seeing, there is more people are recognizing that the challenges
+in this space aren't necessarily like the algorithms anymore.
+It's like having access to like good like high quality data, right?
+If you give someone, you know, a good data set, you know, there's going to be like some
+nerd in some basement, you know, who's like lives on stack overflow is going to be able
+to put together like some kind of machine learning solution, uh, using that data set.
+It's just are there data sets that are out there.
+And I think now we're starting to see like more and more data sets, um, like in this space.
+And so the ones that come to mind.
+So I think there's, there was one that was released by, um, the Broad Institute, um, it was
+like part of like the 2018, um, Kaggle data science competition, uh, for doing nuclear
+segmentation.
+Um, that was one of the things that we tackled in our plus computation biology paper.
+But more data sets on more data types and you'll get better on better neural networks.
+And as we saw today, um, you know, figure eight is releasing annotated data on H&E pathology
+images, um, for doing nuclear segmentation on a variety of like different tissue types.
+And so I think like the more and more data sets that we have that cover more and more,
+um, use cases, then like the closer we're going to get to actually having like general tools
+that, you know, people be able to use like off the shelf, um, which I think is going to
+be like really, really awesome.
+So yeah.
+Uh, in my view, like I view this space as the challenges, I don't want to like downplay
+how hard it is to like it started like in machine learning and deep learning.
+It's like, you know, of course, there's like, there's like challenges and issues, but
+it's really, I'd say like data sets, um, are like one big challenge and deployment, um,
+challenges and other challenge, um, once you have like a neural network, um, that's trained
+to like do your task.
+How do you give it to like other people so they can use it for their problems and like
+their data?
+Yeah.
+Yeah.
+And have you, have you started to tackle that one at all or one thing that I talked about
+at my talk, um, yesterday was, you know, sort of like what are, what are we working on
+on the deep learning space, um, one is, yeah.
+So one is just deployment and experiments, experiments that we do in our lab.
+That requires, you know, a little bit more training data because like the experience that
+we like to do or sort of like, like large scale imaging and then also deploying, um, these
+neural networks so you can do like segmentation in, in tissues, right?
+And so there's sort of like the, you know, well controls, you know, cell culture type experiments,
+but then there's a messier world of, you know, imaging and, you know, real life tissues
+that, you know, pathologists, um, pathologists do.
+And so these require different scales of training data and the things that you'd really like
+to do in these spaces are either like very complicated tissues or having three dimensional
+data sets.
+So being able to do two dimensions in space plus time or being able to do like three
+dimensional, um, spatial, um, three dimensions in space, say like you're using like a confocal
+microscopy, um, setup or, um, another like more sophisticated instrument.
+And so that requires a different scale of training data because instead of annotating
+a couple of frames to be able to look at the objects, you have to be able to like annotate
+like entire movies.
+And that's what I've been working with, um, people that figure it with, um, is, how do
+you train people on the crowd to like do these, um, sorts of tasks?
+Oh, I think we're just, I think they ended up talking.
+I think we showed, you know, sort of like some of like the stuff that's off the press.
+I think we're just now getting people, um, in the crowd able to annotate the 3D data
+sets, um, Robert Monroe show being able to, you know, do like object tracking, um, in
+the crowd.
+I'm super, super excited about that because I think that's one of the, you know, one of
+the big, um, challenges, um, in lifestyle imaging and, you know, to do that, what you need
+are, you know, nice, um, annotated, um, annotated data sets.
+And so we've been working on annotating on issues with like crowdsourcing, like, um,
+data set annotation, we're also, um, thinking about deployment as well.
+And so there are a lot of things to think about there.
+Um, so yeah, I would say there's a difference between what I like to call like academic
+software, which is, you know, someone has like a cool idea they put together a nice set
+of scripts, um, in Python or MATLAB or R. And for, well, for MATLAB and R, they're relatively
+like well-contained environments and you can give someone a dot M file, um, or an R file
+and it'll kind of work on another MATLAB installation.
+But Python's a different beast.
+Everybody's got like their own version, their own limitation and for all of the different
+stacks on the library, does a different libraries.
+And so that's a, that's a problem, right?
+Is that I can't give somebody like a link to my GitHub and say like, good luck.
+Um, you have to, there's a lot more, um, there's a lot more work that has to be done.
+So, you know, it's basically, you know, doing your due diligence, looking at like the best
+tools that are out there for solving these problems, um, we have switched to doing like
+our development inside of NVIDIA Docker now.
+And we're looking as, um, to use that for, you know, deployment.
+So like we have collaborators who use some of those scripts that we generate, um, and
+now instead of, you know, giving them like, hey, here's like the Python file, um, you
+know, hey, here's like a Docker container, um, that has like all of the packages, um,
+installed.
+And, you know, there's layers of work to, uh, that has to be done like on top of that.
+Ideally, you know, you'd have like your Docker container, um, up and running, you'd have
+stuff like wrap within like a web framework.
+You have, you know, that backend talking to like a front end with some semblance of like
+user interface, um, and now that I have like a team of people thinking of these sorts
+of issues, um, you know, we're thinking of, um, we're thinking of like just implementing
+on some of these things to like have it easier for people like within the lab, um, people
+within the labs that we collaborate with and also like the people who, um, you know, download
+our stuff and use it, um, make it easier for them to use too.
+Awesome.
+Awesome.
+Yeah.
+Uh, well, David, this has been really, really interesting.
+Thanks so much for taking the time to chat with us.
+Um, it's been absolute pleasure.
+Um, thank you very much.
+Uh, I should like, I mean, I would like to think like a few people, um, if I'm like a
+lot, go right ahead.
+Yeah.
+Uh, like I think the graduate students, um, who have, um, been worth rotating with me,
+like the last, um, this quarter.
+So Dylan Bannon and Nadia Vilevich, uh, I've got to thank, um, people I've worked with
+at Stanford.
+And so I had the privilege of working with Nicholas Quatt.
+She's a very talented undergrad who did a lot of the experiments I talked about yesterday.
+Um, my postdoctoral advisor, um, Marcus covert, um, he was great.
+And it was his lab that, um, sort of gave me like the intellectual freedom to start exploring
+like these, um, sets of issues, um, you know, looking at like AI and the interface with
+uh, the biological sciences, um, I had a great, great ongoing collaboration with, uh, Michael
+Angelo, who's a professor at the college department at Stanford.
+Um, he's done amazing, um, amazing stuff, um, on digital pathology and developing like
+the next platform of digital pathology instruments.
+I will let you look at literally, you know, dozens of different biological markers within
+tissues.
+And he's had an amazing postdoctoral fellow, um, Leot Karen, um, who I worked with as
+well, uh, unfortunately, you didn't get to stick around for the talk yesterday, um, but
+I talked about some of the work I was doing with them.
+And also like to think, um, Casey Wong and long, hi, um, I do, I do work with their labs,
+um, as well.
+Awesome.
+So yeah.
+Awesome.
+And of course, the folks that figure eight for the support of your work and having us
+here at the podcast, folks that figure eight, um, Andy, Justin, Robert, um, everybody's
+been like, everybody's been amazing.
+Their openness has, I think is, I was like, it's a model that people in academia should
+pay attention to as far as like collaborations between like academia and industry, like the
+things that figure eight's allowing my lab to do.
+And the resources they've given us, like the work that, you know, we're doing and we're
+going to do would not be possible like without them.
+Fantastic.
+Yeah.
+Other funders, uh, NH, or welcome fund, uh, Paul Allen Family Foundation, um, they funded,
+um, a large, um, large amount of work and also the division of biology and engineering
+at Caltech for posting my laboratory and also, um, funding us as well.
+Awesome.
+Well, thanks so much, David.
+Thank you.
+All right, everyone.
+That's our show for today for more information on David or any of the topics covered
+in this episode, head on over to twimlai.com slash talk slash one forty one.
+Thanks again to figure eight for their sponsorship of this episode.
+To follow along with the train AI series, visit twimlai.com slash train AI 2018.
+And last, but not least, go ahead and show us some love for our second anniversary and
+share how the podcast has been helpful to you over at twimlai.com slash two A V, the
+number two A V.
+Thanks so much for listening and catch you next time.

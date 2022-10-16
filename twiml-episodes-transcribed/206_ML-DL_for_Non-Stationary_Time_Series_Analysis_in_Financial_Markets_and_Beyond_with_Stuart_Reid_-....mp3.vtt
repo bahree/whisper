@@ -1,0 +1,1778 @@
+WEBVTT
+
+00:00.000 --> 00:16.320
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+
+00:16.320 --> 00:21.480
+people, doing interesting things in machine learning and artificial intelligence.
+
+00:21.480 --> 00:31.480
+I'm your host Sam Charrington.
+
+00:31.480 --> 00:36.520
+Before we jump into today's episode, a big thanks to everyone who listened to shared
+
+00:36.520 --> 00:40.560
+and commented on our AI platform series.
+
+00:40.560 --> 00:45.840
+As always, we love hearing your feedback and we've received a ton of it on these shows.
+
+00:45.840 --> 00:51.160
+Stay tuned for part two of the series, early next year, and if you haven't yet, be sure
+
+00:51.160 --> 00:56.600
+to sign up for my upcoming series of e-books on the topic, which we'll be releasing soon.
+
+00:56.600 --> 01:02.160
+Finally, over the next few weeks, I'll be bringing you great interviews from the AWS
+
+01:02.160 --> 01:07.400
+Reinvent Conference, which I'm at right now, NURRIPS and CUBE CON.
+
+01:07.400 --> 01:11.720
+And I'd love to connect with any listeners and attendants, so please shoot me a message
+
+01:11.720 --> 01:19.440
+via at Sam Charrington on Twitter, email or thetwimlai.com website if you'll be around.
+
+01:19.440 --> 01:24.320
+Today we're joined by Stuart Reed, Chief Scientist at Numerical Research.
+
+01:24.320 --> 01:29.800
+Numerical, based in Stellanbaugh, South Africa, is an investment management firm that uses
+
+01:29.800 --> 01:34.760
+machine learning algorithms to make adaptive, unbiased, scalable, and testable training
+
+01:34.760 --> 01:37.480
+decisions for its funds.
+
+01:37.480 --> 01:41.960
+In our conversation, Stuart and I dig into the way Numerical uses machine learning and
+
+01:41.960 --> 01:45.680
+deep learning models to support the firm's investment decisions.
+
+01:45.680 --> 01:50.960
+In particular, we focus on techniques for modeling non-stationary time series, of which
+
+01:50.960 --> 01:54.000
+financial markets are just one example.
+
+01:54.000 --> 01:58.920
+We start from first principles and look at stationary versus non-stationary time series,
+
+01:58.920 --> 02:03.680
+discuss some of the challenges of building models using financial data, explore issues
+
+02:03.680 --> 02:06.640
+like model interpretability and much more.
+
+02:06.640 --> 02:11.680
+This was a very insightful conversation, which I expect will be useful not just for those
+
+02:11.680 --> 02:13.480
+in the Fintechs base.
+
+02:13.480 --> 02:16.240
+Enjoy.
+
+02:16.240 --> 02:19.840
+All right, everyone.
+
+02:19.840 --> 02:22.240
+I am on the line with Stuart Reed.
+
+02:22.240 --> 02:25.440
+Stuart is the Chief Scientist at Numerical Research.
+
+02:25.440 --> 02:28.720
+Stuart, welcome to this week in machine learning and AI.
+
+02:28.720 --> 02:33.120
+Yeah, thanks for having me, Sam, it's really great to be speaking to you.
+
+02:33.120 --> 02:37.920
+I've been listening to the podcast for a long time now, so it's great.
+
+02:37.920 --> 02:40.280
+And I'm really glad we were able to connect.
+
+02:40.280 --> 02:44.520
+This one has taken a while to put together for a variety of reasons.
+
+02:44.520 --> 02:51.360
+We initially connected around the time, kind of in the run-up to the deep learning and
+
+02:51.360 --> 02:53.840
+dava, which you participated in.
+
+02:53.840 --> 02:59.640
+And for whatever reason, it's taken us a bit to connect, but welcome once again.
+
+02:59.640 --> 03:01.280
+Yeah, thank you very much.
+
+03:01.280 --> 03:06.120
+It was a pretty busy week during the deep learning and dava, so I'm not surprised that
+
+03:06.120 --> 03:10.120
+it took a while, but good to finally be speaking to you.
+
+03:10.120 --> 03:14.640
+So why don't we get started with a little bit of your background.
+
+03:14.640 --> 03:18.840
+You are currently focused on applying AI to finance.
+
+03:18.840 --> 03:21.440
+How did you get here?
+
+03:21.440 --> 03:28.760
+Yeah, so I think that my interest in technology itself predates my interest in finance.
+
+03:28.760 --> 03:35.640
+I was actually the youngest South African to get an amateur radio license when I was 11.
+
+03:35.640 --> 03:38.960
+And that's kind of when I got into technology.
+
+03:38.960 --> 03:44.980
+But soon afterwards, I discovered finance, started out with the traditional books by Warren
+
+03:44.980 --> 03:50.760
+Buffett and Benjamin Graham on security analysis and how do you actually value companies.
+
+03:50.760 --> 03:56.560
+And then that slowly shifted into some of the more modern approaches, taken by lacronase
+
+03:56.560 --> 03:59.440
+on technologies in D.E. Shaw and AQI.
+
+03:59.440 --> 04:01.200
+And that's really quantitative finance.
+
+04:01.200 --> 04:07.400
+So that interest is actually what propelled me to study computer science in the first place.
+
+04:07.400 --> 04:12.760
+And you're now, again, chief scientist at numerical research, what does numerical research
+
+04:12.760 --> 04:13.760
+do?
+
+04:13.760 --> 04:18.000
+Yes, a numerical research is a startup financial services provider based in still in
+
+04:18.000 --> 04:20.240
+Barcelona, Africa.
+
+04:20.240 --> 04:25.760
+We have two investment funds which are run entirely by machine learning algorithms.
+
+04:25.760 --> 04:26.760
+So that's what we do.
+
+04:26.760 --> 04:31.840
+We're using deep learning algorithms for the most part to predict what is going to happen
+
+04:31.840 --> 04:38.200
+in global financial markets, which sounds like the best idea ever, but it's incredibly
+
+04:38.200 --> 04:42.040
+challenging for a number of different reasons.
+
+04:42.040 --> 04:44.240
+And we will get into those.
+
+04:44.240 --> 04:49.480
+The kind of way you framed your presentation as I understand it at the end of was around
+
+04:49.480 --> 04:54.360
+the application of machine learning to kind of the broader class of problems that you see
+
+04:54.360 --> 05:02.800
+in financial markets, and that is a specific type of time series analysis.
+
+05:02.800 --> 05:08.640
+And you made a distinction when we were talking before we got started between stationary
+
+05:08.640 --> 05:11.280
+versus non-stationary time series.
+
+05:11.280 --> 05:12.960
+Can you elaborate on that?
+
+05:12.960 --> 05:13.960
+Yeah.
+
+05:13.960 --> 05:19.200
+So, you know, a stationary time series is really one which is sample from a distribution
+
+05:19.200 --> 05:21.200
+which doesn't change.
+
+05:21.200 --> 05:25.720
+So that fits quite nicely with your traditional machine learning paradigm, which is where
+
+05:25.720 --> 05:32.240
+you are fundamentally assuming that your data generating process is constant or very slowly
+
+05:32.240 --> 05:33.800
+time varying.
+
+05:33.800 --> 05:39.760
+But financial markets are anything but stationary that continuously changing.
+
+05:39.760 --> 05:44.680
+In fact, I would go as far as to say that the markets themselves are adversarial.
+
+05:44.680 --> 05:47.520
+They don't really want you to succeed.
+
+05:47.520 --> 05:50.320
+And this gets into the whole debate of like market efficiency.
+
+05:50.320 --> 05:55.680
+So my focus is very much on how can we get deep learning algorithms which were designed
+
+05:55.680 --> 06:02.320
+to work in a stationary environment under some reasonably strict assumptions?
+
+06:02.320 --> 06:07.080
+How can we get those algorithms in our work in an environment where you can not only experience
+
+06:07.080 --> 06:12.880
+a lot of non-stationary but experience extreme shifts in the distribution of the data that
+
+06:12.880 --> 06:14.640
+has been generated.
+
+06:14.640 --> 06:19.440
+So these kind of points are regime shifts, structural breaks, critical transitions, change
+
+06:19.440 --> 06:24.480
+points, as many names for them in the literature, but I prefer change points.
+
+06:24.480 --> 06:32.200
+And so what are the main challenges that you see in doing this, do you, are there, you
+
+06:32.200 --> 06:37.200
+know, is it just hard or are there distinct challenges that you can point to in trying
+
+06:37.200 --> 06:41.680
+to apply machine learning and deep learning to these types of time series?
+
+06:41.680 --> 06:42.680
+Okay.
+
+06:42.680 --> 06:43.680
+Yeah.
+
+06:43.680 --> 06:49.120
+Now there are some very specific challenges, but let me first take a step back and say
+
+06:49.120 --> 06:54.600
+that if you are interested in applying deep learning algorithms to financial markets, there
+
+06:54.600 --> 07:02.040
+are more problems than just non-stationarity and kind of like this adversarial behavior.
+
+07:02.040 --> 07:06.960
+You also have a very challenging problem with signal to noise.
+
+07:06.960 --> 07:09.200
+So there's a lot of noise in financial markets.
+
+07:09.200 --> 07:15.680
+In fact, most derivatives that are priced these days are priced using random walk models.
+
+07:15.680 --> 07:20.160
+And that's kind of where my fascination with randomness comes in, but also markets are
+
+07:20.160 --> 07:24.120
+challenging because of this non-stationarity.
+
+07:24.120 --> 07:29.880
+But there are a number of different challenges associated with China predict time series
+
+07:29.880 --> 07:34.960
+which can abruptly change from one distribution to another one.
+
+07:34.960 --> 07:40.960
+And that's, you know, can we actually detect these change points in a timely manner?
+
+07:40.960 --> 07:46.760
+And how many of these change points are actually going to occur? Is it a one-soft kind of transition
+
+07:46.760 --> 07:53.120
+as you might see in some ecological systems or is it a multi-way kind of transition kind
+
+07:53.120 --> 07:58.520
+of like we have in finance where you cycle between maybe a low volatility and a high volatility
+
+07:58.520 --> 08:02.200
+regime or between a bear market and a bull market?
+
+08:02.200 --> 08:06.760
+Then the next challenge is the duration of that change point.
+
+08:06.760 --> 08:13.840
+So you can have change points which are extremely abrupt. Like for example, if we're using change
+
+08:13.840 --> 08:19.520
+point analysis or machine learning algorithms to identify the onset of an attack on a network
+
+08:19.520 --> 08:25.000
+like network intrusion detection, that's a very instantaneous kind of change in the distribution
+
+08:25.000 --> 08:29.640
+in that network activity. Whereas in financial markets, it's actually generally a slightly
+
+08:29.640 --> 08:36.120
+slower transition. And that can actually make it harder to detect because it's lots of small
+
+08:36.120 --> 08:42.200
+changes which kind of add up and eventually become a very large regime shift.
+
+08:42.200 --> 08:49.320
+Also another challenge is the extensiveness of the regime shift. Is this regime shift
+
+08:49.320 --> 08:54.440
+or is this change point affecting the entire model which we've trained or is it just affecting
+
+08:54.440 --> 09:00.040
+a subset of the model? Is it just affecting the part of the model which is looking at interest
+
+09:00.040 --> 09:05.160
+rates or the part of the model which is looking at currencies? And then the other two challenges
+
+09:05.160 --> 09:11.240
+is the magnitude. So very large or very small shifts and where those shifts are happening.
+
+09:11.240 --> 09:16.360
+And then the certainty around this. So how confident are we that we've identified a real
+
+09:16.360 --> 09:23.080
+change in the distribution as opposed to just an outlier or an anomaly in the data?
+
+09:23.080 --> 09:28.880
+So those are kind of like the challenges that you're presented with when you're trying
+
+09:28.880 --> 09:36.880
+to use deep learning algorithms to predict time series which are non-stationary and can
+
+09:36.880 --> 09:44.560
+have these abrupt transitions. And when you're faced with those very distinct challenges,
+
+09:44.560 --> 09:51.360
+do you attempt to kind of pick them off one by one or do they kind of together lead you to
+
+09:52.000 --> 09:58.320
+a class of solutions to this general problem that has good properties for some subset of the
+
+09:58.320 --> 10:05.040
+challenges? That's a very good question. I have definitely taken a very non-linear approach to
+
+10:06.720 --> 10:12.640
+this set of problems. In fact, I've only realized that some of them are problems quite recently
+
+10:14.000 --> 10:21.120
+and it's kind of like an ongoing area of research for me. But generally what kind of spurred
+
+10:21.120 --> 10:28.000
+the interest was that we developed this framework at an numerical and we were training all of these
+
+10:28.000 --> 10:34.800
+different models. And one of the early things I noticed is that the best models were generally the
+
+10:34.800 --> 10:41.920
+ones which got the financial crisis right, like in terms of their predictions. So that motivated me
+
+10:42.560 --> 10:49.120
+to take a look at those models and try and work out what made them get it right. And I think for
+
+10:49.120 --> 10:54.160
+the most part it was luck for those models. But then I got really interested in these kind of
+
+10:54.160 --> 11:00.160
+like change points because the reality is that significant changes in the distribution of
+
+11:00.160 --> 11:05.840
+financial markets, not only affects how you should make your investment decisions, which affects
+
+11:05.840 --> 11:13.440
+everybody's retirement savings and their ability to do things, but also policy changes. When we're
+
+11:13.440 --> 11:20.800
+talking about how the government should decide to set interest rates or how it should behave in
+
+11:20.800 --> 11:28.160
+situations like trade wars, you know, these kind of things. So my approach to it was very much
+
+11:28.160 --> 11:34.480
+from an applied perspective. It was like, this is an interesting problem. And then I tried a whole
+
+11:34.480 --> 11:40.320
+bunch of different things to try and solve that problem. And then slowly began to see that
+
+11:40.320 --> 11:47.120
+it was a very common problem, which actually arises in many different areas, not just finance and
+
+11:47.120 --> 11:53.360
+economics, but also in statistical quality control and manufacturing, speech recognition, medical
+
+11:53.360 --> 12:00.240
+condition monitoring, you know, disaster prediction. If we're talking about like earthquakes,
+
+12:02.080 --> 12:06.400
+network intrusion detection, there's a whole bunch of really interesting ideas. And then through
+
+12:06.400 --> 12:11.040
+looking at all of the different applications, kind of piece together the theory and what the
+
+12:11.040 --> 12:15.680
+challenges are when you're looking at these kinds of time series. And what's interesting is that
+
+12:15.680 --> 12:20.720
+different parts of the literature from different domains are focusing on different subproblems.
+
+12:20.720 --> 12:28.720
+Like duration of the change point is a much bigger issue in ecology, for example, than in
+
+12:28.720 --> 12:33.920
+network intrusion detection. So I hope that kind of answers the question. It's a very good question.
+
+12:33.920 --> 12:38.560
+I have no idea. I'm just kind of going at it and seeing what happens.
+
+12:38.560 --> 12:47.200
+You mentioned that one of the ways you or one of the hallmarks of a good model is the ability
+
+12:47.200 --> 12:54.240
+to predict the financial crisis, which kind of suggests to me that the main thing you're doing
+
+12:54.240 --> 13:03.440
+to test here is kind of back testing against historical financial data. And I guess I'm wondering
+
+13:03.440 --> 13:10.160
+is what exactly when we say a model or these models, what exactly are we talking about? Is it one
+
+13:10.160 --> 13:15.680
+model that predicts the price of the S&P or some portfolio or do you have models for individual
+
+13:15.680 --> 13:21.040
+securities or are you modeling some of the sub components that you mentioned like interest rates
+
+13:21.040 --> 13:26.400
+and bond prices and things like that? Like how granular are the models that you're developing?
+
+13:26.400 --> 13:33.680
+Yeah, that's a great question. So I think back testing is a little bit of a swear word in finance.
+
+13:33.680 --> 13:36.720
+Is it? What did I just walk into?
+
+13:38.240 --> 13:44.000
+So no, not at all. I mean, most people call it back testing. I'm not a huge fan of the term
+
+13:44.000 --> 13:48.320
+because back testing kind of implies that we have some model. It has some parameters.
+
+13:48.320 --> 13:54.160
+And what we do is we pick a whole bunch of different parameters. We run a simulation on
+
+13:54.160 --> 14:00.080
+historical data and we see which one did the best. And then generally that's the one that we pick
+
+14:00.080 --> 14:06.720
+going forward. And that's a very, very bad way to actually go about finding a good investment
+
+14:06.720 --> 14:10.960
+process because inevitably what you're going to do is you're going to curve, but you're going to
+
+14:10.960 --> 14:15.680
+you're going to memorize the historical data and you're going to pick very sub optimal parameters
+
+14:15.680 --> 14:22.480
+going into the future. So what we prefer to do is really like a walk forward simulation three
+
+14:22.480 --> 14:30.640
+time, which arises a whole bunch of additional challenges. One of the challenges that we
+
+14:30.640 --> 14:38.320
+have in finance, which doesn't exist in in some areas is this issue of survivorship bias.
+
+14:38.320 --> 14:44.800
+So for example, the S&P 500 as you mentioned today, like the constituents of that are not the same
+
+14:44.800 --> 14:51.760
+as the S&P 500 from 1980 or 1995. You actually have stocks coming in and coming out and more
+
+14:51.760 --> 14:58.720
+recently you have a lot of of stocks going out and and fewer like staying in that S&P for a long
+
+14:58.720 --> 15:05.440
+period of time. So we have this kind of like non stationarity, not only in the time series
+
+15:05.440 --> 15:10.640
+dimension, but also in the cross section. So like what stocks are we actually looking at at any
+
+15:10.640 --> 15:16.240
+particular point in time? And we can't just pick the S&P 500 today and run a simulation on that
+
+15:16.240 --> 15:21.760
+because then we've introduced a massive bias. None of the stocks in our simulation can fail,
+
+15:22.800 --> 15:28.240
+which is obviously not at all reality and reality. You have, you know, enrons which
+
+15:28.240 --> 15:34.240
+which completely fail and world comms which also completely fail. So the process that we've
+
+15:34.240 --> 15:39.200
+taken has been quite systematic. It's like how can we construct data sets which are truly
+
+15:39.200 --> 15:46.080
+representative of what the market looked like at that point in time? And and as far as what
+
+15:46.080 --> 15:53.600
+models we're using go, we started off quite simple. Then we very much focused on the recurrent
+
+15:53.600 --> 15:58.800
+models, recurrent deep neural networks. And lately we've actually had a lot of success with
+
+15:58.800 --> 16:03.200
+convolutional neural networks for time series analysis which also seems to be picking up in the
+
+16:03.200 --> 16:09.120
+literature. And generally we're looking at multi-variant time series prediction. And I think
+
+16:09.120 --> 16:13.120
+that that's interesting because there is this whole covariance matrix that you're trying to
+
+16:13.120 --> 16:18.320
+model. It's not just about, you know, if we can predict what the stock is going to do into the
+
+16:18.320 --> 16:22.880
+future, it's how the stock is going to influence, you know, these other stocks in the universe and
+
+16:22.880 --> 16:31.840
+how they evolve through time together as a as a collective. So as far as the number of models go,
+
+16:31.840 --> 16:37.680
+we actually want to have many many different models and then we kind of stack them together to
+
+16:37.680 --> 16:42.480
+generate better and better predictions. I think in our funds at the moment we've got about
+
+16:42.480 --> 16:48.560
+2000 neural networks in production, which is a challenge in and of itself, the engineering
+
+16:48.560 --> 16:54.320
+challenges is, you know, distinctly different to the theoretical challenge of how do you actually
+
+16:54.320 --> 16:59.040
+get the model to work in the first place. And those are continuously generating a lot of
+
+16:59.040 --> 17:03.920
+information, not just predictions, bad measures of their confidences in those predictions,
+
+17:04.480 --> 17:09.520
+measures of their errors and the predictions. Yeah, so there's a lot going on.
+
+17:09.520 --> 17:16.480
+Yeah. And can you speak it all to the granularity of those individual models or those 2000 models,
+
+17:16.480 --> 17:22.880
+all targeting trying to predict the performance of some basket of securities or you,
+
+17:22.880 --> 17:28.240
+I'm imagining you modeling different kind of underlying fundamentals. Is that the case?
+
+17:29.360 --> 17:34.800
+Yeah, so definitely looking at different things in different models, but also using different
+
+17:34.800 --> 17:39.760
+inputs into different models to generate those predictions. We're trying to come up with a very
+
+17:39.760 --> 17:45.680
+diverse set of predictions, which we can then ensemble over. As far as the granularity of the data
+
+17:45.680 --> 17:50.880
+itself goes, this is another challenge that you get in finance, which maybe you don't get in other
+
+17:50.880 --> 17:57.120
+spaces, is that you have some really, really important data, which only comes out quarterly.
+
+17:58.320 --> 18:03.200
+You know, if we're talking about like unemployment numbers or we're talking about GDP and, you know,
+
+18:03.200 --> 18:08.000
+all of these things obviously have an impact on the markets, but there's people are looking at
+
+18:08.000 --> 18:12.800
+them and they're using that to make investment decisions on like which countries they should be
+
+18:12.800 --> 18:18.000
+allocating capital to and which sectors in those countries they should be allocating to and then
+
+18:18.000 --> 18:24.240
+which stocks. But then you have this very high frequency data as well. So you've got price data,
+
+18:24.240 --> 18:30.400
+which is continuously coming at you. You've got volatility data. And what you want is a model
+
+18:30.400 --> 18:35.840
+which can actually weigh all of these time series, which may be occurring at very different time
+
+18:35.840 --> 18:42.800
+scales together in an unbiased way. Yeah, it's a very hard problem. I'm not sure that we've got a
+
+18:42.800 --> 18:48.480
+perfect solution to it yet, but we've tried a lot of different things. Ensembling is the most
+
+18:48.480 --> 18:54.400
+obvious approach and it's something that's worked quite well for us. Are you also incorporating in
+
+18:54.400 --> 19:01.280
+like natural language processing types of models or are trying to get at information that's
+
+19:01.280 --> 19:06.960
+embedded in unstructured text and documents as well or social media things like that?
+
+19:07.760 --> 19:13.120
+Yeah, this is a this is an interesting question because I'm actually a little bit of a sentiment
+
+19:13.120 --> 19:19.280
+skeptic. That's not to say that, you know, the sentiments that are extracted are wrong. But just
+
+19:19.280 --> 19:26.880
+consider the statement sales are down $40 million for the quarter. Now that is clearly a negative
+
+19:26.880 --> 19:34.480
+sentiment, right? I mean sales they're down for the quarter. But the reality is that if the
+
+19:34.480 --> 19:41.680
+analysts had expected sales to be down 60 million and then they were only down 14, the market would
+
+19:41.680 --> 19:47.520
+actually probably rally in that situation. So I think that the challenge with sentiment analysis
+
+19:47.520 --> 19:54.320
+is really that there is a lot of context which is very hard to capture. So we've spent quite a
+
+19:54.320 --> 20:00.240
+bit of time working on natural language processing and building these kind of like sentiment scores
+
+20:00.240 --> 20:06.400
+and including that in our models. And one of the other challenges with using deep neural networks
+
+20:06.400 --> 20:12.720
+in finances is obviously the problem of black box, right, is that it's very hard to interpret the
+
+20:12.720 --> 20:18.560
+models. And you recently had Sarah on your show. And I really enjoyed the the discussion that she
+
+20:18.560 --> 20:25.120
+had about interpretability because some people in machine learning seem to think that interpretability
+
+20:25.120 --> 20:31.760
+is a non-issue. But having spoken to many investors and many people who are interested in using
+
+20:31.760 --> 20:38.080
+this technology, but from outside of machine learning and and computer science interpretability
+
+20:38.080 --> 20:43.040
+is a big problem. So even if we did include these sentiment scores, it's actually quite
+
+20:43.040 --> 20:49.680
+challenging to work out if the model is is using that data and if it's using it in an optimal way.
+
+20:49.680 --> 20:55.280
+That's kind of like a segue into another like sub conversation. I mean the main technique we're
+
+20:55.280 --> 20:59.920
+using there is really ablation studies and sensitivity analysis. But to answer the question,
+
+20:59.920 --> 21:05.200
+yeah, we've looked at sentiment. I personally am a little bit of a skeptic, but that's maybe because
+
+21:05.200 --> 21:12.720
+I can't tell what my models are doing. So the general approach that you're taking is one of
+
+21:12.720 --> 21:19.120
+unsombling lots of models. Some might argue that you know what you're doing is kind of feature
+
+21:19.120 --> 21:25.760
+engineering and with the sophisticated and deep enough neural network and enough of the right
+
+21:25.760 --> 21:30.800
+data, the network could figure all that stuff out on its own and you should be looking at that.
+
+21:30.800 --> 21:36.160
+Have you have you looked at that approach and like how do you respond to to that kind of
+
+21:37.040 --> 21:45.520
+approach? I would say that that person is wrong. That's that's how I would respond. Okay, so
+
+21:45.520 --> 21:51.840
+this is another interesting discussion. You are very good at asking questions. I'm very impressed.
+
+21:52.640 --> 21:57.520
+You know, in the machine learning community, you know, data is considered to be like
+
+21:57.520 --> 22:04.080
+unreasonably effective, right? It's like the more data you have, the better your model is going to be.
+
+22:05.520 --> 22:12.560
+But my experience in trying to use deep learning and finance has been quite the opposite.
+
+22:12.560 --> 22:18.000
+And I think that the analogy that fits at best is really that the markets are kind of like a
+
+22:18.000 --> 22:24.240
+haystack. And there are a few needles in there which correspond to signals which you can extract
+
+22:24.240 --> 22:30.240
+and actually profit from. And when I get more data, so I go wider, I'm looking at more time
+
+22:30.240 --> 22:35.920
+series for more locations and whatnot. Generally, what I'm doing is I'm just throwing more hay
+
+22:35.920 --> 22:42.960
+on top of that haystack. So one of the challenges that we have is that if I and we're looking at
+
+22:42.960 --> 22:48.960
+about 400,000 independent time series at this stage, if I had to take all 400,000 of those time
+
+22:48.960 --> 22:55.040
+series and throw it into one model, it would almost certainly fail. And the main reason why is because
+
+22:56.080 --> 23:02.000
+because of two things. One is it's an incredibly wide data set. So you've got a lot of columns,
+
+23:02.000 --> 23:08.000
+right? But the other problem is that because this data is inherently non-stationary and now we're
+
+23:08.000 --> 23:14.880
+getting back to kind of like my main focus area, you know, a very small subset of that data if we're
+
+23:14.880 --> 23:19.920
+looking at, you know, a time horizon is actually relevant for predicting what's going to happen next.
+
+23:20.480 --> 23:26.080
+So your data kind of gets wider and wider and wider, but it's not necessarily getting deeper
+
+23:26.080 --> 23:32.720
+because, you know, the market fundamentally changed two years ago and, you know, including data from,
+
+23:32.720 --> 23:38.560
+you know, 2014 is not actually helping. It actually makes my models worse because it's learning
+
+23:38.560 --> 23:44.400
+from a regime which is no longer representative of the data which has been generated now in the
+
+23:44.400 --> 23:52.080
+process. So one of the reasons why ensembling is a good approach is because we can actually take
+
+23:52.080 --> 23:57.920
+that very wide data set and carve it up into different subsets and give it to smaller models and
+
+23:57.920 --> 24:03.840
+then kind of aggregate them and stack them in that way. It's very difficult to do feature engineering
+
+24:03.840 --> 24:08.960
+with a very, very big model when your data is more wide than it is deep. I guess that's kind of my
+
+24:08.960 --> 24:15.200
+answer to that question, but I accept the criticism. Maybe I just don't have enough data.
+
+24:18.000 --> 24:24.800
+One of the things that you talked about in your in Daba presentation and if you're making the
+
+24:24.800 --> 24:29.680
+slides available to anyone, they're really, really interesting and I'd encourage folks to
+
+24:31.200 --> 24:34.640
+take a look at them and we'd be happy to link to them or post them someplace.
+
+24:34.640 --> 24:40.720
+Yeah, I will definitely do that. They're just hyper animated in PowerPoint, so I've just got
+
+24:40.720 --> 24:47.760
+to turn them into videos and then I'll do that. Okay. So one of the things that you talked about in
+
+24:47.760 --> 24:55.120
+that deck was online learning which makes sense as a way to address this non-stationary
+
+24:55.920 --> 25:00.320
+nature of the signals that you're looking at. Can you talk a little bit about the way that you use
+
+25:00.320 --> 25:06.160
+online learning and what some of the challenges and discoveries you've made there are?
+
+25:07.120 --> 25:14.240
+Yeah. Okay. So there are a lot of intuitions and what I'm working on with my supervisor,
+
+25:14.240 --> 25:23.440
+I've actually decided to try postgraduate studies once again is to try and codify these ideas
+
+25:23.440 --> 25:29.360
+and publish some of them. But online learning is for anybody who's listening is not familiar.
+
+25:29.360 --> 25:33.520
+Really, when you have a machine learning model and it's trained on some data up to a current
+
+25:33.520 --> 25:39.680
+point in time and then what we do is we walk forward through time and we're using that model and
+
+25:39.680 --> 25:44.720
+we're just updating it on the most recent data which has happened. So there are a number of unique
+
+25:44.720 --> 25:51.120
+challenges that you face when you're doing online learning which is when you do kind of one pattern
+
+25:51.120 --> 25:56.720
+at a time or incremental learning which is when you have a model you move forward in steps and then
+
+25:56.720 --> 26:01.920
+you update on the most recent end patterns or n plus some window size. It's an incremental
+
+26:01.920 --> 26:11.200
+kind of batch learning and that's that by the time you have moved from let's say 2002 to 2007
+
+26:11.200 --> 26:16.000
+you might have actually forgotten a lot of the stuff that you knew in 2002. The model is actually
+
+26:16.000 --> 26:22.560
+forgotten a lot of information which means that when it enters into a regime such as the 2008
+
+26:22.560 --> 26:30.000
+financial crisis it actually doesn't know how to deal with that. Online learning is on the other
+
+26:30.000 --> 26:36.800
+hand a very good approach because we have these different regimes and if I had to just continuously
+
+26:36.800 --> 26:43.760
+include all of the available data and kind of like an expanding dataset fashion then my model would
+
+26:43.760 --> 26:48.560
+actually struggle to distinguish between the different regimes unless I had some sort of indicator
+
+26:48.560 --> 26:54.480
+of what regime the data was was being stumbled from. That's one of the challenges one of the other
+
+26:54.480 --> 27:01.200
+challenges which we were talking about in the office today actually is is for example regularization
+
+27:01.840 --> 27:07.120
+and this is I don't know if it's published in literature and I'm not sure if I'm 100% right in
+
+27:07.120 --> 27:13.200
+what I'm saying but different parts of the information which we're training our models on
+
+27:13.200 --> 27:18.240
+matter at different points in time. So if we have to take a neural network and we have to train
+
+27:18.240 --> 27:24.880
+it on let's say you know 2000 time series and the first 500 time series were not relevant from
+
+27:24.880 --> 27:31.680
+the period 2002 to 2004. Slowly but surely the regularization term in that neural network would
+
+27:31.680 --> 27:39.440
+push those weights very close to zero right but let's say from the period from 2004 to 2006
+
+27:39.440 --> 27:45.040
+those first 500 time series which weren't relevant in the past now all of a sudden become
+
+27:45.040 --> 27:51.520
+relevant in in the future then we have a challenge which is that you know we've actually pushed all
+
+27:51.520 --> 27:58.320
+of these weights very very close to zero and now we actually want to grow those weights again which
+
+27:58.320 --> 28:03.600
+which is just something which the models seem to struggle with through time and the other
+
+28:03.600 --> 28:12.960
+challenges that maybe the last 1500 time series are now not relevant from 2004 to 2006 and it pushes
+
+28:12.960 --> 28:18.880
+all of those weights down to zero. So a lot of the assumptions a lot of the ideas that we can apply
+
+28:18.880 --> 28:24.400
+successfully at a particular point in time. So if we just have to train a model on a data set
+
+28:24.400 --> 28:30.320
+deployed into production can cause problems when we're doing an online or incremental learning
+
+28:31.040 --> 28:38.000
+approach. One of them is regularization so you know that we tend to to bias ourselves towards
+
+28:38.000 --> 28:45.040
+you know dropout kind of approaches as opposed to L1 or L2 regularization but there are a lot of
+
+28:45.040 --> 28:50.400
+small issues like that. One of the topics that you mentioned early on but we haven't really
+
+28:51.040 --> 28:58.000
+died into yet is the types of models that you're using and that seems particularly relevant to
+
+28:58.000 --> 29:05.760
+this discussion. You know we think of kind of time series and models with memory and some of the
+
+29:05.760 --> 29:10.560
+comments you're making about you know models remembering and forgetting things I tend to think of
+
+29:10.560 --> 29:17.760
+recurrent networks but it sounds like you're shifting increasingly to using CNNs. Where does that
+
+29:18.320 --> 29:27.440
+memorization element come from in a CNN? Yeah so none of them are particularly good at remembering
+
+29:28.320 --> 29:35.440
+data which is very far in the past. So let's say we we have our data and it goes from 2002
+
+29:35.440 --> 29:42.560
+all the way through to 2008 and we're training on two years worth of data or four years worth
+
+29:42.560 --> 29:49.440
+of data at a time. By the time we reach 2008 we're only really updating our model on data from
+
+29:49.440 --> 29:56.320
+2004 you know we've forgotten 2001 2002 we've forgotten what a financial crisis looks like
+
+29:56.320 --> 30:02.160
+and whether you're using a convolutional neural network or an LSTM or a grue or you know just a
+
+30:02.160 --> 30:07.200
+feed for neural network you're going to run into similar problems because that regime is no longer
+
+30:07.200 --> 30:14.000
+in the data that you're training on. So you will forget it. So one of the techniques that I'm busy
+
+30:14.000 --> 30:21.840
+developing with my supervisor is kind of this idea of storing historical versions of your models
+
+30:22.480 --> 30:29.440
+in some sort of like explicit memory bank and then like let's say you find 2008 and you're like
+
+30:29.440 --> 30:36.560
+oh my model is struggling and we can identify that is struggling by looking at you know change point
+
+30:36.560 --> 30:42.400
+analysis and we can say all right well there's been a significant change in the data our historical
+
+30:42.400 --> 30:50.160
+data from 2007 and 2006 is no longer relevant what do we do either we re-initialize the model
+
+30:50.160 --> 30:56.240
+completely at that point in time and we just hope to hold that it learns or what we could do is we
+
+30:56.240 --> 31:01.040
+could actually go backwards in time and we could say well is there a point in time historically like
+
+31:01.040 --> 31:08.160
+from a long time ago where we learned something we learned to representation which is relevant for
+
+31:08.160 --> 31:13.360
+the regime that we're in now I hope that makes sense. No it makes a lot of sense and I've heard of folks
+
+31:13.360 --> 31:22.480
+doing similar things from kind of at a model management perspective so you've got some model
+
+31:22.480 --> 31:28.720
+in production and you've got kind of a constant evaluation system and it determines that
+
+31:29.760 --> 31:36.240
+the models performance has degraded as opposed to you know just immediately triggering a
+
+31:36.240 --> 31:43.440
+retrain you know what some folks have done at least is to look at the historical models that have
+
+31:43.440 --> 31:49.520
+been in production and kind of test the current regime against those models and see if you know
+
+31:49.520 --> 31:54.880
+as opposed to just us moving into new territory we've reverted into territory you know for which we
+
+31:54.880 --> 32:01.680
+previously had a model and you know switched to that one precisely so that's exactly kind of the
+
+32:01.680 --> 32:08.080
+approach that I've been working on lately although it sounds like in this case at somewhat a lower
+
+32:08.080 --> 32:14.080
+level in a sense of at the granularity of kind of the weights of the model or model you know sub
+
+32:14.080 --> 32:19.760
+components as opposed to kind of fully rolled models in production or something like that.
+
+32:20.720 --> 32:25.200
+Yeah so we're talking about like the weights right so what we would do is we would walk forward
+
+32:25.200 --> 32:30.400
+through time and we would actually drop these weights onto some sort of explicit memory so that we
+
+32:30.400 --> 32:36.000
+can load them at a later date. Now what I'm thinking and I haven't built anything like this yet but
+
+32:36.000 --> 32:41.040
+it's just like an idea that's in my head is really about whether we can model the transitions
+
+32:41.040 --> 32:45.600
+between those because you can kind of think of the states that we're dropping onto this memory
+
+32:46.240 --> 32:52.960
+as as being really states in like some sort of like Markov process and kind of like where I'm
+
+32:52.960 --> 32:57.360
+heading with my researchers whether we can model the transitions between these states and actually
+
+32:57.360 --> 33:02.720
+use it for simulation as well but that's just an idea. Interesting interesting.
+
+33:02.720 --> 33:11.520
+And so kind of going back to the application of convolutional networks in this case.
+
+33:12.640 --> 33:23.200
+So you're you're feeding the the CNN yeah let's call it a frame. Is that frame kind of a
+
+33:23.200 --> 33:31.280
+single point in time across a single time series or a single point of time across multiple time
+
+33:31.280 --> 33:39.840
+series or a historical frame that contains some time segments across you know one or more
+
+33:39.840 --> 33:45.920
+more time series like what what goes into the CNN? Oh yeah so we're we're generally using like
+
+33:45.920 --> 33:52.800
+dilated convolutional neural networks which means what? So ones which are preserving the
+
+33:52.800 --> 33:59.040
+the temporal structure of the data so we're never feeding in you know historical or future data
+
+33:59.040 --> 34:03.600
+into historical notes it's it's always kind of like wave net other than if you've seen the diagrams
+
+34:03.600 --> 34:12.240
+on on Google's block. But what's going in is really an image of where you've got your stocks
+
+34:12.960 --> 34:19.120
+on you know the on the columns and you've got a number of days at the bottom so we're feeding in
+
+34:19.120 --> 34:27.840
+kind of like a picture which is a whole bunch of time series put together you know column by the
+
+34:27.840 --> 34:33.760
+amount of time yeah I hope that makes sense. So if it's like 500 stocks and we're looking at you
+
+34:33.760 --> 34:40.080
+know 40 days worth of data at a frequency of one data point per day then it would be a 500 by 40
+
+34:40.080 --> 34:49.200
+image which is basically going into that convolutional neural network. And so the the difference between
+
+34:49.200 --> 34:58.320
+that kind of situation and something like an LSTM is that your memory if you will is kind of limited
+
+34:58.320 --> 35:04.400
+by this fixed window as opposed to some some thing that kind of sticks around a varying degrees
+
+35:04.400 --> 35:08.480
+indefinitely. Is that right? And what are the implications of that in the way you you model?
+
+35:09.840 --> 35:16.160
+Yeah so that is definitely true and I must say that I was surprised myself that the convolutional
+
+35:16.160 --> 35:23.040
+neural networks generally perform quite well. I wouldn't have expected that but we don't find a
+
+35:23.040 --> 35:27.520
+huge difference in the performance between our best convolutional neural networks and our best
+
+35:27.520 --> 35:34.480
+LSTM neural networks or between the best like grooves. Generally they're all performing quite
+
+35:34.480 --> 35:39.440
+well what makes a much bigger difference than architecture choices the choice of other hyperparameters
+
+35:39.440 --> 35:45.920
+like how much regularization are we are we adding what kind of dropout are we using how many layers
+
+35:45.920 --> 35:51.040
+are we using because the challenge with the data that we're looking at is because it's non-stationary
+
+35:51.040 --> 35:56.160
+we can't look at all of the historical data we can only look at the historical data that is relevant
+
+35:56.160 --> 36:03.200
+so sample from the same regime that we're in which means that if we have a very very over
+
+36:03.200 --> 36:09.040
+parameterized network like extremely large or extremely deep and then we shift into a new regime
+
+36:09.040 --> 36:14.400
+and we don't have that much data that model actually can't converge with the amount of data that we
+
+36:14.400 --> 36:20.560
+have so what matters far more than the choice of architecture in our situation has really been
+
+36:20.560 --> 36:26.480
+the hyperparameters that we're choosing for this I mean I'm pretty sure I could tune an LSTM
+
+36:26.480 --> 36:33.760
+to beat our best you know convolutional neural network or vice versa I'm not sure if that comes
+
+36:33.760 --> 36:41.440
+back to the free lunch theorem or what they generally work differently and because they work
+
+36:41.440 --> 36:46.720
+differently they can really come up with predictions which are hopefully uncarlated and then when
+
+36:46.720 --> 36:52.720
+combined in an ensemble or in another neural network downstream actually generate better and
+
+36:52.720 --> 37:01.920
+better predictions so beyond no free lunch implications would you say that it also has something to
+
+37:01.920 --> 37:10.000
+do with the fact that your regime durations are short enough to be kind of captured in your
+
+37:10.000 --> 37:15.280
+CNN window as opposed to you know something that might have longer maybe a longer tail.
+
+37:16.240 --> 37:22.480
+Yeah perhaps it's it's hard to say this gets back to the interpretability discussion
+
+37:23.920 --> 37:33.760
+maybe we should ask Sarah I'm not sure yeah so we we started down this path in talking about
+
+37:33.760 --> 37:42.880
+online learning and one of the the challenges that you raised in your slides was this issue of
+
+37:42.880 --> 37:48.800
+kind of weight transfer and the ability to kind of capture knowledge and project it forward to
+
+37:50.080 --> 37:57.280
+to the next time step how have you kind of dealt with that am I am I capturing that that issue
+
+37:57.280 --> 38:03.120
+correctly the weight transfer yeah so I think you know when we're doing online learning we don't
+
+38:03.120 --> 38:08.080
+want to continuously reset the model so we don't want to reinitialize it from scratch at every
+
+38:08.080 --> 38:14.400
+point in time especially if the model that we had at the previous point in time with the previous
+
+38:14.400 --> 38:21.280
+batch is actually relevant for for where we are now in time so in that situation we would like to
+
+38:21.280 --> 38:26.720
+transfer the weights from the previous model to the next model but that doesn't hold when we're
+
+38:26.720 --> 38:33.360
+talking about a change point so let's say you know something happens and there's a massive
+
+38:33.360 --> 38:38.560
+structural break in financial markets right so now the previous model we have is really learned
+
+38:38.560 --> 38:43.440
+to representation of the world which is which no longer exists we've we've moved on from that
+
+38:44.240 --> 38:48.080
+when we transfer our weights from the previous point in time to the next point in time
+
+38:49.120 --> 38:54.080
+we have a few options right so the first option is something we spoke about earlier which is
+
+38:54.080 --> 38:59.680
+really going backwards in time and trying to find some optimal weights which work and then
+
+38:59.680 --> 39:05.040
+transferring those into the model but another approach would simply be to reinitialize the weights
+
+39:05.040 --> 39:15.040
+completely which is extremely detrimental in the situation where you had a false positive so you
+
+39:15.040 --> 39:20.560
+made a prediction that there has been a change point that you've shifted from one regime into
+
+39:20.560 --> 39:25.920
+the next but you didn't now all of a sudden you've reinitialized your model you've forgotten
+
+39:25.920 --> 39:33.440
+everything that you learned previously and all for nothing so one of the things that we've we've
+
+39:33.440 --> 39:38.080
+also been playing around with this kind of like partial reinitialization which is this idea that
+
+39:38.080 --> 39:43.760
+we take our weights and we actually pass them through some sort of noising function so we add a
+
+39:43.760 --> 39:48.160
+little bit of of randomness to those weights at every single point in time to kind of keep them
+
+39:48.160 --> 39:54.960
+fresh keep them alive and also give the model the ability to remember some of what it's learned
+
+39:54.960 --> 39:59.600
+in the past but not all of it I like to call it kind of like optimal brain damage I know that
+
+39:59.600 --> 40:04.240
+there is actually something in machine learning called optimal brain damage and this is not it
+
+40:05.440 --> 40:09.680
+but I just I just love the name it's kind of cool it's like basically have a model you hit it
+
+40:09.680 --> 40:13.840
+on the head and and you hope that it learned something a little bit better than what I knew in the
+
+40:13.840 --> 40:20.800
+past all of these ideas are just different things that we've tried because I think that you know
+
+40:20.800 --> 40:26.640
+to understand where we're coming from is you know we you know deep learning is like the solution
+
+40:26.640 --> 40:32.800
+right so we we took these models and we applied it and we realized quite quickly that financial
+
+40:32.800 --> 40:39.600
+markets don't care how smart to model is they don't care how you know deep the maths is or or how
+
+40:39.600 --> 40:46.720
+you know optimal they work on on image net or on speech recognition problems the market is
+
+40:46.720 --> 40:51.600
+is this adversarial very complex system that's gotten on stationarity and the cross section in
+
+40:51.600 --> 40:57.600
+the time series it experiences these change points which can be partial affecting part of the
+
+40:57.600 --> 41:03.760
+model or full affecting you know the full model itself and they occur at kind of like a regular
+
+41:03.760 --> 41:10.240
+frequency you would be surprised at how often they occur so all of the ideas that we've tried and all
+
+41:10.240 --> 41:15.280
+my whole talk at the deep learning and Darva was really just a presentation of a whole bunch of
+
+41:15.280 --> 41:19.680
+tricks that we've tried and some of them have worked particularly well and some of them have not
+
+41:19.680 --> 41:25.280
+worked at all I tried to focus on the tricks that have worked as opposed to the tricks that happens
+
+41:25.280 --> 41:29.840
+but yeah that's really where all of this is coming from and I think like going forward I'd like
+
+41:29.840 --> 41:34.560
+to formalize you know some of those ideas and publish them yeah well one of those tricks that caught
+
+41:34.560 --> 41:43.840
+my eye was using reinforcement learning as a way to I guess control the way you ensemble these
+
+41:43.840 --> 41:50.400
+models or control the can you talk a little bit about that yeah sure so as I mentioned before what
+
+41:50.400 --> 41:58.400
+matters more than the choice of model is the choice of hyper parameters so for example if we're
+
+41:58.400 --> 42:03.440
+using early stopping which you know some people don't like I'm quite a fan of it and the main
+
+42:03.440 --> 42:07.440
+reason why is because I'm doing continuous learning through time I'm not training my model one
+
+42:07.440 --> 42:13.120
+some training at you know maybe three thousand times you know the there's a parameter there which
+
+42:13.120 --> 42:17.680
+is the patient so how many epochs are you willing to see without improvement before you just stop
+
+42:17.680 --> 42:24.960
+training and there is other parameters like your learning rate and both of these parameters your
+
+42:24.960 --> 42:31.360
+patients and your learning rate should probably change if you experience a different regime or if
+
+42:31.360 --> 42:38.080
+you enter into a different state if you think that you've moved from you know you know one regime
+
+42:38.080 --> 42:43.920
+into another regime it might actually make sense to increase your learning rate because you want to
+
+42:43.920 --> 42:51.520
+get into you want to push your weights to a place which matches the new regime quicker or maybe
+
+42:51.520 --> 42:56.000
+what you want to do is you want to train for longer because you want to give your model more of an
+
+42:56.000 --> 43:03.280
+opportunity to actually fit the new regime I hope that makes sense so you can kind of think of
+
+43:03.280 --> 43:10.160
+these as the actions that a reinforcement learning agent can take so it can change these hyperparameters
+
+43:11.040 --> 43:18.080
+in the models as we walk forward through time depending on the state which it observes so we're
+
+43:18.080 --> 43:24.480
+really using it as kind of like a meta optimization framework around each one of the individual agents
+
+43:24.480 --> 43:31.360
+in this in this massive ensemble and that's it's been something that's been quite fun and it works
+
+43:31.360 --> 43:36.640
+quite well it's not nearly as sophisticated as some of the reinforcement learning that's coming
+
+43:36.640 --> 43:44.160
+out these days but yeah it's it's worked quite well and that's also a better a cheaper approach
+
+43:44.160 --> 43:48.960
+than just creating a bigger and bigger ensemble right because what I could you know what you could
+
+43:48.960 --> 43:55.920
+argue is well why don't you just create more agents with the you know higher and lower learning rates
+
+43:55.920 --> 44:01.520
+or different patients and just grow that ensemble and make it bigger and bigger and the main reason
+
+44:02.160 --> 44:06.560
+why I would want to use reinforcement learning instead of just making this ensemble bigger and
+
+44:06.560 --> 44:14.320
+bigger is because I only have so many computers right and I have this this thing called a hard drive
+
+44:14.320 --> 44:19.600
+pulls up very very quickly when I'm training these models I mean we're producing about 200 gigs
+
+44:19.600 --> 44:26.000
+of data a week luckily we can delete a lot of it the next week and we can compress a lot of it
+
+44:26.000 --> 44:31.680
+but it's a it's a challenge to actually train massive ensembles like this what are the other
+
+44:31.680 --> 44:39.760
+interesting tricks that I came across in your in your slides relates to kind of the challenge of
+
+44:39.760 --> 44:47.200
+identifying fundamental patterns in time series data when you can have differences in frequency
+
+44:47.200 --> 44:52.320
+and magnitude but kind of the same underlying shape and it can be difficult for networks to
+
+44:53.680 --> 44:58.000
+to figure that out and I hadn't come across this notion of dynamic time working before
+
+44:58.000 --> 45:05.520
+yeah it's a very traditional technique I think it's been used since the 70s okay there was a paper
+
+45:05.520 --> 45:14.400
+which came out I think in 2017 actually proposing and a loss function for neural networks which
+
+45:14.400 --> 45:20.720
+incorporates the idea of dynamic time warping but essentially that I mean just to quickly explain
+
+45:20.720 --> 45:27.520
+the idea is that if we have two time series which are exactly identical in the sense that they have
+
+45:27.520 --> 45:35.680
+the same waveform and they just occur over different intervals like let's say we're looking at audio
+
+45:35.680 --> 45:41.280
+because it's mostly been used for speech recognition and I say the word apple and then I say it really
+
+45:41.280 --> 45:50.960
+slow apple the waveform of me saying apple is the same but the duration over which it occurred
+
+45:50.960 --> 45:55.760
+is different so it's a different time scale and one of the challenges with that is that if I
+
+45:55.760 --> 46:02.080
+to do a Euclidean distance between those two waveforms I would say that those two things were very
+
+46:02.080 --> 46:08.240
+different when in fact they're actually very similar they're the same thing they just were said
+
+46:08.240 --> 46:14.720
+in a different way so the idea behind dynamic time warping is really that you that you drop the one
+
+46:15.600 --> 46:21.040
+time series onto the one axis of a matrix and you drop the other time series onto the other
+
+46:21.040 --> 46:29.360
+axis of a matrix and then you use a procedure to actually draw a connection between between the
+
+46:29.360 --> 46:34.080
+top right hand corner and the bottom left hand corner now I can't remember you know for the life
+
+46:34.080 --> 46:41.040
+of me the exact details of the procedure but the idea is that it's a it's a more optimal measure
+
+46:41.040 --> 46:46.480
+of similarity between different time series and one of the things that we've been looking at for
+
+46:46.480 --> 46:52.000
+that is really in time series clustering so this is this idea of if we have a time series and
+
+46:52.000 --> 46:57.920
+we chunk it up into different sub sequences you know can we measure the similarity between those
+
+46:57.920 --> 47:03.520
+things and kind of group them together in times time series clustering is another approach to change
+
+47:03.520 --> 47:10.080
+point analysis that's one of the tricks which has not been very successful it's very computationally
+
+47:10.080 --> 47:14.880
+expensive and so I think that some of the papers which have come out on how to incorporate that
+
+47:14.880 --> 47:19.680
+into a loss function is maybe a more interesting approach have you implemented any of those
+
+47:19.680 --> 47:26.240
+papers is that what you're doing or are you doing it more procedurally like you mentioned yeah now
+
+47:26.240 --> 47:31.040
+we're getting into like some of the more secret source kind of stuff that that we have it with
+
+47:31.040 --> 47:37.680
+but yeah loss function engineering is important um I'll just leave it at that okay interesting
+
+47:37.680 --> 47:43.040
+interesting yeah when you when I saw that in the slide I envisioned something that you do kind
+
+47:43.040 --> 47:48.080
+of as a you know maybe even pre-processing or kind of windowing or something like that but
+
+47:48.800 --> 47:52.720
+the idea of doing this building this right into a loss function is kind of interesting
+
+47:53.600 --> 47:59.520
+yeah I mean there there are papers out there about it you know I recommend people going Google it
+
+48:00.480 --> 48:06.080
+we implemented that a while ago that was probably almost 18 months ago that we looked at that
+
+48:06.080 --> 48:14.800
+so we have touched on just a few of the tricks in this set of slides and we're starting to run out
+
+48:14.800 --> 48:23.120
+of time you also mention and discuss in the slides time series embeddings embeddings have come a
+
+48:23.120 --> 48:30.560
+very hot topic of late can you talk a little bit about how they apply to time series yeah that is
+
+48:30.560 --> 48:40.080
+a great question I'm a huge fan of of of order encoder is variational order encoders and also
+
+48:40.080 --> 48:45.120
+you know your your traditional kind of dimensionality reduction techniques multi-dimensional scaling
+
+48:45.120 --> 48:54.960
+PCA ICA FCA all of these techniques are quite useful at taking time series which have a lot of
+
+48:54.960 --> 48:59.680
+redundancy so there's a lot of of correlation and actually reducing it down into a lower
+
+48:59.680 --> 49:06.640
+dimensional space which really captures the statistical properties that are relevant so the
+
+49:06.640 --> 49:12.800
+reason why we do that is because there is a lot of correlation in financial markets and I think
+
+49:12.800 --> 49:18.400
+that I don't want to get into the debate of causation and the best way to to go about that because
+
+49:18.400 --> 49:26.240
+I'm not sure but I think that is difficult for the models to really assign importance to the
+
+49:26.240 --> 49:32.960
+the different inputs when all of them look very very similar so let's say you had stock A B C
+
+49:32.960 --> 49:40.560
+and D and we know for a fact that you know through domain knowledge or whatever that A is influencing
+
+49:40.560 --> 49:51.120
+D but maybe A is is also kind of influencing B C as well so maybe the model would look at the
+
+49:51.120 --> 49:57.280
+correlations and say well B is maybe the influencer of DNA to apply you know the weights in that way
+
+49:58.320 --> 50:04.080
+it's a bad explanation but it's very hard to tease out what is causation and what is correlation
+
+50:04.080 --> 50:09.920
+in the data and and financial market data is incredibly correlated so what we've been using the
+
+50:09.920 --> 50:20.880
+time series embeddings for is really to reduce this highly correlated space down into another
+
+50:20.880 --> 50:27.440
+subspace which has nicest statistical properties to predict and the nice thing about decoding or
+
+50:27.440 --> 50:32.560
+auto encoding is that you then have a network that if I had to generate a prediction from this
+
+50:32.560 --> 50:38.880
+latent representation I can actually then get it back into the original space so maybe I have like
+
+50:38.880 --> 50:44.880
+2000 time series which are all very similar maybe they're the Russell 2000 at this point in time
+
+50:44.880 --> 50:49.440
+they're all driven by similar market forces you know of Trump decides to tweet about something
+
+50:49.440 --> 50:55.040
+you know they're all going to move in in similar ways and what we can do is we can really squeeze
+
+50:55.040 --> 51:01.280
+that down into a latent representation which really captures the salient features which are useful
+
+51:01.280 --> 51:05.920
+for prediction but the other nice thing about those features is that they have good statistical
+
+51:05.920 --> 51:11.440
+properties especially if we're talking about a variational autoencoder and then what we do is we
+
+51:11.440 --> 51:17.840
+decode back into the original space after we've generated our predictions in the latent space
+
+51:17.840 --> 51:22.000
+I hope that that makes sense you can do it much more cheaply using principal components
+
+51:22.560 --> 51:28.960
+and those kind of more linear techniques but I'm just very partial towards
+
+51:28.960 --> 51:35.200
+ordering encoders and variational ordering encoders and so do you end up with essentially a time
+
+51:35.200 --> 51:43.120
+series of these or time series in this embedding space or are you is the embedding somehow
+
+51:43.120 --> 51:49.520
+are you using that more statically that question makes sense yeah so what you end up with
+
+51:49.520 --> 51:56.640
+is another time series but just of much lower dimension and preferably of better statistical
+
+51:56.640 --> 52:02.880
+quality which we can then generate our predictions in but it's it's still a time series
+
+52:04.000 --> 52:09.120
+and it kind of like preserves the the temporal ordering the ordering of the data
+
+52:09.120 --> 52:15.840
+so there are a few architectures that you can use for that and then you would you would use
+
+52:15.840 --> 52:22.080
+these embeddings as inputs to your other neural networks the the way you might with other
+
+52:22.080 --> 52:28.880
+kinds of embeddings yeah precisely and then it generates a prediction in that space and then
+
+52:28.880 --> 52:34.400
+we can actually decode back into the original space because there's no point in predicting let's
+
+52:34.400 --> 52:41.520
+say you know the first two principal components or predicting you know this five dimensional
+
+52:41.520 --> 52:46.640
+latent representation learned by an autoencoder because I don't know how to make decisions off of
+
+52:46.640 --> 52:53.520
+that so we need to be able to actually get it back into the original space so that we can make
+
+52:53.520 --> 52:59.040
+decisions about that because it's it's no good knowing you know what's going to happen to the
+
+52:59.040 --> 53:05.280
+first principal component or to the first dimension in this latent representation
+
+53:06.080 --> 53:11.120
+how does that help me make a constructed portfolio that somebody can invest in
+
+53:12.480 --> 53:17.360
+yeah but the main reason for doing that is really just that the statistical properties
+
+53:17.360 --> 53:22.640
+that you get out are better than the statistical properties you put in you don't have as many
+
+53:22.640 --> 53:29.600
+issues with cointegration and correlation between the time series it doesn't help with regime
+
+53:29.600 --> 53:36.480
+shifts which is the main focus of my research but it it has helped in improving the accuracy
+
+53:36.480 --> 53:44.000
+of the models very early on in our chat you mentioned that one of the techniques you use to
+
+53:44.800 --> 53:49.600
+kind of optimize these models and and kind of explore these tricks is ablation studies
+
+53:49.600 --> 53:56.880
+uh is that worth a quick comment before we wrap up? I'm a huge fan of ablation studies yeah but
+
+53:56.880 --> 54:02.000
+I mean basically the idea is that if you've architected your neural network in a particular way
+
+54:02.000 --> 54:07.760
+you can actually switch off parts of that neural network and measure the deterioration in your
+
+54:07.760 --> 54:14.640
+models performance in the same languages whatever loss function you specified and that's particularly
+
+54:14.640 --> 54:20.560
+useful when we go to investors or or somebody who would like to understand or have some confidence
+
+54:20.560 --> 54:25.200
+in the models that we're using we can say well listen we can't tell you exactly what the functional
+
+54:25.200 --> 54:32.480
+form or or the exact decision boundaries look like but what we can tell you is that you know these
+
+54:32.480 --> 54:38.880
+are the inputs which are contributing most time model at this point in time and uh and I stress
+
+54:38.880 --> 54:44.640
+that at this point in time because the ablation studies again are applied in this kind of like online
+
+54:44.640 --> 54:52.080
+learning setting and what's really interesting for me is just how how much they change I mean
+
+54:52.080 --> 54:58.160
+you have at certain points in time some variables are just absolutely you know if you took it out of
+
+54:58.160 --> 55:04.480
+your model your model would be useless um but then fast forward a year or two into the future I mean
+
+55:04.480 --> 55:11.280
+that variable is is it might as well be white noise uh going into the model and some other variable
+
+55:11.280 --> 55:16.880
+is now driving you know the performance of the model so what's really interesting to me is really
+
+55:16.880 --> 55:23.440
+the dynamics of the neural networks what inputs are mattering at what point in time and uh and then
+
+55:23.440 --> 55:27.840
+what I'm particularly interested in and something I haven't spent a lot of time on unfortunately
+
+55:27.840 --> 55:35.600
+is then seeing how those kind of measures of are variable importance uh match up to things like
+
+55:35.600 --> 55:42.000
+your your business cycle um you know if we're at the end of the bull run you know do we see that
+
+55:42.000 --> 55:47.520
+certain variables which we would expect to matter mattering more uh and and really seeing with
+
+55:47.520 --> 55:53.760
+or not we can actually test economic theory using neural networks um and and go beyond just
+
+55:53.760 --> 55:59.920
+fitting a function uh but actually trying to understand what that function does uh I hope
+
+55:59.920 --> 56:04.800
+that makes some sense but I'm a huge fan of that particular approach and I think you know anybody's
+
+56:04.800 --> 56:10.880
+interested in in interpretability should check out some of your previous podcasts but that's
+
+56:10.880 --> 56:18.000
+the approach that that we found the easiest to implement uh and the most useful from um from an
+
+56:18.000 --> 56:23.920
+insights perspective we're not necessarily using that uh for any decision making or to improve the
+
+56:23.920 --> 56:31.360
+model but simply to understand what is going on in that model um yeah awesome awesome well Stuart
+
+56:31.360 --> 56:39.920
+yeah any uh words of uh advice or pointers or kind of recommended resources for folks that are
+
+56:39.920 --> 56:45.520
+interested in the application of uh machine learning and deep learning to these types of time
+
+56:45.520 --> 56:51.280
+series whether in finance or any of the other uh domains that you rattled off earlier yeah I
+
+56:51.280 --> 56:56.480
+think that um you know there are a lot of really really cool applications in time series analysis
+
+56:56.480 --> 57:03.040
+and I think that there are very strong statistical motivations to spend some time looking at change
+
+57:03.040 --> 57:08.400
+point analysis and regimeships but also many applied motivations so I'd recommend students who
+
+57:08.400 --> 57:13.840
+are listening to this to really you know you know pick up the calls and and and do some research in
+
+57:13.840 --> 57:21.440
+it but as far as advice goes I'd say uh you know expect to be unexpected uh you know we expect to be
+
+57:21.440 --> 57:27.840
+surprised um because financial markets like I mentioned earlier are almost adversarial in the way
+
+57:27.840 --> 57:35.120
+that they behave uh and many of the things which we believe work uh in machine learning I'm not sure
+
+57:35.120 --> 57:42.080
+that they do work uh and you start to identify the cracks in the arguments when you apply these
+
+57:42.080 --> 57:48.240
+techniques to problems which they were not originally intended to be used for um so yeah I would
+
+57:48.240 --> 57:54.720
+just say you're going to be uh surprised at what you see and um and also always be prudent
+
+57:55.760 --> 58:03.280
+don't train a model and then see that it's getting 75% accuracy is predicting the S&P 500 and
+
+58:03.280 --> 58:07.040
+take all of your money and put it into that model because I guarantee you it is wrong
+
+58:07.040 --> 58:14.720
+uh with that level of accuracy uh if you're getting anything above you know 55% accuracy you probably
+
+58:14.720 --> 58:22.880
+have a bug um yeah that's just the reality of of the game um awesome yeah we'll start it's a
+
+58:22.880 --> 58:30.640
+sombring end sorry to not being like yeah it's great you should go and apply machine learning
+
+58:30.640 --> 58:37.520
+to finance is hard but it may save a listen or a ton of money all right I'll I'll be very happy
+
+58:37.520 --> 58:44.080
+if that is the case also interesting people who do this full time that's what I'm that's what I'm
+
+58:44.080 --> 58:49.600
+suggesting Stewart thanks so much for taking the time it was great chat yeah thank you very much
+
+58:49.600 --> 59:00.400
+and it was great to chat to you all right everyone that's our show for today for more information on
+
+59:00.400 --> 59:08.720
+Stewart or any of the topics covered in this show visit twimmel ai.com slash talk slash 203 if you're
+
+59:08.720 --> 59:14.080
+a fan of the show and you haven't already done so or you're a new listener and you like what you
+
+59:14.080 --> 59:21.040
+hear please visit your apple or google podcast app and leave us a five star rating in review your
+
+59:21.040 --> 59:26.480
+reviews help inspire us to create more and better content and they help new listeners find the
+
+59:26.480 --> 59:45.680
+show as always thanks so much for listening and catch you next time
+

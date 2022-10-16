@@ -1,0 +1,838 @@
+Hello and welcome to another episode of Twimble Talk, the podcast where I interview interesting
+people doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington, a bit about the show you're about to hear.
+This show is part of a series that I'm really excited about, in part because I've been
+working to bring it to you for quite a while now.
+The focus of this series is a sampling of the really interesting work being done over
+at OpenAI, the independent AI research lab, founded by Elon Musk, Sam Altman, and others.
+A few quick announcements before we dive into the show.
+In a few weeks, we'll be holding our last Twimble online meetup of the year.
+On Wednesday, December 13th, please join us and bring your thoughts on the top machine
+learning and AI stories of 2017 for our discussion segment.
+For our main presentation, formal Twimble Talk guest, Bruno Gensalves, we'll be discussing
+the paper, understanding deep learning requires rethinking generalization, by Shi Juan
+Zhang from MIT and Google Brain and others.
+You can find more details and register at twimlai.com slash meetup.
+Also, we need to build out our 2018 presentation schedule for the meetup.
+So if you'd like to present your own work or your favorite third-party paper, please
+reach out to us via email at teamattwimlai.com or ping us on social media and let us know.
+If you receive my newsletter, you already know this, but Twimble is growing and we're
+looking for an energetic and passionate community manager to help managing grow programs
+like the podcast and meetup and some other exciting things we've gotten store for 2018.
+This is a full-time role that can be done remotely.
+If you're interested in learning more, reach out to me for additional details.
+I should mention that if you don't already get my newsletter, you are really missing
+out and you should visit twimlai.com slash newsletter to sign up.
+In this show, I'm joined by Jonas Schneider, robotics technical team lead at OpenAI.
+While in San Francisco a few months ago, I sat down with Jonas at the OpenAI office during
+which we covered a lot of really interesting ground, including not just OpenAI's work
+in robotics, but also OpenAI Jim, which was the first project he worked on at OpenAI,
+as well as how they approach setting up the infrastructure for their experimental work,
+including how they've set up a robot as a service environment for their researchers,
+and how they use the open source Kubernetes project to manage their compute environment.
+Check it out and let us know what you think.
+I really enjoyed this one, a quick note before we jump in.
+Support for this OpenAI series is brought to you by our friends at NVIDIA, a company
+which is also a supporter of OpenAI itself.
+If you're listening to this podcast, you already know about NVIDIA and all the great
+things they're doing to support advancements in AI research and practice.
+What you may not know is that the company has a significant presence at the NIPPS conference
+going on next week in Long Beach, California, including four accepted papers.
+To learn more about the NVIDIA presence at NIPPS, head on over to twimlai.com slash NVIDIA
+and be sure to visit them at the conference.
+Of course, I'll be at NIPPS as well and I'd love to meet you if you'll be there, so
+please reach out if you will.
+And now on to the show.
+All right, well, hey everyone, I am here at the OpenAI offices and I am with Jonas Schneider.
+Jonas is a member of technical staff here as well as being the technical team lead for
+robotics.
+Welcome to the podcast, Jonas.
+Hey, glad to be here.
+It's great to have you on the show.
+Why don't we get started by having you tell us a little bit about your background and
+how you got interested in artificial intelligence?
+Yeah, so my background is actually, so I work on OpenAI's robotics team, but my background
+is actually in software engineering.
+Okay, my background is neither in robotics, like classical, like academic robotics, nor
+machine learning, which is of course like OpenAI's big focus.
+And so in the robotics team, we kind of have a couple of different skillsets coming together.
+So in the robotics, there's of course machine learning experts and also software engineering
+people like me.
+So before OpenAI, I was actually software engineering intern at Stripe.
+That's also where I met our CTO, Greg Brockman, who is now a CTO at OpenAI.
+And so basically, yeah, and so that was actually, like, while I was still in college.
+And so after I was done with college, I actually reached out to record and was like, so what's
+up these days?
+What kind of stuff are you working on?
+And so he introduced me to OpenAI.
+Fantastic.
+Yeah.
+So I actually got started working on OpenAI Gym.
+So that was kind of like my, I was a contractor for OpenAI there, basically working with Greg.
+And so that's how it kind of got started thinking about all these AI ML things.
+And then eventually I got started working on OpenAI's robotics team.
+Awesome.
+Awesome.
+So tell me a little bit about the work that you do on the robotics team.
+Yeah.
+So the goal of the robotics team basically is to enable new capabilities for robots.
+So today's robots, they're really good at like very specific tasks, for example, like
+in a factory robot, you have an assembly line and you have a robot that can place one
+very specific screw into one specific location on the part that you're assembling.
+For example, then robots are great at that.
+They're really good at that.
+They can, they have very, very high precision.
+They can, like, they can repeat this movement, like, tens of thousands of times.
+And they, yeah, and they, they never get tired or anything.
+But the issue is that these environments are very constrained, of course, because like,
+that's how a factory is.
+Like, everything is super precise.
+Whenever something like unexpected happens, you just abort.
+Right.
+And you like, and the human goes in there and like, figures it out and it resets and then
+it goes on again.
+Right.
+But so that's very different from, for example, like a home environment where like, if
+you're trying to clean up someone's apartment, for example, where like unexpected stuff happens
+all the time and you're like, something like falls over, then you have to like react to
+that and pick it back up.
+Yeah.
+So this is like a very simple task, but it turns out that like today's robots are actually
+not that great at operating these unconstrained environments.
+And usually the reason for that is that they are pre-programmed, basically.
+So when you, when you're, when you have this factory setting, someone, like, when you
+set up the robot initially, someone goes in there and like, and basically like programs,
+this exact movement pattern for the robot.
+But of course, and that works great in this constrained environment, but in an unconstrained
+environment, you actually can't really do that because you have to react to what, what's
+happening in the environment.
+And so that's why today's robots are like, very pre-restricted in these kinds of environments.
+And we're, we're trying to embark on solving that.
+Nice.
+Nice.
+So it sounds like the, you know, we're talking about the environments as being constrained
+and unconstrained.
+But in a lot of cases, it's my sense that the constraints themselves are artificially
+imposed.
+Like the, you know, the factory environment is constrained because it has to be because
+that's the way they can get the robots to work.
+Like, do you look at applying this stuff in the industrial settings as well?
+Well, so the thing is, like, yeah, you're of course exactly right, that basically, basically
+today's automation, like basically everything, like the way these factories are designed
+is exactly so that the robots can function.
+I think for the most part, it will be, or at least with the current state of, of like
+capabilities of ML-based systems, it will actually be pretty hard to be better than
+this constrained environment, if, if basically your, like, your application or your business
+is like fine with operating in a constrained environment.
+So for example, like while it might be nice to, let's say there's a Tesla, there's a Tesla
+like robot that moves the auto bodies around.
+Right.
+And then, and then let's say like it, like of course it would be nice, for example, like
+if, if it would be smart enough to react to, if it like drops the thing on the floor,
+if it could like pick it back up and just pick when you're going on, but these events
+are so rare that, and basically of course there's like a lot of other engineering factors
+there where like you got to be sure that if the robots in this like reaction mode that
+it doesn't, doesn't accidentally, I call like more failure somewhere else in the system.
+And basically just because these events are so rare in, if your environment is already
+constrained.
+So we're like, we're not really looking at that, I guess like in the, definitely in the
+short, short and medium term.
+I'm thinking about applications like pick and place types of applications where I've
+seen a number of research is kind of in the context of, you know, today, a robot that's
+being used to bolt stuff in, right.
+It's getting these bolts that are like preloaded into, you know, a very constrained like a harness
+that basically it can bolt in, right.
+But some of the examples show that in some instances you might want to just put a box
+of bolts and let the robot kind of grasp the bolts and then from there bolt them in.
+And I guess the question is, have you, have you looked at the, you know, is that really
+practical?
+Like, is that where you see the application of this kind of stuff or it's like, no, the
+industrial environments, you know, we've got that kind of figured out.
+People probably aren't going to, you know, switch from using these, you know, the very
+rigid environments to the more unstructured environments to save a little bit of that
+upfront cost.
+Yeah.
+So I think there are definitely, there are some opportunities, basically, specifically
+in the areas you mentioned, like machine tending, basically where like, you have this
+inbound, like box of parts and they come from like a, like a some vendor and you basically
+have to like feed them to the machines correctly, like unpack them.
+And that is again, because it's kind of an unconstrained environment, you don't really
+know, like they might change like their shipping material and suddenly it looks different
+and you have to process this package differently.
+Mm-hmm.
+And also one, one other, one other kind of interesting example is actually plugging in cables.
+So that's something that, that all these industrial robots are also very bad at, it turns
+out, because like cables are deformable and basically there again, you might have to
+react like if the cable is bending weirdly, you have to like poke it so it falls into the
+correct place.
+And so this is actually something that consumes a lot of time, in, for example, like auto
+assembly, where basically you can do the entire frame, it's all, all the body size and
+all super nice.
+And then you have a bunch of people like installing all the stuff in the interior, for
+example, and that includes, actually, it really is like one very specific task that
+people have tried to automate using the classical robotics, it's plugging in these
+like connectors basically, or I guess maybe like a day-to-day variant of this would be
+like plugging in a charger into, like plugging your phone into like a phone charger.
+But it turns out basically for these problems you also, you actually, like, these are surprisingly
+hard, because you have to like figure out the like exact positioning for the charger
+and then plug it in for like a year.
+So we built USB-C and like lightning reversible ones to make it easy for robots to charge
+our phones for us.
+Yeah, so I think definitely like for the industrial applications, like, it, why it might be hard
+to basically, in the short term, improve on the stuff that is already handled by robots,
+there are definitely a lot of fringe cases that, like, there's, there's no way that you
+could currently even, like, get close to automating it and new technologies could enable
+that.
+Okay.
+So tell me a little bit about some of the areas of research that you're pursuing to kind
+of enable this, this vision.
+Yeah.
+Basically, the thing we're very interested in is basically acting on, and reacting on feedback
+from the real world.
+So basically this, and this kind of feedback is really also what gives, what gives humans
+this super good, like manipulation, like super good, like robotic skills, basically.
+Okay.
+So one, actually one, one quick experiment you can verify that is if you try to, to, if
+you put both of your index fingers out, like horizontally, and doing this, yeah, yeah.
+And you try to move them, move them together and like touch the fingertips.
+That's very easy to do, and you can always do it.
+Yeah.
+But so, but, and now try doing it again with your eyes closed.
+Mm-hmm.
+And it turns out this is actually, it's actually really hard.
+Ha, ha.
+Yeah.
+And like, after a while, you can, like, if you have, like, the touch feedback.
+But basically, so the thing there is that, like, actually human motion is not very precise,
+but it is very good at, like, figuring out, oh, I'm, like, off in this, in some direction
+and then going for it.
+And going for it.
+Going for it.
+Exactly.
+And so that is actually a thing that, that, like, again, these, like, industrial robots,
+like, they don't really do that on, like, a higher level.
+They do it on, like, a very, like, very low level of, like, am I in the right place?
+But this gets harder if you have, like, other objects or something that you're interacting
+with.
+And so this is what, like, this is one area that I research focused on, basically, taking
+data from the real world and using that, like, online in the loop to have the robot be
+able to, like, react to what it's doing and what, like, the things it's interacting
+with, which could be, like, a block or, like, like, whatever object that you're working
+with is doing.
+And like, if you're, like, grasping it correctly, for example, or if you're moving it
+to the right place.
+And so how do you do that?
+Yeah.
+That's a very good question.
+So there we're, we're building on, on the, on the large body of work that has, that
+has been done in the computer, like, in the, like, ML-based computer vision areas.
+So basically, we take, we take a convolutional neural network that's been, that's been trained
+on ImageNet to do this, like, image recognition challenge.
+And then we basically slice off the, the last layers of that network where it, where it
+does this thing of, like, classifying an object into categories.
+Right.
+Yeah.
+And the parts we want from that is basically the lower level features of the network,
+like figuring out, like, where edges are, where, like, these, like, small features are.
+And then we instead train it to predict the state of the world, basically.
+So, so we're using this, this, this machine learning pipeline, basically, to, to feed
+an image from, like, a normal webcam or something like that that's attached to the robot.
+And then have, have this neural network that uses this image to predict, like, where,
+like, where am I?
+And where is, like, what state am I in?
+What, where is the object that I'm interacting with?
+And then we use that to, to correct the movement of the robot.
+Are we close to doing this?
+It seems like it would be helpful to do this in three dimensions, like, are we close
+to that at all?
+Right.
+I think so, so maybe not for the general case, but probably if you have, like, basically
+something where you, where you know, at least a little about, like, what kinds of objects
+you're dealing with, then, then I don't think anyone has done it yet, but, but it's, like,
+we think it would probably be doable.
+So, so the work, the work that we've done.
+So we use this technique called domain randomization, where we basically, so, so questions, of course,
+how do you train this network?
+So what I just mentioned earlier with, like, predicting the position of things.
+And the way we do it is basically we create chaos in simulation.
+Because the problem is, if you just feed it images from a simulator, the real world
+will look different.
+And then it will just get confused and be like, this is weird, why is there, like, a pixel
+in the back that I, that is now, like, bright, where, where it was, like, dark always
+before. And the way we get around that is by basically randomizing everything in the
+simulator.
+It looks pretty crazy because we basically replace all the textures in this, like, 3D rendered
+scene with random textures, like random colors, random patterns.
+It looks, we just call it the disco, because it's just random colors everywhere.
+And basically this, this kind of makes the network robust against, like, variations
+in the environment.
+And so this is actually, and, and basically you can measure that, like, if you do this,
+then in the real world will look as just, like, another incarnation of, like, of the
+random, of this random setting.
+And it will work.
+And if you don't, it will just be, like, completely off of it.
+Okay.
+Yeah, one of the projects that Peter Beelow is working on is, like, tying a knot, using
+a robot to tie a knot in some string.
+And there's a, he's got an interesting video about this.
+But one of the comments in the, in the video or the commentary on the page is, like, you
+know, it works great if the rope is on a green table, but it totally fails if the rope
+is on a red table, or if the rope is, like, striped or something like that.
+It sounds like this domain randomization is, you know, trying to solve for that same kind
+of problem.
+All right.
+Yeah.
+Yeah, totally.
+I think so, so for the, for the, like, rope, like, for the, like, rope stuff specifically.
+So the reason why, like, why people do this at all is, is because a rope, like, similar
+to the, to the phone charger, like, the phone connector, is that because the rope is flexible,
+like, does not, like, just, like, like a block or something.
+And basically, to tie a rope, you have to, like, either, you have to have some, like,
+some internal model of, like, how is it going to bend if I, like, if you, like, turn
+it this way?
+So I guess people just, like, work on this, and, like, it's a couple, like, it's a couple
+from the, like, perception way.
+But this is very plausible for you, like, put these, put these two results together to
+create something that can, kind of, in an arbitrary colored environment.
+Yeah.
+Yeah.
+What makes me think of is, is Apple's recent CVPR paper, where they use GAN approach to
+take simulated images, like, from a video game engine, and kind of make them look like
+real images, so that they would perform better in the real world.
+Like, the ultimate goal is to have this robot perform well in the real world.
+You are trying to, trying to avoid overfitting by, kind of, doing, you know, randomization
+of your backgrounds and, you know, funky colors and all that kind of stuff.
+But do you still then have the problem of, hey, this doesn't look like the real world?
+And, like, how do you approach that?
+This is actually very interesting, like, high level questions that, like, I don't think
+there's a different, different answer to.
+It's basically the question of, like, do you, basically, should you invest time in making
+your simulations, like, super nice and photorealistic, basically, to have, like, special rendering
+artifacts of, like, light reflections and basically just make your, make your, make your
+simulation be almost indistinguishable from the real world, or whether you can actually
+get away with having really lacking simulation, basically, that is, like, very rudimentary,
+just has, like, the geometry and, like, edges and the couple of, like, 3D lights.
+And then you can use, like, neural network, regularization techniques to basically use
+that to make the network robust against it.
+And more generally, in the case of, of your research, you know, what, using the domain
+randomization, like, what kind of performance have you seen in the real world, and have
+you explored ways to enhance real work performance beyond the domain?
+Are there specifics to the simulation environment that calls your training to kind of overfit
+on simulated looking images?
+Yeah, yeah, so, like, like, I remember that's, when we're initially doing this domain
+randomization work, so, so the setting that we did there was, we basically had a table
+off, like, different colors, like, wooden blocks.
+And then we had the robot, basically, you could give it to commands of something, like,
+stack the green block on top of the blue block.
+And then it would, like, basically correctly localize these blocks.
+And this was with an accuracy of, I believe, a couple of millimeters.
+So it was pretty decent for, like, given that this was really, like, just a normal, like,
+HD webcam, like, basically, nothing, basically, nothing that's, like, super specialized
+robotics equipment, but I actually remember that initially, sometimes it was just failing
+randomly.
+And we didn't really know why.
+Okay.
+And then it turned out that if there was someone standing in the background, then casting
+shadow or something like that.
+Exactly.
+Exactly.
+Or just having, like, a leg or, like, a foot in the image that threw it off.
+And that is actually, basically, like, these kind of things encourage us to just make the
+simulation crazier, basically.
+And then if you have this, these random distractors appear in the background during the
+training as well, then it will actually be, again, robust to that.
+And so how did you characterize the performance gains, you know, after using the domain randomization?
+The way we measured it actually is we just had, like, an actual, like, object tracking system
+and just measured the error from that.
+But, of course, it's also just reflected in the, like, success rate of, like, how often
+could you, like, stack the correct block, like, on top of the other one.
+And basically, if it didn't do the domain randomization, it would just, like, run it to the
+table or something.
+So it was, like, it was, like, very, very, very off.
+And basically, to your performance metric was bad versus good, sort of, sort of, yes,
+what's the sort of?
+Yes.
+So, like, basically, what we did initially when we did work during the domain randomization
+is we actually, one of the researchers, Josh spent a very long time basically just moving
+around pieces in the real world and, like, adjusting the, like, camera position and basically
+just fine tuning it.
+So it would be, like, just right.
+And it would, like, appear to work, but then as soon as you, basically, like, you could
+see that it wasn't really working.
+Like, it was only working if you, like, basically, like, manually overfitted to, like, one,
+one very specific instance.
+But basically, the, the, the main randomization helped, like, helping with that.
+Okay.
+And so did you build a custom simulator to do this or did you use some off-the-shelf thing?
+Yeah.
+So pretty much all of all of what we do these days is in, is running in Madroco.
+Okay.
+Madroco?
+Yeah.
+So tell me about that.
+Um, Madroco is this physics simulator developed by University of Washington professor,
+M.O.
+To Dora.
+Okay.
+And it's pretty much the, I would say, the standard in, um, and basically these, like,
+kind of, like, robotics and, like, robotics-related tasks.
+It's also used for all the physics-related environments in, in open-air gym.
+And so basically, if you ever seen the, like, yellow, like, humanoid, humanoid walking
+around, that's, that's Madroco.
+And basically having these, like, capsule geometries.
+And the good thing about Madroco, as opposed to, like, of course, there are many other physics
+engines, like, game physics engines.
+There's Nvidia physics.
+Right.
+There's a bunch of, yeah, like, from an Unreal engine, they all bring their own Nvidia.
+They announced some new simulation engine at the last GTC.
+I forget.
+The Vinci or some kind of name thing.
+Flex.
+Flex?
+I don't know.
+I thought it was a person who has a whole bunch of them because they really like making
+beautiful things.
+So the thing that game engines do for the most part is they are often not super concerned
+about accuracy or physical realism, which is totally fine.
+They just, they're just working on making something that, that looks great and is performance
+too.
+And Madroco kind of comes from a different perspective there, where it comes from, like,
+robotics people, basically.
+And they, and they are using this for, like, optimal control, which is kind of the analytical
+way of, like, how do you control the system to achieve a given task?
+And it has pretty good features for accurately describing an actual physical robot, like it
+can do things like friction and, like, tendon-based or a way you pull on cables to move the robot
+around.
+Okay.
+It has a bunch of these things that, like, you could, you could implement them, like, on
+top of the game engines for the most part, but they just don't come with it.
+And also Madroco is just, like, engineering-wise.
+It's pretty practical.
+It's just, like, a library that you link against, and then you can use it.
+Mink against, so it's, like, C++ or something.
+Yeah.
+Exactly.
+Yeah.
+So, like, it's not open-source.
+It's commercial, unfortunately.
+There's, like, a lot of the popular simulators are, like, is there a dominant open-source
+simulator?
+Yeah.
+It's bullet.
+Bullet is pretty popular.
+And we've actually been looking at it, like, maybe switching to that, just because it's
+open-source.
+Yeah.
+That's pretty much it.
+Because it's just, like, on, like, a day-to-day, it's just very convenient to be, like,
+what is happening?
+This is weird.
+Let me just dive into the code and see what's going on.
+But also, I would think to make it easier for other people to replicate your results and
+to, you know, try to build on the kinds of things that you're doing.
+Yeah.
+You don't have to say, well, you have to first go get a license.
+Yeah.
+So, I believe they do have, like, pre-favorable agreements, at least for students.
+So, I think as a student, you can get it for free.
+Okay.
+Yeah.
+But so, like, the good thing about Madroco is that it's basically that it's, like, wild
+kind of, like, a walled garden.
+Yeah.
+It's a pretty nice walled garden.
+And it's, yeah, and things.
+Yeah.
+Said every walled garden maker.
+Well, we're not doing it.
+We're not garden makers.
+No, I'm putting a word in Madroco now.
+That's true.
+It's true.
+The one thing where we've actually been eyeing some of the game engine fitting simulators
+as well is actually exactly like dealing with these deformable objects, like a cable or
+the rope or liquids, even, like stuff like that.
+That is something that Madroco can't really deal with because it's entirely, like, a rigid
+body simulator.
+And it basically, like, it's performance scales with the, like, basically, it gets slow
+very quickly if you have a bunch of things, like, moving around.
+Okay.
+Basically, like, of course, a scale thing doesn't matter at all because it's just, like,
+meshes and just numbers.
+But if you have, like, if you have, like, a bowl of, like, a thousand pearls or something,
+there would be, it would be pretty, pretty gnarly in which awkward probably we haven't
+tried it.
+But we have tried, like, I believe you've basically tried to do, like, a jenga, kind
+of, like, a jenga set up.
+And it was just, like, jiggle around and then eventually, like, kind of explode or just
+fall apart.
+Yeah.
+So I think it's, like, a limit of, like, maybe, like, a couple hundreds of, like, of
+basically, of, like, rigid individual bodies flying around or not flying around but moving
+around.
+Is that rigid body simulation or something that learns itself to distributed compute
+or does that not work so well?
+Or does it just Madroco not support that?
+That's a good question.
+So I think the, I believe, I believe the creators of Madroco have tried to basically run
+it under OpenCL, so to, like, GPU accelerated.
+But I think the main problem with that is they're actually, it's very similar from the
+computer computation you would, you would run for, for running a neural network where it's
+basically just like a bunch of, just a bunch of, like, matrix multiplies or, like, related
+related things.
+But for the physics simulation, you actually have a lot of branching because you run, like,
+a collision detection system and then you do something, it's like, if there's a collision,
+then do these things and you do that for, like, all the collisions in the scene or something
+like that.
+And that is something that, like, at least, take two days to use, I can't deal super
+well with that.
+I think actually in the, this was, like, a long time ago, but I think in video, they
+used to sell something, like, a physics processing unit, a PPU.
+Actually, I'm not sure if it was a video, but, like, some, like, some, some vendor, and
+they basically try to make it, like, an established, like, hardware accelerated physics.
+This was, like, marked to gamers, I really, I don't think, I don't think it ever really
+took off because eventually people realized, actually, CPUs are pretty good.
+The screws are pretty smooth, and especially with, like, with, like, today's where you
+have a bunch of cores, you could just have a physics core, and, you, and at least in
+the, like, game setting, it just works pretty well.
+That being said, basically, today, or, like, at least a bit more joke with us, it's, it's
+just a single thread CPU processing, it's, it's, it's pretty fast, but I think you'd
+probably be hard pressed to distribute that specific architecture.
+Actually, probably some of the other, like, basically, if you had something like a, like,
+some of the game engine, similar to our particle base, so, for example, Nvidia's flex.
+And basically, they don't represent bodies as, like, like, a rigid mesh.
+Yeah, it's basically, it's literally just, like, just, like, a bunch of particles that
+have some, like, basically, some, like, stickiness, what they stick to each other applied.
+I believe there have been some attempts at, like, distributing that, where basically
+we have, like, cells of the world, and every, like, every node basically computes all
+the particles that are, like, in this specific cell, then they, like, hand it off to some
+other node.
+Okay.
+But we're not using that today.
+Okay.
+Interesting, interesting.
+So, I think we're going to talk about simulation and tell me a little bit about the, I guess,
+the process for, you know, the relationship between your training data and your simulator
+and, like, how you load all that up and, like, how you build the simulation and, you know,
+are there things that you've learned about integrating simulation into AI training pipeline
+that are maybe, you know, not intuitive or, you know, maybe, you know, stimulators weren't
+really designed to do this.
+And so, it was kind of hard, but we figured out how to do X, Y, C.
+Yeah.
+So, I would say for the simulation, and this is actually kind of following the, like,
+the, like, what we're just talking about with the distributed aspect of it.
+One reason why we're not, like, pushing out, pushing out super hard is because we actually
+can just horizontally scale it.
+So actually the way we, we basically do our training, which is basically running a lot
+of simulators.
+So you can do, you can distribute it in this way.
+It's just that the simulators are all independent of each other.
+Like, they do, they all simulate the same, like, the whole scene, but they all have, like,
+different, like, they all basically run, like, different, like, they all run the same
+scene or some randomize version of it.
+But they, they basically, basically, instead of, like, serializing all the attempts, we
+just paralyzed, like, 10, or, like, actually more, like, a thousand of them.
+So the way we actually run our training is we have, like, one box that actually does
+the, like, tens of flow, like, the computation for actually training the network and
+like, taking in the data.
+And then we have a bunch of, like, worker or, like, evaluator machines that basically
+like, take in the current best guess for, like, for the policy, which is, like, our
+trained neural network.
+And then they basically roll that out in a simulator, which basically just means they run
+it over and over again.
+And so this happens on, like, hundreds or thousands of machines, like, in parallel.
+And, but they don't really talk to each other.
+Like, they just do this on their own.
+And then they actually send this experience back to the optimizer node.
+And that's basically where we, where we transfer numbers to actually improve the policy.
+So you, you generate a policy, generate a network, you push it out to a bunch of different
+nodes in parallel.
+Like, what's, what's the input to those nodes?
+Are you giving each of those nodes specific input or are they just kind of running things
+in random and, you know, computing a function or something like that across a random
+distribution?
+Yeah.
+So, so the worker nodes, they basically receive, they receive the parameters for the
+policy.
+And there's like some shared configuration for, like, what's the kind of scene I'll be
+running?
+Like, what's the robot and like, where, like, where are the objects that we're interacting
+with?
+Like, what's their, what's their initial positions?
+There are actually a couple different ways of, of how to communicate the results back
+to this, like, central, like, mastermind machine.
+So one way is if you actually have the workers do the, do the gradient computation.
+So they basically, they roll out the physics simulators.
+And then they figure out some kind of reward or cost function for this.
+And like, what's this a good roll out?
+Like, we end up in a good state where, like, for example, when you're moving these blocks
+around, like, the, the right block, end up on top of the other right block.
+And then the workers figure out, okay, if my parameters were like tweaked slightly differently,
+I would have gotten a better outcome this time.
+Yeah.
+And then the other, the other approach is to, is to just send over the raw, like, what
+happened in simulation to the, to optimize the machine and then let, let the, the optimizer
+figure out what the, what the parameters should be and like, how we should change them.
+Okay.
+And which do you tend to do the, both or, yeah, so right now we do the, we do the sending
+over the experience or the latter thing, which is just because it's simpler for the most
+part, because then the basically the workers are kind of dumb and they don't need to worry
+about that much.
+But there's a situation where this can actually be problematic, especially if you're, like,
+if your observations are big, for example, if you're, like, if your observation, which
+is like what your, what your policy or your agent is, is using to make a decision for
+what to do next, that is something big, like an image from a simulated camera.
+Then you don't want to send that over the network, just because there's so many of them
+and just clogs up the entire bandwidth.
+Where we'll probably look into the, and just switching to the sending over the gradients
+over the network over, over the next few months, especially as we move to these more
+like high dimensional observations.
+And is the, the infrastructure that you're doing all this with, like, is this all hand
+crafted stuff or, like, I had a conversation with Ian Stoica about Ray the other day,
+like, you're using something like Ray to do that.
+So we're actually using Kubernetes.
+Yeah.
+So, so we, I believe we had a, we did like an infrastructure blog post about this a couple
+months back, but basically we run, we run lots of Kubernetes clusters across all of the
+major clouds as well.
+Like, we're running on, we're running on Azure, we're running on AWS, you also have some
+stuff running on Google.
+So yeah, there's a, there's a, there's a lot of compute.
+The way actually we went is using these tools is actually somewhat simple.
+You, you basically just tell, tell Kubernetes in our case to, here's this batch job, run
+this thing once for the GPU optimizer and run this thing once for the couple hundred
+worker machines and it just kind of goes in, does it?
+But there is like, there is a ceiling there where like, where you can't, just because it's
+not really the original use case for Kubernetes, I believe the, like, what they, what they
+recommend as a limit is like, not more than, say, 10,000 nodes, which is just a lot, of
+course.
+And have you bumped up against that one?
+Yeah.
+So we have bumped against previous limits where the limit was something like 5,000 and
+then it won't crash, but it will just become like more and more unhappy and just stop
+responding and like, basically things will become weird in the cluster.
+And how long are these simulation jobs?
+Are they, you know, they're not like on the order of training jobs that are days and
+days.
+They're much shorter.
+Is that the case?
+Yeah.
+Yeah.
+So, yeah.
+So basically, so one specific cycle is much shorter.
+Like a one specific cycle of basically get the current policy parameters to a bunch of roll
+outs and then back.
+That's something like maybe like a second, but the way we actually start them is we, we
+basically just keep the keep these like rollout machines around the same way that we keep
+the training.
+So they basically they just want like temporary cluster basically.
+Okay.
+And that cluster will just stay around for the duration of of the entire training, which
+is like maybe like a day or a day.
+Okay.
+Interesting.
+And so, you know, all this is to help you develop a kind of a better model, the simulation.
+Like, what do you do when you want to test that in the real world?
+Ah, yeah.
+This is going to be a pretty important question for you.
+Exactly.
+Exactly.
+So, yeah.
+So the kind of interesting thing is that a lot of other areas in machine learning, they
+just kind of stop short of that.
+And they're like, well, this is a model looks pretty reasonable.
+Right.
+So it's fine.
+We're done here.
+And so we're actually really adamant about like dumping through all the hoops to actually
+to actually make it run on the robot.
+Okay.
+Because we found that it helps like keep us honest.
+Basically it's like very easy to be impressed by like cool stuff happening in a simulator.
+But usually there's some caveats that make it harder.
+For example, like if like some of the like robots meshes, like aren't actually like touching
+each other or something into a robot mesh.
+So basically that's kind of just the shape of like some like part of the robot, like a
+limb of the robot.
+Okay.
+And usually for example, for the for when you're determining whether like the robot is pushing
+something, you do this like collision test of like is the robot colliding with an object
+and if yes, then you push the object away.
+But the thing is like while like while you have to super nice like visual rendition of
+the robot with like a nice like models, all the aspects and excrues or something.
+Yeah.
+Often the geometry is actually used for this collision check, which actually determines
+what's happening in the like physics wise might be like a like a simple version of this
+geometry.
+Like it might just be like a cylinder where the actual robot is something super complex
+like it with like rounded corners or something like that.
+So your angles are all off and kind of this power.
+Yeah.
+Yeah.
+Yeah.
+So like this gone, so like kind of like tricky and just thinking of thinking that something
+works.
+Whereas it doesn't actually work if you try it in the real world right now.
+And so the so the way we run we actually run run our policies on the real world.
+We have developed our system called robots as a service, which basically means that the
+robot goes onto the network and then people can connect to it and like run like run specific
+algorithms or like the models that they trained on the robot.
+And so there's some like specific like technical things that they think is like non trivial
+because it is like a real time environment and you can't just basically it's much harder
+than just simulating like a piece of software like people often do with like Atari games.
+For example, for training, you have to be careful if you don't miss like a cycle because
+otherwise your policy will get super confused because your time step will just be longer
+for example.
+So basically like working on all these artifacts has actually turned this robots as a service
+system into into a pretty big engineering project here.
+So the example you gave struck me is something that is more of a training artifact and training
+issue as opposed to deploying it to the physical robot like how is it how does it manifest itself
+on the physical robot in such a way that you could do something about it there.
+Yeah.
+So the specific example of like so in simulation, it would start at like T equals zero.
+Then you get some like current state to decide what you want to do and you set the action.
+But basically while you're thinking about this simulation stops right it's paused.
+So basically you do this computation then you get your output and then you advance a simulation
+by one step and then you repeat you think again and you step again.
+In the real world of course all of this happens like simultaneously and you I just don't
+get the chance to just like pause and think for a while.
+So you've got inertia and continuous variables and all the stuff that exactly exactly.
+But you raise a very interesting question like is it a training problem or an evaluation
+problem and actually for most of these things these things it can be both like like sticking
+with the like timing discrepancy example.
+There's basically always like this is pretty much like a decision we have to make for like
+every every issue so much of this that comes up is like are we okay with like investing
+time in actually like ironing out this issue in our like in our software stack or should
+we just be like oh well I mean if there's some fluctuation in the time step then we
+can just train with that and basically just add that to this to the set of things that
+we randomized in simulation right and basically there's always a balance of these two choices
+like either make the simulation harder or make your your real world system more predictable
+to execute and so this is kind of it and this is kind of an area where you have to pick
+your battles to some extent right because if you like if you have if you just have too
+many unknowns then it's while like there's like a theory radical it should be theoretically
+possible for for you to be able to learn a model that can cope with all of these uncertainties
+it will just be very hard to practice to debug it and inspect it and see if something
+was wrong and you can't and then you will basically you will see a break and then you'll be like well
+so why did it break and basically they're getting to the bottom of that requires you to exactly
+do this part where you remove like as many of the unknowns as possible but you surely read that
+basically it's in the end our policies eventually we want them to be capable of basically you put
+them on your robot that is very terribly instrumented or has like really weird software that causes
+like lags and delays and just figure it out I don't think we're there quite yet okay okay
+and so you call this robot as a service do you have is it like on demand like you have a
+a bank upstairs of like thousands of robots just swinging around and or do you have you know
+a robot or two connected to the network that folks can like you know there's a calendar
+an outlook or whatever that they schedule their robot time with like how cloud like is this
+I really wish it would be the former but but it is in fact closer to the latter so we actually
+thought about and actually some others so some folks over at Google I think this was circulating
+they they actually did this they bought a bank of robots they bought I think like around 50
+or something like robot arms right and just had them do these like grasping grasping tasks
+yeah we thought about doing that too but at least with the current setup it's it's exactly
+that like we have a fetch we have a couple big we have a couple other of other robot arms
+and these are like individually connected to the network and we usually do the scheduling by like
+whoever is around the robot at the time um so scheduling by proximity exactly exactly okay the
+main reason why they actually need like a specific system for like accessing the robot there is
+that so these robots all come with software right they come with some kind of software they come
+with either like they come either with some integration for Ross which is the robot operating system
+which is a big open source effort to to provide like a like a very like unified framework for
+you're not a bit Rosscon that's going on now I think oh is this going on right now and bank
+over oh great well shout out to Rosscon so we're actually not using Ross
+yeah so we found that like Ross actually really great if you if what you have is you have a robot
+and then you have a bunch of like other things around it that you want that that you want to use
+for example you have your robot arm and then you might have like some like like a light
+I think I've got a bunch of modules and yeah exactly exactly just so many yeah and and you have
+and you have like tracking cameras or you have like maybe you have like one one robot that is your
+arm and then one robot that is your gripper and they need to be independently controlled or
+something like that and we found that that is that's really great that like all these things
+already ship with with the ship with drivers for Ross and you can just plug them plucking together
+and they will and they will just work pretty much out of the box I think for us it it kind of comes
+back to the issue we we talked about before this where where they are just timing uncertainties
+basically and you don't really know what's what's going on inside the system for example if you had
+this this case where you have a robot and you have some external sensor and in Ross they
+would just appear like here you're about to use the sensor great you're all set but actually
+there might be like subtle things there were for example the timing updates for both of these
+systems might be out of phase where like the robot updates and then there's delay and then the
+sensor updates and then then you will have like a timing lag there and while this wouldn't matter
+in like for a lot of the like like classical applications where you do something where like
+you collect data over 10 seconds or something and you're basically doing this in a very slow
+way and then then you don't really care about what what the what this is like tiny differences
+it cause problems for our case where we basically we try to instantly react to like if something
+changes in the in the environment you might be at tens of milliseconds before we feed this back
+into like into the policy to correct correct for that and so this is why we actually have to be
+like super careful about like what are the exact timing like timing phases of all these sensors
+and so so we found that a better lot of the lot of the Ross abstractions are actually they
+can encapsulate this and hide it from you which is actually great I think for the majority of
+use cases it just doesn't work that well for us so we actually do need full control over these
+things okay so do you did you write your own operating system or is it more like less like an
+operating system more like a thin layer that you know I'm assuming that at the bottom of this it's
+all kind of just your controlling step promoters and stuff like that through IO ports and you know
+there's got to be some kind of you want some kind of software layer there to make that a little
+easier did you just roll that around yourself exactly so it's pretty much like a layer of middleware
+basically so we didn't we didn't really write right our own OS or something right so for some
+of our robots we actually we basically get rid of all the software that they ship with yeah and
+just basically like if there's some firmware on like some embedded microcontrollers on the robot
+then we will we usually won't touch that because that and that will because that will also usually
+be fast and predictable like well defined yeah but so the issue with the with the off-the-shelf
+option was like code path lengths or you know you know variable because they're accounting for
+plugging in like external modules and all that kind of stuff is it that well yes so there's
+certainly a lot of complexity in that like they like they basically have this this entire framework
+for being like plug and play but but like they're actually also like real operational issues where
+like for example like this the the timing issue I just mentioned like wouldn't be because they like
+it's not that crazy basically that we have to like make sure that our code has like constant
+execution time or something it's just you have to like for example like usually these like systems
+have some kind of trigger signal okay and you have to you basically just have to to lay your
+code out in a way that like now my cycle starts you trigger all the systems basically you synchronize
+all of them and then you like read out all that data or something like that and that's how you
+synchronize synchronize all these things so it's not so much like really like dark magic of like
+performance optimization it's basically for the most part we just have like a very specific usage
+pattern that requires like carefully thinking about like basically when like when when do we do what
+and so pulling this all together you're trying to develop a technique that allows the robot to
+you know be more like the human and can kind of do you know fine tune course correction you know
+as it's operating and you train all these models and simulation like how do you then use that
+with the robots and do you know do the inference to make those course corrections like how does
+all that part work yeah so so basically right now what we're like what we're still like aiming for
+is that we actually don't do any don't do any fine tuning basically of our model in the real world
+so so we train our model simulation and then we we basically just rolled out on the real robot like
+you'll be gathered all your sensor data like from the robot and from your like internal from
+external like cameras and tracking systems and stuff like that and you feed that into the policy
+you do the inference and then you react to that and so the basically the adaptation loop
+for like figuring out like differences between the the real world and the simulator right now
+is actually like at least for us it's pretty much manual still so there are lots of like there are
+lots of ideas for for basically doing this kind of like metal learning where you learn to learn
+to adapt to a new environment and we've had some initial success with that for basically
+imitating a human doing some behavior and then you would you would figure out it's like oh what
+are these the what are the semantics that the human intended to achieve with with this task
+I think it's probably like like more like a more like a general segment is like this stuff is
+still pretty early both in the in the robotics and the like ML communities but it is super
+interesting and and eventually we'll want to do something where like we have a bunch of the
+different simulators we talked about might even have like different kinds of robots and
+basically just increasing the like breadth of this distribution so you encapsulate like more and
+more things and and really hope that your that your policy gets to the like gets to the bottom of
+like I see this is how I learned to like control a new robot in an entire new environment
+okay so this is something we're super excited about and eventually we're hoping that like
+this will enable a robot that can that can truly solve a variety of like very complex tasks
+on a variety of different robot platforms okay and so if I wanted to learn more about
+this dig into the details like see it in action like have you published code on this or like
+you know what is what would be required for someone kind of you know play with this and try
+to replicate what you did yeah so we did a pretty big release a couple months ago where we basically
+put some of the things we talked about together like the domain randomization part and the part
+where you where you observe your human and figure out okay I want to do like this specific task
+and like the robot imitates this in like a new setting we have a release there where we basically
+show like like show how it works like show how how the networks are aligned and like how they like
+basically how we feed the data from one to the other and how they train okay and we'll probably
+be be publishing at least parts of this robot as a service layer that they just talked about
+together with like our next set of research results there like we figured it doesn't really make
+sense for them to just be the kind of on their own because then you there's a lot of moving parts
+right exactly exactly and so the the issue there is that like even if you open source the code then
+it's like well great you can get started today just add a really expensive robot to the mix but like
+we'll definitely be as we publish our research we want to release like both the research and the
+infrastructure parts required for it okay cool awesome well Jonas thanks so much for taking
+the time to chat with me about this is really cool stuff awesome thank you for having me for sure
+all right everyone that's our show for today thanks so much for listening and for your continued
+feedback and support for more information on Jonas or any of the topics covered in this
+episode head on over to twimlai.com slash talk slash 76 to follow along with our open AI series
+visit twimlai.com slash open AI of course you can send along your feedback or questions via
+Twitter to add twimlai or at Sam charrington or leave a comment right on the show notes page
+thanks once again to Nvidia for their support of this series to learn more about what they're
+doing at nips visit twimlai.com slash Nvidia and of course thanks once again to you for listening
+and catch you next time

@@ -1,0 +1,288 @@
+Welcome to the Twimal AI Podcast. I'm your host, Sam Charrington.
+Before we get going, I'd like to send a huge thanks to LinkedIn for sponsoring today's show.
+LinkedIn Engineering solves complex challenges at scale to create economic
+opportunity for every member of the global workforce. AI and ML are integral aspects of almost
+every product the company builds for its members and customers. LinkedIn's highly structured
+dataset gives their data scientists and researchers the ability to conduct applied research to
+improve member experiences. To learn more about the work of LinkedIn Engineering, visit
+engineering.linkedin.com slash blog and now on to the show.
+All right, everybody. I am here in Santa Clara at the first O'Reilly TensorFlow World conference.
+And I've got the pleasure of being seated with Jonathan Hong. Jonathan is a senior software
+engineer at LinkedIn and he is presenting here at the conference tomorrow. Is that right, Jonathan?
+Oh, yep. That's correct. On your experiences, scale,
+link TensorFlow at LinkedIn. Welcome to the Twimal AI Podcast. Thank you. Before we jump into
+your talk and your project, I'd love to learn a little bit about your background and how you came
+to work on machine learning infrastructure at LinkedIn. Yeah. So back in 2014, I joined LinkedIn
+as an intern on what was then called the Hadoop development team. So we handled the Hadoop
+infrastructure at LinkedIn for storage and compute and compute orchestration. So I rejoined LinkedIn
+the next year in 2015 on the same team. When I joined, I was working on the compute
+infrastructure at LinkedIn, which is yarn in the Hadoop project. So we were building some
+enhancements around compute efficiency, making sure we were getting good ROI on the hardware
+that our jobs were running on. So I worked on that for a few years. Was this the Tony project or
+was that separate? No, so this is separate. This was yarn specific. So nothing related to machine
+learning yet. Just making sure we have Hadoop clusters at LinkedIn that we manage a couple
+of thousands of nodes and making sure that things are running efficiently. So I worked on that
+for a few years. And then in late 2017, I'd say there was a lot of interest in using deep learning
+to improve the insights that we were giving our members. So we started exploring using
+TensorFlow as our deep learning framework. And so we were kind of experimenting with various
+existing frameworks in the open source world for running TensorFlow on Hadoop cluster.
+So we explored some projects and none of them really fit our needs exactly. So that's when we
+started to build this project called Tony, which stands for TensorFlow on yarn. And so this is our
+in-house solution for running distributed TensorFlow on our Hadoop clusters. I'm curious,
+what were some of the things that you looked at that didn't quite work for you? Yeah, so we looked
+at a few options. The first one was a project called TensorFlow on Spark. So this was open-sourced
+by Yahoo. I don't know the exact date. So the concept there is pretty similar. Instead of running your
+TensorFlow training and modeling code directly on your yarn cluster, you would run it on a
+Spark cluster, which usually runs on a yarn cluster. And so that worked reasonably well, but there
+were some feature gaps that we couldn't overcome. So at the time, there wasn't great support for
+fault tolerance in that project. I know since then it's improved. But at the time, this was a
+big blocker for us. And then a couple of other things that are related to kind of the
+Spark execution model. So one of them was that Spark didn't have support for
+GPU requesting and scheduling. And so a lot of our AI engineers, they were interested in running
+their distributed TensorFlow training on GPU hardware to accelerate the speed at which they can
+iterate. And so since Spark didn't have support for this, this was one of the big reasons we
+decided to build something else that we could integrate that GPU support with. And then the last
+thing was more related to Spark itself. So kind of the Spark execution model is, you know, you have
+a driver and a bunch of executors in your job. And the problem here is that all of your executors
+need to share the same resource profile, essentially. And this didn't really mix well with the
+TensorFlow execution model where you have various job types such as your like your perimeter servers
+or your workers and things like that. And each of these job types may require different resource
+profiles. And so if you're running TensorFlow on Spark, this won't really work. And then you end
+up with a lot of resource wastage. Yeah. And so maybe taking a step back, what's the overarching
+motivation for running TensorFlow on the Hadoop clusters? Is it that you have them in there there?
+And you want to use the machines? Is it that, you know, you like yarn as a general kind of workload
+orchestration system? And maybe kind of an adjacent question, you know, if you didn't have that
+existing investment, would you do the same thing? Would you stand up with the Hadoop cluster and
+then run TensorFlow on it? Or would you be going in a totally different direction? Yeah. So
+I think our biggest motivation for building Tony was because we had these Hadoop clusters.
+So LinkedIn has invested in Hadoop as our de facto data processing platform for many years now.
+You know, even before I joined the company. Sure. And so, you know, teams across our company are
+running very diverse workloads at scale on our Hadoop clusters. And so the Hadoop ecosystem at
+LinkedIn is very mature. And so we're running these clusters with thousands of nodes, you know,
+petabytes of compute. And so we wanted to use our infrastructure and our expertise in Hadoop and
+build a way to run TensorFlow on this infrastructure. And historically, you know, Hadoop offered
+this advantage of, you know, in the context of MapReduce, this kind of locality between your
+compute and your data. Does that have any relevance in the machine learning model training world?
+Yeah. So ideally, the model training would be bounded by your compute speed. And so hopefully,
+IO doesn't become a concern. Yeah. We have found in the past that IO was a big limiter for us. But
+we don't think it was related to locality reasons. You're just a bad model or training or something
+like that. Okay. Okay. I've had Beechan on the show before talking about ProML. What's the
+relationship between Tony and ProML? Yeah. So the idea behind ProML was to give our AI engineers a
+better experience for building and machine learning pipelines. So you know, you have your data
+pre-processing phase. You may be doing some feature extraction, things like that. And then
+you have your model training and then you can save your model and then go onto the serving phase.
+And so the Tony part is kind of fills the model training part of this pipeline. And then we have
+some internal libraries to link all these systems together. Okay. So ProML is kind of a layer of
+abstraction that sits on top of a bunch of things. Tony being one of those on the training side.
+Yeah, exactly. Cool. So tell us about your presentation. How's your presentation structured?
+Yeah. So it's kind of a mix of the things that we've talked about kind of the
+hoodie ecosystem at LinkedIn, what that looks like. And then kind of going into the story of
+why we were looking at TensorFlow as our deep learning framework and kind of what the experience
+was like for our AI engineers in running either single node or distributed TensorFlow back in 2017
+when our deep learning infrastructure was not very mature. So talking about what that experience
+was like some of the gaps that we saw. But maybe pause here. It sounds like you have some interesting
+stories there. What's the kind of what what what what did that world look like and how does that
+contrast to how it looks today? Yeah. So I think the biggest gaps there were
+users would have to like AI engineers would have to set up their own training environment either
+locally or on machines that we provided them. And so there wasn't really like a set of managed
+compute hardware that people could run on. So it was it was kind of like a free for all wild west
+situation. You know, you have all this compute hardware sitting there, but there's nothing to
+manage it. So it kind of ends up being the user who has to figure out which machines are available
+when you run into like race conditions where I see this machine is available, but so on
+else does and then you end up kind of butting heads. Yeah. So that was the biggest issue. And you
+know, especially with like GPU hardware, this becomes an even bigger issue because you only have
+so many GPUs on a single machine. And you end up running into, you know, multi-tenancy issues
+a lot, which is what we experienced. Yeah, the race condition, race condition issue is that's
+an interesting one I hadn't thought about that particular example of you've got some shared
+resource and two people see it and want to take advantage of it and then they spend something
+up and now they're colliding. Yeah, exactly. The ones wins, but you know, the other person loses.
+Right. That's the really bad experience. Yeah. And so today, obviously, it's more of a you've
+got a set of shared services that developers can take advantage of and TensorFlow is a big part of
+of that. And why TensorFlow? Any, you know, particular thoughts on why TensorFlow is a framework,
+you know, was the right direction for you? I can't really speak to why we decided to make
+TensorFlow the official deep learning platform. But maybe the more interesting question is,
+you know, one of the big decisions that folks that are trying to provide platform services need
+to face is whether they are offering, you know, whether they're trying to be framework agnostic
+and support everything or whether they're focusing on a particular thing. Is it correct to infer
+that there's a strong focus on TensorFlow for LinkedIn to the exclusion of other frameworks? So do
+you also have ways of supporting, you know, you're just here talking about TensorFlow, but you also have,
+you know, PyTorch on yarn or something. Yeah. Yeah. Yeah. So this is actually something.
+It's kind of interesting. When we first developed Tony, it was for TensorFlow specific support.
+Okay. And this was mostly guided by our AI teams who were most interested in using TensorFlow.
+There was certainly a period in time in which TensorFlow was the only choice that made sense.
+Right. Right. Yeah. And so, you know, I think right now we are not really platform agnostic.
+We, as a policy, I'd say, we only support certain frameworks. And I think that's maybe
+an easier way to scale our deep learning infrastructure. You know, we only have so many
+infra engineers on our team that can support these frameworks. So we kind of need to
+limit what kind of the support we provide to the engineers at our company. Yeah. Yeah.
+It's interesting. We earlier this month had a conference, Twomelcon focused on Twomelcon AI
+platforms to be precise focused on the platforms and technologies that folks are standing up to
+accelerate machine learning. And you hear a lot of people kind of advocating for you got to support,
+you know, in platform roles, you have to support everything that the engineers want to use.
+And it's, I think, worthy of pointing out that if an organization, you know, with an engineering
+culture like a LinkedIn and, you know, the size and scale of LinkedIn, both in terms of
+engineering team and problem, you know, can say, well, you know, we're going to focus on this.
+Yeah. Then there are probably a lot of other organizations that are smaller that can also do
+that and probably get as much advantage, you know, of focusing on something, whether it's
+TensorFlow or PyTorch or whatever. Yeah. Exactly. I feel like, you know, if you have a team of
+hundreds of engineers that are working just for deep learning at your company, that might be
+something that's possible. Maybe just on your platform team. Yeah. Yeah. Not developing. No,
+you know, right. Yeah. But, you know, we only have so many people on our team that can only do so
+much. Right. And so I think this is the best way for us to do it. Yeah. Okay. So you were talking
+about the motivation for this investment and the experience that engineers had before this project.
+What's next in your kind of agenda or your story on this with the presentation?
+Yeah. So, you know, after we go into kind of the gaps that we saw in distributed
+TensorFlow training, we'll talk a little bit about how Tony works behind the hood.
+So kind of what features we support, how it's implemented on top of yarn,
+and then kind of how AI engineers at LinkedIn would use it.
+Yeah. And so that part will kind of go into like coming back to the pitfalls that we saw,
+how Tony addresses them, basically, to walk us through that. Yeah. So do you want like a walk
+through of how Tony works? Yeah. Yeah. Absolutely. Absolutely. Yeah. So sort of for any yarn
+application, there's a few main components. There is a client component that is submitting jobs
+to your hudu cluster. And then there's what yarn calls an application master. So you can think of
+this as essentially a driver that handles all of the subtasks in your hudu job.
+And then you have what Tony calls a task executor. These are essentially the tasks that are doing
+the heavy lifting in your job. And so for us, we have implementations of all three of these
+components. And then we package them all into this Tony library. And so some of the things that
+we've built into the design of Tony, most of this is happening in the application master of the
+driver. So some of the things that we need to support are like fall tolerance, which we talked
+a little bit about earlier. So you know, as our engineers are running on more and more training
+data, their training may be running on more workers running for longer. You know, there's this idea
+that any machine can fail at any time, which will cause the tasks running on that machine to fail.
+And so we needed good support for fall tolerance in the Tony framework to make sure that if we run
+into these transient issues such as hardware failure, that Tony can transparently continue training
+and make sure that the job succeeds to completion. Yeah. In the Hadoop world, there's,
+you know, people will say fault tolerance and mean lots of different things, right? They can
+mean that they can mean that a node fails, but there's been checkpointing happening during the,
+you know, the training or the job. And so some other node is able to access that state and start
+or continue and not have to start back to the beginning, you know, or you said kind of
+continuous, you know, fault tolerance. Whereas, or such that there's no interruption at all.
+There's no checkpointing that needs to happen. Those are maybe the spectra of different, you know,
+ways that people use fault tolerance. You know, what level of fault tolerance are you providing?
+And how are you providing that? Yeah. So I think for, you know, for frameworks like MapReduce
+or Spark, it will follow this model of you, you may need to recompute some things. And then the
+framework will handle exactly what you need to recompute. Yeah. So in Tony's case, it's a little
+different. So since TensorFlow already has this capability of checkpointing, checkpointing status
+to some durable storage essentially. In our case, we're using HDFS since it's running on our
+HD cluster. Yeah. So for us, we're like checkpointing the status of our Tony jobs every, every few
+minutes to our HDFS clusters. And then in Tony's case, if it detects that some worker has failed
+for whatever reason, it can tear down the the Tony application of all the workers associated
+with it and then re-request resources from the HD cluster, spin up the same job, but read from
+the checkpoints that were saved from the previous attempt. We spoke earlier about this race condition
+issue. Does Tony kind of inherently solve that race condition problem, or is it just that it
+organizes everything in some higher level abstraction like ProML, like a scheduler of some sort with
+the user interface can handle, can better handle that race condition. Yeah. So the, I think the core
+problem with having these unmanaged machines and, you know, that's the race condition. Yeah.
+Is that there is no layer that is that is aware of which machines have how many resources and
+how many are being used. Right. And so we kind of got this for free, so to say, when we move to
+manage infrastructure like yarn. So, you know, when we want to build end-to-end GPU support for
+our users, we need to make sure that every layer in our stack is aware of these GPU resources,
+so that we don't have this race condition. So for us, that meant, you know, in the yarn layer,
+yarn needs to know, you know, you have all of these machines in your cluster. How many GPUs are on
+each machine? When a user runs a task on one of these machines, how many GPUs is it using? And so
+yarn is aware of all of these things. And then so we can leverage that in Tony. And Tony can say,
+you know, this user requested 2GPUs. I'm going to ask the yarn cluster for 2GPUs. And then the yarn
+layer can handle the scheduling part for that. And so that was the kind of how it works
+element. And we covered some of the problems that it fixes are there others that you highlight in
+presentation. So the fault tolerance issue and the GPU issue, those are the two that we cover.
+There are a few that we decided not to get into. So after that, we kind of start to go into,
+you know, this is useful for scaling up TensorFlow training at LinkedIn. But we also have this
+orthogonal issue of if AI engineers want to experiment on new libraries that came out in the
+open source world, how can they easily experiment on that? And, you know, if you've ever worked with
+Hadoop, it doesn't lend itself very well to experimentation, I think. And so one thing that we were
+exploring was building a Kubernetes research cluster that our engineers could use to do various
+experimentation. And so one of the powerful things about Kubernetes is that there's very good
+support for containerization. So if our engineers want to use some library, they can easily
+build the image themselves and run it on the Kubernetes cluster. And so the later part of the talk
+we'll get into kind of how we built that out. Some of the gaps that we saw when we were building
+out our Kubernetes cluster and some use cases. Okay. And just to be clear, the Kubernetes cluster is
+independent of the Hadoop cluster, or you somehow running Kubernetes on top of Hadoop?
+Yeah. Yeah, I know there have been some attempts to do. Yeah. We decided not to go that
+route. So essentially the Kubernetes compute part is a separate cluster. And this is something
+we'll get into in the talk as well. We already have this vast data lake on HDFS with all of our
+training data. And so even while we have this separate compute cluster for Kubernetes, we want
+a way to access this data lake. So this is one of the gaps that we saw when building out this
+Kubernetes cluster, how if people run these Kubernetes jobs in this cluster, how do they access
+this data? You know, since we're running a secure Hadoop, it's kind of non-trivial to instrument
+this. So that's something we also get into in the talk. And so the main challenges there are
+kind of integrating in with the kind of your access controls and entitlements on the Hadoop side
+between the kind of the file system driver infrastructure on the Kubernetes side, or is it
+something else? Yeah, that's basically what it does. Okay. You know, there's built-in support
+for accessing a secure cluster. How do you like authenticate things like that when you're running
+your tests on the Hadoop cluster. But then when you have some external cluster on Kubernetes,
+how do you do the same thing? And so that gap is something we have to bridge.
+Well, before we dive a little bit deeper into the Kubernetes side of things,
+does Tony take advantage of or draw from any of the other distributed training
+approaches for TensorFlow, the, you know, the built-in distributed training, or a horrified,
+or any of those kinds of things, or is it, you know, as part of what you did kind of build your own
+version of that stuff? Yeah. So the layer at which Tony operates that is kind of on top of the
+TensorFlow distributed training part. So when the AI, when an AI engineer wants to run distributed
+training, they are writing like the model creation and the training logic themselves. So if they
+are interested in running some distributed training strategy, they can do that. And then Tony is
+kind of a thin layer on top of that, which will handle the resource acquisition and task launch
+essentially. And then once that part is complete, then the user, the AI engineers distributed
+TensorFlow job will proceed as it normally would. Got it. Yeah. And so some portion of your user
+community is coming in, you know, their jobs are being submitted via ProML. But I'm imagining
+some are using Tony directly. And if that's the case, I'm curious what the user experience is.
+Are they creating Tony Yamal files? Yeah. Yeah. So kind of the bare bones Tony experience is
+you need to create your configuration files. Yeah. And then package all of your source code
+and everything yourself. Like jar files or something. Right. Exactly. So if you're running Tony
+from like the command line, for example, that's something we would expect the user to do. But
+at LinkedIn, we have this this ProML ecosystem. And the objective there is to provide a higher
+level abstraction to our engineers. And so a lot of these nuts and bolts are kind of handled
+for them. Cool. Well, maybe let's take a few minutes and talk about how you're approaching
+Kubernetes. I guess first of all, are you, you know, is there an official position? Like, you
+know, this is the future of the future direction for, you know, distributed compute for ML and AI
+at LinkedIn? Or do you see Kubernetes and Tony coexisting long term? Yeah. That's a difficult
+question for me to answer. I don't think we I think we are the Kubernetes work we're doing is
+still pretty early phase. And so I think as we onboard more and more use cases, we'll see
+what the gaps there are. And then I think at that point, we'll have a better idea of what the
+long term distributed TensorFlow story will be at LinkedIn. But as of now, the state of Kubernetes
+at LinkedIn is, you know, we're we're still building out the infrastructure. And we don't really
+have a solid idea of how that plays into our long term solution. Beyond the challenge of
+the security challenges that we talked about integrating at that level, these two
+disparate systems, what are some of the other challenges that, well, challenges are what are some
+of the other, you know, focus areas that you're doing to kind of make the Kubernetes cluster accessible
+to folks? Yeah. So I think that the HDFS access thing is was the biggest thing for us.
+And then for experimentation, we're still kind of experimenting with it within the infrastructure
+team. And so a lot of the issues are related to building out the actual cluster and making sure
+that it operates as a production cluster should. So for example, making sure that the nodes in
+our cluster are up most of the time and making sure that we have appropriate metrics and monitoring
+to accurately assess the state of our cluster. Yeah. So it's kind of core
+Kubernetes operability stage that a lot of people, frankly, are at as opposed to how do we build
+some higher level abstraction on top of Kubernetes that is ML focused or creates the user experience.
+You're trying to offer to your ML engineers. Right. Exactly. Yeah. I think once we solidify
+the Kubernetes infrastructure, then we can start onboarding more and more users and then
+hopefully it will take off from there. And it's not like you have a few research focused teams
+running on Kubernetes now, are they doing, are they kind of experimenting? Well, I guess they're,
+yeah, experimenting is overloaded, but are they like running real use cases and workloads on this?
+But maybe not time-critical ones or like what's how do you characterize how you've started,
+you know, in terms of a workload perspective on the Kubernetes side?
+Yeah. For now, it's mostly kind of on an ad hoc basis. So people aren't really running
+critical jobs there. Yeah. And we've kind of played with some use cases such as running
+horrified on Kubernetes or running Qflow, for example. But yeah, those are still very experimental.
+So did you cover anything beyond the Kubernetes stuff? Or is that where you left it?
+I think that's the last thing that we cover. Yeah. Okay. You know, I asked a little bit about the
+kind of the feature of all this at LinkedIn with respect to Kubernetes and Hadoop. But more broadly,
+you know, what are some of the things that your group is looking at going forward?
+Yeah. I think right now, it's really important for us to give our engineers a really good user
+experience. A lot of our work so far has been making sure our clusters can scale well as we add
+more machines and, you know, hundreds of users are onboarding their deep learning jobs. But
+we're all just trying to improve our user experience. And so that's something we'll be addressing in the
+next few months. And other specific aspects of that that you can talk about? I'm not sure how much
+I can say. A lot of it is related to, for example, like internal tooling or the way our clusters are
+built out, for example. So even if you could say it wouldn't mean much to anyone. Yeah. Cool. And
+I'm curious if you have any kind of going back to kind of core TensorFlow, any kind of interesting
+lessons learned or, you know, things that you would share with folks that are, you know, starting to
+think about, you know, building out platform support around TensorFlow key, key things that it
+was important for your team to learn. Yeah. So far, I think just using what the open source
+TensorFlow community has provided has worked reasonably well for us. And I think when we cover,
+for example, Tony and talk, it kind of sits on a different layer from TensorFlow. So up to now,
+we haven't really had to delve into the TensorFlow internals. But in the future, I think as we optimize
+model training more and more, that's something we're going to look into, you know, how can we
+better optimize the actual TensorFlow layer rather than the layers that sit on top of it?
+Well, Jonathan, thanks so much for taking the time to chat with me. Yeah. Thank you. It was a pleasure.
+All right, everyone. That's our show for today. To learn more about today's show, including our
+guests, visit twomalai.com. If you missed Twomalcon or want to share what you learned with your team,
+be sure to visit twomalcon.com slash videos for more information about Twomalcon video packages.
+Thanks so much for listening and catch you next time.

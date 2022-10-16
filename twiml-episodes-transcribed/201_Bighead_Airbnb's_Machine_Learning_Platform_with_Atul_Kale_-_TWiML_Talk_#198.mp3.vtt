@@ -1,0 +1,2105 @@
+WEBVTT
+
+00:00.000 --> 00:16.320
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+
+00:16.320 --> 00:21.480
+people, doing interesting things in machine learning and artificial intelligence.
+
+00:21.480 --> 00:31.960
+I'm your host Sam Charrington.
+
+00:31.960 --> 00:36.200
+As many of you already know, one of the exciting parts of my work involves keeping tabs on
+
+00:36.200 --> 00:40.800
+the way large companies are adopting machine learning, deep learning, and AI.
+
+00:40.800 --> 00:44.920
+While it's still fairly early in the game, we're at a really interesting time for many
+
+00:44.920 --> 00:45.920
+companies.
+
+00:45.920 --> 00:50.400
+With the first wave of ML projects at early adopter enterprises starting to mature, many
+
+00:50.400 --> 00:56.720
+organizations are now asking how they can scale up their efforts to support more projects.
+
+00:56.720 --> 01:01.160
+Part of the answer to successfully scaling ML is supporting data scientists and machine
+
+01:01.160 --> 01:05.480
+learning engineers with modern processes, tooling, and platforms.
+
+01:05.480 --> 01:10.100
+This is the topic that we're super excited to address here on the podcast with the AI
+
+01:10.100 --> 01:14.880
+Platforms podcast series that you're currently listening to, as well as a series of ebooks
+
+01:14.880 --> 01:17.400
+that we'll be publishing on the topic.
+
+01:17.400 --> 01:21.480
+The first of these ebooks takes a bottoms up look at AI platforms and is focused on the
+
+01:21.480 --> 01:27.000
+open source Kubernetes project, which is used to deliver scalable ML infrastructure at
+
+01:27.000 --> 01:31.680
+places like Airbnb, booking.com, and open AI.
+
+01:31.680 --> 01:35.640
+The second book in the series, which looks at scaling data science and ML engineering
+
+01:35.640 --> 01:41.560
+from the top down, explores the internal platforms companies like Airbnb, Facebook, and Uber
+
+01:41.560 --> 01:45.400
+have built, and what enterprises can learn from them.
+
+01:45.400 --> 01:50.240
+If this is the topic you're interested in, I'd encourage you to visit twimmelai.com slash
+
+01:50.240 --> 01:56.600
+AI platforms and sign up to be notified as soon as these books are published.
+
+01:56.600 --> 02:02.000
+In this episode of our AI Platforms series, we're joined by Atul Kale, engineering manager
+
+02:02.000 --> 02:06.120
+on the machine learning infrastructure team at Airbnb.
+
+02:06.120 --> 02:10.960
+Atul and I met at the Stradded Data Conference a while back to discuss Airbnb's internal
+
+02:10.960 --> 02:13.840
+machine learning platform, Big Head.
+
+02:13.840 --> 02:19.880
+In our conversation, Atul outlines the ML lifecycle at Airbnb and how the various components
+
+02:19.880 --> 02:21.720
+of Big Head support it.
+
+02:21.720 --> 02:26.180
+We then dig into those components, which include Red Spot, their supercharged Jupyter
+
+02:26.180 --> 02:32.680
+Notebook service, Deep Thought, their real-time inference environment, Zipline, their data management
+
+02:32.680 --> 02:35.560
+platform, and quite a few others.
+
+02:35.560 --> 02:39.800
+We also take a look at some of Atul's best practices for scaling machine learning and
+
+02:39.800 --> 02:44.280
+discuss a special announcement that he and his team made at Stradda.
+
+02:44.280 --> 02:48.040
+And now on to the show.
+
+02:48.040 --> 02:50.640
+All right, everyone.
+
+02:50.640 --> 02:54.520
+I am in New York City here for the Stradda Conference, and I've got the pleasure of being
+
+02:54.520 --> 02:56.800
+seated with Atul Kale.
+
+02:56.800 --> 03:02.480
+Atul is an engineering manager at Airbnb on the machine learning infrastructure team.
+
+03:02.480 --> 03:05.880
+Atul, welcome to this week in machine learning and AI.
+
+03:05.880 --> 03:06.880
+Thanks, Sam.
+
+03:06.880 --> 03:07.880
+Thanks for having me.
+
+03:07.880 --> 03:09.640
+It's a pleasure to be here.
+
+03:09.640 --> 03:16.440
+So yesterday you did a presentation on Airbnb's machine learning platform, which is called
+
+03:16.440 --> 03:17.440
+Big Head.
+
+03:17.440 --> 03:21.880
+It was a great presentation, and I'm really looking forward to diving into some of the
+
+03:21.880 --> 03:22.880
+details with you.
+
+03:22.880 --> 03:26.680
+But before we do that, how did you get into ML and AI?
+
+03:26.680 --> 03:27.680
+Yeah, sure.
+
+03:27.680 --> 03:30.160
+So I'm trained as a computer engineer.
+
+03:30.160 --> 03:35.560
+I went to the University of Illinois, and right out of college, I actually started my
+
+03:35.560 --> 03:40.320
+career in the trading industry at a firm called DRW Trading.
+
+03:40.320 --> 03:45.960
+And DRW, they're proprietary trading firms, so they trade their own money for their own
+
+03:45.960 --> 03:46.960
+profit.
+
+03:46.960 --> 03:48.200
+They don't have any customers.
+
+03:48.200 --> 03:53.640
+And you can imagine for a trading firm like DRW, it's really important to have a data
+
+03:53.640 --> 03:57.800
+warehouse that's stockful of information about the financial markets.
+
+03:57.800 --> 04:04.320
+So imagine you're working on a particular trading strategy, and you need something kind
+
+04:04.320 --> 04:07.280
+of like Tivo for the markets, right?
+
+04:07.280 --> 04:11.280
+So you need to be able to understand that a very fine granularity exactly what was going
+
+04:11.280 --> 04:15.600
+on on a particular exchange or in the markets for a particular instrument.
+
+04:15.600 --> 04:22.560
+So my first job at DRW was to create that data warehouse, you know, everything from kind
+
+04:22.560 --> 04:28.080
+of the basic ETL and even like the data capture and all that sort of stuff, as well as
+
+04:28.080 --> 04:31.120
+like that back end database that's required.
+
+04:31.120 --> 04:37.200
+But then after I completed working on that, I made a transition towards working on trading
+
+04:37.200 --> 04:41.320
+strategies, and that's kind of where I got more into machine learning.
+
+04:41.320 --> 04:46.120
+So we went through kind of two different trading strategies.
+
+04:46.120 --> 04:52.160
+One was kind of light on the machine learning, and one was really heavy on machine learning.
+
+04:52.160 --> 04:57.040
+And in that latter one, I started really focusing on infrastructure.
+
+04:57.040 --> 05:03.000
+I think in general, my background is in back end work and infrastructure engineering.
+
+05:03.000 --> 05:06.160
+So that's really, you know, where my passion is.
+
+05:06.160 --> 05:10.440
+And for the trading strategies that we were working on, we really needed a high degree
+
+05:10.440 --> 05:15.240
+of automation and sophistication around training our models.
+
+05:15.240 --> 05:22.040
+So I spent quite a bit of time working on building infrastructure for my individual team.
+
+05:22.040 --> 05:27.680
+And then, you know, about a year and a half ago, I was kind of looking to make a transition,
+
+05:27.680 --> 05:34.080
+and I got a good opportunity at Airbnb, you know, working on their machine learning infrastructure
+
+05:34.080 --> 05:40.800
+team, kind of combining this passion for infrastructure with the interests I have in machine learning.
+
+05:40.800 --> 05:47.520
+So I've been working there for about the last year or so, and I'm currently leading the
+
+05:47.520 --> 05:48.520
+team.
+
+05:48.520 --> 05:53.640
+Where you explained the motivation for big head in your presentation, I thought was very
+
+05:53.640 --> 05:54.640
+well put.
+
+05:54.640 --> 06:00.120
+You talked about this notion of inherent complexity and incidental complexity.
+
+06:00.120 --> 06:01.120
+What are those?
+
+06:01.120 --> 06:02.120
+Right.
+
+06:02.120 --> 06:03.120
+Yeah.
+
+06:03.120 --> 06:07.600
+So I think the term that we use is intrinsic complexity and incidental complexity.
+
+06:07.600 --> 06:13.200
+We kind of just maybe use terms up, but the idea is pretty simple that the intrinsic
+
+06:13.200 --> 06:19.600
+complexity with machine learning is all about, you know, kind of understanding the latest
+
+06:19.600 --> 06:24.720
+modeling techniques, picking the right model, picking the right features for your model.
+
+06:24.720 --> 06:29.240
+And then really fine tuning that, you know, machine learning in some ways is kind of an
+
+06:29.240 --> 06:34.920
+art of, you know, really understanding your problem domain and fitting the right models
+
+06:34.920 --> 06:36.320
+to it.
+
+06:36.320 --> 06:41.720
+And that's really what we found that our ML practitioners at Airbnb, by that I mean,
+
+06:41.720 --> 06:48.360
+now in the data scientists and engineers that are working on deploying ML in our product,
+
+06:48.360 --> 06:52.200
+we found that they're really interested in solving those problems.
+
+06:52.200 --> 06:57.520
+But on the other hand, there's this other side of getting a machine learning project
+
+06:57.520 --> 06:58.520
+off the ground.
+
+06:58.520 --> 06:59.920
+And that's incidental complexity.
+
+06:59.920 --> 07:01.440
+That's what we call it.
+
+07:01.440 --> 07:06.560
+And that has to do with all like the messy details of, you know, getting access to your
+
+07:06.560 --> 07:12.480
+data warehouse and then making sure that what you prototype with is, you know, what is
+
+07:12.480 --> 07:15.920
+consistent with what you actually go into production with.
+
+07:15.920 --> 07:22.960
+And, you know, just having consistency also between your, your trained model and what
+
+07:22.960 --> 07:27.360
+you're going to actually see in production at inference time, for example.
+
+07:27.360 --> 07:33.720
+So there's a lot of like messy details there, you know, you also have to deal with managing
+
+07:33.720 --> 07:37.240
+all the various experiments that you've got, the versions of your model.
+
+07:37.240 --> 07:40.760
+And you know, all of that just adds up to a lot.
+
+07:40.760 --> 07:45.440
+And we, what we found is that when teams were having to deal with intrinsic complexity
+
+07:45.440 --> 07:50.760
+and incidental complexity together, that's just, you know, overwhelming for them.
+
+07:50.760 --> 07:57.520
+And a lot of teams at Airbnb were just not even that interested in machine learning just
+
+07:57.520 --> 08:00.320
+because the cost of it was so high.
+
+08:00.320 --> 08:06.160
+So part of the goal is to reduce the barrier to entry so that a greater proportion of
+
+08:06.160 --> 08:09.840
+teams could incorporate machine learning into what they're doing.
+
+08:09.840 --> 08:10.840
+Exactly.
+
+08:10.840 --> 08:11.840
+Yeah.
+
+08:11.840 --> 08:16.640
+I mean, our goal as a team, the machine learning instructor team is really to scale ML
+
+08:16.640 --> 08:18.440
+at Airbnb.
+
+08:18.440 --> 08:22.800
+And in order to reach that goal, of course, you know, we're going to need to reduce the
+
+08:22.800 --> 08:24.240
+barrier to entry.
+
+08:24.240 --> 08:26.720
+So that's really important to us.
+
+08:26.720 --> 08:33.560
+What did it evolve? Was it initially a collection of specific tools that solve specific problems
+
+08:33.560 --> 08:38.200
+or was it architected from the beginning as kind of a broad platform?
+
+08:38.200 --> 08:39.200
+Oh, yeah.
+
+08:39.200 --> 08:40.200
+Definitely.
+
+08:40.200 --> 08:42.160
+We did not get this right from the start.
+
+08:42.160 --> 08:49.280
+I think that, yeah, as with many products, it's just like, you know, cycle of iteration
+
+08:49.280 --> 08:55.320
+and, you know, lessons learned and then applying those lessons learned and building something
+
+08:55.320 --> 08:56.320
+new.
+
+08:56.320 --> 09:01.400
+The history for us specifically is that, you know, big heads components, sort of the
+
+09:01.400 --> 09:08.160
+subcomponents of big head are their pieces that Airbnb had kind of collected over the
+
+09:08.160 --> 09:14.360
+years, all to solve, you know, really specific problems with machine learning, with getting
+
+09:14.360 --> 09:16.400
+machine learning into production.
+
+09:16.400 --> 09:20.160
+And we found that that was kind of piecemeal, you know, of course, those problems were
+
+09:20.160 --> 09:26.520
+solved, sometimes not in the most sustainable way, but it solved nonetheless.
+
+09:26.520 --> 09:30.360
+But then, you know, when we looked at the entire system and we looked at the shortcomings,
+
+09:30.360 --> 09:35.160
+the problem was really that it wasn't cohesive, all these piecemeal components didn't really
+
+09:35.160 --> 09:36.600
+fit well together.
+
+09:36.600 --> 09:41.600
+So big head was an attempt to kind of make one more pass over the entire system, the
+
+09:41.600 --> 09:48.200
+entire architecture, and really focus this time on cohesiveness and end time consistency.
+
+09:48.200 --> 09:52.160
+Maybe let's walk through the various components of the system.
+
+09:52.160 --> 09:53.160
+Where do you start?
+
+09:53.160 --> 09:55.720
+Oh, you went through this in your presentation yesterday.
+
+09:55.720 --> 09:57.720
+What was the first component that you presented?
+
+09:57.720 --> 09:58.720
+Yeah, sure.
+
+09:58.720 --> 10:01.480
+So we start with where our users start, right?
+
+10:01.480 --> 10:03.400
+So our users need to prototype.
+
+10:03.400 --> 10:08.840
+They need kind of a development environment for machine learning and for that we have
+
+10:08.840 --> 10:13.520
+a red spot, which is really just a Jupyter Notebook service.
+
+10:13.520 --> 10:18.000
+It's a Jupyter Notebooks as a service, but you know, they're really not just, you know,
+
+10:18.000 --> 10:21.640
+the same as running Notebook on your laptop.
+
+10:21.640 --> 10:23.040
+It's pretty high-powered.
+
+10:23.040 --> 10:30.160
+You can plug it into more or less, you know, any EC2 instance type on AWS that we have
+
+10:30.160 --> 10:31.680
+available.
+
+10:31.680 --> 10:38.040
+So you can get access to things like GPUs and really high-memory instances.
+
+10:38.040 --> 10:41.840
+So you can be kind of unblocked to get your work done.
+
+10:41.840 --> 10:48.200
+But then in addition, it's really cleanly integrated into our data warehouse.
+
+10:48.200 --> 10:51.560
+So you have access to all the wealth of data that's going to actually make your machine
+
+10:51.560 --> 10:53.280
+learning project powerful.
+
+10:53.280 --> 10:58.840
+Yeah, one of the things that I've run into just with personal experimentation is you
+
+10:58.840 --> 11:03.980
+choose an instance type, you start running some experiment and then you realize that you
+
+11:03.980 --> 11:06.080
+get to a point where you wish you had more hardware.
+
+11:06.080 --> 11:10.880
+Like, have you managed to decouple the notebook itself from the underlying infrastructure?
+
+11:10.880 --> 11:14.120
+Yeah, yeah, and that's a great point.
+
+11:14.120 --> 11:18.960
+I think this is actually something that we're looking to address in the future.
+
+11:18.960 --> 11:24.240
+It's not just that you might not know exactly what hardware you need, but also it's pretty
+
+11:24.240 --> 11:32.200
+efficient or inefficient rather for every user that might need to train a deep neural network
+
+11:32.200 --> 11:39.440
+to fire up a GPU machine and have it sitting around for weeks maybe while they tinker
+
+11:39.440 --> 11:41.680
+around with their model, right?
+
+11:41.680 --> 11:44.920
+So that's definitely an area of concern.
+
+11:44.920 --> 11:50.160
+You can't vertically scale individuals' development environment for long.
+
+11:50.160 --> 11:56.000
+So what we're doing, and this is kind of on our roadmap, is to build out what we're calling
+
+11:56.000 --> 11:58.040
+Big Q right now.
+
+11:58.040 --> 12:02.800
+The idea is that your notebook environment can then become really thin and instead what
+
+12:02.800 --> 12:09.200
+you do is you just submit your job for training your model off to a work queue that's
+
+12:09.200 --> 12:15.920
+powered by GPUs or potentially the latest in distributed training algorithm, something
+
+12:15.920 --> 12:16.920
+like that.
+
+12:16.920 --> 12:21.160
+This is sort of a follow-on to the rest of our infrastructure where the goal is to really
+
+12:21.160 --> 12:23.520
+neatly encapsulate models.
+
+12:23.520 --> 12:30.040
+Once we have that powerful abstraction, now we can create these high-power tools like
+
+12:30.040 --> 12:36.320
+Big Q where we understand enough about your model that we can train it really efficiently.
+
+12:36.320 --> 12:39.880
+So it's definitely kind of out there on our roadmap.
+
+12:39.880 --> 12:44.040
+I think it was one of those things where we took an initial stab and we looked at our
+
+12:44.040 --> 12:49.240
+user base and we said, well, yeah, this kind of works for most people, and so it's definitely
+
+12:49.240 --> 12:55.240
+kind of minimally viable there, but we have a lot of plans to make that more efficient.
+
+12:55.240 --> 13:02.520
+And then underlying the notebooks, all of the code is stored in Git repositories, and
+
+13:02.520 --> 13:10.760
+is that transparent to the user, or is the user kind of manually checking things and
+
+13:10.760 --> 13:13.560
+checking things out?
+
+13:13.560 --> 13:17.760
+The user is indicating that they want to check things in, but have you built kind of
+
+13:17.760 --> 13:21.440
+in UI into the notebook experience where they're doing that or they're doing that kind
+
+13:21.440 --> 13:22.440
+of traditionally?
+
+13:22.440 --> 13:24.440
+They're doing that more traditionally.
+
+13:24.440 --> 13:30.960
+I think that we can try to hide away some of the details of version control, but ultimately
+
+13:30.960 --> 13:38.000
+it's kind of just a complicated messy process, version control in general.
+
+13:38.000 --> 13:42.360
+So we don't really want to try to reinvent the wheel on that.
+
+13:42.360 --> 13:48.320
+What we focus on is just making sure that it's easy to get your notebook or Python code
+
+13:48.320 --> 13:54.280
+into production, and that it's neatly version just like any other production code.
+
+13:54.280 --> 14:00.680
+And now Python code typically has, or the notebook code typically has annotations and
+
+14:00.680 --> 14:08.640
+other types of artifacts that you don't necessarily want to, you know, they're there for experimentation,
+
+14:08.640 --> 14:14.040
+but they're not there for, you know, when you're actually trying to put a model into production,
+
+14:14.040 --> 14:16.120
+do you separate those somehow?
+
+14:16.120 --> 14:17.120
+Yeah, yeah.
+
+14:17.120 --> 14:23.080
+So I think just to start, I would say that we don't necessarily focus on notebooks.
+
+14:23.080 --> 14:28.520
+We really just treat notebooks as Python code, and what we do is pre-process those notebooks
+
+14:28.520 --> 14:35.640
+to kind of strip out the annotations and strip out some of the exploratory work that
+
+14:35.640 --> 14:38.280
+you might be doing while you're prototyping.
+
+14:38.280 --> 14:41.360
+And you know, right now, of course, that's pretty simple.
+
+14:41.360 --> 14:48.120
+You just have to tag your notebook cells as prototype or not, and we just strip them
+
+14:48.120 --> 14:49.120
+out.
+
+14:49.120 --> 14:50.120
+Maybe who knows?
+
+14:50.120 --> 14:53.000
+We'll come up with a machine learning model to do that automatically or something.
+
+14:53.000 --> 14:58.520
+But yeah, it's pretty much manually tagged for now, and we've actually been doing that
+
+14:58.520 --> 15:02.240
+for a while, and it seems to work reasonably well.
+
+15:02.240 --> 15:08.400
+But I think that one thing to note is that notebooks are kind of a mixed bag.
+
+15:08.400 --> 15:14.640
+On the one hand, you've got this ability to annotate things, to show your work, and
+
+15:14.640 --> 15:19.400
+to, you know, really show the process of experimentation.
+
+15:19.400 --> 15:24.680
+And that's great for machine learning projects where, especially when you get to kind of code
+
+15:24.680 --> 15:29.320
+review time, what you're reviewing when you look at somebody else's project isn't really
+
+15:29.320 --> 15:30.480
+just their code.
+
+15:30.480 --> 15:34.920
+You're reviewing kind of their thought process, their experimentation process.
+
+15:34.920 --> 15:40.720
+So it's almost kind of more like a research paper or something like that than it is just,
+
+15:40.720 --> 15:42.280
+you know, a normal code review.
+
+15:42.280 --> 15:44.920
+So notebooks are great for that.
+
+15:44.920 --> 15:52.040
+But they're not great for is kind of the traditional software engineering process.
+
+15:52.040 --> 15:57.320
+Composition is in great, you know, of course, you can jam all of your code right into the
+
+15:57.320 --> 16:03.200
+notebook, but, you know, a lot of times we find people repeating themselves.
+
+16:03.200 --> 16:09.240
+And testing, unit testing, this is super important for software engineering, but it's equal
+
+16:09.240 --> 16:12.400
+important for some of this machine learning code.
+
+16:12.400 --> 16:19.960
+And I think we're trying to strike the right balance between having those really solid
+
+16:19.960 --> 16:26.920
+software engineering practices as well as having that flexibility of the notebook.
+
+16:26.920 --> 16:29.760
+So what's the next component?
+
+16:29.760 --> 16:35.640
+So next up in sort of the lifecycle for getting your model into production, that would be
+
+16:35.640 --> 16:36.640
+Big Head Service.
+
+16:36.640 --> 16:43.560
+So the idea with Big Head Service is to manage all of the different versions of your model,
+
+16:43.560 --> 16:47.760
+maybe the different experiments that you have, or you can imagine that say you have a model
+
+16:47.760 --> 16:49.840
+that needs to be trained weekly.
+
+16:49.840 --> 16:54.200
+All of those versions of that model are stored in Big Head Service.
+
+16:54.200 --> 16:59.880
+And it's got this nice convenient UI where you can go in and click deploy on your model
+
+16:59.880 --> 17:02.600
+and voila, it's in production.
+
+17:02.600 --> 17:07.160
+And kind of, you know, for a lot of users, we're hoping that, you know, they start with
+
+17:07.160 --> 17:12.080
+their notebook, they go into Big Head Service, they hit deploy, and end of story.
+
+17:12.080 --> 17:14.960
+That's sort of the happy path, of course.
+
+17:14.960 --> 17:20.160
+You know, and maybe you don't have to go even further than that, but, of course, things
+
+17:20.160 --> 17:21.960
+do go wrong.
+
+17:21.960 --> 17:26.840
+And when they do, Big Head Service also kind of serves as a portal into some of our model
+
+17:26.840 --> 17:28.320
+debugging tools.
+
+17:28.320 --> 17:32.040
+And those are more related to how we run our models in production.
+
+17:32.040 --> 17:39.200
+So the next pieces in the process are to actually get your model into production.
+
+17:39.200 --> 17:45.480
+So say, you've got a model that takes an image of, I don't know, like a listing photo,
+
+17:45.480 --> 17:49.000
+and predicts whether it's a bathroom or not.
+
+17:49.000 --> 17:54.040
+And you need to be able to do this live in real time in production.
+
+17:54.040 --> 18:00.200
+Maybe it's hooked up to the Airbnb website, and you want to, when you, when a host uploads
+
+18:00.200 --> 18:04.760
+a listing photo, you want to see if it's a bathroom to ask them something like, you
+
+18:04.760 --> 18:08.880
+know, how many towels are there, do you have a hair dryer, you know, little details
+
+18:08.880 --> 18:09.880
+like that.
+
+18:09.880 --> 18:13.600
+So say there's some kind of feature, and you need just sort of a live prediction.
+
+18:13.600 --> 18:17.680
+That's where our component deep dot comes in.
+
+18:17.680 --> 18:24.960
+It's just designed to be scalable, offer like a rest endpoint for your model.
+
+18:24.960 --> 18:28.880
+And that's, that's something I think that's pretty standard we've seen across the industry.
+
+18:28.880 --> 18:33.560
+And then we've also got another productionization component that's called ML Automator.
+
+18:33.560 --> 18:38.400
+The idea here is to automate batch training and batch inference.
+
+18:38.400 --> 18:45.920
+And I think at Airbnb, maybe more than other, other places batch inference is actually a
+
+18:45.920 --> 18:48.040
+pretty common thing.
+
+18:48.040 --> 18:50.760
+So there's a lot of times where you don't really need a live score.
+
+18:50.760 --> 18:57.200
+You just need to kind of backfill a lot of predictions or scores across your data.
+
+18:57.200 --> 19:00.560
+And so that's where ML Automator comes in.
+
+19:00.560 --> 19:06.640
+And so when you're, when the developer is working in the big head service interface and
+
+19:06.640 --> 19:11.080
+they click deploy, that's kind of pushing the model to deep thought deploying it out on
+
+19:11.080 --> 19:14.360
+some actual machines and exposing the rest endpoint.
+
+19:14.360 --> 19:19.080
+And then they can build that into whatever they're trying to use the model for.
+
+19:19.080 --> 19:20.080
+Yeah, exactly.
+
+19:20.080 --> 19:25.320
+If they have their model set up for live inference, then when you click deploy, it's just like
+
+19:25.320 --> 19:28.960
+deploying a service at Airbnb, right?
+
+19:28.960 --> 19:33.640
+It's kind of a new version of that service that's going out there and that endpoint is now
+
+19:33.640 --> 19:34.640
+available.
+
+19:34.640 --> 19:41.760
+And you know, we do some things to try to make sure that that endpoint stays available for,
+
+19:41.760 --> 19:48.880
+you know, spikes in traffic or, you know, potentially if that endpoint, that particular model needs
+
+19:48.880 --> 19:52.800
+a lot of memory, maybe to load a bunch of parameters into memory.
+
+19:52.800 --> 19:57.320
+So we do a lot of fine tuning there to make sure that more or less we kind of hide that
+
+19:57.320 --> 20:03.120
+away from our users who don't necessarily want to deal with the details of scaling their
+
+20:03.120 --> 20:04.120
+model.
+
+20:04.120 --> 20:05.120
+Right.
+
+20:05.120 --> 20:08.360
+And hopefully, you know, since we're leveraging Kubernetes for that, we're hoping that
+
+20:08.360 --> 20:14.600
+we can really get some of the benefits of potentially auto scaling algorithms there.
+
+20:14.600 --> 20:16.600
+And has that, has that worked well so far?
+
+20:16.600 --> 20:20.000
+Yeah, Kubernetes has been definitely working well so far.
+
+20:20.000 --> 20:25.600
+I think auto scaling is a little bit trickier, but that's something that right now we're
+
+20:25.600 --> 20:28.440
+just kind of getting into.
+
+20:28.440 --> 20:37.200
+And are you using, are you kind of finally managing GPU requirements and things like that
+
+20:37.200 --> 20:42.880
+that a given model might have and placing those on specific pods or workers in the Kubernetes
+
+20:42.880 --> 20:43.880
+environments?
+
+20:43.880 --> 20:44.880
+Yeah, yeah, definitely.
+
+20:44.880 --> 20:50.840
+So when we ask our users to specify their model, we ask them to specify their requirements
+
+20:50.840 --> 20:53.000
+for a computation up front.
+
+20:53.000 --> 20:59.200
+So that includes like memory requirements or a number of cores or potentially GPU.
+
+20:59.200 --> 21:02.720
+And then we use that throughout the rest of our system to make sure that their model
+
+21:02.720 --> 21:09.680
+runs an environment suitable for their resource requirements in production.
+
+21:09.680 --> 21:15.200
+I think earlier in the conversation, you've mentioned experiment management and things like
+
+21:15.200 --> 21:16.200
+that.
+
+21:16.200 --> 21:20.560
+But I don't think that came up in big head service deep thought or ML automator.
+
+21:20.560 --> 21:22.640
+Is it some place else in the system?
+
+21:22.640 --> 21:24.120
+No, actually, that's right.
+
+21:24.120 --> 21:25.920
+And that's very built into big head service.
+
+21:25.920 --> 21:31.840
+So yeah, I think that like this whole process of getting your model from prototype and
+
+21:31.840 --> 21:34.680
+clicking the deploy button and its introduction, that's great.
+
+21:34.680 --> 21:39.120
+But it's actually kind of scary, you know, just getting your model in a production with just
+
+21:39.120 --> 21:41.960
+a quick deploy, you know, is it, is it ready?
+
+21:41.960 --> 21:43.280
+Is it predictive?
+
+21:43.280 --> 21:46.280
+Do you know whether it even works or not?
+
+21:46.280 --> 21:52.040
+So that's where big head service offers a whole lot of kind of introspection tools into
+
+21:52.040 --> 21:53.560
+your model.
+
+21:53.560 --> 21:59.640
+And you know, it's like some of the examples of that, you know, if we wrap a particular
+
+21:59.640 --> 22:06.520
+library called, like let's say, XGBoost, we're able to produce a lot of details about the
+
+22:06.520 --> 22:14.400
+train model that you have right from XGBoost, you can of course, like, get details like
+
+22:14.400 --> 22:22.120
+ROC or PR curves, and you can also, you know, for XGBoost, get feature importance information.
+
+22:22.120 --> 22:28.320
+And both of those types of information, both the actual performance of your model and
+
+22:28.320 --> 22:32.840
+the, you know, explainability of your model, that's really important before you click
+
+22:32.840 --> 22:33.840
+deploy.
+
+22:33.840 --> 22:36.680
+And you can kind of surface that to our users in big head service.
+
+22:36.680 --> 22:42.800
+And of course, all of these tools that we have, particularly visualizations around this,
+
+22:42.800 --> 22:45.200
+they're all available in your notebook environment.
+
+22:45.200 --> 22:50.880
+So we kind of use the visualizations that we see people doing in their notebook environment.
+
+22:50.880 --> 22:55.840
+And the most common ones, we kind of elevate them to the status of being incorporated into
+
+22:55.840 --> 22:57.320
+our infrastructure.
+
+22:57.320 --> 23:01.640
+If they kind of reach that point where we really see everybody doing this all the time,
+
+23:01.640 --> 23:05.720
+or we might be thinking, you know what, feature importance, that's probably something useful
+
+23:05.720 --> 23:07.640
+that everybody should see.
+
+23:07.640 --> 23:10.120
+So we'll just automatically incorporate it.
+
+23:10.120 --> 23:13.240
+So this is all built right into the UI.
+
+23:13.240 --> 23:21.000
+Are you doing anything in big head service or ML automator that is doing automated hyperparameter
+
+23:21.000 --> 23:22.600
+optimization?
+
+23:22.600 --> 23:25.480
+So that's kind of an area that we're hoping to get into.
+
+23:25.480 --> 23:30.960
+Right now, the training phase is, and especially hyperparameter optimization, that's sort of
+
+23:30.960 --> 23:34.680
+left to the user way at prototype time.
+
+23:34.680 --> 23:38.240
+But one of the things that we want to do with Big Q, which I mentioned before, is offer
+
+23:38.240 --> 23:40.040
+hyperparameter optimization.
+
+23:40.040 --> 23:46.840
+And I think that part of what we need to do here is just have people specify their model
+
+23:46.840 --> 23:51.680
+to us in a little bit more structured of a way than, all right, here's a Python function
+
+23:51.680 --> 23:53.520
+that trains my model.
+
+23:53.520 --> 23:57.040
+For us to be able to do something like hyperparameter optimization.
+
+23:57.040 --> 24:03.640
+So once we have kind of better adoption of that, then we can move on to that next level
+
+24:03.640 --> 24:08.160
+of abstraction on top of this, where we can automatically train your models.
+
+24:08.160 --> 24:12.920
+And that includes hyperparameter optimization, but also like I mentioned before, using
+
+24:12.920 --> 24:18.240
+like advanced training algorithms, whatever you need.
+
+24:18.240 --> 24:26.120
+So one of the other platforms in the Big Head ecosystem is Zipline, which handles a lot
+
+24:26.120 --> 24:29.880
+of the training data, pipeline data acquisition.
+
+24:29.880 --> 24:31.800
+Can you talk a little bit about that?
+
+24:31.800 --> 24:32.800
+Yeah, yeah, sure.
+
+24:32.800 --> 24:38.200
+So this entire process that I mentioned, you know, going from prototype into production,
+
+24:38.200 --> 24:41.560
+there's a lot of ways that it can just go wrong on you.
+
+24:41.560 --> 24:45.600
+And what we found is like consistency across the board is really key.
+
+24:45.600 --> 24:51.920
+So in addition to the four components I mentioned already, we've got three other components
+
+24:51.920 --> 24:56.440
+whose job is purely just to maintain consistency.
+
+24:56.440 --> 25:01.320
+Some of that is around consistency of your environment, and maybe the code that you're
+
+25:01.320 --> 25:08.360
+executing, the actual logic of your model, and some of it is around data.
+
+25:08.360 --> 25:13.720
+Now data is super important for machine learning projects, having the right feature data.
+
+25:13.720 --> 25:19.840
+And so we created Zipline as sort of a solution for keeping consistency across the board.
+
+25:19.840 --> 25:25.880
+And I think that, you know, this is probably one of the areas I think that we see sometimes
+
+25:25.880 --> 25:31.720
+overlooked, and it's definitely a piece that's really hard to get right.
+
+25:31.720 --> 25:38.360
+But when you do it, when you have a single system that owns getting feature data for the prototype
+
+25:38.360 --> 25:43.920
+phase when you're just kind of playing around, and you don't, you know, want to wait three
+
+25:43.920 --> 25:49.000
+days for your backfill job to generate all your data, but also having that same system
+
+25:49.000 --> 25:55.840
+be responsible for materializing your data when you need to train, you know, the entire
+
+25:55.840 --> 26:01.160
+large scale model, and maybe perform batch inference on the model, or even real time inference
+
+26:01.160 --> 26:07.160
+with the model, having one system that is responsible for features that's really key.
+
+26:07.160 --> 26:12.640
+And it's a pretty hard goal to get to, but we're taking a stab at it with Zipline.
+
+26:12.640 --> 26:18.960
+Yeah, I think one of the things that I remember picking up on in your talk, maybe
+
+26:18.960 --> 26:22.920
+it was another talk, I don't know if I should attribute this to you or if it was someone
+
+26:22.920 --> 26:29.800
+else, but there was a comment that someone made at this event about data scientists not
+
+26:29.800 --> 26:32.080
+wanting to share their features.
+
+26:32.080 --> 26:33.800
+Do you run into that?
+
+26:33.800 --> 26:34.800
+That's interesting.
+
+26:34.800 --> 26:41.600
+You know, I guess maybe the culture is very from company to company, but at least at
+
+26:41.600 --> 26:45.040
+Airbnb, we've gotten a lot of value out of sharing.
+
+26:45.040 --> 26:51.680
+Now of course, there's situations where, you know, it's not so much about wanting to
+
+26:51.680 --> 26:56.440
+share your features, but you know, machine learning and features in general, it's all
+
+26:56.440 --> 26:59.200
+really tied together.
+
+26:59.200 --> 27:04.120
+You can't really separate exactly how your features are calculated from how your model
+
+27:04.120 --> 27:05.120
+works.
+
+27:05.120 --> 27:10.720
+And let's say you create some features and I want to use those features and maybe you're
+
+27:10.720 --> 27:14.360
+not quite happy with that implementation of those features and you want to change them
+
+27:14.360 --> 27:15.360
+down the line.
+
+27:15.360 --> 27:20.360
+Well, now I've already got my machine learning model in production.
+
+27:20.360 --> 27:22.320
+That's going to be really disruptive to my flow.
+
+27:22.320 --> 27:27.920
+So I think that maybe some data scientists might be a little bit more cautious about sharing
+
+27:27.920 --> 27:33.440
+what they're working on because, you know, as soon as you share something, you kind of
+
+27:33.440 --> 27:36.200
+need to keep it a little bit more constant.
+
+27:36.200 --> 27:40.200
+But what we found is that, you know, as long as we're able to appropriately version our
+
+27:40.200 --> 27:45.280
+feature definitions and kind of deal with it in the same way that you might have a library
+
+27:45.280 --> 27:46.520
+that you depend on.
+
+27:46.520 --> 27:52.960
+You know, maybe you depend on TensorFlow version, you know, X, but TensorFlow version Y has
+
+27:52.960 --> 27:53.960
+been released.
+
+27:53.960 --> 27:57.080
+And as long as you don't upgrade, you know, you're fine.
+
+27:57.080 --> 28:01.040
+And I think that's a pretty important part of our system.
+
+28:01.040 --> 28:08.000
+And the way that works, you know, every single time there's a new version of a particular
+
+28:08.000 --> 28:12.240
+feature, we had to go and back the level of a bunch of data up front before you could
+
+28:12.240 --> 28:13.240
+use it.
+
+28:13.240 --> 28:14.400
+That would be pretty painful.
+
+28:14.400 --> 28:22.480
+So this only works when you kind of lazily evaluate your feature data sets, just kind
+
+28:22.480 --> 28:23.480
+of on demand.
+
+28:23.480 --> 28:27.280
+And that's something that's like a key focus for zipline.
+
+28:27.280 --> 28:31.000
+So how are the features defined?
+
+28:31.000 --> 28:37.600
+The basic way that you define a feature in zipline, you'll define kind of some information
+
+28:37.600 --> 28:42.800
+about where to fetch the events for that feature and potentially some aggregation that you're
+
+28:42.800 --> 28:45.320
+going to apply over those events.
+
+28:45.320 --> 28:49.720
+And we kind of try to model roughly everything as events, but sometimes that's a little bit
+
+28:49.720 --> 28:51.520
+of a tough fit.
+
+28:51.520 --> 28:57.080
+And then, you know, so now you've kind of told zipline how your feature needs to be calculated
+
+28:57.080 --> 28:59.560
+at any given point in time.
+
+28:59.560 --> 29:05.440
+But zipline doesn't know what points in time, you know, you actually need your feature
+
+29:05.440 --> 29:07.040
+information.
+
+29:07.040 --> 29:10.400
+So what it does at that point is not much.
+
+29:10.400 --> 29:11.760
+It just kind of keeps track of that.
+
+29:11.760 --> 29:16.480
+But then when you come to it and you say, all right, I need a training data set.
+
+29:16.480 --> 29:23.160
+And, you know, I need to be able to see my features over the last year.
+
+29:23.160 --> 29:27.560
+And here's all the particular timestamps I need, my features calculated at.
+
+29:27.560 --> 29:32.760
+At that point, zipline gets to work, gathering all the information it needs and efficiently
+
+29:32.760 --> 29:35.400
+aggregating everything and materializing your data set.
+
+29:35.400 --> 29:42.480
+So you can imagine, you know, let's say that you have a page on the Airbnb website and
+
+29:42.480 --> 29:47.160
+you're trying to predict whether a user visiting that page is likely to book.
+
+29:47.160 --> 29:52.880
+And you want to know maybe the like last seven days of history in the last seven days,
+
+29:52.880 --> 29:55.760
+how many bookings did that user make?
+
+29:55.760 --> 29:57.680
+Maybe that's like a feature into your model.
+
+29:57.680 --> 30:03.560
+So specifying, you know, where you get the information about bookings and that you want
+
+30:03.560 --> 30:09.400
+a seven day sum or average or something like that, that's sort of the feature definition
+
+30:09.400 --> 30:10.640
+side of it.
+
+30:10.640 --> 30:16.320
+And then the next side of it is when you actually need to materialize your training data set,
+
+30:16.320 --> 30:22.520
+you actually give zipline a series of timestamps and say, okay, for these users, at these
+
+30:22.520 --> 30:28.640
+times, give me the information about what their seven day booking history was.
+
+30:28.640 --> 30:32.800
+So there's kind of that two step approach and that lets us materialize the data only when
+
+30:32.800 --> 30:34.160
+we need to.
+
+30:34.160 --> 30:35.880
+And where are those timestamps coming from?
+
+30:35.880 --> 30:43.000
+Is this so that you can compare models generated at different times by kind of rolling back
+
+30:43.000 --> 30:46.720
+the clock and looking at the training data that the models saw when they were trained,
+
+30:46.720 --> 30:49.600
+or are there other use cases?
+
+30:49.600 --> 30:57.520
+So I think the way to think about it is the training data set that we're creating, the
+
+30:57.520 --> 31:01.720
+columns in that training data set are the features that you might define.
+
+31:01.720 --> 31:05.600
+Maybe like your seven day booking sum or something like that.
+
+31:05.600 --> 31:11.080
+And the rows are really all of your data points for your machine learning model, right?
+
+31:11.080 --> 31:19.480
+So say that a user goes and views a particular page and at that point in time, we want to
+
+31:19.480 --> 31:22.960
+know what the state of all these various features were.
+
+31:22.960 --> 31:27.600
+And we know at another point in time in the future, what actually happened with that user,
+
+31:27.600 --> 31:28.600
+right?
+
+31:28.600 --> 31:30.920
+Like did they book or were they just viewing the page?
+
+31:30.920 --> 31:34.840
+So each of those data points, you can think of like imagine you have like millions of
+
+31:34.840 --> 31:41.000
+page views over the course of, you know, some time period, each of those data points ends
+
+31:41.000 --> 31:45.280
+up being an input into your machine learning model, right?
+
+31:45.280 --> 31:49.600
+So does the event that actually happened plus all of these features that you think are
+
+31:49.600 --> 31:50.600
+relevant to that?
+
+31:50.600 --> 31:51.600
+Exactly.
+
+31:51.600 --> 31:52.600
+Exactly.
+
+31:52.600 --> 31:57.200
+So you can think of it as zipline materializing that data set for you.
+
+31:57.200 --> 32:02.800
+And there is of course kind of like the separate question of machine learning model evolution
+
+32:02.800 --> 32:07.200
+over time and how training data is impacting that.
+
+32:07.200 --> 32:11.800
+And I think that's sort of somewhat of a higher level problem than just directly the
+
+32:11.800 --> 32:15.000
+future data that involves the model as a whole as well.
+
+32:15.000 --> 32:18.560
+And that's something that we're hoping that the UI visualization tools and think that
+
+32:18.560 --> 32:23.000
+service help you do is to kind of see how your model is trending over time.
+
+32:23.000 --> 32:33.000
+And it sounds like zipline's ability to access training data relative to these timestamps
+
+32:33.000 --> 32:40.400
+could feed into the ability to, you know, if he's into reproducibility, like can I,
+
+32:40.400 --> 32:46.560
+you know, can I reproduce the steps that went into creating this model, you know, if I'm
+
+32:46.560 --> 32:54.680
+training it at a different time and it sounds like the having an ability to have just having
+
+32:54.680 --> 33:00.560
+the flexibility to manipulate training data with respect to time is feet would feed into
+
+33:00.560 --> 33:01.560
+that.
+
+33:01.560 --> 33:02.560
+Yeah.
+
+33:02.560 --> 33:03.560
+Yeah.
+
+33:03.560 --> 33:04.560
+Exactly.
+
+33:04.560 --> 33:07.360
+And I think like one way to explain zipline is we like to use this analogy.
+
+33:07.360 --> 33:10.160
+It's like a time machine for your data warehouse, right?
+
+33:10.160 --> 33:14.200
+You know, you have all these events that are data points into your machine learning model
+
+33:14.200 --> 33:19.680
+and they happen, you know, all throughout the continuous space of time that you have in
+
+33:19.680 --> 33:21.000
+your data warehouse.
+
+33:21.000 --> 33:27.480
+But your data warehouse isn't really suited for time in as much of a continuous sense.
+
+33:27.480 --> 33:34.000
+You know, it's more suited for kind of large level, large scale aggregation.
+
+33:34.000 --> 33:39.520
+And at least at Airbnb, our data warehouse is very much oriented in like sort of a day
+
+33:39.520 --> 33:43.200
+by day snapshot of the world.
+
+33:43.200 --> 33:45.440
+And that works really well for humans.
+
+33:45.440 --> 33:50.200
+You know, humans can't really process things at a millisecond or but second by second level
+
+33:50.200 --> 33:51.200
+anyways.
+
+33:51.200 --> 33:54.200
+So we of course need to aggregate it.
+
+33:54.200 --> 34:00.040
+But for machines, you really need that high precision at every single point in time for
+
+34:00.040 --> 34:02.920
+your feature data to actually be useful.
+
+34:02.920 --> 34:10.120
+So having that ability to kind of like rewind time and go to any particular point and say
+
+34:10.120 --> 34:13.960
+what was the exact state of the world at that moment that my machine learning algorithm
+
+34:13.960 --> 34:18.640
+would have seen when it's trying to make this prediction, that's really, really valuable.
+
+34:18.640 --> 34:24.080
+It's actually something that kind of is parallel to what I worked on before in the trading
+
+34:24.080 --> 34:28.240
+industry where you want to be able to rewind the clock and go exactly to a point in time
+
+34:28.240 --> 34:30.800
+and see the state of the market.
+
+34:30.800 --> 34:37.240
+And then of course, there's that other part of using your model and that is actually
+
+34:37.240 --> 34:39.600
+performing inference live, right?
+
+34:39.600 --> 34:45.600
+So if you have a great system set up to rewind to any particular point in time, that same
+
+34:45.600 --> 34:51.480
+system, if it's responsible for calculating your features live right now, then you have
+
+34:51.480 --> 34:58.200
+that absolute consistency between getting gathering all your trading data and actually
+
+34:58.200 --> 35:02.320
+running your model in production and creating live predictions.
+
+35:02.320 --> 35:08.120
+And what we found is that when people don't have one system to do both those things,
+
+35:08.120 --> 35:13.920
+they end up kind of doing a little bit of manual ETL in their data warehouse and then maybe
+
+35:13.920 --> 35:16.960
+in their live service, they try to replicate that.
+
+35:16.960 --> 35:18.760
+And that leads to a lot of problems.
+
+35:18.760 --> 35:23.760
+Now you've got two code bases doing basically the same thing, maintained by potentially
+
+35:23.760 --> 35:25.720
+different people.
+
+35:25.720 --> 35:29.720
+So there's a lot of opportunity for those things to become inconsistent and besides, it's
+
+35:29.720 --> 35:31.800
+just kind of wasted effort.
+
+35:31.800 --> 35:43.480
+So having that kind of single system that encompasses both your offline data warehouse work and
+
+35:43.480 --> 35:48.160
+your online live service work, that's really important.
+
+35:48.160 --> 35:54.360
+You mentioned in constructing these features, you're specifying aggregations that are happening
+
+35:54.360 --> 36:01.920
+over the underlying events, in the case of, for example, a deep learning pipeline, you
+
+36:01.920 --> 36:08.720
+may also want to do some stand that I said of data augmentation or data transformations,
+
+36:08.720 --> 36:15.440
+things like that, image transformations, does big head or zip line support those types
+
+36:15.440 --> 36:16.440
+of things?
+
+36:16.440 --> 36:17.440
+Yeah, yeah.
+
+36:17.440 --> 36:21.080
+And this is actually an interesting question.
+
+36:21.080 --> 36:27.680
+In general, when it comes to forming our feature data, like before we actually go and submit
+
+36:27.680 --> 36:32.360
+it into a machine learning algorithm, we do a lot of pre-processing to it.
+
+36:32.360 --> 36:39.120
+And some of that pre-processing is things like I've talked about before, potentially doing
+
+36:39.120 --> 36:48.960
+aggregations, maybe sums across several days of data, maybe if you're trying to get a
+
+36:48.960 --> 36:53.680
+history of seven day bookings, like I mentioned before, but then some of it is just like
+
+36:53.680 --> 36:59.080
+extra-processing that we're doing, imputation or normalization.
+
+36:59.080 --> 37:06.720
+And we're trying to find the right place to draw the line where that actually happens.
+
+37:06.720 --> 37:11.280
+Does it happen in zip line where you're materializing your feature data data set, or does it
+
+37:11.280 --> 37:16.080
+happen in what we call your model's pipeline?
+
+37:16.080 --> 37:23.880
+And that means what's built into your model directly before your data enters into a machine
+
+37:23.880 --> 37:25.320
+learning algorithm.
+
+37:25.320 --> 37:33.320
+So that's a tricky balance, but I think that one lesson we've learned there is that if
+
+37:33.320 --> 37:40.880
+your model is seeing those same features and doing that same imputation or normalization
+
+37:40.880 --> 37:46.040
+in production, maybe on live queries that it's getting, then that needs to be more
+
+37:46.040 --> 37:48.800
+built into sort of the model pipeline.
+
+37:48.800 --> 37:53.720
+And if in production, and if you're trying to reproduce something that in your backend
+
+37:53.720 --> 37:59.800
+data warehouse that maybe the model would have just seen directly from the queries it's
+
+37:59.800 --> 38:03.400
+getting from a live service, then that kind of belongs more in zip line.
+
+38:03.400 --> 38:10.800
+So it's sort of a balance between kind of doing some computation upfront in feature
+
+38:10.800 --> 38:14.480
+calculation and doing some of it as part of the model.
+
+38:14.480 --> 38:17.640
+And I think we're still kind of trying to figure that out.
+
+38:17.640 --> 38:26.160
+And so for those types of transformations that should happen in the model, we've talked
+
+38:26.160 --> 38:33.480
+about this Jupyter Notebook experience is there also some kind of workflow or pipeline
+
+38:33.480 --> 38:39.560
+engine, or have you thought about and decided against that?
+
+38:39.560 --> 38:46.840
+Do you are there templates or a library of sorts that data scientists and ML engineers
+
+38:46.840 --> 38:47.840
+have access to?
+
+38:47.840 --> 38:51.280
+How do you address those kind of abstraction types of issues?
+
+38:51.280 --> 38:53.080
+Yeah, this is an excellent question.
+
+38:53.080 --> 39:01.480
+So in the early days for us, we did something kind of really lightweight in terms of the
+
+39:01.480 --> 39:03.520
+interface that we provided our users.
+
+39:03.520 --> 39:09.040
+We asked them to define basically a Python function that trains your model and another
+
+39:09.040 --> 39:12.600
+one that kind of performs inference with your model.
+
+39:12.600 --> 39:18.120
+It's just like, hey, there's two Python functions, fill these in, you're good to go.
+
+39:18.120 --> 39:21.480
+And there's some trade-offs with that.
+
+39:21.480 --> 39:25.320
+So on the one hand, it's great with the flexibility.
+
+39:25.320 --> 39:29.040
+You can really almost plug in almost anything.
+
+39:29.040 --> 39:35.680
+And it's really simple for people to take what they had already been doing likely in their
+
+39:35.680 --> 39:40.920
+notebook and just get it more or less straight into production by just kind of filling out
+
+39:40.920 --> 39:41.920
+these functions.
+
+39:41.920 --> 39:47.400
+But what we found was that it was kind of lacking.
+
+39:47.400 --> 39:54.880
+We found that people were reinventing the wheel a lot when they were writing these models
+
+39:54.880 --> 39:56.160
+for production.
+
+39:56.160 --> 40:01.960
+They're really redoing a lot of work that had been done before by themselves in another
+
+40:01.960 --> 40:03.480
+model or by somebody else.
+
+40:03.480 --> 40:09.760
+So we decided to go kind of add a little bit more structure to that workflow and have
+
+40:09.760 --> 40:12.760
+them instead create what we call an ML pipeline.
+
+40:12.760 --> 40:18.360
+It's really kind of just a pipeline of transformations that happened to your input data before it's
+
+40:18.360 --> 40:19.360
+output.
+
+40:19.360 --> 40:27.000
+And a model you can think of the output, sometimes it's a prediction, but really it's just
+
+40:27.000 --> 40:29.840
+a function that's transforming some input.
+
+40:29.840 --> 40:35.240
+So what we've done is we've tried to create a really generic interface for just specifying
+
+40:35.240 --> 40:40.080
+these transformation pieces and plugging them in together in kind of this like really easy
+
+40:40.080 --> 40:46.080
+to compose way that you can just create a entire end to end pipeline to do some stuff
+
+40:46.080 --> 40:52.880
+like image preprocessing or imputation or normalization and then have that be just
+
+40:52.880 --> 40:57.800
+enough structure that we can actually understand a little bit more about your model and do
+
+40:57.800 --> 41:04.520
+some more intelligent things than we could if we just had a function to call for training.
+
+41:04.520 --> 41:10.560
+So for example, if we know that your model is a deep neural network and maybe on the
+
+41:10.560 --> 41:15.680
+back end we've enabled this feature that gives us maybe distributed training or something
+
+41:15.680 --> 41:21.920
+like that, just having a little bit extra information from our users that slightly more
+
+41:21.920 --> 41:28.280
+onerous interface for them to specify their model, that's really useful, that's powerful.
+
+41:28.280 --> 41:34.200
+But that's definitely a trade off because our users are looking at that interface and
+
+41:34.200 --> 41:36.520
+they're wondering why do I need to use this.
+
+41:36.520 --> 41:44.640
+So I want to just, I already have my model or this is really complicated, I know TensorFlow
+
+41:44.640 --> 41:47.200
+or I know Keras, can I just use that.
+
+41:47.200 --> 41:53.400
+So we have to be really careful about adding value in that interface and keeping it really
+
+41:53.400 --> 41:55.200
+lightweight.
+
+41:55.200 --> 42:00.440
+And we try to add value of course through our infrastructure but you then end the prototyping
+
+42:00.440 --> 42:01.440
+phase.
+
+42:01.440 --> 42:07.880
+We need our users to adopt these tools up front, this is something we've learned and
+
+42:07.880 --> 42:13.360
+we found that other companies have also come to this realization that those tools that
+
+42:13.360 --> 42:19.680
+you use to productionize your model can't just be incorporated at that point where you're
+
+42:19.680 --> 42:20.680
+ready to productionize.
+
+42:20.680 --> 42:25.560
+They need to be used up front as much as possible because that way you'll really lower that
+
+42:25.560 --> 42:28.680
+barrier to entry into production.
+
+42:28.680 --> 42:33.320
+What's the experience or the interface for these pipelines?
+
+42:33.320 --> 42:39.160
+Yeah, so you can think of it kind of like plugging in Lego blocks together, you hopefully
+
+42:39.160 --> 42:47.120
+the blocks that you need already exist, things like imputation or normalization and you kind
+
+42:47.120 --> 42:54.280
+of have an easy way to, I talk about it, we call it a pipeline but it's really kind of
+
+42:54.280 --> 43:00.960
+a dag of computation that's happening on your input feature vector before it produces
+
+43:00.960 --> 43:01.960
+some output.
+
+43:01.960 --> 43:05.640
+So really what you're doing, we're trying to create a lightweight way for you to create
+
+43:05.640 --> 43:12.800
+that computation dag, that having to think too much about the details of what dag are.
+
+43:12.800 --> 43:20.080
+But we create this pipeline for you and fortunately I can't, the best way to explain it is really
+
+43:20.080 --> 43:26.080
+to look at a code sample of how you create a pipeline but I can try to describe it badly.
+
+43:26.080 --> 43:31.760
+That answers the question for me, it was really is this something that's defining code
+
+43:31.760 --> 43:42.600
+or is there some user interface and is there some notion of a repository of steps that
+
+43:42.600 --> 43:48.400
+I might want to plug in that I'm doing visually or do I have to know what those are and
+
+43:48.400 --> 43:52.680
+like I'm using a library, a standard library of some sorts and call them from within code.
+
+43:52.680 --> 43:55.440
+It sounds like it's the code orientation.
+
+43:55.440 --> 44:01.040
+Yeah, definitely, there's several different ways to do things you could prefer a config,
+
+44:01.040 --> 44:06.800
+you could prefer code, you could prefer UIs for managing this but what we found is code
+
+44:06.800 --> 44:09.200
+seems to be the best way to go.
+
+44:09.200 --> 44:14.280
+A lot of times what we see is people doing powerful stuff like programmatically creating
+
+44:14.280 --> 44:21.400
+these pipelines or composing them and I think that's a lot easier with code and I think
+
+44:21.400 --> 44:27.440
+that to address the piece about sharing, yeah of course, we don't want all of our users
+
+44:27.440 --> 44:33.360
+to be reinventing all of these different LEGO blocks so we have our inventory of pipeline
+
+44:33.360 --> 44:38.400
+transformations that they can just plug into but they can also kind of share those pieces
+
+44:38.400 --> 44:45.000
+that they've created so that they can easily maybe if somebody on another team is working
+
+44:45.000 --> 44:50.560
+on a particular model that is sort of relevant, maybe it's an image model and you're also
+
+44:50.560 --> 44:52.440
+working on an image model.
+
+44:52.440 --> 44:58.640
+You can actually go to the UI and browse and click in and see what pipeline transformation
+
+44:58.640 --> 45:04.080
+components they're using and say, hey, oh yeah, you know what, I actually do need a piece
+
+45:04.080 --> 45:08.440
+that kind of like resizes my image or something like that so I'll just go ahead and use
+
+45:08.440 --> 45:09.440
+what you have.
+
+45:09.440 --> 45:14.840
+So that was something really important for us to incorporate into our kind of discoverability
+
+45:14.840 --> 45:16.920
+and sharing aspect of our UI.
+
+45:16.920 --> 45:18.840
+Okay, awesome, awesome.
+
+45:18.840 --> 45:27.480
+So for folks that are maturing in their use of machine learning, AI, but don't have
+
+45:27.480 --> 45:32.920
+a platform in place, are there kind of a handful of core principles that they should be
+
+45:32.920 --> 45:38.320
+keeping in mind as they start to coalesce different tools into, you know, something that's
+
+45:38.320 --> 45:39.320
+more coherent?
+
+45:39.320 --> 45:41.280
+Yeah, yeah, absolutely.
+
+45:41.280 --> 45:47.320
+So I mean, we've talked to a lot of companies and they're all on this, on various stages
+
+45:47.320 --> 45:51.720
+of this journey in scaling ML at their organization, right?
+
+45:51.720 --> 45:57.440
+You've got, you know, the big tech giants like Google and Facebook who are really far
+
+45:57.440 --> 46:01.640
+along have been doing this for years and, you know, I think they're getting closer to
+
+46:01.640 --> 46:07.360
+that ideal of, you know, engineers or data scientists, everybody feeling like they have
+
+46:07.360 --> 46:10.560
+ML in their toolkit.
+
+46:10.560 --> 46:16.040
+But, you know, and I think Uber is actually coming along on that as well with Michelangelo.
+
+46:16.040 --> 46:19.760
+Michelangelo is a major inspiration for us.
+
+46:19.760 --> 46:25.000
+And we've talked to other companies as well who are, like, kind of going down that journey.
+
+46:25.000 --> 46:27.720
+And, you know, we're seeing a lot of the same problems.
+
+46:27.720 --> 46:35.880
+I think that two things that I would mention, one is consistency, be thinking about consistency
+
+46:35.880 --> 46:41.520
+in, you know, all aspects of the lifecycle of deploying your machine learning model.
+
+46:41.520 --> 46:46.440
+And that's what pieces like the big head library that we talked about and a zip line are
+
+46:46.440 --> 46:48.280
+meant to address.
+
+46:48.280 --> 46:54.720
+And I think that data is, you know, really probably one of the hardest things to get right.
+
+46:54.720 --> 47:02.880
+So, my other point is about, you know, understanding the value of making sure that data and the
+
+47:02.880 --> 47:07.880
+entire pipeline leading up to machine learning at your company is really well set up for
+
+47:07.880 --> 47:08.880
+machine learning.
+
+47:08.880 --> 47:14.360
+I think that, you know, something that we've experienced at Airbnb is that machine learning
+
+47:14.360 --> 47:18.560
+is kind of at the tail end of a whole lot of work that's happening upstream.
+
+47:18.560 --> 47:23.440
+You know, you've got your production services, the databases they use, maybe the data warehouse,
+
+47:23.440 --> 47:27.240
+and then lastly, you've got machine learning tacked on to the end of that.
+
+47:27.240 --> 47:31.680
+And so, one of the things we've noticed is that there's sort of a butterfly effect, you
+
+47:31.680 --> 47:37.360
+know, upstream changes can have a really outsized impact on machine learning.
+
+47:37.360 --> 47:44.240
+And one of the things we're trying to change is just getting more visibility around machine
+
+47:44.240 --> 47:49.680
+learning as something that's being used downstream throughout the company.
+
+47:49.680 --> 47:56.560
+And I think that that's like kind of a broader organizational type problem that you need
+
+47:56.560 --> 47:58.120
+to be able to solve.
+
+47:58.120 --> 48:03.440
+Getting awareness about machine learning, what the benefits of it are, and then also having
+
+48:03.440 --> 48:08.360
+people incorporate it into their workflow and their understanding of kind of, like, what's
+
+48:08.360 --> 48:09.680
+downstream.
+
+48:09.680 --> 48:15.360
+So, yeah, data is, of course, like, very critical and very hard to get right, and really
+
+48:15.360 --> 48:20.960
+kind of unique to every different organization, the types of data that's important to you,
+
+48:20.960 --> 48:23.520
+the pipelines you have set up for it.
+
+48:23.520 --> 48:28.120
+But I think there's certainly some tools and best practices that are emerging throughout
+
+48:28.120 --> 48:29.120
+the industry.
+
+48:29.120 --> 48:35.560
+I think it all kind of boils down to this analogy of using some of, like, the best practices
+
+48:35.560 --> 48:41.000
+from software engineering that we've accumulated over the decades and applying them to machine
+
+48:41.000 --> 48:42.000
+learning.
+
+48:42.000 --> 48:47.640
+I mean, sometimes this analogy doesn't work great, but as with all analogies, but I think
+
+48:47.640 --> 48:49.200
+it can kind of go a long way.
+
+48:49.200 --> 48:55.800
+So, making sure that you have a good developer environment, making sure that, you know,
+
+48:55.800 --> 49:04.600
+you have solid versioning, unit testing, continuous build deployment, monitoring, observability,
+
+49:04.600 --> 49:08.600
+these are all things that we've kind of arrived on for software engineering, traditional
+
+49:08.600 --> 49:10.320
+software engineering.
+
+49:10.320 --> 49:14.720
+And one of the things we're trying to do is just translate those concepts to machine
+
+49:14.720 --> 49:15.720
+learning.
+
+49:15.720 --> 49:22.320
+Understand, like, what does it mean to unit test your model or integration test your model?
+
+49:22.320 --> 49:24.520
+What does it mean to, like, code review a model, right?
+
+49:24.520 --> 49:29.000
+This is also a best practice for software engineering, but we need to kind of reinvent
+
+49:29.000 --> 49:32.120
+it for machine learning.
+
+49:32.120 --> 49:35.320
+And yeah, what does observability look like for a model?
+
+49:35.320 --> 49:42.920
+So that's some of, like, the, in kind of a high level way, how we're going about approaching
+
+49:42.920 --> 49:44.920
+scaling ML.
+
+49:44.920 --> 49:50.680
+And we should probably also mention that you announced in the talk that Airbnb is planning
+
+49:50.680 --> 49:52.080
+to open source big head.
+
+49:52.080 --> 49:53.080
+Yeah, that's right.
+
+49:53.080 --> 50:00.160
+So Airbnb, we've got kind of a culture of being a host to our community.
+
+50:00.160 --> 50:05.080
+And I think that's why there's been several open source projects from Airbnb, like Air
+
+50:05.080 --> 50:07.160
+Flow and Super Set.
+
+50:07.160 --> 50:12.040
+And we're hoping to actually open source big head as well in the coming months.
+
+50:12.040 --> 50:13.720
+We're really excited about that.
+
+50:13.720 --> 50:20.560
+It's kind of something that our entire team has been thinking about since the start.
+
+50:20.560 --> 50:23.720
+It certainly takes a lot of work to actually make happen.
+
+50:23.720 --> 50:27.920
+So we're hoping to get to that in Q1 of 2019.
+
+50:27.920 --> 50:28.920
+Awesome.
+
+50:28.920 --> 50:29.920
+Awesome.
+
+50:29.920 --> 50:31.240
+Well, I'll be keeping track of it.
+
+50:31.240 --> 50:34.200
+And it's an exciting step.
+
+50:34.200 --> 50:35.200
+Thanks so much.
+
+50:35.200 --> 50:36.200
+I'll appreciate it.
+
+50:36.200 --> 50:37.200
+Yeah.
+
+50:37.200 --> 50:42.200
+Thanks for having me, Sam.
+
+50:42.200 --> 50:43.200
+All right, everyone.
+
+50:43.200 --> 50:45.000
+That's our show for today.
+
+50:45.000 --> 50:50.520
+For more information on Atul or any of the topics covered in this podcast, visit twimmelai.com
+
+50:50.520 --> 50:54.080
+slash talk slash 198.
+
+50:54.080 --> 50:59.880
+To learn more about our AI platform series, or to download our eBooks, visit twimmelai.com
+
+50:59.880 --> 51:02.400
+slash AI platforms.
+
+51:02.400 --> 51:29.160
+As always, thanks so much for listening and catch you next time.
+

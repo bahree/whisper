@@ -1,0 +1,563 @@
+Hello and welcome to another episode of Twimmel Talk, the podcast where I interview
+interesting people, doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington.
+This is the third and final show in our series of podcasts from the recent Wrangle Conference.
+As you might know, a few weeks ago I was in San Francisco for Wrangle, which is a great
+little conference brought to you by our friends over at Cloud Era.
+This is the second time I've attended a Wrangle, and each year it brings an interesting and
+diverse community of data scientists to an intimate and informal setting for great talks
+on real data science issues and projects, not to mention cowboy hats and barbecue.
+If you haven't yet caught the first two episodes in our Wrangle series, Twimmel Talk No. 39
+with Drew Conway and Twimmel Talk No. 40 with Sheriff Rao, you'll want to be sure to check
+those out.
+They're both great interviews and the intro to the first show in the series includes
+important announcements about the series as well as our latest ticket giveaway, our online
+research paper discussion group, and my email newsletter.
+To show you're listening to now features my interview with Aaron Schelman. Aaron is a
+statistician and data science manager with Zymergen, a company using robots and machine
+learning to engineer better microbes.
+If you're wondering what exactly that means and involves, I was too, and we talk about
+it in the interview.
+Our conversation focuses on Zymergen's use of a patchy airflow, an open source data management
+platform originating at Airbnb.
+Aaron and her team uses airflow to create reliable, repeatable data pipelines for their machine
+learning applications, and we explore all that in the interview.
+A quick note before we dive in, as is the case with my other field recordings, there's
+a bit of unavoidable background noise in this interview, sorry about that.
+And now on to the show.
+Now we start by having you tell us a little bit about your background.
+Sure.
+So my background sort of at the intersection of computer science, statistics, and biology.
+So I went to graduate school at the University of Michigan.
+I did my masters in biostatistics, and then my PhD in bioinformatics.
+So always kind of working at the intersection of data and biology, and when I graduated
+sort of maybe counterintuitively, I came out to the West Coast, I live in Seattle, and
+I worked at Nordstrom in Nordstrom technology.
+Interesting.
+Yeah.
+And I was on a really cool team called the Data Lab there and built product recommendations
+for Nordstrom.com.
+Okay.
+And then did a stint at AWS, and now I'm at Symargin.
+Okay.
+Nice.
+And what specifically do you do at Symargin?
+Yeah.
+So I was initially, I was the first data scientist at the company, and I was a data scientist
+there for the better part of nearly two years, and then recently I've transitioned into
+managing the data science group there.
+And we're now eight people including myself, so a lot of growth since I started.
+Okay.
+So yeah.
+So a friend of mine and a former, a previous podcast guest, Josh Blum, has said that the worst
+job in the world is to be a company's first data scientist.
+Do you agree with me?
+That is a, there's a lot of truth to that.
+It really depends, yeah, it depends on what you like.
+So what I like about, so actually maybe surprisingly all of the jobs that I've had, I've been
+the first onto that team, and that wasn't really on purpose, but what I like about it is
+that you really have the ability to kind of structure what the goals and what the mission
+is, who you hire and how you build out that team.
+And I really enjoy that part of the job, sort of the higher level, maybe not so data-centric
+parts of the job.
+Okay.
+And you definitely have that kind of stuff more available to you when you're the only
+person on the team.
+It hasn't been like building out a team from having that experience as being the very
+first.
+Does it change your perspective on team composition and how you build it out?
+Yeah, it definitely changes your perspective because when you're the only person you're
+quite resource-constrained, and so the hiring matters in some sense more than when you
+have quite a bit more staff because every, you know, you double to two people that's
+still quite, not very many people, and so it's really important that you get somebody
+who has skills that complement your own or somebody who can teach you a lot of things
+that you don't know to make everybody more productive.
+So it's definitely a different experience than being in a big group with lots of people,
+but I actually, I think I like it more.
+I prefer it.
+Okay.
+Awesome.
+Awesome.
+Now, Zymergen, I'm betting is a company that not a lot of people in our audience know
+about what does the company do?
+Yeah.
+We're a little bit different than, you know, the Airbnb's and the Facebook's and all
+of those type of those companies, though we use a lot of Airbnb's technology, so kind
+of like Airbnb for microbes, not really.
+But yeah, so at Zymergen, what we're doing is we partner with companies who use industrial
+fermentation to make materials and molecules, and so what we do is we operate, we optimize
+strains, microbial strains, to be more efficient or more effective at producing molecules
+of interest to our customers through fermentation.
+So often these are companies who are already using fermentation at scale to produce molecules.
+So it turns out-
+I'm thinking beer.
+Yeah, exactly.
+Is it beer?
+Yeah.
+Another use case is zero.
+Yeah.
+So, you know, we, the common application, right, of fermentation is to make alcohols,
+alcoholic beverages, but it turns out that you can use that process to create lots of
+different types of molecules, and you can use that to make molecules that can be precursors
+for pretty complicated materials as well, and so that's what we do.
+We kind of do the same process, but we're making all kinds of different types of molecules
+for different applications.
+What are some examples of those applications?
+So examples of applications in general, not specific to Zymergen, are, well, for example,
+insulin is sort of a classical example of using fermentation in health sciences to produce
+insulin.
+So that was a huge revolution in terms of being able to create it because it was a very
+expensive and kind of grew some way that we used to do it in the past, which is largely
+through extracting it from pigs, which is not pretty.
+Obviously, if you feel it's a lot better if you can, you know, use microbes and do it in
+giant fermenters, and you can produce a lot more at lower costs, so it's kind of the
+same thing, yeah.
+And so is it a direct byproduct of fermentation, or is it, is there a byproduct that's used
+in its creation?
+Yeah, it kind of depends on the microbe and the molecule that you're producing, but
+often what we're doing is sort of augmenting or kind of ramping up normal metabolic processes
+in the cell, so these microbes will ingest, you know, sugars, metabolize things like that
+to create these molecules, sort of as sometimes their waste products, it really depends, and
+they excrete those into the surrounding fluid inside the tank, and then we harvest that
+or we extract that.
+Oh, wow.
+Yeah, to get those molecules.
+Wow.
+So what was your talk about?
+Yeah, so I was talking about some of the sort of the challenges that we face.
+So I was talking a little bit about our mission, actually, of the Data Science Teams mission,
+and our goal is to use our testing platform.
+So the way that we do what we do as I imagine stepping back for a second is that we rely
+on robotic automation, sort of combined with machine learning to build this test platform
+that allows us to simultaneously measure the performance of lots of different strains
+in parallel.
+Okay.
+And we use our goal on the Data Science team is to use all of that data that we're generating
+through this high throughput screening process, use all of that to then make machine learning
+models or make predictive models to help us make better decisions about the experiments,
+the strains that we design in the first place.
+So basically to help the scientists design better strains so that we don't have to spend
+as much time experimenting if we could get to the solution or get to the answer faster,
+that's really our goal.
+That's an ambitious goal, it's not easy to do, and so part of what I was talking about
+was sort of the things that make it hard to accomplish that.
+So what are sort of the practical data issues that we encounter and how we're solving those
+so that we get really clean in analysis ready or modeling ready data for those complicated
+models.
+Okay.
+And so what are some specific examples of the data sources and data types that feed your
+models?
+Yeah, so by and large, a lot of the data that we're consuming is really kind of measurements
+that represent concentrations.
+So we've got these microbes, they're metabolizing things and they're excreting these compounds
+or these molecules into the solution around them and then we measure the concentration
+of that so that we can tell whether the microbe has improved over its predecessor and then
+move that into make a decision based on that essentially.
+And so for the most part, the data that we're working with is some measurement, is some
+measure of concentration.
+Got it.
+And what's the scale that this is happening at?
+Like is this concentrations in vats of things or like microarrays or somewhere in between?
+Yeah, that's a really great question.
+So it's kind of all of those things.
+So what we do practically in our testing platform is we kind of do it more, not quite as dense
+as a microarray, but typically it's something like 96-well plates.
+So we have these kind of plates that have 96-wells, each of those wells contains fluid, contains
+the microbe and sort of the experimental input.
+And that's the level that initially when we're doing our initial screens that we're experimenting
+at.
+Once a strain, for example, demonstrates improvement compared to its predecessor, it'll go into
+another round of that testing, we basically want to validate or replicate that performance
+again.
+Once it's done that, we actually validate those strains in fermenters.
+And so it's kind of a challenge to, you know, the size of a fermentation tank is much
+larger than that of a tiny well on a plate.
+And so we always want to validate those strains before we deliver them to a customer, for
+example, to make sure that the performance and the plate actually represents the performance
+that we expect in the fermentation tanks.
+And so we do both at Xymrgin, and then we also like to partner with people and run them
+at scale in their tanks, too, when possible.
+Okay.
+Interesting.
+And so you started your talk, talking a little bit about kind of the context and your
+mission, and then what?
+Oh, and then, yeah, and so I was talking a little about some of the challenges we face
+with our data, some kind of practical challenges, and how we're using Airflow to build a pipeline
+that addresses some of those challenges.
+Okay.
+What's Airflow?
+So Airflow is, it's a Apache incubating project.
+It's a Python module, basically, that allows you to construct data processing workflows,
+and you're basically constructed DAG of that workflow, and allows you to do things like
+scheduling, monitor the progress of those jobs, and even a little bit of reporting.
+Yeah.
+So it basically helps us orchestrate all of our sort of complicated ETL steps.
+Okay.
+Where are you eating the data from?
+Where does it tend to live?
+Yeah, so, and mostly, so we have what's called a limbs, it's sort of a biology, that's
+right.
+Okay.
+I've never met anyone who was, like, not a biologist who knew what that was.
+Yes, that's exactly what it is.
+So we have a, we have a limbs, and we have a corresponding front end that the scientists
+can upload and sort of download data from, and then that gets persisted to a sort of a single
+source of truth, like a data warehouse, and that's, for the most part, with the data scientists
+access the data from.
+From a data warehouse?
+Okay.
+So you use Airflow, how long have you been using that?
+We've been using it, I guess, almost about a year.
+Okay.
+And that's, you mentioned earlier, you use AirBnB stuff.
+Airflow is an AirBnB product?
+Yeah, it was a project.
+Yeah, exactly, it was an AirBnB product that I think they opened source, and then it was
+picked up by Apache, and now it's kind of an incubating project, which, yeah.
+And how does it compare to, I'm trying to remember the name of the product that complements,
+like Google Cloud, has their data flow, and there's an open source, it's also Apache,
+it's not.
+It's like oozee or, yeah, no.
+It's comparable to that.
+It's comparable to oozee?
+Yeah.
+Okay.
+And it's agnostic to sort of, I think oozee is sort of a part of the Hadoop ecosystem.
+Airflow is not.
+So it's pretty generic in that sense, so you can really use it, it's pretty powerful
+in that sense.
+So it doesn't have any opinions, really, about the platform when where your data come
+from.
+Okay.
+And so what are the implications on the way you kind of craft and deploy the analytics that
+sit on top of the underlying, you know, the data, kind of the data engineering pieces?
+Like does airflow, does the weight, any of the semantics of airflow have direct impact
+on the way you view the analytics, or is it, you know, kind of separate concerns?
+I don't know.
+I think maybe they're largely separate concerns, although I guess one of some one of the sort
+of use cases that I described was, you know, we do a lot of experimentation as I'm
+origin, lots of different types of experiments.
+And our scientists use lots of different types of tools to work with data.
+And the result of that is sometimes the data doesn't make it into our limbs, so it doesn't
+make it into the warehouse.
+And one way that we've addressed that is that airflow has all these nice sort of hooks
+or operators into third party things like Dropbox.
+And so one thing that we've had success with is to be able to work with the scientists
+and get them to make some standards around where they put their data in Dropbox, and then
+we make really lightweight ingestion pipelines to grab that data and ingest it into our limbs
+for them.
+And then we're using also a NARB&B product called SuperSet, which is sort of a dashboarding
+tool.
+So we've now hooked that up so that we can ingest data from Dropbox, and then we can
+produce dashboards for the scientists to actually consume their own data that way.
+And that's been kind of a success story, making really lightweight stuff, doesn't take
+very long to make it all, and can surface the results right there pretty quickly.
+Okay.
+And so what were some of the insights that you were sharing about using airflow?
+Yeah, so I was sharing, I was kind of stepping through a couple of use cases that we, well,
+I was describing some of the our limitate or the challenges that we face with our data.
+And then sort of the challenges we had when we were working on our own sort of homegrown
+ETL solution or platform, and why we eventually sort of abandoned that and adopted airflow.
+And so I imagine that a lot of people start there.
+Yeah.
+Like what are some of those challenges?
+Yeah.
+So one of the, I think more difficult challenges was that, I mentioned that largely the,
+a lot of the data that we're working with is concentrations of things, so we're measuring
+how much of something there is in a certain volume of solution.
+It turns out measuring concentration of something is not that straightforward, so there are
+a lot of different ways that you can measure the concentration of a solution, of something
+in a solution.
+And depending on the group and whether, like who they're working with and sort of the
+way that they choose to measure that, that has implications for the data that we can
+expect.
+But we need to basically process everything the same way, regardless of the sort of the
+format or the type of experiment that they used.
+And so that was challenging to kind of articulate ourselves, there's just a lot of overhead
+and there's sort of a lot of logic that we would have to encode to do that.
+Another challenge was describing this sort of complex dependencies in between our processing
+steps.
+So, you know, I need this to happen and then that's going to kick off another job that
+does this and that's going to kick off something else, but orchestrating sort of that communication
+and writing all the logic to, for what do I do if the first thing fails or what if I,
+what do I do if the second thing fails and doing all of that ourselves is challenging.
+And we have all the, we have data coming in at different velocities and that's also hard
+to orchestrate.
+So some of our products, they start processing data as soon as a scientist uploads data
+into the limbs or into the warehouse.
+Others can be scheduled and so it runs nightly or weekly and, or doing all that orchestration
+ourselves was, was very challenging.
+And, and so I imagine the upside is that airflow kind of handles, handles all of this for you.
+It, you know, does the impedance matching from, you know, the different, different velocities
+of information coming in and things like that.
+Yeah.
+So, airflow does a lot of things for us in terms of sort of handling different data inputs
+and being sort of agnostic to that.
+It's been huge for us for that.
+So, we've basically in our processing steps, we have created sort of a generic interface.
+So we have sort of three big processing nodes that need to happen.
+And they all have very generic interfaces.
+So they don't know anything about the data that they're going to receive.
+And then basically we, we contextualize it at the time that we've received data.
+And so, and that, that has made it very flexible and modular for us so that we can, you know,
+a new experimental platform comes online.
+It will be very easy for us to apply the same, well, I wouldn't say very easy.
+It will be much easier for us to apply the same set of processing steps with a new data
+set just because we've, we've gone through the effort of making the interface generic.
+So that, and that was something that's harder to do.
+Yeah.
+Sorry.
+Are these three, you said nodes?
+Are the three nodes, are they, is this an artifact of kind of the way you would ideal
+or design your own processes or is this something that's kind of imposed on you by the way air
+flow does things?
+Oh, no.
+It's, it's more just like sort of the flow of the pipeline, the processing pipeline.
+And it, which so happens to have three steps.
+Yeah.
+So like the, the initial step, one of the, one of the things that we see, you know, I
+mentioned, I think that we use, part of the reason we're able to do what we do is that
+we rely heavily on robotic automation to do a lot of the heavy lifting in the lab, but
+robots fail sometimes or weird things happen in the lab, you know, it's a, it's, the experimentation
+is, is challenging.
+And so the result of that is we'll see sort of extreme values or like outlying values
+that, you know, typically indicate a process failure.
+And so that first step is really just an outlier detection step.
+So let's, let's identify those process failures and filter those out of any downstream processes.
+The second step of that pipeline is something called normalization.
+And that's really meant to address sort of another challenge that we face, which are batch
+effects, which is a very common phenomenon and high throughput screening environment.
+So, you know, you've got a bunch of, you've got a chip with a lot of samples or a lot
+of, you know, probes or on it.
+And you're asking a lot of questions in a very tight space.
+And so these types of environments tend to have strong temporal effects.
+So even if you imagine you do the exact same experiment this week and next week, they
+might look like they're coming from different distributions.
+And that doesn't actually reflect meaningful biological variability.
+It's actually just kind of a reflection of the process or of the temperature in the room
+at the time.
+So yeah, the person who ran it or all these other things that we don't actually care
+about.
+They're kind of nuisance things.
+Right.
+And so the second step of that processing pipeline is normalizing the data to try to
+eliminate those process, process-related biases.
+Okay.
+And then sort of the third step and sort of the third challenge that we face with our
+data is we have a motto at Zymrogen that is any micro, any molecule.
+And what that means is that we, we've built a testing platform that is agnostic to
+our customers, microbe, and to the molecule that they're making.
+We think that we have a process that will allow us to optimize those strains regardless
+of the actual application.
+That's amazing from a sort of a business strategy point of view because we can work in lots
+of different industries.
+We can work with lots of different bugs and make lots of different types of molecules.
+But it can be challenging from a data perspective because it can result in a proliferation
+of solutions.
+So we don't always have agreement on what the right way or whether something that constitutes
+an improvement for one group might not be considered an improvement in another group.
+And from a modeler's perspective, it's not always clear what the result of the experiment
+it is to us as consumers of that test data in a way.
+And so one way that we're addressing that is this sort of third piece of that processing
+pipeline where we actually do the matching up of the candidate strain with its reference
+strain, and we do that testing, and we, like statistical hypothesis testing, and we write
+that result so that regardless, sort of independent of the decisions that our scientists make,
+we have some indication of what we think happened in the experiment in a sort of a consistent
+view of what improvement looks like for our models.
+Interesting is it from a modeling and statistical perspective, is it challenging to imagine
+it to be challenging to kind of normalize results from comparing one molecule to another
+or one biological process to another?
+Is that challenging?
+So in general, we're not doing that, so we don't share data at all between sort of projects
+or...
+I guess what I understood you to say that, you know, you've built this general platform for
+testing the results of these molecule production, microptomolecule production processes,
+and then as a way to make sure that you understand their efficacy, you know, you're kind of
+taking that analysis all the way to, you know, what would tell me, what is that end result
+that you're driving for?
+Yeah, so that note or that last step in the pipeline is often called hit detection in
+sort of the biology, the high throughput screening literature, and that's really just
+the process of identifying in your screen, which of those candidates that you were exploring
+seem to have the characteristics that you're looking for.
+And so it's sort of a, it's not as, because it's a screening scenario where our statistical
+criteria isn't quite as high as it would be if you were doing a single test, like I
+want to know, you know, we're screening, and so actually we care more about keeping false
+negatives low than we do about having high false positive rate and you know, retesting
+something that actually wasn't a very good strength.
+We would rather waste some resources testing something that wasn't good than lose the
+opportunity to test again something that actually was good.
+Meaning you're screening for possibilities, and the more possibilities you have, the
+more opportunity you have to find the thing that actually works.
+Yeah, exactly, yeah, yeah, yeah, so it's kind of a different, like way of thinking about
+it then, you know, often like in an A, B test, for example, you want to know the right
+answer.
+Right, right.
+Okay, got it.
+And so you talked about the challenges that led to deploying airflow.
+What about the challenges of deploying airflow and kind of building out this system?
+Did you encounter anything in particular there?
+Yeah, so, you know, it's sort of probably challenges that are typical of adopting anything
+that's kind of an early project.
+Right.
+One of our bigger challenges was really just finding non-trivial examples of how it's
+used in production.
+So what I think was some of, at least I experienced this, I feel like this was sort of the general
+experience of everybody on the team is that, you know, there's a certain way you're supposed
+to write these DAGs or these workflows in airflow every time I would write when I felt
+like it was the wrong way.
+So I would either try to, it felt like I was putting too little processing sort of in one
+node and kind of making too many nodes or it felt like I had one big node that did everything.
+And so it was really hard to like get a sense for what the right way to construct, what
+unit of work was appropriate and was sort of intended by the design of airflow.
+That was challenging, took some getting used to it.
+The team is using it a lot now, so I feel like we've got that a pretty good handle on
+that now.
+That was certainly challenging, sort of getting familiar with it and finding good examples
+of non-trivial examples of its use, which I don't know.
+It's interesting, it's something that comes up a lot in my conversations with folks in
+different domains.
+You know, both in take as an example, architecting neural nets or this, there's the documentation
+and there's the research and the literature, so much of adopting these new technologies,
+like tribal knowledge or black art, or it just practice that, you know, you often don't
+find good sources for how to do that stuff.
+Yeah, and that makes it, I don't know, that's kind of a friction on adopting this stuff.
+Like you want to see some success stories of somebody having used it so that you can
+be sure that before abandoning, like our home grown ETL system, we want to be reasonably
+sure that the thing that we move to works isn't going to be suffer from the same problems.
+And of course, at the understanding that it is a new project and that there will be
+sort of foibles as a result of that.
+But in general, we want to make sure it solves the bulk of the problems that we have with
+our own solution.
+And that can be hard to demonstrate sometimes.
+But in our case, it worked out Airflow is a really powerful tool for our group.
+Has that changed at all since you started to use it, are you seeing more of these examples
+or more, you know, better documentation of these more subtle, either use case examples
+like you described, or kind of some of these more subtle design philosophies and decisions?
+Yeah, I mean, even today, like I was the speaker right before me to talk a lot about Airflow
+and then right after me, it was a panel where they talked a bit about Airflow.
+So it seems like it is now becoming quite a popular tool and being used pretty pervasively.
+So I expect that we'll see more and more, more and more of these kind of stories of how
+it's being used in production.
+And it's a very flexible tool and it has a lot of functionality.
+And so we're using it in ways that we didn't actually expect initially.
+And so I'm excited to see how other people are using it.
+I'm sure there are a lot of really creative things that are being developed on it.
+Nice.
+And for the, or is it intended, do you think that the main consumer of the tool is a data
+science team, as opposed to a data engineering team or some other variation on the term?
+Yeah, I think that's a good question.
+I'm not totally sure what the intentions were, but it's definitely a tool that's very
+powerful for data scientists in terms of just like the way that we think and being able
+to construct workflows that way, it just feels very natural.
+I guess it's even a hard question to answer because data science and data scientist means
+so many different things.
+This actually came up in my last interview as well.
+We talked about how this has evolved since five years ago when everything was considered
+data science, or data science was considered needing to know all of the different bits
+and pieces of moving the data around and doing the analytics and getting it to production.
+When I hear you describe the tool, I think plumbing, I think kind of no-level stuff.
+And that was really the source of the question, like, is it is, do you think that that is typical
+for data science to kind of dive into that level, or is our data scientist typically
+that's supported by other groups that are kind of putting the plumbing in place?
+Yeah, so for us, the way that we ended up kind of productionizing our airflow environment
+was with the collaboration with data engineering.
+We have, our group is pretty engineering-heavy anyway, all the data scientists are fairly
+do a lot of engineering.
+And so of course we had help from actual data engineers, and then members of the team
+who have that skill set as well, are responsible for sort of doing all the configuration and
+the start-up scripts for people.
+Because our group is pretty mixed in terms of the background and interests and the skills.
+And so that's been great, like, they spent a lot of time really developing structure
+around how to get it set up, and so that all of the data scientists, when they come
+online, can easily set it up and then start doing what they already know how to do,
+which is construct the workflows and Python.
+So it's kind of two levels.
+I think we did probably need help from data engineers to actually get it up and get it
+running consistently, and sort of in a production level of an environment.
+But then once it's there, it's actually, I think, a very simple tool for the average
+data scientist to quickly start making processing workflows.
+And part of that is that it has a really cool out-of-the-box UI, so you can write your
+workflow in Python, and then you can go to the UI, you can run it there, you can view
+all kinds of metrics about the pipeline, there's even stuff about sort of which tasks in
+that pipeline are sort of the bottlenecks, and what are the performance metrics of each
+of the individual tasks.
+So it allows you to kind of see, get visibility into those workflows that, in the past, I
+haven't had actually really anywhere, so it's great for that.
+Interesting.
+Is that user experience, is it kind of analogous to a notebook, or is it more like a job processing
+type of tool?
+No, it's more like a bonafide application.
+So it's got sort of a table of all of the jobs that are around, and you can kind of change
+the scheduling right there in the UI, turn them on and off, and then tab over to metrics
+and all kinds of other things.
+You can view the logs from there, so if something failed, obviously you can log into the machine
+and view the logs there, or you can just use the UI and view the logs directly, see what
+happened with your job, you'll get a bunch of rich diagnostics about which part of the
+workflow failed, and all kinds of stuff right there in the UI.
+So it's actually, it's a pretty developed tool.
+Oh wow.
+It's really helpful.
+Oh, very nice.
+Very nice.
+Anything else you'd like to share with the audience, or leave with the audience?
+I guess just check it out, it's been a really great tool for us, so the reason that we
+invested in it really is to support our work in predictive strain design, that is sort
+of our mission is to use machine learning so that we can construct better strains and help
+our scientists get to the solution faster.
+And airflow has been incredible in helping us solidify that processing pipeline to support
+that work.
+It's a clean analysis ready or modeling ready data that's consumable directly from this
+pipeline, and a lot of it, a lot of the headache of what's sort of traditionally, or maybe
+not associated with being a data scientist, but with data scientists know it's actually
+about, can be sort of addressed with airflow, or at least can be ameliorated some so that
+it's not, so that 90% of your time isn't actually spent cleaning data and munging it and moving
+it around.
+We can do, it's very flexible, can do all kinds of different types of tasks, and that's
+been really helpful for getting, sort of, trying to eliminate sort of the boring stuff so
+that we can do the cool stuff.
+Awesome, awesome.
+If I can draw you back in, that was kind of a great summary, but we haven't really
+talked a lot about the specific models that you use, like we've talked about this tool
+that helps you get the data to the models.
+Yeah.
+A bit about the types of models that you're building, the modeling techniques you're
+using, things like that.
+Yeah, I can't talk a ton about them, but the conceptually what we're doing is we're
+taking information about what we know the scientists are engineering into the strains,
+so the type of change that they're making, where it is, so what gene is it that's being
+perturbed, or being engineered, and we're basically making models to predict combinations
+of those changes, so the typical microbe has something between three and 5,000 genes in
+it, and so if we were to perturb each of those individually and then start perturbing
+each pairwise combination, that's an infinite, combinatorical space to explore, and so what
+we're trying to do instead is take all of the information about the things that we know
+we've already done, and then make predictions about how we think those are going to perform
+when they're combined.
+So a little bit of evolutionary genetic algorithm types of things, or...
+A lot of things, actually, so we have a lot of different types of models and some work
+in better context than others, so we have models that kind of address different things.
+Some work better when you have a bunch more information, so after a project is fairly
+mature, and we have a whole lot of test data that we can use to train on, our models are
+different than when we're at the cold start problem, where really all we know, maybe
+is the metabolic structure of the microbe, we haven't started doing anything yet, so
+how do we guide the experimentation in that case when we don't know at all about really
+where to start, and so those suite of models are a little bit different and they rely
+more on structural information about metabolism than experimental information, which can
+happen later, after we've collected a bunch of information from experiments.
+Okay, all right, very cool, very cool.
+Thank you so much, everyone, for taking the time to jump on the podcast with me.
+Yeah, thanks so much for having me.
+There's a lot of fun, thank you.
+Yeah.
+All right, everyone, that's our show for today.
+Thanks so much for listening and for your continued support of this podcast.
+For the notes for this episode, or for any feedback or questions, please leave a comment
+on the show notes page at twimmaleye.com slash talk slash 41.
+Thanks again to Cloud Era, our sponsor for the Rangle Conference series of podcasts.
+To learn more about Cloud Era and the company's data science workbench products, visit them
+at cloudera.com and be sure to tweet at them using at cloud era to thank them for their
+support of this podcast.
+If you're interested in joining the twimmale online meetup, we'll discuss research papers
+like Apple's recent paper on generative adversarial networks.
+You can register for that at twimmaleye.com slash meetup.
+And don't forget to sign up for the newsletter at twimmaleye.com slash newsletter.
+Thanks again for listening and catch you next time.

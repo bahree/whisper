@@ -1,0 +1,2252 @@
+1
+00:00:00,000 --> 00:00:13,120
+Welcome to the Tumel AI Podcast.
+
+2
+00:00:13,120 --> 00:00:16,240
+I'm your host Sam Charrington.
+
+3
+00:00:16,240 --> 00:00:24,840
+Hey, what's up everyone?
+
+4
+00:00:24,840 --> 00:00:29,180
+Over the next few weeks, we'll be exploring just a bit of the great research that was
+
+5
+00:00:29,180 --> 00:00:33,700
+showcased during last week's CVPR conference.
+
+6
+00:00:33,700 --> 00:00:38,180
+Before we get to today's episode, though, I'd like to send a huge thank you to our friends
+
+7
+00:00:38,180 --> 00:00:44,540
+at Qualcomm for their support of the podcast and their sponsorship of this series.
+
+8
+00:00:44,540 --> 00:00:50,940
+Qualcomm AI research is dedicated to advancing AI to make its core capabilities, perception,
+
+9
+00:00:50,940 --> 00:00:55,700
+reasoning, and action ubiquitous across devices.
+
+10
+00:00:55,700 --> 00:01:00,340
+The work makes it possible for billions of users around the world to have AI enhanced
+
+11
+00:01:00,340 --> 00:01:04,980
+experiences on Qualcomm technology's powered devices.
+
+12
+00:01:04,980 --> 00:01:11,620
+To learn more about what Qualcomm is up to on the research front, visit twimmelai.com-qualcomm
+
+13
+00:01:11,620 --> 00:01:15,460
+QAL-COM.
+
+14
+00:01:15,460 --> 00:01:18,100
+Next up, a quick community update.
+
+15
+00:01:18,100 --> 00:01:22,300
+If you're interested in the topic of causal modeling and machine learning, but missed
+
+16
+00:01:22,300 --> 00:01:27,980
+out on the initial cohort of the course we hosted with Robert Osa-Zooness, I'm happy
+
+17
+00:01:27,980 --> 00:01:33,460
+to announce the second cohort of this course and study group will be starting soon.
+
+18
+00:01:33,460 --> 00:01:40,140
+For more information, join us this Thursday, June 25th for a live webinar that Robert
+
+19
+00:01:40,140 --> 00:01:45,780
+and I will be hosting to introduce causality and review all of the details of the course,
+
+20
+00:01:45,780 --> 00:01:48,980
+including the many enhancements he's made this time around.
+
+21
+00:01:48,980 --> 00:01:58,900
+For more information, visit twimmelai.com-causal, and now on to the show.
+
+22
+00:01:58,900 --> 00:02:03,060
+Alright everyone, I am on the line with Bobak at Tashami Bishnordi.
+
+23
+00:02:03,060 --> 00:02:07,540
+Bobak is a research scientist at Qualcomm AI Research.
+
+24
+00:02:07,540 --> 00:02:10,060
+Bobak, welcome to the Twimmelai.com podcast.
+
+25
+00:02:10,060 --> 00:02:12,140
+And thank you for having me.
+
+26
+00:02:12,140 --> 00:02:15,500
+It's great to have an opportunity to chat with you and I'm looking forward to learning
+
+27
+00:02:15,500 --> 00:02:20,260
+a bit more about your research and what you're up to there at Qualcomm.
+
+28
+00:02:20,260 --> 00:02:23,860
+But to get us started, why don't you share a little bit about your background and how
+
+29
+00:02:23,860 --> 00:02:25,900
+you came to work in AI?
+
+30
+00:02:25,900 --> 00:02:26,900
+Sure.
+
+31
+00:02:26,900 --> 00:02:32,100
+So I did my master's in electrical engineering at Chonmer's University of Technology in
+
+32
+00:02:32,100 --> 00:02:33,340
+Sweden.
+
+33
+00:02:33,340 --> 00:02:38,140
+And in that program we had a bunch of courses like machine learning and patent recognition
+
+34
+00:02:38,140 --> 00:02:43,300
+as well as some image analysis courses, which kind of drew me to this field and I decided
+
+35
+00:02:43,300 --> 00:02:48,820
+to do my master thesis on cervical cancer diagnosis using ML.
+
+36
+00:02:48,820 --> 00:02:53,260
+So kind of in the medical imaging domain and I absolutely enjoyed it and decided to do
+
+37
+00:02:53,260 --> 00:02:56,780
+my PhD in the similar field.
+
+38
+00:02:56,780 --> 00:03:04,220
+So I came to the Netherlands in Rodwald University and for my PhD I was developing machine learning
+
+39
+00:03:04,220 --> 00:03:08,940
+models for breast cancer diagnosis in histopathological images.
+
+40
+00:03:08,940 --> 00:03:14,380
+histopathological images are microscopic images of tissue.
+
+41
+00:03:14,380 --> 00:03:20,700
+And kind of in the early mid part of my PhD this deep learning revolution happened.
+
+42
+00:03:20,700 --> 00:03:26,620
+And me and a lot of my colleagues quickly switched to use deep learnings and get familiar
+
+43
+00:03:26,620 --> 00:03:34,420
+with retraining it ourselves and kind of moved to that to using that in my entire project.
+
+44
+00:03:34,420 --> 00:03:38,340
+And during my PhD I also organized the chameleon challenge.
+
+45
+00:03:38,340 --> 00:03:46,180
+It was a challenge on finding cancer metastases on breast to more patients.
+
+46
+00:03:46,180 --> 00:03:49,140
+And it turned out to be a very successful challenge.
+
+47
+00:03:49,140 --> 00:03:56,420
+And was one of the first examples in which using AI the top leading algorithms were actually
+
+48
+00:03:56,420 --> 00:03:59,420
+outperforming human experts.
+
+49
+00:03:59,420 --> 00:04:06,460
+We compared the top two algorithms in the challenge with a panel of 11 pathologies and all they
+
+50
+00:04:06,460 --> 00:04:10,540
+were actually beating all the 11 pathologies without exception.
+
+51
+00:04:10,540 --> 00:04:17,700
+I also did a visiting research at Harvard at bedclap and also towards the end of my PhD
+
+52
+00:04:17,700 --> 00:04:23,700
+I decided to join Qualcomm where I'm here for a bit more than two years now and I'm mainly
+
+53
+00:04:23,700 --> 00:04:25,940
+working on conditional computation.
+
+54
+00:04:25,940 --> 00:04:29,700
+What is conditional computation tell us a little bit more about that?
+
+55
+00:04:29,700 --> 00:04:35,220
+So conditional computation in the context of neural networks refers to a class of algorithms
+
+56
+00:04:35,220 --> 00:04:42,380
+that can selectively activate its units conditioned on the input it receives.
+
+57
+00:04:42,380 --> 00:04:45,340
+Such that on average we have lower computation costs.
+
+58
+00:04:45,340 --> 00:04:51,260
+And when I'm speaking of units it could be layers or individual filters for example.
+
+59
+00:04:51,260 --> 00:04:58,300
+And the thing is in our feed forward neural networks we usually have this prior that no
+
+60
+00:04:58,300 --> 00:05:03,340
+matter what input is is receiving we always run all the layers, all the filters no matter
+
+61
+00:05:03,340 --> 00:05:04,340
+what.
+
+62
+00:05:04,340 --> 00:05:09,060
+And reality some examples might be simple and some harder and maybe for simple examples
+
+63
+00:05:09,060 --> 00:05:14,020
+we could exit earlier from that from the network and finish the classification or sometimes
+
+64
+00:05:14,020 --> 00:05:20,420
+we were for a classification task classifying the image of a cat and sometimes classifying
+
+65
+00:05:20,420 --> 00:05:22,540
+the image of a vehicle for example.
+
+66
+00:05:22,540 --> 00:05:26,340
+But now even in the middle of a network that we are kind of certain that we are dealing
+
+67
+00:05:26,340 --> 00:05:32,500
+with a picture of a cat we are still applying all those vehicle detection features or filters
+
+68
+00:05:32,500 --> 00:05:38,420
+in our to our feature map which is superfluous and also from a generalization perspective
+
+69
+00:05:38,420 --> 00:05:40,580
+that is bad for our network.
+
+70
+00:05:40,580 --> 00:05:45,660
+So conditional computation aims to selectively activate parts of a network.
+
+71
+00:05:45,660 --> 00:05:50,260
+It could be different layers, it could be channels, it could be actually a whole subnetwork
+
+72
+00:05:50,260 --> 00:05:54,220
+in your main network which you could completely deactivate.
+
+73
+00:05:54,220 --> 00:06:00,580
+In fact if we want to look back the first examples were maybe by Hinton, Jaffa Hinton
+
+74
+00:06:00,580 --> 00:06:06,740
+and Robert Jacobs from 1991 they had a paper adaptive mixture of local experts and the
+
+75
+00:06:06,740 --> 00:06:14,740
+idea there was they trained a giant network with many kind of small subnetworks which were
+
+76
+00:06:14,740 --> 00:06:20,180
+experts for a specific subset of a data and then there was a gating network which would
+
+77
+00:06:20,180 --> 00:06:24,900
+get the input as well and based on the input it decides which of these subnetworks should
+
+78
+00:06:24,900 --> 00:06:26,300
+be selected.
+
+79
+00:06:26,300 --> 00:06:31,700
+And in that way they were kind of encouraging the network to be expert, the subnetworks
+
+80
+00:06:31,700 --> 00:06:35,740
+to be expert on their own specific data.
+
+81
+00:06:35,740 --> 00:06:40,740
+And also in recent years in the era of deep learning we see more of the more approaches
+
+82
+00:06:40,740 --> 00:06:43,140
+are using conditional computation.
+
+83
+00:06:43,140 --> 00:06:50,100
+Maybe one of the early examples was branching it which adds auxiliary classifiers in your
+
+84
+00:06:50,100 --> 00:06:54,620
+network, let's say some early in the network, some in the middle of your network.
+
+85
+00:06:54,620 --> 00:06:58,660
+And the aim is that easy examples should exit early years.
+
+86
+00:06:58,660 --> 00:07:04,740
+Another work which was an inspiring work was convolutional networks with adaptive inference
+
+87
+00:07:04,740 --> 00:07:13,540
+graphs which basically decides to gate basically activate or deactivate individual layers
+
+88
+00:07:13,540 --> 00:07:16,140
+in a red net block, conditional input.
+
+89
+00:07:16,140 --> 00:07:21,900
+They hypothesize that maybe some layers are important for specific classes but not for
+
+90
+00:07:21,900 --> 00:07:28,060
+the others and they could learn how to turn on and off individual basically layers in
+
+91
+00:07:28,060 --> 00:07:29,060
+a network.
+
+92
+00:07:29,060 --> 00:07:34,100
+And they were actually inspired by their own previous works which showed that if you
+
+93
+00:07:34,100 --> 00:07:39,700
+actually delete individual layers in a resonant model at test time it's accuracy will not
+
+94
+00:07:39,700 --> 00:07:40,700
+drop.
+
+95
+00:07:40,700 --> 00:07:42,020
+That was very interesting.
+
+96
+00:07:42,020 --> 00:07:48,380
+Of course on the layers which you have a stride too so a down sampling you may get
+
+97
+00:07:48,380 --> 00:07:52,780
+a little bit of performance drop but on the rest of the layers you didn't get so they decided
+
+98
+00:07:52,780 --> 00:07:55,900
+to learn then to drop.
+
+99
+00:07:55,900 --> 00:08:01,220
+And this is also in short contracts to other types of complex like like VGG network you cannot
+
+100
+00:08:01,220 --> 00:08:06,220
+actually do that because if you drop a layer that their whole sequential part will break
+
+101
+00:08:06,220 --> 00:08:09,100
+but in resonant it was perfectly doable.
+
+102
+00:08:09,100 --> 00:08:17,060
+And that actually constituted the basic idea for what we want to do as well which was starting
+
+103
+00:08:17,060 --> 00:08:20,020
+to gate channels instead of layers.
+
+104
+00:08:20,020 --> 00:08:27,740
+Before we get into the details of your specific research are the conditional computation techniques
+
+105
+00:08:27,740 --> 00:08:35,100
+that you're applying exclusively focused on inference or conceptually it seems like
+
+106
+00:08:35,100 --> 00:08:37,340
+you could apply it to both.
+
+107
+00:08:37,340 --> 00:08:38,340
+All right.
+
+108
+00:08:38,340 --> 00:08:39,340
+Yes, exactly.
+
+109
+00:08:39,340 --> 00:08:42,180
+You could definitely apply it at training time as well.
+
+110
+00:08:42,180 --> 00:08:48,460
+So there's like an if and if else argument inside your training for example is saying
+
+111
+00:08:48,460 --> 00:08:54,460
+the activate you could choose not to send the gradients to that part of a network and
+
+112
+00:08:54,460 --> 00:09:02,260
+you could basically gain speed or an inference training time and also inference time as well.
+
+113
+00:09:02,260 --> 00:09:08,500
+And the specific techniques that you focus on are those more concerned with inference
+
+114
+00:09:08,500 --> 00:09:09,500
+time?
+
+115
+00:09:09,500 --> 00:09:18,460
+Yes, well, our main focus has been on inference time we try to, so it is definitely possible
+
+116
+00:09:18,460 --> 00:09:24,860
+to do that for training time as well but we mainly focus on inference time as well.
+
+117
+00:09:24,860 --> 00:09:34,100
+With the over-arching implication that you're trying to reduce the power and cost of doing
+
+118
+00:09:34,100 --> 00:09:35,780
+inference on a device.
+
+119
+00:09:35,780 --> 00:09:36,780
+Right, exactly.
+
+120
+00:09:36,780 --> 00:09:40,620
+So maybe that is actually not the only motivation.
+
+121
+00:09:40,620 --> 00:09:41,620
+Okay.
+
+122
+00:09:41,620 --> 00:09:47,180
+Interestingly, if you train such networks these networks tend to perform much better than
+
+123
+00:09:47,180 --> 00:09:52,220
+counterpart like a fixed neural network with the same computation cost.
+
+124
+00:09:52,220 --> 00:09:59,140
+And I will describe that in a bit that the reason is that these models tend to you can
+
+125
+00:09:59,140 --> 00:10:05,740
+start training a very giant model but then at inference time select only very limited
+
+126
+00:10:05,740 --> 00:10:11,340
+subsets of the resources available, condition on the input, you say, okay, this network is
+
+127
+00:10:11,340 --> 00:10:14,700
+huge but you should just pick the relevant ones.
+
+128
+00:10:14,700 --> 00:10:22,300
+It induces the network to have expert subnetworks inside the network as well because by gating
+
+129
+00:10:22,300 --> 00:10:27,980
+it understands, okay, these subset of filters should be activated for cat detection and the
+
+130
+00:10:27,980 --> 00:10:31,060
+rest maybe for another for vehicle detection.
+
+131
+00:10:31,060 --> 00:10:36,140
+So it actually interestingly improves the performance as well which is a good thing.
+
+132
+00:10:36,140 --> 00:10:41,540
+Well, why don't I take a step back and have you kind of describe at a high level the
+
+133
+00:10:41,540 --> 00:10:47,180
+different types of approaches you're taking in these papers and then we can dig into more
+
+134
+00:10:47,180 --> 00:10:48,180
+specifics.
+
+135
+00:10:48,180 --> 00:10:49,340
+Sure, sure.
+
+136
+00:10:49,340 --> 00:10:54,260
+So in the first paper which was batch shaping for learning conditional channel gated and
+
+137
+00:10:54,260 --> 00:11:01,140
+networks we were basically thinking instead of gating individual layers in the network,
+
+138
+00:11:01,140 --> 00:11:06,460
+let's make it more fine-grained and gate individual filters.
+
+139
+00:11:06,460 --> 00:11:13,500
+That would give us more, basically more flexibility and more power representation power.
+
+140
+00:11:13,500 --> 00:11:19,420
+It would allow us actually to gain more interpretability as well to understand which filters
+
+141
+00:11:19,420 --> 00:11:22,060
+are firing for what classes.
+
+142
+00:11:22,060 --> 00:11:25,780
+So that was the main focus of the first paper.
+
+143
+00:11:25,780 --> 00:11:31,220
+The second paper which was on continual learning actually before starting the second paper,
+
+144
+00:11:31,220 --> 00:11:37,940
+we already knew that this idea of channel gating would be very useful for multitask learning
+
+145
+00:11:37,940 --> 00:11:43,740
+and continual learning because for example in multitask learning one problem they have.
+
+146
+00:11:43,740 --> 00:11:49,700
+So we know that if you want to learn a couple of tasks together, it generally tasks might
+
+147
+00:11:49,700 --> 00:11:55,660
+help each other so that the performance gets a little bit improved in general because
+
+148
+00:11:55,660 --> 00:11:57,980
+they can share the features among them.
+
+149
+00:11:57,980 --> 00:12:01,940
+But as a number of these tasks, in principle, suddenly you see the performance actually
+
+150
+00:12:01,940 --> 00:12:07,980
+starts dropping and that is because of feature interference.
+
+151
+00:12:07,980 --> 00:12:14,420
+By forcing a specific task to use a feature which is not relevant for the task, it actually
+
+152
+00:12:14,420 --> 00:12:19,300
+starts degrading performance and we thought that if we could use our gated networks we
+
+153
+00:12:19,300 --> 00:12:25,700
+could decide when to activate or deactivate features and not allow feature sharing if
+
+154
+00:12:25,700 --> 00:12:28,100
+a feature is not relevant.
+
+155
+00:12:28,100 --> 00:12:33,700
+And in continual learning these gates could actually serve as memory which would allow
+
+156
+00:12:33,700 --> 00:12:40,140
+us that if a feature is particularly important for a specific task, maybe we have to preserve
+
+157
+00:12:40,140 --> 00:12:44,540
+it and not allow other tasks to update it too much.
+
+158
+00:12:44,540 --> 00:12:51,700
+And in the last paper, if we mainly focused on video long range activity detection videos
+
+159
+00:12:51,700 --> 00:12:57,500
+for classification and we thought we might get as input a video which is like 10 minutes
+
+160
+00:12:57,500 --> 00:13:03,140
+but we know that there is huge amount of redundancy and relevant things happening which are not
+
+161
+00:13:03,140 --> 00:13:09,420
+really important for the actual classification task and we did dynamic gating of individual
+
+162
+00:13:09,420 --> 00:13:16,740
+snippets in the video to only focus on the important parts and actually saved a huge amount
+
+163
+00:13:16,740 --> 00:13:18,780
+of computation based on that.
+
+164
+00:13:18,780 --> 00:13:19,780
+Okay.
+
+165
+00:13:19,780 --> 00:13:24,220
+Well let's jump into the first paper because I have some questions there.
+
+166
+00:13:24,220 --> 00:13:30,140
+You mentioned that this paper is kind of shifting from thinking about gating layers to
+
+167
+00:13:30,140 --> 00:13:32,100
+gating individual filters.
+
+168
+00:13:32,100 --> 00:13:35,900
+What are the specific types of filters you're gating here?
+
+169
+00:13:35,900 --> 00:13:42,420
+So the design is something like this, assume we have a resonant block, we are augmenting
+
+170
+00:13:42,420 --> 00:13:47,420
+this while we are adding to this resonant block a gating module, this gating module gets
+
+171
+00:13:47,420 --> 00:13:51,060
+the same representation that goes to the resonant as input.
+
+172
+00:13:51,060 --> 00:13:57,300
+And its output is a bunch of gates and the number of these gates is equal to the number
+
+173
+00:13:57,300 --> 00:14:03,820
+of filters let's say in a first convolutional layer of the resonant block.
+
+174
+00:14:03,820 --> 00:14:09,900
+So one gate couple to each filter and the filter wants to activate or deactivate the use
+
+175
+00:14:09,900 --> 00:14:14,820
+of that filter and we had a bunch of criteria for example we wanted the gating module to be
+
+176
+00:14:14,820 --> 00:14:21,380
+very light because we didn't want to have a lot of additional overhead.
+
+177
+00:14:21,380 --> 00:14:26,460
+We wanted the gates to be input dependent so that they don't make just arbitrary decisions
+
+178
+00:14:26,460 --> 00:14:31,220
+but they see the input and condition and the input make a decision.
+
+179
+00:14:31,220 --> 00:14:36,580
+And last we wanted it to make a binary decision.
+
+180
+00:14:36,580 --> 00:14:39,820
+We didn't want it to be like an attention because attention would not keep saving you
+
+181
+00:14:39,820 --> 00:14:40,820
+any compute.
+
+182
+00:14:40,820 --> 00:14:45,460
+We wanted to be zero or one which means it would have been a discrete optimization problem
+
+183
+00:14:45,460 --> 00:14:49,900
+and we used gumball softmax for training this network.
+
+184
+00:14:49,900 --> 00:14:55,380
+But it was very interesting problem because we started training this model and from the
+
+185
+00:14:55,380 --> 00:14:59,580
+very beginning if you have let's say it's a classification problem let's say and you
+
+186
+00:14:59,580 --> 00:15:01,980
+have the cross entropy loss.
+
+187
+00:15:01,980 --> 00:15:06,940
+The gate automatically want to learn the most trivial solution which is just be on all
+
+188
+00:15:06,940 --> 00:15:07,940
+the time.
+
+189
+00:15:07,940 --> 00:15:12,540
+And by being on all the time it satisfy the objective of the cross entropy loss and it's
+
+190
+00:15:12,540 --> 00:15:18,620
+as if you're training a boring regular network it's just a standard regular network.
+
+191
+00:15:18,620 --> 00:15:23,220
+While we wanted the gates to behave conditionally to be sometimes off for certain types of
+
+192
+00:15:23,220 --> 00:15:25,740
+input and sometimes on.
+
+193
+00:15:25,740 --> 00:15:26,740
+And for that.
+
+194
+00:15:26,740 --> 00:15:32,700
+So training this network it kind of all at once you're not separately training the gate
+
+195
+00:15:32,700 --> 00:15:38,020
+layer and the network itself right we're training into and all at once exactly.
+
+196
+00:15:38,020 --> 00:15:43,780
+So then we started saying okay we want to specify these gates we don't want it to be always
+
+197
+00:15:43,780 --> 00:15:44,780
+on.
+
+198
+00:15:44,780 --> 00:15:49,540
+And by doing that we found out actually if you for example apply L0 loss a lot of gates
+
+199
+00:15:49,540 --> 00:15:55,500
+turn out to be permanently off which is actually not interesting either because permanently
+
+200
+00:15:55,500 --> 00:16:00,140
+off would be equivalent to these model compression techniques like pruning techniques.
+
+201
+00:16:00,140 --> 00:16:05,420
+We want the gate to be at the same time sometimes on and sometimes off.
+
+202
+00:16:05,420 --> 00:16:11,340
+So and interestingly when we decided to encourage entropy to to have a higher entropy let's
+
+203
+00:16:11,340 --> 00:16:16,980
+say sometimes on sometimes off these gates could easily cheat they could generate a probability
+
+204
+00:16:16,980 --> 00:16:23,460
+distribution center that 0.5 so assume at the output of the gate you pass it to a sigmoid
+
+205
+00:16:23,460 --> 00:16:27,340
+and then take the arc max or or a threshold 0.5.
+
+206
+00:16:27,340 --> 00:16:33,900
+It could put the distribution center 0.5 that when you add the gumball noise and and take
+
+207
+00:16:33,900 --> 00:16:39,900
+the sample it is randomly on and off it's not really like yes just randomly so it it
+
+208
+00:16:39,900 --> 00:16:45,220
+had learned to be a random dropout which was really not not something we wanted.
+
+209
+00:16:45,220 --> 00:16:50,780
+But we wanted in contrast was a U shaped by model distribution which means for certain
+
+210
+00:16:50,780 --> 00:16:55,660
+the type of data the output is 1 and for certain data it is 0 and we said okay we have
+
+211
+00:16:55,660 --> 00:17:02,100
+this strong prior why don't we actually help the gate to have a distribution like this
+
+212
+00:17:02,100 --> 00:17:08,060
+and that we that came the our other contribution which was the batch shaping loss which was
+
+213
+00:17:08,060 --> 00:17:14,740
+inspired by the Kramer fanmeasus criterion what it does it basically takes our prior distribution
+
+214
+00:17:14,740 --> 00:17:20,300
+which is a better like a U distribution we can see the F and then we also compute the
+
+215
+00:17:20,300 --> 00:17:27,020
+empirical CDF of our sampled distribution from the output of a gate for batch of data
+
+216
+00:17:27,020 --> 00:17:32,460
+and then we minimize the distance between these CDFs and the interestingly well CDF is
+
+217
+00:17:32,460 --> 00:17:39,180
+perfectly differentiable the derivative of that of a CDF is PDF so we could get that
+
+218
+00:17:39,180 --> 00:17:44,540
+freely from the forward pass and then the distributions perfectly matched each other
+
+219
+00:17:44,540 --> 00:17:49,780
+which was very interesting to see and we think this batch shaping loss could be very interesting
+
+220
+00:17:49,780 --> 00:17:54,340
+for a lot of other applications when you want to match to distributions before we go into
+
+221
+00:17:54,340 --> 00:18:00,500
+the some of the applications which distributions were matching one another was a better distribution
+
+222
+00:18:00,500 --> 00:18:07,540
+so we we forced the gate to have a better like distribution that's a 50% on 50% off
+
+223
+00:18:09,140 --> 00:18:16,500
+and that helped a lot the the gate to behave more conditionally because he knew that it can only
+
+224
+00:18:16,500 --> 00:18:22,660
+be 50% on so let's turn off turn it off for whatever irrelevant type of data and this helped the
+
+225
+00:18:22,660 --> 00:18:28,820
+network to behave really conditionally and we could also visualize when it is on when it is off
+
+226
+00:18:28,820 --> 00:18:37,060
+and it was really making sense and interestingly we saw very good behavior of this network we
+
+227
+00:18:37,060 --> 00:18:43,140
+we saw that we could actually take a resident 18 model let's make this resident 18 model
+
+228
+00:18:43,140 --> 00:18:50,420
+incredibly wide let's make it 20x wider but at an inference time before it to make it so much
+
+229
+00:18:50,420 --> 00:18:55,780
+as small that this is the site of the size of a standard resident 18 with widths one so it has
+
+230
+00:18:55,780 --> 00:19:00,420
+a lot of filters but you are only allowed to choose among them such that the size doesn't
+
+231
+00:19:00,420 --> 00:19:05,780
+doesn't change that much but on average so for more complex examples you could choose more filters
+
+232
+00:19:05,780 --> 00:19:12,420
+and easier less filters and this resident 18 at an inference time size could perform as with as
+
+233
+00:19:12,420 --> 00:19:20,260
+a resident 50 for example it performs much better than it's it's kind of an equivalent size
+
+234
+00:19:20,260 --> 00:19:26,900
+network which is with a fixed architecture and how would you compare the complexity of the
+
+235
+00:19:26,900 --> 00:19:34,180
+very wide resident 18 with the resident 50 so the complexity we we measured that in terms of
+
+236
+00:19:34,180 --> 00:19:41,300
+MAC operations so multiplication and accumulation operations so it's much much more cheaper than
+
+237
+00:19:41,300 --> 00:19:49,300
+resident 50 of course and we of course forced it to have with disparity to not how to not use
+
+238
+00:19:49,300 --> 00:19:55,620
+all the filters so that in front time it is actually still the size of a resident 18 when you were
+
+239
+00:19:55,620 --> 00:20:03,620
+applying the the bad shaping is the idea that one of your parameters is how many of the gates are
+
+240
+00:20:03,620 --> 00:20:10,820
+active is that how you how you were able to shrink down this wide resident 18 to a much more
+
+241
+00:20:10,820 --> 00:20:18,900
+narrow one yeah so so we had a prior for these for this better distribution the prior was actually
+
+242
+00:20:18,900 --> 00:20:26,980
+being 60% on and 40% off and we started with with a very strong coefficient at the start of
+
+243
+00:20:26,980 --> 00:20:33,380
+training so all the gates are forced to take that shape but we as we go on we slowly reduced that
+
+244
+00:20:33,940 --> 00:20:40,020
+that coefficient so that the model has a little bit more flexibility and then we see that some of
+
+245
+00:20:40,020 --> 00:20:45,540
+the gates might actually just get rid of that conditionality and go and be completely on those are
+
+246
+00:20:45,540 --> 00:20:50,100
+maybe the filters which are very important and it's like too fundamental they they need to be
+
+247
+00:20:50,100 --> 00:20:56,260
+always executed but there's some gates all the majority of the gates keep that shape but we also
+
+248
+00:20:56,260 --> 00:21:03,700
+added the L0 loss and L0 loss has the ability to actually throw away if a filter is completely
+
+249
+00:21:03,700 --> 00:21:10,500
+useless so for example if due to poor initialization some of the filters turned out not to be that
+
+250
+00:21:10,500 --> 00:21:18,100
+useful for the classification task it could actually push it down to completely off so we have
+
+251
+00:21:18,100 --> 00:21:24,260
+a combination of completely off filters and completely on filters but the majority conditional
+
+252
+00:21:24,260 --> 00:21:30,340
+filters and they take the conditional ones take different shapes some of them might be 80% off
+
+253
+00:21:30,340 --> 00:21:37,620
+20% on and some of them 80% on 20% off and we using the coefficient of these two losses we
+
+254
+00:21:37,620 --> 00:21:45,300
+controlled how much Mac we want to save basically now it sounds like you if I'm understanding this
+
+255
+00:21:45,300 --> 00:21:51,380
+right you kind of set off with this idea of building these conditional channel gate and networks
+
+256
+00:21:51,940 --> 00:21:58,340
+and when you saw kind of the gates you know all on or all all for kind of flipping randomly
+
+257
+00:21:58,340 --> 00:22:05,220
+back and forth were these presumably these were your initial experiments and they were surprising
+
+258
+00:22:05,220 --> 00:22:12,660
+like did you I'm curious as you were seeing these kind of results you know how did you
+
+259
+00:22:12,660 --> 00:22:19,700
+note it to go to the to the batch shaping you know as opposed to I'm thinking about you know maybe
+
+260
+00:22:19,700 --> 00:22:28,260
+this just doesn't want to work right yeah exactly so so we had several minutes
+
+261
+00:22:28,260 --> 00:22:34,660
+meetings with Maxwell and we had a lot of brainstorming sessions very interesting one one day he came
+
+262
+00:22:34,660 --> 00:22:41,300
+so I was plotting the histogram of the gate output a lot of them were centered in the middle
+
+263
+00:22:41,300 --> 00:22:46,180
+and he was so sharp like as soon as he saw he said oh these are like random dropout you want
+
+264
+00:22:46,180 --> 00:22:52,500
+these U shape right and I said oh I want that U shape but it said let's think about how how to
+
+265
+00:22:52,500 --> 00:22:58,660
+make that U shape and we thought of a lot of different experiments for example pushing the values
+
+266
+00:22:58,660 --> 00:23:07,300
+to be away from 0.5 so the values tended to be in the center we decided to make it pushing towards
+
+267
+00:23:07,300 --> 00:23:12,340
+the two sides but that didn't work we we tried the entropy as a loss that didn't work because the
+
+268
+00:23:12,340 --> 00:23:19,540
+gating much it could easily cheat and after everything in the middle and a lot of losses actually
+
+269
+00:23:19,540 --> 00:23:25,700
+led to not conditionality so complete pruning which is like static compression methods which
+
+270
+00:23:25,700 --> 00:23:34,020
+were we were not interested we wanted the conditional way of doing that and over time we thought
+
+271
+00:23:34,020 --> 00:23:41,060
+that actually you cannot so a single gate you cannot cause a specific distribution without
+
+272
+00:23:41,060 --> 00:23:46,740
+regarding the entire batch so that the whole point was that this distribution is only defined
+
+273
+00:23:46,740 --> 00:23:52,340
+well when you take the entire batch into account so you know in this batch there is a collection
+
+274
+00:23:52,340 --> 00:23:58,580
+of data points and you want to these data points to get to behave differently for some of them
+
+275
+00:23:58,580 --> 00:24:03,140
+we wanted to be on and for some of them to be off and we didn't know which ones are going to be
+
+276
+00:24:03,140 --> 00:24:09,940
+on off isn't it the network has to learn and we actually didn't even know of the so at least
+
+277
+00:24:09,940 --> 00:24:16,260
+I didn't know of the Kramer-Famizus criterion we came up with this loss and then later stage
+
+278
+00:24:16,260 --> 00:24:23,540
+we found out oh did this Kramer-Famizus criteria did exist and it was like proposed like 40-50
+
+279
+00:24:23,540 --> 00:24:29,220
+years ago but it was never used in the deep learning and we made it like differentiable and
+
+280
+00:24:30,180 --> 00:24:36,740
+and there is one key point inside that and that when you get the output of a gate you have to sort it
+
+281
+00:24:37,620 --> 00:24:45,220
+and and then generate CDF of the sorted sorting values and then during the backprop you have to
+
+282
+00:24:45,220 --> 00:24:51,460
+remember to un sort the operation so that the gradient goes through the right input and the
+
+283
+00:24:51,460 --> 00:24:58,340
+right direction so there were a bunch of tricks but then we tried to basically narrow down the
+
+284
+00:24:58,340 --> 00:25:04,180
+problem make it as simple as possible to find out what makes it work and this turned out to work
+
+285
+00:25:04,180 --> 00:25:08,900
+nice nice and you you mentioned that this batch shaping technique has your starting to
+
+286
+00:25:08,900 --> 00:25:15,380
+mention that this back shaping technique has other applications sure sure I'm thinking that it could
+
+287
+00:25:15,380 --> 00:25:21,380
+potentially be used for whatever application in which you want so you want to match the distribution
+
+288
+00:25:21,380 --> 00:25:27,220
+of a parameterized feature in your network let's say a feature map to any distribution for example
+
+289
+00:25:27,220 --> 00:25:31,460
+in batch norm we may want it to be normally distributed we could actually enforce that with the
+
+290
+00:25:31,460 --> 00:25:38,820
+batch shaping loss and basically in whatever application that you want to impose a prior on the
+
+291
+00:25:38,820 --> 00:25:46,260
+distribution of your feature maps you could do that in this with this technique. So the next paper
+
+292
+00:25:46,260 --> 00:25:52,260
+where you're looking at task where continual learning is that building on this batch norm
+
+293
+00:25:52,260 --> 00:25:57,620
+or sorry batch shaping technique or is it a separate research in the direction of the
+
+294
+00:25:57,620 --> 00:26:04,340
+conditional gated networks. So it is a follow up on the channel gated networks we use the same
+
+295
+00:26:04,340 --> 00:26:09,140
+the exact same type of network but instead of applying it to ResNet because we knew it would work
+
+296
+00:26:09,140 --> 00:26:14,660
+for regular networks as well like VGG type we we applied it both for regular types of models
+
+297
+00:26:14,660 --> 00:26:22,420
+and and ResNet models so maybe I could briefly tell of talk about the continual learning problem
+
+298
+00:26:22,420 --> 00:26:30,100
+well in continual learning we we have basically this setting that you want to learn a specific task
+
+299
+00:26:30,100 --> 00:26:36,180
+let's say task a using a neural network and you train this model using data from task a and
+
+300
+00:26:36,180 --> 00:26:42,260
+get a very good accuracy let's say then you go to task b but you assume you should consider that
+
+301
+00:26:42,260 --> 00:26:48,660
+you will never have access to data from task a anymore and now you want to train this previously
+
+302
+00:26:48,660 --> 00:26:54,900
+trained model again such that it performs very good on task b but doesn't forget what it has
+
+303
+00:26:54,900 --> 00:27:00,340
+learned on task a in reality the fundamental problem with continual learning is that we have the
+
+304
+00:27:00,340 --> 00:27:05,220
+catastrophic forgetting problem because as soon as you update the weights they completely forget
+
+305
+00:27:05,220 --> 00:27:10,820
+what they previously learned and that is actually a fundamental problem we have in training neural
+
+306
+00:27:10,820 --> 00:27:16,980
+networks that's why we when training we train these models using many epochs or we have to shuffle
+
+307
+00:27:16,980 --> 00:27:21,940
+the data all the all the time we cannot just take a batch and perfectly learn it and go to the
+
+308
+00:27:21,940 --> 00:27:27,060
+next batch to perfectly learn it because we keep forgetting and this problem also arises in
+
+309
+00:27:27,060 --> 00:27:34,820
+continual learning so our idea was that we could use these channel gated networks
+
+310
+00:27:36,660 --> 00:27:43,940
+to bring several benefits but but let me let me before that tell about two very fundamental
+
+311
+00:27:43,940 --> 00:27:52,580
+approaches which people use one of them is is basically maybe a work by deep mind on elastic
+
+312
+00:27:52,580 --> 00:27:58,660
+weight consolidation what they do they measure at the end of training on task one they measure
+
+313
+00:27:58,660 --> 00:28:05,380
+the importance of the individual filters using the diagonals of the Fisher matrix that if a
+
+314
+00:28:05,380 --> 00:28:11,220
+feature if a particular weight is very important let's not update it too much let's slow down the
+
+315
+00:28:11,220 --> 00:28:15,700
+learning on those weights and the features that were less important we could actually
+
+316
+00:28:17,300 --> 00:28:22,500
+learn them better or make them more available for the future task well obviously the problem with
+
+317
+00:28:22,500 --> 00:28:29,060
+this method is that as you as you go on and on and learn more tasks you tend to have this trade
+
+318
+00:28:29,060 --> 00:28:35,860
+off between learning new things and not being able to change things previously learned and this
+
+319
+00:28:35,860 --> 00:28:42,820
+approach works very well on simple data sets like MNES for for now for let's say two or three tasks
+
+320
+00:28:42,820 --> 00:28:48,260
+but as soon as you increase the number of tasks it fails there is another vein of approaches
+
+321
+00:28:49,060 --> 00:28:55,060
+which are basically progressive neural networks which they say okay let's train our model on task A
+
+322
+00:28:55,060 --> 00:29:02,500
+and then when we go to the next task list add neurons and learn task B and we have the ability to
+
+323
+00:29:02,500 --> 00:29:08,740
+learn previously to use previously learned features but are not able to change them the problem
+
+324
+00:29:08,740 --> 00:29:15,460
+with this approach is that as you add neurons it will become really not very scalable because your
+
+325
+00:29:15,460 --> 00:29:20,740
+model is going to get huge and also you're forcing to share previously learned features which
+
+326
+00:29:20,740 --> 00:29:28,260
+might be irrelevant for the current task that is coming so so our idea was was like this so we
+
+327
+00:29:28,260 --> 00:29:35,140
+thought we let's use our channel gated networks so you have task one you you train it using our
+
+328
+00:29:35,140 --> 00:29:42,340
+channel gated network and each of the layers have a specific gating module which is specific for
+
+329
+00:29:42,340 --> 00:29:48,420
+that the specific task so each task has its own gating modules these gating modules are not only
+
+330
+00:29:48,420 --> 00:29:58,740
+task dependent but also input dependent so they basically during training we basically enforce
+
+331
+00:29:58,740 --> 00:30:05,620
+these gates to not use all the filters because we want to make a lot of filters available for future
+
+332
+00:30:05,620 --> 00:30:13,060
+tasks so we impose a lot of sparsity let's say a specific layer has 100 filters using channel gated
+
+333
+00:30:13,060 --> 00:30:21,140
+methods we and sparsity we enforce that it for example uses 20 of out of the 100 filters available
+
+334
+00:30:21,140 --> 00:30:28,420
+and because filters or these gates are input dependent as well not all not all of these 20 filters
+
+335
+00:30:28,420 --> 00:30:34,740
+will be actually used for all the examples some may use only five filters some maybe the entire
+
+336
+00:30:34,740 --> 00:30:43,460
+filters this makes these these these channel gated models extremely efficient and very with very
+
+337
+00:30:43,460 --> 00:30:50,260
+low computational cost you're essentially adding the task as a another input to the channel
+
+338
+00:30:50,260 --> 00:30:55,380
+gate that you already had before yes that would then put dependent yes but then we go to the
+
+339
+00:30:55,380 --> 00:31:04,020
+to a new task now the new task is going to have its own gating module well these gating modules
+
+340
+00:31:04,020 --> 00:31:09,220
+are actually very important things because they if we study them how they are firing they could
+
+341
+00:31:09,220 --> 00:31:14,740
+easily tell us how important the feature is if a filter is if a gate is firing too often it means
+
+342
+00:31:14,740 --> 00:31:19,700
+the filter is going to be used all the time we should never change this filter so what we do we look
+
+343
+00:31:19,700 --> 00:31:26,660
+at the the most important features and in practice we actually even because of a heavy sparsification
+
+344
+00:31:26,660 --> 00:31:35,220
+if a if a filter is selected even only once we chose to keep it and freeze it so all the features
+
+345
+00:31:35,220 --> 00:31:41,220
+or the filters that were important for task one we freeze all of them and all the rest of the
+
+346
+00:31:41,220 --> 00:31:46,180
+filters which we are not used we re-initialize them and make them available for the new task
+
+347
+00:31:46,180 --> 00:31:53,780
+and the new task can obviously learn the new filter is based on based on basically its own objective
+
+348
+00:31:53,780 --> 00:32:00,900
+but it also has the option using its own gating modules to to choose to use previously learned
+
+349
+00:32:00,900 --> 00:32:06,180
+features as well it is not allowed to update them but it can choose to use or not use them
+
+350
+00:32:07,140 --> 00:32:12,820
+which would make these networks to have positive transfer of information but not forcing it
+
+351
+00:32:12,820 --> 00:32:19,140
+so if a feature is not irrelevant it will not be shared and you can keep growing and increasing
+
+352
+00:32:19,140 --> 00:32:24,740
+more tasks the great thing is that these gates are always input dependent and inference time
+
+353
+00:32:24,740 --> 00:32:31,540
+they are extremely light so if you make this network extremely wide still it would be super light
+
+354
+00:32:31,540 --> 00:32:36,980
+in at the inference time because only a very small subset of filters are going to be selected
+
+355
+00:32:36,980 --> 00:32:48,580
+at each layer so how exactly are you allowing the the tasks to choose the filters from the previous
+
+356
+00:32:48,580 --> 00:32:55,380
+tasks is this based on initialization or something something else so so just imagine we have a
+
+357
+00:32:55,380 --> 00:33:02,260
+resonant block and in and in the let's say in the first convolutional layer we have 100 filters
+
+358
+00:33:02,260 --> 00:33:08,500
+10 of them are frozen so they are not he's the gate is not or they're not updateable
+
+359
+00:33:08,500 --> 00:33:14,660
+and 90 of them are are learnable so the gating module gets the same representation that goes to
+
+360
+00:33:14,660 --> 00:33:21,220
+these resonant block as input and chooses okay should I use this filter number one which is
+
+361
+00:33:21,220 --> 00:33:26,900
+not updateable or not it makes a binary decision pretty much like before but it cannot update the
+
+362
+00:33:26,900 --> 00:33:33,540
+filter it just has to say choose to use or not but for the rest of a 90 it can update them
+
+363
+00:33:34,660 --> 00:33:42,340
+and so we trained this model and very interestingly we saw that there were actually a lot of
+
+364
+00:33:42,340 --> 00:33:49,460
+SOTA and very good methods already in the literature and on four data sets we were able to
+
+365
+00:33:49,460 --> 00:33:56,660
+to achieve as good or better performance than all competing methods but then we wanted to make
+
+366
+00:33:56,660 --> 00:34:02,820
+this a little bit more challenging there is a specific setting in which you actually don't even
+
+367
+00:34:02,820 --> 00:34:10,020
+know which tasks you are trained you are operating on so up to now we were assuming that you know
+
+368
+00:34:10,020 --> 00:34:16,740
+which task you are going to work on at test time and you would only activate that that branch
+
+369
+00:34:16,740 --> 00:34:22,260
+of the network and the gating modules of that is specific task but in some cases you might not even
+
+370
+00:34:22,260 --> 00:34:27,860
+know which task you are working on and this is a very complicated setting and there is not much
+
+371
+00:34:27,860 --> 00:34:36,500
+working the literature and what we did was that so we we assumed from the start of at the inference
+
+372
+00:34:36,500 --> 00:34:41,940
+time so you could train as usual but at inference time you would when you get an input you would
+
+373
+00:34:41,940 --> 00:34:47,140
+gate them with different hypothesis this is task one this is task two this is task three the same
+
+374
+00:34:47,140 --> 00:34:53,540
+input but at the end of the network we we added the task classifier which looks at the gating
+
+375
+00:34:53,540 --> 00:34:59,540
+patterns of this feature map how how this feature map has been altered based on different
+
+376
+00:34:59,540 --> 00:35:06,580
+hypothesis and based on that makes a makes a decision that which task you are you should be classifying
+
+377
+00:35:06,580 --> 00:35:12,180
+this network but but of course this classifier at the end of the network is going to suffer from
+
+378
+00:35:12,180 --> 00:35:16,980
+forgetting as well because you have as you increase the number of tasks you have to retrain this
+
+379
+00:35:16,980 --> 00:35:26,420
+classifier and we chose to use a generative model to remember the data that was used for previous
+
+380
+00:35:26,420 --> 00:35:32,500
+tasks so when we are training on task one we are also using a generative model to learn to generate
+
+381
+00:35:32,500 --> 00:35:38,820
+data from task one and these generated are some generated samples are used for training the task
+
+382
+00:35:38,820 --> 00:35:45,940
+classifier at the end they're not that many methods but we there was one method from cvpr 19 that
+
+383
+00:35:45,940 --> 00:35:51,380
+we compared against and we were outperforming it on the on all the data sets but actually a very
+
+384
+00:35:51,380 --> 00:35:57,540
+large margin but it's still a very complex task it's like it sounds like your model is starting to
+
+385
+00:35:57,540 --> 00:36:03,140
+get very complex when you start to add a generative model on top of everything you've already done
+
+386
+00:36:03,140 --> 00:36:12,340
+yeah definitely if this is kind of a problem which is very complex already and adding the complexity
+
+387
+00:36:12,340 --> 00:36:18,500
+of the generative model and being able to generate very sharp and it nice examples just
+
+388
+00:36:18,500 --> 00:36:23,620
+adds more complexity to the continual learning problem and do you think that there's something
+
+389
+00:36:24,820 --> 00:36:34,260
+in particular that you've done with the application of conditional networks that allows the
+
+390
+00:36:34,260 --> 00:36:38,820
+generative model to work or could you have that could you then now that you've seen some good
+
+391
+00:36:38,820 --> 00:36:43,940
+results with the generative model take that back and apply that to other aspects of the network
+
+392
+00:36:43,940 --> 00:36:51,540
+without the conditional gating for the unknown multitask problem that that's a very good question
+
+393
+00:36:51,540 --> 00:36:58,500
+so first of all these gating models sorry these generative models are not going to be used at
+
+394
+00:36:58,500 --> 00:37:05,700
+the inference time we don't need them it's just used for training the basically the task classifier
+
+395
+00:37:05,700 --> 00:37:12,020
+and after training you can throw them away but we also actually thought about training this
+
+396
+00:37:12,020 --> 00:37:19,620
+generative model using a unified giant generative model which can be gated as well in the same
+
+397
+00:37:19,620 --> 00:37:25,540
+way that we are we are training this this inference model we didn't try that but I think it would be
+
+398
+00:37:25,540 --> 00:37:31,940
+an interesting idea to use gating for for generating examples as well so creating with task one
+
+399
+00:37:31,940 --> 00:37:38,100
+generate examples of task one things like that we've got a third paper that we wanted to make
+
+400
+00:37:38,100 --> 00:37:47,060
+sure to cover as well and that's the time gate paper refresh us on on the setting that that
+
+401
+00:37:47,060 --> 00:37:56,020
+paper is looking into sure so in that paper we primarily focused on recognizing long range
+
+402
+00:37:56,020 --> 00:38:02,340
+activities in in long range videos so the problem with long range activity what what first of
+
+403
+00:38:02,340 --> 00:38:08,900
+what do we call when do we call a video a long range activity so assume we have a 10-minute
+
+404
+00:38:08,900 --> 00:38:15,780
+video and all that is happening inside that video is a guy skiing and the label of that video
+
+405
+00:38:15,780 --> 00:38:21,300
+is skiing that's going to be so easy to classify because even if you look at a single frame you
+
+406
+00:38:21,300 --> 00:38:26,900
+would be able to classify the entire video this we don't call a long range activity a long range
+
+407
+00:38:26,900 --> 00:38:33,220
+activity could be for example making a pancake because it has so many atomic small action items
+
+408
+00:38:33,220 --> 00:38:39,060
+which you have to recognize getting getting the egg from the from the freeze for example getting
+
+409
+00:38:39,060 --> 00:38:44,100
+powder scrambling or mixing everything together and I'm putting on the path so it has a lot of
+
+410
+00:38:44,100 --> 00:38:50,340
+atomic activities and in order to recognize that this action is making a pancake you have to
+
+411
+00:38:50,340 --> 00:38:56,660
+identify all of this but all of these could happen at different time intervals inside a 20-minute
+
+412
+00:38:56,660 --> 00:39:03,700
+video and if you want to go and classify frame by frame all these 20-minute video is gonna explode
+
+413
+00:39:03,700 --> 00:39:09,220
+it's gonna cost you need to recognize all that or can you just recognize the round thing you know
+
+414
+00:39:09,220 --> 00:39:13,460
+kind of with bubbles and then getting flipped at the end and then you figure out you you're making
+
+415
+00:39:13,460 --> 00:39:18,820
+a pancake it could be that there are a lot of classes which are similar for example scrambled eggs
+
+416
+00:39:18,820 --> 00:39:24,260
+might be making it scrambled eggs could be very similar as well and maybe there are items like
+
+417
+00:39:24,260 --> 00:39:30,020
+picking up the flower could also be a key item here that would help you identify that it's
+
+418
+00:39:30,020 --> 00:39:36,100
+actually making a pancake and picking out the flower by itself might not be enough because
+
+419
+00:39:36,100 --> 00:39:42,100
+the person could be making a very puffed cake as well so you need really multiple things to be
+
+420
+00:39:42,100 --> 00:39:48,980
+able to to recognize the entire video so for the setting you've got this long video with multiple
+
+421
+00:39:48,980 --> 00:39:57,940
+tasks being illustrated tasks in the human behavior sense yeah and you're trying to classify
+
+422
+00:39:57,940 --> 00:40:07,540
+all of the entire video as one thing that's happening exactly exactly so the so one of the very
+
+423
+00:40:07,540 --> 00:40:13,140
+common way of doing that is if you divide this entire video into chunks of snippets which let's
+
+424
+00:40:13,140 --> 00:40:20,580
+say each snippet is eight frames and then you could give it to a very heavy model like i3d or
+
+425
+00:40:20,580 --> 00:40:27,700
+or a resident 3d model that would make a representation out of these eight frames and then you do that
+
+426
+00:40:27,700 --> 00:40:32,340
+for like a sliding window all throughout your network then you have a classifier that looks at
+
+427
+00:40:32,340 --> 00:40:37,860
+these features and does the classification this is going to be extremely expensive so what we saw
+
+428
+00:40:37,860 --> 00:40:44,820
+we saw that we could maybe actually do a gating using a gating module dynamic that dynamically
+
+429
+00:40:44,820 --> 00:40:51,060
+looks at these frames and decides which parts of the video are interesting to look at so our
+
+430
+00:40:51,060 --> 00:40:58,820
+approach basically has made up of two steps it has a very very light classifier or basically
+
+431
+00:40:58,820 --> 00:41:07,940
+network in the start which gets a very compact representation of the of an input frame then we have
+
+432
+00:41:07,940 --> 00:41:12,980
+a gating module and this gating module is conditioned both on the on the segment and also looks at
+
+433
+00:41:12,980 --> 00:41:21,220
+the context so not only the current frame but also at the other frames and using this gating
+
+434
+00:41:21,220 --> 00:41:28,820
+module we are able to to say whether this particular frame is relevant for classifying this video
+
+435
+00:41:28,820 --> 00:41:36,420
+or not and only the ones which are the most relevant and we could also similar to previous works
+
+436
+00:41:36,420 --> 00:41:42,420
+impose a sparsity so that the network the light network does not pick so many frames only
+
+437
+00:41:42,420 --> 00:41:49,700
+a limited numbers and only the most relevant ones would go to a heavy network and do the actual
+
+438
+00:41:49,700 --> 00:41:55,780
+heavy operation which is which is common we use the same models as well and the good thing is
+
+439
+00:41:55,780 --> 00:42:02,180
+that you could couple these lights network with any model you could actually use very super efficient
+
+440
+00:42:02,180 --> 00:42:07,300
+models which are also already implemented and complete with this gating module it would still
+
+441
+00:42:07,300 --> 00:42:13,700
+give you a lot of benefit and no matter what model we use as the main feature representation
+
+442
+00:42:13,700 --> 00:42:20,180
+extractor we roughly saved half of the mac operations and even at that point we slightly got
+
+443
+00:42:20,180 --> 00:42:27,220
+improved performance maybe because we we are able to help the network focus only on the
+
+444
+00:42:27,220 --> 00:42:32,900
+relevant parts of the video and get over from the distractions and actually get slightly better
+
+445
+00:42:32,900 --> 00:42:40,420
+performance even even at half the computation cost and this approach is definitely orthogonal to
+
+446
+00:42:40,420 --> 00:42:47,140
+a lot of compression techniques because some some approaches focus on making the models compact
+
+447
+00:42:47,140 --> 00:42:52,740
+and let's say you could you could basically do our channel gating on these models as well or
+
+448
+00:42:52,740 --> 00:42:59,380
+you could do static compression methods and adding these gating modules to only focus on the
+
+449
+00:42:59,380 --> 00:43:03,700
+relevant parts of the video could really bring down the computation cost overall.
+
+450
+00:43:03,700 --> 00:43:11,380
+And so is the use of channel gating or conditional gating in this context you know how similar is
+
+451
+00:43:11,380 --> 00:43:16,980
+it you know an application is conditional gating in the other two papers it seems like it's
+
+452
+00:43:16,980 --> 00:43:23,300
+somewhat different. It is somewhat different actually so we use the same gumball softmax trick
+
+453
+00:43:23,300 --> 00:43:31,860
+trick for for training these gating modules but it is basically for training this we we sought
+
+454
+00:43:31,860 --> 00:43:39,700
+of first extracting a bunch of concept kernels concept kernels could be extracted using
+
+455
+00:43:40,660 --> 00:43:45,620
+let's say a network which is pre-trained on the data set you want to work on and getting some
+
+456
+00:43:45,620 --> 00:43:51,460
+representations let's say I want 100 kernels at the end and you you basically compress this data
+
+457
+00:43:51,460 --> 00:43:57,780
+and say these are the core concepts of my data set and then this gate as inputs instead of
+
+458
+00:43:57,780 --> 00:44:03,620
+getting or training or during training this is before the start of the training you could this
+
+459
+00:44:03,620 --> 00:44:11,940
+is an independent concept so you could extract that anyway okay and then for these gating is so
+
+460
+00:44:11,940 --> 00:44:16,340
+previously we had for example as input to our gates the representation coming from the
+
+461
+00:44:16,340 --> 00:44:22,420
+resident block here is very different here the gating module would get as input the representation
+
+462
+00:44:22,420 --> 00:44:27,300
+coming from the last layer of the light network in the start of the model so the light
+
+463
+00:44:27,300 --> 00:44:34,420
+network first give us some representation and using that and and also we do a dot product of that
+
+464
+00:44:34,420 --> 00:44:39,860
+with the concept kernels to see if there is anything interesting in this frame given the concept
+
+465
+00:44:39,860 --> 00:44:45,940
+kernels that I know about this data set and this dot product would go to our gating module and
+
+466
+00:44:45,940 --> 00:44:51,860
+this gating module well of course it uses the gumball softmax trick which which we've been using
+
+467
+00:44:51,860 --> 00:44:59,460
+previously as well I think I'm struggling with what is actually gated in this are you gating the
+
+468
+00:45:00,020 --> 00:45:06,580
+kind of the input flowing into the kind of the the overall network or you you're still doing
+
+469
+00:45:06,580 --> 00:45:11,540
+something similar where you're you're gating you know resident modules or filters or something
+
+470
+00:45:11,540 --> 00:45:20,500
+like that the former so so the light net and a heavy net and if the light net says the current
+
+471
+00:45:20,500 --> 00:45:29,380
+frame is irrelevant the entire frame and and actually this snippet around it so we we analyze the
+
+472
+00:45:29,380 --> 00:45:35,220
+center of the snippet let's say we have eight frames that goes to the heavy net but the light net
+
+473
+00:45:35,220 --> 00:45:40,660
+only analyzes that the middle frame of these eight among these eight frames and if you know it's
+
+474
+00:45:40,660 --> 00:45:48,740
+not interesting then we just completely get not analyze the entire snippet okay and so you've got
+
+475
+00:45:48,740 --> 00:45:54,900
+these eight frames and you're analyzing the center frame are you striding or is it eight and then
+
+476
+00:45:55,460 --> 00:46:02,660
+the the next day uniformly sampled and so uniform sample a lot of these segments let's say eight
+
+477
+00:46:02,660 --> 00:46:08,260
+frame eight frame eight frame until the end to cover the entire video and the only the two net only
+
+478
+00:46:08,260 --> 00:46:14,020
+analyzes the center frame among these let's say the frame number four and based on that makes
+
+479
+00:46:14,020 --> 00:46:21,940
+a decision is these the entire chunk of frames useful for the current classification task or not
+
+480
+00:46:21,940 --> 00:46:29,700
+are there other applications to this then video or why did why did you even go after this
+
+481
+00:46:29,700 --> 00:46:38,100
+particular problem so we thought gating in general would benefit a lot in let's say classification
+
+482
+00:46:38,100 --> 00:46:44,820
+problems or or we even tried that on segmentation problem as well but a dataset with the biggest
+
+483
+00:46:44,820 --> 00:46:52,340
+amount of redundancy we think is video video analyzing video there is so much correlation in
+
+484
+00:46:52,340 --> 00:46:57,460
+in different frames that you're basically observing the same thing over time that it makes it that
+
+485
+00:46:57,460 --> 00:47:05,620
+the most low hanging fruit for for gating operations we are actually following up a lot of tasks
+
+486
+00:47:05,620 --> 00:47:11,940
+using a conditional compute for video analysis as well including video segmentation classification
+
+487
+00:47:11,940 --> 00:47:19,300
+etc apologies if you mentioned this already but the specific results of this in terms of the
+
+488
+00:47:20,340 --> 00:47:26,500
+videos and your the computational complexity all that what did you end up finding so you found
+
+489
+00:47:26,500 --> 00:47:33,300
+that for example no matter what heavy type architecture we we use whether it is the most complex
+
+490
+00:47:33,300 --> 00:47:41,060
+resident 3d model let's say resident 3d 101 or it's a very efficient model we can reduce the cost
+
+491
+00:47:41,060 --> 00:47:46,900
+by half while still getting slightly better performance than the original model which so we both
+
+492
+00:47:46,900 --> 00:47:53,060
+have and perform better and one very interesting property of this this approach is that it makes
+
+493
+00:47:53,060 --> 00:47:59,220
+interprecipibility very easy because you could immediately look at the chunks of video in the entire
+
+494
+00:47:59,220 --> 00:48:05,540
+10 minute video that are selected and are they actually correlated so you could very easily analyze
+
+495
+00:48:05,540 --> 00:48:13,540
+if the gates are working properly or not and did you see any interpretability results in other
+
+496
+00:48:13,540 --> 00:48:19,140
+couple of papers or problems that you were looking at as a result of this yeah absolutely so in
+
+497
+00:48:19,140 --> 00:48:25,540
+the first work for the channel gating we we targeted some of the some of the gates that would
+
+498
+00:48:25,540 --> 00:48:31,220
+uh that the most interesting gates are the ones which are very selective in firing for example
+
+499
+00:48:31,220 --> 00:48:36,340
+only firing five percent of the times if you look at them the examples look very similar for
+
+500
+00:48:36,340 --> 00:48:44,820
+example only tiny insects in the middle of grasses are detected so by by this particular gate
+
+501
+00:48:44,820 --> 00:48:51,540
+or for example all the giant creatures in in the water are detected by a particular gate
+
+502
+00:48:51,540 --> 00:48:56,980
+and then in the continual learning it was we thought it would be harder to recognize these these
+
+503
+00:48:56,980 --> 00:49:05,220
+gates uh to to see differences but it was uh very very interesting we we looked at a gate which was
+
+504
+00:49:05,220 --> 00:49:11,060
+running in all different tasks let's say the task was one versus two classification for task one
+
+505
+00:49:11,700 --> 00:49:17,860
+three versus four for task two four versus five task three et cetera and there was a gate
+
+506
+00:49:17,860 --> 00:49:23,860
+that would activate whenever the wall in in the first like blanks i didn't recognize it but then
+
+507
+00:49:23,860 --> 00:49:29,700
+i focused on it said okay this this gate is actually firing for all the bolt phones and all the
+
+508
+00:49:29,700 --> 00:49:36,500
+ones which are like the tiny phones uh which is the the defter is not very bold it would not fire
+
+509
+00:49:36,500 --> 00:49:41,700
+which which found that feature interesting but but it's in general it's a little bit more difficult
+
+510
+00:49:41,700 --> 00:49:47,060
+uh when the number of classes is not huge to find interpretability but for internet for example
+
+511
+00:49:47,060 --> 00:49:52,820
+it was very easy to to see uh interesting uh to get interesting insights of what these
+
+512
+00:49:52,820 --> 00:50:01,860
+gate is doing yeah yeah this this work in conditional gated networks yeah how does this um
+
+513
+00:50:01,860 --> 00:50:07,620
+ultimately kind of get expressed in you know products and and things like that what do you do with
+
+514
+00:50:07,620 --> 00:50:14,100
+you know this stuff that you're you know learning and discovering uh so this is currently mostly
+
+515
+00:50:14,100 --> 00:50:21,700
+at our at a research level of course um we we have been um so the the entire vision is that
+
+516
+00:50:21,700 --> 00:50:27,780
+we could probably at some point have a very very giant network that could be very sparsely activated
+
+517
+00:50:27,780 --> 00:50:32,820
+it could even work for multiple tasks completing independent tasks and then condition on the input
+
+518
+00:50:32,820 --> 00:50:38,740
+it would find out which path in the network uh it would it would actually should should need to be
+
+519
+00:50:38,740 --> 00:50:44,500
+activated so at the inference time it's gonna be very light but uh but of course um the first step
+
+520
+00:50:45,300 --> 00:50:50,900
+that we took we talked to the software team and uh to see what are the requirements for
+
+521
+00:50:50,900 --> 00:51:00,020
+for uh making use of such models and usually um our discussions were were so we we need to convince
+
+522
+00:51:00,020 --> 00:51:06,980
+them that we need to implement a specific layer is that that would allow uh implementing this
+
+523
+00:51:06,980 --> 00:51:13,780
+on our our particular hardware uh we are in the middle of a discussion and uh trying to use this
+
+524
+00:51:13,780 --> 00:51:20,260
+channel gating in a in a number of works um but in general a lot of times this when the when the
+
+525
+00:51:20,260 --> 00:51:26,580
+trick that we are using or researching is straightforward that could have very fast impact and go
+
+526
+00:51:26,580 --> 00:51:33,380
+directly into the product for example one of my uh colleagues uh Marcus Nagel and and Martin
+
+527
+00:51:33,380 --> 00:51:42,580
+Taiman uh have been working on a quantization paper uh which was from iccv 2019 i think uh and this
+
+528
+00:51:44,020 --> 00:51:49,860
+paper was working very well they they talked to the software team it was immediately implemented
+
+529
+00:51:49,860 --> 00:51:56,820
+and uh it was suddenly like in a in a matter of a couple of months event to our Snapdragon
+
+530
+00:51:56,820 --> 00:52:03,220
+platform and people could could actually use it and then later on we got in our uh private
+
+531
+00:52:03,220 --> 00:52:08,260
+what what's that group i got a message that this uh this particular quantization method is now
+
+532
+00:52:08,260 --> 00:52:14,260
+employed by this very famous app that i'm not going to name it but but but but not suddenly maybe
+
+533
+00:52:14,260 --> 00:52:19,380
+hundreds of millions of people are going to are going to make use of the uh the the technique that
+
+534
+00:52:19,380 --> 00:52:24,740
+you developed it was completed research at some point but now it is actually in your product
+
+535
+00:52:24,740 --> 00:52:32,580
+wow wow but something like uh like this work is it um you know to what degree is it you know
+
+536
+00:52:32,580 --> 00:52:40,340
+broadly applicable uh to a wide variety of of applications and in particular we've talked about
+
+537
+00:52:40,340 --> 00:52:46,660
+you know different applications that it it can be applied to but uh in each of those cases
+
+538
+00:52:46,660 --> 00:52:56,100
+you're kind of tuning the application of um the conditional gating uh i think quite a bit
+
+539
+00:52:56,100 --> 00:53:03,620
+you know do you do you see a uh a point in which this is um a kind of off the shelf you know
+
+540
+00:53:03,620 --> 00:53:09,060
+thing that's automatically applied across different use cases you know what's the the path towards
+
+541
+00:53:09,060 --> 00:53:16,900
+making it generally applicable and that's a good question i think uh so i'm really advocating
+
+542
+00:53:16,900 --> 00:53:23,060
+the use of conditional compute uh in general i think it is biologically also very uh very
+
+543
+00:53:23,060 --> 00:53:30,580
+uh relevant because uh a lot of uh uh the models of the brain say say that the neurons are activated
+
+544
+00:53:30,580 --> 00:53:35,860
+in a very sparse fashion and it's not like a pruning method that some of the neurons are never
+
+545
+00:53:35,860 --> 00:53:41,620
+activated it's it's really dynamic sometimes some elements are activated and sometimes not so i
+
+546
+00:53:41,620 --> 00:53:50,420
+think this should definitely be um a direction in the future uh and uh i think it's kind of
+
+547
+00:53:50,420 --> 00:53:56,100
+uh it would be weird for me if the future of AI would be that we have let's say for 100
+
+548
+00:53:56,100 --> 00:54:01,300
+applications we have 100 independent models uh which are only trained with that data and we
+
+549
+00:54:01,300 --> 00:54:06,660
+run them all one at uh one at the time this this is not going to be the future i think i think it
+
+550
+00:54:06,660 --> 00:54:14,500
+would be a centralized model which would be very good in operating uh uh on multiple tasks at the same
+
+551
+00:54:14,500 --> 00:54:21,700
+time and it could sparsely get activated um so initially even i when i talked to some hardware
+
+552
+00:54:21,700 --> 00:54:28,980
+forks they they thought this might be a little bit uh and not uh in maybe by next year as it may not
+
+553
+00:54:28,980 --> 00:54:35,220
+happen but they definitely see uh that this might happen at some point because they they see the
+
+554
+00:54:35,220 --> 00:54:42,260
+vision that this uh this could be part of the future uh of AI models and this immediately says that
+
+555
+00:54:42,260 --> 00:54:48,260
+for example to get this implemented you need an if else statement so if this happened if get
+
+556
+00:54:48,260 --> 00:54:55,060
+gate says this operation uh you need to do this and else do that so we need uh first of to see
+
+557
+00:54:55,060 --> 00:55:01,780
+what can be done by the software forks uh and then if if necessary we could even reach out to
+
+558
+00:55:01,780 --> 00:55:07,620
+to the hardware forks to influence the next generation of even hardware i think well ballback
+
+559
+00:55:07,620 --> 00:55:12,980
+thanks so much for taking the time to share with us uh what you're up to there it sounds like uh
+
+560
+00:55:12,980 --> 00:55:18,100
+really interesting stuff that um you know i hope to to see more of in the future
+
+561
+00:55:18,100 --> 00:55:21,140
+it was my pleasure thank you very much for having me thank you
+
+562
+00:55:25,300 --> 00:55:30,340
+all right everyone that's our show for today for more information on today's show
+
+563
+00:55:30,340 --> 00:55:40,820
+visit twomolai.com slash shows as always thanks so much for listening and catch you next time
+

@@ -1,0 +1,205 @@
+If we're doubling the amount of data that we throw at our models, it is reasonable to think that we might also be doubling the amount of verification that we need to do for our models and to be sure that they're doing the right thing.
+All right, everyone. Welcome to another episode of the Twemble AI podcast. I'm your host, Sam Charrington. And today I'm joined by Dee Scully.
+Dee is a director at Google Brain. Before we get into today's conversation, be sure to take a moment to head over to Apple Podcasts or your listening platform of choice.
+And if you enjoy the show, be sure you subscribe and leave us a five star rating and review. Dee, welcome to the Twemble AI podcast. Welcome to the show.
+Hi, Sam. Thanks for having me.
+I am looking forward to diving into our conversation. We're going to be talking about data centric AI and data debt.
+This topic of debt is one that at least in our community, you are well known for, you wrote a paper, the hidden technical debt in machine learning systems that at one point when we had our first Twemble Con conference all about ML ops and AI platforms.
+I heard later that some folks had a bingo game for when that little diagram that you created showed up in in someone's talk.
+So we'll talk a little bit about that, but before we do, I'd love to have you share a little bit about your background and how you can work in the field.
+Oh gosh, how I came to work in the field. So I had a bit of a non traditional path.
+So as an undergraduate, I was an art major and I was deeply concerned with issues of visual narrative.
+And I guess I graduated in the late 90s and discovered that I needed a job and became a teacher. I was a high school teacher in high schools around the world taught in in the Middle East and Abu Dhabi for a while.
+And then I was in Venezuela and Switzerland and California.
+Went back to grad school for education.
+It was really concerned about, you know, was it mean for a subject to be learnable? What does it mean for for a concept to be learnable or some concepts inherently more more difficult to learn than others.
+And I found that the education people didn't have a great set of concepts to draw on for that.
+You know, this was the early 2000s, you know, 2001 or so. I found the machine learning people that actually thought about this a lot. And they had wonderful concepts like VC dimension to talking about concept complexity and things like that. I just kind of got hooked and realized, oh no, I studied the wrong stuff.
+So I went back and read it, you know, undergraduate courses that I hadn't done.
+I was learning a master's in a PhD at Tufts and machine learning, sort of following over the field that way. Then came to Google soon after that.
+At that time, my focus area was very much applied machine learning started off like kicking out scammy and spammy advertisers from our systems.
+And this was in 2008 or so at a time when machine learning wasn't necessarily the go to tool for things like that, you know, there were plenty of rule based systems that were created by really smart people thinking carefully about, you know, what does it mean for something to be to be spam.
+And so, you know, I was able to to be part of kind of the transition of, you know, systems moving from being hand engineered code based systems to to being machine learning systems and been sort of part of that journey ever since it's been a been a wild ride.
+I bet is that what led to the interest in technical debt as a concept.
+Yeah, so over time at Google, I worked on this problem of finding scammy and spammy advertisers and kicking it out for several years.
+And then for a number of years after that, I worked on Google's ad click through prediction models, which turns out to be just a fascinating problem domain that has all of the problems of, you know, being very large scale production critical latency sensitive.
+With all kinds of feedback loops and, you know, other interesting machine learning and statistical problems, but also has the problem that it needs to work every single second of every single day.
+And so I came to really appreciate, if you will, the importance of having systems that can be maintained over a long period of time.
+We certainly ran into a bunch of the problems that ended up writing about in the technical debt papers in these production settings.
+I'm seeing, okay, well, what happens when you have a feature source that changes its semantics over time under the hood without someone telling you, or when you have to migrate from one version to another of a given data dependency.
+What happens when there is a feedback loop that exists through some other related system where the only connection is what data is being consumed.
+You know, getting to really cut my teeth in a production critical setting exposed me to a lot of those problems and helped to sort of motivate, you know, telling, telling others about these things.
+And it turns out that these problems, you know, they weren't unique to us and they weren't, you know, one off problems. They seem to be, you know, pretty general.
+They've resonated pretty strongly, I think, and pretty broadly for folks that are trying to do machine learning and production.
+Yeah, you know, it's funny because, you know, when you write a paper, you, you really kind of wanted to stand the test of time and for, you know, for to, you know, be relevant for many years.
+And this is one that I really wish kind of wasn't, you know, you know, here we are, you know, seven years later.
+And we're still like talking about, you know, machine learning and technical debt and things like that.
+I would like to live in a world where these problems are kind of capitalists.
+And they seem, you know, not to be at least not in any sort of full or final sense, although obviously, you know, folks are doing a much better job with these problems than we were, you know, back in the day.
+So this podcast will be published in the context of a series of shows focused on data centric AI. And you've recently applied this idea of technical debt or debt to thinking about data.
+Maybe let's start by having you talk broadly about this idea of data centric AI is it, you know, what does it mean to you? How, in what ways do you relate to it based on your experiences?
+Yeah, so the phrase data centric AI, you know, I came in contact with that sort of phrase through Andrew Ming who reached out to me and, you know, we had some interesting discussions on this.
+I think that the overall point is that in the end creating machine learning models just isn't that hard.
+And it's not that hard because a large number of people has spent a huge amount of time creating infrastructure and tools and toolkits and frameworks for helping people train and create machine learning models.
+And so packages like TensorFlow and PyTorch and Jax and all these things exist now in wonderful ways and they're supported by, you know, fantastic cloud based offerings.
+And so sort of the problem of how do you create a model is one that maybe 10 or 15 years ago was a very difficult one has now become a relatively simple one.
+A model framework platform cloud service by itself isn't useful at all until you have data that you're feeding into that modeling system.
+And so to a first approximation, you know, in the current day, 100% of the problem is gathering the appropriate data and figuring out what is the right data to train our models on.
+You can see, you know, just the influence of even a really simple thing like getting more data and when we're, you know, seeing things like, you know, the large language model world, you know, exploding in capabilities by exploding in data set sizes.
+And obviously when we're we're gathering larger and larger data sets, it's not because we're gathering the same data pointed same information many times, it's that we're gathering and ever more diverse ever broader set of sort of experiences and pieces of knowledge to throw out our model and systems.
+And so because it's no longer really, you know, a particularly hard challenge to create models.
+Starting to focus on what is the big problem, which is to create the data to curate the data to figure out, okay, are we, you know, gathering the most appropriate data.
+Do we have data that is the most representative that's going to handle all use cases, perhaps all users of different backgrounds.
+These are really the questions that are coming to the fore now.
+For a while, we've kind of taken it as a given that to train larger and larger models, we just need to create, you know, just need to collect more and more data.
+And this whole idea of data centric AI is starting to maybe shift the conversation away from quantity alone to quality and other characteristics and this concept of debt plays into into that.
+Can you talk about where debt comes into play?
+Yeah, sure. So, so we talk about debts, you know, the most common one that we talk about is technical debt.
+And so technical debt is sort of this nice metaphor that software engineers and software engineering community have developed to talk about sort of the costs that you incur from basically writing more code or creating more stuff.
+And those technical debts are often incurred, especially when you're trying to move quickly.
+And so, you know, if you've ever written some code super fast, maybe on a tight deadline, you might have noticed that maybe didn't have all the comments that you would like it to have.
+Or maybe it wasn't quite as well tested as you might have preferred or maybe you did a little bit more copy and paste and a little less refactoring into an ice API.
+So those are costs, you know, their choices that you make under a certain set of circumstances, often when you need to move quickly, you know, now, and you're willing to maybe go back later and kind of pay off those costs.
+At a later time that will allow you to do a better job of making sure that your, your system is maintainable over time and can be modified, maybe by others who aren't you or things like that.
+The future use, I find that the future me is often a really great person who's willing to take on all kinds of tasks, but the past me as a real jerk has given me a lot of work to do.
+When we think about concepts of technical debt as they apply to, to data sets for machine learning.
+The sort of this nice phrase that has kind of made the rounds, which is that in machine learning systems data takes the place of code, and it's, you know, kind of this nice profound thing to think about because you're saying, OK, we're defining the behavior of our systems that are learning from data on the code on the data that we're providing.
+Data is taking the place of code, the data that we're providing, then also has many of the qualities of code, which is that if we were to say double the amount of code that we're putting into a system, we might assume that we're also maybe doubling the number of behaviors that we're asking our system to create or to exhibit and thus maybe doubling the number of unit tests that we might need to put in or maybe doubling the amount of documentation that we might have to put in.
+For doubling the amount of data that we throw out our models, it is reasonable to think that we might also be doubling the amount of verification that we need to do for our models and to be sure that they're doing the right thing.
+So one of my favorite examples of this is in line with the GPT three models, so one of the first, you know, large language models to really make waves.
+And in the original GPT three paper, they had this really wonderful result, which is that just training on their large language model on text from the web with no special instructions over time it learned to do simple addition and arithmetic.
+And they had wonderful plots showing how these behaviors emerged as more and more data was given to the system and there are a couple of interesting things there. One is that they didn't design the system to do arithmetic.
+This was learned from the data that they gave it another is that the behaviors emerged at certain amounts of data.
+So you needed quite a lot of data to see these things emerge. And the last thing is that if you look at the plots in that paper, you'll notice that they weren't actually 100% accurate at doing three digit addition, even with many billions of examples, many billions of parameters.
+And so this is, you know, I'm not picking on GPT three here. It's a fantastic model. It was a great advance for the field. But in terms of the kinds of testing and verification that you would need to do to be confident that your model was going to do a great job at three digit addition or four digit addition or more complex mathematics.
+You can imagine needing to go ahead and creating some formal tests for this of one form or another and needing to get some level of assurance about what the qualities that this model is going to behave you give over time.
+And obviously addition is just one example. It's a really nice one to think about. But, you know, any model that we're throwing ever more amounts of data. We're essentially doing so because we wanted to have ever more fine grained and specialized behaviors.
+And each of those specialized and fine grained behaviors is one that it might do well or it might not and made if we really think it's important, we might want to check.
+And so in this sense, adding more and more data to our models, in some sense, creates a, you know, an opportunity for debt that will, you know, want to pay off through all of the careful activities of, you know, testing and documentation and, you know, understanding, you know, what are the capabilities and models in the long term.
+For example, also explain why machine learning is much more difficult than traditional software from testing and validation perspective. I'm thinking, you know, if you had an API that was adding to three digit numbers, you know, you'd probably tested on a few examples because if you get it right for, you know, a few three digit number pairs, you probably, it's probably working.
+Whereas in a probabilistic system or statistical system like a machine learning model, who knows where the errors are.
+Yeah, it's a great question, right? And so, I think it's worth reflecting on the question of why do we do machine learning at all.
+And it's not because it's, you know, better or easier than traditional code based systems. It's because we use machine learning in situations where we don't actually know how to write down an algorithm in code.
+And to have all of the correct behaviors, you know, we can't necessarily write all the if the analysis for every single situation that say a large language model is going to encounter.
+People tried that in the 80s 90s and it just, it doesn't work. Right. And so we use machine learning in situations where we can't have a formal verification of what it is we want our models to do.
+And that's the reason why it's so hard to then go back and say, okay, well, now what are the unit tests to apply to this? Because in some sense, the unit tests are.
+Unit testing overalls an idea of saying, okay, what are the behaviors that we've specified in advance and we're going to make sure that those those are going to exist.
+Right, you know, the whole field of machine learning has come or, you know, developed and sort of founded on this idea of ID test sets. So, you know, in traditional machine learning, you know, if you want to write a nurse paper, typically what you do is you have a data set of training data.
+You randomly sample, you know, some portion of that to hold out as your test data. And both of those are from the same identically and independently drawn distribution.
+And the idea is that, okay, if we know that that distribution is the one that we care about, then doing these two independent draws from that same distribution means that if the if a behavior is important, it'll be represented very likely in both our test and our training data.
+We'll be able to verify that our model is doing the right thing on this distribution by having these two draws from them.
+And this is a really good idea.
+It works well when the distribution that we're drawing our training data from matches the distribution that it will be used on practice in nervous papers. This happens, you know, all the time except for specialized cases where people are really probing.
+In the world, it's quite difficult to have a training data set that matches exactly the data that will be encountered in practice, right.
+And we've seen, you know, all kinds of different ways that this can hold true, but, but just, you know, the simple observation that tomorrow is not necessarily a specialized case of yesterday is, you know, is evidence that we're going to have some amount of data set shifts.
+The problem for this is that the IID test setting that is traditional was was developed by the machine learning folks initially because there is this problem from statistics that correlation is not equal to causation, right.
+We all know this to be true.
+And the models that we build typically are ones that pick up exclusively on correlations in the data.
+And this would of course be terrible if those correlations didn't hold at test time.
+The IID test setting is one in which because all of our data is IID, we don't have to worry about the distinction between correlational and causal factors.
+But the moment we have any amount of data set shift, now we do run into situations where the differences between correlations and causation become much more relevant, much more meaningful.
+Sort of the fun underlying assumption of machine learning, you know, typically that we're drawing, you know, IID test and training data is sort of so steeped into us as machine learning researchers and people that it's one that we really need to force ourselves to recognize and recognize on a regular basis.
+There are specific patterns or or failure modes that you see repeatedly in practice that are sources of data debt.
+You've mentioned kind of this fixation on historical data and the assuming IID of their other patterns that you see.
+And I think that looking at things like, you know, representativeness is a really nice nice lens to, to view some of these pieces on.
+And so, you know, representativeness, you know, we often talk about this in sort of like a fairness or a bias sense, where perhaps there's a group of users that might not be as well represented in the data.
+These issues are incredibly important and there's a whole, you know, field and, you know, literature on this, you know, folks out of the mirror, much more qualified to talk on.
+But as a lens for thinking about the kinds of problems that can come up when our data is not IID and when our data is not drawn in a representative way, like that's a really good important one to be thinking of.
+The representative can also be thought of in sort of a counterfactual sense, imagine that, you know, we're dealing with data that's that's coming from some recommender system.
+I don't know, you know, we're building a shoe website when two users type in certain kinds of shoes, we show them some shoes they might consider buying, you know, that kind of thing.
+In this world, we'll often only get data on shoes that we've shown to users and ones that, you know, ranked not quite highly enough to show at the top of the page or not quite highly enough to be shown to users, we probably don't have data on.
+But we certainly need to its own form of representation bias that is, you know, the sort of thing that can happen not only in shoe recommenders, but in many different systems where we're looking at observational data to try and understand the impacts of things that might not happen in practice as often or as well.
+The ideas of randomization can be really helpful there. So, you know, adding a little bit of explorer to exploit can be extremely important in such situations to make sure that we're actively seeking out parts of the data space that wouldn't otherwise people represented.
+You kind of think about this kind of debt that machine learning systems are accruing what are some of the things that we as a community or that you in particular in your projects have done to try to mitigate these issues.
+So, I think there's a lot that can be done. One that I really like to highlight is from to Nick or brew her idea of data sheets for data sets data cards is, I think, utterly fantastic and everybody should be doing it.
+So, this is the idea that when you buy an electronics component, there's a data sheet that comes with it that you can tell you look, what are the qualities of your op amp, where the ranges of inputs and outputs where you can hit the rails and those kinds of things and those data sheets, those data sheets are often dozens or even hundreds of pages.
+This set should also have a sheet that accompanies it, talking about the qualities of the data, where is it sourced, how is it sourced, what are its shortcomings, what kinds of things are in it.
+So, the people can have a really clear understanding of what kinds of blind spots a model might encounter if it was trained on that data, what an appropriate use of that data might or might not be.
+The second is, I think it's really important that we have good processes for auditing data for quality. For a machine learning person, it can feel like, oh gosh, I have to get my hands dirty with the data and the answer is, well, yeah, you do.
+And so, we've seen everything from folks working on, say, protein discovery and wet labs using data that comes from wet labs can often be incredibly noisy and understanding, what is the quality of the data, what's the level of noise, where they're confounding factors.
+And that's true for things that look like wet lab data, it's equally true for credit scoring or for recommender systems or for anything in between, you know, having a deep sense of what's in the data and, you know, whether it's matching the appropriate levels of quality and quality that we need.
+And when I hear you describe that, I think of kind of an exploratory, you know, EDA type of process where you're learning about the data, do you also see more structured approaches that folks are taking to ensure high levels of data quality.
+I think in terms of structured pieces, you know, like the data sheets are a good way to bring structure to that exploratory piece. There's a whole additional approach that we can think about drawing from the causal literature, you know, who said before, hey, you know, our typical machine learning models don't know the difference between a causal factor and a non causal factor.
+And, you know, at the same time, there's this whole world of causal learning, you know, driven by folks like Judea Perl and other contributors in that area, who have an entire literature built up around this idea of a causal inference graph.
+And a causal inference graph is basically a way of writing down all of the ways that different factors might be causally linked to each other in a data regime.
+And if you have one and it's complete, and you can pay the computation cost for using it, then you're going to be all set.
+The problems are that typically a fully complete causal inference graph needs to come from an omniscient oracle, those are often in short supply.
+And for it to be truly reliable, it also needs to be complete. And so these things may have, you know, many, many factors, including things like, you know, what is the temperature of the sun that day or who does what.
+And in reality, it is much more common that we don't have a fully complete causal inference graph.
+But we do maybe have ways of talking with domain experts or other folks, and at least writing down some useful number of nodes in a causal inference graph that might be imperfect, might be incomplete, but can still tell us some interesting things about a causal structure of our data world.
+It gives us a way to sort of look at our data and say, okay, what are the correlations that we might need to make sure are broken in our data so that we can make sure not to be picking up on a specific correlation.
+And where might we want to create a stress test that specifically inverts a common correlation in our data to make sure that our model is still robust.
+Making of a causal inference graph, not so much as, you know, a source of truth that our model is going to rely on exclusively, but as a useful formalism for writing down, at least what we know about a, a given problem.
+And making sure that we're being systematic about generating ways for, for testing those brought assumptions and in some sort of stress test kind of format.
+Is the, that approach of using causal inference graphs, is this something that you've worked with in your projects.
+Yeah, so we've done a bit of this.
+Some folks in my group, Victor Vich and his teammates in my group, I had a paper at NURPS this last year on using causal invariants in this way.
+In that paper, they, they applied it to large language models as a, as a nice way to, to do stress testing. And I think it's a, it's a pretty good idea.
+It's also one that I think can be applied much more generally.
+Can you talk a little bit about how it's applied in the context of large language models, if you're familiar with that paper.
+One of the nice things about text data is that it's reasonably easy to create counterfactual data.
+So, you know, if the data that you had at hand had the phrase, you know, he is a doctor appearing many, many times, it is relatively easy to create a, you know, quote unquote counterfactual piece of data that has the words she is a doctor.
+And so, using causal inference graphs to write down a set of invariants that we think should hold true, such as whether somebody's a doctor shouldn't depend on the gender of the pronoun in the sentence, then allows you to go through and, and,
+uh, invert some of those, uh, commonly occurring pieces in the data set, um, and allow you to, to stress test according what's the kind of the end product of that type of stress testing.
+Yeah, so there are a couple of pieces. Um, one is that, uh, you can use this to create a suite of stress tests and stress testing in general is one that you don't have to have a causal inference graph to start thinking of some useful stress test for your model.
+But, um, in general, putting together a suite of stress test data sets that explore and probe, um, different behaviors or different edge cases for, for a model that are maybe different than what might be represented in an IID test set or, you know, one way to, to give yourself sort of like the moral equivalent of a set of unit tests that,
+um, you can be, uh, working with and, and using to verify your moments. The second is that, you know, what this paper showed is that you can also then use some of these ideas of, uh,
+uh, causal invariance as, as an additional regularizer in your model and, and maybe not just discover that your model wasn't so good in some of these situations, but then also, you know, use that as a way to help improve the model, um, in the next generation.
+You were talking through some ideas around how we can, uh, address, um, you know, data, data, data and machine learning system from a data perspective.
+Are there others that come to mind?
+I think in general, really focusing on the discipline of model evaluation is something that I think is incredibly important.
+Um, you know, when you look at, uh, you know, some of the recent papers that have come out on large language models, so I quickly released one on, on poem, uh, just a couple days ago, and it's, um, forget exactly how many pages was, but it's something like 80 pages.
+And most of it was, uh, really insightful, very detailed evaluations of different stress test use cases.
+Um, I think this is kind of the model of how we should be, um, looking at not just large language models, but, but all of the models that we create, um, and being very careful and very thoughtful about, um, using specialized data sets, uh, where we at least know what it is that we're asking for, and the kinds of behaviors that we're looking at, um, to, uh, to probe and ensure what our models are doing.
+Um, and you might ask, okay, well, what happens if we don't have one of these special use cases around, um, there are some, uh, good ways to use, um, the data that we already have to help probe, um, there are two that I quite like.
+One is, uh, so you're, you're familiar, um, with cross validation and the idea of, you know, leaving out, you know, uh, one out of many different folds, um, from a data set and, and using your overall cross validation is a way to get more resolution on, um, goodness of the model.
+Um, there's a slightly different technique, um, that we could call, uh, leave one cluster out, where instead of, uh, creating a cross validation folds by randomly, we first cluster, cluster our data, um, before doing any training, and then do the moral equivalent of cross validation, but instead of holding a fold out, we hold one of these clusters out.
+And so we're creating a world in which our models, um, explicitly have some blind spots and, um, that blind spot corresponds to a cluster that we then use as, as test data.
+If over the course of these, you know, evaluating over all of these different, uh, held out clusters, we're doing a good job that can be reasonably sure that our models is probably pretty robust and not just picking up on, on spurious correlations.
+A second form of this looks like slicing our data, our evaluation data based on how close a given test example is to its nearest neighbor in the training data.
+And so you can imagine that if, um, uh, we're, one of our given test examples is like an identical copy of an example in our training data that it, you know, being good on that is nice to see that isn't really that useful and impressive.
+Um, if it's a little bit further away that it gives us a little bit more confidence, if it's very far away from its nearest neighbor in the training data, then that's probably a pretty tricky example to get right.
+And if we're doing a good job on that, um, you know, that kind of data, then that our model is probably pretty robust.
+And so, you know, bending up our evaluation data based on how far it at each of those examples is from its nearest neighbor in the training data can be a way to help us, you know, begin to answer some of these questions at the level of robustness of our models, even if we don't have any specialized data around.
+Assume a certain level of smoothness in the reward function or the relationship between the, the points in the data.
+So, you know, it's machine learning, right? There's always one hidden assumption that gets you.
+So, um, in this case, and I guess, you know, I guess I'm asking you more in practice, like, do you find that that is overly limiting a sanction or no more so than, you know, differentiability or other things that we have to deal with anyway.
+Yeah, so, um, I think the, the thing to focus on for this kind of evaluation is, you know, what is the distance function that you're using to judge, you know, how far away.
+The point is from its nearest neighbor in the training.
+Sometimes we have a distance function that makes a lot of sense, like if we're dealing with proteins using something like edit distance that's reasonably well established is great.
+In other cases, if we're dealing with images, we probably want to use some sort of image embedding.
+And there, you know, we probably don't want to have the embedding that we're using be like the embedding that we're learning at the same time we probably wanted to be independent in some way just so that we're not, you know, overly favoring one model or another.
+But yeah, we will need to have some sort of distance function that makes sense.
+If we don't have a distance function that makes any kind of sense, then we probably have some more thinking to do about our problem overall.
+Have you explored techniques like active learning to address some of these issues?
+Active learning, I think, is one of the great underused machine learning methods.
+Learning we're often gathering more data to label based on some amount of uncertainty or disagreement or things like that from our current model.
+So we're trying to find the most informative data to add into a given model for things like model evaluation using ideas from active learning in an evaluation sense can be extremely helpful.
+So there, you know, we're not necessarily using say model uncertainty to tell us which examples to go off and get new labels for.
+But maybe we're using some ideas of model uncertainty to tell us which examples will be most useful to focus on when trying to understand model failures or which examples might be most indicative of problem areas.
+You know, using active learning to go off and gather additional data for helping to augment our models capabilities for areas of the data space that might be underrepresented are of course extremely helpful in use as well.
+I think one last thing to say is that active learning can break down in areas where the things that we're looking for are incredibly rare.
+Active learning in a, you know, I came across this in the world of machine learning for spam detection.
+You know, when when spam is a 10% problem, then active learning can save you a tremendous amount of problems when your spammers are like crazy clever and weird and rare and they're more like 0.001% of the world.
+Then active learning can still show you an awful lot of unuseful or uninteresting data before you finally find a couple of hits. And there, I think Josh Attenberg had a paper on this maybe 15 years ago, but one of the things that can be helpful there is is not so much.
+Appearly model based, you know human agnostic active learning, but more of a model assisted exploration and using machine learning or maybe some learned distances to help you build exploratory tools to help you know smart humans go and find the most useful examples, you know, either a stress test or as counterfactuals or things like that.
+And all this sort of speaks to the idea that just as, you know, a couple of decades ago, people realized that if you have computers and you have humans, maybe there should be a field of human computer interaction.
+That helps to figure out how these these two very different entities should be interacting with each other, we're probably getting towards a world where there should be some sort of field of human data interaction that really focuses on, you know, tools and best practices and methods for people to be interacting with data in a way that that helps individual humans makes sense of datasets of size billions or larger.
+How far along do you think we are in, you know, having the tools that we need to approach the kinds of problems you're envisioning.
+I think we're still relatively early days talking to a fully licensed statistician can be really illuminating experience because, you know, the statistics people have known about the importance of data for forever and as with most things in machine learning, the statistics people were right all along.
+But one of the differences is that, you know, the sizes of datasets that folks are dealing with, you know, in current machine learning are so large that I think that they they make it difficult to apply many of the traditional practices of exploratory data analysis and things of that form.
+I think that we do need to really focus on tools and techniques that allow us to, you know, explore and comprehend datasets of the current size.
+Thinking about debt in the financial sense, you know, it's a number in the code sense, there are proxies like code coverage and other things are there metrics that you think can be proxies for understanding the level of data debt in the system.
+Does that make sense? Is there anything there? Yeah, it's a great question.
+You know, like, and I think it's important to say that, you know, technical debt is a metaphor. It's not a measure for me.
+The best proxy is, you know, how are you feeling about your model?
+Are you starting to get worried? And, you know, like, what are the issues that are keeping you up at night when you think about your model's performance or ability to deploy in your production setting?
+Overall, you know, things that are indicative of technical debt and code based systems are often long term metrics.
+Like, how easy is it to create a change in the system? How easy is it for someone else to modify the system or improve the system?
+You know, how often do we get, you know, paged in the middle of the night when something breaks or when there's an outage? And I think all of those kinds of questions can be reasonably asked in machine learning systems and models as well.
+Any any additional thoughts on data debt that we haven't covered yet?
+You know, more than anything, I think it's, it's pretty exciting to be living in the world in which training model isn't that hard and the hard part is putting the data together because I think that this is actually going to be a world that opens the field up to folks with all kinds of different backgrounds and insights, you know, you need a reasonably specialized set of skills to, you know, build a modeling platform.
+I think it's a relatively different set of skills to think about collecting and curating the appropriate data sets and to think about the right ways to be evaluating stress testing models.
+And I think that it's up to us as a community to make sure that we're being open to to a broad variety of perspectives on that.
+Awesome. Well, Dee, thanks so much for taking the time to share a bit about your work you've been doing on characterizing data debt.
+Thanks so much. Appreciate the time.

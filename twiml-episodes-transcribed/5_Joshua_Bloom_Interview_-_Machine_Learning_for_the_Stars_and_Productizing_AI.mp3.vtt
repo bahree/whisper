@@ -1,0 +1,2828 @@
+WEBVTT
+
+00:00.000 --> 00:16.880
+Hello everyone and welcome to another episode of Twimmel Talk, the podcast where I interview
+
+00:16.880 --> 00:22.200
+interesting people, doing interesting things in machine learning and artificial intelligence.
+
+00:22.200 --> 00:26.080
+I'm your host Sam Charrington.
+
+00:26.080 --> 00:28.720
+I think you all are really going to get a kick out of this show.
+
+00:28.720 --> 00:34.640
+My guest this time is Joshua Bloom, professor of astronomy at the University of California
+
+00:34.640 --> 00:41.640
+Berkeley and co-founder and chief technology officer of machine learning startup Wise.io.
+
+00:41.640 --> 00:46.440
+I was in California last week and Josh graciously agreed to host me in his company's office
+
+00:46.440 --> 00:48.560
+for this interview.
+
+00:48.560 --> 00:52.880
+We had a wonderful discussion and as you might have guessed, if you happen to have noticed
+
+00:52.880 --> 00:58.240
+the length of this episode, we covered quite a lot of ground, but I promise you that you'll
+
+00:58.240 --> 01:05.760
+find this 84 minute interview to be jam packed with great information, ideas and war stories.
+
+01:05.760 --> 01:09.400
+In this show, you'll learn how Josh and his research group at Berkeley pioneered the
+
+01:09.400 --> 01:14.920
+use of machine learning for the analysis of images from robotic infrared telescopes.
+
+01:14.920 --> 01:19.320
+We talk extensively about the challenges they faced in doing this and some of the results
+
+01:19.320 --> 01:21.000
+they achieved.
+
+01:21.000 --> 01:26.000
+We also discussed the founding of his company Wise.io, which uses machine learning to help
+
+01:26.000 --> 01:31.480
+customers deliver better customer support, but that wasn't where the company started and
+
+01:31.480 --> 01:35.880
+you'll hear why and how they evolved to serve that market.
+
+01:35.880 --> 01:40.880
+We talk about his company's technology stack and data science pipeline in fair detail
+
+01:40.880 --> 01:45.680
+and discuss some of the key technology decisions they've made in building their product.
+
+01:45.680 --> 01:51.000
+We also discussed some interesting open research challenges in machine learning and AI.
+
+01:51.000 --> 01:56.080
+Of course, I'll be linking to Josh and the various things we mentioned on the show in the
+
+01:56.080 --> 02:01.600
+show notes, which you'll be able to find at twimmelai.com slash talk slash five.
+
+02:01.600 --> 02:09.520
+That's twimelai.com slash T-A-L-K slash the number five.
+
+02:09.520 --> 02:23.520
+And now onto the interview, hey everyone, I am here at the Wise.io offices with the
+
+02:23.520 --> 02:29.960
+CTO, Joshua Bloom, and we got a great conversation lined up for you, and we'll start with Josh.
+
+02:29.960 --> 02:33.080
+Why don't you introduce yourself to the audience here.
+
+02:33.080 --> 02:39.560
+Great, so this is Josh and I am CTO and one of the co-founders of Wise.io.
+
+02:39.560 --> 02:45.520
+I'm also a professor at UC Berkeley in the astronomy department.
+
+02:45.520 --> 02:51.240
+One of the important things that we'll touch on today is how does somebody go from astronomy
+
+02:51.240 --> 02:56.960
+and teaching to building an AI application company.
+
+02:56.960 --> 03:02.760
+I think a big part of the origin story of course of the company is my history, but I
+
+03:02.760 --> 03:10.040
+think it also has some interesting lessons for how we think about AI and production
+
+03:10.040 --> 03:16.600
+systems and why having diverse backgrounds is pretty important these days.
+
+03:16.600 --> 03:20.640
+Yeah, that's a lot of good stuff to talk about there.
+
+03:20.640 --> 03:25.560
+Why don't we start by learning a little bit more about you and your background and how
+
+03:25.560 --> 03:27.720
+you got to where you are.
+
+03:27.720 --> 03:35.840
+So I was trained as a physicist and an astronomer, went to Harvard as an undergrad and caught
+
+03:35.840 --> 03:41.920
+a bit of the research bug over the summers working in Los Alamos, then went to Cambridge
+
+03:41.920 --> 03:48.440
+England to do a masters and back to Caltech where I did my PhD all in the context of astronomy
+
+03:48.440 --> 03:52.520
+and then back to Harvard where I was a postdoc.
+
+03:52.520 --> 04:00.120
+All the while working on what we could broadly term time-domain astrophysics, understanding
+
+04:00.120 --> 04:07.360
+the variable sky and why things do what they do explosively, cataclysmically or otherwise.
+
+04:07.360 --> 04:14.320
+And while there's a deep interest in understanding the origins of those events and how they're
+
+04:14.320 --> 04:19.280
+connected to other things that we study in the universe, I got more and more interested
+
+04:19.280 --> 04:27.720
+over time in the informatics of actually just doing the science, the statistics on variable
+
+04:27.720 --> 04:30.120
+sources and the presence of noise.
+
+04:30.120 --> 04:38.480
+And then as I became a faculty member at Berkeley, I started looking ahead to really a series
+
+04:38.480 --> 04:46.640
+of new surveys, particularly imaging surveys of large swaths of the night sky and one
+
+04:46.640 --> 04:52.680
+of the great interests for myself and many others was in finding new events, essentially
+
+04:52.680 --> 04:57.680
+new explosions or new variable eruptive stars that hadn't been known about before and doing
+
+04:57.680 --> 05:00.800
+that as quickly as possible.
+
+05:00.800 --> 05:06.360
+Now the traditional way in which that was done and in some cases is still done today is
+
+05:06.360 --> 05:12.200
+that as you acquire more data, you linearly hire more grad students that scales with the
+
+05:12.200 --> 05:16.680
+total number of images that you're getting and you need to sift through.
+
+05:16.680 --> 05:22.280
+And as I was becoming involved in some of those projects, I wound up realizing that as time
+
+05:22.280 --> 05:24.280
+went on, that really wouldn't scale anymore.
+
+05:24.280 --> 05:31.280
+And we needed to find effectively a replacement for domain experts who otherwise would have
+
+05:31.280 --> 05:36.080
+been looking at and apining on data using alternate techniques.
+
+05:36.080 --> 05:43.200
+And about 79 years ago, I stumbled upon machine learning as a real interesting potential avenue.
+
+05:43.200 --> 05:51.440
+And at the time, machine learning really hadn't been applied to anything in astronomy in
+
+05:51.440 --> 05:54.920
+the variable sky, sort of in a time to mean context.
+
+05:54.920 --> 06:00.600
+There had been a number of studies in using machine learning to do special types of inference
+
+06:00.600 --> 06:08.120
+on the static sky and understanding, sort of demographics of stars and galaxies and
+
+06:08.120 --> 06:10.600
+their distribution in space.
+
+06:10.600 --> 06:19.520
+So we really felt like there wasn't a lot of precedent in us applying some of the capabilities
+
+06:19.520 --> 06:23.800
+to this data, but we wound up realizing it was sort of an imperative.
+
+06:23.800 --> 06:27.720
+And one of the things that people who know astronomers would probably say about them is
+
+06:27.720 --> 06:36.560
+they tend to like to use tools that help them and seek those tools out, be those new types
+
+06:36.560 --> 06:37.560
+of detectors.
+
+06:37.560 --> 06:46.080
+So CCDs, for instance, were something that astronomers adopted almost as soon as they were invented.
+
+06:46.080 --> 06:50.760
+And obviously statistical techniques and computational techniques, astronomers are willing to try
+
+06:50.760 --> 06:54.000
+things out to solve their problem.
+
+06:54.000 --> 06:59.280
+The classic example I go back to is Galileo who said, hey, there's this new thing that's
+
+06:59.280 --> 07:05.520
+been invented to look at the horizon for ships coming towards us.
+
+07:05.520 --> 07:07.960
+What if I just took it and pointed it to the stars?
+
+07:07.960 --> 07:08.960
+What could I do with that?
+
+07:08.960 --> 07:15.000
+And so our use of the telescope was essentially a co-option of the use of a technology that
+
+07:15.000 --> 07:16.880
+had been built for other purposes.
+
+07:16.880 --> 07:21.320
+And so that kind of precedes a pace throughout the history of astronomy.
+
+07:21.320 --> 07:28.920
+And so the idea of essentially a fairly new technique into the fold is not at all unusual.
+
+07:28.920 --> 07:32.320
+Do you remember how you stumbled across machine learning?
+
+07:32.320 --> 07:41.480
+Yeah, so part of it was just asking the question, if I've got a bunch of data and I need to
+
+07:41.480 --> 07:48.000
+decide, is this part of the sky interesting or not, is this event new or not, what type
+
+07:48.000 --> 07:53.320
+of event could this be, very quickly you wind up realizing this is a classification problem
+
+07:53.320 --> 07:55.760
+of some sort.
+
+07:55.760 --> 08:01.880
+And talking to people at UC Berkeley in the stats department as I was starting to introduce
+
+08:01.880 --> 08:08.080
+some of these interesting challenges became very clear that machine learning and particularly
+
+08:08.080 --> 08:14.320
+supervised learning would be a fertile ground for us to start exploring.
+
+08:14.320 --> 08:19.000
+But one of the challenges that I saw is that even though we're in a very rich and fertile
+
+08:19.000 --> 08:24.160
+environment at UC Berkeley, and there's a lot of crosstalk between departments and individuals
+
+08:24.160 --> 08:30.080
+within departments, it was very hard to get even the kind of the language on both sides
+
+08:30.080 --> 08:34.560
+up and running where both sides understood the methodological folks who deeply understood
+
+08:34.560 --> 08:39.360
+what machine learning was and what it could be used for, and then people like myself from
+
+08:39.360 --> 08:44.640
+the physical side of even learning to ask the right questions.
+
+08:44.640 --> 08:51.560
+So thankfully wind up getting a group from the stats department and those folks from
+
+08:51.560 --> 08:57.720
+computer science together with me and my postdocs and we were able to get a proposal together
+
+08:57.720 --> 09:03.480
+the National Science Foundation funded that allowed us to basically start building out new
+
+09:03.480 --> 09:06.760
+ways of doing inference on astronomy data.
+
+09:06.760 --> 09:11.480
+That turned out to be a very fruitful place for us, for me in particular, to learn about
+
+09:11.480 --> 09:15.640
+the landscape of what other techniques were out there that we hadn't been taught in
+
+09:15.640 --> 09:16.640
+school.
+
+09:16.640 --> 09:21.920
+Can you tell us a little bit about from that initial discovery what the research arc looked
+
+09:21.920 --> 09:25.320
+like, what were some of the first things you started exploring and how that evolved
+
+09:25.320 --> 09:26.320
+over time?
+
+09:26.320 --> 09:34.160
+Yeah, so I really just started looking at toy amounts of data that we already had in
+
+09:34.160 --> 09:39.480
+the can, and we could start applying these different techniques to, and looking for tools
+
+09:39.480 --> 09:45.120
+that would be useful for us, and really the best thing out there the time that we started
+
+09:45.120 --> 09:51.680
+was something called WECCA, which was a, and still is, a collection of machine learning
+
+09:51.680 --> 09:57.880
+algorithms that one can apply in a sort of gooey graphical way, all kind of written
+
+09:57.880 --> 10:05.200
+in Java, and really that was our original playground in benchmark, and used that as a launching
+
+10:05.200 --> 10:10.320
+off point to start understanding what are these different modeling techniques that are being
+
+10:10.320 --> 10:11.320
+exposed to here?
+
+10:11.320 --> 10:15.320
+What does a support vector machine, what does it mean when people say random forest, and
+
+10:15.320 --> 10:19.760
+use that as a way to sort of educate myself and those in our group, and started seeing
+
+10:19.760 --> 10:21.920
+some interesting results, right?
+
+10:21.920 --> 10:25.600
+We started seeing accuracies that were better than what you could get from random, and then
+
+10:25.600 --> 10:29.720
+as we poked farther and farther, one ended up seeing how far can we take these algorithms,
+
+10:29.720 --> 10:35.520
+how well does one of them work relative to the others to get the kinds of answers that
+
+10:35.520 --> 10:36.520
+we want?
+
+10:36.520 --> 10:43.040
+How do we build in a loss function, which turns out to be very important to get good answers,
+
+10:43.040 --> 10:49.560
+because in the case of what we did, when we're discovering something in the sky, it's
+
+10:49.560 --> 10:55.560
+not easy to articulate that loss function, and by that I mean, what is the cost of
+
+10:55.560 --> 10:58.040
+missing an interesting place in the sky?
+
+10:58.040 --> 11:02.920
+It means that you don't get to do new science, versus what's the cost of saying everything
+
+11:02.920 --> 11:09.320
+in the sky is interesting, which means you burn all of your follow-up resources, and
+
+11:09.320 --> 11:17.280
+starting then to think about context-aware classification, now just not in the context
+
+11:17.280 --> 11:24.680
+of really just resources, but now time constraints, making an inference about something that could
+
+11:24.680 --> 11:30.840
+be of interest, may be more important than waiting to get another couple of data points
+
+11:30.840 --> 11:33.920
+and saying something with even more confidence.
+
+11:33.920 --> 11:39.240
+So understanding how to calibrate confidence in probabilities, doing this in the presence
+
+11:39.240 --> 11:46.800
+of sort of missing data and irregularly sampled data in time, all of these also started
+
+11:46.800 --> 11:54.200
+wind up showing to us that there were parts of the machine learning sphere, at least
+
+11:54.200 --> 11:58.720
+in the academic world, that were not often exposed to the kinds of data that we were
+
+11:58.720 --> 12:00.520
+exposed to.
+
+12:00.520 --> 12:05.200
+And so noisy data, for instance, know whenever, when they talk about the iris data set,
+
+12:05.200 --> 12:10.880
+they don't say, you know, the pedal of this is red plus or minus purple.
+
+12:10.880 --> 12:15.840
+So even just having uncertainties in your features, let alone your labels, became an interesting
+
+12:15.840 --> 12:19.680
+challenge, and we wanted realizing perhaps there were some new techniques that we needed
+
+12:19.680 --> 12:25.320
+to start innovating on, to even do the kinds of inference we wanted to do with our data.
+
+12:25.320 --> 12:32.000
+So you mentioned the loss function and needing to wrap your arms around what that means, can
+
+12:32.000 --> 12:35.760
+you succinctly describe how you grapple that?
+
+12:35.760 --> 12:39.360
+What did you end up, how did you approach it and what did you end up coming up with for
+
+12:39.360 --> 12:42.520
+the types of data that you were looking at?
+
+12:42.520 --> 12:46.680
+One of the things we wind up realizing is that one person's loss function is not the
+
+12:46.680 --> 12:54.760
+same as another person's loss function, and so to get traction on your answers, one needs
+
+12:54.760 --> 12:59.360
+to at least be clear about what it is that you're optimizing for.
+
+12:59.360 --> 13:05.360
+And at least give people the ability to imbue their own loss functions, if for instance
+
+13:05.360 --> 13:11.720
+you're producing a catalog of different types of variable stars on the sky.
+
+13:11.720 --> 13:17.160
+We have a specific notion of what it means to get something wrong about say a very minority
+
+13:17.160 --> 13:24.840
+class versus a majority class, and I wouldn't say that we solved that problem by any stretch,
+
+13:24.840 --> 13:28.800
+but at least we were trying to be clear about what our assumptions were of the loss function
+
+13:28.800 --> 13:34.640
+and articulate what it is that we're optimizing for.
+
+13:34.640 --> 13:40.800
+When people are doing AI or machine learning in a production environment, there is always
+
+13:40.800 --> 13:47.960
+going to be an optimization of some sort, and the typical one people will go to without
+
+13:47.960 --> 13:54.560
+knowing exactly what the business value is, or scientific value is of the answer, is
+
+13:54.560 --> 13:58.960
+you go for some notion of an accuracy, and then when you get a level deeper in that,
+
+13:58.960 --> 14:03.920
+you say, well, what I really want to do is I want to minimize false positives at a false
+
+14:03.920 --> 14:12.760
+negative rate of 0.1, and then that is an implicit statement of what your loss function is,
+
+14:12.760 --> 14:18.720
+and you hope that by defining it that way, and by optimizing on it that way, that you're
+
+14:18.720 --> 14:25.280
+actually getting very close to an optimization of the result of what you're emitting out
+
+14:25.280 --> 14:28.440
+of your modeling.
+
+14:28.440 --> 14:34.480
+And so you're primarily looking at image-oriented data over time.
+
+14:34.480 --> 14:40.080
+Are there other fields where you've seen them adopt the same types of approaches to
+
+14:40.080 --> 14:41.800
+what you were working with?
+
+14:41.800 --> 14:46.680
+Well, one of the nice things is you can work at the sensor level data, which is effectively
+
+14:46.680 --> 14:51.400
+photoelectrons in a CCD and counting those up as a function of position in X, Y, and
+
+14:51.400 --> 14:53.120
+then trying to map that back in the sky.
+
+14:53.120 --> 14:58.160
+So that's what you might call noisy image sensor data, and we worked at that level.
+
+14:58.160 --> 15:02.760
+And then we also worked at a metadata level, which was now, let's use traditional astronomy
+
+15:02.760 --> 15:07.400
+techniques to extract the brightness of a star as a function of time.
+
+15:07.400 --> 15:13.720
+So we got ourselves out of the image plane and into the time domain, and then we're basically
+
+15:13.720 --> 15:16.840
+working with effectively tabular data.
+
+15:16.840 --> 15:21.800
+And again, there are lots of different models and feature engineering approaches that one
+
+15:21.800 --> 15:23.680
+can take to all of that.
+
+15:23.680 --> 15:29.120
+I wouldn't say that there was a common thread in our work, across a bunch of these different
+
+15:29.120 --> 15:34.840
+sort of sub-questions, other than say that over time we wind up realizing that there
+
+15:34.840 --> 15:41.000
+were only really a couple of different machine learning models that did as well or better
+
+15:41.000 --> 15:42.480
+than everything else.
+
+15:42.480 --> 15:48.080
+And so even though, for instance, support vector machines are very popular because they
+
+15:48.080 --> 15:53.000
+have some great sort of theoretical, provable properties, they tend to be kind of unwieldy
+
+15:53.000 --> 15:59.480
+and for dealing with the kinds of data we were working with, which is heterogeneous, noisy,
+
+15:59.480 --> 16:05.680
+dirty, sparse, missing, and multi-class, where you needed to also get probabilities out
+
+16:05.680 --> 16:11.400
+that you could then calibrate models like support vector machines really fall short for
+
+16:11.400 --> 16:12.720
+practical purposes.
+
+16:12.720 --> 16:18.720
+And so we wound up recognizing in our group, and I think that was validated in a conference
+
+16:18.720 --> 16:23.840
+that we ran at UC Berkeley on essentially streaming inference with machine learning.
+
+16:23.840 --> 16:30.440
+It was a sort of week-long conference that involved folks from Netflix, folks from Google,
+
+16:30.440 --> 16:35.600
+and then domain experts, everything from biomedical to physics.
+
+16:35.600 --> 16:39.320
+A number of people would stand up, give their talk, and say, yeah, and we wound up realizing
+
+16:39.320 --> 16:42.840
+that decision forest pretty much always won.
+
+16:42.840 --> 16:47.720
+Now this was in 2012 before the resurgence of deep learning, I bet if we ran this conference
+
+16:47.720 --> 16:55.120
+again half of the talks would be about how that's a better algorithm as it were.
+
+16:55.120 --> 16:57.040
+But it was pretty eye-opening.
+
+16:57.040 --> 17:01.480
+And it was one of the things that we took to heart as we wound up starting the company
+
+17:01.480 --> 17:11.560
+is a recognition that to exceed, to produce value sort of very generally, the algorithm
+
+17:11.560 --> 17:14.240
+itself is not necessarily the key.
+
+17:14.240 --> 17:19.440
+In some sense, the way I view this now is that algorithms and their accuracy that they
+
+17:19.440 --> 17:25.640
+can produce and their ability to optimize them around a loss function is really only
+
+17:25.640 --> 17:33.280
+table stakes for the utility of these in a real environment.
+
+17:33.280 --> 17:39.080
+So yes, you need to use a model that's very, very accurate and potentially can be retrained
+
+17:39.080 --> 17:40.680
+and gets slightly better.
+
+17:40.680 --> 17:45.360
+But as most data scientists or most people at work in machine learning workflows will
+
+17:45.360 --> 17:50.000
+say almost all of that work is in feature engineering.
+
+17:50.000 --> 17:53.680
+And if you're a deep learning person, you'll say almost all of that work is in figuring
+
+17:53.680 --> 17:58.880
+out what the shape of the network should be iterating over that.
+
+17:58.880 --> 18:02.720
+On that note, before we jump into what you're doing at the company today, what were some
+
+18:02.720 --> 18:07.440
+of the results you saw out of your research on the astronomy side?
+
+18:07.440 --> 18:11.480
+So we looked at a couple of different realms.
+
+18:11.480 --> 18:18.520
+One was looking at large catalogs of variable stars and coming up with probabilistic classifications
+
+18:18.520 --> 18:23.560
+of what type of variable stars they were, what was the physics that drove them.
+
+18:23.560 --> 18:31.120
+And we did that in a bootstrap way, starting with effectively a few hundred known classes
+
+18:31.120 --> 18:33.280
+and few hundred or a few thousand known labels.
+
+18:33.280 --> 18:37.560
+And then extrapolated that to tens of thousands, hundreds of thousands of variable stars and
+
+18:37.560 --> 18:41.040
+produced probabilistic catalogs.
+
+18:41.040 --> 18:45.600
+One of the things I became adamant about as we were doing that was producing a catalog
+
+18:45.600 --> 18:51.440
+where you say, hey, this object in the sky is of this type with this probability is effectively
+
+18:51.440 --> 18:57.320
+useless unless it's then used for some new kind of science.
+
+18:57.320 --> 19:02.280
+And one of the things that I became, I won't say frustrated with, but I noticed often
+
+19:02.280 --> 19:08.400
+is that people started using, not just in astronomy, but in many other fields, machine
+
+19:08.400 --> 19:12.960
+learning as an end to itself saying, I'm going to apply machine learning to this data.
+
+19:12.960 --> 19:19.720
+I'm going to get a result until that result itself is novel or until that becomes a stepping
+
+19:19.720 --> 19:28.320
+stone to another result, which becomes novel, it's sort of an empty exercise.
+
+19:28.320 --> 19:32.640
+And so what we want to be saying is what can we do with this probabilistic catalog that
+
+19:32.640 --> 19:34.400
+couldn't have been done with any other means.
+
+19:34.400 --> 19:39.600
+And so one of the things we did is we looked for very strange types of stars that had certain
+
+19:39.600 --> 19:44.800
+properties and then followed those up with big telescopes and actually wrote science papers
+
+19:44.800 --> 19:45.800
+with those.
+
+19:45.800 --> 19:48.760
+So we use that as a launching off point.
+
+19:48.760 --> 19:52.800
+In a real time environment where we actually were looking at images as they were streaming
+
+19:52.800 --> 20:00.680
+off of telescopes in Southern California off of Palomar Mountain, every 60 seconds or so,
+
+20:00.680 --> 20:05.800
+we would basically get transferred up to Lawrence Berkeley National Lab and we'd apply our machine
+
+20:05.800 --> 20:11.520
+learning to that to find new interesting objects in the sky and then populate databases
+
+20:11.520 --> 20:14.880
+of, you know, for tonight here are the interesting objects.
+
+20:14.880 --> 20:18.200
+And then also had another machine learning code which would go into those databases and
+
+20:18.200 --> 20:23.880
+periodically make statements about what types of objects those wind up might be, what
+
+20:23.880 --> 20:25.320
+they could be.
+
+20:25.320 --> 20:32.040
+And we went up having, I think of order of 100, maybe 200 papers that came out of that,
+
+20:32.040 --> 20:36.920
+a refereed papers, which again, the machine learning part of that was really the stepping
+
+20:36.920 --> 20:41.120
+stone to discovery, the other parts of the machine learning were the stepping stones
+
+20:41.120 --> 20:43.120
+to initial inference.
+
+20:43.120 --> 20:49.240
+And obviously in the end, you needed people to actually write the paper, but we tried
+
+20:49.240 --> 20:50.760
+it to the grad students, right?
+
+20:50.760 --> 20:54.840
+It all goes back to grad students, exactly.
+
+20:54.840 --> 21:01.040
+But I really thought about kind of removing people from the real time inference loop and
+
+21:01.040 --> 21:04.160
+getting as far up the inference stack as we could.
+
+21:04.160 --> 21:08.160
+We even got to the point where we were finding interesting objects in the sky without any
+
+21:08.160 --> 21:12.600
+humans in the loop, identifying that not only is it a new object, but it's something
+
+21:12.600 --> 21:14.280
+we probably should be following up.
+
+21:14.280 --> 21:17.640
+And we were ishing alerts to robotic telescopes to go follow those up.
+
+21:17.640 --> 21:21.840
+So by the time people woke up in the morning, we not only had the discovery, we not only
+
+21:21.840 --> 21:28.560
+had the initial inference, we then also had real follow-up, scientific follow-up.
+
+21:28.560 --> 21:33.840
+One of the, I think, great achievements of the work that we and others did in one of
+
+21:33.840 --> 21:40.840
+our collaborations was to build this production system that had real consumers on the other
+
+21:40.840 --> 21:46.680
+side of that, and when it was broken or was wrong or didn't take feedback properly, you
+
+21:46.680 --> 21:52.360
+know, we'd get nasty emails from our collaborators and say, your thing didn't work for an hour.
+
+21:52.360 --> 21:54.840
+You kind of screwed my science while I was at the telescope.
+
+21:54.840 --> 22:03.680
+So having an end user really keeps you heavily focused on making sure the things that it
+
+22:03.680 --> 22:06.680
+needs to do does it right and robustly.
+
+22:06.680 --> 22:11.600
+But because we were discovering things even faster than a whole army of grad students
+
+22:11.600 --> 22:16.080
+would have been able to pour over all of these images, we were able to find, for instance,
+
+22:16.080 --> 22:23.000
+the nearest type one, a supernova that had been found in 25 years and get a whole bunch
+
+22:23.000 --> 22:26.880
+of people looking at that part of the sky and taking lots of data that led to a bunch
+
+22:26.880 --> 22:30.040
+of papers in nature and science.
+
+22:30.040 --> 22:34.400
+Not because that object wouldn't have been found by even amateurs because it got so bright
+
+22:34.400 --> 22:38.520
+you could have seen it with binoculars eventually.
+
+22:38.520 --> 22:44.480
+But because the interesting science happened hours after the event blew up, right?
+
+22:44.480 --> 22:45.720
+The event happened.
+
+22:45.720 --> 22:50.800
+And so it wind up also driving home for me the need for not only something that's working
+
+22:50.800 --> 22:56.800
+and is robust, et cetera, but where it's able to make statements quickly and do it in
+
+22:56.800 --> 22:59.520
+a way that's reliable.
+
+22:59.520 --> 23:00.520
+Interesting.
+
+23:00.520 --> 23:08.840
+So I'm sure that that has led you to some interesting perspectives on the relationship
+
+23:08.840 --> 23:15.920
+between this technology and society and jobs and stuff like that.
+
+23:15.920 --> 23:23.920
+I'm hearing parallels to a lot of people kind of projecting that as AI is deployed, shifting
+
+23:23.920 --> 23:29.760
+shifts in the job market will take place that put a lot of people out of work.
+
+23:29.760 --> 23:35.920
+But I'm also hearing in your example kind of the counter-argument you often hear that
+
+23:35.920 --> 23:40.840
+really what it does is it empowers people and allows people to do different things that
+
+23:40.840 --> 23:45.880
+I don't necessarily want to go deep into the society stuff at this point.
+
+23:45.880 --> 23:52.200
+But yeah, it's certainly a valid concern.
+
+23:52.200 --> 24:00.240
+What we do in our company at WiseIO is help customers support agents become more efficient
+
+24:00.240 --> 24:07.440
+at their work by suggesting answers of how they can respond to an incoming inquiry,
+
+24:07.440 --> 24:15.440
+by automatically triaging, incoming increase or tickets, emails, et cetera, that is getting
+
+24:15.440 --> 24:18.880
+them to the right person or the right group who's going to be the best at answering that
+
+24:18.880 --> 24:19.880
+question.
+
+24:19.880 --> 24:24.280
+And then in some cases, we will automatically respond to incoming increase.
+
+24:24.280 --> 24:31.000
+So when you write into e-commerce site and say my package didn't arrive, there's a
+
+24:31.000 --> 24:37.120
+growing chance that us or somebody else may be answering what looks like a bespoke
+
+24:37.120 --> 24:41.360
+question of yours with what looks like a bespoke answer.
+
+24:41.360 --> 24:48.240
+But in the end, it's just a templatized response that we ourselves are using.
+
+24:48.240 --> 24:52.200
+For us to be able to do that, obviously, we can talk more deeply about how that works
+
+24:52.200 --> 24:54.520
+from an AI perspective.
+
+24:54.520 --> 24:57.680
+We have to get very confident in what our answers are.
+
+24:57.680 --> 25:04.960
+But what does this mean on one side to your question about labor displacement companies
+
+25:04.960 --> 25:07.720
+don't need to hire as many support agents?
+
+25:07.720 --> 25:09.960
+So where would they have gone?
+
+25:09.960 --> 25:16.000
+The other side of that is that the agents that they do have become better and more tuned
+
+25:16.000 --> 25:21.680
+at working in some of the harder parts of what their own products are about and what
+
+25:21.680 --> 25:25.800
+their customer complaints are about, in a way they wouldn't have been able to because
+
+25:25.800 --> 25:27.840
+they would have been distracted by the mundane.
+
+25:27.840 --> 25:33.040
+So if you say, how do I reset my password and there's a person or sets of people that
+
+25:33.040 --> 25:37.280
+have to look at that email and decide how to respond, that's time that those people are
+
+25:37.280 --> 25:42.400
+not spending on really complex problems where empathy is required as well.
+
+25:42.400 --> 25:51.760
+So we think of it as our product and what we do as a way of freeing people to work on
+
+25:51.760 --> 25:55.800
+the things that people are uniquely suited at that machines really aren't going to be
+
+25:55.800 --> 26:01.200
+that good until somebody solves the turing test.
+
+26:01.200 --> 26:06.400
+Chat bots are not going to be able to understand people in the subtle ways that they need to.
+
+26:06.400 --> 26:10.880
+But we can take a lot of easy stuff off the table.
+
+26:10.880 --> 26:14.240
+So there was certainly a concern as we were starting to roll this out that we were part
+
+26:14.240 --> 26:19.760
+of this labor displacement movement, but we heard time and time again from our customers
+
+26:19.760 --> 26:26.000
+that their support agents became more and more happy, the more involved we were.
+
+26:26.000 --> 26:32.640
+There was an entire team in Asia who had been tasked with basically reading an incoming
+
+26:32.640 --> 26:38.680
+inquiry or a ticket and then deciding who else should be reading this to solve the problem.
+
+26:38.680 --> 26:45.400
+And because our triage capability came into play, they effectively deprecated a 20-person
+
+26:45.400 --> 26:50.800
+team, one of our clients, off of triage because we're effectively automatically triaging
+
+26:50.800 --> 26:51.800
+now.
+
+26:51.800 --> 26:56.040
+And we were worried what's going to happen to these people, they have families to feed.
+
+26:56.040 --> 27:01.040
+And we got a whole bunch of really great quotes from them saying because they had been reassigned
+
+27:01.040 --> 27:05.280
+to actually work these support tickets rather than push them along, they were much more
+
+27:05.280 --> 27:06.600
+happy in their job.
+
+27:06.600 --> 27:08.600
+That's fantastic.
+
+27:08.600 --> 27:15.600
+So we jumped right into what you're doing at Wise.Oat.io, but the transition is a fascinating
+
+27:15.600 --> 27:16.600
+one as well.
+
+27:16.600 --> 27:22.280
+How do you get from astrophysics to software company doing CRM stuff?
+
+27:22.280 --> 27:25.800
+And I know there was an intermediate step there as well.
+
+27:25.800 --> 27:32.760
+So going back to the original part of the conversation, we had recognized in the team
+
+27:32.760 --> 27:38.880
+that I had built and the people I had worked with that A, we had some great sort of technical
+
+27:38.880 --> 27:45.920
+orthogonality, some were good software engineering, some good at ML, some UI, et cetera.
+
+27:45.920 --> 27:53.840
+And B, that what we had learned to do of recognizing the importance of putting AI into production
+
+27:53.840 --> 28:00.600
+and having real end users give real feedback in potentially a real-time loop was something
+
+28:00.600 --> 28:03.480
+we at the time didn't see anyone else doing.
+
+28:03.480 --> 28:08.360
+We knew obviously that the Googles and the LinkedIn's and the Netflix's of the world had
+
+28:08.360 --> 28:14.280
+this kind of baked in to their overall data flow, but we certainly weren't seeing companies
+
+28:14.280 --> 28:16.840
+helping other companies do it.
+
+28:16.840 --> 28:24.520
+And one of my now co-founders had more or less, while he was between jobs, figured out how
+
+28:24.520 --> 28:29.040
+to make one of the algorithms that we liked a lot, these decisions for our scale very,
+
+28:29.040 --> 28:33.080
+very well, at least on a single machine in a multi-core environment.
+
+28:33.080 --> 28:39.080
+And so we realized that we might have some interesting firepower and given that there
+
+28:39.080 --> 28:45.520
+seemed at the time to be so much emphasis on massive-scale machine learning.
+
+28:45.520 --> 28:50.800
+It was certainly a pre-spark era, but it was very much in the Hadoop heyday.
+
+28:50.800 --> 28:54.520
+It looked like most of the interesting ML that was starting to come out and some of the
+
+28:54.520 --> 28:59.520
+other companies that were coming out were really focused around helping the, you know,
+
+28:59.520 --> 29:05.520
+I won't say exit scale, but certainly pediscale level, Google scale, amount of data companies
+
+29:05.520 --> 29:08.280
+bring machine learning into their workflows.
+
+29:08.280 --> 29:13.680
+So we thought about sort of skating to a place, you know, using the analogy that's heavily
+
+29:13.680 --> 29:19.440
+overused to the part of where the puck was going to be, which was helping smaller companies
+
+29:19.440 --> 29:25.960
+and mid-sized scale companies bring machine learning into production environments.
+
+29:25.960 --> 29:30.720
+And that was the impetus for starting the company.
+
+29:30.720 --> 29:32.120
+What the domain was going to be?
+
+29:32.120 --> 29:36.400
+We didn't know who the customer was going to be and who the buyer was going to be.
+
+29:36.400 --> 29:37.560
+We didn't know.
+
+29:37.560 --> 29:42.200
+We were, I'd say blissfully ignorant about all of the business challenges that we would
+
+29:42.200 --> 29:46.840
+wind up encountering over the next couple of years in bringing this to market.
+
+29:46.840 --> 29:55.080
+And when we emerged out of our first accelerator, I gave a talk, our demo day was the alchemist
+
+29:55.080 --> 30:01.760
+accelerator where I said we're going to be GitHub for data scientists and produce some
+
+30:01.760 --> 30:08.120
+interesting UIs of interactions to help data scientists like ourselves more easily build
+
+30:08.120 --> 30:12.040
+models that they could then push into a production environment.
+
+30:12.040 --> 30:17.160
+We wind up seeing over the next couple of months the challenges of selling products like this
+
+30:17.160 --> 30:22.480
+into data science teams, first data science teams were few and far between.
+
+30:22.480 --> 30:26.160
+And the ones that existed were either too sophisticated to believe they could build it
+
+30:26.160 --> 30:30.400
+all themselves or not sophisticated enough to get a large enough budget to pay for the
+
+30:30.400 --> 30:35.040
+things that we wanted to provide them from a tooling perspective.
+
+30:35.040 --> 30:40.560
+All the while we were building out our underlying platform to be able to do exactly that, to
+
+30:40.560 --> 30:46.000
+be able to build templated machine learning models against certain types of data for
+
+30:46.000 --> 30:48.160
+certain types of use cases.
+
+30:48.160 --> 30:53.880
+And then even though you built it at a laptop level, push it into the cloud and have, you
+
+30:53.880 --> 31:02.120
+know, in Amazon or other compute frameworks, the scalability to be able to serve large
+
+31:02.120 --> 31:07.800
+numbers of customers around the same use cases where what's emerged for us is the difference
+
+31:07.800 --> 31:12.680
+between a customer is not new code, it's just a config file if they're using that same
+
+31:12.680 --> 31:13.840
+use case.
+
+31:13.840 --> 31:19.360
+So all of that to say that we evolved, you could call it a pivot, if you'd like, but
+
+31:19.360 --> 31:25.000
+I think of it as a series of of pivots to a place where we wind up seeing in customer
+
+31:25.000 --> 31:35.800
+support, a lot of data, a lot of manual work and some really nice CRM systems with open
+
+31:35.800 --> 31:38.880
+APIs and a fairly fixed schema.
+
+31:38.880 --> 31:46.520
+So the sales forces and Zendes and service now's of the world really are the data lake and
+
+31:46.520 --> 31:52.040
+the transactional layer for doing customer support and related activities.
+
+31:52.040 --> 31:57.760
+And we thought if we could build now an intelligent system on top of that and do all the things
+
+31:57.760 --> 32:01.280
+that I mentioned in powering these agents to become more efficient of their job and make
+
+32:01.280 --> 32:06.640
+the whole support desk more efficient at serving customers, we would solve a bunch of
+
+32:06.640 --> 32:07.640
+pain points.
+
+32:07.640 --> 32:12.240
+And that as we wind up going into the market and started leading with products that could
+
+32:12.240 --> 32:17.120
+be more or less installed by a non-technical user and could be used by a non-technical
+
+32:17.120 --> 32:22.280
+user, wind up getting a lot of feedback that indeed we were solving some pain points.
+
+32:22.280 --> 32:26.320
+There's obviously the efficiency question of needing less head count, but there's also
+
+32:26.320 --> 32:31.600
+some really interesting customers of ours who are growing very quickly.
+
+32:31.600 --> 32:36.040
+And one of them said to us that if the CEO had given him an infinite budget, he wouldn't
+
+32:36.040 --> 32:40.640
+be able to hire good customer support agents quick enough.
+
+32:40.640 --> 32:45.440
+So helping them capture all the internal knowledge was something that it turns out machine
+
+32:45.440 --> 32:49.360
+learning actually does quite well at.
+
+32:49.360 --> 32:54.480
+What were some of the biggest challenges in going from product direction focused on
+
+32:54.480 --> 33:00.400
+generalize tools and platforms to one focused on a very specific application area?
+
+33:00.400 --> 33:05.720
+I mean interestingly, it was all the things that we hadn't thought about which was product
+
+33:05.720 --> 33:11.200
+management and how do you get structured feedback from customers?
+
+33:11.200 --> 33:17.040
+What does it mean to build an MVP, roll that out, iterate on it, etc.
+
+33:17.040 --> 33:21.960
+A lot of kind of lean startup 101 stuff was something that we hadn't really been thinking
+
+33:21.960 --> 33:28.400
+of when we started the company and certainly didn't have frankly a lot of expertise in.
+
+33:28.400 --> 33:36.120
+And then as we started scaling, it was a recognition that there are large parts of a machine
+
+33:36.120 --> 33:40.600
+learning pipeline that don't naturally scale.
+
+33:40.600 --> 33:47.400
+So figuring out ways to containerize the parts that need special attention from PhD levels
+
+33:47.400 --> 33:54.200
+and data science and abstract that away from other parts of our engineering group that
+
+33:54.200 --> 33:59.000
+don't need to know about what's happening deeply but need to be able to ask predictions
+
+33:59.000 --> 34:03.680
+of some other part of the stack, restfully in a services oriented way.
+
+34:03.680 --> 34:09.800
+We just want to realizing that what worked for us from a scaling perspective, compute
+
+34:09.800 --> 34:14.880
+scaling perspective also wound up being what we needed to do from an organizational and
+
+34:14.880 --> 34:23.760
+HR perspective, when we hire front-end engineers and middleware engineers who create it writing
+
+34:23.760 --> 34:29.080
+scripts against databases and managing reticues, etc.
+
+34:29.080 --> 34:31.680
+Those folks don't need to know about machine learning.
+
+34:31.680 --> 34:37.680
+They need to know that there is a contract between their part of the stack and somewhere
+
+34:37.680 --> 34:43.040
+deeper in the stack that if I ask you for a prediction for this client, for this model,
+
+34:43.040 --> 34:48.000
+I'm expecting to get it back in this format on this time scale and if I don't, then
+
+34:48.000 --> 34:49.400
+our contract's broken.
+
+34:49.400 --> 34:53.640
+But likewise, I'm going to hand to that deeper part of the stack that's going to be providing
+
+34:53.640 --> 35:00.040
+those predictions effectively some data and JSON or otherwise that will have a fixed schema
+
+35:00.040 --> 35:06.520
+so that the group that built that machine learning pipeline knows that this column is going
+
+35:06.520 --> 35:11.920
+to be of type date time, this column is going to be an int and it's going to join using
+
+35:11.920 --> 35:14.920
+these four indices on some other data.
+
+35:14.920 --> 35:21.200
+So once we wind up realizing that we could lock down the schema for a given use case, it
+
+35:21.200 --> 35:28.320
+meant that we could write data science pipelines against data we hadn't seen before.
+
+35:28.320 --> 35:32.360
+You need to see it once to make sure it's all working and make sure it crossvalidates
+
+35:32.360 --> 35:37.200
+in an offline sense and it has the kinds of accuracy properties that you want.
+
+35:37.200 --> 35:42.040
+But then it means that we could basically start spinning up new customers where they get
+
+35:42.040 --> 35:49.000
+the base template that operates on their data and when we need to make changes, those
+
+35:49.000 --> 35:56.720
+can happen really from a more or less technical person than somebody with a PhD in statistics.
+
+35:56.720 --> 36:00.840
+So there were a bunch of challenges around that and as we started solving those, it just
+
+36:00.840 --> 36:08.760
+sort of fell out that our stack really mimics what our organization looks like.
+
+36:08.760 --> 36:14.240
+Can you talk a little bit about the data that you typically see in a customer environment?
+
+36:14.240 --> 36:20.160
+I'm imagining just loads of trouble tickets but I imagine as well that there's ancillary
+
+36:20.160 --> 36:25.040
+data supporting data as well and you mentioned that there's lots of it.
+
+36:25.040 --> 36:28.360
+Can you talk about the size you typically see, those kinds of things?
+
+36:28.360 --> 36:40.640
+Yeah, so our typical customer is doing a quarter of five to 20,000 tickets a month and
+
+36:40.640 --> 36:46.280
+we need to be working with companies that are achieving that level of volume A because
+
+36:46.280 --> 36:49.960
+the price points are reasonably high and so it's typically the companies that have those
+
+36:49.960 --> 36:55.560
+large volumes that are willing to pay for what we do and B because the machine learning
+
+36:55.560 --> 37:03.400
+models are built specifically for and on their data and we don't use a common model for
+
+37:03.400 --> 37:05.200
+instance across our customers.
+
+37:05.200 --> 37:09.040
+So we need a lot of training data for a given customer.
+
+37:09.040 --> 37:12.080
+Now this isn't again, this is not pediscale amounts of data.
+
+37:12.080 --> 37:19.240
+We're talking sort of tens to hundreds of gigabytes at the per month level per customer.
+
+37:19.240 --> 37:27.120
+The data is indeed a lot of human interaction from emails, web forums, even chat and there's
+
+37:27.120 --> 37:28.400
+also a lot of metadata.
+
+37:28.400 --> 37:35.000
+So what is the value of this customer, what products are they using, how often have they
+
+37:35.000 --> 37:41.760
+been emailing so there's a time series component to this as well and we've had to build these
+
+37:41.760 --> 37:46.680
+pipelines that are generic enough that we can then apply them to other use cases but
+
+37:46.680 --> 37:53.520
+specific enough that they give good enough accuracies that wind up rivaling what humans
+
+37:53.520 --> 37:54.520
+can do.
+
+37:54.520 --> 38:00.640
+And so oftentimes our goal is to get to not, we don't call it accuracy, we call it matching
+
+38:00.640 --> 38:04.880
+capability because oftentimes when a human's labeling something and saying it belongs
+
+38:04.880 --> 38:09.000
+to this bucket or this person should answer it or it should have been answered with this
+
+38:09.000 --> 38:11.480
+template, they oftentimes can be wrong.
+
+38:11.480 --> 38:13.280
+So we want to get all that experience.
+
+38:13.280 --> 38:18.920
+We want to get ourselves to that kind of level of quality, let's say.
+
+38:18.920 --> 38:23.560
+So it's mostly from a from a featureization perspective, we're doing lots of natural
+
+38:23.560 --> 38:30.240
+language processing, getting it to the point of sort of rectangularized data where each
+
+38:30.240 --> 38:35.760
+row is a different instance and each column is a set of features and then we have a bunch
+
+38:35.760 --> 38:37.640
+of labels of what the answers are.
+
+38:37.640 --> 38:44.520
+So we're working almost entirely in a supervised sense where we know from past data to particularly
+
+38:44.520 --> 38:48.640
+closed tickets what the actual right answer is quote unquote.
+
+38:48.640 --> 38:53.760
+We've got a couple of unsupervised models that we also wind up running where we wind up
+
+38:53.760 --> 39:01.000
+discovering for instance that there is a grouping and semantic space of outgoing tickets
+
+39:01.000 --> 39:06.200
+that is how agents are responding that don't look like templates that are sanctioned by
+
+39:06.200 --> 39:11.640
+the company which means that they're coming up with their own templated responses and
+
+39:11.640 --> 39:13.640
+potentially even sharing those with other agents.
+
+39:13.640 --> 39:17.600
+So we have a dashboard for instance, we show our customers the one that was running the
+
+39:17.600 --> 39:22.720
+support desk of potentially new templates that they can use because obviously if there's
+
+39:22.720 --> 39:27.920
+a new issue for instance with a product then agents who are on the ground have to figure
+
+39:27.920 --> 39:32.520
+out a way to answer it and if it's a recurring problem within a couple of emails that wind
+
+39:32.520 --> 39:36.880
+up essentially having the right answer that they've already pre-formulated.
+
+39:36.880 --> 39:39.160
+So that's an unsupervised problem.
+
+39:39.160 --> 39:46.760
+And do you see in that last example a feature place for generative types of AI approaches
+
+39:46.760 --> 39:51.160
+or is that more do you think of when you hear that is that like the technology you know
+
+39:51.160 --> 39:54.000
+looking for chasing the problem kind of thing?
+
+39:54.000 --> 39:55.360
+Yeah it's a good question.
+
+39:55.360 --> 40:00.840
+We've shied away from the generative component and in fact we make that a big part of our
+
+40:00.840 --> 40:07.760
+sales pitch of to say you are a potential client really know the voice that you want to
+
+40:07.760 --> 40:14.440
+speak in and speak with your customers and it's who is it for us to come in and say we're
+
+40:14.440 --> 40:19.920
+going to auto-generate at the character level you know CNNs or something a bespoke answer
+
+40:19.920 --> 40:25.120
+the way that you know Google inbox does well if it gives you five different words sure
+
+40:25.120 --> 40:29.720
+all sounds good I'll see you then or how about Friday.
+
+40:29.720 --> 40:37.280
+Those are fine but because we're really focused on not just getting results into the hands
+
+40:37.280 --> 40:41.960
+of agents where they can actually see in a UI sense within the dashboards they normally
+
+40:41.960 --> 40:46.000
+see what our predictions are and consume it in a way that they like to.
+
+40:46.000 --> 40:50.480
+We also want to take a lot of these tickets off the table in an automatic sense.
+
+40:50.480 --> 40:55.040
+The only way our customers get comfortable with that is if we're basically showing to
+
+40:55.040 --> 41:01.240
+them in an offline way here's our accuracies for these types of templates so we're going
+
+41:01.240 --> 41:05.440
+to send every now and then somebody says I'm very unhappy with what you've done we're
+
+41:05.440 --> 41:09.440
+going to said thanks for your feedback when it should have gone a different path but
+
+41:09.440 --> 41:15.320
+we're only going to do that you know 1% of the time at this at this level of false positive
+
+41:15.320 --> 41:20.120
+and once we can do that then our customers essentially can turn on a specific macro for
+
+41:20.120 --> 41:21.920
+us to auto respond with.
+
+41:21.920 --> 41:26.160
+The idea that we're going to auto respond without any agents in the loop to something like
+
+41:26.160 --> 41:30.800
+that to potentially I rate customer is pretty challenging.
+
+41:30.800 --> 41:35.160
+So we don't certainly want to rule it out but we certainly don't think about ourselves
+
+41:35.160 --> 41:39.280
+as producing gendered advances in a bespoke way.
+
+41:39.280 --> 41:43.520
+We're just more or less turning all of our problem into multi-class classification problems
+
+41:43.520 --> 41:48.320
+of what of the hundreds or potentially thousands of canned responses is the right one to answer
+
+41:48.320 --> 41:49.320
+with.
+
+41:49.320 --> 41:55.960
+And just so I understand the comment that you made a second ago in terms of sending
+
+41:55.960 --> 42:03.880
+out a given response a small percentage of the times are you describing an errors type
+
+42:03.880 --> 42:11.880
+of situation or you describing a feature where you're like an exploration type of feature.
+
+42:11.880 --> 42:12.880
+Good point.
+
+42:12.880 --> 42:18.320
+So we try not to do we there's an explore exploit component to what we do in a multi-armed
+
+42:18.320 --> 42:26.600
+bandit sense that's typically not you know expose or a knob that's tunable by our customers.
+
+42:26.600 --> 42:30.920
+So that will happen and some of that will happen naturally in the case of auto response
+
+42:30.920 --> 42:36.040
+we hold back 10% of the ones that work we know what the answer is or we believe we know
+
+42:36.040 --> 42:41.000
+with a certain threshold of confidence and then compare after the fact whether an agent
+
+42:41.000 --> 42:45.920
+who wound up now having to see it because we did not a respond gave the same response
+
+42:45.920 --> 42:46.920
+we did.
+
+42:46.920 --> 42:52.440
+There's an exploration where with the agents job is now to do the exploration implicitly.
+
+42:52.440 --> 42:59.600
+No that the one I was pointing out is ones where we are essentially wrong.
+
+42:59.600 --> 43:04.120
+And that gets back to the question of the loss function of what does it mean to be wrong?
+
+43:04.120 --> 43:05.120
+Right.
+
+43:05.120 --> 43:10.600
+If one of the canned responses is I'm so sorry for your loss I will refund your entire
+
+43:10.600 --> 43:17.120
+vacation you know in the amount of $10,000 the cost of being wrong of that is very very
+
+43:17.120 --> 43:18.440
+high.
+
+43:18.440 --> 43:22.760
+But if somebody is mad and says my vacation got ruined because of something you did I
+
+43:22.760 --> 43:29.520
+want my 10k back and we say thanks for your feedback it's being wrong on that side is
+
+43:29.520 --> 43:32.400
+not nearly as bad as being wrong on the other side of that.
+
+43:32.400 --> 43:37.120
+And so we give and empower our customers to basically make the decision about you know
+
+43:37.120 --> 43:41.440
+let's do the easy stuff where the cost of being wrong is not a big deal.
+
+43:41.440 --> 43:46.720
+But because and that's for the automatic response but for the recommended types of responses
+
+43:46.720 --> 43:51.160
+if our first canned responses here's your money back and an agent looks at that and says no
+
+43:51.160 --> 43:54.800
+that's crazy the right answer is farther down the list.
+
+43:54.800 --> 43:59.280
+They'll select that and that becomes the feedback that our model you know our models went
+
+43:59.280 --> 44:02.800
+up getting better as they wind up learning over time.
+
+44:02.800 --> 44:09.560
+What are some of the most interesting challenges that you've run into in putting together this
+
+44:09.560 --> 44:17.840
+kind of hybrid you know ML plus human solution like in one of the things that pops to my
+
+44:17.840 --> 44:22.240
+mind is you know just user experience user interface like are there challenges there
+
+44:22.240 --> 44:28.640
+that are interesting or you know what surprised you the most in trying to fill these types
+
+44:28.640 --> 44:30.640
+of solutions.
+
+44:30.640 --> 44:37.320
+Certainly because this we're getting into the space and the face of agents who do this
+
+44:37.320 --> 44:43.600
+all the time when we first started releasing our products we didn't have a good training
+
+44:43.600 --> 44:44.600
+program for them.
+
+44:44.600 --> 44:48.840
+And so when they would see even though what we thought was an intuitive set of responses
+
+44:48.840 --> 44:53.520
+in the form of widgets that would show up on their on their desktop you know they didn't
+
+44:53.520 --> 44:57.360
+know how to consume it and they didn't know how to use it as effectively as we thought
+
+44:57.360 --> 45:04.440
+they should you know there's all the mundane stuff around UIs like responsiveness and somebody
+
+45:04.440 --> 45:08.520
+saying well doesn't look like your products working because now there are no responses
+
+45:08.520 --> 45:12.360
+and we'd say well that's because you've already responded and you're bringing up a new
+
+45:12.360 --> 45:17.200
+ticket you bring up an old ticket that already has a whole conversation and we're only getting
+
+45:17.200 --> 45:21.320
+involved in at least for now in the first part of the conversation what's the first response
+
+45:21.320 --> 45:25.880
+you should do okay so then we weren't showing the results and so how can we you know
+
+45:25.880 --> 45:30.760
+to modify our widgets so that the agents understand we're not showing it for a purpose it's
+
+45:30.760 --> 45:39.320
+not that our system is is broken and then realizing also that many agents wanted parts
+
+45:39.320 --> 45:50.040
+of our UI that and UX were generally that doesn't have anything to do with ML so they wanted
+
+45:50.040 --> 45:54.200
+keyboard shortcuts because we thought everyone would just click on stuff but high velocity
+
+45:54.200 --> 46:00.320
+support desk wanted just to use the keyboard so having to build that in for a set of customers
+
+46:00.320 --> 46:04.840
+because they essentially is like the keyboard had some disease or the mouse had a disease
+
+46:04.840 --> 46:13.320
+on it they didn't want to touch it getting feedback from the UI itself back into our system
+
+46:13.320 --> 46:19.160
+making sure that we're getting the right metrics back making sure that the KPIs that
+
+46:19.160 --> 46:24.520
+we're measuring or that we're aligned with the KPIs that our customers wanted I think
+
+46:24.520 --> 46:30.480
+one of the hardest things for us and it frankly continues to be a challenge is really
+
+46:30.480 --> 46:35.820
+just thinking about how fault tolerant ML needs to happen and again Google going back to
+
+46:35.820 --> 46:41.560
+Google inbox for those of you that have used it it makes a couple of suggestions about
+
+46:41.560 --> 46:46.200
+how you could respond to an email if you don't want to use those you don't use it so
+
+46:46.200 --> 46:53.160
+I would call that a great fault tolerant ML experience and the same thing in a spam
+
+46:53.160 --> 46:57.880
+filter within your within your mail system it'll say we think this is spam if it's not
+
+46:57.880 --> 47:01.960
+move it over and then later on we'll figure out how not to call these things spam anymore
+
+47:01.960 --> 47:07.640
+that are like that that sort of fault tolerance where you're also getting feedback either
+
+47:07.640 --> 47:13.520
+implicitly or explicitly is just something we've had to build up over time but I think
+
+47:13.520 --> 47:21.280
+more broadly that that kind of approach needs to be built into any AI system in a production
+
+47:21.280 --> 47:26.840
+environment unless the AI outputs that you're building are going to be consumed entirely
+
+47:26.840 --> 47:33.560
+by machines you need to have some level of understanding of who it is that's going
+
+47:33.560 --> 47:38.640
+to be consuming it what are their concerns and how can they give you feedback so that
+
+47:38.640 --> 47:44.960
+your models one of getting better over time can you talk a little bit about the algorithms
+
+47:44.960 --> 47:51.960
+that you're employing and the the tool chain the pipelines what does all that look like
+
+47:51.960 --> 47:58.240
+yeah so we we stay out of what we call the algorithms arms race internally a we're not
+
+47:58.240 --> 48:03.720
+really selling the the platforms other data scientists it gives us the freedom to focus
+
+48:03.720 --> 48:11.880
+on parts of the of the pipeline that we we find most important all of our algorithmic
+
+48:11.880 --> 48:18.120
+sort of learning parts and then prediction parts are built in C++ and then surface
+
+48:18.120 --> 48:23.640
+back out into Python which is where the data science team winds up working we have our
+
+48:23.640 --> 48:30.160
+own notion of what a pipeline needs to be and the data science team works entirely within
+
+48:30.160 --> 48:34.960
+that the confines of what that pipeline ought to be which is some sort of pre filtering
+
+48:34.960 --> 48:41.160
+so for instance if a if a ticket is from a voicemail don't predict on it or don't use
+
+48:41.160 --> 48:46.720
+it for a build so you get rid of those that have this in this column this value then there's
+
+48:46.720 --> 48:51.920
+the data transformation parts of that in the joining across multiple across multiple
+
+48:51.920 --> 49:00.360
+datasets if that's needed and then the featureization which we'll often use open source tools
+
+49:00.360 --> 49:07.640
+for that in the Python ecosystem pandas is that we use very regularly and then once we
+
+49:07.640 --> 49:12.320
+want to realizing that we've created a bottleneck which typically will happen not so much in
+
+49:12.320 --> 49:19.960
+time but in ram usage we'll wind up rewriting other people's algorithms or code so that
+
+49:19.960 --> 49:27.920
+we create you know a ram efficient pipeline and then once the featureization happens basically
+
+49:27.920 --> 49:32.840
+the learning winds up happening in the C++ layer and we've built a whole bunch of hyper
+
+49:32.840 --> 49:38.440
+parameter optimizations and feature selection capabilities and then post process capabilities
+
+49:38.440 --> 49:46.080
+to get calibrated probabilities out of a multi-class problem so we have a bunch of pieces
+
+49:46.080 --> 49:51.240
+that we've been building up that are not in the open world and something that we've decided
+
+49:51.240 --> 49:59.160
+not to open source for now that allow us to work efficiently so we think of it as high
+
+49:59.160 --> 50:03.920
+velocity data science and building out a template for the first time but then because the
+
+50:03.920 --> 50:09.440
+models have to rebuild every single day for every single customer on you know cloud infrastructure
+
+50:09.440 --> 50:16.560
+which is not super cheap we needed to make the cost of doing that as small as possible
+
+50:16.560 --> 50:23.160
+and what we want up realizing is that open source tools you know that many people use
+
+50:23.160 --> 50:31.840
+like the psychic learns and the Tories slash dotes of the world or even Spark ML were vastly
+
+50:31.840 --> 50:37.400
+more costly to run even if you could do it in the same amount of time which we think
+
+50:37.400 --> 50:42.560
+we're much much faster than most of those tools because of the ram requirements needed
+
+50:42.560 --> 50:48.240
+on multiple machines or even a large single machine in Amazon the cost of building a model
+
+50:48.240 --> 50:57.200
+just was x percent higher and x being you know in the thousands so having a ram efficient
+
+50:57.200 --> 51:01.080
+speed efficient and obviously again getting back to the original conversation about table
+
+51:01.080 --> 51:06.560
+six highly accurate set of algorithms which produce the kinds of answers we want that
+
+51:06.560 --> 51:11.920
+we could then get into and modify if we needed to was kind of where we went up settling
+
+51:11.920 --> 51:18.040
+as where we needed to spend our kind of R&D slash engineering time now one of the areas
+
+51:18.040 --> 51:24.680
+that many of the machine learning platform companies have focused on is trying to close
+
+51:24.680 --> 51:32.960
+this gap between data science and production yep and in essence eliminate the hey I've got
+
+51:32.960 --> 51:38.280
+this model that kind of works though it over the wall to developers and have it implemented
+
+51:38.280 --> 51:46.280
+and it sounds like you guys have maybe embraced that and you're using that as a way to build
+
+51:46.280 --> 51:56.040
+out the models in C++ for presumably for performance are there ways that you've been compensated
+
+51:56.040 --> 52:02.320
+for that in terms of automation tooling or do you just accept that or you know even you
+
+52:02.320 --> 52:06.440
+know we just have the you know the best people on both sides of that fence that can deal
+
+52:06.440 --> 52:13.960
+with the you know the existence of the gap like how do you maintain a level of efficiency
+
+52:13.960 --> 52:19.680
+and innovation in terms of the development pipeline not the machine learning pipeline
+
+52:19.680 --> 52:24.880
+so that it all works for you yeah so there's definitely this separation of concerns which
+
+52:24.880 --> 52:32.920
+again is both an organizational one and then is also a computational one to the level
+
+52:32.920 --> 52:38.720
+where we think we often talk about what we call the organizational API of who within
+
+52:38.720 --> 52:44.480
+this stack is the customer of who and so for instance the people who are the sort of
+
+52:44.480 --> 52:49.920
+core ML and algorithms folks in the company are working in C++ and surfacing the great
+
+52:49.920 --> 52:59.400
+results back into Python layer their customer is the data science team the customer of
+
+52:59.400 --> 53:07.200
+the data science team is the people working on our architecture who have to maintain you
+
+53:07.200 --> 53:13.720
+know this the scalable robust infrastructure and you know their customers are the people
+
+53:13.720 --> 53:18.800
+working in the middle where and their customers are the ones who are in the UI and so each
+
+53:18.800 --> 53:24.000
+of them have a set of contracts of what it is that each part of that stack is looking
+
+53:24.000 --> 53:30.240
+for and and how in fact they're supposed to engage with each other and that's become
+
+53:30.240 --> 53:35.400
+very very helpful for us because you know what you find is that when you put somebody in
+
+53:35.400 --> 53:41.000
+a box they figure out a way to innovate very highly within that box so if there is a very
+
+53:41.000 --> 53:45.000
+strong contract of what data is expected to come in and what data is expected to come
+
+53:45.000 --> 53:49.680
+out and everything in between there is really up to you to decide how to do this well and
+
+53:49.680 --> 53:54.920
+efficiently that's where for instance our data science team and implementation team will
+
+53:54.920 --> 54:00.040
+wind up working and building out a new template they can work at their laptop or glorified
+
+54:00.040 --> 54:06.240
+laptop level on a toy data set get some confidence that the pipeline is working offline accuracies
+
+54:06.240 --> 54:11.200
+look good and the whole thing is going to work and they once they're comfortable with
+
+54:11.200 --> 54:17.320
+that they literally are just pushing a new version of a of a Docker image into our registry
+
+54:17.320 --> 54:21.720
+which then farther upstream from something they ever have to think about from a production
+
+54:21.720 --> 54:27.000
+sense once a new build winds up getting kicked off for that customer for that type of template
+
+54:27.000 --> 54:31.640
+the new the new image will just get pulled and it'll just get built with the config file
+
+54:31.640 --> 54:37.720
+for that customer and so the data science team can wind up working within their confines
+
+54:37.720 --> 54:42.160
+and of course we have a whole testing suite to make sure that if they build something
+
+54:42.160 --> 54:47.680
+new they're not going to break something downstream from them gain confidence in that and
+
+54:47.680 --> 54:52.520
+then they're literally just pushing the results of what they're doing on a semi weekly
+
+54:52.520 --> 54:58.800
+basis into the Docker registry that becomes the latest template for let's say triage and
+
+54:58.800 --> 55:04.400
+then all the customers in production are automatically migrated to that so having the
+
+55:04.400 --> 55:07.960
+data science team be able to push stuff into production without having to be on the
+
+55:07.960 --> 55:13.440
+op side of things nor have to think about the architecture has a has really freed us
+
+55:13.440 --> 55:21.640
+up in great ways I think to innovate and likewise when they need a new beller and or whistle
+
+55:21.640 --> 55:28.280
+from the the core algorithm folks because they say this part of our entire a build chain
+
+55:28.280 --> 55:35.160
+is really inefficient they can ask of the people working on that to improve it and they
+
+55:35.160 --> 55:39.400
+go through their own testing suite and I think we're at 300,000 regression tests in our
+
+55:39.400 --> 55:46.440
+core ML we're also testing against every open source algorithm on customer data to make
+
+55:46.440 --> 55:51.600
+sure that we're staying as efficient or more on all these different axes before we
+
+55:51.600 --> 55:56.320
+cut a release then the data science team can just pull essentially Python egg from our
+
+55:56.320 --> 56:05.040
+registry and use that in their system so having those separations has been great obviously
+
+56:05.040 --> 56:10.720
+if you're abstracting everybody from what the ends use cases are there can be a huge danger
+
+56:10.720 --> 56:17.800
+but it's the job of people like myself to make sure that everyone is is focused and innovating
+
+56:17.800 --> 56:25.440
+towards the right set of goals. Oh great great I'm glad that Docker came up you guys
+
+56:25.440 --> 56:32.440
+published a you publish and maintain a set of Docker images for data science tools I've
+
+56:32.440 --> 56:40.200
+come across that my impression is that in general Docker adoption within the data science
+
+56:40.200 --> 56:46.000
+machine learning community is not particularly high is that years as well.
+
+56:46.000 --> 56:51.600
+Certainly haven't heard of many other companies using it in the ways that we are but it
+
+56:51.600 --> 57:00.440
+seems like such a natural way to literally containerize and abstract the work of one
+
+57:00.440 --> 57:05.400
+part of an organization from the other so long as they you know that container will respond
+
+57:05.400 --> 57:10.680
+with a slash build predict endpoint you know feedback endpoint etc in the way that everyone
+
+57:10.680 --> 57:18.440
+expects it to. I think that's a I think that's a wonderful way to do abstraction so and
+
+57:18.440 --> 57:25.040
+then obviously it also helps you wind up achieving scale because for us scale is not you know
+
+57:25.040 --> 57:30.800
+can we serve you know a billion of our customers with the same app it's instead well we've
+
+57:30.800 --> 57:35.640
+got a new customer that we just spin up more containers to do the builds and the predicts
+
+57:35.640 --> 57:39.600
+for that customer and if we need more compute capability that's elastically scaling for
+
+57:39.600 --> 57:47.320
+us for free on top of Amazon. So I think of a very natural way to separate concerns you
+
+57:47.320 --> 57:52.320
+know from a stack perspective and also a very natural way to do what is for a company
+
+57:52.320 --> 57:58.320
+that's serving lots and lots of customers a very embarrassingly parallel type of of
+
+57:58.320 --> 58:03.840
+compute. Interesting I got into a conversation on Twitter or Reddit or someplace where
+
+58:03.840 --> 58:14.240
+someone was kind of griping about just the dependency hell with Python and pandas and trying
+
+58:14.240 --> 58:18.120
+to come to terms with managing different versions of you know different tooling versions
+
+58:18.120 --> 58:24.240
+and things like that and I suggested I might have even pointed to your docker repository
+
+58:24.240 --> 58:28.600
+and the response was now I want to make this simpler not more complex and obviously you
+
+58:28.600 --> 58:35.240
+find it to be simpler can you give folks that aren't familiar with docker and containers
+
+58:35.240 --> 58:41.160
+like your 30 second you know docker for data science pitch and where they can learn
+
+58:41.160 --> 58:52.720
+more about it. Yeah so docker is a way of basically explicitly specifying what not
+
+58:52.720 --> 58:59.920
+only your let's say Python requirements are which you can do with a simple file but
+
+58:59.920 --> 59:06.760
+also what the entire OS shall be for running whatever scripts you're going to need and
+
+59:06.760 --> 59:14.880
+once you build that and you can confidence that that image is doing what it ought to you
+
+59:14.880 --> 59:21.680
+can essentially very rapidly turn a container on that is the almost instant instantiation
+
+59:21.680 --> 59:28.600
+of that entire OS plus that script and all of the dependencies built inside of that and
+
+59:28.600 --> 59:36.080
+you can hand somebody a link to the docker hub registry or if you maintain your own
+
+59:36.080 --> 59:45.720
+private registry explicit URI to that explicit version of that explicit image and more
+
+59:45.720 --> 59:51.160
+less guarantee that when they run that with whatever data is contained inside of that
+
+59:51.160 --> 59:56.280
+or whatever will be pulled over so long as it's the same you'll get the same answer out.
+
+59:56.280 --> 01:00:02.600
+So I tend to think from a data science workflow and then getting back to you know just
+
+01:00:02.600 --> 01:00:12.040
+doing science more generally docker is a very nice framework for reproducibility and
+
+01:00:12.040 --> 01:00:17.400
+so the idea that now I'm not I don't have to share a machine with you or an Amazon
+
+01:00:17.400 --> 01:00:21.960
+machine image with you I'm just handing you effectively a docker file and says if
+
+01:00:21.960 --> 01:00:29.400
+you run this you're going to want to get the same answer that I got but again because
+
+01:00:29.400 --> 01:00:34.320
+I don't think doing the types of work that we do and wise and in some cases what we do
+
+01:00:34.320 --> 01:00:41.040
+on the science side of things as the you know the final result is not what comes out
+
+01:00:41.040 --> 01:00:47.600
+of the docker image or container it's not okay here's a report of what my ROC curve is
+
+01:00:47.600 --> 01:00:52.320
+going to be my false positive versus false negative curve and then let me write a paper
+
+01:00:52.320 --> 01:00:57.960
+about that it needs to be for us at least in a production environment just now I've produced
+
+01:00:57.960 --> 01:01:02.320
+a prediction that now needs to get consumed by something that's farther downstream.
+
+01:01:02.320 --> 01:01:08.000
+So docker is quite nice in that sense as well because you can also now connect docker
+
+01:01:08.000 --> 01:01:13.240
+containers explicitly using something like a docker compose on there's many other tools
+
+01:01:13.240 --> 01:01:18.640
+out there as well so that containers talk to other containers and you allow each container
+
+01:01:18.640 --> 01:01:23.800
+to have again its own separated concern from the other ones but still pull the results
+
+01:01:23.800 --> 01:01:28.600
+and push results to the other the other ones around in addition some containers can just
+
+01:01:28.600 --> 01:01:35.240
+contain data and you can build databases around that data so now it allows you to build
+
+01:01:35.240 --> 01:01:41.640
+up a very lightweight version of what might be your entire stack and do this in a way
+
+01:01:41.640 --> 01:01:48.040
+that's programmable so we found that to be incredibly useful for testing purposes.
+
+01:01:48.040 --> 01:01:51.960
+So as your GitHub the place that someone can go to learn more about what you're doing
+
+01:01:51.960 --> 01:02:00.720
+or. Yeah so we've got a public docker registry that you can go to the docker registry
+
+01:02:00.720 --> 01:02:07.880
+in search for YZO or you can go to GitHub slash YZO and see our other public projects
+
+01:02:07.880 --> 01:02:13.640
+that we've pushed out so there's one around docker and data science which in that case
+
+01:02:13.640 --> 01:02:19.240
+because we're not releasing any of our internal tools we're basically building up a container
+
+01:02:19.240 --> 01:02:24.120
+with open source tools that we find are really useful for doing lots of different types
+
+01:02:24.120 --> 01:02:31.080
+of data science. The other major project which we have up there in GitHub that's open
+
+01:02:31.080 --> 01:02:37.320
+is something we call Paratax which started as just sort of a weekend hack from one of
+
+01:02:37.320 --> 01:02:43.520
+our engineers Damian Eeds who wanted to see what it would be like to read data from
+
+01:02:43.520 --> 01:02:50.080
+disk in parallel just to see what kind of speedups you could wind up getting and it turns
+
+01:02:50.080 --> 01:02:55.040
+out pretty much every open source tool out there doesn't read in parallel and the ones
+
+01:02:55.040 --> 01:03:00.720
+that do are explicitly parallelized like over multiple machines but if you just made
+
+01:03:00.720 --> 01:03:06.000
+multiple use of the multi-core environment how well would you get and we want to getting
+
+01:03:06.000 --> 01:03:12.400
+100,000 x speedups over some of the other tools that are out there and importantly also
+
+01:03:12.400 --> 01:03:19.920
+use vastly less memory that Paratax is not yet in our production environment but we thought
+
+01:03:19.920 --> 01:03:25.600
+it would be a good example of kind of showing off the philosophies that we try to adhere to
+
+01:03:25.600 --> 01:03:31.760
+within the company of creating efficiencies that isn't just the one thing like around accuracy
+
+01:03:31.760 --> 01:03:38.480
+but you know around how fast can you read data and how big is your model on disk all these
+
+01:03:38.480 --> 01:03:43.360
+other aspects of what it means to do machine learning that has nothing to do with the algorithm
+
+01:03:44.000 --> 01:03:49.520
+once you're happy and you've reached some level of plateau with the algorithm accuracy all
+
+01:03:49.520 --> 01:03:56.160
+that you're left to do is optimize all these other pieces of that pipeline and so a lot of our
+
+01:03:56.160 --> 01:04:02.160
+engineering over the last year in particular has moved away from just optimizing accuracy to
+
+01:04:02.160 --> 01:04:07.840
+you know things like creating interpretability around the models that we build
+
+01:04:08.560 --> 01:04:14.480
+making the models smaller on disk making the other parts of the featureization pipeline
+
+01:04:15.200 --> 01:04:22.800
+be more ram-efficient and once you start sort of playing whack-a-mole with let's just say ram usage
+
+01:04:22.800 --> 01:04:28.080
+you want to find really interesting parts of your entire pipeline that very few people
+
+01:04:28.080 --> 01:04:32.880
+want to talk about just you know again reading data which is should be the easiest part of your
+
+01:04:32.880 --> 01:04:41.680
+entire tool chain is vastly inefficient and you know whacking that mole turns out you save a whole
+
+01:04:41.680 --> 01:04:47.280
+bunch of Amazon costs because now you need a smaller ram machine that's great that's great
+
+01:04:48.320 --> 01:04:54.320
+you mentioned interpretability have you spent a lot of time working on that and what were the
+
+01:04:54.320 --> 01:04:59.920
+drivers for that we have spent a lot of time on that you know sort of one of what we think of
+
+01:04:59.920 --> 01:05:08.080
+as our trade secret one of our trade secrets around getting back to the question of UI and UX
+
+01:05:08.080 --> 01:05:15.360
+for end users we we were asked often at least in the early days well why are you getting the answer
+
+01:05:15.360 --> 01:05:21.200
+that you're getting and you can't say well you know it's a thousand dimensional feature space
+
+01:05:21.200 --> 01:05:27.840
+and there's covariance between all of these and you know the model importance is over the entire
+
+01:05:27.840 --> 01:05:33.760
+thing you know says that this is the most important feature I don't know why we said for this one
+
+01:05:33.760 --> 01:05:40.240
+what the answer is but that answer is what what's called in in the financial services world reason
+
+01:05:40.240 --> 01:05:46.720
+codes turns out to be really important some some some places it's actually regulatory required
+
+01:05:46.720 --> 01:05:51.840
+that you tell somebody why you got the answer that you got even if it's a machine learning black box
+
+01:05:53.120 --> 01:05:59.920
+and so some of our early R&D effort was around how to make at the instance level so an individual
+
+01:05:59.920 --> 01:06:06.400
+prediction level how do we make these models interpretable by saying these are the important
+
+01:06:06.400 --> 01:06:14.080
+features and these are what's driving this specific prediction so as an example if you're
+
+01:06:14.080 --> 01:06:19.200
+working on customer churn and you want to predict somebody going to churn in 90 days from now it's
+
+01:06:19.200 --> 01:06:25.520
+a use case that we've also used on our platform but not something we go to market with necessarily
+
+01:06:27.200 --> 01:06:33.200
+two customers can have an identical probability of churning but one of them may be churning because
+
+01:06:33.200 --> 01:06:37.280
+they haven't really used your product and they haven't done the training videos and the other one
+
+01:06:37.280 --> 01:06:41.920
+may be churning because there's a high probability they're going to go bankrupt in the first case
+
+01:06:41.920 --> 01:06:46.560
+that's something you can do something about and the second case you know you're kind of SOL
+
+01:06:47.760 --> 01:06:53.200
+and so even though they're identical and what their predictions are and their and their
+
+01:06:53.200 --> 01:07:00.560
+probabilities of those predictions coming to pass one is actionable and one isn't and so it's
+
+01:07:00.560 --> 01:07:05.280
+not just people gaining kind of a warm fuzzy about why did you get these predictions and does it
+
+01:07:05.280 --> 01:07:12.160
+jive with my you know feeling about why that that could be okay which is critically important
+
+01:07:12.160 --> 01:07:19.600
+it also then starts tying into next best action and because I think again a important part of
+
+01:07:19.600 --> 01:07:26.240
+machine learning and production is to drive value if the value isn't the prediction in of itself
+
+01:07:26.240 --> 01:07:32.160
+then the prediction in of itself is really just there to drive the next thing that happens
+
+01:07:32.160 --> 01:07:39.600
+and so next best action is heavily coupled with you know the the importance is around which
+
+01:07:39.600 --> 01:07:46.800
+features are driving the prediction okay um you mentioned value and that's a great transition
+
+01:07:46.800 --> 01:07:52.160
+to one of the things that I really wanted to dig into with you and that is the this blog post
+
+01:07:52.160 --> 01:07:58.000
+that you wrote about cost optimized AI that I've incidentally mentioned on the podcast a couple
+
+01:07:58.000 --> 01:08:06.000
+of times do you have time to go into that of course so I guess the first you know it's it's actually
+
+01:08:06.000 --> 01:08:12.560
+come up several times in our conversation already this notion of cost and value but was there a
+
+01:08:12.560 --> 01:08:19.520
+specific thing that prompted you to I really got to write this down now would drove that
+
+01:08:19.520 --> 01:08:29.760
+so that was a bit of an intellectual journey I was wondering to be really frank why the hell are
+
+01:08:29.760 --> 01:08:35.600
+all these companies building these neuromorphic chips and all these specialized hardware to do deep
+
+01:08:35.600 --> 01:08:43.840
+learning where where you know because I think much of the world's data and much of the world's
+
+01:08:43.840 --> 01:08:49.200
+value in data is tied up and I'll use the word or quote unquote small data or medium data
+
+01:08:49.200 --> 01:08:55.760
+non massive scale Google scale data Facebook scale data I was wondering why all these people
+
+01:08:55.760 --> 01:09:01.840
+are starting to build these very specialized pieces of hardware when you know deep learning I
+
+01:09:01.840 --> 01:09:10.720
+think magnanimously one could say or charitable is incredibly good at a large number of of inference
+
+01:09:10.720 --> 01:09:18.480
+problems but not very good at a large probably even larger space of inference problems that may be
+
+01:09:18.480 --> 01:09:24.320
+changing over time as people start applying it to these new realms but the place where deep learning
+
+01:09:24.320 --> 01:09:31.360
+winds up shining is in really large amounts of data right because effectively what you're doing
+
+01:09:31.360 --> 01:09:37.200
+is turning millions or even billions of knobs to optimize a model and to do that credibly without
+
+01:09:37.200 --> 01:09:43.440
+overfitting when it's lots and lots of data so so I want to ask you this question of myself why are
+
+01:09:43.440 --> 01:09:52.320
+people doing this and why isn't what we already have out there and even just the GPU land good
+
+01:09:52.320 --> 01:10:00.880
+enough and if you look at the the plot which I have in my blog post of the efficiency sort of
+
+01:10:00.880 --> 01:10:06.560
+gigaflops per watt right which is something of if I put this amount of energy in which has this
+
+01:10:06.560 --> 01:10:13.520
+amount of cost how many computations can I get out that efficiency has been growing over time
+
+01:10:14.720 --> 01:10:19.520
+but it's nowhere near what some of these other chips or the specialized pieces of hardware can do
+
+01:10:19.520 --> 01:10:24.240
+for these specific types of calculations and those themselves are nowhere near what the human
+
+01:10:24.240 --> 01:10:30.000
+brain can do right which is of order if I remember right about 10 to the five gigaflops per watt
+
+01:10:30.000 --> 01:10:36.400
+so your your brain is a you know 30 watt supercomputer unrivaled at least for now by anything
+
+01:10:36.400 --> 01:10:41.680
+else it's out there and anything that else is out there is likely going to take megawatts or
+
+01:10:41.680 --> 01:10:46.240
+hundreds of megawatts to get anywhere close the computational capability incidentally I don't know
+
+01:10:46.240 --> 01:10:53.040
+if you've come across it but there there's a parallel to using DNA for storage and the the storage
+
+01:10:53.040 --> 01:11:00.240
+density per per unit energy is incredible in DNA yeah something like you know the the drop of
+
+01:11:00.240 --> 01:11:05.840
+of uh you know in a teaspoon or something it can take all the world's data as it's it's
+
+01:11:05.840 --> 01:11:13.040
+it's incredible um so so getting back to this you know that's an obvious that's an obvious one
+
+01:11:13.040 --> 01:11:20.400
+and I started thinking about it when alpha go um had uh it's big um set of results uh the national
+
+01:11:20.400 --> 01:11:26.400
+or international championships and you want to looking at the computational capability that it took
+
+01:11:26.400 --> 01:11:34.160
+to win those um those competitions it's just huge thousands and thousands of computers thousands
+
+01:11:34.160 --> 01:11:41.680
+and thousands of GPUs the amount of power required there uh was several orders of magnitude larger
+
+01:11:42.480 --> 01:11:49.200
+than what was going on in uh you know the the the champions head that they was playing against
+
+01:11:49.200 --> 01:11:56.480
+so I was thinking about that sort of vast gulf and I wound up realizing that the companies that
+
+01:11:56.480 --> 01:12:02.880
+are pushing towards these specialized pieces of hardware is because they realized that uh for a
+
+01:12:02.880 --> 01:12:09.200
+given amount of time and a given amount of data because these algorithms are all basically
+
+01:12:09.200 --> 01:12:17.120
+saturating on near perfect answers uh the only thing left to do is to get more uh energy
+
+01:12:17.120 --> 01:12:23.520
+efficient um machine learning uh for building and and that the step after energy efficiency when
+
+01:12:23.520 --> 01:12:32.400
+it comes down to it is really cost efficiency um and and so my my take away on on that part was
+
+01:12:33.040 --> 01:12:38.640
+that people are building these chips because that's sort of the last frontier of squeaking out
+
+01:12:38.640 --> 01:12:45.360
+and eaking out the last amount of dollars uh coming out of the system for the number of dollars
+
+01:12:45.360 --> 01:12:52.080
+going into the system um and then it's taking a step back from that it went up realizing that uh
+
+01:12:52.080 --> 01:12:58.000
+or or at least realizing for myself it's probably obvious to most out there that because machine
+
+01:12:58.000 --> 01:13:05.680
+learning is optimization that you're a good optimizer will find the optimal answer by definition
+
+01:13:05.680 --> 01:13:11.200
+that if you're not writing down your uh your the function that you're trying to optimize um to get
+
+01:13:11.200 --> 01:13:19.520
+a minimum of or maximum of uh in terms that actually matter then you're creating by definition a sub sub
+
+01:13:19.520 --> 01:13:26.800
+optimal answer or system and now that system doesn't just involve you know as my algorithm
+
+01:13:26.800 --> 01:13:31.920
+more optimal at getting an accuracy better than yours but now translating the accuracy into
+
+01:13:31.920 --> 01:13:36.960
+well let's go back to our loss function what's the cost of being wrong you know and saying this
+
+01:13:36.960 --> 01:13:43.600
+thing is uh a and this thing is b um translating that to a business term is something that's critical
+
+01:13:43.600 --> 01:13:50.000
+and almost everybody knows that that's uh important but then you want to realizing well um if I'm
+
+01:13:50.000 --> 01:13:55.600
+going to build a model what if it takes me 12 days to build one of these models right to get an
+
+01:13:55.600 --> 01:14:01.840
+accuracy which is only epsilon better than one that takes me to 10 seconds uh and what if
+
+01:14:01.840 --> 01:14:08.080
+you know I can build a model that may take 12 days and the accuracy is much higher than one
+
+01:14:08.080 --> 01:14:14.240
+took me less time but uh the labor costs are very different so I had to spend more data science time
+
+01:14:14.240 --> 01:14:19.920
+building one versus the other and what about the opportunity costs of those data scientists not
+
+01:14:19.920 --> 01:14:25.120
+working on another problem in your business that may be more important and when you wind up
+
+01:14:25.120 --> 01:14:31.600
+couching the problem that way um you get out of just again focused on accuracy in the algorithm
+
+01:14:31.600 --> 01:14:36.880
+to what is my cost of doing the entire pipeline and now the entire pipeline isn't just
+
+01:14:37.760 --> 01:14:42.160
+running a uh a machine learning model in production for this specific use case
+
+01:14:42.160 --> 01:14:47.840
+but how does that couple to all the other things you're doing in your business um are you hiring a
+
+01:14:47.840 --> 01:14:53.200
+data science team to do this and then paying pensions or you're going to do a third party to do
+
+01:14:53.200 --> 01:14:59.040
+this and just write a check one time um and then you know where the societal benefits of all this
+
+01:14:59.040 --> 01:15:03.520
+and you know it becomes unwieldy at some point if you're actually being very honest about what's
+
+01:15:03.520 --> 01:15:08.720
+the cost of doing this but at least if people I just wanted people to start thinking about as we
+
+01:15:08.720 --> 01:15:14.400
+started thinking about within our company that accuracy is the table stakes and let's assume that
+
+01:15:14.400 --> 01:15:20.000
+you all have your good algorithm that's going to do well is it going to have strong scaling
+
+01:15:20.000 --> 01:15:25.760
+properties so that if you needed to get the model built uh you know an x amount of time that you
+
+01:15:25.760 --> 01:15:31.520
+could just have n number of machines that get you x divided by n amount of time on the clock
+
+01:15:31.520 --> 01:15:36.800
+because maybe you need that model built very quickly very often um and then you know questions
+
+01:15:36.800 --> 01:15:45.120
+around the pipeline and and RAM usage and AWS costs in the end as a as a small uh start up
+
+01:15:46.560 --> 01:15:52.480
+when you start getting down to the breast tax of what's our revenue um and what's our cost of
+
+01:15:52.480 --> 01:15:59.840
+good soul was our cogs the cogs component is really what is it cost to build a model and predict
+
+01:16:00.480 --> 01:16:06.640
+and until we were able to boil down the fact that the cost per prediction for one of our customers
+
+01:16:06.640 --> 01:16:13.520
+is x and we're going to be making x times some number um you know everything else is sort of move
+
+01:16:13.520 --> 01:16:17.760
+if you're losing you know every time you make a prediction effectively hand over fist
+
+01:16:17.760 --> 01:16:23.520
+uh then you've got something wrong that's unsustainable so i i started thinking about it as we
+
+01:16:23.520 --> 01:16:28.480
+were going through the exercise of what's our cost of doing business and the cost of doing business
+
+01:16:28.480 --> 01:16:34.960
+is running an ai system in a cloud with real customers right um and the labor part we can get
+
+01:16:34.960 --> 01:16:40.960
+but all the other pieces they're in the end there's an amazon bill and because we put it all inside
+
+01:16:40.960 --> 01:16:45.520
+of amazon you know and we know how much money we're taking in we can see how those two things
+
+01:16:45.520 --> 01:16:52.080
+relate to each other so you you started with the question and and kind of ran through the thought
+
+01:16:52.080 --> 01:16:57.840
+exercise what's next there whether it's you or someone else that does it do you do you see this
+
+01:16:57.840 --> 01:17:03.680
+evolving or uh you know co-evolving with someone else thinking about you know analytical frameworks
+
+01:17:03.680 --> 01:17:11.280
+for thinking about this or you know tools you know whether that's a spreadsheet or um you know
+
+01:17:11.280 --> 01:17:16.160
+it almost lends itself to machine learning algorithm trying to figure out how to deploy resources
+
+01:17:16.160 --> 01:17:20.640
+to you know do the machine learning yeah it's a great question and you know one of the nice
+
+01:17:20.640 --> 01:17:24.720
+things about blog posts is you admit it out to the world and you hope somebody runs you hope somebody
+
+01:17:24.720 --> 01:17:31.680
+runs with it um it's been helpful in focusing for me in my own thoughts and as we drive those
+
+01:17:31.680 --> 01:17:38.960
+sorts of efficiencies in in our company and then again more broadly um you know in doing science
+
+01:17:38.960 --> 01:17:46.080
+doing astrophysics uh choosing the right tools um choosing the right skill sets and people
+
+01:17:46.080 --> 01:17:52.240
+choosing the right problems to work on or not work on those those are very obvious uh sort of
+
+01:17:52.240 --> 01:17:57.440
+outcomes from me having thought about it and framed it that way one of the challenges is and I
+
+01:17:57.440 --> 01:18:04.560
+think people may wind up being able to pick uh pieces up of this uh and work with it is coming up
+
+01:18:04.560 --> 01:18:14.800
+with articulations of um essentially what is the conversion term uh between that item in the
+
+01:18:14.800 --> 01:18:22.640
+in the entire optimization uh equation and dollars so one I'll throw out there that I don't
+
+01:18:22.640 --> 01:18:31.360
+know the answer to is uh what's the dollar value of interpretability um and once somebody starts
+
+01:18:31.360 --> 01:18:39.680
+getting some handle on that then optimization takes its wonderful you know uh told or or approach
+
+01:18:39.680 --> 01:18:45.600
+uh or at least shall lead to a great outcome which is you know once you once you can really put a
+
+01:18:45.600 --> 01:18:50.960
+dollar cost to all these different pieces then I think you can do a real honest to goodness
+
+01:18:50.960 --> 01:18:56.080
+optimization so I know what the dollar costs for instance of needing a ram machine of this size
+
+01:18:56.080 --> 01:19:05.040
+versus that size on Amazon okay great um but what's the real dollar cost of and can I know
+
+01:19:05.040 --> 01:19:09.600
+what how much time it's going to take for a data science team to build up this template
+
+01:19:09.600 --> 01:19:15.760
+from scratch and then push that into production uh and how many people do I really need on that
+
+01:19:15.760 --> 01:19:22.000
+is it good to have one data scientist or multiple ones right um and so all those things I think wind
+
+01:19:22.000 --> 01:19:27.040
+up becoming really interesting over time uh ones people wind up potentially even wind up agreeing
+
+01:19:27.040 --> 01:19:32.400
+upon what this equation what's in ban for this equation and what's not obviously out of scope is
+
+01:19:32.400 --> 01:19:37.360
+uh you know what's the probability that you know my machine learning algorithm is going to start
+
+01:19:37.360 --> 01:19:42.320
+world world three right probably not worth talking about right right something smaller than that
+
+01:19:43.040 --> 01:19:48.880
+smaller in scope at the company level um is probably worth starting to get some clear
+
+01:19:48.880 --> 01:19:53.600
+understanding around so now we've maybe come back full circle to graduate students sounds like
+
+01:19:53.600 --> 01:19:58.480
+there are a lot of interesting uh research parts research questions in here for PhD student or
+
+01:19:58.480 --> 01:20:04.080
+something yeah I think in the you know for for those in computer science thinking about systems
+
+01:20:04.080 --> 01:20:09.040
+optimization uh who are also interested in machine learning this is um hopefully some fertile
+
+01:20:09.040 --> 01:20:15.920
+ground to start to start thinking um the other statement which hopefully is clear from what we've
+
+01:20:15.920 --> 01:20:22.960
+been talking about is that doing machine learning for machine learning sake really doesn't make sense
+
+01:20:22.960 --> 01:20:29.360
+it's it's probably the last thing you want to do if somebody hands you data uh you do it because
+
+01:20:29.360 --> 01:20:35.120
+you have to do it it's painful and to run it in a production environment um given all the crazy
+
+01:20:35.120 --> 01:20:41.280
+bugaboo's that um many many people have talked about there's a great paper from the folks at Google
+
+01:20:41.280 --> 01:20:47.840
+by Dee Scully is the first author called machine learning is the high interest credit card of
+
+01:20:47.840 --> 01:20:53.600
+technical debt um my last interview yes I'm not surprised it's an important paper it's got I think
+
+01:20:53.600 --> 01:20:59.600
+no equations in it but it's a whole bunch of important lessons about how machine learning
+
+01:21:00.480 --> 01:21:08.320
+systems tend to be very different than typical engineering systems um so so so there's a lot in
+
+01:21:08.320 --> 01:21:13.760
+there uh to get right a lot of bugaboo's there that people who haven't done this before
+
+01:21:13.760 --> 01:21:18.480
+tend to get wrong but what you wind up realizing is that once you realize machine learning or
+
+01:21:18.480 --> 01:21:24.960
+or more broadly AI is the right set of tools to apply to the problem uh that you have
+
+01:21:25.680 --> 01:21:31.520
+what you'll often wind up finding I think is at the graduate student level um in terms of graduate
+
+01:21:31.520 --> 01:21:38.880
+student projects they can be working on is that it's still very much early days for the for the
+
+01:21:38.880 --> 01:21:47.360
+types of algorithms pipelines etc in dealing with real world data um I've often said to my my
+
+01:21:47.360 --> 01:21:58.080
+colleagues on campus that um real data is not doing uh sentiment analysis on twitter right and yet
+
+01:21:58.080 --> 01:22:03.440
+many many many papers saying my scaling algorithms but then your scaling algorithm uh will wind up
+
+01:22:03.440 --> 01:22:09.520
+using that as a toy data set the real world is not uh toy data sets yes we need to have benchmark
+
+01:22:09.520 --> 01:22:13.840
+data to have a lingua franca of who's doing better in these different axes right but when you
+
+01:22:13.840 --> 01:22:19.200
+wind up getting exposed to real questions uh you wind up realizing that all the stuff that people
+
+01:22:19.200 --> 01:22:25.760
+know out there in the academic world that people write about and do kegel blog posts about are not
+
+01:22:25.760 --> 01:22:30.560
+what you really need if you're being truly honest about what needs to get optimized hmm that's
+
+01:22:30.560 --> 01:22:36.640
+great so how does one manage being ctl for you know the high growth startup and you know being
+
+01:22:36.640 --> 01:22:42.880
+a astrophysics professor it's becoming increasingly common to see folks particularly in the machine
+
+01:22:42.880 --> 01:22:50.480
+learning community have uh professor real posts and do um academic or do uh you know work in these
+
+01:22:50.480 --> 01:22:57.120
+research labs and things like that but yeah so i i uh been on a what's called an industry leave
+
+01:22:57.120 --> 01:23:03.040
+for for a number of years um and so it's allowed me to have also that separation of concern so
+
+01:23:03.760 --> 01:23:08.400
+so uh not getting not getting paid by the university and i have been uh health care has made it
+
+01:23:08.400 --> 01:23:15.200
+easier for me to spend all my time as need be on the uh on the on the company um while still
+
+01:23:15.200 --> 01:23:20.960
+maintaining uh the kinds of links that i think are important um as i you know start thinking about
+
+01:23:20.960 --> 01:23:26.240
+coming back into the university setting um obviously a number of things i've picked up and
+
+01:23:26.240 --> 01:23:32.320
+management thing you know ideas and and and capabilities um and then also thinking about how to
+
+01:23:32.320 --> 01:23:38.320
+evaluate uh new technologies when is it appropriate to bring this into your toolkit or when is
+
+01:23:38.320 --> 01:23:45.440
+it appropriate to wait um those become really practical uh uses that you know i can take i can take
+
+01:23:45.440 --> 01:23:52.160
+with me but then also again recognizing that as i was saying before there's a whole uh interesting
+
+01:23:52.160 --> 01:23:58.240
+set of problems out there that are not being addressed by um pure academic R&D research
+
+01:23:58.800 --> 01:24:04.880
+means that i can also start uh you know looking for those white spaces to actually do some
+
+01:24:04.880 --> 01:24:10.320
+pure academic research around those um i'm particularly interested in questions around
+
+01:24:10.320 --> 01:24:16.000
+interpretability and how you put metrics on interpretability um and that's something that i think
+
+01:24:16.000 --> 01:24:21.840
+i benefit from having come from uh you know felt the pain of customers asking about that
+
+01:24:21.840 --> 01:24:28.000
+right um that uh you know at least have a fresh lens on that um doesn't mean i'll solve any of
+
+01:24:28.000 --> 01:24:34.240
+those problems but at least i'll i'll have a direction of potential interest um so it's uh it's
+
+01:24:34.240 --> 01:24:40.960
+certainly a challenge but i think uh despite the challenges the the benefits to both myself
+
+01:24:40.960 --> 01:24:48.480
+the company and the university and my students at the university uh are are far up way all the
+
+01:24:48.480 --> 01:24:56.080
+gray hairs that i wind up getting i'm i'm teaching a uh data science um class essentially a
+
+01:24:56.080 --> 01:25:01.840
+python ecosystem data science class right now it's uh aimed at graduate students
+
+01:25:01.840 --> 01:25:07.840
+and the things that i've seen in the uh in the business world have really helped me
+
+01:25:08.560 --> 01:25:13.840
+hone that that class and i'm directly giving back to the students uh from that from those
+
+01:25:13.840 --> 01:25:20.960
+learnings and is that a MOOC or is that available only to uh it is not a MOOC um other incarnations of
+
+01:25:20.960 --> 01:25:27.040
+that class that i've done in the past uh are probably online somewhere in the iTunes sphere or
+
+01:25:27.040 --> 01:25:34.000
+elsewhere um that can also be found on github all the material uh and then we'll hopefully post
+
+01:25:34.000 --> 01:25:40.400
+some of the of the lectures online as well okay great uh so if folks want to learn more about the
+
+01:25:40.400 --> 01:25:45.040
+the company or get in touch with you what's what are the best ways for them to find you guys um
+
+01:25:45.040 --> 01:25:50.560
+easiest is uh drop me an email um and you can find that by googling around
+
+01:25:50.560 --> 01:25:56.320
+uh um so i'll i'll add that as a little bit of a bar that if you really fun to find me you'll have
+
+01:25:56.320 --> 01:26:03.200
+to do a little bit of work uh you can tweet at me so that's prof jsp uh it's my twitter handle
+
+01:26:03.200 --> 01:26:09.360
+and uh and we can do a direct message um maybe that's probably the best way to to get at me
+
+01:26:09.360 --> 01:26:13.760
+great great uh well i really appreciate you taking the time it's great to finally meet you
+
+01:26:13.760 --> 01:26:19.520
+in person and uh i really enjoy the conversation i think folks will will enjoy it as well and get
+
+01:26:19.520 --> 01:26:23.040
+a lot out of it great well thanks so much thanks for your interest great thanks
+
+01:26:28.960 --> 01:26:33.360
+all right everyone that's it for today's interview thanks so much for listening
+
+01:26:34.000 --> 01:26:39.040
+i haven't asked you all to do this in a while but if you enjoyed this episode of the show
+
+01:26:39.040 --> 01:26:45.680
+please please please do these two things first share it with your friends on twitter
+
+01:26:45.680 --> 01:26:52.320
+facebook good old email or however you share cool things with your friends second reach out
+
+01:26:52.320 --> 01:26:57.600
+let me know how you like the show who you'd like to hear on it and how i can make it better for you
+
+01:26:57.600 --> 01:27:05.200
+you can reach me on twitter at at twimmel ai and at sam charrington and you can email me directly
+
+01:27:05.200 --> 01:27:18.640
+from the contact page on the twimmel ai.com site thank you so much for your support and catch you next time
+
+01:30:05.200 --> 01:30:06.160
+you
+

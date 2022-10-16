@@ -1,0 +1,669 @@
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+people, doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington.
+In this episode we're joined by Hambiel Zhu, a PhD student in the Robotics Institute
+at Carnegie Mellon University.
+Han, who's on track to complete his thesis at the end of the year, is working on what is
+called the Panoptic Studio, a multi-dimension motion capture studio with over 500 camera
+sensors that are used to capture human body behavior and body language.
+While robotic and other artificially intelligent systems can interact with humans, Han's
+work focuses on understanding how humans interact and behave with one another so that we can
+teach AI-based systems to react to humans more naturally.
+In our conversation, we discuss his CVPR best student paper award winner, Total Capture,
+3D deformation model for tracking faces, hands, and bodies.
+Han also shares a complete overview of the Panoptic Studio and we dig into the creation and
+performance of the models and much more.
+Okay, enjoy the show.
+Alright everyone, I am on the line with Hambiel Zhu.
+Hambiel is a PhD student in Robotics at Carnegie Mellon University.
+Han, welcome to this week in machine learning and AI.
+Thank you for having me today.
+So you've been a PhD student at CMU since 2012 and a major focus of your work is in and
+around an environment that's been built there called the Panoptic Studio.
+What is the Panoptic Studio?
+Yeah, the Panoptic Studio is basically a multi-b system with more than 500 camera sensors
+and the system is also controlled by more than 50 machines.
+So this is indeed a giant system using computer vision technique to measure or sense humans
+by the behaviors.
+So basically we are very interested in the way we are using our bodies for social communication.
+For example, all these subtle facial expressions and body gestures and so on.
+And we really wanted to make a machine who can understand the body languages we are using
+and in the end we want to make a machine which can use these body languages to communicate
+with us.
+And for the purpose, the first thing we wanted to do is we wanted to collect this kind
+of motion capture data of naturally interacting people so that we can use some machine learning
+technique on top of that so that we can in the end machine can understand these kind of
+signals.
+And that was the main motivation of this Panoptic Studio and since we are interested
+in multiple people's interaction to avoid all this complicated occlusion kind of problem,
+we wanted to make a system with many, many sensors with many viewpoint so that we can
+really release these particular occlusion problems.
+And this Panoptic Studio goes back quite a ways it sounds like.
+Yeah, so CNU has really amazing history on this multi-b system because Professor Dakeo
+already started this multi-view system kind of research about, I think, 30 years ago.
+And at the moment, the major goal is to reconstruct the 3D world, especially 3D object and
+3D human body behavior.
+And to do that, obviously, this multi-view system is a really good kind of key to solve all
+this depth kind of ambiguity.
+At the moment, he already started this project with 15 machines and it was extremely challenging
+problem at the moment.
+And our Panoptic Studio is kind of third generation and our basic idea is maybe 40 or 50 cameras
+I will let it boring.
+Let's try to make a system with 1000 cameras, for example, and see what we can solve.
+And that was kind of the beginning of our studio and we particularly chose this social
+interaction analysis problem because that is indeed a challenging problem and very important
+future problems so that the machine can actually have a way to interact with us.
+And so how do you frame out this social interaction problem and what are the different research
+problems that come out of this broader problem?
+So basically, you can easily consider natural language or verbal language problems.
+So for example, nowadays, there is a very popular commercial AI system which can understand
+human's voice and human's language and use their languages to communicate with humans.
+But in that case, the main channel is verbal language, which has sentence and grammar
+or just rules.
+Basically, we wanted to do the similar thing with non-verbal languages.
+And for example, when humans are communicating each other, we use obviously our verbal
+languages, but we also use our facial expressions and our body languages.
+And all this subtle movement have some specific meaning, which is actually really hard to
+define, but humans are really easily understanding.
+And so basically, so maybe social signal understanding is something like expanding the dimension
+from this verbal channel to non-verbal channel as well.
+For example, the input can be, in this case, a verbal voice and also images or motion-catcher
+data and machine understand the meaning of each sudden movement and maybe machine can
+react to the input signals by using the similar outputs, for example, verbal language or non-verbal
+languages.
+And so one of the papers that we wanted to talk about is a paper that recently won the
+CVPR Best Student Paper Award.
+And that was your total capture paper.
+And the full headline or the full title is Total Capture, a 3D deformation model for
+tracking faces, hands, and bodies, which is right in line with what you've been describing.
+Do you want to start kind of jump into that paper or do you want to tell us a little bit
+about where that paper fits into kind of the broader scope of research that you're doing
+for your PhD in at the studio?
+Well, I think by explaining the paper, maybe the concept would be a little bit more clear.
+So, yeah, so basically, so let's say we are given a large scale data set and now we have
+some consensus that we can solve some problem using machine learning or this fancy deep learning
+techniques, right?
+So we have seen such kind of success in language part and computer vision or image processing
+part or object recognition part.
+And let's say we wanted to do the similar thing for body languages.
+The problem is the amount of data is extremely rare in this body language.
+And maybe the first problem is what kind of data we can use for this purpose, for example.
+So machine sees the world maybe using cameras and how can understand the human's behavior.
+Maybe machine can use the images and videos directly for the purpose similar to human because
+actually we are using our two eyes which captured the scene and we can do some all these visual
+kind of understanding part and indeed actually we know the meaning of each other movement
+of humans.
+But using directly images or videos are extremely challenging because it actually they are actually
+nothing to do with humans, but actually they are some pixels and machine need to understand
+the meaning of all these pixels so that they can finally infer oh, there is this human
+here, there is this human's arm here, arm is moving in such a way, I mean solving all
+these problems from the image or video is extremely challenging problem.
+So although this is still very popular area in computer vision, using such a data set
+for finer output meaning understanding the social interaction is extremely challenging.
+So maybe another way to do that is just by collecting a lot of motion capture data because
+motion capture is in a 3D space and maybe there can be camera independent, illumination
+independent and that each motion capture data like for example 3D skeleton, this already
+has some semantic meaning, we know where is the arm, where is the hand, where is, I mean
+how they are moving in 3D space.
+And this is usually done with the humans are wearing specialized suits with like I've seen
+pictures of these things, I don't know if they're balls or lights or sensors or something
+like that.
+Yeah, exactly.
+The area is extremely popular in movie industry and game industry and these are main way to
+capture the real world human body signal so that we can put that to the virtual world.
+But our idea is to use such data for understanding human behavior using machine learning techniques.
+So to do that, we wanted to collect such kind of motion capture data a lot from natural
+interacting people.
+So the key here is as you mentioned, we really don't want to use any artificial markers
+or suit because they may affect the natural motion of humans.
+For example, if you are wearing this kind of black suit and say you have all this sensor
+or all this kind of markers on your fingers, maybe your motion will be very kind of non-natural.
+We really wanted to avoid such kind of cases and we just wanted to capture that in natural
+human behavior when they are very naturally interacting.
+That means that the method itself should be in necklace.
+And this necklace motion capture area is also very popular in computer vision and computer
+graphics because if you can do the similar motion capture with a single camera or just multiple
+cameras, there can be really great to provide a really reconstruction output or it can
+be also used for many main purpose like some action recognition, for example, or all this
+movie industry or game industry.
+And this itself is a challenging problem and this is especially challenging if there
+are multiple people because some part is extremely occluded.
+And our idea is, all right, we wanted to collect such data set first so that we can somehow
+tackle the final problem we are very interested in.
+But solving this problem itself is challenging then why not using a very kind of a good system
+which can reduce the challenge of this problem.
+So that we can start this project and then if this is really meaningful, then actually
+we can expand the project to more challenging environments such as in the wild or maybe
+you can try to use some YouTube video for the similar purpose.
+So that was kind of the major motivation of our kind of the studio, all right.
+This problem itself is too challenging and even obtaining the data is challenging.
+So let's solve this problem, the initial data generation problem or human body measurement
+problem first so that we can actually tackle the later problem.
+And our total capture paper is one of the output of our measurement step.
+So here we are interested in interacting multiple people and we are also interested
+in measuring all these body signals at the same time, for example, facial expressions,
+finger motions and body gestures because when we are using our bodies, these parts are
+extremely correlated.
+Some specific facial expressions should be very, very correlated to hand signals and we
+wanted to make find, we want to find some rules humans are using when they are interacting.
+So catching subtle details of entire body part is extremely important, but doing that
+is very hard although we are using markers because of all these occlusion, self occlusion
+for example, human hands, human have when they're moving their hands, for example.
+So yeah, so our total capture paper is person in that direction and it actually showed
+some meaningful kind of output in measuring all these parts at the same time.
+One question I've got for you about this is are the humans that are in this environment?
+Are they just kind of naturally interacting, doing what they're doing and you're capturing
+that and then kind of going back and labeling it maybe from video or audio capture or is
+there a script that they're kind of working against and well, I'll let you answer then
+I may have a follow up question.
+Yeah, that's actually a very, very good question because although we have, we collect people
+who have no idea about our project, it's very hard to ask them to do some natural motion
+right because.
+Right.
+Because then it's not natural.
+Exactly.
+So for the purpose, actually we are very closely collaborating with psychologists and they
+are actually very careful about that.
+What we are doing currently is we build some specific social situation and we actually define
+some social game, which is a kind of negotiation game and this negotiation scenario where three
+people are negotiating each other and in this game, which we call haggling, there are two
+sellers and there is one buyer and the goal of this game is two sellers need to sell some
+competitive items to this buyer and if the seller actually successfully sells the product
+within a minute of time, we actually gave some bonus for them and because of this bonus,
+this monetary bonus, actually they can be really involved in this project because the game
+itself is pretty fun and actually they can additionally get this money because of the
+region actually we found that the motion became very natural for sure because of the
+special system at the very beginning when they first entered the studio, they actually
+see the cameras and they can, they usually see the round but we actually spend some time
+inside the studio so that they can be fully familiar with the system and because we don't
+put any kind of camera in front of their face because cameras are all this cameras are
+attached on the surface of the dome.
+So it just seems like some kind of special room and after some time, actually the room
+is just somehow similar to other kind of room with some special wallpaper.
+So we found that their motions are pretty natural and in the end, we actually did some
+questionnaire.
+It turns out the majority people completely forgot that they are inside the dome and they
+can fully kind of involved in this kind of social game.
+And so for labeling, have you perhaps in conjunction with your partners on the psychology
+side, like have you developed a taxonomy of gestures or some kind of labeling system
+or do you have a free, free description of the gestures, which I would imagine would
+be pretty difficult to deal with?
+Exactly, so that's actually a really big question about this project because let's say we
+can obtain all this body motion capture data from this, let's say three people's interaction.
+Let's say we have all this facial expression movement and this finger movement and body
+movement.
+Then what type of problem can we actually tackle given this somehow restrict social situation?
+Maybe we can do some type of annotation but actually annotation itself is some big question
+in this problem because what kind of label can you annotate in this behavior?
+In computer vision, for example, there is just area named action recognition, but different
+from object recognition, action is really hard to define because there's starting time
+and the time is usually really hard to define, right?
+And making the label, the name of each motion is also very challenging because making the
+name means we wanted to describe the motion using some language.
+The language is in a very discreet space and it's in a very low dimensional space while
+the expression, the signals we are using in our social communication is actually really
+high dimensional space.
+So in that sense, actually, we don't try to do any so-called kind of annotation label.
+What we are labeling is kind of more objective thing, for example, who is the winner of this
+game, who is the loser of this game, and for example, who is speaking at this moment
+so that we can actually be very objective about the label.
+And our scenario is something like this.
+So how can you maybe make sure that robot detection interesting is a social behavior?
+That is another good question we should ask.
+And maybe our solution for that problem is something like the following.
+Well, if a machine sees the world, sees the human's behavior, and if machine can predict
+the future motion of these people, then that can be maybe a way to define that robot has
+some understanding about our social behavior.
+More statistically, let's say we have all this data and we somehow delete some human's
+motion data.
+And can we actually predict, can robot predict the person's motion, I mean, this hidden
+person's motion by observing the other people's motion?
+This is exactly the way we are interacting, for example.
+When we are interacting, we observe other people's signal, and we're making some signal
+from our body.
+And the signal is sent to other people, and the other people are reacting to our signal.
+And actually, this is somehow the way we are doing communication.
+We just generate some signals using our body, send that, the signal is understood by people,
+and that is also, I mean, the reaction is also sent to us, and we are just exchanging
+some type of signals.
+And we wanted to do the similar thing for the machine, so machine is in the loop and
+machine see the world, machine decoded the social behavior with other people, understand
+the meaning, and somehow predict the future motion.
+So this is a way we define the problem at this moment, and this is exactly what we are
+currently working on.
+I'm trying to reconcile the idea that you're not doing any kind of annotation with the idea
+that you're able to predict motion, but I'm imagining you're not predicting the label
+of some motion.
+You're trying to predict motion itself, so where is the hand going to be at some future
+time based on some set of interactions as opposed to what's the name of the gesture
+that the person is going to do?
+That's exactly true.
+So we just use the motion capture data as the input signal for this machine learning
+tool, and output is also the similar types of signals.
+But based on the definition of the problem, we can consider different scenarios, but one
+kind of scenario we are considering is the input is the other people's body motion,
+which is the motion capture itself, the signal itself, and the output is the target person's
+future motion.
+For example, if somebody is speaking something, maybe our target person can be nodding, which
+is synchronized to other people's behavior, or our target person would be maybe laughing,
+or moving in a specific way, and actually can we predict such kind of future motion of
+the target person given other people's body behavior?
+And so does it work?
+How?
+It sounds like a really interesting problem formulation, and tell us about the system and
+how well it performs, and then walk us through kind of how you build it.
+Well, so that is something we are currently working on, and for sure to this problem,
+we really need a lot of data, because human's behavior would be very different, given the
+same situation, right?
+That would be maybe very related to our culture or personality, so given the same signal
+actually human's behavior would be very different, so basically it's multi-model, very good
+is this multi-model issue, and our data set is never sufficient for the purpose.
+So we really need to narrow down the scope at this moment, so that we can tackle the initial
+problem, and you can consider this simple problem first, for example, unless that we are
+always considering three people's behavior interactions, and the input is two sellers'
+body behavior.
+So we have this skeleton, 3D skeleton kind of motion capture data of two people, two sellers,
+and those are the input of our, for example, neural network architecture.
+And can we actually guess the gase direction of our buyer?
+So you can simply imagine that if somebody is speaking, if all that we don't have any
+verbal kind of signals, if somebody is speaking there, if it is some speaking specific kind
+of body behavior, and probably the buyer's gaze will be on this speaker, right?
+This is some very simple kind of scenario we can imagine.
+So this is just one channel, just estimating the gase direction of the target person.
+Can we increase the dimension, for example, what about the facial expression?
+Facial expression is indeed some 3D face key point, or we can just simply imagine the
+mesh itself, so we have all these vertexes moving 3D meshes.
+And this itself is the output of the network.
+And can you actually predict the target person who is the seller, a buyer in this case,
+of the buyer's facial expression based on the other people's kind of behavior?
+Or another case is maybe location, where is the location of our target person?
+Because basically humans try to have some distance among each other.
+And this distance is also somehow trained throughout our life.
+And we actually maintain some specific distance when you are communicating.
+So actually, machine can predict the distance of the target person and orientation of the
+person.
+So this is something we can imagine as a very low dimension signal.
+And we can actually consider higher, higher dimension signal, for example, can you actually
+predict the target person's skeletal movement, or long-term movement, or hand gestures.
+And at this moment, all this part is still remains in a very challenging problem, because
+we don't have any specific output in this case.
+But this is magic focused on our purpose, our motivation.
+Got it.
+So the big picture is understanding how to predict from these 3D motion capture models,
+human behavior in interactions, so that ultimately machines could better understand
+human behavior and make predictions based on it.
+The longer-term goal to get you there is being able to predict on a, say, pixel-by-pixel
+basis what the future state of one of these participants' body position is.
+But the intermediate steps or the near-term challenges, and that's really, I think you
+sense that that was my, you know, what prompted me to ask, is it working yet?
+Yeah, that sounds like a huge problem, and it is.
+So the way you're tackling that is these intermediate problems of, can we track the gaze
+direction?
+Can we track the facial expression?
+Can we track hand position, things like that?
+Exactly.
+So basically, our current kind of problem definition is, we want to make a machine to understand
+the human's behavior, and the way to do that is making some system which can predict
+the future motion of the target person.
+And there, we can imagine some simple good examples and application for this, for example,
+let's say we have this AI, which kind of Amazon Alexa or Google Home kind of AI system,
+which is nowadays just using verbal language, for example, audio or speaker.
+But let's say this small machine has video as well.
+So it can capture the scene, the human's behavior using camera, and actually it can display
+some behavior using their own display.
+I think this can be really interesting because now somehow they can understand the meaning
+of our BID behavior, and they can react with that.
+You can also consider many interesting AI systems or robot exist, and for example, if there
+is a toy robot, which is actually interacting with a child, and if the machine can understand
+the meaning of the child's body movement, basically let's say the baby cannot speak at
+all, but it can actually make some facial expression and so on and so forth.
+But still, the machine can understand this because human can do that, mother and father,
+they actually knows the meaning of some specific movement of this child.
+So this can be also interesting application.
+Also you can imagine some application in medical area, for example, we have all these surveillance
+systems, and we need to maybe monitor the elderly people's body behavior so that we can somehow
+identify some unusual kind of behavior.
+For example, in this case, all this measurement kind of skills and techniques and this understanding
+that their behavior would be extremely important kind of techniques for these applications.
+And so in the total capture paper you're presenting is a deformation model for tracking
+these face-hand and body positions.
+What do you mean by deformation model?
+So basically we can do some 3D reconstruction without multiple cameras because connect
+can do some type of thing or that camera can do some type of 3D reconstruction.
+Here deformation model basically means the human's behavior is parameterized by some
+limited amount of parameters and this parameter represent body motions.
+So body motion means each joint angle is one parameter for each joint.
+So we can consider some number of joint and each joint let's say have three-dimensional
+rotation vector.
+So that is some parameterization for body model.
+And also we can do some parameterization for shape deformation.
+So we have let's say 10 parameters and by just changing these parameters we can represent
+the different size and shape of the people.
+So without this parameterization actually reconstructing 3D humans are human is more challenging
+because maybe we need to reconstruct all these vertex, all these 3D point of all this
+entire body and that dimension is extremely large.
+For example let's say we want to reconstruct some mesh model for each individual and
+let's say this mesh model has let's say 10,000 vertexes.
+The basically we need to estimate the location of these 10,000 vertexes for each time instance.
+But the interesting thing is our surface is extremely correlated each other.
+So our vertex is not moving arbitrarily.
+If we know some location of one part we can easily guess at the location because they
+are somehow very, you know, in a low dimensional kind of space in the end.
+So this parameterization is basically to parameterize all these variations of human body motions
+and body shape in a low dimensional space but still we wanted to have some sufficient
+expressive power to express all these body behavior and the shape deformation.
+And our total model capture is basically so this deformation model is actually really
+popular in computer vision and computer graphics and there it is really popular as deformation
+model for body and faces.
+Our major contribution of our paper is we build a model which can actually include all
+this part together including body deformation, body motion, facial deformation, facial expression
+and finger motion and finger deformation and so on.
+And when you say you have built a unified model in what way is it unified?
+Is it, you know, have you built some ensemble that does each of the things well or have
+you kind of abstracted away from the individual parts of the body that you're modeling and
+really trained a model that can given any of those inputs, producer and output?
+So in this paper actually we defined two different models.
+The first model is more related to some independent model.
+For example, we have independent facial model and body model and hand model and we somehow
+consolidate together by attaching each other explicitly.
+So this model is called Frankenstein or Frank because the way we built this system is
+similar to this Frankenstein's model.
+But yeah, the problem is all part have individual parameterization so sometimes they are not
+consistent each other.
+The final model we built which we call Adam is actually has single parameter space for
+entire shape space.
+So if we change one parameter of this space, a phase by the, a phase by the fingers are
+changing together and basically defining this low dimensional deformation space means
+we want to find out some correlation of different part so that we can reduce the dimension
+of this space.
+That's the key.
+And since we built this model by collecting all this 3D reconstruction of body phase and
+hand together, actually when we built this model in a low dimensional space, the model
+somehow knows the correlation across bodies.
+For example, if somebody has really big maybe face, maybe their hands would be also big
+as well.
+And by somehow merging this deformation space together, someone we can reduce the space.
+So the final model actually has such kind of ability.
+So it has some amount of deformation space which can control all this body face hands
+together.
+And also all this motion on body motion space is in a single skeleton space.
+And that means so hand cannot be apart from the body and we know they are somehow linked
+together by a skeleton, which is quite important for a computer graphics area, for example,
+retargeting zone.
+So yeah, that's the meaning of all this total body motion catcher and deformation model
+space.
+And so is the idea that you were expressing it with the dimensionality reduction with
+the atom model that with the Frankenstein model, these parts are, the body parts are more
+closely related.
+We understand that if as you were describing earlier, if we create a mesh model of the
+face, if the vertex and the cheek moves, then the vertex and the eyes are probably going
+to move.
+Like with these relationships are relatively easy to understand.
+But on this atom model, you've got the single parameter space.
+And so moving a parameter may have implications in multiple places.
+And so it's more challenging and requires a different approach than you might take in
+reducing the parameter space on the Frankenstein side or on the ensemble side.
+Did I capture that correctly?
+Yeah, I am mostly.
+So basically the vision why we built this Frankenstein model is actually to build this
+atom model.
+So for example, for dimension reduction, we simply use, we can simply use PCA kind of method.
+But the input of this PCA model is basically the 3D mesh model of many people.
+So different shape and different body parts.
+So they actually, this PCA can learn the variation space of these humans of deformation
+and motion changes.
+But generating such input that the mesh data, which include all these details of face by
+the enhance, I mean, making such reconstruction is surface challenging, although we use many
+many cameras because we are interested in subtle movement of facial expression.
+And we are also interested in this subtle movement of fingers.
+And at the same time, we are interested in this large movement of bodies.
+So how to place the camera is actually a big problem because if we want to capture the
+face, the camera should be very close to the face.
+If we want to capture the detailed hand, maybe people wanted to use the camera, which is
+very close to the finger.
+So doing this reconstruction to build the AIDA model, the reconstruction is surface challenging.
+So we were only to make some intermediate status by using some already available 3D mesh
+model, a deformation model, and that's the main kind of motivation of this Frank model,
+which is easier to build without doing any PCA kind of learning.
+And after we have this model, actually, we use this model to reconstruct all these details
+together.
+And then finally, we reconstruct like 100 people's shape deformations, shapes and body motions.
+And then we just put all this to this PCA kind of tool so that we can actually learn the
+deformation space.
+And there are just actually two big regions of doing that.
+For example, if we build this deformation model for entire body part, actually we can use
+that in the more challenging situation, for example, now let's say we don't have this
+motif system.
+And now we have this single image or videos from maybe YouTube or Internet.
+And let's say our goal is similarly to reconstruct this 3D body behavior by the motion of the
+person.
+This is obviously extremely challenging problem because we now have single view and we
+wanted to get this 3D motion capture data.
+But since we now we have some model, which restricts the surface to this low dimensional
+space than the original high dimensional space, actually, the problem can be much easier
+because now what we need to do is just estimating the parameter of this model, which can express
+our measurements, which is the image.
+So the major kind of, I mean, the main motivation of research at this total capture is after
+we build this model, now we can use this model to do this motion capture face by the enhanced
+motion capture in this in the wild situation, so that we can collect more and more data
+in this challenge situation.
+So that is the major kind of motivation of building this a parametry model.
+And another big reason is once we have this parametry model, actually, the data
+structure can be very simple.
+So instead of having the same mesh structure, which has some arbitrary number of vertices,
+now we have some fixed amount of parameter to express the particular motion of the person.
+So now we can consider this parameters as the input of our machine learning tools, those
+that can be the input.
+So other people's motion is abstracted as a parameter.
+And then the machine learning tool produces some parameters as the output, which is actually
+presenting some motion of the target person.
+Can you comment at all about the size of the parameter space relative to the size of
+your typical 3D vectorized or mesh type of model?
+Well, I don't remember the exact number, but the rough number is we have 21 joint for
+the body, and each hand has 21 joint, and each joint has three dimension space.
+So 21, 21, and 21, and that is 63, and each joint has three dimensions.
+So that is for the motion to represent the body motion.
+And we can also have facial expression.
+And facial expression is not explained by the sculptor movement that is explained by another
+parameterization, which is expressed in the movement of this mesh structure.
+And that has 100 dimensions.
+So 100 dimension for facial expression, and about 200 dimension for body motion.
+And we have about 40 dimension to represent this shape.
+So by changing this 40 dimension, the shape, the size, and the shape of the body, bodies
+are changing.
+But it's more or less I cannot sum them up now, but about 400 to 500 dimension to represent
+the human's behavior, including face and body and hands.
+But the original dimension can be probably, if we don't have such kind of model, let's
+say we wanted to do the similar thing by a mesh structure.
+And then the mesh we are using is around maybe 10k of vertexes.
+So each vertex has three dimension, and that is more than about 30k dimension.
+So we reduced the 30k to this 500 dimension to represent a similar thing.
+When you look at the skeletal model, plus the face, you have several 100 or so, 120,
+130, then you said you can reduce that down to 40, and then you said, then you started
+saying 400, 500, and I didn't catch where the 400, 500 came from.
+Okay, let me try to explain this again.
+So if we just consider skeletons, which is kind of a stick figure, then we forget about
+all this surface movement.
+So we can consider the joint location for the body, joint location for the finger, and
+some surface key point movement of the face.
+So each point is a three dimension space, and we can maybe consider all this number of
+3D key point.
+So that is our way to represent human body, but let's say now we are more interested
+in the subtle details of the surface.
+That means we wanted to get the mesh as the input and output of our machine line tool.
+And in this case, now instead of just a handful number of stick figure joint location,
+now we consider all these vertex locations of the surface.
+So that is around, let's say, 40K dimension, because to represent some details, we need
+many many vertices.
+So the way to reduce this is instead of having independent vertex separately, now we already
+learned the correlation of all this vertex movement, and we can reduce the space by using
+the motion space and shape deformation space.
+So motion space means we just keep the similar motion parameter for each joint, which is
+similar to stick figure, and shape deformation space is actually catching the variation of
+the surface of the given fixed body motion.
+So by changing this deformation space, actually a surface shape can be changing, and by changing
+this motion space, human can behave some body motion.
+So this deformation, shape deformation space is about 40K, sorry, about 40 dimension,
+which is really extremely low dimension, because humans are these are very, very correlated
+in this case.
+And for motion space, we have three degree of freedom for each joint.
+And we have about 60 or 70 joint, so that is about 200 dimension to represent body motion.
+And also we have about about 100 kind of dimension to expect facial expressions.
+What you're able to represent with this lowest dimension, the lowest dimension of vector
+is 40, is not just the stick figure, the body positioning, but also the surface as well.
+Is that correct?
+Exactly.
+So we have a function to convert this parameters to the original mesh space.
+The function is somehow fixed function.
+So given this parameter space, parameters we obtain, we can convert that to this mesh
+space.
+So instead of keeping the mesh space, we can just keep the parameters.
+The problem obviously here is the expressive power of this model is limited.
+So for example, usually in nowadays, this model can express some kind of some body shape
+with minimum clothing, because clothing modeling is clothing is extremely challenging,
+because of all these variations we have.
+So usually when we build this model, the input data is limited to somehow subject with minimum
+clothing.
+Because of the vision, this model can express only the mesh with minimum clothing.
+For example, if you generate any arbitrary body shape and motion from this parameter,
+the output is almost always this kind of naked body with minimum clothing.
+You've reduced the dimension down to this 40 and then you're able to use this 40 to produce.
+You said you refer to it as a fixed function.
+Is this a function that's learned through machine learning model or what does that function
+come from?
+This function is somehow actually a very common function in graphics area.
+So actually from the motion capture, if in graphics area, from the motion capture data,
+which is basically the three degree of freedom for each joint, we can manipulate, we can
+animate the 3D character and actually the 3D character output is mesh, although the
+parameter input is this motion parameter.
+Similarly, we just use the similar function, which is called linear blending skinning.
+So we have some mapping between the vertex movement and the skeleton movement and we are
+just manipulating the skeleton.
+And then as an output, we can get the location of each vertex of the mesh.
+And so you've developed this representation of the body.
+How does this tie into the larger goal?
+Yeah, exactly.
+So first, we wanted to parameterize all this face and body and hands movement in a common
+format, a common motion capture format.
+That was one of the original building this model.
+And as I mentioned, the final goal is actually to use this model to get a similar motion capture
+output in the YouTube video.
+So actually, we are working on this project and now the goal is instead of having multiple
+view, we will just have a single view, single YouTube video, and we wanted to get the motion
+capture of the target person.
+And motion capture output has all this component facing body and fingers together.
+This is ongoing research and we actually get some meaningful result at this moment and
+which we plan to submit that to a conference in the end.
+So yeah, so basically, we wanted to convert all of our collected data to these types so
+that we can actually put this to our understanding part.
+That is the current one at this moment.
+We are working on.
+And is PCA the primary place that machine learning is used in this project or are there
+other places where you're building models as well?
+Well, actually, this project is a little bit far from the popular machine learning area.
+This is more like a three construction.
+In this paper, what we show is usually this finger reconstruction and facial of face reconstruction
+battery constructions are considered as separate problems.
+But we actually somehow demonstrate that we can capture all these components together
+without using any markers.
+And to do that, maybe one of the key kind of contribution is we use this to the key point
+estimation method for each individual camera.
+And indeed, we combine them together in this 3D space using a multi-view system.
+And in the end, this 3D key point we constructed by using this 2D key point detector.
+It turns out they are working extremely well in this challenging problem and we just showed
+the result as a total battery reconstruction result.
+So in that sense, probably, it would be good to share the 2D detection, post detection
+problem our lab is working on.
+And that is the open pose work?
+Exactly.
+Yeah, exactly.
+So this 2D body pose detection area is a very popular area.
+And one of the most successful areas in computer vision in recent years.
+So now we have really great algorithms which can detect this human's body key point, multiple
+people's body key point in YouTube video and single image.
+And open pose is a version of that.
+And one good thing about open pose is this is providing all these facial key point and
+body key point and finger to the key point in a single framework in real time.
+And multiple papers our lab has been presented is included in this work.
+And actually, this is closely related to our panel text studio project because we are
+using this detector to reconstruct all the total motion in the end.
+And at the same time, we use our system to generate new annotations set to train this
+2D detector.
+So this is a very interesting idea because usually this multivit system has been used to reconstruct
+3D.
+But now we believe this multivit system can be a way to generate some 2D annotations for
+2D detector because sometimes this generating 2D detector itself can be challenging.
+For example, let's say this is one paper we published in last CVPR and the goal is to
+make this 2D hand key point detector which is now the part of the open pose.
+And the main idea is very simple.
+We just wanted to make some data set for 2D hand key point detector.
+But just annotating this 2D hand key point is a challenging problem because of all these
+side focal illusions.
+So at the beginning, we hired some annotators and we asked them to annotate this 2D key point
+given some to the image.
+But it turns out usually these fingers are glued to each other and just clicking this
+finger key point is a challenging problem.
+And our idea is if we can capture some data in this multivit system, since we have 500
+views, let's say we wanted to capture some finger movement, we wanted to annotate some
+key point of some finger movement, then since we have this many views, we can easily
+find some good view point to easily annotate the target finger part.
+More importantly, if we can have some 3D reconstruction of the target hand, if we can
+project this 3D hand to 500 views, each individual view point can have a new annotation by
+projecting this 3D hand to this single view.
+And we just used this annotation for a neural network architecture to train the 2D detector.
+In terms of this, this is extremely successful in making this 2D key point detector and
+the key point detector.
+So in a way that is, it's kind of a specialized mechanism of data augmentation.
+Exactly, exactly.
+But in this case, we can use this multi-view supervision so that we can filter out some
+noise outputs.
+For example, since the original target hand should be in the 3D space, and our image
+is just capture of the 3D space in this 2D space, so ideally, if we can generate some
+rays from each individual camera, they should intersect in this 3D space, which is the
+original 3D joint location.
+If they are not, then we can simply say that maybe the detection or 2D measurement is
+wrong.
+So we can easily filter out all these noisy cases using this multi-view supervision.
+And that is a key to make this data augmentation.
+Yeah.
+Awesome.
+Well, Han, thanks so much for taking the time to share this with us.
+Are there any final thoughts that you'd like to share to kind of close us out?
+Yeah, so currently, we are trying to release entire of our dataset, regenerated from our
+panoptic studio.
+So people can easily download 500 videos for the same input.
+And also, they can get all these 3D annotations regenerated, for example, 3D key point and also
+depth information or 3D point cloud for the same target scene, so that we believe people
+can use this kind of data to many interesting computer vision and machine learning problem
+because people now have some 2D image input.
+And they can also have corresponding 3D annotations.
+And that can be maybe interestingly trained in many interesting machine learning techniques.
+For example, given the single image, can we generate 3D skeleton, given the single
+image, can we generate depth data or 3D point cloud because we all captured this all different
+sensors output using hardware synchronization and the calibration.
+So this can be easily kind of maybe not easy, but this can be in the end used for many interesting
+machine learning problems.
+Oh, wow.
+How many images or videos are you including?
+Wow.
+Not how many unique kind of scenarios or captures are you including?
+So the original data is about 10 hours of many different situations.
+So we have captured some musical instruments like playing piano, cello, and so on.
+And we also have many social motion capture results, for example, 3D point tracking.
+Also we have captured some very simple, example range of motion, which can be easily maybe
+useful, much easier kind of problems.
+So yeah, and we should collect more and more data and we try to release all of them in
+the end.
+Awesome.
+Awesome.
+Well, once again, thank you so much, Tom, for joining us.
+Thank you for having me.
+Thank you.
+All right, everyone, that's our show for today.
+For more information on Hambio or any of the topics covered in this episode, visit twimolei.com
+slash talk slash 180.
+If you're a fan of the podcast, we'd like to encourage you to head over to your Apple
+or Google podcast app and leave us a five-star rating and review.
+Your reviews help inspire us to create more and better content and they help new listeners
+find the show.
+As always, thanks so much for listening and catch you next time.

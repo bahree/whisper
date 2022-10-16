@@ -1,0 +1,671 @@
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+people, doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington.
+While at this past NURBS, I attended the second annual Black NAI workshop, which gathered
+participants from all over the world to showcase their research, share experiences and support
+one another.
+This week, we continue our Black NAI series with interviews with some of the great presenters
+from the workshop.
+Today I'm joined by Justice Ammo, a PhD student at Dartmouth, Thayer School of Engineering.
+Justice presented his work on an optimized recurrent unit for ultra low power acoustic
+event detection.
+In our conversation, we discuss his goal of bringing low cost, high efficiency wearables
+to market for monitoring asthma.
+We explore the many challenges of using classical machine learning models on microcontrollers,
+and how he went about developing models optimized for constrained hardware environments.
+We'd also like to wish Justice the best of luck as he should be defending his PhD any day
+now.
+Enjoy.
+Alright everyone, I am on the line with Justice Ammo.
+Justice is a PhD student at the Thayer School of Engineering at Dartmouth.
+Justice, welcome to this week in machine learning and AI.
+Thank you Sam, I'm happy to talk to you today about my wake.
+Fantastic, so to kind of lead us into what you're up to, I would love if you share a little
+bit about how you got started working in machine learning and AI.
+Yes, I'm happy to share a bit about my background.
+So I was born and raised in Ghana and came to Dartmouth for undergrad.
+So this was in like 2009, I mean, undergrad when I was coming in, I always wanted to do
+electronics.
+So that's where I started.
+Pretty much embedded system tried.
+How do you build devices that was always fascinating to me?
+So I finished undergrad becoming sort of good at building devices for embedded systems.
+And then when I stayed a year after undergrad to do research, one of my mentors in undergrad
+was he had this research project and he was like, hey, I think you really do good on
+this.
+He was interested in building a wearable monitor for monitoring asthma, like monitoring
+the lungs, right?
+Like if you can listen to what is going on in the lungs, then maybe you can better advise.
+So he asked me to come on board and I was excited to come on board and just explore that project
+for a year.
+And it really came down to two things.
+One was how do you build the hardware that can really listen to, you know, can acquire
+the sound really well, right?
+And then the second phase is once you have that hardware in place, right?
+How do you detect these sounds well enough?
+How do you detect sounds and symptoms like coughing, whizzing or even when someone is
+panting?
+How do you detect them and do that very well?
+And so that one year I did, we came pretty far on, like, device in a good hardware.
+And so I started looking at, you know, how do we do detection?
+What are the algorithms that exist in for detection?
+That's what brought me to classifiers and machine learning and looking at that.
+And so after that one one year, we're all excited about the work as I say, hey, let's
+explore this as a PAD work and I start going to work on it.
+And it was mainly from the standpoint of your, okay, how do I, now that I have some hardware,
+how do I make the signal really great?
+And then how do I really detect these sounds very well?
+So started from traditional classifiers, like, you know, decision trees, hidden macaw models
+because those were the things that people were doing around that time.
+And then all the way meeting to, you know, deep learning, looking at, like, convenants
+and then more recently into recurrent.
+So that's kind of been the very broad journey, yeah, of mine.
+One thing that jumps out at me hearing the story is that you started with the hardware
+and then went on to think about the software, is that it stretched me as the opposite of
+the way that won my purchase, is that like an academic thing or was there something novel
+about the way you were approaching the hardware that you thought was the right thing for this
+application?
+Yeah, actually, it's interesting you point that out because like, I really started out
+interested in hardware, right?
+How do I build really good hardware?
+And the point wasn't just, you know, build whatever hardware, like, you know, build the
+best hardware, I was really constrained for very efficient but affordable hardware.
+The initial boost, where, like I mentioned, I'm from Ghana, so our initial boost, where
+how do we build devices that can be used in, you know, and the resource communities,
+communities where, you know, they cannot afford to buy really expensive devices, right?
+In areas that you can have doctors to do diagnosis, can use some of these tools to, you know,
+better do diagnose.
+So that was really the real motivation.
+And so when I was building hardware, even in building the hardware, I realized that,
+you know, hardware is expensive, software is cheap, right?
+So there is this trade off you can do, right?
+You can build a just okay hardware and do more of the signal processing and machine learning
+so that you don't have to use, you know, the best sense.
+So you can have really cheap hardware and then software is much cheaper, so, you know,
+you can duplicate it, right?
+So that's where it really, like I followed that trajectory, where I built a hardware
+that was like, you know what, this hardware is good enough, I could spend more time making
+the best hardware that would be very expensive, but I think this is affordable.
+And so now, how do I use software to bridge that gap to go the extra mile, right?
+And so that's where it came in and machine learning became a really good answer to that,
+right?
+And if you have data that is not like 100% like, you know, clean, you can still use advanced
+patent recognition tools to extract information from that and make really reasonable inferences
+of that.
+So it was like that practical approach that brought me into machine learning.
+And so before we jump into the machine learning elements, can you give us an overview
+of the hardware and the various components? It sounds like acoustics, maybe some microphones
+or something like that.
+And, you know, what is the processing capability?
+What are the various components of the hardware system?
+So as I said, I'm interested in this application, we're interested in basically escortating
+sounds from the body.
+So that's like what a status group does, right?
+And so you want an acoustic sensor that you can collect sound from the body.
+You could use really advanced microphones, like MEMS, but then those are really, they
+can be more expensive.
+But also, when you think of collecting data from the body, you can, and you can use pz
+electric transducers that have contact sensors, right?
+And so when you have that compared to a microphone, it would only pick up sounds that is coming
+from the patient.
+So already you start off eliminating a lot of the external background sounds, right?
+So a huge part of the hardware system is a contact pz electric transducer, also a pz
+electric transducer can generate power.
+And so it's not that power hungry.
+You don't have to, it's going to be really good for low power applications, right?
+And so from there, from the pz electric transducer to your raw sensor, you have some analog
+front end secretary to condition the signal, right?
+You're looking for things like cove sounds and we sounds.
+But a person is going to be wearing this most of the time, right?
+And people speak all the time.
+So you want to make sure that you're actually filtering out a lot of this, you know, the
+speech sounds and all of the other possible background sounds.
+So that's what a lot of the analog front end does.
+So these are things like low pass, high pass, notch filters, that kind of thing?
+Exactly, exactly.
+So you have, you know, a couple of stages of, you know, classical analog filters where
+you are really in the, in the kind of the range that we are interested in, you're looking
+for sounds between 100 heads and two kilohertz, right?
+So you're attenuating anything outside of that band, that band and sort of really amplifying
+the signal there.
+Because in that way, you can capture the re sounds, the cove sounds and the things that
+are of interest, right?
+Yeah.
+So once you condition that signal, then now you come to, you know, you need a microprocessor
+to sample the, to sample the analog signal and then, you know, maybe preprocess and identify
+what events actually okay, right?
+And so there you have a lot of options for microcontrollers.
+But if you think of something that is going to be wearable for, you know, there's something
+that someone will wear for maybe a whole day, that leaves you with only ultra low power
+microcontrollers, right?
+You cannot think of some of the fancy, you know, and for even M7, you have to go to something
+that is really, really low power.
+So the huge specification of this was to go for the lowest power microcontroller.
+So we are using an ARM M0, right?
+It's like the lowest power, the most energy efficient ARM microcontrollers are out there,
+right?
+So once you go there, that's where all the constraints begin to happen because you don't
+have, you don't have floating point operations, you don't have DSP instructions.
+So you are really constrained, right?
+And you still have to be able to get inference and working at that level.
+That's, I guess, pretty much sort of the set up for the hardware.
+And so that led you down the path of trying to figure out how to get the various types
+of software that you wanted to have working on this hardware, you had to work within kind
+of these constraints.
+You've got some constraints that are set up by the choice of microcontroller.
+Are you also thinking about power envelope and that kind of thing, or is that all inferred
+by the microcontroller choice?
+So actually, the ultimate and fundamental constraint is power, right?
+Power is always, right?
+Exactly.
+So you start out with power.
+And if you really look at the power range, you are talking about, right?
+To put it in perspective.
+So I like smartphones around the thousand milliwatts, even some of these fun embedded systems
+are around hundreds of milliwatts, but we are talking of tens of milliwatts.
+So that already really constrains you.
+And when you look at all the microprocesses available within that low, ultra-low power
+range, right?
+You realize they have so many things in common, like they don't have, you know, they don't
+have floating point operations, the clocks are normally much lower.
+We are looking at things less than 48 megahertz.
+And so the constraints become very apparent for that range.
+I guess what I was curious about was, you know, certainly within a given power constraint,
+you choose your microcontroller.
+But I guess I was envisioning a scenario where you want to do things at the software level
+to even further manage the power consumption given a specific microcontroller.
+Are you having to deal with that kind of thing or did you just constrain the power by choosing
+the microcontroller and then you can go hog while you're with?
+No.
+So that's a perfect question actually, because even with the microcontroller, you have
+in place, if you just run it all the time, you're not going to make your power budget.
+So you have to do this, you know, event pre-event detection task that can, you know, your
+microcontroller is mostly in a very low power state.
+And you wake it up when you think that the events you are seeing correspond to, you need
+to make an inference on it.
+So you have all of those like low levels sort of software already implemented.
+It's kind of like the very first layer of your entire detection pipeline, right?
+This wake up webbit has an sound event okay and at all, right?
+Before you wake up, other things to be processing.
+So you have that block link.
+It sounds like a low level version of like the wake word for an Alexa type of device.
+Exactly, exactly, exactly.
+Yeah.
+But putting like the whole pipeline is very, very interesting because you have to get all
+these blocks in place in order to make all your specifications.
+And so you have the hardware in place, I'm imagining that the traditional way of solving
+this problem is using kind of time-tested digital signal processing algorithms.
+Is that the direction that you'd first go with this or is there something else?
+Yeah, yeah.
+So when I started my research very early on, right, the traditional way was, you know what
+you get your signal and you do like a smart signal processing as you can.
+So you're doing things like, you know, what is the best feature extraction that you can
+do, right?
+So people have come up with so many sort of kind of fifth features that once you extract
+those features, it makes it so easy to fail your event, right?
+So I'm imagining things like FFTs would come into play here.
+Exactly, exactly, exactly.
+So FFTs being fast for your transform form is a way to kind of extract the frequency
+components of an incoming signal.
+Exactly, exactly.
+So doing something like that and even other sort of steps on top of the FFTs, so get
+something like the spectrails, centroid, the fundamental frequency and all of these things
+make it much, much easier so that now you can just use a very simple, say, like, you
+know, thresholding to detect when an event has happened, right?
+So that was kind of like the assistant work, right?
+How do you extract the salient features from this so that classification becomes so,
+so much easier, right?
+Okay.
+But of course, the handicap of that is, what is the best feature, right?
+So FFTs spend so many years sort of identifying the best features for say, curve detection
+for whiz detection.
+And I started out with looking at all of that.
+And that's when the promise of deep learning became really exciting because in deep learning
+now, you don't have to hunt engineer features, right?
+You can do the learning of both the features and the classifier jointly.
+So that's actually what pushed me into that direction that, hey, what I'm sitting here
+trying to hand crab the best feature sets, but it can actually be automated as part of
+the process.
+So how about we look at that and see how that compares?
+And so as a, you know, someone who's equally excited about deep learning, I kind of get
+that as a direction, but I wonder if you've got, you know, a very well defined kind of body
+of work for that's, you know, there's already handing you the features, kind of telling
+you the way to do it.
+What's the real advantage that deep learning is giving you?
+Yeah.
+So one of the key things to start realizing was these models with that, these kind
+of like handcrafted features were there, but one of the areas that they really struggled
+to do with was how do you handle, you know, the temporal nature of the data, right?
+Okay.
+That means it's pretty key.
+So a typical part actually has very key characteristics.
+You have about three phases.
+So there's a phase phase that is sort of the explosive phase.
+You literally have like these three phases that are very distinctive to the core, right?
+And the properties in any of these three states are very different, right?
+But then most of the previous methods were all sort of pretty much like think of them as
+a static way of approaching and not really taking advantage of the temporal properties.
+So they could only do so well, right?
+And people had now started using things like hidden Markov models to try to model those
+temporal patterns and those were sort of like working very well, but then hidden Markov
+models are pretty, you know, basically algorithms to start dealing with, right?
+And so a good segue was, hey, and I started out also like implementing HMMs for this application.
+And at that level, you've already gone into the complexity that, you know, you can now
+use some of that even deep learning models that these days much easier than, you know,
+a full blown hidden Markov model, right?
+So you quickly run into the area where you realize that this traditional approach was
+not doing the work quite right.
+And congestion becomes even much more complex when you start thinking of different patients,
+or main patient to patient variability, so the sounds, the cough sounds sound very different
+from different patients.
+And when they have different conditions, it makes it sound like, you know, very different.
+So you quickly run into the issue where you just feel like, no, I need better models
+to really capture this.
+How far down the path of the traditional models did you go?
+Did you try?
+Did you have a working HMM that you could later compare to deep learning?
+Yeah.
+So that was actually one of my very first papers.
+I did a whole survey on all of these traditional algorithms that folks have been using.
+They had decision trees, you had your SVM, you had the HMM with like, you know, Gaussian
+make some model observations.
+And then you had like the, you know, the early neural networks I started working on.
+So the first one I started being was to use convolutional neural networks.
+And they compared very well, they compare like, you know, much better than the HMM, right?
+Which was very, very impressive.
+And at that time, I was using the convolutional neural net on top of the spectrogram, right?
+I was using, yeah, on top of the spectrogram.
+So it was being able to learn both the, you know, the temporal and spatial in terms of
+the frequency components of the sound and helping you make decisions, like make good inferences
+based off on that.
+So I started off actually validating that, hey, actually, these deep learning approaches
+work much better than the traditional, you know, approaches, those are some of my
+anyways, okay, before jumping or into it, okay.
+So I'm imagining the early work into CNN's, you, you validated all this, but you were
+doing this on desktop computers and then you had to figure out, okay, how do I get this
+thing to actually run on the devices?
+Exactly, exactly, exactly.
+Before we dig into into that, I just remember a question I had from your earlier description
+of the hardware.
+You mentioned that you were using traditional analog stages to condition the signal.
+One of the great things, and you mentioned this about deep learning is that you don't
+have to do a lot of feature engineering and often you find that by giving the network,
+you know, as much data and not doing as much pre-processing as you might otherwise do,
+you can find patterns that haven't traditionally been used, like maybe a cough has like these
+really high frequency components that no one really thought about, but that can be predictive.
+Did you explore that angle at all?
+Yeah, so I did, I did with sort of the first combination, right?
+So this was around, I started this week, around 2014, 2015 using the combination, and
+so I was using like piano at that time, and I started visualizing the features it was
+learning, right?
+Of course, some of them were, there were some that looked really interesting, so if you
+look at the spectrogram, normally in speech, you have these harmonics, right?
+Where you would have these kind of distinct fine lines in the spectrum, but cough is just
+a burst of energy, right?
+So it's quite over the entire place, right?
+It's like the whole place is just full of energy.
+And you could see that what the network was actually doing was for the cough.
+It was really activated by like a broad range across the spectrum.
+For us, like for the speech, it was mostly activated by these sort of lines, right?
+And in that space, I thought I was discriminating between cough and speech.
+So you could definitely see that it was learning this notion, and was being activated by the
+fact that in cough, you have a burst of energy spread across a wide range of frequency,
+and it would highlight those.
+Given that, why is it still important to do the conditioning?
+Oh, so the reason why it's actually important to do the conditioning is because of the sense
+that we are using, right?
+So like I mentioned, I'm using this piezoelectric transducer, which is, it's not like you
+know, your best microphone is actually a good, it's used for like guitar pickups.
+So the sense is not great to begin with.
+So your signal is actually really bad to start out with.
+So the conditioning that we do on there is one to sort of make sure that hey, your signal
+is at least clean enough that it's even audible when you hear that, you know, a person
+can discern something because without that conditioning, you can even hear the different
+events that okay, but yeah, but I think what was really critical is you do have a point
+because we could have done more conditioning on there to get a really great signal, right?
+But that would have defeated the point.
+And so because you could have added more stages, just like really good operational amplifiers,
+but we really did the minimal.
+So we have like a one stage filter, for instance, right?
+A minimum processing so that you can use the rest of the deep learning pipeline to take
+advantage of that, right?
+So we do sort of really use the benefit of the not having to clean up the signal too much,
+except we do do a little cleaning.
+Got it, got it.
+Yeah, that was the intuition that I was trying to explore.
+Yeah.
+Awesome.
+So for your latest paper, which you presented at NURP set the the black and AI workshop,
+which is all about an optimized recurrent unit for ultra low power acoustic event detection.
+Tell us about that paper and the key challenges you're trying to solve there.
+Yeah.
+So that's great.
+And I think it follows very well, we kind of like what we've been discussing up on
+to now.
+So like I mentioned, I started with convolutional neural nets and the comments are great,
+right?
+We all love them.
+They do awesome.
+And even these days there is an argument that hey, recurrent neural nets are no longer
+necessary, because if you see some of Google's work with on like wave net, you see these
+direct solutions are doing great for speech recognition and like speech synthesis.
+So why do we care about recurrent net at all?
+And the motivation for that was first recurrent net when you're thinking of like really
+constrained sort of applications where you don't have a lot of time for you can't admit
+a lot of late things, right?
+In combination, if you think about it, you literally have to buffer up the entire event
+so you can apply the confidence, and you have to apply windows, but recurrent net have
+this natural nature where they can process data one time step at a time, right?
+So that's really great.
+It's great for application because it's just like a digital filter.
+You can implement it in such a way that a sample comes in, you process it, the next sample
+comes in, you process it, and you have really, really low latency, right?
+So that was one of the big promises for starting this, right?
+But then once we started, okay, we have this recurrent net.
+We can train them and they can do very well on the task.
+How do we put them on the device?
+Then it's like, wow, we open a whole box of challenges because it's interesting.
+And there are a lot of people working on deploying deep learning to the edge.
+And you know, you have, you know, really great hardware systems, like the Nvidia drive.
+You have like Jetson, which is like this small embedded system board by Nvidia that you can
+true, you know, neural nets on there and they run just fine, right?
+But when you look at all of these hardware, you are just above our power budget, right?
+We are running at either tens of thousands of milliwatts or thousands, and we are literally
+looking for something that's within, you know, tens of milliwatts, right?
+Something that looked very promising was this library, it's called, like, new tensor or
+micro tensor.
+It's supposed to be a really lightweight tensor tool like we that can run on certain embedded
+boards.
+But then when you look at that, it's still above the power range of these really, really
+ultra-low power, like, you know, microcontrollers, right?
+And so the challenges, can we take the classical models and put them on these microcontrollers?
+And the first thing realized that no, if you look at the specifications on the, you
+are thinking of, you know, memory of, you're thinking of memory of like less than 32 kilobytes,
+you don't have floating point operations, that's like a no, no, right?
+So the real challenges was, well, how do we look at the, you know, some of these recurring
+neural networks?
+I was looking at particularly the gated recurring unit, now can I optimize it all the way down
+so that it can run on my target device, right?
+So that was the motivation, right?
+But when you look at the current systems, they are limited precisely in terms of power,
+right?
+And if we can come up with a way of optimizing them, such that you can run on this unit,
+then that would be great, right?
+So once that problem was formulated, I run into the, you know, the main areas in which
+I can start optimizing them, yeah.
+Okay.
+And just to get a sense of the scope of this, you said you're trying to optimize this gated
+recurrent unit all the way down, does that mean you're like writing it in assembly and,
+you know, and writing it to, you know, to run on this physical device at the instruction
+level?
+Like how far down are we going here?
+Oh, okay.
+So I'm writing it to run just at C level, right?
+Okay.
+So it's just, yeah, see, not assembly, I think with me, but just at C, right?
+But that means, you cannot just, you know, grab your TensorFlow model and just run it on
+TensorFlow Lite, right?
+That means you're going to have to write everything from scratch in a very optimized way.
+And so this, how did you approach this process of writing the, of kind of writing it to run
+on the device?
+Was it, and we, you talked a little bit about challenges, but was it was, was it just
+kind of work or were there's particular problems that you ran into that you had to overcome?
+Yeah.
+So there were, there were actually like three main areas I identified that, you know,
+of like optimization that could really make this feasible.
+So just sort of stat, and a lot of these had been, you know, already resets and explored,
+right?
+In isolation, but they had been done.
+That's one of the great things about the deep learning community.
+There are so many researchers working on incredible things.
+And so just taking the time to look at all the work you would see that a lot of people
+have worked on, how do you really quantize which, right?
+So there was a lot of work there.
+And how do you make which run on, run, how do you see, maybe build new networks without
+even using a lot of multiplication?
+So there were a lot of these, you know, research out there.
+And when I really sat down and started like, you know, thinking of implementing, I did
+this in steps by the four main areas that I did was, the first was sort of in the gated
+recurring unit.
+So if you think of the gated recurring units, actually an optimized form of the LSTM unit,
+right?
+Where, you know, in LSTM, you have a lot of gates.
+In the gated recurring unit, you just have two gates.
+You have your reset gate and your data gate.
+So I was like, wait, if we can optimize LSTM to goo, then we can optimize goo even down,
+right?
+What happens if we just use one gate, right?
+And there's a lot of, there were some, there are some, a few weights out there actually
+from 2017, 2017, 2018, there were a few researchers who had just woken on this idea of, hey, what
+if we true out one of the gates, particularly the reset gate?
+So two main papers stood out, there was, there's one paper from Banger's Group, which said
+in speech recognition applications, you can actually omit the reset gate.
+And because speech doesn't change so much, it doesn't change too quickly, like you don't
+have these sudden discontinuities, it tends to work just as okay as having a group.
+And so I took that and sort of tried to apply that to my case of like, okay, maybe I can
+get rid of the reset gate.
+And when I, in my first simulations, when I did it, I realized that for my application,
+it actually tends to work well.
+And yes, conditection is different from speech because you do have, you know, sudden changes
+when the event happens, but then I validated that you can actually omit the reset gate
+and get it to work as much, right?
+The next, once I was able to do that, so you cut down one gate and get that expensive
+by the way, because it gets means you need weights, you need a lot of weights you need,
+you need a lot of computations to do the dot product, like do the weight and the activation
+function.
+So just by removing one gate, it's like you cut down the network by 33% in terms of memory
+and, you know, computation.
+Like, so once I got rid of the gates, the next, the main area that everyone thinks of
+when you're thinking of, you know, making optimizing neural net is quantization, right?
+So I have to do quantization.
+But what was popular out there was 8-bit quantization.
+I think even today you can use TensorFlow or even PyTorch and you can get 8-bit weights equivalent
+of whatever network you train, right?
+But I knew 8-bit wasn't going to cut it for my publication, so we have to go all the
+way down to just three bits, right?
+Three-bit quantization for the network.
+So I also did a lot of experiments and simulations to ensure that with three weights, I can still
+sort of train the network and have it run, well, and the trick there was to do what people
+have done in the past, which is during training, you apply the quantization as kind of like
+functions within your computational graph so that you are simulating the quantization process
+while you are training.
+And the next trick is learning about it and shifting the weights to the right place.
+Something else too with the quantization was rather than just quantizing to three-bit
+weights, you could quantize them such that they are just, you know, integer exponents of
+two or like, you know, the inverse of integer exponents of two.
+And if you did it that way, then you don't need multiplications anymore because you can
+replace all multiplications with, you know, with base shifts, right?
+So to recap the two main areas, one was true, I will show a way one of the gates and then
+you know, cut down the network computation and memory by 33% do this kind of exponential
+with quantization all the way down to three-bit and that saves you a lot of memory, but also
+enables you to just do base shifts and no multiplications, which you can do on the
+ultra-loop power microcontroller, right?
+And then the other main area of optimization was we don't have, we don't have two team
+points units on the microcontroller.
+So to get rid of every floating point of operation and replace that with integer operations, right?
+So the whole network on the microcontroller has to be implemented in such a way that you
+are just using integer operations, right?
+So all the activation functions, all the, you know, the linear transformations, the
+weak multiplication and the dot product, they all have to be done in such a way that
+you're operating within integer, you know, framework, I was using like 16-bit integers and
+then you are applying all the necessary collecting so you don't overflow, right?
+So those were the main sort of key areas of quantization, the integer arithmetic throughout,
+train out the single gate, like, train out the reset gate, and then also using fast activation
+because those are ourselves, right?
+Using what was that last one?
+Fast activations?
+Yeah, I have to, like, you know, so in the traditional, you know, recurring unit or
+updated recurring unit, you have the sigmoid and a time each and those are expensive on
+the microcontroller.
+Whenever you have to do an exponential on the microcontroller, if you are thinking all
+child do power, they become very painful.
+And so what I did was to use soft sign function instead, you can have like, soft sign variance
+of the time each and a soft sign and it works just as well, right?
+So these are the four main areas I had to, I had to bring together in order to really
+pull this off.
+One of the things that occurs to me here is a lot of times when we're trying to get networks
+to converge, we're doing things like drop out and other things that are like adding noise
+which kind of helps with regularization, but your process is inherently adding noise.
+So does that change the way you do regularization or eliminate the need to do regularization
+when you're trying to train the network?
+Yeah, so I don't do any additional regularization apart from these methods that I'm talking
+about.
+And almost every one of them you can actually think of as a regularization and you see
+that effect.
+So if I train on a really big network, it actually trains, you are able to convey to
+about the same or even it's slightly better than what you would with like a full precision
+network, right, but then when you go like really when you are training a very, very small
+network, the full precision will, you know, do better, but yes, you do see the regularization
+effect of these and you don't need to do any additional external regularization.
+I think one thing also that I have to point out is you see the whole simulation, the quantization
+but also the fixed point in the gyrismatic, it pretty much means you are sort of clipping
+how high the outputs of certain nodes can go, right?
+So nothing can go above the highest number in say 16 bit into the presentation.
+So it's almost like you're doing with clipping, right?
+You're doing all of these things that you traditionally do with regularization.
+In fact, really strict regularization.
+So it ends up training very well and then you're able to get a network that function.
+So you made a comment about how for large networks, it works as well or better than,
+than non, you know, networks where you're not doing these four things.
+How broadly does that generalize, is that, you know, just for this specific problem?
+Or, I mean, we always care about, you know, compute and usually care about power.
+Like could you just take this and apply it to something totally, you know, a totally
+different kind of problem?
+And do you think it would work or there are specific things about your problem that
+allows you to make these compromises?
+So actually in my paper, in the work that I presented in the paper, I actually wrote
+a paper on this that would be coming out for you become, like maybe later this year.
+What we realized was we tried on two additional like tasks, right?
+One was recognizing spoken digits, right?
+And you see that it still waits, right?
+In like, when you're trying to Google has this speech command dataset, it pretty much has
+like one second audio recording of sounds like on or, and you have 20,000 flat examples,
+right?
+And the way it's just as well, where you begin to see it hurting is when you look at the
+test as we consider this was called like a band sounds where you have really, really long
+recordings.
+You have recordings that are about four seconds long, right?
+And sequences that are about 100 plus, you know, instances that you begin to see it hurting.
+I think one of the reason why it begins hurting is because when you don't have the reset
+gate, you are pretty much now like you're limiting the long-term memory of the network, right?
+Like the very advantage of the group and then LSTM, like your handicrafting, the network
+is that because it can't really remember for too long, right?
+So I think these optimizations make it very suitable for applications like, you know,
+keywords, potten, or where you are, literally detection sounds that are very short, you
+know, or not very short, but relatively short.
+So, you know, anything one second, two second and below, then it becomes really promising.
+And then once you are looking at really long sequences, like you would in speech recognition,
+then it would not be ideal, right?
+And so you mentioned two additional tasks was one the digits and the other was the speech
+commands or were those one?
+Yeah, those were one the speech commands has the spoken digits.
+The test was this a band sounds.
+If the data says it's available online and they have, it's actually a really difficult
+task.
+You have like recordings of environments, you have things like child playing, car honking,
+and you know, you're supposed to identify these classes.
+You have about 20 classes or 10 classes, 10 to 20 classes, one of those.
+And sometimes it's really even hard for a person to discriminate between them because
+you know, the sounds are long and then the context is also very broad, right?
+So those, that was a very difficult task for our model.
+So we're performing maybe 10 to 15% ways than using a full precision, like, you know,
+green network.
+Okay.
+What was that data set called again?
+Abans sounds data set.
+So I think if I remember correctly, it's from, yeah, they have two.
+There's the Abans sound 8K and then like a more Abans sound like with even longer recordings
+and we have a paper out there on it.
+I think it's a data set in taxonomy for Abans sound research was published in an ACM conference
+on multimedia.
+So it's a data set that has been out there since 2015.
+I'm sorry.
+Yeah.
+All right.
+So you've developed this GRU kind of all the way down.
+You have demonstrated that it works for your task and reasonably well for other tasks.
+Are you done then or is there more work that you had to do here?
+Yeah.
+So I think right now for, and I actually had deployed it to the device and have it like,
+you know, run on examples in the data set and get like the decent results.
+I think one key area to was late, right?
+You need this to not just fit, but be fast enough.
+And that also we were meeting the right spec actually where I'm going about 60 to 70 times
+faster than if you were to just manually put a GRU onto any of these devices.
+And so while they all work and everything is like great, you've been able to embed
+the model.
+The entire pipeline that I talked about, right, also needs to be in place, right?
+So right now, it means, you know, our our GRU, our optimized recovery unit can, when
+you train it, they can't really detect these sounds.
+But then once you put it, once you start thinking, you know, okay, I have a whole streaming
+input, right?
+How do I ensure that I'm telling off my microprocessor, like at the right time, I'm waking up quickly
+enough so that I don't miss the events.
+And then my, you know, recurring neural network is also like, it's also processing the incoming
+sequence.
+And and finally also, how do I, so you get some outputs from your recovery net, right?
+But how do you smoothen over those posterior probabilities and actually record the event
+at what time?
+So those are that sort of additional work, that's what I've been working on, sort of completing
+that whole pipeline, right?
+Because I don't see the, the RNA is one block in that whole pipeline and you want to get
+the whole pipeline working, so this can be used in real time, right?
+So that's kind of like the work that I'm finishing on right now.
+Nice.
+And you're finishing up your PhD, what's next for for you in this project?
+Yeah.
+I'm very excited, I'm hopefully going to be defending in a month.
+Oh wow.
+And yeah, so very exciting things.
+But actually, my advice and I have found that a company called Clewis to commercialize
+these, this Asma monitoring device that I've been talking about, this world would device
+for monitoring the lungs, right?
+And the company is called Clewis and we are very excited about it.
+We just, I was just awarded an SBIR grant to sort of see that too.
+So I think for the next year, that's what I'll be, that's what I'll be fully dedicated
+to trying to bring the technology out of the lab and into the hospitals to actually use
+in patients on patients.
+Nice, nice.
+And so I imagine that this will have to go through the, kind of the FDA approvals, is this
+subject to like clinical trials and all of those kinds of things?
+Yes.
+So, eventually, it's going to go to FDA.
+We've actually been sort of prepping on the right materials and sort of lining up the
+right studies we have to do.
+I have done some preliminary studies at the hospital on patients' population of even
+up to 30, actually testing on patients, but we have to do like a really full-blown study.
+But for the next year, we are hoping to work with some medical companies who are already,
+you know, doing clinical trials for their respiratory therapeutics, and they need data, they need
+data on, you know, have these patients responding to particular drugs, right?
+And often, the available data is just subjective reports from patients, oh, I think these
+recalls COVID-19, but if they could have something that's more objective, huh?
+They were within X, RS throughout this week, and that reduced by 10% the next week, or
+their cough went down by this, they'll be really, really, you know, actionable for them
+and really valuable to them.
+So we are talking with some pharmaceuticals about, you know, the need and positioning the
+device in such a way that it can fulfill that need.
+Awesome.
+And will you also be getting into physical manufacturer of the devices themselves?
+Yes.
+So, for some of the studies that I did, I had to do like batch sort of manufacturing of
+these processes of these devices, because, you know, you're running a small study where
+you have maybe 50 subjects, you still have to have a lot of, you know, devices, and you
+have to have like packaging down how they're going to arrive at the hospital, how do you
+get the information in and out, and so I have had to do that, and I anticipate I'm going
+to have to do much more of that, like in this year, once I finished school.
+Wow.
+So, yeah.
+It's exciting.
+It sounds like a really exciting project, and you will certainly have your hands full
+over the coming months.
+I really appreciate you taking the time to share it with us.
+Oh, thank you.
+Well, this was fun.
+It's taking a while.
+Fantastic.
+Thank you.
+All right, everyone, that's our show for today.
+For more information on justice or any of the topics covered in this show, visit twimlai.com
+slash talks slash 2 3 0.
+For more information on our Black and AI series, visit twimlai.com slash Black and AI 19.
+As always, thanks so much for listening, and catch you next time.

@@ -1,0 +1,3352 @@
+1
+00:00:00,000 --> 00:00:15,920
+Hello and welcome to another episode of Twimble Talk, the podcast where I interview interesting
+
+2
+00:00:15,920 --> 00:00:20,880
+people doing interesting things in machine learning and artificial intelligence.
+
+3
+00:00:20,880 --> 00:00:25,720
+I'm your host Sam Charrington, a bit about the show you're about to hear.
+
+4
+00:00:25,720 --> 00:00:29,860
+This show is part of a series that I'm really excited about, in part because I've been
+
+5
+00:00:29,860 --> 00:00:32,900
+working to bring it to you for quite a while now.
+
+6
+00:00:32,900 --> 00:00:37,060
+The focus of this series is a sampling of the really interesting work being done over
+
+7
+00:00:37,060 --> 00:00:44,540
+at OpenAI, the independent AI research lab, founded by Elon Musk, Sam Altman, and others.
+
+8
+00:00:44,540 --> 00:00:48,020
+A few quick announcements before we dive into the show.
+
+9
+00:00:48,020 --> 00:00:53,060
+In a few weeks, we'll be holding our last Twimble online meetup of the year.
+
+10
+00:00:53,060 --> 00:00:58,100
+On Wednesday, December 13th, please join us and bring your thoughts on the top machine
+
+11
+00:00:58,100 --> 00:01:02,660
+learning and AI stories of 2017 for our discussion segment.
+
+12
+00:01:02,660 --> 00:01:08,380
+For our main presentation, formal Twimble Talk guest, Bruno Gensalves, we'll be discussing
+
+13
+00:01:08,380 --> 00:01:13,900
+the paper, understanding deep learning requires rethinking generalization, by Shi Juan
+
+14
+00:01:13,900 --> 00:01:17,340
+Zhang from MIT and Google Brain and others.
+
+15
+00:01:17,340 --> 00:01:22,140
+You can find more details and register at twimlai.com slash meetup.
+
+16
+00:01:22,140 --> 00:01:27,500
+Also, we need to build out our 2018 presentation schedule for the meetup.
+
+17
+00:01:27,500 --> 00:01:32,060
+So if you'd like to present your own work or your favorite third-party paper, please
+
+18
+00:01:32,060 --> 00:01:40,100
+reach out to us via email at teamattwimlai.com or ping us on social media and let us know.
+
+19
+00:01:40,100 --> 00:01:44,260
+If you receive my newsletter, you already know this, but Twimble is growing and we're
+
+20
+00:01:44,260 --> 00:01:49,300
+looking for an energetic and passionate community manager to help managing grow programs
+
+21
+00:01:49,300 --> 00:01:55,220
+like the podcast and meetup and some other exciting things we've gotten store for 2018.
+
+22
+00:01:55,220 --> 00:01:57,820
+This is a full-time role that can be done remotely.
+
+23
+00:01:57,820 --> 00:02:02,420
+If you're interested in learning more, reach out to me for additional details.
+
+24
+00:02:02,420 --> 00:02:06,540
+I should mention that if you don't already get my newsletter, you are really missing
+
+25
+00:02:06,540 --> 00:02:12,020
+out and you should visit twimlai.com slash newsletter to sign up.
+
+26
+00:02:12,020 --> 00:02:18,340
+In this show, I'm joined by Jonas Schneider, robotics technical team lead at OpenAI.
+
+27
+00:02:18,340 --> 00:02:22,900
+While in San Francisco a few months ago, I sat down with Jonas at the OpenAI office during
+
+28
+00:02:22,900 --> 00:02:27,060
+which we covered a lot of really interesting ground, including not just OpenAI's work
+
+29
+00:02:27,060 --> 00:02:33,180
+in robotics, but also OpenAI Jim, which was the first project he worked on at OpenAI,
+
+30
+00:02:33,180 --> 00:02:38,540
+as well as how they approach setting up the infrastructure for their experimental work,
+
+31
+00:02:38,540 --> 00:02:42,900
+including how they've set up a robot as a service environment for their researchers,
+
+32
+00:02:42,900 --> 00:02:47,540
+and how they use the open source Kubernetes project to manage their compute environment.
+
+33
+00:02:47,540 --> 00:02:49,580
+Check it out and let us know what you think.
+
+34
+00:02:49,580 --> 00:02:53,580
+I really enjoyed this one, a quick note before we jump in.
+
+35
+00:02:53,580 --> 00:02:58,180
+Support for this OpenAI series is brought to you by our friends at NVIDIA, a company
+
+36
+00:02:58,180 --> 00:03:01,900
+which is also a supporter of OpenAI itself.
+
+37
+00:03:01,900 --> 00:03:05,580
+If you're listening to this podcast, you already know about NVIDIA and all the great
+
+38
+00:03:05,580 --> 00:03:09,740
+things they're doing to support advancements in AI research and practice.
+
+39
+00:03:09,740 --> 00:03:14,300
+What you may not know is that the company has a significant presence at the NIPPS conference
+
+40
+00:03:14,300 --> 00:03:19,780
+going on next week in Long Beach, California, including four accepted papers.
+
+41
+00:03:19,780 --> 00:03:26,060
+To learn more about the NVIDIA presence at NIPPS, head on over to twimlai.com slash NVIDIA
+
+42
+00:03:26,060 --> 00:03:28,540
+and be sure to visit them at the conference.
+
+43
+00:03:28,540 --> 00:03:33,020
+Of course, I'll be at NIPPS as well and I'd love to meet you if you'll be there, so
+
+44
+00:03:33,020 --> 00:03:35,460
+please reach out if you will.
+
+45
+00:03:35,460 --> 00:03:45,060
+And now on to the show.
+
+46
+00:03:45,060 --> 00:03:50,500
+All right, well, hey everyone, I am here at the OpenAI offices and I am with Jonas Schneider.
+
+47
+00:03:50,500 --> 00:03:55,820
+Jonas is a member of technical staff here as well as being the technical team lead for
+
+48
+00:03:55,820 --> 00:03:56,820
+robotics.
+
+49
+00:03:56,820 --> 00:03:58,460
+Welcome to the podcast, Jonas.
+
+50
+00:03:58,460 --> 00:03:59,460
+Hey, glad to be here.
+
+51
+00:03:59,460 --> 00:04:01,740
+It's great to have you on the show.
+
+52
+00:04:01,740 --> 00:04:05,940
+Why don't we get started by having you tell us a little bit about your background and
+
+53
+00:04:05,940 --> 00:04:08,780
+how you got interested in artificial intelligence?
+
+54
+00:04:08,780 --> 00:04:13,300
+Yeah, so my background is actually, so I work on OpenAI's robotics team, but my background
+
+55
+00:04:13,300 --> 00:04:14,820
+is actually in software engineering.
+
+56
+00:04:14,820 --> 00:04:19,780
+Okay, my background is neither in robotics, like classical, like academic robotics, nor
+
+57
+00:04:19,780 --> 00:04:23,500
+machine learning, which is of course like OpenAI's big focus.
+
+58
+00:04:23,500 --> 00:04:27,780
+And so in the robotics team, we kind of have a couple of different skillsets coming together.
+
+59
+00:04:27,780 --> 00:04:31,820
+So in the robotics, there's of course machine learning experts and also software engineering
+
+60
+00:04:31,820 --> 00:04:33,060
+people like me.
+
+61
+00:04:33,060 --> 00:04:37,020
+So before OpenAI, I was actually software engineering intern at Stripe.
+
+62
+00:04:37,020 --> 00:04:41,100
+That's also where I met our CTO, Greg Brockman, who is now a CTO at OpenAI.
+
+63
+00:04:41,100 --> 00:04:45,340
+And so basically, yeah, and so that was actually, like, while I was still in college.
+
+64
+00:04:45,340 --> 00:04:49,340
+And so after I was done with college, I actually reached out to record and was like, so what's
+
+65
+00:04:49,340 --> 00:04:50,500
+up these days?
+
+66
+00:04:50,500 --> 00:04:52,460
+What kind of stuff are you working on?
+
+67
+00:04:52,460 --> 00:04:54,180
+And so he introduced me to OpenAI.
+
+68
+00:04:54,180 --> 00:04:55,180
+Fantastic.
+
+69
+00:04:55,180 --> 00:04:56,180
+Yeah.
+
+70
+00:04:56,180 --> 00:04:59,180
+So I actually got started working on OpenAI Gym.
+
+71
+00:04:59,180 --> 00:05:03,580
+So that was kind of like my, I was a contractor for OpenAI there, basically working with Greg.
+
+72
+00:05:03,580 --> 00:05:08,140
+And so that's how it kind of got started thinking about all these AI ML things.
+
+73
+00:05:08,140 --> 00:05:10,980
+And then eventually I got started working on OpenAI's robotics team.
+
+74
+00:05:10,980 --> 00:05:11,980
+Awesome.
+
+75
+00:05:11,980 --> 00:05:12,980
+Awesome.
+
+76
+00:05:12,980 --> 00:05:15,220
+So tell me a little bit about the work that you do on the robotics team.
+
+77
+00:05:15,220 --> 00:05:16,220
+Yeah.
+
+78
+00:05:16,220 --> 00:05:21,660
+So the goal of the robotics team basically is to enable new capabilities for robots.
+
+79
+00:05:21,660 --> 00:05:25,700
+So today's robots, they're really good at like very specific tasks, for example, like
+
+80
+00:05:25,700 --> 00:05:30,500
+in a factory robot, you have an assembly line and you have a robot that can place one
+
+81
+00:05:30,500 --> 00:05:34,180
+very specific screw into one specific location on the part that you're assembling.
+
+82
+00:05:34,180 --> 00:05:36,460
+For example, then robots are great at that.
+
+83
+00:05:36,460 --> 00:05:37,460
+They're really good at that.
+
+84
+00:05:37,460 --> 00:05:38,820
+They can, they have very, very high precision.
+
+85
+00:05:38,820 --> 00:05:42,700
+They can, like, they can repeat this movement, like, tens of thousands of times.
+
+86
+00:05:42,700 --> 00:05:45,900
+And they, yeah, and they, they never get tired or anything.
+
+87
+00:05:45,900 --> 00:05:49,420
+But the issue is that these environments are very constrained, of course, because like,
+
+88
+00:05:49,420 --> 00:05:50,420
+that's how a factory is.
+
+89
+00:05:50,420 --> 00:05:51,420
+Like, everything is super precise.
+
+90
+00:05:51,420 --> 00:05:56,020
+Whenever something like unexpected happens, you just abort.
+
+91
+00:05:56,020 --> 00:05:57,020
+Right.
+
+92
+00:05:57,020 --> 00:06:00,420
+And you like, and the human goes in there and like, figures it out and it resets and then
+
+93
+00:06:00,420 --> 00:06:01,420
+it goes on again.
+
+94
+00:06:01,420 --> 00:06:02,420
+Right.
+
+95
+00:06:02,420 --> 00:06:05,740
+But so that's very different from, for example, like a home environment where like, if
+
+96
+00:06:05,740 --> 00:06:10,060
+you're trying to clean up someone's apartment, for example, where like unexpected stuff happens
+
+97
+00:06:10,060 --> 00:06:13,300
+all the time and you're like, something like falls over, then you have to like react to
+
+98
+00:06:13,300 --> 00:06:14,300
+that and pick it back up.
+
+99
+00:06:14,300 --> 00:06:15,300
+Yeah.
+
+100
+00:06:15,300 --> 00:06:19,900
+So this is like a very simple task, but it turns out that like today's robots are actually
+
+101
+00:06:19,900 --> 00:06:23,940
+not that great at operating these unconstrained environments.
+
+102
+00:06:23,940 --> 00:06:28,540
+And usually the reason for that is that they are pre-programmed, basically.
+
+103
+00:06:28,540 --> 00:06:31,660
+So when you, when you're, when you have this factory setting, someone, like, when you
+
+104
+00:06:31,660 --> 00:06:36,140
+set up the robot initially, someone goes in there and like, and basically like programs,
+
+105
+00:06:36,140 --> 00:06:38,460
+this exact movement pattern for the robot.
+
+106
+00:06:38,460 --> 00:06:41,980
+But of course, and that works great in this constrained environment, but in an unconstrained
+
+107
+00:06:41,980 --> 00:06:46,420
+environment, you actually can't really do that because you have to react to what, what's
+
+108
+00:06:46,420 --> 00:06:48,140
+happening in the environment.
+
+109
+00:06:48,140 --> 00:06:52,860
+And so that's why today's robots are like, very pre-restricted in these kinds of environments.
+
+110
+00:06:52,860 --> 00:06:55,380
+And we're, we're trying to embark on solving that.
+
+111
+00:06:55,380 --> 00:06:56,380
+Nice.
+
+112
+00:06:56,380 --> 00:06:57,380
+Nice.
+
+113
+00:06:57,380 --> 00:07:02,140
+So it sounds like the, you know, we're talking about the environments as being constrained
+
+114
+00:07:02,140 --> 00:07:03,580
+and unconstrained.
+
+115
+00:07:03,580 --> 00:07:07,940
+But in a lot of cases, it's my sense that the constraints themselves are artificially
+
+116
+00:07:07,940 --> 00:07:08,940
+imposed.
+
+117
+00:07:08,940 --> 00:07:12,820
+Like the, you know, the factory environment is constrained because it has to be because
+
+118
+00:07:12,820 --> 00:07:14,660
+that's the way they can get the robots to work.
+
+119
+00:07:14,660 --> 00:07:19,660
+Like, do you look at applying this stuff in the industrial settings as well?
+
+120
+00:07:19,660 --> 00:07:24,780
+Well, so the thing is, like, yeah, you're of course exactly right, that basically, basically
+
+121
+00:07:24,780 --> 00:07:28,660
+today's automation, like basically everything, like the way these factories are designed
+
+122
+00:07:28,660 --> 00:07:30,980
+is exactly so that the robots can function.
+
+123
+00:07:30,980 --> 00:07:35,340
+I think for the most part, it will be, or at least with the current state of, of like
+
+124
+00:07:35,340 --> 00:07:40,440
+capabilities of ML-based systems, it will actually be pretty hard to be better than
+
+125
+00:07:40,440 --> 00:07:44,740
+this constrained environment, if, if basically your, like, your application or your business
+
+126
+00:07:44,740 --> 00:07:48,020
+is like fine with operating in a constrained environment.
+
+127
+00:07:48,020 --> 00:07:52,420
+So for example, like while it might be nice to, let's say there's a Tesla, there's a Tesla
+
+128
+00:07:52,420 --> 00:07:55,340
+like robot that moves the auto bodies around.
+
+129
+00:07:55,340 --> 00:07:56,340
+Right.
+
+130
+00:07:56,340 --> 00:07:59,260
+And then, and then let's say like it, like of course it would be nice, for example, like
+
+131
+00:07:59,260 --> 00:08:03,420
+if, if it would be smart enough to react to, if it like drops the thing on the floor,
+
+132
+00:08:03,420 --> 00:08:06,740
+if it could like pick it back up and just pick when you're going on, but these events
+
+133
+00:08:06,740 --> 00:08:11,220
+are so rare that, and basically of course there's like a lot of other engineering factors
+
+134
+00:08:11,220 --> 00:08:15,340
+there where like you got to be sure that if the robots in this like reaction mode that
+
+135
+00:08:15,340 --> 00:08:19,500
+it doesn't, doesn't accidentally, I call like more failure somewhere else in the system.
+
+136
+00:08:19,500 --> 00:08:22,620
+And basically just because these events are so rare in, if your environment is already
+
+137
+00:08:22,620 --> 00:08:23,620
+constrained.
+
+138
+00:08:23,620 --> 00:08:26,340
+So we're like, we're not really looking at that, I guess like in the, definitely in the
+
+139
+00:08:26,340 --> 00:08:27,700
+short, short and medium term.
+
+140
+00:08:27,700 --> 00:08:32,780
+I'm thinking about applications like pick and place types of applications where I've
+
+141
+00:08:32,780 --> 00:08:39,980
+seen a number of research is kind of in the context of, you know, today, a robot that's
+
+142
+00:08:39,980 --> 00:08:42,340
+being used to bolt stuff in, right.
+
+143
+00:08:42,340 --> 00:08:48,700
+It's getting these bolts that are like preloaded into, you know, a very constrained like a harness
+
+144
+00:08:48,700 --> 00:08:51,180
+that basically it can bolt in, right.
+
+145
+00:08:51,180 --> 00:08:55,900
+But some of the examples show that in some instances you might want to just put a box
+
+146
+00:08:55,900 --> 00:09:02,140
+of bolts and let the robot kind of grasp the bolts and then from there bolt them in.
+
+147
+00:09:02,140 --> 00:09:07,580
+And I guess the question is, have you, have you looked at the, you know, is that really
+
+148
+00:09:07,580 --> 00:09:08,580
+practical?
+
+149
+00:09:08,580 --> 00:09:12,500
+Like, is that where you see the application of this kind of stuff or it's like, no, the
+
+150
+00:09:12,500 --> 00:09:15,260
+industrial environments, you know, we've got that kind of figured out.
+
+151
+00:09:15,260 --> 00:09:19,660
+People probably aren't going to, you know, switch from using these, you know, the very
+
+152
+00:09:19,660 --> 00:09:24,100
+rigid environments to the more unstructured environments to save a little bit of that
+
+153
+00:09:24,100 --> 00:09:25,100
+upfront cost.
+
+154
+00:09:25,100 --> 00:09:26,100
+Yeah.
+
+155
+00:09:26,100 --> 00:09:29,420
+So I think there are definitely, there are some opportunities, basically, specifically
+
+156
+00:09:29,420 --> 00:09:32,580
+in the areas you mentioned, like machine tending, basically where like, you have this
+
+157
+00:09:32,580 --> 00:09:37,140
+inbound, like box of parts and they come from like a, like a some vendor and you basically
+
+158
+00:09:37,140 --> 00:09:40,500
+have to like feed them to the machines correctly, like unpack them.
+
+159
+00:09:40,500 --> 00:09:42,820
+And that is again, because it's kind of an unconstrained environment, you don't really
+
+160
+00:09:42,820 --> 00:09:46,580
+know, like they might change like their shipping material and suddenly it looks different
+
+161
+00:09:46,580 --> 00:09:48,660
+and you have to process this package differently.
+
+162
+00:09:48,660 --> 00:09:49,660
+Mm-hmm.
+
+163
+00:09:49,660 --> 00:09:53,780
+And also one, one other, one other kind of interesting example is actually plugging in cables.
+
+164
+00:09:53,780 --> 00:09:57,940
+So that's something that, that all these industrial robots are also very bad at, it turns
+
+165
+00:09:57,940 --> 00:10:01,780
+out, because like cables are deformable and basically there again, you might have to
+
+166
+00:10:01,780 --> 00:10:05,940
+react like if the cable is bending weirdly, you have to like poke it so it falls into the
+
+167
+00:10:05,940 --> 00:10:06,940
+correct place.
+
+168
+00:10:06,940 --> 00:10:10,100
+And so this is actually something that consumes a lot of time, in, for example, like auto
+
+169
+00:10:10,100 --> 00:10:13,980
+assembly, where basically you can do the entire frame, it's all, all the body size and
+
+170
+00:10:13,980 --> 00:10:14,980
+all super nice.
+
+171
+00:10:14,980 --> 00:10:18,460
+And then you have a bunch of people like installing all the stuff in the interior, for
+
+172
+00:10:18,460 --> 00:10:21,940
+example, and that includes, actually, it really is like one very specific task that
+
+173
+00:10:21,940 --> 00:10:25,620
+people have tried to automate using the classical robotics, it's plugging in these
+
+174
+00:10:25,620 --> 00:10:30,180
+like connectors basically, or I guess maybe like a day-to-day variant of this would be
+
+175
+00:10:30,180 --> 00:10:34,420
+like plugging in a charger into, like plugging your phone into like a phone charger.
+
+176
+00:10:34,420 --> 00:10:38,620
+But it turns out basically for these problems you also, you actually, like, these are surprisingly
+
+177
+00:10:38,620 --> 00:10:42,940
+hard, because you have to like figure out the like exact positioning for the charger
+
+178
+00:10:42,940 --> 00:10:44,540
+and then plug it in for like a year.
+
+179
+00:10:44,540 --> 00:10:49,640
+So we built USB-C and like lightning reversible ones to make it easy for robots to charge
+
+180
+00:10:49,640 --> 00:10:51,340
+our phones for us.
+
+181
+00:10:51,340 --> 00:10:57,140
+Yeah, so I think definitely like for the industrial applications, like, it, why it might be hard
+
+182
+00:10:57,140 --> 00:11:01,060
+to basically, in the short term, improve on the stuff that is already handled by robots,
+
+183
+00:11:01,060 --> 00:11:05,860
+there are definitely a lot of fringe cases that, like, there's, there's no way that you
+
+184
+00:11:05,860 --> 00:11:09,620
+could currently even, like, get close to automating it and new technologies could enable
+
+185
+00:11:09,620 --> 00:11:10,620
+that.
+
+186
+00:11:10,620 --> 00:11:11,620
+Okay.
+
+187
+00:11:11,620 --> 00:11:15,820
+So tell me a little bit about some of the areas of research that you're pursuing to kind
+
+188
+00:11:15,820 --> 00:11:17,820
+of enable this, this vision.
+
+189
+00:11:17,820 --> 00:11:18,820
+Yeah.
+
+190
+00:11:18,820 --> 00:11:24,540
+Basically, the thing we're very interested in is basically acting on, and reacting on feedback
+
+191
+00:11:24,540 --> 00:11:25,780
+from the real world.
+
+192
+00:11:25,780 --> 00:11:29,900
+So basically this, and this kind of feedback is really also what gives, what gives humans
+
+193
+00:11:29,900 --> 00:11:34,140
+this super good, like manipulation, like super good, like robotic skills, basically.
+
+194
+00:11:34,140 --> 00:11:35,140
+Okay.
+
+195
+00:11:35,140 --> 00:11:39,380
+So one, actually one, one quick experiment you can verify that is if you try to, to, if
+
+196
+00:11:39,380 --> 00:11:43,860
+you put both of your index fingers out, like horizontally, and doing this, yeah, yeah.
+
+197
+00:11:43,860 --> 00:11:47,060
+And you try to move them, move them together and like touch the fingertips.
+
+198
+00:11:47,060 --> 00:11:49,500
+That's very easy to do, and you can always do it.
+
+199
+00:11:49,500 --> 00:11:50,500
+Yeah.
+
+200
+00:11:50,500 --> 00:11:52,900
+But so, but, and now try doing it again with your eyes closed.
+
+201
+00:11:52,900 --> 00:11:53,900
+Mm-hmm.
+
+202
+00:11:53,900 --> 00:11:56,340
+And it turns out this is actually, it's actually really hard.
+
+203
+00:11:56,340 --> 00:11:57,340
+Ha, ha.
+
+204
+00:11:57,340 --> 00:11:58,340
+Yeah.
+
+205
+00:11:58,340 --> 00:12:00,180
+And like, after a while, you can, like, if you have, like, the touch feedback.
+
+206
+00:12:00,180 --> 00:12:04,820
+But basically, so the thing there is that, like, actually human motion is not very precise,
+
+207
+00:12:04,820 --> 00:12:09,300
+but it is very good at, like, figuring out, oh, I'm, like, off in this, in some direction
+
+208
+00:12:09,300 --> 00:12:10,300
+and then going for it.
+
+209
+00:12:10,300 --> 00:12:11,300
+And going for it.
+
+210
+00:12:11,300 --> 00:12:12,300
+Going for it.
+
+211
+00:12:12,300 --> 00:12:13,300
+Exactly.
+
+212
+00:12:13,300 --> 00:12:16,140
+And so that is actually a thing that, that, like, again, these, like, industrial robots,
+
+213
+00:12:16,140 --> 00:12:18,420
+like, they don't really do that on, like, a higher level.
+
+214
+00:12:18,420 --> 00:12:22,220
+They do it on, like, a very, like, very low level of, like, am I in the right place?
+
+215
+00:12:22,220 --> 00:12:25,100
+But this gets harder if you have, like, other objects or something that you're interacting
+
+216
+00:12:25,100 --> 00:12:26,100
+with.
+
+217
+00:12:26,100 --> 00:12:28,820
+And so this is what, like, this is one area that I research focused on, basically, taking
+
+218
+00:12:28,820 --> 00:12:33,700
+data from the real world and using that, like, online in the loop to have the robot be
+
+219
+00:12:33,700 --> 00:12:37,220
+able to, like, react to what it's doing and what, like, the things it's interacting
+
+220
+00:12:37,220 --> 00:12:41,060
+with, which could be, like, a block or, like, like, whatever object that you're working
+
+221
+00:12:41,060 --> 00:12:42,060
+with is doing.
+
+222
+00:12:42,060 --> 00:12:45,500
+And like, if you're, like, grasping it correctly, for example, or if you're moving it
+
+223
+00:12:45,500 --> 00:12:46,500
+to the right place.
+
+224
+00:12:46,500 --> 00:12:48,060
+And so how do you do that?
+
+225
+00:12:48,060 --> 00:12:49,060
+Yeah.
+
+226
+00:12:49,060 --> 00:12:50,700
+That's a very good question.
+
+227
+00:12:50,700 --> 00:12:54,500
+So there we're, we're building on, on the, on the large body of work that has, that
+
+228
+00:12:54,500 --> 00:12:58,660
+has been done in the computer, like, in the, like, ML-based computer vision areas.
+
+229
+00:12:58,660 --> 00:13:03,140
+So basically, we take, we take a convolutional neural network that's been, that's been trained
+
+230
+00:13:03,140 --> 00:13:06,260
+on ImageNet to do this, like, image recognition challenge.
+
+231
+00:13:06,260 --> 00:13:10,420
+And then we basically slice off the, the last layers of that network where it, where it
+
+232
+00:13:10,420 --> 00:13:13,060
+does this thing of, like, classifying an object into categories.
+
+233
+00:13:13,060 --> 00:13:14,060
+Right.
+
+234
+00:13:14,060 --> 00:13:15,060
+Yeah.
+
+235
+00:13:15,060 --> 00:13:18,580
+And the parts we want from that is basically the lower level features of the network,
+
+236
+00:13:18,580 --> 00:13:22,220
+like figuring out, like, where edges are, where, like, these, like, small features are.
+
+237
+00:13:22,220 --> 00:13:25,820
+And then we instead train it to predict the state of the world, basically.
+
+238
+00:13:25,820 --> 00:13:30,740
+So, so we're using this, this, this machine learning pipeline, basically, to, to feed
+
+239
+00:13:30,740 --> 00:13:34,820
+an image from, like, a normal webcam or something like that that's attached to the robot.
+
+240
+00:13:34,820 --> 00:13:39,420
+And then have, have this neural network that uses this image to predict, like, where,
+
+241
+00:13:39,420 --> 00:13:40,420
+like, where am I?
+
+242
+00:13:40,420 --> 00:13:42,060
+And where is, like, what state am I in?
+
+243
+00:13:42,060 --> 00:13:44,140
+What, where is the object that I'm interacting with?
+
+244
+00:13:44,140 --> 00:13:47,500
+And then we use that to, to correct the movement of the robot.
+
+245
+00:13:47,500 --> 00:13:49,980
+Are we close to doing this?
+
+246
+00:13:49,980 --> 00:13:52,820
+It seems like it would be helpful to do this in three dimensions, like, are we close
+
+247
+00:13:52,820 --> 00:13:53,820
+to that at all?
+
+248
+00:13:53,820 --> 00:13:54,820
+Right.
+
+249
+00:13:54,820 --> 00:13:58,300
+I think so, so maybe not for the general case, but probably if you have, like, basically
+
+250
+00:13:58,300 --> 00:14:01,100
+something where you, where you know, at least a little about, like, what kinds of objects
+
+251
+00:14:01,100 --> 00:14:05,500
+you're dealing with, then, then I don't think anyone has done it yet, but, but it's, like,
+
+252
+00:14:05,500 --> 00:14:07,740
+we think it would probably be doable.
+
+253
+00:14:07,740 --> 00:14:10,020
+So, so the work, the work that we've done.
+
+254
+00:14:10,020 --> 00:14:15,980
+So we use this technique called domain randomization, where we basically, so, so questions, of course,
+
+255
+00:14:15,980 --> 00:14:17,340
+how do you train this network?
+
+256
+00:14:17,340 --> 00:14:20,620
+So what I just mentioned earlier with, like, predicting the position of things.
+
+257
+00:14:20,620 --> 00:14:24,380
+And the way we do it is basically we create chaos in simulation.
+
+258
+00:14:24,380 --> 00:14:27,420
+Because the problem is, if you just feed it images from a simulator, the real world
+
+259
+00:14:27,420 --> 00:14:28,420
+will look different.
+
+260
+00:14:28,420 --> 00:14:32,300
+And then it will just get confused and be like, this is weird, why is there, like, a pixel
+
+261
+00:14:32,300 --> 00:14:36,100
+in the back that I, that is now, like, bright, where, where it was, like, dark always
+
+262
+00:14:36,100 --> 00:14:40,460
+before. And the way we get around that is by basically randomizing everything in the
+
+263
+00:14:40,460 --> 00:14:41,460
+simulator.
+
+264
+00:14:41,460 --> 00:14:45,460
+It looks pretty crazy because we basically replace all the textures in this, like, 3D rendered
+
+265
+00:14:45,460 --> 00:14:49,860
+scene with random textures, like random colors, random patterns.
+
+266
+00:14:49,860 --> 00:14:55,340
+It looks, we just call it the disco, because it's just random colors everywhere.
+
+267
+00:14:55,340 --> 00:14:59,260
+And basically this, this kind of makes the network robust against, like, variations
+
+268
+00:14:59,260 --> 00:15:00,460
+in the environment.
+
+269
+00:15:00,460 --> 00:15:03,700
+And so this is actually, and, and basically you can measure that, like, if you do this,
+
+270
+00:15:03,700 --> 00:15:08,460
+then in the real world will look as just, like, another incarnation of, like, of the
+
+271
+00:15:08,460 --> 00:15:10,420
+random, of this random setting.
+
+272
+00:15:10,420 --> 00:15:11,420
+And it will work.
+
+273
+00:15:11,420 --> 00:15:14,140
+And if you don't, it will just be, like, completely off of it.
+
+274
+00:15:14,140 --> 00:15:15,140
+Okay.
+
+275
+00:15:15,140 --> 00:15:20,580
+Yeah, one of the projects that Peter Beelow is working on is, like, tying a knot, using
+
+276
+00:15:20,580 --> 00:15:22,660
+a robot to tie a knot in some string.
+
+277
+00:15:22,660 --> 00:15:25,260
+And there's a, he's got an interesting video about this.
+
+278
+00:15:25,260 --> 00:15:30,940
+But one of the comments in the, in the video or the commentary on the page is, like, you
+
+279
+00:15:30,940 --> 00:15:34,460
+know, it works great if the rope is on a green table, but it totally fails if the rope
+
+280
+00:15:34,460 --> 00:15:38,300
+is on a red table, or if the rope is, like, striped or something like that.
+
+281
+00:15:38,300 --> 00:15:43,820
+It sounds like this domain randomization is, you know, trying to solve for that same kind
+
+282
+00:15:43,820 --> 00:15:44,820
+of problem.
+
+283
+00:15:44,820 --> 00:15:45,820
+All right.
+
+284
+00:15:45,820 --> 00:15:46,820
+Yeah.
+
+285
+00:15:46,820 --> 00:15:47,820
+Yeah, totally.
+
+286
+00:15:47,820 --> 00:15:51,140
+I think so, so for the, for the, like, rope, like, for the, like, rope stuff specifically.
+
+287
+00:15:51,140 --> 00:15:56,140
+So the reason why, like, why people do this at all is, is because a rope, like, similar
+
+288
+00:15:56,140 --> 00:16:00,260
+to the, to the phone charger, like, the phone connector, is that because the rope is flexible,
+
+289
+00:16:00,260 --> 00:16:03,620
+like, does not, like, just, like, like a block or something.
+
+290
+00:16:03,620 --> 00:16:07,060
+And basically, to tie a rope, you have to, like, either, you have to have some, like,
+
+291
+00:16:07,060 --> 00:16:09,940
+some internal model of, like, how is it going to bend if I, like, if you, like, turn
+
+292
+00:16:09,940 --> 00:16:10,940
+it this way?
+
+293
+00:16:10,940 --> 00:16:14,180
+So I guess people just, like, work on this, and, like, it's a couple, like, it's a couple
+
+294
+00:16:14,180 --> 00:16:16,100
+from the, like, perception way.
+
+295
+00:16:16,100 --> 00:16:19,820
+But this is very plausible for you, like, put these, put these two results together to
+
+296
+00:16:19,820 --> 00:16:23,940
+create something that can, kind of, in an arbitrary colored environment.
+
+297
+00:16:23,940 --> 00:16:24,940
+Yeah.
+
+298
+00:16:24,940 --> 00:16:25,940
+Yeah.
+
+299
+00:16:25,940 --> 00:16:34,140
+What makes me think of is, is Apple's recent CVPR paper, where they use GAN approach to
+
+300
+00:16:34,140 --> 00:16:38,540
+take simulated images, like, from a video game engine, and kind of make them look like
+
+301
+00:16:38,540 --> 00:16:41,700
+real images, so that they would perform better in the real world.
+
+302
+00:16:41,700 --> 00:16:46,900
+Like, the ultimate goal is to have this robot perform well in the real world.
+
+303
+00:16:46,900 --> 00:16:53,980
+You are trying to, trying to avoid overfitting by, kind of, doing, you know, randomization
+
+304
+00:16:53,980 --> 00:16:57,900
+of your backgrounds and, you know, funky colors and all that kind of stuff.
+
+305
+00:16:57,900 --> 00:17:02,420
+But do you still then have the problem of, hey, this doesn't look like the real world?
+
+306
+00:17:02,420 --> 00:17:04,460
+And, like, how do you approach that?
+
+307
+00:17:04,460 --> 00:17:08,460
+This is actually very interesting, like, high level questions that, like, I don't think
+
+308
+00:17:08,460 --> 00:17:10,380
+there's a different, different answer to.
+
+309
+00:17:10,380 --> 00:17:13,900
+It's basically the question of, like, do you, basically, should you invest time in making
+
+310
+00:17:13,900 --> 00:17:19,380
+your simulations, like, super nice and photorealistic, basically, to have, like, special rendering
+
+311
+00:17:19,380 --> 00:17:24,660
+artifacts of, like, light reflections and basically just make your, make your, make your
+
+312
+00:17:24,660 --> 00:17:29,020
+simulation be almost indistinguishable from the real world, or whether you can actually
+
+313
+00:17:29,020 --> 00:17:33,500
+get away with having really lacking simulation, basically, that is, like, very rudimentary,
+
+314
+00:17:33,500 --> 00:17:38,780
+just has, like, the geometry and, like, edges and the couple of, like, 3D lights.
+
+315
+00:17:38,780 --> 00:17:43,180
+And then you can use, like, neural network, regularization techniques to basically use
+
+316
+00:17:43,180 --> 00:17:45,340
+that to make the network robust against it.
+
+317
+00:17:45,340 --> 00:17:50,940
+And more generally, in the case of, of your research, you know, what, using the domain
+
+318
+00:17:50,940 --> 00:17:56,820
+randomization, like, what kind of performance have you seen in the real world, and have
+
+319
+00:17:56,820 --> 00:18:03,300
+you explored ways to enhance real work performance beyond the domain?
+
+320
+00:18:03,300 --> 00:18:09,100
+Are there specifics to the simulation environment that calls your training to kind of overfit
+
+321
+00:18:09,100 --> 00:18:10,900
+on simulated looking images?
+
+322
+00:18:10,900 --> 00:18:14,340
+Yeah, yeah, so, like, like, I remember that's, when we're initially doing this domain
+
+323
+00:18:14,340 --> 00:18:17,980
+randomization work, so, so the setting that we did there was, we basically had a table
+
+324
+00:18:17,980 --> 00:18:20,660
+off, like, different colors, like, wooden blocks.
+
+325
+00:18:20,660 --> 00:18:24,140
+And then we had the robot, basically, you could give it to commands of something, like,
+
+326
+00:18:24,140 --> 00:18:26,380
+stack the green block on top of the blue block.
+
+327
+00:18:26,380 --> 00:18:29,620
+And then it would, like, basically correctly localize these blocks.
+
+328
+00:18:29,620 --> 00:18:33,060
+And this was with an accuracy of, I believe, a couple of millimeters.
+
+329
+00:18:33,060 --> 00:18:37,220
+So it was pretty decent for, like, given that this was really, like, just a normal, like,
+
+330
+00:18:37,220 --> 00:18:41,580
+HD webcam, like, basically, nothing, basically, nothing that's, like, super specialized
+
+331
+00:18:41,580 --> 00:18:46,340
+robotics equipment, but I actually remember that initially, sometimes it was just failing
+
+332
+00:18:46,340 --> 00:18:47,340
+randomly.
+
+333
+00:18:47,340 --> 00:18:48,340
+And we didn't really know why.
+
+334
+00:18:48,340 --> 00:18:49,340
+Okay.
+
+335
+00:18:49,340 --> 00:18:54,260
+And then it turned out that if there was someone standing in the background, then casting
+
+336
+00:18:54,260 --> 00:18:55,740
+shadow or something like that.
+
+337
+00:18:55,740 --> 00:18:56,740
+Exactly.
+
+338
+00:18:56,740 --> 00:18:57,740
+Exactly.
+
+339
+00:18:57,740 --> 00:19:00,900
+Or just having, like, a leg or, like, a foot in the image that threw it off.
+
+340
+00:19:00,900 --> 00:19:05,060
+And that is actually, basically, like, these kind of things encourage us to just make the
+
+341
+00:19:05,060 --> 00:19:07,540
+simulation crazier, basically.
+
+342
+00:19:07,540 --> 00:19:11,460
+And then if you have this, these random distractors appear in the background during the
+
+343
+00:19:11,460 --> 00:19:15,140
+training as well, then it will actually be, again, robust to that.
+
+344
+00:19:15,140 --> 00:19:21,900
+And so how did you characterize the performance gains, you know, after using the domain randomization?
+
+345
+00:19:21,900 --> 00:19:26,780
+The way we measured it actually is we just had, like, an actual, like, object tracking system
+
+346
+00:19:26,780 --> 00:19:28,940
+and just measured the error from that.
+
+347
+00:19:28,940 --> 00:19:32,420
+But, of course, it's also just reflected in the, like, success rate of, like, how often
+
+348
+00:19:32,420 --> 00:19:35,660
+could you, like, stack the correct block, like, on top of the other one.
+
+349
+00:19:35,660 --> 00:19:39,340
+And basically, if it didn't do the domain randomization, it would just, like, run it to the
+
+350
+00:19:39,340 --> 00:19:40,340
+table or something.
+
+351
+00:19:40,340 --> 00:19:42,740
+So it was, like, it was, like, very, very, very off.
+
+352
+00:19:42,740 --> 00:19:47,900
+And basically, to your performance metric was bad versus good, sort of, sort of, yes,
+
+353
+00:19:47,900 --> 00:19:48,900
+what's the sort of?
+
+354
+00:19:48,900 --> 00:19:49,900
+Yes.
+
+355
+00:19:49,900 --> 00:19:53,140
+So, like, basically, what we did initially when we did work during the domain randomization
+
+356
+00:19:53,140 --> 00:19:59,780
+is we actually, one of the researchers, Josh spent a very long time basically just moving
+
+357
+00:19:59,780 --> 00:20:04,460
+around pieces in the real world and, like, adjusting the, like, camera position and basically
+
+358
+00:20:04,460 --> 00:20:05,460
+just fine tuning it.
+
+359
+00:20:05,460 --> 00:20:07,220
+So it would be, like, just right.
+
+360
+00:20:07,220 --> 00:20:11,180
+And it would, like, appear to work, but then as soon as you, basically, like, you could
+
+361
+00:20:11,180 --> 00:20:12,500
+see that it wasn't really working.
+
+362
+00:20:12,500 --> 00:20:16,300
+Like, it was only working if you, like, basically, like, manually overfitted to, like, one,
+
+363
+00:20:16,300 --> 00:20:18,140
+one very specific instance.
+
+364
+00:20:18,140 --> 00:20:21,340
+But basically, the, the, the main randomization helped, like, helping with that.
+
+365
+00:20:21,340 --> 00:20:22,340
+Okay.
+
+366
+00:20:22,340 --> 00:20:28,140
+And so did you build a custom simulator to do this or did you use some off-the-shelf thing?
+
+367
+00:20:28,140 --> 00:20:29,140
+Yeah.
+
+368
+00:20:29,140 --> 00:20:32,380
+So pretty much all of all of what we do these days is in, is running in Madroco.
+
+369
+00:20:32,380 --> 00:20:33,380
+Okay.
+
+370
+00:20:33,380 --> 00:20:34,380
+Madroco?
+
+371
+00:20:34,380 --> 00:20:35,380
+Yeah.
+
+372
+00:20:35,380 --> 00:20:36,380
+So tell me about that.
+
+373
+00:20:36,380 --> 00:20:41,180
+Um, Madroco is this physics simulator developed by University of Washington professor,
+
+374
+00:20:41,180 --> 00:20:42,180
+M.O.
+
+375
+00:20:42,180 --> 00:20:43,180
+To Dora.
+
+376
+00:20:43,180 --> 00:20:44,180
+Okay.
+
+377
+00:20:44,180 --> 00:20:47,180
+And it's pretty much the, I would say, the standard in, um, and basically these, like,
+
+378
+00:20:47,180 --> 00:20:50,420
+kind of, like, robotics and, like, robotics-related tasks.
+
+379
+00:20:50,420 --> 00:20:55,900
+It's also used for all the physics-related environments in, in open-air gym.
+
+380
+00:20:55,900 --> 00:21:00,700
+And so basically, if you ever seen the, like, yellow, like, humanoid, humanoid walking
+
+381
+00:21:00,700 --> 00:21:02,380
+around, that's, that's Madroco.
+
+382
+00:21:02,380 --> 00:21:04,700
+And basically having these, like, capsule geometries.
+
+383
+00:21:04,700 --> 00:21:07,820
+And the good thing about Madroco, as opposed to, like, of course, there are many other physics
+
+384
+00:21:07,820 --> 00:21:09,820
+engines, like, game physics engines.
+
+385
+00:21:09,820 --> 00:21:10,900
+There's Nvidia physics.
+
+386
+00:21:10,900 --> 00:21:11,900
+Right.
+
+387
+00:21:11,900 --> 00:21:15,340
+There's a bunch of, yeah, like, from an Unreal engine, they all bring their own Nvidia.
+
+388
+00:21:15,340 --> 00:21:19,180
+They announced some new simulation engine at the last GTC.
+
+389
+00:21:19,180 --> 00:21:20,180
+I forget.
+
+390
+00:21:20,180 --> 00:21:22,580
+The Vinci or some kind of name thing.
+
+391
+00:21:22,580 --> 00:21:23,580
+Flex.
+
+392
+00:21:23,580 --> 00:21:24,580
+Flex?
+
+393
+00:21:24,580 --> 00:21:25,580
+I don't know.
+
+394
+00:21:25,580 --> 00:21:28,500
+I thought it was a person who has a whole bunch of them because they really like making
+
+395
+00:21:28,500 --> 00:21:29,500
+beautiful things.
+
+396
+00:21:29,500 --> 00:21:34,140
+So the thing that game engines do for the most part is they are often not super concerned
+
+397
+00:21:34,140 --> 00:21:37,660
+about accuracy or physical realism, which is totally fine.
+
+398
+00:21:37,660 --> 00:21:42,060
+They just, they're just working on making something that, that looks great and is performance
+
+399
+00:21:42,060 --> 00:21:43,060
+too.
+
+400
+00:21:43,060 --> 00:21:46,700
+And Madroco kind of comes from a different perspective there, where it comes from, like,
+
+401
+00:21:46,700 --> 00:21:48,660
+robotics people, basically.
+
+402
+00:21:48,660 --> 00:21:53,340
+And they, and they are using this for, like, optimal control, which is kind of the analytical
+
+403
+00:21:53,340 --> 00:21:57,300
+way of, like, how do you control the system to achieve a given task?
+
+404
+00:21:57,300 --> 00:22:02,500
+And it has pretty good features for accurately describing an actual physical robot, like it
+
+405
+00:22:02,500 --> 00:22:07,500
+can do things like friction and, like, tendon-based or a way you pull on cables to move the robot
+
+406
+00:22:07,500 --> 00:22:08,500
+around.
+
+407
+00:22:08,500 --> 00:22:09,500
+Okay.
+
+408
+00:22:09,500 --> 00:22:12,100
+It has a bunch of these things that, like, you could, you could implement them, like, on
+
+409
+00:22:12,100 --> 00:22:16,020
+top of the game engines for the most part, but they just don't come with it.
+
+410
+00:22:16,020 --> 00:22:18,020
+And also Madroco is just, like, engineering-wise.
+
+411
+00:22:18,020 --> 00:22:19,020
+It's pretty practical.
+
+412
+00:22:19,020 --> 00:22:23,220
+It's just, like, a library that you link against, and then you can use it.
+
+413
+00:22:23,220 --> 00:22:25,100
+Mink against, so it's, like, C++ or something.
+
+414
+00:22:25,100 --> 00:22:26,100
+Yeah.
+
+415
+00:22:26,100 --> 00:22:27,100
+Exactly.
+
+416
+00:22:27,100 --> 00:22:28,100
+Yeah.
+
+417
+00:22:28,100 --> 00:22:29,100
+So, like, it's not open-source.
+
+418
+00:22:29,100 --> 00:22:30,100
+It's commercial, unfortunately.
+
+419
+00:22:30,100 --> 00:22:34,500
+There's, like, a lot of the popular simulators are, like, is there a dominant open-source
+
+420
+00:22:34,500 --> 00:22:35,500
+simulator?
+
+421
+00:22:35,500 --> 00:22:36,500
+Yeah.
+
+422
+00:22:36,500 --> 00:22:37,500
+It's bullet.
+
+423
+00:22:37,500 --> 00:22:38,500
+Bullet is pretty popular.
+
+424
+00:22:38,500 --> 00:22:41,900
+And we've actually been looking at it, like, maybe switching to that, just because it's
+
+425
+00:22:41,900 --> 00:22:42,900
+open-source.
+
+426
+00:22:42,900 --> 00:22:43,900
+Yeah.
+
+427
+00:22:43,900 --> 00:22:44,900
+That's pretty much it.
+
+428
+00:22:44,900 --> 00:22:49,100
+Because it's just, like, on, like, a day-to-day, it's just very convenient to be, like,
+
+429
+00:22:49,100 --> 00:22:50,100
+what is happening?
+
+430
+00:22:50,100 --> 00:22:51,100
+This is weird.
+
+431
+00:22:51,100 --> 00:22:53,100
+Let me just dive into the code and see what's going on.
+
+432
+00:22:53,100 --> 00:22:57,500
+But also, I would think to make it easier for other people to replicate your results and
+
+433
+00:22:57,500 --> 00:23:00,500
+to, you know, try to build on the kinds of things that you're doing.
+
+434
+00:23:00,500 --> 00:23:01,500
+Yeah.
+
+435
+00:23:01,500 --> 00:23:03,500
+You don't have to say, well, you have to first go get a license.
+
+436
+00:23:03,500 --> 00:23:04,500
+Yeah.
+
+437
+00:23:04,500 --> 00:23:08,700
+So, I believe they do have, like, pre-favorable agreements, at least for students.
+
+438
+00:23:08,700 --> 00:23:10,700
+So, I think as a student, you can get it for free.
+
+439
+00:23:10,700 --> 00:23:11,700
+Okay.
+
+440
+00:23:11,700 --> 00:23:12,700
+Yeah.
+
+441
+00:23:12,700 --> 00:23:15,300
+But so, like, the good thing about Madroco is that it's basically that it's, like, wild
+
+442
+00:23:15,300 --> 00:23:16,300
+kind of, like, a walled garden.
+
+443
+00:23:16,300 --> 00:23:17,300
+Yeah.
+
+444
+00:23:17,300 --> 00:23:18,600
+It's a pretty nice walled garden.
+
+445
+00:23:18,600 --> 00:23:19,900
+And it's, yeah, and things.
+
+446
+00:23:19,900 --> 00:23:20,900
+Yeah.
+
+447
+00:23:20,900 --> 00:23:21,900
+Said every walled garden maker.
+
+448
+00:23:21,900 --> 00:23:22,900
+Well, we're not doing it.
+
+449
+00:23:22,900 --> 00:23:24,900
+We're not garden makers.
+
+450
+00:23:24,900 --> 00:23:27,700
+No, I'm putting a word in Madroco now.
+
+451
+00:23:27,700 --> 00:23:28,700
+That's true.
+
+452
+00:23:28,700 --> 00:23:29,700
+It's true.
+
+453
+00:23:29,700 --> 00:23:33,900
+The one thing where we've actually been eyeing some of the game engine fitting simulators
+
+454
+00:23:33,900 --> 00:23:38,460
+as well is actually exactly like dealing with these deformable objects, like a cable or
+
+455
+00:23:38,460 --> 00:23:41,260
+the rope or liquids, even, like stuff like that.
+
+456
+00:23:41,260 --> 00:23:45,500
+That is something that Madroco can't really deal with because it's entirely, like, a rigid
+
+457
+00:23:45,500 --> 00:23:46,700
+body simulator.
+
+458
+00:23:46,700 --> 00:23:53,180
+And it basically, like, it's performance scales with the, like, basically, it gets slow
+
+459
+00:23:53,180 --> 00:23:56,300
+very quickly if you have a bunch of things, like, moving around.
+
+460
+00:23:56,300 --> 00:23:57,300
+Okay.
+
+461
+00:23:57,300 --> 00:24:00,540
+Basically, like, of course, a scale thing doesn't matter at all because it's just, like,
+
+462
+00:24:00,540 --> 00:24:02,140
+meshes and just numbers.
+
+463
+00:24:02,140 --> 00:24:07,420
+But if you have, like, if you have, like, a bowl of, like, a thousand pearls or something,
+
+464
+00:24:07,420 --> 00:24:11,780
+there would be, it would be pretty, pretty gnarly in which awkward probably we haven't
+
+465
+00:24:11,780 --> 00:24:12,780
+tried it.
+
+466
+00:24:12,780 --> 00:24:16,020
+But we have tried, like, I believe you've basically tried to do, like, a jenga, kind
+
+467
+00:24:16,020 --> 00:24:17,500
+of, like, a jenga set up.
+
+468
+00:24:17,500 --> 00:24:21,900
+And it was just, like, jiggle around and then eventually, like, kind of explode or just
+
+469
+00:24:21,900 --> 00:24:22,900
+fall apart.
+
+470
+00:24:22,900 --> 00:24:23,900
+Yeah.
+
+471
+00:24:23,900 --> 00:24:27,220
+So I think it's, like, a limit of, like, maybe, like, a couple hundreds of, like, of
+
+472
+00:24:27,220 --> 00:24:30,980
+basically, of, like, rigid individual bodies flying around or not flying around but moving
+
+473
+00:24:30,980 --> 00:24:31,980
+around.
+
+474
+00:24:31,980 --> 00:24:36,220
+Is that rigid body simulation or something that learns itself to distributed compute
+
+475
+00:24:36,220 --> 00:24:38,980
+or does that not work so well?
+
+476
+00:24:38,980 --> 00:24:40,980
+Or does it just Madroco not support that?
+
+477
+00:24:40,980 --> 00:24:41,980
+That's a good question.
+
+478
+00:24:41,980 --> 00:24:47,180
+So I think the, I believe, I believe the creators of Madroco have tried to basically run
+
+479
+00:24:47,180 --> 00:24:51,660
+it under OpenCL, so to, like, GPU accelerated.
+
+480
+00:24:51,660 --> 00:24:54,740
+But I think the main problem with that is they're actually, it's very similar from the
+
+481
+00:24:54,740 --> 00:24:59,060
+computer computation you would, you would run for, for running a neural network where it's
+
+482
+00:24:59,060 --> 00:25:03,700
+basically just like a bunch of, just a bunch of, like, matrix multiplies or, like, related
+
+483
+00:25:03,700 --> 00:25:04,700
+related things.
+
+484
+00:25:04,700 --> 00:25:08,780
+But for the physics simulation, you actually have a lot of branching because you run, like,
+
+485
+00:25:08,780 --> 00:25:11,860
+a collision detection system and then you do something, it's like, if there's a collision,
+
+486
+00:25:11,860 --> 00:25:15,660
+then do these things and you do that for, like, all the collisions in the scene or something
+
+487
+00:25:15,660 --> 00:25:16,660
+like that.
+
+488
+00:25:16,660 --> 00:25:20,580
+And that is something that, like, at least, take two days to use, I can't deal super
+
+489
+00:25:20,580 --> 00:25:21,580
+well with that.
+
+490
+00:25:21,580 --> 00:25:26,420
+I think actually in the, this was, like, a long time ago, but I think in video, they
+
+491
+00:25:26,420 --> 00:25:29,820
+used to sell something, like, a physics processing unit, a PPU.
+
+492
+00:25:29,820 --> 00:25:33,700
+Actually, I'm not sure if it was a video, but, like, some, like, some, some vendor, and
+
+493
+00:25:33,700 --> 00:25:37,500
+they basically try to make it, like, an established, like, hardware accelerated physics.
+
+494
+00:25:37,500 --> 00:25:41,380
+This was, like, marked to gamers, I really, I don't think, I don't think it ever really
+
+495
+00:25:41,380 --> 00:25:44,660
+took off because eventually people realized, actually, CPUs are pretty good.
+
+496
+00:25:44,660 --> 00:25:48,500
+The screws are pretty smooth, and especially with, like, with, like, today's where you
+
+497
+00:25:48,500 --> 00:25:53,140
+have a bunch of cores, you could just have a physics core, and, you, and at least in
+
+498
+00:25:53,140 --> 00:25:55,260
+the, like, game setting, it just works pretty well.
+
+499
+00:25:55,260 --> 00:25:58,940
+That being said, basically, today, or, like, at least a bit more joke with us, it's, it's
+
+500
+00:25:58,940 --> 00:26:03,780
+just a single thread CPU processing, it's, it's, it's pretty fast, but I think you'd
+
+501
+00:26:03,780 --> 00:26:06,940
+probably be hard pressed to distribute that specific architecture.
+
+502
+00:26:06,940 --> 00:26:11,180
+Actually, probably some of the other, like, basically, if you had something like a, like,
+
+503
+00:26:11,180 --> 00:26:15,980
+some of the game engine, similar to our particle base, so, for example, Nvidia's flex.
+
+504
+00:26:15,980 --> 00:26:19,900
+And basically, they don't represent bodies as, like, like, a rigid mesh.
+
+505
+00:26:19,900 --> 00:26:23,380
+Yeah, it's basically, it's literally just, like, just, like, a bunch of particles that
+
+506
+00:26:23,380 --> 00:26:26,900
+have some, like, basically, some, like, stickiness, what they stick to each other applied.
+
+507
+00:26:26,900 --> 00:26:29,860
+I believe there have been some attempts at, like, distributing that, where basically
+
+508
+00:26:29,860 --> 00:26:33,820
+we have, like, cells of the world, and every, like, every node basically computes all
+
+509
+00:26:33,820 --> 00:26:37,620
+the particles that are, like, in this specific cell, then they, like, hand it off to some
+
+510
+00:26:37,620 --> 00:26:38,620
+other node.
+
+511
+00:26:38,620 --> 00:26:39,620
+Okay.
+
+512
+00:26:39,620 --> 00:26:40,620
+But we're not using that today.
+
+513
+00:26:40,620 --> 00:26:41,620
+Okay.
+
+514
+00:26:41,620 --> 00:26:42,620
+Interesting, interesting.
+
+515
+00:26:42,620 --> 00:26:46,940
+So, I think we're going to talk about simulation and tell me a little bit about the, I guess,
+
+516
+00:26:46,940 --> 00:26:51,580
+the process for, you know, the relationship between your training data and your simulator
+
+517
+00:26:51,580 --> 00:26:56,020
+and, like, how you load all that up and, like, how you build the simulation and, you know,
+
+518
+00:26:56,020 --> 00:27:02,860
+are there things that you've learned about integrating simulation into AI training pipeline
+
+519
+00:27:02,860 --> 00:27:07,620
+that are maybe, you know, not intuitive or, you know, maybe, you know, stimulators weren't
+
+520
+00:27:07,620 --> 00:27:08,940
+really designed to do this.
+
+521
+00:27:08,940 --> 00:27:11,700
+And so, it was kind of hard, but we figured out how to do X, Y, C.
+
+522
+00:27:11,700 --> 00:27:12,700
+Yeah.
+
+523
+00:27:12,700 --> 00:27:17,100
+So, I would say for the simulation, and this is actually kind of following the, like,
+
+524
+00:27:17,100 --> 00:27:20,140
+the, like, what we're just talking about with the distributed aspect of it.
+
+525
+00:27:20,140 --> 00:27:23,580
+One reason why we're not, like, pushing out, pushing out super hard is because we actually
+
+526
+00:27:23,580 --> 00:27:25,380
+can just horizontally scale it.
+
+527
+00:27:25,380 --> 00:27:30,900
+So actually the way we, we basically do our training, which is basically running a lot
+
+528
+00:27:30,900 --> 00:27:32,140
+of simulators.
+
+529
+00:27:32,140 --> 00:27:34,740
+So you can do, you can distribute it in this way.
+
+530
+00:27:34,740 --> 00:27:37,180
+It's just that the simulators are all independent of each other.
+
+531
+00:27:37,180 --> 00:27:40,580
+Like, they do, they all simulate the same, like, the whole scene, but they all have, like,
+
+532
+00:27:40,580 --> 00:27:43,660
+different, like, they all basically run, like, different, like, they all run the same
+
+533
+00:27:43,660 --> 00:27:46,180
+scene or some randomize version of it.
+
+534
+00:27:46,180 --> 00:27:50,900
+But they, they basically, basically, instead of, like, serializing all the attempts, we
+
+535
+00:27:50,900 --> 00:27:56,500
+just paralyzed, like, 10, or, like, actually more, like, a thousand of them.
+
+536
+00:27:56,500 --> 00:28:00,820
+So the way we actually run our training is we have, like, one box that actually does
+
+537
+00:28:00,820 --> 00:28:04,460
+the, like, tens of flow, like, the computation for actually training the network and
+
+538
+00:28:04,460 --> 00:28:05,820
+like, taking in the data.
+
+539
+00:28:05,820 --> 00:28:10,540
+And then we have a bunch of, like, worker or, like, evaluator machines that basically
+
+540
+00:28:10,540 --> 00:28:15,340
+like, take in the current best guess for, like, for the policy, which is, like, our
+
+541
+00:28:15,340 --> 00:28:16,700
+trained neural network.
+
+542
+00:28:16,700 --> 00:28:20,180
+And then they basically roll that out in a simulator, which basically just means they run
+
+543
+00:28:20,180 --> 00:28:21,540
+it over and over again.
+
+544
+00:28:21,540 --> 00:28:25,900
+And so this happens on, like, hundreds or thousands of machines, like, in parallel.
+
+545
+00:28:25,900 --> 00:28:27,620
+And, but they don't really talk to each other.
+
+546
+00:28:27,620 --> 00:28:29,220
+Like, they just do this on their own.
+
+547
+00:28:29,220 --> 00:28:33,300
+And then they actually send this experience back to the optimizer node.
+
+548
+00:28:33,300 --> 00:28:38,020
+And that's basically where we, where we transfer numbers to actually improve the policy.
+
+549
+00:28:38,020 --> 00:28:45,300
+So you, you generate a policy, generate a network, you push it out to a bunch of different
+
+550
+00:28:45,300 --> 00:28:46,300
+nodes in parallel.
+
+551
+00:28:46,300 --> 00:28:49,780
+Like, what's, what's the input to those nodes?
+
+552
+00:28:49,780 --> 00:28:53,780
+Are you giving each of those nodes specific input or are they just kind of running things
+
+553
+00:28:53,780 --> 00:28:58,660
+in random and, you know, computing a function or something like that across a random
+
+554
+00:28:58,660 --> 00:28:59,660
+distribution?
+
+555
+00:28:59,660 --> 00:29:00,660
+Yeah.
+
+556
+00:29:00,660 --> 00:29:02,860
+So, so the worker nodes, they basically receive, they receive the parameters for the
+
+557
+00:29:02,860 --> 00:29:03,860
+policy.
+
+558
+00:29:03,860 --> 00:29:07,260
+And there's like some shared configuration for, like, what's the kind of scene I'll be
+
+559
+00:29:07,260 --> 00:29:08,260
+running?
+
+560
+00:29:08,260 --> 00:29:11,420
+Like, what's the robot and like, where, like, where are the objects that we're interacting
+
+561
+00:29:11,420 --> 00:29:12,420
+with?
+
+562
+00:29:12,420 --> 00:29:14,100
+Like, what's their, what's their initial positions?
+
+563
+00:29:14,100 --> 00:29:18,020
+There are actually a couple different ways of, of how to communicate the results back
+
+564
+00:29:18,020 --> 00:29:20,700
+to this, like, central, like, mastermind machine.
+
+565
+00:29:20,700 --> 00:29:25,420
+So one way is if you actually have the workers do the, do the gradient computation.
+
+566
+00:29:25,420 --> 00:29:28,740
+So they basically, they roll out the physics simulators.
+
+567
+00:29:28,740 --> 00:29:31,580
+And then they figure out some kind of reward or cost function for this.
+
+568
+00:29:31,580 --> 00:29:33,060
+And like, what's this a good roll out?
+
+569
+00:29:33,060 --> 00:29:36,940
+Like, we end up in a good state where, like, for example, when you're moving these blocks
+
+570
+00:29:36,940 --> 00:29:40,660
+around, like, the, the right block, end up on top of the other right block.
+
+571
+00:29:40,660 --> 00:29:44,660
+And then the workers figure out, okay, if my parameters were like tweaked slightly differently,
+
+572
+00:29:44,660 --> 00:29:46,460
+I would have gotten a better outcome this time.
+
+573
+00:29:46,460 --> 00:29:47,460
+Yeah.
+
+574
+00:29:47,460 --> 00:29:50,940
+And then the other, the other approach is to, is to just send over the raw, like, what
+
+575
+00:29:50,940 --> 00:29:55,500
+happened in simulation to the, to optimize the machine and then let, let the, the optimizer
+
+576
+00:29:55,500 --> 00:29:59,100
+figure out what the, what the parameters should be and like, how we should change them.
+
+577
+00:29:59,100 --> 00:30:00,100
+Okay.
+
+578
+00:30:00,100 --> 00:30:03,620
+And which do you tend to do the, both or, yeah, so right now we do the, we do the sending
+
+579
+00:30:03,620 --> 00:30:07,540
+over the experience or the latter thing, which is just because it's simpler for the most
+
+580
+00:30:07,540 --> 00:30:11,140
+part, because then the basically the workers are kind of dumb and they don't need to worry
+
+581
+00:30:11,140 --> 00:30:12,420
+about that much.
+
+582
+00:30:12,420 --> 00:30:15,980
+But there's a situation where this can actually be problematic, especially if you're, like,
+
+583
+00:30:15,980 --> 00:30:19,860
+if your observations are big, for example, if you're, like, if your observation, which
+
+584
+00:30:19,860 --> 00:30:23,820
+is like what your, what your policy or your agent is, is using to make a decision for
+
+585
+00:30:23,820 --> 00:30:27,980
+what to do next, that is something big, like an image from a simulated camera.
+
+586
+00:30:27,980 --> 00:30:30,820
+Then you don't want to send that over the network, just because there's so many of them
+
+587
+00:30:30,820 --> 00:30:32,820
+and just clogs up the entire bandwidth.
+
+588
+00:30:32,820 --> 00:30:36,780
+Where we'll probably look into the, and just switching to the sending over the gradients
+
+589
+00:30:36,780 --> 00:30:40,980
+over the network over, over the next few months, especially as we move to these more
+
+590
+00:30:40,980 --> 00:30:43,220
+like high dimensional observations.
+
+591
+00:30:43,220 --> 00:30:48,220
+And is the, the infrastructure that you're doing all this with, like, is this all hand
+
+592
+00:30:48,220 --> 00:30:53,580
+crafted stuff or, like, I had a conversation with Ian Stoica about Ray the other day,
+
+593
+00:30:53,580 --> 00:30:55,860
+like, you're using something like Ray to do that.
+
+594
+00:30:55,860 --> 00:30:57,500
+So we're actually using Kubernetes.
+
+595
+00:30:57,500 --> 00:30:58,500
+Yeah.
+
+596
+00:30:58,500 --> 00:31:02,180
+So, so we, I believe we had a, we did like an infrastructure blog post about this a couple
+
+597
+00:31:02,180 --> 00:31:07,820
+months back, but basically we run, we run lots of Kubernetes clusters across all of the
+
+598
+00:31:07,820 --> 00:31:08,820
+major clouds as well.
+
+599
+00:31:08,820 --> 00:31:12,580
+Like, we're running on, we're running on Azure, we're running on AWS, you also have some
+
+600
+00:31:12,580 --> 00:31:13,980
+stuff running on Google.
+
+601
+00:31:13,980 --> 00:31:16,860
+So yeah, there's a, there's a, there's a lot of compute.
+
+602
+00:31:16,860 --> 00:31:20,780
+The way actually we went is using these tools is actually somewhat simple.
+
+603
+00:31:20,780 --> 00:31:26,140
+You, you basically just tell, tell Kubernetes in our case to, here's this batch job, run
+
+604
+00:31:26,140 --> 00:31:30,860
+this thing once for the GPU optimizer and run this thing once for the couple hundred
+
+605
+00:31:30,860 --> 00:31:33,940
+worker machines and it just kind of goes in, does it?
+
+606
+00:31:33,940 --> 00:31:38,700
+But there is like, there is a ceiling there where like, where you can't, just because it's
+
+607
+00:31:38,700 --> 00:31:43,540
+not really the original use case for Kubernetes, I believe the, like, what they, what they
+
+608
+00:31:43,540 --> 00:31:47,540
+recommend as a limit is like, not more than, say, 10,000 nodes, which is just a lot, of
+
+609
+00:31:47,540 --> 00:31:48,540
+course.
+
+610
+00:31:48,540 --> 00:31:49,900
+And have you bumped up against that one?
+
+611
+00:31:49,900 --> 00:31:50,900
+Yeah.
+
+612
+00:31:50,900 --> 00:31:54,060
+So we have bumped against previous limits where the limit was something like 5,000 and
+
+613
+00:31:54,060 --> 00:31:58,820
+then it won't crash, but it will just become like more and more unhappy and just stop
+
+614
+00:31:58,820 --> 00:32:03,100
+responding and like, basically things will become weird in the cluster.
+
+615
+00:32:03,100 --> 00:32:05,220
+And how long are these simulation jobs?
+
+616
+00:32:05,220 --> 00:32:09,820
+Are they, you know, they're not like on the order of training jobs that are days and
+
+617
+00:32:09,820 --> 00:32:10,820
+days.
+
+618
+00:32:10,820 --> 00:32:11,820
+They're much shorter.
+
+619
+00:32:11,820 --> 00:32:12,820
+Is that the case?
+
+620
+00:32:12,820 --> 00:32:13,820
+Yeah.
+
+621
+00:32:13,820 --> 00:32:14,820
+Yeah.
+
+622
+00:32:14,820 --> 00:32:15,820
+So, yeah.
+
+623
+00:32:15,820 --> 00:32:16,820
+So basically, so one specific cycle is much shorter.
+
+624
+00:32:16,820 --> 00:32:20,500
+Like a one specific cycle of basically get the current policy parameters to a bunch of roll
+
+625
+00:32:20,500 --> 00:32:22,020
+outs and then back.
+
+626
+00:32:22,020 --> 00:32:26,620
+That's something like maybe like a second, but the way we actually start them is we, we
+
+627
+00:32:26,620 --> 00:32:30,900
+basically just keep the keep these like rollout machines around the same way that we keep
+
+628
+00:32:30,900 --> 00:32:31,900
+the training.
+
+629
+00:32:31,900 --> 00:32:34,900
+So they basically they just want like temporary cluster basically.
+
+630
+00:32:34,900 --> 00:32:35,900
+Okay.
+
+631
+00:32:35,900 --> 00:32:38,900
+And that cluster will just stay around for the duration of of the entire training, which
+
+632
+00:32:38,900 --> 00:32:41,940
+is like maybe like a day or a day.
+
+633
+00:32:41,940 --> 00:32:42,940
+Okay.
+
+634
+00:32:42,940 --> 00:32:43,940
+Interesting.
+
+635
+00:32:43,940 --> 00:32:50,180
+And so, you know, all this is to help you develop a kind of a better model, the simulation.
+
+636
+00:32:50,180 --> 00:32:53,220
+Like, what do you do when you want to test that in the real world?
+
+637
+00:32:53,220 --> 00:32:54,220
+Ah, yeah.
+
+638
+00:32:54,220 --> 00:32:57,020
+This is going to be a pretty important question for you.
+
+639
+00:32:57,020 --> 00:32:58,020
+Exactly.
+
+640
+00:32:58,020 --> 00:32:59,020
+Exactly.
+
+641
+00:32:59,020 --> 00:33:00,020
+So, yeah.
+
+642
+00:33:00,020 --> 00:33:02,020
+So the kind of interesting thing is that a lot of other areas in machine learning, they
+
+643
+00:33:02,020 --> 00:33:03,700
+just kind of stop short of that.
+
+644
+00:33:03,700 --> 00:33:06,020
+And they're like, well, this is a model looks pretty reasonable.
+
+645
+00:33:06,020 --> 00:33:07,020
+Right.
+
+646
+00:33:07,020 --> 00:33:08,020
+So it's fine.
+
+647
+00:33:08,020 --> 00:33:09,020
+We're done here.
+
+648
+00:33:09,020 --> 00:33:12,780
+And so we're actually really adamant about like dumping through all the hoops to actually
+
+649
+00:33:12,780 --> 00:33:14,420
+to actually make it run on the robot.
+
+650
+00:33:14,420 --> 00:33:15,420
+Okay.
+
+651
+00:33:15,420 --> 00:33:17,260
+Because we found that it helps like keep us honest.
+
+652
+00:33:17,260 --> 00:33:22,060
+Basically it's like very easy to be impressed by like cool stuff happening in a simulator.
+
+653
+00:33:22,060 --> 00:33:24,700
+But usually there's some caveats that make it harder.
+
+654
+00:33:24,700 --> 00:33:29,900
+For example, like if like some of the like robots meshes, like aren't actually like touching
+
+655
+00:33:29,900 --> 00:33:32,660
+each other or something into a robot mesh.
+
+656
+00:33:32,660 --> 00:33:36,540
+So basically that's kind of just the shape of like some like part of the robot, like a
+
+657
+00:33:36,540 --> 00:33:37,540
+limb of the robot.
+
+658
+00:33:37,540 --> 00:33:38,540
+Okay.
+
+659
+00:33:38,540 --> 00:33:42,700
+And usually for example, for the for when you're determining whether like the robot is pushing
+
+660
+00:33:42,700 --> 00:33:46,620
+something, you do this like collision test of like is the robot colliding with an object
+
+661
+00:33:46,620 --> 00:33:49,020
+and if yes, then you push the object away.
+
+662
+00:33:49,020 --> 00:33:53,620
+But the thing is like while like while you have to super nice like visual rendition of
+
+663
+00:33:53,620 --> 00:33:57,540
+the robot with like a nice like models, all the aspects and excrues or something.
+
+664
+00:33:57,540 --> 00:33:58,540
+Yeah.
+
+665
+00:33:58,540 --> 00:34:02,020
+Often the geometry is actually used for this collision check, which actually determines
+
+666
+00:34:02,020 --> 00:34:06,420
+what's happening in the like physics wise might be like a like a simple version of this
+
+667
+00:34:06,420 --> 00:34:07,420
+geometry.
+
+668
+00:34:07,420 --> 00:34:10,940
+Like it might just be like a cylinder where the actual robot is something super complex
+
+669
+00:34:10,940 --> 00:34:13,540
+like it with like rounded corners or something like that.
+
+670
+00:34:13,540 --> 00:34:15,940
+So your angles are all off and kind of this power.
+
+671
+00:34:15,940 --> 00:34:16,940
+Yeah.
+
+672
+00:34:16,940 --> 00:34:17,940
+Yeah.
+
+673
+00:34:17,940 --> 00:34:18,940
+Yeah.
+
+674
+00:34:18,940 --> 00:34:22,300
+So like this gone, so like kind of like tricky and just thinking of thinking that something
+
+675
+00:34:22,300 --> 00:34:23,300
+works.
+
+676
+00:34:23,300 --> 00:34:26,900
+Whereas it doesn't actually work if you try it in the real world right now.
+
+677
+00:34:26,900 --> 00:34:32,100
+And so the so the way we run we actually run run our policies on the real world.
+
+678
+00:34:32,100 --> 00:34:36,980
+We have developed our system called robots as a service, which basically means that the
+
+679
+00:34:36,980 --> 00:34:42,060
+robot goes onto the network and then people can connect to it and like run like run specific
+
+680
+00:34:42,060 --> 00:34:45,340
+algorithms or like the models that they trained on the robot.
+
+681
+00:34:45,340 --> 00:34:50,660
+And so there's some like specific like technical things that they think is like non trivial
+
+682
+00:34:50,660 --> 00:34:54,980
+because it is like a real time environment and you can't just basically it's much harder
+
+683
+00:34:54,980 --> 00:34:59,220
+than just simulating like a piece of software like people often do with like Atari games.
+
+684
+00:34:59,220 --> 00:35:03,420
+For example, for training, you have to be careful if you don't miss like a cycle because
+
+685
+00:35:03,420 --> 00:35:08,340
+otherwise your policy will get super confused because your time step will just be longer
+
+686
+00:35:08,340 --> 00:35:09,340
+for example.
+
+687
+00:35:09,340 --> 00:35:13,500
+So basically like working on all these artifacts has actually turned this robots as a service
+
+688
+00:35:13,500 --> 00:35:16,260
+system into into a pretty big engineering project here.
+
+689
+00:35:16,260 --> 00:35:21,500
+So the example you gave struck me is something that is more of a training artifact and training
+
+690
+00:35:21,500 --> 00:35:27,420
+issue as opposed to deploying it to the physical robot like how is it how does it manifest itself
+
+691
+00:35:27,420 --> 00:35:31,540
+on the physical robot in such a way that you could do something about it there.
+
+692
+00:35:31,540 --> 00:35:32,540
+Yeah.
+
+693
+00:35:32,540 --> 00:35:37,820
+So the specific example of like so in simulation, it would start at like T equals zero.
+
+694
+00:35:37,820 --> 00:35:41,900
+Then you get some like current state to decide what you want to do and you set the action.
+
+695
+00:35:41,900 --> 00:35:46,580
+But basically while you're thinking about this simulation stops right it's paused.
+
+696
+00:35:46,580 --> 00:35:50,740
+So basically you do this computation then you get your output and then you advance a simulation
+
+697
+00:35:50,740 --> 00:35:54,420
+by one step and then you repeat you think again and you step again.
+
+698
+00:35:54,420 --> 00:35:58,580
+In the real world of course all of this happens like simultaneously and you I just don't
+
+699
+00:35:58,580 --> 00:36:01,220
+get the chance to just like pause and think for a while.
+
+700
+00:36:01,220 --> 00:36:06,260
+So you've got inertia and continuous variables and all the stuff that exactly exactly.
+
+701
+00:36:06,260 --> 00:36:09,220
+But you raise a very interesting question like is it a training problem or an evaluation
+
+702
+00:36:09,220 --> 00:36:14,620
+problem and actually for most of these things these things it can be both like like sticking
+
+703
+00:36:14,620 --> 00:36:16,980
+with the like timing discrepancy example.
+
+704
+00:36:16,980 --> 00:36:19,940
+There's basically always like this is pretty much like a decision we have to make for like
+
+705
+00:36:19,940 --> 00:36:24,740
+every every issue so much of this that comes up is like are we okay with like investing
+
+706
+00:36:24,740 --> 00:36:31,020
+time in actually like ironing out this issue in our like in our software stack or should
+
+707
+00:36:31,020 --> 00:36:35,100
+we just be like oh well I mean if there's some fluctuation in the time step then we
+
+708
+00:36:35,100 --> 00:36:39,020
+can just train with that and basically just add that to this to the set of things that
+
+709
+00:36:39,020 --> 00:36:44,380
+we randomized in simulation right and basically there's always a balance of these two choices
+
+710
+00:36:44,380 --> 00:36:48,980
+like either make the simulation harder or make your your real world system more predictable
+
+711
+00:36:48,980 --> 00:36:52,940
+to execute and so this is kind of it and this is kind of an area where you have to pick
+
+712
+00:36:52,940 --> 00:36:56,460
+your battles to some extent right because if you like if you have if you just have too
+
+713
+00:36:56,460 --> 00:37:01,500
+many unknowns then it's while like there's like a theory radical it should be theoretically
+
+714
+00:37:01,500 --> 00:37:05,660
+possible for for you to be able to learn a model that can cope with all of these uncertainties
+
+715
+00:37:05,660 --> 00:37:09,500
+it will just be very hard to practice to debug it and inspect it and see if something
+
+716
+00:37:09,500 --> 00:37:13,900
+was wrong and you can't and then you will basically you will see a break and then you'll be like well
+
+717
+00:37:13,900 --> 00:37:18,380
+so why did it break and basically they're getting to the bottom of that requires you to exactly
+
+718
+00:37:18,380 --> 00:37:23,020
+do this part where you remove like as many of the unknowns as possible but you surely read that
+
+719
+00:37:23,020 --> 00:37:28,060
+basically it's in the end our policies eventually we want them to be capable of basically you put
+
+720
+00:37:28,060 --> 00:37:32,780
+them on your robot that is very terribly instrumented or has like really weird software that causes
+
+721
+00:37:32,780 --> 00:37:37,660
+like lags and delays and just figure it out I don't think we're there quite yet okay okay
+
+722
+00:37:38,300 --> 00:37:43,500
+and so you call this robot as a service do you have is it like on demand like you have a
+
+723
+00:37:43,500 --> 00:37:50,060
+a bank upstairs of like thousands of robots just swinging around and or do you have you know
+
+724
+00:37:50,060 --> 00:37:55,180
+a robot or two connected to the network that folks can like you know there's a calendar
+
+725
+00:37:55,180 --> 00:38:00,140
+an outlook or whatever that they schedule their robot time with like how cloud like is this
+
+726
+00:38:00,140 --> 00:38:05,100
+I really wish it would be the former but but it is in fact closer to the latter so we actually
+
+727
+00:38:05,100 --> 00:38:09,180
+thought about and actually some others so some folks over at Google I think this was circulating
+
+728
+00:38:09,180 --> 00:38:13,340
+they they actually did this they bought a bank of robots they bought I think like around 50
+
+729
+00:38:13,340 --> 00:38:17,260
+or something like robot arms right and just had them do these like grasping grasping tasks
+
+730
+00:38:17,260 --> 00:38:22,300
+yeah we thought about doing that too but at least with the current setup it's it's exactly
+
+731
+00:38:22,300 --> 00:38:25,980
+that like we have a fetch we have a couple big we have a couple other of other robot arms
+
+732
+00:38:26,540 --> 00:38:30,620
+and these are like individually connected to the network and we usually do the scheduling by like
+
+733
+00:38:30,620 --> 00:38:38,060
+whoever is around the robot at the time um so scheduling by proximity exactly exactly okay the
+
+734
+00:38:38,060 --> 00:38:42,140
+main reason why they actually need like a specific system for like accessing the robot there is
+
+735
+00:38:42,140 --> 00:38:46,540
+that so these robots all come with software right they come with some kind of software they come
+
+736
+00:38:46,540 --> 00:38:51,420
+with either like they come either with some integration for Ross which is the robot operating system
+
+737
+00:38:51,420 --> 00:38:56,700
+which is a big open source effort to to provide like a like a very like unified framework for
+
+738
+00:38:56,700 --> 00:39:02,140
+you're not a bit Rosscon that's going on now I think oh is this going on right now and bank
+
+739
+00:39:02,140 --> 00:39:07,100
+over oh great well shout out to Rosscon so we're actually not using Ross
+
+740
+00:39:13,580 --> 00:39:19,180
+yeah so we found that like Ross actually really great if you if what you have is you have a robot
+
+741
+00:39:19,180 --> 00:39:23,020
+and then you have a bunch of like other things around it that you want that that you want to use
+
+742
+00:39:23,020 --> 00:39:26,860
+for example you have your robot arm and then you might have like some like like a light
+
+743
+00:39:26,860 --> 00:39:32,060
+I think I've got a bunch of modules and yeah exactly exactly just so many yeah and and you have
+
+744
+00:39:32,060 --> 00:39:37,180
+and you have like tracking cameras or you have like maybe you have like one one robot that is your
+
+745
+00:39:37,180 --> 00:39:40,860
+arm and then one robot that is your gripper and they need to be independently controlled or
+
+746
+00:39:40,860 --> 00:39:45,340
+something like that and we found that that is that's really great that like all these things
+
+747
+00:39:45,340 --> 00:39:49,580
+already ship with with the ship with drivers for Ross and you can just plug them plucking together
+
+748
+00:39:49,580 --> 00:39:54,060
+and they will and they will just work pretty much out of the box I think for us it it kind of comes
+
+749
+00:39:54,060 --> 00:39:59,260
+back to the issue we we talked about before this where where they are just timing uncertainties
+
+750
+00:39:59,260 --> 00:40:04,460
+basically and you don't really know what's what's going on inside the system for example if you had
+
+751
+00:40:04,460 --> 00:40:09,500
+this this case where you have a robot and you have some external sensor and in Ross they
+
+752
+00:40:09,500 --> 00:40:13,820
+would just appear like here you're about to use the sensor great you're all set but actually
+
+753
+00:40:13,820 --> 00:40:18,860
+there might be like subtle things there were for example the timing updates for both of these
+
+754
+00:40:18,860 --> 00:40:23,020
+systems might be out of phase where like the robot updates and then there's delay and then the
+
+755
+00:40:23,020 --> 00:40:28,300
+sensor updates and then then you will have like a timing lag there and while this wouldn't matter
+
+756
+00:40:28,300 --> 00:40:32,460
+in like for a lot of the like like classical applications where you do something where like
+
+757
+00:40:32,460 --> 00:40:36,620
+you collect data over 10 seconds or something and you're basically doing this in a very slow
+
+758
+00:40:36,620 --> 00:40:42,060
+way and then then you don't really care about what what the what this is like tiny differences
+
+759
+00:40:42,060 --> 00:40:45,900
+it cause problems for our case where we basically we try to instantly react to like if something
+
+760
+00:40:45,900 --> 00:40:50,860
+changes in the in the environment you might be at tens of milliseconds before we feed this back
+
+761
+00:40:50,860 --> 00:40:56,380
+into like into the policy to correct correct for that and so this is why we actually have to be
+
+762
+00:40:56,380 --> 00:41:01,820
+like super careful about like what are the exact timing like timing phases of all these sensors
+
+763
+00:41:01,820 --> 00:41:07,180
+and so so we found that a better lot of the lot of the Ross abstractions are actually they
+
+764
+00:41:07,180 --> 00:41:11,500
+can encapsulate this and hide it from you which is actually great I think for the majority of
+
+765
+00:41:11,500 --> 00:41:15,820
+use cases it just doesn't work that well for us so we actually do need full control over these
+
+766
+00:41:15,820 --> 00:41:21,820
+things okay so do you did you write your own operating system or is it more like less like an
+
+767
+00:41:21,820 --> 00:41:27,580
+operating system more like a thin layer that you know I'm assuming that at the bottom of this it's
+
+768
+00:41:27,580 --> 00:41:33,020
+all kind of just your controlling step promoters and stuff like that through IO ports and you know
+
+769
+00:41:33,020 --> 00:41:36,860
+there's got to be some kind of you want some kind of software layer there to make that a little
+
+770
+00:41:36,860 --> 00:41:40,860
+easier did you just roll that around yourself exactly so it's pretty much like a layer of middleware
+
+771
+00:41:40,860 --> 00:41:45,020
+basically so we didn't we didn't really write right our own OS or something right so for some
+
+772
+00:41:45,020 --> 00:41:49,740
+of our robots we actually we basically get rid of all the software that they ship with yeah and
+
+773
+00:41:49,740 --> 00:41:54,140
+just basically like if there's some firmware on like some embedded microcontrollers on the robot
+
+774
+00:41:54,140 --> 00:41:58,940
+then we will we usually won't touch that because that and that will because that will also usually
+
+775
+00:41:58,940 --> 00:42:04,940
+be fast and predictable like well defined yeah but so the issue with the with the off-the-shelf
+
+776
+00:42:04,940 --> 00:42:10,940
+option was like code path lengths or you know you know variable because they're accounting for
+
+777
+00:42:10,940 --> 00:42:15,420
+plugging in like external modules and all that kind of stuff is it that well yes so there's
+
+778
+00:42:15,420 --> 00:42:20,060
+certainly a lot of complexity in that like they like they basically have this this entire framework
+
+779
+00:42:20,060 --> 00:42:24,700
+for being like plug and play but but like they're actually also like real operational issues where
+
+780
+00:42:24,700 --> 00:42:28,940
+like for example like this the the timing issue I just mentioned like wouldn't be because they like
+
+781
+00:42:28,940 --> 00:42:32,860
+it's not that crazy basically that we have to like make sure that our code has like constant
+
+782
+00:42:32,860 --> 00:42:37,660
+execution time or something it's just you have to like for example like usually these like systems
+
+783
+00:42:37,660 --> 00:42:42,460
+have some kind of trigger signal okay and you have to you basically just have to to lay your
+
+784
+00:42:42,460 --> 00:42:47,580
+code out in a way that like now my cycle starts you trigger all the systems basically you synchronize
+
+785
+00:42:47,580 --> 00:42:51,420
+all of them and then you like read out all that data or something like that and that's how you
+
+786
+00:42:51,420 --> 00:42:56,620
+synchronize synchronize all these things so it's not so much like really like dark magic of like
+
+787
+00:42:56,620 --> 00:43:01,020
+performance optimization it's basically for the most part we just have like a very specific usage
+
+788
+00:43:01,020 --> 00:43:06,700
+pattern that requires like carefully thinking about like basically when like when when do we do what
+
+789
+00:43:06,700 --> 00:43:14,700
+and so pulling this all together you're trying to develop a technique that allows the robot to
+
+790
+00:43:14,700 --> 00:43:20,140
+you know be more like the human and can kind of do you know fine tune course correction you know
+
+791
+00:43:20,140 --> 00:43:26,540
+as it's operating and you train all these models and simulation like how do you then use that
+
+792
+00:43:26,540 --> 00:43:33,020
+with the robots and do you know do the inference to make those course corrections like how does
+
+793
+00:43:33,020 --> 00:43:38,380
+all that part work yeah so so basically right now what we're like what we're still like aiming for
+
+794
+00:43:38,380 --> 00:43:44,140
+is that we actually don't do any don't do any fine tuning basically of our model in the real world
+
+795
+00:43:44,140 --> 00:43:50,540
+so so we train our model simulation and then we we basically just rolled out on the real robot like
+
+796
+00:43:50,540 --> 00:43:54,540
+you'll be gathered all your sensor data like from the robot and from your like internal from
+
+797
+00:43:54,540 --> 00:43:58,620
+external like cameras and tracking systems and stuff like that and you feed that into the policy
+
+798
+00:43:58,620 --> 00:44:03,740
+you do the inference and then you react to that and so the basically the adaptation loop
+
+799
+00:44:03,740 --> 00:44:08,300
+for like figuring out like differences between the the real world and the simulator right now
+
+800
+00:44:08,300 --> 00:44:12,940
+is actually like at least for us it's pretty much manual still so there are lots of like there are
+
+801
+00:44:12,940 --> 00:44:18,220
+lots of ideas for for basically doing this kind of like metal learning where you learn to learn
+
+802
+00:44:18,220 --> 00:44:22,780
+to adapt to a new environment and we've had some initial success with that for basically
+
+803
+00:44:22,780 --> 00:44:27,980
+imitating a human doing some behavior and then you would you would figure out it's like oh what
+
+804
+00:44:27,980 --> 00:44:32,140
+are these the what are the semantics that the human intended to achieve with with this task
+
+805
+00:44:32,140 --> 00:44:35,500
+I think it's probably like like more like a more like a general segment is like this stuff is
+
+806
+00:44:35,500 --> 00:44:40,540
+still pretty early both in the in the robotics and the like ML communities but it is super
+
+807
+00:44:40,540 --> 00:44:44,700
+interesting and and eventually we'll want to do something where like we have a bunch of the
+
+808
+00:44:44,700 --> 00:44:49,180
+different simulators we talked about might even have like different kinds of robots and
+
+809
+00:44:49,180 --> 00:44:53,580
+basically just increasing the like breadth of this distribution so you encapsulate like more and
+
+810
+00:44:53,580 --> 00:44:58,540
+more things and and really hope that your that your policy gets to the like gets to the bottom of
+
+811
+00:44:58,540 --> 00:45:03,420
+like I see this is how I learned to like control a new robot in an entire new environment
+
+812
+00:45:03,420 --> 00:45:07,340
+okay so this is something we're super excited about and eventually we're hoping that like
+
+813
+00:45:07,980 --> 00:45:13,980
+this will enable a robot that can that can truly solve a variety of like very complex tasks
+
+814
+00:45:13,980 --> 00:45:18,940
+on a variety of different robot platforms okay and so if I wanted to learn more about
+
+815
+00:45:18,940 --> 00:45:24,300
+this dig into the details like see it in action like have you published code on this or like
+
+816
+00:45:24,860 --> 00:45:29,980
+you know what is what would be required for someone kind of you know play with this and try
+
+817
+00:45:29,980 --> 00:45:34,780
+to replicate what you did yeah so we did a pretty big release a couple months ago where we basically
+
+818
+00:45:34,780 --> 00:45:39,500
+put some of the things we talked about together like the domain randomization part and the part
+
+819
+00:45:39,500 --> 00:45:44,940
+where you where you observe your human and figure out okay I want to do like this specific task
+
+820
+00:45:44,940 --> 00:45:48,940
+and like the robot imitates this in like a new setting we have a release there where we basically
+
+821
+00:45:48,940 --> 00:45:53,580
+show like like show how it works like show how how the networks are aligned and like how they like
+
+822
+00:45:53,580 --> 00:45:58,620
+basically how we feed the data from one to the other and how they train okay and we'll probably
+
+823
+00:45:58,620 --> 00:46:03,180
+be be publishing at least parts of this robot as a service layer that they just talked about
+
+824
+00:46:03,180 --> 00:46:06,780
+together with like our next set of research results there like we figured it doesn't really make
+
+825
+00:46:06,780 --> 00:46:11,180
+sense for them to just be the kind of on their own because then you there's a lot of moving parts
+
+826
+00:46:11,180 --> 00:46:16,300
+right exactly exactly and so the the issue there is that like even if you open source the code then
+
+827
+00:46:16,300 --> 00:46:20,940
+it's like well great you can get started today just add a really expensive robot to the mix but like
+
+828
+00:46:20,940 --> 00:46:24,780
+we'll definitely be as we publish our research we want to release like both the research and the
+
+829
+00:46:24,780 --> 00:46:30,540
+infrastructure parts required for it okay cool awesome well Jonas thanks so much for taking
+
+830
+00:46:30,540 --> 00:46:34,540
+the time to chat with me about this is really cool stuff awesome thank you for having me for sure
+
+831
+00:46:34,540 --> 00:46:44,860
+all right everyone that's our show for today thanks so much for listening and for your continued
+
+832
+00:46:44,860 --> 00:46:50,380
+feedback and support for more information on Jonas or any of the topics covered in this
+
+833
+00:46:50,380 --> 00:46:58,300
+episode head on over to twimlai.com slash talk slash 76 to follow along with our open AI series
+
+834
+00:46:58,300 --> 00:47:05,260
+visit twimlai.com slash open AI of course you can send along your feedback or questions via
+
+835
+00:47:05,260 --> 00:47:11,820
+Twitter to add twimlai or at Sam charrington or leave a comment right on the show notes page
+
+836
+00:47:13,020 --> 00:47:18,140
+thanks once again to Nvidia for their support of this series to learn more about what they're
+
+837
+00:47:18,140 --> 00:47:26,620
+doing at nips visit twimlai.com slash Nvidia and of course thanks once again to you for listening
+
+838
+00:47:26,620 --> 00:47:36,620
+and catch you next time
+

@@ -1,0 +1,1283 @@
+WEBVTT
+
+00:00.000 --> 00:16.320
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+
+00:16.320 --> 00:21.480
+people, doing interesting things in machine learning and artificial intelligence.
+
+00:21.480 --> 00:31.400
+I'm your host Sam Charrington.
+
+00:31.400 --> 00:36.480
+While it nerfs this past December, I attended the second annual Black and AI workshop, which
+
+00:36.480 --> 00:41.680
+gathered participants from all over the world to showcase their research, share experiences
+
+00:41.680 --> 00:43.560
+and support one another.
+
+00:43.560 --> 00:47.680
+This week I'm excited to continue our Black and AI series with this interview with Alvin
+
+00:47.680 --> 00:53.160
+Grissom II, Assistant Professor of Computer Science at Ersinus College.
+
+00:53.160 --> 00:57.600
+Alvin's research is focused on computational linguistics, and we begin with a brief chat
+
+00:57.600 --> 01:02.040
+about some of his prior work on verb prediction using reinforcement learning.
+
+01:02.040 --> 01:06.440
+We then dive into the paper he presented at the workshop, pathologies of neuro models
+
+01:06.440 --> 01:09.360
+make interpretations difficult.
+
+01:09.360 --> 01:13.120
+We talk through some of the quote unquote pathological behaviors he identified in the
+
+01:13.120 --> 01:18.160
+paper, how we can better understand the overconfidence of trained deep learning models in certain
+
+01:18.160 --> 01:23.560
+settings, and how we can improve model training with entropy regularization.
+
+01:23.560 --> 01:28.080
+We also touch on the parallel between his work and the work being done on adversarial examples
+
+01:28.080 --> 01:30.480
+by Ian Goodfellow and others.
+
+01:30.480 --> 01:31.480
+Enjoy.
+
+01:31.480 --> 01:35.200
+Alright everyone, I am on the line with Alvin Grissom II.
+
+01:35.200 --> 01:39.840
+Alvin is an Assistant Professor of Computer Science at Ersinus College.
+
+01:39.840 --> 01:43.520
+Welcome to this week in machine learning and AI.
+
+01:43.520 --> 01:45.000
+Absolutely.
+
+01:45.000 --> 01:50.600
+It was really great meeting you at the recent NERPS conference and in particular the Black
+
+01:50.600 --> 01:56.320
+and AI workshop where you presented the paper that we'll be talking about today pathologies
+
+01:56.320 --> 01:59.800
+of neuro models makes interpretations difficult.
+
+01:59.800 --> 02:04.240
+But before we jump into that, I would love to hear a little bit about your background
+
+02:04.240 --> 02:09.320
+and how you ended up doing research at the intersection of computational linguistics
+
+02:09.320 --> 02:10.320
+and machine learning.
+
+02:10.320 --> 02:11.320
+Sure.
+
+02:11.320 --> 02:18.960
+So I have a kind of winding path, I mean, so as an undergraduate I was actually very interested
+
+02:18.960 --> 02:26.640
+in AI and this was before it sort of blew up into what it has recently become.
+
+02:26.640 --> 02:31.040
+And I was always interested in language as well, just in general even before I was in
+
+02:31.040 --> 02:33.040
+college.
+
+02:33.040 --> 02:36.960
+And actually not a lot of people know this about me, but I considered becoming an English
+
+02:36.960 --> 02:39.000
+teacher when I was in high school.
+
+02:39.000 --> 02:40.000
+Oh, wow.
+
+02:40.000 --> 02:41.000
+Yeah.
+
+02:41.000 --> 02:42.000
+So that didn't happen.
+
+02:42.000 --> 02:45.000
+But yeah.
+
+02:45.000 --> 02:53.840
+So when I was a master student, I was getting a master's in computer science and I was doing
+
+02:53.840 --> 02:56.600
+language processing stuff.
+
+02:56.600 --> 03:02.920
+And my thesis was on actually some sentiment analysis, like qualitative and quantitative
+
+03:02.920 --> 03:07.440
+analysis of sentiment in Japanese.
+
+03:07.440 --> 03:10.960
+So I really enjoyed doing that, although I'm not sure I'd want to go back and read my
+
+03:10.960 --> 03:14.120
+master's thesis at this point.
+
+03:14.120 --> 03:21.240
+And after that, I was actually a PhD student for a year in linguistics.
+
+03:21.240 --> 03:27.440
+Decided that that wasn't really for me, at least at that time.
+
+03:27.440 --> 03:32.720
+And eventually I worked for a year and then I went back into sort of the computational
+
+03:32.720 --> 03:38.800
+linguistics area and that's where I am now.
+
+03:38.800 --> 03:41.560
+So several many years later.
+
+03:41.560 --> 03:42.560
+Awesome.
+
+03:42.560 --> 03:50.400
+And I'm curious about the decision, was that a decision that linguistics wasn't for you,
+
+03:50.400 --> 03:54.280
+but computational linguistics was or was it just the timing around the PhD?
+
+03:54.280 --> 03:56.280
+Well, it wasn't the timing.
+
+03:56.280 --> 04:05.000
+I think there were a lot of things going on, I was, I'm not sure how deeply I want to
+
+04:05.000 --> 04:13.800
+go down this rabbit hole, but there are some contentious issues in linguistics and I didn't
+
+04:13.800 --> 04:15.560
+realize this at the time.
+
+04:15.560 --> 04:22.440
+I mean, I had some sense of it, but I mean, there are a lot of things going on, but I still
+
+04:22.440 --> 04:27.640
+am very interested in linguistics, but I wanted to get kind of a broader view.
+
+04:27.640 --> 04:34.280
+And I was, it was more satisfying or at least, maybe satisfying isn't the word, but more,
+
+04:34.280 --> 04:35.280
+it was easier.
+
+04:35.280 --> 04:42.120
+I felt better about the intellectual claims I was making and I could make and computational
+
+04:42.120 --> 04:46.480
+linguistics than I did and some of the linguistic stuff I was interested in.
+
+04:46.480 --> 04:50.480
+And I'm, I say this with some trepidation because I don't want it to be misinterpreted
+
+04:50.480 --> 04:56.040
+as saying linguistics isn't like, isn't real or I'm not saying that, I'm saying that
+
+04:56.040 --> 05:01.400
+for me personally, and maybe it's just because of my background, but there are some other
+
+05:01.400 --> 05:08.840
+epistemological reasons I found the computational approach to be more to my liking as a F for
+
+05:08.840 --> 05:09.840
+a PhD.
+
+05:09.840 --> 05:13.800
+I'm going to study something for five plus years, I want to be comfortable with it and
+
+05:13.800 --> 05:16.160
+I found that I personally wasn't.
+
+05:16.160 --> 05:22.920
+Yeah, linguistics is one of those fields that I've done some kind of cursory, cursory reading
+
+05:22.920 --> 05:27.640
+of and I just, I find it fascinating and so when you said that, I kind of got the sense
+
+05:27.640 --> 05:31.720
+that they was something there that was kind of, kind of interesting.
+
+05:31.720 --> 05:33.520
+So thank you for elaborating on that.
+
+05:33.520 --> 05:34.520
+Sure.
+
+05:34.520 --> 05:37.200
+I mean, actually, it's funny because a lot of the things that bothered me at the time
+
+05:37.200 --> 05:44.960
+don't bother me so much anymore, but I had to kind of get some distance from it, I think,
+
+05:44.960 --> 05:50.440
+because I was kind of in fight or flight mode for a whole year when dealing with a lot
+
+05:50.440 --> 05:55.720
+of that and then I got away from it and was able to more leisurely sort of think about
+
+05:55.720 --> 06:03.680
+the issues and now I'm not so perturbed anymore, but at the time I was not a happy person.
+
+06:03.680 --> 06:10.280
+So then your research more recently is focused on the computational side as we've discussed.
+
+06:10.280 --> 06:12.840
+Can you elaborate on the kinds of things you've been looking at?
+
+06:12.840 --> 06:21.440
+My PhD work which, so I finished my PhD in 2017, I've continued to extend that a little
+
+06:21.440 --> 06:25.400
+bit and so that's on simultaneous interpretation.
+
+06:25.400 --> 06:29.160
+So trying to make computers do simultaneous interpretation.
+
+06:29.160 --> 06:35.000
+So like at the UN or something, you know, you're someone speaking in one language and you
+
+06:35.000 --> 06:39.040
+want to translate that in real time without necessarily waiting for the whole sentence
+
+06:39.040 --> 06:46.640
+to be uttered and just because that problem is so easy, of course, and things are passing.
+
+06:46.640 --> 06:51.120
+You know, we wanted to do this for what's what are called SOV or subject object-verb
+
+06:51.120 --> 06:54.240
+languages, to subject-verb-object languages.
+
+06:54.240 --> 06:58.480
+So a language like Japanese, for example, the verb comes at the end, but in English it
+
+06:58.480 --> 07:00.040
+comes after the subject.
+
+07:00.040 --> 07:05.000
+So if you want to translate, you know, I to the store went, you have to wait until you
+
+07:05.000 --> 07:10.000
+see when at the end of the sentence before you can say I went to the store.
+
+07:10.000 --> 07:12.000
+So that's a problem and so we-
+
+07:12.000 --> 07:13.760
+It's a problem for humans too, right?
+
+07:13.760 --> 07:14.920
+It is a problem for humans.
+
+07:14.920 --> 07:19.960
+So one of the things we had to ask ourselves was how do humans do this and they do a lot
+
+07:19.960 --> 07:20.960
+of things.
+
+07:20.960 --> 07:26.320
+So they'll reorder sentences, they'll use more vague words sometimes, but the first approach
+
+07:26.320 --> 07:31.040
+we sort of looked at and which I'm still working on with some other people is predicting
+
+07:31.040 --> 07:32.040
+those verbs.
+
+07:32.040 --> 07:36.880
+So humans are, when they do this, it's actually very cognitively taxing and they can only
+
+07:36.880 --> 07:39.040
+do it for so long at one time.
+
+07:39.040 --> 07:45.720
+I've noticed that at events that the transcriptionists kind of work in teams and they'll swap off
+
+07:45.720 --> 07:48.760
+every half an hour or hour or something like that.
+
+07:48.760 --> 07:53.800
+And I've had people tell me it's because it gets really taxing for them.
+
+07:53.800 --> 07:58.520
+Yeah, it's really, I mean, if you think just think about what they're doing, right?
+
+07:58.520 --> 08:04.760
+They're processing two languages simultaneously, translating between them and predicting the
+
+08:04.760 --> 08:07.360
+future essentially.
+
+08:07.360 --> 08:11.400
+And you know, your brain can only take so much for that long.
+
+08:11.400 --> 08:18.240
+And so what I worked on, one of the things was trying to see how computers could do this.
+
+08:18.240 --> 08:22.920
+And so it's like, well, let's see if we can predict these verbs, which in terms, it can
+
+08:22.920 --> 08:23.920
+Japanese.
+
+08:23.920 --> 08:26.960
+Let's see if we can predict the final verb and then just put it in the sentence earlier.
+
+08:26.960 --> 08:33.160
+It turns out that's very difficult, but we've probably worked on that and we use what's
+
+08:33.160 --> 08:37.440
+called reinforcement learning to try to teach a system.
+
+08:37.440 --> 08:39.680
+We were actually the first people to do this.
+
+08:39.680 --> 08:43.400
+Some of the people have done it before since then with neural networks and other things,
+
+08:43.400 --> 08:49.840
+but let's see if we can learn under which situations we can trust these predictions.
+
+08:49.840 --> 08:55.600
+So you have like a prediction of a verb, you have like a translation and let's see when
+
+08:55.600 --> 08:59.520
+should we trust each and what should we do with that information.
+
+08:59.520 --> 09:03.800
+And so this sort of spawn this other project we're just taking on the life of its own,
+
+09:03.800 --> 09:07.840
+which is just verb prediction and predicting that kind of stuff incrementally, which
+
+09:07.840 --> 09:14.560
+just it turns out is a very interesting problem, both for cycle linguistics and for machine
+
+09:14.560 --> 09:17.320
+learning computer science.
+
+09:17.320 --> 09:24.720
+And so since then, I've worked on some other stuff, but the paper you brought up was the
+
+09:24.720 --> 09:29.000
+pathologies of neural models, make interpretations difficult.
+
+09:29.000 --> 09:30.000
+And so that looks at...
+
+09:30.000 --> 09:35.640
+Actually, if you don't mind me hitting Paul, I know it's going pretty fast.
+
+09:35.640 --> 09:44.720
+No, you touched on something that is potentially interesting, this use of reinforcement learning
+
+09:44.720 --> 09:48.160
+as part of this verb prediction problem.
+
+09:48.160 --> 09:53.320
+So it sounds like you made a distinction between reinforcement learning and folks that came
+
+09:53.320 --> 09:56.120
+along after and did deep reinforcement learning.
+
+09:56.120 --> 09:58.320
+You are using more traditional RL methods.
+
+09:58.320 --> 10:01.080
+Right, we were using imitation learning.
+
+10:01.080 --> 10:02.080
+Yeah.
+
+10:02.080 --> 10:03.080
+Okay.
+
+10:03.080 --> 10:08.400
+And so can you walk us through kind of how you formulated the problem there and how you
+
+10:08.400 --> 10:12.400
+applied RL and imitation learning to that particular problem?
+
+10:12.400 --> 10:13.400
+Sure.
+
+10:13.400 --> 10:14.400
+Yeah.
+
+10:14.400 --> 10:17.440
+So you can think of sentence.
+
+10:17.440 --> 10:19.840
+So we don't speak sentences all at once.
+
+10:19.840 --> 10:25.280
+We speak them, you could say a word at a time, although defining word in some languages
+
+10:25.280 --> 10:29.440
+can be difficult, but we speak them incrementally.
+
+10:29.440 --> 10:33.040
+And you can think of that as like a time series of steps.
+
+10:33.040 --> 10:40.160
+So if you kind of discretize the sentence by words, say, then every time, let's all imagine
+
+10:40.160 --> 10:42.280
+you are a translator interpreter.
+
+10:42.280 --> 10:46.520
+So you can imagine that every time you hear a word, you have a decision to make.
+
+10:46.520 --> 10:47.760
+Okay.
+
+10:47.760 --> 10:49.400
+And so what should that decision be?
+
+10:49.400 --> 10:55.200
+So you might want to do nothing because you might not be certain and not you might not
+
+10:55.200 --> 11:00.520
+know enough like to make a good to say anything or to make a translation and incremental translation.
+
+11:00.520 --> 11:06.080
+So you might just wait or you might make the best translation you can with what you have.
+
+11:06.080 --> 11:11.320
+You might make the best translation you can with what you have while making some kind of
+
+11:11.320 --> 11:12.440
+prediction.
+
+11:12.440 --> 11:15.960
+So maybe you have a good idea of what the next word is or what the verb is or something
+
+11:15.960 --> 11:17.720
+like that.
+
+11:17.720 --> 11:23.880
+And so in a reinforcement learning framework, you typically have some kind of time series
+
+11:23.880 --> 11:29.320
+of steps and every time you take a step, you choose an action.
+
+11:29.320 --> 11:33.760
+So when in this in our case, the actions were things like wait, which means don't try
+
+11:33.760 --> 11:39.320
+to translate anything at that point, commit, which just means that you make the best translation
+
+11:39.320 --> 11:46.040
+of that fragment you can at that point, verb, which does the same with a verb prediction.
+
+11:46.040 --> 11:49.160
+And we had another one for the next word that does the same thing.
+
+11:49.160 --> 11:54.360
+And so that in that formulation, every time you get a word, you just choose an action.
+
+11:54.360 --> 11:58.840
+And if you have some examples of good actions, this is where the imitation learning comes
+
+11:58.840 --> 12:07.400
+in, then you just try to imitate the good examples and try to generalize from those good
+
+12:07.400 --> 12:12.920
+examples when you can take what action.
+
+12:12.920 --> 12:19.560
+How are you training the model, were you training it on kind of existing translation, you
+
+12:19.560 --> 12:24.200
+know, some corpus of translated phrases or documents or something like that?
+
+12:24.200 --> 12:25.200
+Right.
+
+12:25.200 --> 12:31.600
+We were using a standard web corpus of parallel data.
+
+12:31.600 --> 12:38.400
+So it's not ideal because it's not actual simultaneously translated data, which there's
+
+12:38.400 --> 12:45.920
+another paper that shows that these look very different.
+
+12:45.920 --> 12:50.000
+So that's a weakness in it, but it's also just because that data doesn't really exist
+
+12:50.000 --> 12:51.000
+in large measure.
+
+12:51.000 --> 12:54.640
+There's some, but it's not enough to really train a model in the traditional way.
+
+12:54.640 --> 12:57.520
+So yeah, we were using basic parallel data.
+
+12:57.520 --> 12:58.520
+Okay.
+
+12:58.520 --> 13:06.280
+It strikes me that actual simultaneously translated data would be, you know, there's a noise
+
+13:06.280 --> 13:12.120
+aspect to it because the translators are making these mistakes that, you know, they might
+
+13:12.120 --> 13:15.720
+not make if they have full access to full information.
+
+13:15.720 --> 13:16.720
+Is that exact?
+
+13:16.720 --> 13:17.720
+Yeah.
+
+13:17.720 --> 13:18.720
+That's a problem.
+
+13:18.720 --> 13:23.280
+I don't know if it's a problem or not, but it's definitely an aspect of the data.
+
+13:23.280 --> 13:28.760
+So there's actually some interesting data where they have three translators.
+
+13:28.760 --> 13:33.960
+I think it's Japanese, English, three translators of different, I guess you could say experience
+
+13:33.960 --> 13:41.720
+levels or ranks, and so, and they have them all translating the same stuff, it's simultaneously
+
+13:41.720 --> 13:46.000
+and you can actually see like the different kinds of things that they do and strategies
+
+13:46.000 --> 13:47.920
+they use and mistakes they make and stuff like that.
+
+13:47.920 --> 13:48.920
+It's pretty interesting.
+
+13:48.920 --> 13:49.920
+Huh.
+
+13:49.920 --> 13:50.920
+Wow.
+
+13:50.920 --> 13:51.920
+Interesting.
+
+13:51.920 --> 13:57.760
+You were starting to introduce the paper that I saw you present the pathologies paper.
+
+13:57.760 --> 14:02.000
+Can you tell us a little bit about the background and motivation of that paper?
+
+14:02.000 --> 14:07.880
+Yeah, so there's been an uptick in interest, well obviously in deep learning in general.
+
+14:07.880 --> 14:13.040
+I mean, everybody knows that and who's going to be listening to this podcast, but one
+
+14:13.040 --> 14:18.800
+of the criticisms of deep models is that they're black boxes.
+
+14:18.800 --> 14:22.760
+So if you have like a logistic regression or something of some kind of linear model,
+
+14:22.760 --> 14:27.720
+you can look at the weights and even though that's not a perfect method of analyzing a model,
+
+14:27.720 --> 14:33.040
+you can get a sense of why the model is making the decisions it's making, right?
+
+14:33.040 --> 14:37.320
+But with a deep model, it's very difficult, right?
+
+14:37.320 --> 14:43.040
+And the deeper and more complex the architecture, the harder it gets to interpret what these
+
+14:43.040 --> 14:45.840
+models are doing and why.
+
+14:45.840 --> 14:50.520
+And so because we want to interpret these models, we thought, well, let's look at what
+
+14:50.520 --> 14:51.520
+they're doing.
+
+14:51.520 --> 14:56.920
+And so what we found is that they exhibit what we call these pathological behaviors.
+
+14:56.920 --> 15:02.840
+So they don't do what any reasonable person would expect.
+
+15:02.840 --> 15:07.520
+They would do when they're given something, but they're not used to seeing.
+
+15:07.520 --> 15:13.320
+So I think the example I used in the presentation was you can reduce, so for question answering,
+
+15:13.320 --> 15:18.360
+like you can reduce the question to just the word did, right?
+
+15:18.360 --> 15:23.480
+And not only, so it still gives the right answer, but the confidence in the right answer
+
+15:23.480 --> 15:31.080
+goes up to like 91% if you just ask did, right, which is a ridiculous, yeah.
+
+15:31.080 --> 15:34.520
+So, so I found that the example really interesting.
+
+15:34.520 --> 15:37.480
+Can you, let's walk through that in a little bit more detail.
+
+15:37.480 --> 15:40.560
+It was, well, let's actually, let's go back to the data set.
+
+15:40.560 --> 15:42.520
+The data set is question answering.
+
+15:42.520 --> 15:43.520
+Was it squad?
+
+15:43.520 --> 15:44.520
+It was squad.
+
+15:44.520 --> 15:45.520
+Yeah, for that one.
+
+15:45.520 --> 15:46.520
+Okay.
+
+15:46.520 --> 15:52.000
+And so tell us about what you were trying to do with a given example from the squad data
+
+15:52.000 --> 15:53.000
+set.
+
+15:53.000 --> 16:01.640
+Okay, so you're given some context, like some kind of short sequence of sentences with
+
+16:01.640 --> 16:10.440
+some information and you give it a question and you want the model to give you an answer
+
+16:10.440 --> 16:14.360
+to the question based on the context.
+
+16:14.360 --> 16:22.120
+And intuitively, you want the confidence, the final confidence of the model to reflect
+
+16:22.120 --> 16:27.280
+the value of the information and the question, right?
+
+16:27.280 --> 16:37.440
+So like if I ask you, so if I give you a paragraph to read and I ask you, you know, what
+
+16:37.440 --> 16:39.240
+or something, right?
+
+16:39.240 --> 16:42.240
+So you have no idea what I'm asking.
+
+16:42.240 --> 16:49.640
+You wouldn't say, yeah, I'm 91% confident that, you know, the answer is x, but we found out
+
+16:49.640 --> 16:54.000
+that these models actually do this a lot.
+
+16:54.000 --> 17:00.000
+And so we wanted to, you know, systematically show that this is, this is like a systemic
+
+17:00.000 --> 17:03.480
+problem and some of these models.
+
+17:03.480 --> 17:04.480
+Okay.
+
+17:04.480 --> 17:08.120
+And so how did you go about showing that?
+
+17:08.120 --> 17:16.480
+So we would incrementally remove words from, so for squad, for example, we would incrementally
+
+17:16.480 --> 17:25.520
+remove words and just observe, so without changing the answer, actually, and observe how
+
+17:25.520 --> 17:32.240
+the confidence shifted and how, and what we found is that, you know, it doesn't really
+
+17:32.240 --> 17:37.760
+comport with what humans, so we also did some human experiments to verify this, but it
+
+17:37.760 --> 17:41.080
+doesn't really comport with what a human would expect.
+
+17:41.080 --> 17:51.360
+And nor does the human performance reflect necessarily what the models do one of these circumstances.
+
+17:51.360 --> 18:00.520
+And so the, the words that you're removing are from the, the context passage or from
+
+18:00.520 --> 18:06.880
+the answer from the, from the question, rather, yes, right, right, right.
+
+18:06.880 --> 18:10.680
+So you've got, you've got these three pieces, then you've got the kind of the sequence of
+
+18:10.680 --> 18:18.240
+sentences that's the context, you've got the, the question and the answer.
+
+18:18.240 --> 18:24.540
+And so you're removing words from the question and you're trying to see the way that that
+
+18:24.540 --> 18:32.040
+changes the prediction of the, or the confidence level in predicting the answer, is that the
+
+18:32.040 --> 18:34.040
+right way to think about it?
+
+18:34.040 --> 18:35.040
+That's right.
+
+18:35.040 --> 18:36.040
+Yes.
+
+18:36.040 --> 18:42.960
+If I remember in this correctly, you, you would kind of sequence the words that you removed
+
+18:42.960 --> 18:49.920
+by, were you sequencing on the one that was most likely or had like the least information
+
+18:49.920 --> 18:52.360
+or the most information or something like that?
+
+18:52.360 --> 18:53.360
+Right.
+
+18:53.360 --> 18:58.520
+So we, we remove what we call the unimportant words.
+
+18:58.520 --> 18:59.520
+So right.
+
+18:59.520 --> 19:03.400
+So we want to remove the words without changing the answer.
+
+19:03.400 --> 19:13.040
+You were removing the words that minimize the changing confidence of the, the answer.
+
+19:13.040 --> 19:18.480
+And then I'm trying to remember the, like you had, you showed a sequence of the words
+
+19:18.480 --> 19:20.560
+that you removed.
+
+19:20.560 --> 19:29.040
+And I guess what was strange about it is that you, oftentimes you were removing words
+
+19:29.040 --> 19:34.520
+that, as a human, you would think had the most meaning in the question and you ended
+
+19:34.520 --> 19:37.880
+up with this, you know, just like a question word.
+
+19:37.880 --> 19:38.880
+Right.
+
+19:38.880 --> 19:43.400
+I'm trying to capture like the visual on the podcast, which is sometimes hard to do.
+
+19:43.400 --> 19:48.840
+But it was really interesting to see the way that that evolved on that slide.
+
+19:48.840 --> 19:49.840
+Yeah.
+
+19:49.840 --> 19:50.840
+So, yeah.
+
+19:50.840 --> 19:53.280
+So that, that was one of the sort of, sort of, have a lot of behaviors, right?
+
+19:53.280 --> 19:58.000
+So what, it doesn't, so nothing that we, I don't want to say nothing we did, but a lot
+
+19:58.000 --> 20:03.360
+of what we did just doesn't, you know, doesn't go with what we would expect, right?
+
+20:03.360 --> 20:08.920
+So what the model thinks is an important term might not necessarily be what a human would
+
+20:08.920 --> 20:10.920
+consider an important term.
+
+20:10.920 --> 20:16.840
+Did you end up in this paper taxonomizing these pathological behaviors?
+
+20:16.840 --> 20:20.320
+Are there, you know, do they, are there, how many of them are there?
+
+20:20.320 --> 20:21.320
+Are there names?
+
+20:21.320 --> 20:26.320
+Or is it more exploring kind of this one particular one that we've been discussing?
+
+20:26.320 --> 20:33.000
+It was a more exploratory, I mean, so we did have a section, so we talked about model
+
+20:33.000 --> 20:37.640
+over confidence, which is one problem, right?
+
+20:37.640 --> 20:40.640
+And we, I'm trying to think, do we give these names?
+
+20:40.640 --> 20:43.440
+I don't think, I don't think we named the pathologies.
+
+20:43.440 --> 20:46.200
+I think we just sort of described them.
+
+20:46.200 --> 20:49.680
+And so one of them is this overconfidence?
+
+20:49.680 --> 20:52.760
+What are some of the other ones that you tended to see?
+
+20:52.760 --> 20:53.760
+Right.
+
+20:53.760 --> 20:59.720
+So I think rather than, I think a different way of thinking about it is that, so we tried
+
+20:59.720 --> 21:01.960
+this on a number of different tasks.
+
+21:01.960 --> 21:09.320
+So the way we, so the method that we used was sort of this word removal, right?
+
+21:09.320 --> 21:15.240
+And we did this for squad, we did this for visual question answering, and we did this
+
+21:15.240 --> 21:22.720
+for SNLI, which looks for things like contradictions and things like that.
+
+21:22.720 --> 21:29.640
+And we noticed, so when we showed the same, sort of the same kinds of pathologies on all
+
+21:29.640 --> 21:34.960
+of these different tasks, when, by, by using NPV reduction.
+
+21:34.960 --> 21:35.960
+Okay.
+
+21:35.960 --> 21:42.040
+So you, kind of the same idea of successfully removing words and you ended up in the same
+
+21:42.040 --> 21:46.680
+kind of weird part where you're left with words that wouldn't be the most useful ones
+
+21:46.680 --> 21:48.400
+that you would expect.
+
+21:48.400 --> 21:49.400
+Right.
+
+21:49.400 --> 21:50.400
+Right.
+
+21:50.400 --> 22:01.120
+And so what, what did all this tell you about neural network models and trying to interpret
+
+22:01.120 --> 22:02.120
+them?
+
+22:02.120 --> 22:05.360
+Uh, that, it's, it's difficult.
+
+22:05.360 --> 22:13.120
+So I mean, you know, I mean, it's not necessarily surprising.
+
+22:13.120 --> 22:17.720
+So there's been some previous work that has shown similar things for, especially sort
+
+22:17.720 --> 22:24.000
+of images that there, there's this notion of like rubbish examples where you show what
+
+22:24.000 --> 22:29.200
+looks like random noise and, you know, the, the classifier, what gives you 90% confidence
+
+22:29.200 --> 22:32.800
+that it's, you know, a flower or something.
+
+22:32.800 --> 22:37.920
+And so this is, kind of, this is definitely related to that.
+
+22:37.920 --> 22:44.880
+And so we also, you know, used a, proposed method of trying to mitigate this using a kind
+
+22:44.880 --> 22:53.560
+of regularization, uh, on the, uh, by training on the reduced inputs, uh, but, um, yeah, I
+
+22:53.560 --> 22:58.400
+mean, I think we're not just trying to say that, you know, deep learning models are garbage
+
+22:58.400 --> 22:59.400
+or whatever.
+
+22:59.400 --> 23:04.440
+We're just, uh, trying to identify sort of the shortcomings and understanding them so
+
+23:04.440 --> 23:06.560
+that we can try to address that.
+
+23:06.560 --> 23:07.560
+Right.
+
+23:07.560 --> 23:13.400
+And did, uh, did the regularization approach that you tried, uh, I'm presuming that that
+
+23:13.400 --> 23:14.880
+worked to some extent?
+
+23:14.880 --> 23:15.880
+It did.
+
+23:15.880 --> 23:22.760
+Uh, so we were, so the nice thing about it is that we were able to, uh, use this to, uh,
+
+23:22.760 --> 23:24.600
+with almost no change in accuracy.
+
+23:24.600 --> 23:30.840
+So we are able to get more, are more reasonable distribution of confidences, uh, that looks
+
+23:30.840 --> 23:35.360
+more like, you know, what a human would, what, what expect, uh, without really hurting
+
+23:35.360 --> 23:36.360
+accuracy.
+
+23:36.360 --> 23:37.360
+Okay.
+
+23:37.360 --> 23:43.120
+Um, so, so even, um, you know, even though the model itself is still difficult to interpret,
+
+23:43.120 --> 23:50.800
+there is a way of, of training it, uh, that gives you, I guess you could say more interpretable
+
+23:50.800 --> 23:53.800
+confidences that, at the end of the prediction.
+
+23:53.800 --> 23:56.960
+Is it this specific approach to regularization?
+
+23:56.960 --> 24:02.760
+The one that you tried that you found to have the advantage of, you know, let's say correcting
+
+24:02.760 --> 24:10.160
+these models in this way, or is it regularization in general, you know, in trying to, to force
+
+24:10.160 --> 24:14.720
+the networks to generalize more that, you know, had some kind of general improvement.
+
+24:14.720 --> 24:15.720
+Right.
+
+24:15.720 --> 24:19.960
+So I don't, uh, know that we try and drop out or something like that.
+
+24:19.960 --> 24:26.480
+Uh, I guess I could, uh, ask the other people who are working on this, uh, but, uh, we just
+
+24:26.480 --> 24:30.840
+showed that this particular, uh, form of regularization, uh, helps.
+
+24:30.840 --> 24:33.760
+Um, so, um, it's possible.
+
+24:33.760 --> 24:35.800
+I mean, I, I doubt it would hurt.
+
+24:35.800 --> 24:40.120
+I'm, I don't know, um, but, uh, you know, to use, uh, some other kind of regularization,
+
+24:40.120 --> 24:47.160
+uh, if you want to call it, drive-out regularization, um, yeah, but, uh, yeah, in our paper, we just
+
+24:47.160 --> 24:49.800
+showed this particular method works.
+
+24:49.800 --> 24:56.840
+What have you done kind of in this direction since then, or, or where do you, you know,
+
+24:56.840 --> 25:00.600
+how would you see extending this, this kind of work?
+
+25:00.600 --> 25:01.920
+Um, yeah.
+
+25:01.920 --> 25:08.280
+So I personally haven't, uh, extended this, uh, since last month or whenever we post
+
+25:08.280 --> 25:09.280
+this.
+
+25:09.280 --> 25:15.360
+Maybe, maybe it was two months ago, um, but, uh, there is another, uh, paper, uh, uh, a workshop
+
+25:15.360 --> 25:21.800
+paper by an undergraduate student at the University of Maryland, uh, named Eric Wallace, um, that
+
+25:21.800 --> 25:25.040
+is, uh, attempting to do something similar.
+
+25:25.040 --> 25:30.040
+I think he's using K nearest neighbors, um, to, so he was also the second author on this
+
+25:30.040 --> 25:36.880
+paper, uh, to try to, uh, so I haven't read his paper, I have to confess, but I think he's
+
+25:36.880 --> 25:41.720
+trying to do that to, uh, do something similar to try to mitigate, uh, make these models
+
+25:41.720 --> 25:42.800
+more interpretable.
+
+25:42.800 --> 25:49.120
+Maybe tell me a little bit about how this particular paper fits into kind of your broader
+
+25:49.120 --> 25:51.120
+research agenda nowadays.
+
+25:51.120 --> 25:52.120
+Sure.
+
+25:52.120 --> 25:55.360
+Um, so going back to Verr projection a little bit.
+
+25:55.360 --> 26:01.040
+So in 2016, I published this paper on, uh, Verr prediction in Japanese and German, mostly
+
+26:01.040 --> 26:08.640
+Japanese, uh, and, uh, so, and that was using just the near models and, uh, so I also interested
+
+26:08.640 --> 26:09.640
+in psycho linguistics.
+
+26:09.640 --> 26:16.520
+So I was interested in sort of comparing the features that, uh, that, uh, that, uh, model
+
+26:16.520 --> 26:21.280
+was using to make its Verr predictions to what humans seem to be using to make the
+
+26:21.280 --> 26:23.160
+same predictions, right?
+
+26:23.160 --> 26:29.120
+So we always try to, I use the word we loosely, but, uh, some people try to make, you know,
+
+26:29.120 --> 26:34.080
+these kinds of analogies between machine learning models and humans, but, uh, without actually
+
+26:34.080 --> 26:38.160
+looking at what the model is doing, it's not clear that that is justified.
+
+26:38.160 --> 26:43.560
+So as we're moving to these, as we have moved to, you know, more deep learning methods,
+
+26:43.560 --> 26:51.480
+uh, I think if you want to make claims about, you know, a model, for example, informing,
+
+26:51.480 --> 26:55.440
+you know, something about what a human is doing, I think it's helpful to have some sense
+
+26:55.440 --> 27:01.920
+of what the model is actually doing, uh, internally, um, so on that Verr prediction products,
+
+27:01.920 --> 27:08.320
+for example, um, uh, we will, I looked, I just looked at the weights of the model and, uh,
+
+27:08.320 --> 27:15.640
+you know, and, and tried to, uh, look at, uh, how, you know, how adding certain, uh, features
+
+27:15.640 --> 27:20.200
+that were linguistically interesting affected the predictions, uh, and you can also do that
+
+27:20.200 --> 27:24.720
+with a deep model, um, you can also look at something like attention weights, those kinds
+
+27:24.720 --> 27:31.640
+of things. Um, so I, I guess what I'm pushing here is, you know, uh, accuracy on a data
+
+27:31.640 --> 27:36.120
+set is an important, uh, metric to look at, but it's not the only metric. It's not all
+
+27:36.120 --> 27:42.160
+we care about, uh, you know, for, and for doing scientific inquiry in parade, and we want
+
+27:42.160 --> 27:47.880
+to look at the model itself, we want to understand why the model is doing what it's doing to the
+
+27:47.880 --> 27:52.480
+best that we can, uh, which is not, again, not to say that accuracy is an important,
+
+27:52.480 --> 27:57.680
+but, uh, as someone who's interested also in linguistic questions, um, it's, uh, much
+
+27:57.680 --> 28:02.560
+more satisfying scientifically if we can peek inside the models and see what they're
+
+28:02.560 --> 28:09.720
+doing. And if we can't, to at least be able to have some sense of why we can't, if that
+
+28:09.720 --> 28:10.720
+makes sense.
+
+28:10.720 --> 28:18.400
+What's your sense of the kind of relationship between cycle linguistics and the kind
+
+28:18.400 --> 28:23.480
+of work that's happening on the machine learning and deep learning side? Are there, have
+
+28:23.480 --> 28:28.280
+there been any interesting kind of cross pollinations or cross results there?
+
+28:28.280 --> 28:33.320
+Uh, there have. And for quite some time, I think, uh, so I think there's so much potential
+
+28:33.320 --> 28:39.360
+that's only beginning to be, uh, the surface of which is only beginning to be scratched.
+
+28:39.360 --> 28:45.400
+Um, so for example, there's a whole, you know, area of, uh, neuroscience of language
+
+28:45.400 --> 28:49.840
+where we have, uh, these really interesting experiments where, you know, you give a person
+
+28:49.840 --> 28:55.280
+a stimulus of some sentences or words or something and you, you see, you put you, uh, you
+
+28:55.280 --> 29:02.120
+give them an EEG helmet or you take an FMRI and you see how their brain is, is, uh, responding
+
+29:02.120 --> 29:07.880
+to these stimuli. Um, so I think that's an, it's an incredible treasure trove of potential
+
+29:07.880 --> 29:15.560
+machine learning research. Um, and it's starting to be, uh, done. Uh, it's been done for a few
+
+29:15.560 --> 29:23.160
+years by some people. Um, so these, so for example, uh, if you wear an EEG helmet, uh, you
+
+29:23.160 --> 29:29.000
+know, your brain produces, uh, certain, I'll just, for simplicity, I'll call them brain
+
+29:29.000 --> 29:36.040
+waves, but it produces a graph that's called an ERP, uh, event-related potential. And, uh,
+
+29:36.040 --> 29:39.880
+you know, I think it's really a really interesting question. So what can you predict by looking
+
+29:39.880 --> 29:47.800
+at an ERP? Uh, can you, uh, predict, uh, other aspects of, uh, that person's, uh, linguistic
+
+29:47.800 --> 29:53.080
+performance based on looking at these, uh, these kinds of things? But even outside of, sort
+
+29:53.080 --> 29:58.840
+of neuroscience, which, um, requires a more specialized background, arguably, um, you
+
+29:58.840 --> 30:03.480
+know, so, uh, for my verbal prediction work, I looked at, uh, what are called case markers
+
+30:03.480 --> 30:10.120
+in Japanese? And it turns out that both, uh, classifier, the, uh, uh, the model that we built,
+
+30:10.120 --> 30:15.800
+and, uh, the humans, there's previous resources. It shows that humans also do this. Uh, we're
+
+30:15.800 --> 30:21.560
+using these case markers in Japanese tube, uh, predict verbs. And so that was in, in instance,
+
+30:21.560 --> 30:26.760
+where it looked like the model and the humans were using the same information in an interesting
+
+30:26.760 --> 30:33.080
+way. Um, and so I think there's a lot of potential there for, for, so for example, you might look
+
+30:33.080 --> 30:37.640
+at a model and, and think to test whether, uh, what the humans are doing is related to what the
+
+30:37.640 --> 30:43.640
+model is doing or vice versa. Um, so I think there's a lot of potential there. Awesome. Uh,
+
+30:43.640 --> 30:49.800
+besides the, the paper that we've been discussing here or that we discussed previously here,
+
+30:49.800 --> 30:55.800
+are there any interesting references that you would point someone to who's interested in
+
+30:55.800 --> 31:02.520
+exploring this area more deeply? Uh, sure. Uh, so the one that, I mean, there, there's a lot, um,
+
+31:02.520 --> 31:06.440
+I, I can't, I'm not going to be able to name them off the top of my head. But one that comes to
+
+31:06.440 --> 31:15.800
+mind is, uh, the, the paper on, uh, rubbish examples. Um, so if you just Google rubbish examples,
+
+31:15.800 --> 31:21.400
+I think it'll, it'll, uh, deep learning what rubbish examples I think it'll come up. Um, so I
+
+31:21.400 --> 31:27.640
+think that's, uh, probably, at least that's coming to mind my, my mind right now, the most
+
+31:27.640 --> 31:32.680
+related paper. And that was published before quite a bit before hours. And that's more related to
+
+31:32.680 --> 31:39.880
+visual, uh, task, I think than, uh, then linguistic task, but it's a similar idea and was, uh,
+
+31:39.880 --> 31:45.000
+certainly, uh, part of the inspiration for our work. Okay. Awesome. Awesome. Yeah. Well,
+
+31:45.000 --> 31:49.480
+Evan, thank you so much for taking the time to chat with us. Sure. Thank you very much for having me.
+
+31:49.480 --> 31:59.240
+All right, everyone, that's our show for today. For more information on Alvin or any of the topics
+
+31:59.240 --> 32:06.520
+covered in this show, visit twimmelai.com slash talk slash 229. For more information on a black
+
+32:06.520 --> 32:14.920
+and AI series, visit twimmelai.com slash black and AI 19. As always, thanks so much for listening
+
+32:14.920 --> 32:21.880
+and catch you next time.
+

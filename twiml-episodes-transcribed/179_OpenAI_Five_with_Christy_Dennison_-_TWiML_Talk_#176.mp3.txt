@@ -1,0 +1,666 @@
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+people, doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington.
+In this episode we're joined by Kristi Denison, machine learning engineer at OpenAI.
+Since joining OpenAI earlier this year, Kristi's been working on OpenAI's efforts to build
+an AI-powered agent to play the Dota 2 video game.
+Our conversation begins with an overview of Dota 2 gameplay and the recent OpenAI 5 benchmark,
+which put the OpenAI agent up against the team of professional human players.
+We then dig into the underlying technology used to create OpenAI 5, including their use
+of deep reinforcement learning and LSTM recurrent neural networks and their liberal use of
+entity embeddings, plus some of the other tricks and techniques they used to train the
+model on 256 GPUs and 128,000 CPU cores.
+This was a fun interview and I hope you enjoy it.
+Let's go.
+All right everyone, I am on the line with Kristi Denison.
+Kristi is a machine learning engineer at OpenAI.
+Kristi, welcome to this week in machine learning and AI.
+Thank you.
+It's nice to be here.
+Fantastic.
+So you've been at OpenAI for coming up on a year now.
+I guess you started there in January and you've been working on Dota, the Dota 2 project
+there.
+And tell us about some of your experiences in joining that team.
+Yeah, it's been a lot of fun.
+I've gotten to learn everything from interfacing with the game to also our machine learning architecture.
+It's really, it's super interesting.
+As a machine learning engineer, I've gotten to add features so the model can observe different
+parts of the game and I've also gotten to learn about how you actually interface with
+the game.
+So I think like if you wanted to, you know, have a bot play in Dota, we do have an API,
+but there's a lot of things to understand there.
+It's not just, we don't look at pixels.
+So instead of pixels, you have to use the API and find ways to represent that in a way
+that our model can understand it.
+Are you a Dota player before joining OpenAI?
+I have to admit that I don't play Dota very well and I did not play beforehand or many
+games at all.
+But I hope by helping OpenAI 5 that it can play well for me.
+I think you and I both are in that same boat.
+In fact, I don't know much about the game at all or at least I didn't until learning about
+it in the context of what OpenAI is doing and I suspect that there are plenty of folks
+in our audience that don't know much about the game.
+So maybe you can tell us a little bit about Dota starting from, you know, why is it an
+interesting environment around which to experiment with AI?
+Sure.
+So again, this is a research company.
+So our, we don't just play games all day are one of the things we really are trying
+to do with Dota is use it as a test bed for these RL algorithms and that's a reinforcement
+learning.
+So why Dota?
+We've seen a lot of strides recently with or even actually not just recently for decades
+with Chast and Go and the real question is what do you do next, right?
+You want something that's close to the real world and that's the main application for
+a lot of AI's to the world like how well can you affect the real world?
+Dota is probably one of the most complex in terms of strategy games that are popular
+out there right now.
+So there's tons of people who have already been playing it for forever and or at least
+as long as it's existed and it's a complex game not just because of, oh well, it's not
+just an eight by eight board because the board does have a size, right?
+You have a map and Dota and you have two sides, two different teams that try to fight
+each other and there are these buildings you're trying to destroy and eventually there's
+one building and you destroy the call of the ancient if you destroyed this particular
+building you win the game and it's not as simple as just taking all your characters and
+charging right at that other building because there is this complex rule set that makes
+it so that you can't just simply win in one way and that's something that they do a
+really good job at at these, you know, multiplayer games is try to keep everything balanced.
+So there's lots of items you can use that can give you certain advantages at different
+parts in the game.
+They also have some downsides in some cases or they don't give you strength another or
+they cost money and you have to get money by killing these little minions that each side
+has. There's a ton of complexity behind Dota and I would take many of your episodes to
+get through it all, I think, but the core of the issue is that it's a great test bed
+for reinforcement learning because it's so complex because you can't understand it
+and it's simple an eight by eight board.
+Is there any one particular factoid or metric that kind of captures for you the complexity
+of the game?
+Well, okay, so I think the thing that really makes it interesting, I think, from a machine
+learning perspective is that there's partial information and that's all you work off of
+is partial information all day long.
+Each side has this what they call a fog of war and it covers your enemies team and unless
+you place certain items in certain spots, you can't see things and if you can't see
+how are you supposed to win, how are you supposed to attack the enemy.
+So this partial information is I think probably the reason that makes it the most complex
+is because if you did know where everyone was, it would be a lot easier game.
+So OpenAI recently held an event that was called the OpenAI 5 benchmark.
+What's the significance of this benchmark in OpenAI 5?
+Sure, so we've been, so actually, I should probably maybe give you a little bit of a
+timeline of what we've been going through so far.
+So last year we had our 1v1 bot and it beat some of the top players in the world at 1v1,
+but as many Dota players know, 1v1 has a restricted set of rules, it's only like kill the
+first tower, it's only mid lane, basically it's a much simpler game.
+And so in order to really do Dota and really do the full complexity again, you have to do
+5v5 with 5 players on each side.
+So that was last year and this last year we've been working really hard to, you know, bring
+you OpenAI 5 as it is today.
+And having 5 instead of 1 presents a lot more challenges than just adding 4 more bots,
+we had to allow, as I said before, like the game features, going back to this last May,
+we had an inhouse team and they were still, I mean, they're pretty good and probably
+average players were able to beat our OpenAI 5.
+And then in June, our OpenAI 5 was able to beat our inhouse team.
+And so we're like, well now what do we do, right?
+How do we figure out how good our OpenAI 5 is?
+We don't have a way of knowing.
+So we found some, you know, some very stronger test teams to test out OpenAI 5 and they were
+also winning.
+The OpenAI 5 was winning.
+So now we're like, well now what do we do, right?
+We need to find, how do you, how do you, like, for something that you can't measure in
+a scripted way, something this complex, how do you do the next thing?
+So that's the point of the benchmark match was to get some, you know, 99.95% out players
+and have them play OpenAI 5 to see how good is it.
+Like where are we?
+What do we need to do for TI?
+And TI is the big competition and at the end of August, it's coming up in a couple
+weeks.
+It's called the International and Dota players from around the world get together to compete.
+There's this large prize pool at the end.
+But the thing that we really want to know is, you know, is self-play?
+Does it work or do you have this thing we call strategy collapse where it learns only
+one strategy can't recover?
+It's a really interesting problem and I feel like the only way we can know if it's actually
+learning well is if by testing against these really strong teams.
+And now this prize pool for the TI, that's like $30 million or something like that.
+Something like that.
+I'm not too connected with the specifics, but yes, it's a pretty big prize pool.
+I vaguely remember from last year's 1v1 work around Dota that there was some controversy.
+Do you recall what that was?
+I maybe if you have more details on that, I mean.
+I remember there was dig into it in a lot of detail.
+But I recall at around the time that OpenAI published its 1v1 results, there were, I guess,
+the usual questions around kind of the applicability and the generality of the results, whether the
+system had, you know, some things that were, you know, hard-coded or, or, you know, rules
+that were baked in versus purely learned, whether, you know, it had access to more better
+information than a human might have that kind of thing.
+So I was not working here last year, but I can at least answer your questions about specifically
+doesn't have better information than a human.
+And the answer there is just, it doesn't have any extra information.
+And if anything, it actually has less.
+When you get all the information we get, we get from the official API, which gives us information
+of, like, where the hero is and what are your abilities that are available and can you
+use those abilities?
+And there's, in fact, one of the things we've realized is that as we've been adding more
+features, the, you know, OpenAI 5 has actually been doing really well, even when it doesn't
+have any vision into certain things, like for a long time, it didn't see a wooden
+zone.
+And it actually sort of did okay.
+It's a lot better now that I can't see them.
+It didn't see what?
+Oh, sorry.
+So there are these things called avoidant zones.
+One example is there's a character, they call them a heroes, called Sniper, who has this
+ability called, that's called Trapnel.
+And it's basically this area of effect spell that gives damage if you walk into it.
+And because OpenAI 5 didn't know where they were, they would walk in the middle and be
+like, I'm taking damage now what?
+And just kind of stand there and take it.
+So in some cases, it started to sort of learn how to get out of it, but it was a lot better
+when it had a map around itself indicating where it was so it knew how to get out.
+But so the thing is, even without that, it still was doing pretty well against Story
+and House team.
+So there's nothing that it had, no information, it has extra.
+The one advantage it does have, and I think this is just because, you know, you do have
+the API, you do have all the observations up front.
+Humans have to check other heroes manually, they have to do that switching, and pro players
+are very fast at it.
+But they do have, there's that delay of switching on the thing, whereas OpenAI 5 just can access
+it as it comes in.
+But I can't react instantly, that's another thing I think some people have been talking
+about.
+So originally, when we were doing this, we do this thing called FrameSkip, and it is
+that there's 30 frames in a second, and we could take an action on every frame, but it
+actually makes training super difficult too long to do.
+So we take an action every four frames and then collect observation and create an action.
+The problem with that is that means your reaction time is around 80 milliseconds, which seems
+on fair compared to even in top humans.
+So we actually slowed it down, although it had to admit, it wasn't because, necessarily,
+we were ready to take that step of, you know, making it even.
+We were just trying to speed up training, because the forward past time took so much time
+and doing the game time took so much time, made a lot of more sense to offset our actions.
+So it is now closer to 200 milliseconds, reaction time, which is closer to humans.
+I think a lot more fair, but other than that, other than the fact that it does get all
+the observations at once, it also the other thing too, is that the time to think is very
+different, right?
+Even if you have, you see an observation, and it's not until 200 milliseconds later, you
+can respond to it, you know, opening a five doesn't need time to think like a human
+does.
+A human, it's not just about need your reaction time, it's also about the thinking time,
+and you know, depending on how good you are, it might be like, involuntary or not, and
+that's another thing that humans don't, like, the opening a five doesn't really, there's
+not a good way.
+I mean, we could delay them, but it's just a disadvantage humans just naturally have.
+So you've mentioned some things like Shrapnel and some aspects of the heroes.
+It's kind of making me want to take a step back and talk about some, you know, nuances
+or details of the game that might help.
+Again, those of us who aren't really familiar with it fully understand, or at least not
+fully understand, but at least get a sense of, you know, what gameplay is like.
+So the standard game is five by five, or is it a game that you would have, you know, unlimited
+number of people playing simultaneously?
+Yeah, so the standard game is five by five, and again, you can play 1v1, but yes, that
+is a standard game.
+Sorry, so I should probably give a little more context about the game.
+So there are, I think, 100 and 100 something heroes, I think it's over 110, I think.
+And each of these heroes has, you know, like, at least for abilities that they have that
+each have a slightly different effect than every other ability.
+Some of them are similar, but some of them are very different.
+And that's part of the reason that for OpenA5 right now, we have a limited hero set.
+It's actually not because that we didn't want the, you know, OpenA5 to train on it.
+It's mainly just because there's just so many things to represent that like we have to
+do manual effort every single time we input a new feature of the model.
+And that is really where a lot of the complexity of this project exists.
+It's just in, like, how do you, you know, coerce all of these API inputs into something that
+this, you know, the LSTM can understand.
+So that's part of it, the other part of it too is that, I think I mentioned this a little
+bit before that, you know, we have a lot of, we have a lot of items and each of these
+items, there's probably like 100 plus items, something like that, I don't go beyond that
+number.
+I don't know exactly, but there are a bunch of items that the, you know, each have their
+own effect and their own caveats and everything.
+There's also other actions, there's an action called scan where you can point to the map.
+You can only use it every three minutes and it will tell you, oh, is there, you know,
+an enemy in this area, there are things called words and they give you vision.
+They also can give you, like, they also call them sentry words and they give you vision
+over invisible units.
+So there are a number of items that can make you invisible, but so you need these other
+type of words to see the invisible units.
+There's other items that can also help you with that.
+So there's like every single aspect of the game has either an item or an ability that
+you can, you can change it with and there's also a bunch of complex rules, like there's
+this thing called backdoor protection, which means that your towers will start healing
+if you try to just rush at them at the enemy's towers because they want to make sure that
+everything is even in fair so that, like, you actually have to have your little minions
+with you in order to actually get far enough to attack other enemy's towers.
+It's because otherwise people would just try to, like, you know, surge and run towards
+the asian, just kill the ancient and that wouldn't be a very interesting game.
+Like, the game developers valve has done a very good job of keeping it balanced and interesting.
+And then I also mentioned the fog of war before, which covers the enemy's map and even what
+you can see, you have this circle around your hero that is influenced by trees and other
+items and other, like, obstructions in the map that you can't see around.
+So like, all these things come together to really make it a complex, interesting game.
+And you mentioned that OpenAI currently supports a subset of the full number of heroes.
+How many heroes does it support?
+And I'm assuming that there are some limitations as a result of that in the 5x5 matches.
+Like, I think I read somewhere that it's in, like, a mirror mode, like both teams are playing
+the same five heroes, or is that right?
+So that's, yes.
+So we used to do mirror mode.
+And recently we've worked on a way to make it so they can play multiple, multiple sets
+of heroes.
+And we really did that with just adding this embedding that says, okay, this is the hero
+you're playing right now, so that the model can know, oh, I see, I have this thing.
+Now I use this different ability instead or is basically as aware of the different abilities
+it has to use.
+So yes, we have 18 heroes now.
+It doesn't have to be a mirror match.
+And if anyone was watching the benchmark saw, we actually introduced drafting as well.
+And the drafting is super interesting because our opening of 5 picks the heroes in the order
+that it thinks will have the best chance of success.
+So again, it's based on the strategy it has learned.
+And so what specifically is drafting?
+So drafting is picking the set of heroes you want to use in your team.
+So from 18 heroes, the two teams, so each side, one side is called Radiant, the other
+one's called dire, the two teams go back and forth picking heroes.
+There's actually a set up where you know, usually Radiant picks first and then dire picks
+two heroes and then Radiant picks two heroes.
+But those are just the specifics.
+The idea is that you get a chance to pick heroes that you want on your team.
+And that way it's not just a mirror match, everyone has the same heroes.
+It's just, we're trying very hard to make this as real Dota as we can because we want it
+to be like a honest evaluation of this research project.
+We want this to show like, can you actually make something superhuman for something that's
+more complex than games that we've already solved?
+So you've mentioned a few technical topics so far, reinforcement learning was one, embeddings
+or another.
+Can you talk a little bit about the technology that underlies the Open AI 5?
+For sure.
+So basically our model is just one enormous LSTM.
+And the rest of the complexity is just coercing these Dota API inputs into something that the
+LSTM can process.
+We have this model architecture diagram that's kind of overwhelming, but there's just so
+much to observing the game.
+So the different modifiers that are going to apply, the different abilities that you have
+and also what items you have in your backpack.
+But when it comes down to it, we have all these inputs.
+We try to put them in reasonable representations.
+One thing that I've worked on recently when I mentioned the avoidance zones before is
+making an embedding for the invoiting zones.
+So the idea is that before it didn't really matter if we just say, hey, there's an avoidance
+zone here.
+Just stay away because we were doing the mirror match and there were only two avoidance
+zones.
+Now that we have 18 heroes, there can be more.
+So what we want to do is actually tell it, okay, which type of avoidance zone are you
+dealing with?
+Because you might want to step out of it.
+Maybe you don't, maybe you'd rather take it so that you can, because you know how much
+damage you'll take, so you can get to this other goal.
+And that's basically implemented as a map around the hero itself and just see the different
+cells are how the embedding type in them.
+So how does the map get translated into an embedding?
+Oh, so it's literally like an 8-by-grid around the hero and we, if we see, oh, the avoidance
+zone covers the cell, you know, just by like, you know, distance detection from the center
+of the avoidance zone, we say, okay, this one is this type.
+And then we put it through the embedding and then feed it to the LSTM.
+So folks that are listening, that have been following along with the fast AI course with
+us, we've been doing a study group around this fast AI, practical deep learning course
+and embeddings has figured pretty prominently in that course as a way for us to capture
+a pretty broad variety of characteristics about different entities into deep learning models.
+So it's interesting to hear that they play so prominently in the Dota model as well.
+Oh, for sure.
+And we use them for, I mean, I can't show you the diagram, but like they are across the
+board here because there's just so many things that have different types.
+Like there are, I don't know, several hundred modifiers and modifiers are ways of knowing
+if there's a spell cast on you or something, something like that or if there's an ability
+to be using, there's so many different things that have different types.
+So it's, it's absolutely essential that so many things go through embeddings.
+And so the embeddings are you, are you training the embeddings separately or are you training
+all of this end to end?
+It's all end to end.
+And so you've got this gigantic LSTM, I think I read it was like a 1024 units, is that
+still accurate?
+I think, you know, that's been changing so much.
+I think we might have, it's actually 2048 now, because I think that 20, the 1024 was
+for 1v1 and so we figured it should probably raise it for five heroes.
+And is the, are the steps in the units in the LSTM are those time steps in the game?
+Like frames or are they some other unit?
+For each time step, we have all of these different inputs.
+I've not worked on that specific section, but the time step we look at right now, actually
+do not remember with, I think it's like 16, it changes based on like if we're doing local
+training or not, but I believe in when we're doing it training for an experiment, we're
+looking at 16 time steps at a time.
+And that's with the frame skip.
+Okay.
+Maybe like, I guess two seconds, something like that.
+You mentioned that you do a lot of different types of transformations to, that a big part
+of the challenge here is figuring out how to feed information into these LSTMs, sounds
+like a big part of that is using embeddings, but there's some other things that you're doing
+to, in terms of representations for making all of this tractable.
+Sure.
+And besides embeddings, well, so one other thing that I've worked on recently is adding
+a mini map.
+So this is a part of the game that everyone, all the humans get to see and opening up
+five never got to see.
+And it's just this high level view of like what vision you have, where are the enemy units
+are, things like that.
+And the way we handled this, because we couldn't talk to the client code, is just trying
+to recreate the vision.
+So what we have is this input, we start out with this large grid.
+It's 260 by 260, and we draw all of, where all the vision is on the map.
+So you get vision from towers, from heroes, and we overlay it.
+And so you've got this one nice vision channel.
+And then we add other channels, like, here's where your heroes are, and another channel
+for where your words are, and another channel for all these things.
+A channel for your creeps, the minions.
+So we add all these up, and then we actually put that through a confnet for the model
+to understand.
+And so far it has been helping with word placement, or so we think it's hard, word placement
+is really hard to figure out, because it's a, it's something that requires a lot of strategy.
+And not every single, word placement makes sense for every single part of the game.
+What's a word?
+Oh, sorry.
+So the word is something that gives you vision, remember?
+Just like the entire map is covered because it's all war.
+So what you really want to, like, you can't evaluate, that's the thing that makes this
+really complex, is that it's hard to evaluate good behavior.
+A lot of this behavior we can't see till really late in the game.
+So I guess for the word placement, like, it's, I'm sorry, but late in the game, I don't
+mean this actual game, I mean, late in training, like, and that's something we actually don't
+have a lot of, without comparing to agents that are similar skill levels.
+It's hard to tell, like, are you doing this well or not?
+And that's part of the reason we had this show match.
+But we have a scripted bot we made a year ago that, you know, it does okay.
+I think it beats me pretty consistently.
+But in an average play, I would probably be able to beat it, because you can't, you can't
+script these complex behaviors that well.
+That's the thing we ran into first, is you just, you can't create a, you know, a set
+of, you know, the open A5 with just scripting, you have to have something else that's learning
+that knows, can figure out these complex strategies, because you can't, you just, you can't
+code them up.
+You mentioned, I guess what I think of as kind of a reward attribution type of a problem,
+meaning things happen in the game, and if you're just measuring the agents progress on
+wins and loses, you don't really know until late in training.
+But I read something about how there's been some experimentation with that binary type
+of a reward relative to more incremental types of a reward, so looking at, you know, kills
+and hits and things like that, specifically some experiments that were done comparing
+like sparse rewards versus dense rewards.
+So yeah, this is something, actually, that interestingly enough, we have been, we have
+been doing some research on.
+So it, when we first started doing one V1 bot, one of the things that we really wanted
+it to learn was creep blocking, and it's the idea that just statistically, if your creeps
+end up in the middle of the map, sorry, slowly over, middle of the map, like into the enemy's
+territory, the enemy can start taking those creeps and killing them faster, and you tend
+to statistically do worse, and so a lot of people tend to creep block at the beginning
+of the game where they'll stand in front of their creeps and prevent them from running
+to the beginning of the map, and so if your opponent is not doing that, what they'll,
+they will end up getting their creeps on your side, your tower will try to take them
+out, and you generally do better that way.
+They couldn't even, with all the training they did, they never saw this happen for one
+V1, so they had to do this shaped reward, basically, you know, give a reward for blocking
+the creeps.
+So however, when we did let it run longer, and this was, I think, earlier this year, we
+actually did start seeing a little bit of that behavior, so I think when it comes to sparse
+or dense reward, and this is, again, this is just off of some of the experiments we've
+seen, you can sometimes see these, like, these good behaviors that you could get out of a
+dense reward, but you have to give it a lot more training time, and so it's really as
+a trade-off of, like, how much, like, how much training time do you need to give it?
+So we do give rewards for kills and things like that, but, you know, in taking towers,
+you get the gold reward, you have to do that, otherwise it would just, I think, it would
+just take too long to see any good results, and sort of interesting fact of this, and
+we saw, actually, in the recent benchmark, is the third game.
+And one of the things that happened is the crowd picked the draft, and so the draft was
+terrible for opening I-5.
+Absolutely terrible.
+It predicted a 2.9% chance of winning, which is pretty abysmal, so it did lose, but the
+interesting thing was, is that we started to see these behaviors where the heroes would
+sacrifice themselves to take a tower, which is kind of strange, like, why are you changing
+your behavior so much to do something like taking out of tower?
+And we realized, is that we've kept the rewards, you know, symmetric, you know, if you win,
+you get one, if you lose, you get negative one, and, but, you know, standard aisle practice,
+you generally have, you know, scam a term that is your horizon, right?
+And so you generally discount the rewards, positive and negative.
+And so if you think you're going to win, it makes sense, you're going to try to drag
+that game out as long as you can to make sure that that penalty is as low as possible.
+So I know, right, it's kind of hilarious.
+And this is what we saw.
+So now we're like, well, now some of that behavior makes sense.
+You sacrifice yourself because of the towers down.
+Then there's more time in the game, because now the enemy team is going to have to work
+harder to keep it balanced.
+And if you eventually lose, you're like, okay, well, now I, you know, got a much smaller
+penalty, but it's hard because you don't want the two teams collaborating, right?
+Yeah, like in general, asymmetrical words are not good.
+And we did try a little experiment so far, trying to see how that works, but like, it's
+tricky.
+It's really tricky to try to get these things right.
+Yeah, you end up with a lot of possibilities for unintended consequences and things that
+unfurl and unexpected ways, I would think.
+Oh, yeah.
+I mean, it's just so many tweaking.
+I think that's, and that's the reason we're doing the research, right, is to figure all
+these things out.
+But even like a few weeks ago, we were talking about how just changing our learning rate.
+We're just like, hey, why don't we explore an experiment with a lower learning rate?
+And oh, guess what?
+That helps.
+Like, there's just, there's so many.
+No, it's too, too bad we can't have the opening of five figure out how to do all these
+things, right?
+You've talked quite a bit about reinforcement learning and some of the papers that I've
+seen referred to in the context of the Open AI 5 and the previous versions were PPO and
+Rainbow and Observe and look further.
+Do you, can you talk a little bit about the roles that each of these plays and how they're
+used in the kind of the training regime?
+Sure.
+So we basically use a pretty scaled out version of PPO.
+We have our training setup, we call, I guess it's training framework, we call rapid, that
+allows us to scale out a lot of, like all of this training, because you know, with reinforcement
+learning, you need lots and lots of samples.
+So we have, I think in our recent blog post, we were talking about how we have 180 days,
+180, sorry, years of training every single day.
+And that's because we're running all of these games in parallel.
+So yeah, so again, it's just, it's basically scaled up PPO.
+One of our, our recent experiment had, so our recent large experiment that we used for
+the benchmark had 80,000 CPUs and 1000 GPUs.
+And about half of those were optimizers, the other half were just doing roll outs.
+And we also have infrastructure for doing evaluations, so that we have like this giant
+tensed word that tells us like how everything's going, we look at sample reuse, we look
+at the, you know, the mean reward, we look at all these different aspects of the training
+to figure out like, is this going well for us?
+Is it not like, what can we tweak, what can we not tweak?
+It's a really great framework for running experiments.
+And we use another teams at OpenAI as well.
+So there are two different types of nodes.
+One was for updates and the other was for something else, what were those two?
+So part of what Rapid does is it does, it handles a lot of like the scaling out.
+We have a whole, you know, different clusters and machines that are used for the whole training
+process.
+And one of those are the optimizers, the optimizers handle all the back prop, you know,
+it's, you know, taking the new parameters, spreading them out to the machines again, combining
+the parameters.
+And then the other half of the machines for the most part are the roll outs.
+And we have both GPU roll outs and non-GPU roll outs because you, so it's basically if you
+want your, as you're running the game, doing your forward passes, do you want to be run
+on GPU?
+And recently we've made that infrastructure change so that it can run on GPU.
+And that does help us not as much speed up training except when we've made the models
+sufficient size than it actually is faster to run it on a GPU.
+What is a roll out specifically?
+Oh, yeah, so roll out is just playing the game, right?
+So it's creating samples.
+So we have all these machines that are creating samples playing the game, you know, seeing
+here's an observation, here's the, you know, here's the next observation, next action,
+you know, your action.
+And then all that gets packaged up and sent to the optimizers.
+And, and then we also have a bunch of machines that do evaluations.
+And so the able to do is, you know, take a snapshot of the parameters and play again against
+our scripted bot.
+And then it will report the results.
+Of course, those, that's usually only useful for the very early part of training because
+again, the scripted bot can only do so much.
+So it's used for new experiments, but later on we have this other piece of infrastructure
+we call scoreboard where we can snapshot parameters played against other snapshots and see how
+they compare.
+And that's really how we decide, you know, coming up to a match if like what is really
+the best of something because otherwise you just can't tell.
+And at a certain point, like even with all these snapshots, we still need humans to evaluate
+because there are, there are probably, as I said, I mentioned this early before very
+quickly, the problem of strategy collapse is what we've been calling it where your opening
+of five might be learning only a small handful of strategies and maybe not learning everything
+just hasn't practiced that.
+So you have five different models that come from five different training iterations.
+Could each of those play a different hero in the same game on the same team?
+You could do that.
+It would require extra infrastructure work.
+Right now we're just sort of doing all of them in parallel with the same brain.
+So they all do have the same brain.
+They're just giving them different inputs and running all of the four passes in parallel.
+You've got these brains that you train for the heroes.
+They use these embedding so that they can, you know, the brain can control any of the heroes
+that open AI five supports at a given time.
+And then it sounds like you play different versions, one against the other to determine
+which ones are best, how long do you play them against?
+Is it a certain number of games or a certain number of quote unquote years, days of play
+to assess, you know, a given model versus against another model?
+So the way our scoreboard is set up right now is that it will try to find the like most
+recent agent that's been uploaded and played against other ones that have the same environment.
+The environment just basically means like we can set up an environment.
+So it's just like sniper versus sniper in which we've done a lot of tests for that.
+And then more recently we've had the ones where we have our 18 hero set.
+So scoreboard looks around and says, okay, like who are the new agents and tries to, you
+know, bias it so they get the most new games, but then other agents like also get games.
+I think it tops out around thing.
+I don't know the exact numbers, but something around maybe like 10,000 games, it'll start
+to ignore you entirely, because it's like, well, we've established what your skill level
+is.
+But other ones, yeah, it's just basically on a need basis, depending on the, because so
+many people are constantly uploading things for their individual experiment, because once
+you get past the scripted bot, you can't really tell very well.
+Okay.
+So it's kind of like a CICD system, you create this model, you experiment with it.
+And then you upload it into this testing infrastructure that basically just pits it against
+other models and determine how it fairs against them.
+Maybe jumping ahead to the actual benchmark match, can you give us the highlights of the
+benchmark match?
+First of all, what were the results?
+Yeah.
+So the results of the benchmark match were the first two games, opening a 5-1 against
+the humans.
+And just one thing you have to understand, like these humans have played for 10,000 hours
+against this game.
+These people are very good at what they do.
+The players we had at the game were like, were some were previous pros, but our casters,
+but they understand the game so well that they're able to talk to other people about it.
+And I think that's really a great demonstration of how well they know it.
+So they're excellent, 99.95% percentile players.
+And they lost the first two games, and the only reason they won the last game was because
+of this adversarial drafting that our audience and Twitch chat were able to assist with.
+So that's the big thing.
+And I think it's not as much, there's a couple things with the drafting results.
+I mean, so the first ones, for the first few minutes of the first two games, it was
+tracking pretty even, but that's how most games go.
+You don't really know if you're winning or not even if things are even like, well,
+opening five got a kill, they got a kill, it was sort of even, but then things changed
+because then opening five starts pushing and they push their lanes and pushing the lanes
+basically means going to the other side of the base and really trying to take the other
+side.
+So even humans had to sacrifice a lot to get some of their first towers.
+And so even though they were getting the towers, it didn't mean that they're really ahead
+because they had to sacrifice so much.
+And then after that, it just kind of went uphill for opening five.
+The fact that the game opens up late in the game is it have to do with that open AI is
+kind of figured out some the right time to start pushing or is it do you see like the
+culmination of some longer term strategy that open AI had been playing all along that,
+you know, either the humans were oblivious to or couldn't effectively counter or something
+like that.
+So I think it's both and it's again, because I think this is actually a complex problem
+because, you know, a lot of professional games even will be pretty even at the beginning
+or even just amateur games.
+So having a advantage at the very beginning does not mean you'll have an advantage later
+in the game, but it can, it's sort of a hard answer.
+I think the thing, how I was talking really about the asymmetric awards, we did start
+doing an experiment where we said, okay, fine, no penalties, right?
+And the games do finish faster because they're trying to maximize that reward.
+So it could be, I think it's a little above, if it's, you know, most games do start out
+even.
+But then also, I think, you know, open AI 5 is motivated to, you know, make it a little
+longer than normal.
+Hmm, where are the humans down?
+Yeah, there you go.
+So it's, yeah, it's all these things, this is why I think after TI certainly will be doing
+a lot more like ablation studies, things like that, to figure out exactly how much of a
+contribution each of these things make, because right now we're just sort of rushing to
+the end, trying to make the best open AI 5 we can, but we really want to understand more
+in depth how, how each of these little knobs affects the performance.
+Are there any other observations that are noteworthy coming out of the benchmark?
+I mean, certainly there are.
+What were some of the main things that, you know, either the open AI team or the audience
+or the commentators observed about the way open AI had learned to play relative to humans?
+Yeah, so I don't know too much about specific strategies.
+I feel like you have to have a certain level of Dota understanding to really understand
+how these things work.
+One thing the commentators did say is that they tend to go very much for pushing lanes,
+which means that like they'll just kind of go straight forward.
+There, again, there are numerous valid strategies in Dota because it is a very complex game.
+They tend to take on these more, I guess, hard fought strategies like where you just kind
+of go for it in some cases and they have the confidence to make it through most of the
+time.
+Not always, but they, and they also support each other.
+That's the other thing that we saw in the last even our internal games is that we have
+this, this Piper parameter called Team Spirit and what we do is, you know, if we turn it
+up, it's basically it's like a shared reward.
+So if the higher it is, the more reward you get for some of your teammates kills rather
+than just one of your kills.
+And interesting things as down at zero, they play terribly and if it's a one, they play
+terribly.
+So there is a mid-ground where you have to be a little bit selfish, but also care about
+your teammates enough to go help them when they're dying.
+But it does, it is interesting, they seem to play more collaboratively than humans at
+times.
+I'm seem to care about each other a little more.
+So I think that is part of the reason that they have done so well.
+You mentioned or I saw in a video somewhere, one of the commentators was talking about
+some strategy that he observed the bots playing.
+I think it was something like keeping the center of the board clear or something to that
+effect that, you know, it took him eight years to figure out or something.
+Yeah.
+So at our first, I think, so we had a, we published a video in a blog post a while back.
+And one of the interesting things about the Dota board is that it's not symmetrical.
+So I mean, it's sort of symmetrical, but there are some different parts.
+And so what Blitz, who was commentating that those games was saying is that there are,
+like, so bottom, the bottom towers on the radiant side are surrounded by forests.
+So it's actually really hard to defend those towers.
+And so his advice is like if you're playing radiant, don't even bother.
+Just let them take those towers because you have a much better chance of taking out the
+enemy and your mid towers and your top towers if you're radiant.
+So it just says, just said that it's like it's very hard to defend the ones in the weeds.
+So again, there's a lot of a lot of strategies there and it's I think the kind of the questions
+you're asking me is like one of these high level strategies.
+It's part of the reason we had these very well practice humans come look at these things
+because these are things that a lot of us just as, you know, as machine learning engineers
+and researchers, we can't spot ourselves because it requires so many hours of gameplay
+that we haven't done yet.
+So maybe to wrap up, can you talk a little bit about how this fits into the broader
+landscape of projects at OpenAI?
+You mentioned that the next big challenge is TI.
+Is this OpenAI 5 allowed to compete in TI like for the 30, 40 million or is it just a
+milestone or are you planning some additional benchmarking kind of there?
+Yeah, so we're just doing this for, I mean, again, OpenAI is a research organization.
+So we're not planning on being part of the human pool as we're not entering a human.
+But I think the main thing for us is really just to see how well we can get OpenAI 5 to work.
+That's our main and only goal is feeling to see, can we get super human performance from
+reinforcement learning and self play?
+Well, Chris, you thanks so much for taking the time to explain all this complicated stuff
+to us and help us understand what OpenAI is doing and why you're also excited about
+the OpenAI 5 playing Dota.
+Great.
+Well, thank you for having me.
+It's been a pleasure.
+All right, everyone, that's our show for today.
+For more information on Christie or any of the topics covered in this episode, head over
+to twimmelai.com slash talk slash 176.
+If you're a fan of the podcast, we'd like to encourage you to head to your Apple or
+Google podcast app and leave us a five-star rating and review.
+The reviews help inspire us to create more and better content and they help new listeners
+find and enjoy the show.
+As always, thanks so much for listening and catch you next time.

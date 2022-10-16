@@ -1,0 +1,2580 @@
+1
+00:00:00,000 --> 00:00:13,400
+Welcome to the Twimal AI Podcast.
+
+2
+00:00:13,400 --> 00:00:18,960
+I'm your host, Sam Charrington.
+
+3
+00:00:18,960 --> 00:00:26,840
+Alright everyone, I am on the line with David Duveno, David is an assistant professor
+
+4
+00:00:26,840 --> 00:00:29,560
+at the University of Toronto.
+
+5
+00:00:29,560 --> 00:00:34,840
+David, welcome back to the Twimal AI Podcast, thank you Sam, it's nice to be back.
+
+6
+00:00:34,840 --> 00:00:38,400
+It is great to catch up with you, I'm really looking forward to this.
+
+7
+00:00:38,400 --> 00:00:44,880
+You have been super busy since the last time we spoke, which was back in January of 2018.
+
+8
+00:00:44,880 --> 00:00:49,440
+So just about two years ago, or at least that's when we published the show, we might have
+
+9
+00:00:49,440 --> 00:00:54,520
+actually caught up a little bit before then, but that show was on composing graphical
+
+10
+00:00:54,520 --> 00:01:01,440
+models with neural networks and you've been quite prolific since then and we will hopefully
+
+11
+00:01:01,440 --> 00:01:04,560
+get a chance to talk about a bunch of what you've been up to.
+
+12
+00:01:04,560 --> 00:01:10,360
+Our fur folks back to that show for your full background and how you got started in machine
+
+13
+00:01:10,360 --> 00:01:16,560
+learning, but why don't we start out by having you share a little bit about your current
+
+14
+00:01:16,560 --> 00:01:17,560
+research interests.
+
+15
+00:01:17,560 --> 00:01:22,680
+So yeah, obviously one big thing that's happened since two years ago is that we started
+
+16
+00:01:22,680 --> 00:01:25,480
+working on differential equations a lot.
+
+17
+00:01:25,480 --> 00:01:29,960
+And we had the first paper, you know, at the neural ODE's paper and we've just actually
+
+18
+00:01:29,960 --> 00:01:30,960
+released it.
+
+19
+00:01:30,960 --> 00:01:33,600
+And I'll just interrupt you to say that was a huge paper last year.
+
+20
+00:01:33,600 --> 00:01:40,320
+Yeah, it was, yeah, it was a, this was Neurf's 2018 where that paper was presented and
+
+21
+00:01:40,320 --> 00:01:41,320
+you've been on my list.
+
+22
+00:01:41,320 --> 00:01:46,800
+We actually did try to catch up around that time, but you were, you were super busy and
+
+23
+00:01:46,800 --> 00:01:48,400
+we'll talk about it this time.
+
+24
+00:01:48,400 --> 00:01:49,880
+Okay, great, great, great.
+
+25
+00:01:49,880 --> 00:01:51,640
+There's a lot of, I think, pretty interesting follow ups.
+
+26
+00:01:51,640 --> 00:01:57,600
+I'm trying to not let that take over all the research that happens here, or at least
+
+27
+00:01:57,600 --> 00:02:01,800
+among my students, but we just published a follow up which I'm really happy about where
+
+28
+00:02:01,800 --> 00:02:07,440
+we figured out how to train stochastic differential equations in a scalable way.
+
+29
+00:02:07,440 --> 00:02:11,480
+And that was actually really surprising that it hadn't been worked up before.
+
+30
+00:02:11,480 --> 00:02:14,480
+It was one of these things where I thought, oh, you know, when we looked at ordinary differential
+
+31
+00:02:14,480 --> 00:02:19,920
+equations, the basic math for how to efficiently do backprop through them was already no one
+
+32
+00:02:19,920 --> 00:02:21,240
+in the numeric community.
+
+33
+00:02:21,240 --> 00:02:24,760
+So I assumed that, you know, SDEs have been around almost as long and it would have been
+
+34
+00:02:24,760 --> 00:02:25,760
+worked out.
+
+35
+00:02:25,760 --> 00:02:27,040
+But actually, it hadn't.
+
+36
+00:02:27,040 --> 00:02:34,360
+And there was sort of a few, there was things called like backwards SDEs and a few other
+
+37
+00:02:34,360 --> 00:02:39,800
+approaches for trying to build the same sorts of algorithms for doing a grading based training
+
+38
+00:02:39,800 --> 00:02:40,800
+of SDEs.
+
+39
+00:02:40,800 --> 00:02:41,800
+But none of them were scalable.
+
+40
+00:02:41,800 --> 00:02:45,320
+And I think it's one of these things where the differential equations community typically
+
+41
+00:02:45,320 --> 00:02:48,840
+hasn't been focused on computational efficiency.
+
+42
+00:02:48,840 --> 00:02:52,680
+So the idea is that, you know, showing that there exists these dynamics is, that had
+
+43
+00:02:52,680 --> 00:02:55,960
+been worked out with the dynamics where, but how to do these things efficiently hadn't
+
+44
+00:02:55,960 --> 00:02:56,960
+been.
+
+45
+00:02:56,960 --> 00:03:00,920
+So I teamed up with a probableist here at University Toronto, Leonard Wong, an amazing
+
+46
+00:03:00,920 --> 00:03:04,120
+undergrad who's now a Google Brain resident, Joy Chen Lee.
+
+47
+00:03:04,120 --> 00:03:08,200
+And we worked out all the details and, you know, they're the ones who really did the mathematical
+
+48
+00:03:08,200 --> 00:03:09,680
+heavily lifting.
+
+49
+00:03:09,680 --> 00:03:13,840
+And I just sort of convinced them that there had to exist a simple algorithm or rather
+
+50
+00:03:13,840 --> 00:03:17,840
+an efficient algorithm because for everything else that people have looked at, there's always
+
+51
+00:03:17,840 --> 00:03:18,840
+one.
+
+52
+00:03:18,840 --> 00:03:23,720
+Backpropagation always has the same asymptotic time complexity as the forward pass.
+
+53
+00:03:23,720 --> 00:03:27,760
+And this was one area where people sort of thought, oh, maybe it's not the case that there
+
+54
+00:03:27,760 --> 00:03:31,640
+is such a efficient reverse algorithm and we eventually worked out what it was.
+
+55
+00:03:31,640 --> 00:03:33,160
+So I'm really happy about that.
+
+56
+00:03:33,160 --> 00:03:39,920
+I feel like we're just diving into the neural ODE stuff and we'll circle back to maybe
+
+57
+00:03:39,920 --> 00:03:45,400
+how all of the different things your lab works on kind of connect together.
+
+58
+00:03:45,400 --> 00:03:50,520
+But for the neural ODE stuff, let's just start from the beginning.
+
+59
+00:03:50,520 --> 00:03:54,920
+I am sure there are folks that are listening that don't really understand what a differential
+
+60
+00:03:54,920 --> 00:03:55,920
+equation is.
+
+61
+00:03:55,920 --> 00:03:56,920
+So.
+
+62
+00:03:56,920 --> 00:03:57,920
+Yeah.
+
+63
+00:03:57,920 --> 00:03:59,760
+And the only thing is that I actually never learned these in undergrad.
+
+64
+00:03:59,760 --> 00:04:02,560
+Like I never took one of these courses on ODE's.
+
+65
+00:04:02,560 --> 00:04:03,560
+Oh, really?
+
+66
+00:04:03,560 --> 00:04:04,560
+Yeah.
+
+67
+00:04:04,560 --> 00:04:07,520
+I just kind of picked it up, you know, from talking to people who knew about them and
+
+68
+00:04:07,520 --> 00:04:08,520
+reading about them.
+
+69
+00:04:08,520 --> 00:04:09,520
+It's almost good.
+
+70
+00:04:09,520 --> 00:04:14,480
+So if you take a course on ODE's, at least the ones that I've looked at, most of the material
+
+71
+00:04:14,480 --> 00:04:18,320
+is based around solving them exactly for special cases.
+
+72
+00:04:18,320 --> 00:04:24,080
+So if you have like linear ODE or some sort of structure in a second order ODE, there
+
+73
+00:04:24,080 --> 00:04:27,400
+is this special case is where the answer is like sign or cosine or X or something like
+
+74
+00:04:27,400 --> 00:04:28,400
+that.
+
+75
+00:04:28,400 --> 00:04:34,200
+And most of I think most often, at least when I encountered them in undergrad, it was
+
+76
+00:04:34,200 --> 00:04:42,360
+the context that were was provided was typically like physical systems, like physics or, you
+
+77
+00:04:42,360 --> 00:04:47,000
+know, the relationships between things in the physical world or, you know, often governed
+
+78
+00:04:47,000 --> 00:04:50,200
+by these differential equations.
+
+79
+00:04:50,200 --> 00:04:51,200
+Yeah.
+
+80
+00:04:51,200 --> 00:04:52,200
+Yeah.
+
+81
+00:04:52,200 --> 00:04:53,200
+That's where they typically come from.
+
+82
+00:04:53,200 --> 00:04:56,880
+And that's actually another big difference is that the numeric community is used to looking
+
+83
+00:04:56,880 --> 00:04:59,200
+at differential equations that are given by nature.
+
+84
+00:04:59,200 --> 00:05:01,960
+And they have to work out how am I going to solve these equations?
+
+85
+00:05:01,960 --> 00:05:03,320
+I can't choose which ones I want to solve.
+
+86
+00:05:03,320 --> 00:05:06,640
+I have to see all the ones that are there.
+
+87
+00:05:06,640 --> 00:05:11,320
+And one thing I want to kind of talk about a bit later is that when we use neural networks
+
+88
+00:05:11,320 --> 00:05:14,880
+to specify these differential equations, it's actually a pretty different game because
+
+89
+00:05:14,880 --> 00:05:20,080
+we think that there's many different sets of dynamics that will encode the same or
+
+90
+00:05:20,080 --> 00:05:22,640
+that will roughly solve the problem.
+
+91
+00:05:22,640 --> 00:05:28,880
+So we can maybe try to choose dynamics that are easy to solve that give almost the same
+
+92
+00:05:28,880 --> 00:05:33,200
+answer as like the very best dynamics that might be really hard to solve.
+
+93
+00:05:33,200 --> 00:05:38,120
+How was frame out the problem that you're trying to solve with this line of work?
+
+94
+00:05:38,120 --> 00:05:41,960
+Is it solving a differential equation?
+
+95
+00:05:41,960 --> 00:05:46,960
+Like you have a given differential equation and you're trying to, what exactly are you
+
+96
+00:05:46,960 --> 00:05:47,960
+trying to do?
+
+97
+00:05:47,960 --> 00:05:48,960
+Sure.
+
+98
+00:05:48,960 --> 00:05:50,320
+So that's a great question because there is some work on trying to use neural networks
+
+99
+00:05:50,320 --> 00:05:53,160
+to solve differential equations.
+
+100
+00:05:53,160 --> 00:05:54,800
+And we're not really doing that.
+
+101
+00:05:54,800 --> 00:05:57,960
+Although I do want to mention that one place where I did learn a lot about these was actually
+
+102
+00:05:57,960 --> 00:06:02,760
+when I visited Philip Henning, who's an amazing researcher at the Max Planck Institute.
+
+103
+00:06:02,760 --> 00:06:07,200
+When I was a PhD student, I did an internship with him in Germany for one summer and we worked
+
+104
+00:06:07,200 --> 00:06:11,120
+on a project where we were trying to, well, where he had worked out this correspondence
+
+105
+00:06:11,120 --> 00:06:19,040
+between the standard ODE solvers called like Runga Kuda methods and probabilistic models
+
+106
+00:06:19,040 --> 00:06:23,280
+that like, well, the ocean processes that would extrapolate what these functions would
+
+107
+00:06:23,280 --> 00:06:28,280
+do in the future given observations about their gradients in the present.
+
+108
+00:06:28,280 --> 00:06:32,560
+So basically people had come up with Runga Kuda algorithms by asking how could we extrapolate
+
+109
+00:06:32,560 --> 00:06:36,520
+in such a way that all these errors cancel out and then he realized that actually you
+
+110
+00:06:36,520 --> 00:06:42,160
+can drive these automatically by just putting a Gaussian process prior on these functions.
+
+111
+00:06:42,160 --> 00:06:46,400
+And then if you ask what the predictive posterior looks like, it actually gives you these
+
+112
+00:06:46,400 --> 00:06:48,160
+Runga Kuda algorithms for free.
+
+113
+00:06:48,160 --> 00:06:51,920
+Anyway, but the point is that all this work on neural adhesives is not actually focused
+
+114
+00:06:51,920 --> 00:06:53,560
+on building better solvers.
+
+115
+00:06:53,560 --> 00:06:57,560
+We're saying let's inherit all these amazing solvers that the numeric community has built
+
+116
+00:06:57,560 --> 00:07:04,280
+and just try to repurpose them to train even bigger models than people normally have before.
+
+117
+00:07:04,280 --> 00:07:09,480
+And from a technical point of view, all the tricks in the neural adhes paper were already
+
+118
+00:07:09,480 --> 00:07:13,720
+existed in the numeric literature, we just put them all together in one place.
+
+119
+00:07:13,720 --> 00:07:20,840
+And so when you say train even bigger models, meaning you're trying to come up with algorithms
+
+120
+00:07:20,840 --> 00:07:26,040
+that are either alternatives to gradient descent or enhancements to gradient descent
+
+121
+00:07:26,040 --> 00:07:32,960
+that facilitate converging on different weights for neural networks that the networks themselves
+
+122
+00:07:32,960 --> 00:07:36,920
+are solving arbitrary problems that don't necessarily have to do with differential
+
+123
+00:07:36,920 --> 00:07:37,920
+equations.
+
+124
+00:07:37,920 --> 00:07:39,040
+Oh, that's a great question.
+
+125
+00:07:39,040 --> 00:07:46,720
+So what I mean specifically is let's find efficient ways to compute gradients of predictive
+
+126
+00:07:46,720 --> 00:07:51,880
+loss or some sort of training lots with respect to all the parameters of some differential equations.
+
+127
+00:07:51,880 --> 00:07:56,760
+And then use standard training algorithms like Adam or whatever in the standard ways on
+
+128
+00:07:56,760 --> 00:07:58,240
+the standard losses.
+
+129
+00:07:58,240 --> 00:08:04,960
+And so when we think of a gradient, the way that that's typically described is it's a slope
+
+130
+00:08:04,960 --> 00:08:11,240
+which is a differential equation in a sense.
+
+131
+00:08:11,240 --> 00:08:16,880
+And so you're applying these methods to identify these gradients more quickly.
+
+132
+00:08:16,880 --> 00:08:17,880
+Well, yeah.
+
+133
+00:08:17,880 --> 00:08:22,120
+So it's pretty good for me to be specifying because almost every question you ask about
+
+134
+00:08:22,120 --> 00:08:26,000
+could we use ODE's to compute gradients or gradients to solve ODE's like the answer is
+
+135
+00:08:26,000 --> 00:08:27,000
+always yes.
+
+136
+00:08:27,000 --> 00:08:30,120
+So there's a lot of different ways that these tools combine and different people are working
+
+137
+00:08:30,120 --> 00:08:31,840
+on different aspects of the problem.
+
+138
+00:08:31,840 --> 00:08:39,520
+So to be precise, we're saying people have often like parameterized differential equations
+
+139
+00:08:39,520 --> 00:08:44,120
+based on some few parameters and like simple functions to maybe specify like, you know,
+
+140
+00:08:44,120 --> 00:08:47,200
+how planets evolve or how chemical concentrations change.
+
+141
+00:08:47,200 --> 00:08:51,320
+And then they call ODE solvers to run these forward and find what the trajectories of these
+
+142
+00:08:51,320 --> 00:08:53,120
+systems look like.
+
+143
+00:08:53,120 --> 00:08:58,920
+And sometimes they want to fit those systems to data, which requires computing the gradient
+
+144
+00:08:58,920 --> 00:09:04,200
+of the training loss like the mismatch between the predictions of your model and the data
+
+145
+00:09:04,200 --> 00:09:08,200
+back through these ODE solutions to the parameters that specify them.
+
+146
+00:09:08,200 --> 00:09:12,080
+So those were the in the neural ODE paper, we basically imported all the tricks from
+
+147
+00:09:12,080 --> 00:09:16,480
+the numerical community into one algorithm and said, oh, this is a scalable way to compute
+
+148
+00:09:16,480 --> 00:09:23,080
+gradients where we can use the like fanciest ODE solvers that also the numeric community
+
+149
+00:09:23,080 --> 00:09:24,080
+developed.
+
+150
+00:09:24,080 --> 00:09:28,360
+So it was really, it was really kind of just showcasing a bunch of things that the numeric
+
+151
+00:09:28,360 --> 00:09:32,520
+community knew and putting them all together in such a way that it would scale to very
+
+152
+00:09:32,520 --> 00:09:33,520
+large systems.
+
+153
+00:09:33,520 --> 00:09:34,520
+Got it.
+
+154
+00:09:34,520 --> 00:09:40,240
+And so what I heard you just say was that you kind of people have in the numeric community
+
+155
+00:09:40,240 --> 00:09:47,640
+have, you know, long studied, you know, how to kind of do the, you know, forward projection
+
+156
+00:09:47,640 --> 00:09:52,560
+of differential equations to trajectories of physical things.
+
+157
+00:09:52,560 --> 00:10:00,000
+And then they want to do kind of the backwards reconciliation so that they can determine how
+
+158
+00:10:00,000 --> 00:10:02,680
+accurate their predictions are.
+
+159
+00:10:02,680 --> 00:10:08,920
+And there were a bunch of different techniques or are a bunch of different techniques for
+
+160
+00:10:08,920 --> 00:10:10,320
+doing that.
+
+161
+00:10:10,320 --> 00:10:14,680
+And what's the relationship between, you know, all of that and neural networks?
+
+162
+00:10:14,680 --> 00:10:19,400
+Did you then pull those into like a deep learning or neural network framework or doing this
+
+163
+00:10:19,400 --> 00:10:21,040
+backward gradient calculation?
+
+164
+00:10:21,040 --> 00:10:22,040
+Yeah.
+
+165
+00:10:22,040 --> 00:10:23,880
+So there's a few different ways we can use these tools.
+
+166
+00:10:23,880 --> 00:10:26,560
+And one of them is to fit these physical systems that people have been doing.
+
+167
+00:10:26,560 --> 00:10:31,760
+But what was I think most exciting to the whole deep learning community was to say, oh,
+
+168
+00:10:31,760 --> 00:10:38,680
+there's also a potential that this sort of network, this sort of ODE network could replace
+
+169
+00:10:38,680 --> 00:10:42,720
+some of the backbone of the neural networks that we used to train today.
+
+170
+00:10:42,720 --> 00:10:47,120
+So in particular, residual networks is like the standard way you build a very deep network.
+
+171
+00:10:47,120 --> 00:10:52,920
+And it's just adding together the contributions of a whole bunch of small neural network
+
+172
+00:10:52,920 --> 00:10:54,320
+layers.
+
+173
+00:10:54,320 --> 00:10:57,960
+And so the connection that we talked about in the neural ODE paper, which had been made
+
+174
+00:10:57,960 --> 00:11:05,760
+before, was, oh, well, if you ask, if you look at how one of these ODE solvers solves
+
+175
+00:11:05,760 --> 00:11:10,200
+or like confused one of these long trajectories, it also adds up many different calls to these
+
+176
+00:11:10,200 --> 00:11:13,800
+smaller functions, the only thing that we really did knew was to sort of take this really
+
+177
+00:11:13,800 --> 00:11:19,560
+seriously and say, OK, let's actually then use ODE solvers to solve or to compute the
+
+178
+00:11:19,560 --> 00:11:20,920
+answer of our neural network.
+
+179
+00:11:20,920 --> 00:11:25,640
+And then it can decide, you know, how many function evaluations to make and where.
+
+180
+00:11:25,640 --> 00:11:28,360
+And yeah, so that was the new part.
+
+181
+00:11:28,360 --> 00:11:31,400
+And so this has a few advantages.
+
+182
+00:11:31,400 --> 00:11:34,880
+It's kind of a different way of formulating the problem, instead of saying, here's the
+
+183
+00:11:34,880 --> 00:11:38,880
+algorithm for computing my residual network, which is like, you know, train together 100
+
+184
+00:11:38,880 --> 00:11:39,880
+times.
+
+185
+00:11:39,880 --> 00:11:45,880
+We say, here's the dynamics of this trajectory, ODE solver, it's your job to figure out how
+
+186
+00:11:45,880 --> 00:11:50,840
+many times and we need to evaluate this function and where to tell me what the exact or to approximate
+
+187
+00:11:50,840 --> 00:11:52,640
+what the exact trajectory would be.
+
+188
+00:11:52,640 --> 00:11:57,800
+So the cool thing is that if the problem is easy, it might only need a few calls to the
+
+189
+00:11:57,800 --> 00:12:00,040
+function and if it's hard, it might need a lot.
+
+190
+00:12:00,040 --> 00:12:04,200
+But this is something that's sort of being determined adaptively on the fly, instead
+
+191
+00:12:04,200 --> 00:12:08,160
+of at training time, where normally right now people have to just sort of try different
+
+192
+00:12:08,160 --> 00:12:09,160
+steps.
+
+193
+00:12:09,160 --> 00:12:11,840
+They say, oh, I tried into their neural network with, you know, 10 layers.
+
+194
+00:12:11,840 --> 00:12:13,320
+It didn't do as good as one with 20.
+
+195
+00:12:13,320 --> 00:12:16,880
+I, you know, it started doing better and better than where I added, but then everything
+
+196
+00:12:16,880 --> 00:12:17,880
+was too expensive.
+
+197
+00:12:17,880 --> 00:12:20,440
+So I had to cap it.
+
+198
+00:12:20,440 --> 00:12:25,680
+The hope is that we can now say, oh, let's at training time, let the, like, just tell
+
+199
+00:12:25,680 --> 00:12:30,240
+our optimizer, here's my tradeoff between accuracy and speed.
+
+200
+00:12:30,240 --> 00:12:34,000
+It's up to you to figure out how to, like, trade these things off.
+
+201
+00:12:34,000 --> 00:12:37,720
+So that was something we sort of said you might be able to do, or rather this idea of at
+
+202
+00:12:37,720 --> 00:12:41,600
+training time, trading off accuracy and speed is something that we, you know, thought we
+
+203
+00:12:41,600 --> 00:12:44,000
+could do, but we didn't really work out how to do it.
+
+204
+00:12:44,000 --> 00:12:48,520
+And, but this is one of the papers that it was up late last night working on for somebody
+
+205
+00:12:48,520 --> 00:12:54,560
+to ICML was me and my, since then, me and my student, Jesse Pettincourt also working with
+
+206
+00:12:54,560 --> 00:13:01,280
+an undergrad, Jacob Kelly and my friend at Google, Matt Johnson, we were saying, oh, well,
+
+207
+00:13:01,280 --> 00:13:07,000
+maybe we can add some sort of term, some sort of regularizing term to the loss that makes
+
+208
+00:13:07,000 --> 00:13:09,120
+the dynamics easy to solve.
+
+209
+00:13:09,120 --> 00:13:10,120
+And so we got that to work.
+
+210
+00:13:10,120 --> 00:13:13,640
+And now we can see, oh, there's this tradeoff that we can explore between having, having
+
+211
+00:13:13,640 --> 00:13:19,920
+training a ODE network that exactly minimizes our training loss versus one that is cheap
+
+212
+00:13:19,920 --> 00:13:22,880
+to solve and sort of requires fewer layers.
+
+213
+00:13:22,880 --> 00:13:26,760
+And so now, you know, if depending on your compute budget, you can just move along this
+
+214
+00:13:26,760 --> 00:13:29,600
+pre-do front and trade these things off however you want.
+
+215
+00:13:29,600 --> 00:13:30,600
+Nice.
+
+216
+00:13:30,600 --> 00:13:31,600
+Nice.
+
+217
+00:13:31,600 --> 00:13:33,760
+And that was the neural networks with, no, that's not the neural networks with cheap,
+
+218
+00:13:33,760 --> 00:13:34,760
+this is unpublished stuff.
+
+219
+00:13:34,760 --> 00:13:43,000
+This is an unpublished paper that was just submitted February 7th in the, we hours
+
+220
+00:13:43,000 --> 00:13:46,960
+of the morning for the upcoming ICML conference.
+
+221
+00:13:46,960 --> 00:13:47,960
+Exactly.
+
+222
+00:13:47,960 --> 00:13:50,760
+It doesn't get any harder off the press than that, yeah.
+
+223
+00:13:50,760 --> 00:13:51,760
+Nice.
+
+224
+00:13:51,760 --> 00:13:54,240
+And is it already up on archive or?
+
+225
+00:13:54,240 --> 00:13:55,240
+No, it's not an archive.
+
+226
+00:13:55,240 --> 00:14:01,280
+Although Jesse gave a talk about it at the program transformation workshop at NRIPS, although
+
+227
+00:14:01,280 --> 00:14:04,240
+it wasn't working at that point, we were just sort of saying, here's the math that we're
+
+228
+00:14:04,240 --> 00:14:05,560
+going to try to implement.
+
+229
+00:14:05,560 --> 00:14:09,160
+And so is this related to the cheap differential operator's paper?
+
+230
+00:14:09,160 --> 00:14:10,160
+Sort of.
+
+231
+00:14:10,160 --> 00:14:13,440
+So the cheap differential operator's paper, again, that was actually Ricky's idea.
+
+232
+00:14:13,440 --> 00:14:18,200
+He just sort of came to me and said, hey, I think we can actually constrain the dynamics
+
+233
+00:14:18,200 --> 00:14:23,680
+of our neural networks such that these quantities that we need to compute are cheap.
+
+234
+00:14:23,680 --> 00:14:28,800
+So the motivation from that was there was a follow up to the neural ODE's paper called
+
+235
+00:14:28,800 --> 00:14:29,800
+Fjord.
+
+236
+00:14:29,800 --> 00:14:34,520
+Or the name of the method was Fjord, and it basically said, we can build normalizing
+
+237
+00:14:34,520 --> 00:14:40,720
+flows out of a continuous time using ordinary differential equations.
+
+238
+00:14:40,720 --> 00:14:45,680
+So normalizing flows are a family of density estimators, which just means, you know, a generic
+
+239
+00:14:45,680 --> 00:14:51,040
+way to model any data in an unsupervised way that work by taking a simple density like
+
+240
+00:14:51,040 --> 00:14:57,800
+a Gaussian and somehow warping it into some non-Gaussian complicated parametric density.
+
+241
+00:14:57,800 --> 00:15:03,240
+And so one of the nice follow-ups from the neural ODE's stuff, we're saying, oh, it turns
+
+242
+00:15:03,240 --> 00:15:09,240
+out that if you think of this transformation happening continuously, then the math that
+
+243
+00:15:09,240 --> 00:15:13,080
+you need to compute the change in density is a little bit nicer.
+
+244
+00:15:13,080 --> 00:15:17,760
+So it goes from having to compute the determinant of the Jacobian of the dynamics to just the
+
+245
+00:15:17,760 --> 00:15:22,360
+trace of the Jacobian of the dynamics, and that's actually a lot easier to approximate.
+
+246
+00:15:22,360 --> 00:15:27,560
+So it's still expensive, though, and it's still kind of a downside of this method.
+
+247
+00:15:27,560 --> 00:15:33,760
+So Ricky worked out that actually if we constrain the architecture of these dynamics networks,
+
+248
+00:15:33,760 --> 00:15:38,400
+we can give them exact trace, we can compute their traces exactly.
+
+249
+00:15:38,400 --> 00:15:44,520
+And this is, I kind of like it, so I want to talk about engineering neural network architectures.
+
+250
+00:15:44,520 --> 00:15:48,720
+So there's a lot of work that has been totally foundational to the field where people sort
+
+251
+00:15:48,720 --> 00:15:51,560
+of do trial and error and they say, oh, what if I add more layers here?
+
+252
+00:15:51,560 --> 00:15:56,520
+Or if I change the non-linearities of my network, what if I add noise here or there?
+
+253
+00:15:56,520 --> 00:16:00,280
+And sometimes these are well-motivated theoretically, sometimes or not, sometimes it's just sort
+
+254
+00:16:00,280 --> 00:16:02,960
+of the trial and error that we need to get any technology to work.
+
+255
+00:16:02,960 --> 00:16:03,960
+Right.
+
+256
+00:16:03,960 --> 00:16:09,640
+I think in the first year of my podcast, there was this period where many of my conversations
+
+257
+00:16:09,640 --> 00:16:13,040
+were asking, okay, how is this done?
+
+258
+00:16:13,040 --> 00:16:14,040
+How are people doing?
+
+259
+00:16:14,040 --> 00:16:19,040
+And the answer that I finally came to understand was that it was just trial and error, and
+
+260
+00:16:19,040 --> 00:16:25,440
+graduate student descent was the term thrown around, and a lot of the great models that
+
+261
+00:16:25,440 --> 00:16:32,440
+we use to solve problems then and now, like came out of this just iterative exploratory
+
+262
+00:16:32,440 --> 00:16:33,440
+process.
+
+263
+00:16:33,440 --> 00:16:34,440
+Yeah.
+
+264
+00:16:34,440 --> 00:16:36,000
+And there's nothing wrong with that.
+
+265
+00:16:36,000 --> 00:16:40,440
+But it's more satisfying when we can say, oh, I want to have a network that's going
+
+266
+00:16:40,440 --> 00:16:41,920
+to learn functions with this property.
+
+267
+00:16:41,920 --> 00:16:46,840
+Therefore, I know that I need that my network has this architecture or that, or saying,
+
+268
+00:16:46,840 --> 00:16:50,440
+if it has architecture, it'll definitely be able to learn functions that enforce this
+
+269
+00:16:50,440 --> 00:16:53,240
+property, like maybe some sort of invariance.
+
+270
+00:16:53,240 --> 00:16:57,800
+So there was some really nice work on this called deep sets, which said, what if I want
+
+271
+00:16:57,800 --> 00:17:01,480
+to have a network that takes in a set of things and gives me an answer that doesn't depend
+
+272
+00:17:01,480 --> 00:17:04,920
+on the order of the things in that set, because that's sort of what makes it a set is that
+
+273
+00:17:04,920 --> 00:17:05,920
+the order shouldn't matter.
+
+274
+00:17:05,920 --> 00:17:09,600
+But on a computer, you do have to give things in a particular order.
+
+275
+00:17:09,600 --> 00:17:13,600
+So sometimes people just budget and they randomize the order, but these guys worked out the
+
+276
+00:17:13,600 --> 00:17:18,880
+math to say, oh, here's the family of architectures that will always be invariant to the order
+
+277
+00:17:18,880 --> 00:17:20,560
+of things in a set.
+
+278
+00:17:20,560 --> 00:17:22,280
+So I really liked that work.
+
+279
+00:17:22,280 --> 00:17:26,200
+And then I liked Ricky's idea because it was the same sort of thing saying, okay, well,
+
+280
+00:17:26,200 --> 00:17:28,160
+we know we want our networks to have this property.
+
+281
+00:17:28,160 --> 00:17:30,480
+Here is the general way.
+
+282
+00:17:30,480 --> 00:17:34,200
+Here's the general trade-off where we can say we have to make this sacrifice, but then
+
+283
+00:17:34,200 --> 00:17:35,880
+we will achieve this nice property.
+
+284
+00:17:35,880 --> 00:17:41,440
+And we can actually interpolate between networks that are, let's say, very restricted, but
+
+285
+00:17:41,440 --> 00:17:46,560
+we give you exact traces or ones that are less restricted, but then you have to approximate
+
+286
+00:17:46,560 --> 00:17:48,400
+the trace.
+
+287
+00:17:48,400 --> 00:17:58,040
+And the trace corresponds only to the cost of determining the weight source, the trace,
+
+288
+00:17:58,040 --> 00:18:01,400
+more fundamental or have broader implications.
+
+289
+00:18:01,400 --> 00:18:06,600
+Yeah, which we had a way forward, but when I say trace, I mean, the sum of the diagonal
+
+290
+00:18:06,600 --> 00:18:13,600
+terms in the Jacobian of these networks, and the Jacobian is just the matrix that says,
+
+291
+00:18:13,600 --> 00:18:17,280
+what is the gradient of all the outputs of the network with respect to all of its inputs?
+
+292
+00:18:17,280 --> 00:18:18,280
+Yeah.
+
+293
+00:18:18,280 --> 00:18:24,280
+So it's just one quantity that we sometimes need to evaluate, but it's actually quite expensive
+
+294
+00:18:24,280 --> 00:18:27,680
+to evaluate it exactly from first standard neural networks.
+
+295
+00:18:27,680 --> 00:18:38,640
+So you're able to, by fixing the network architecture, fixing the trace to be easier to compute,
+
+296
+00:18:38,640 --> 00:18:42,520
+does, is characterizing the trace in that way?
+
+297
+00:18:42,520 --> 00:18:49,960
+Is it just an issue of computational complexity, or does the trace have other implications
+
+298
+00:18:49,960 --> 00:18:54,560
+on the network or its performance or its characteristics?
+
+299
+00:18:54,560 --> 00:18:58,480
+It's an issue of computational complexity.
+
+300
+00:18:58,480 --> 00:19:01,360
+Yeah, that's a great question.
+
+301
+00:19:01,360 --> 00:19:06,320
+So I think one very valid question that people asked is basically saying, okay, how does
+
+302
+00:19:06,320 --> 00:19:10,280
+the trade-off look empirically like where along this curve should I go?
+
+303
+00:19:10,280 --> 00:19:12,920
+What does this restriction actually mean in practice?
+
+304
+00:19:12,920 --> 00:19:17,920
+And in this initial paper, all we basically did was lay out the trick and show that it
+
+305
+00:19:17,920 --> 00:19:20,640
+worked in a bunch of settings.
+
+306
+00:19:20,640 --> 00:19:22,200
+But I think that's a great question.
+
+307
+00:19:22,200 --> 00:19:29,200
+We know that this restriction hurts the expressive capacity of these networks, but we haven't
+
+308
+00:19:29,200 --> 00:19:31,360
+characterized them exactly what way.
+
+309
+00:19:31,360 --> 00:19:34,280
+So that's a great question, and I wish I knew the answer.
+
+310
+00:19:34,280 --> 00:19:35,280
+All right, cool.
+
+311
+00:19:35,280 --> 00:19:43,560
+And then another paper that you presented at or that your team worked on at this last
+
+312
+00:19:43,560 --> 00:19:52,280
+nerve was the latent ODEs for a regularly sampled time series, how does that one tie into this
+
+313
+00:19:52,280 --> 00:19:53,280
+body of work?
+
+314
+00:19:53,280 --> 00:19:57,000
+Well, that one was kind of satisfying because the original motivation for looking at ODEs
+
+315
+00:19:57,000 --> 00:20:01,960
+in the first place was Yulia, who's the first author of that paper and the, well, second
+
+316
+00:20:01,960 --> 00:20:06,880
+but co-first author of the neural ODE's paper was working on some medical applications
+
+317
+00:20:06,880 --> 00:20:14,000
+where we had some gene assays of people's tumors that were evaluated at like a week apart
+
+318
+00:20:14,000 --> 00:20:19,240
+and then a month apart and then maybe another week apart and then a year apart.
+
+319
+00:20:19,240 --> 00:20:23,440
+And it's not quite clear how to fit that sort of data into a standard recurrent neural
+
+320
+00:20:23,440 --> 00:20:24,920
+network or something like that.
+
+321
+00:20:24,920 --> 00:20:28,160
+So that made us look at these continuous time models in the first place.
+
+322
+00:20:28,160 --> 00:20:31,520
+But then we wrote the neural ODEs paper, which didn't, it just had proof of concept.
+
+323
+00:20:31,520 --> 00:20:35,280
+It just said, oh, here's something you can do, we look, we explore it on toy data.
+
+324
+00:20:35,280 --> 00:20:41,360
+So I think academics, including myself, have a bad habit of taking an applied problem,
+
+325
+00:20:41,360 --> 00:20:44,720
+saying, oh, if we did solve this theoretical thing, we could tackle this applied problem,
+
+326
+00:20:44,720 --> 00:20:48,080
+write a paper about solving the theoretical thing and never go back to the problem.
+
+327
+00:20:48,080 --> 00:20:52,880
+So we still haven't applied it to the original data set that Yulia was looking at, but
+
+328
+00:20:52,880 --> 00:20:57,280
+we did apply it in that paper to a standard medical records data set where it's like people
+
+329
+00:20:57,280 --> 00:21:01,040
+in the intensive care unit and there's also different measurements being made of them
+
+330
+00:21:01,040 --> 00:21:03,520
+from different people at different times, like what is their temperature or their blood
+
+331
+00:21:03,520 --> 00:21:08,720
+pressure or whatever, and being able to combine this all into one model is something that's
+
+332
+00:21:08,720 --> 00:21:11,840
+not very natural for the discrete time models we normally use.
+
+333
+00:21:11,840 --> 00:21:15,840
+So we sort of showcase that, yeah, once you have continuous time, here's a set of architectures
+
+334
+00:21:15,840 --> 00:21:20,800
+you can explore in the advantages and yeah, it worked, it was satisfying paper to write.
+
+335
+00:21:20,800 --> 00:21:30,000
+What is the role that this continuous time versus these regularly sample time series played
+
+336
+00:21:30,000 --> 00:21:36,880
+in the original paper, was it a big motivator or just a side note, given this machinery,
+
+337
+00:21:36,880 --> 00:21:40,640
+we can probably tackle this continuous time problem differently.
+
+338
+00:21:40,640 --> 00:21:46,320
+Yeah, so it was the original thing that maybe started to revisit these models,
+
+339
+00:21:46,320 --> 00:21:49,680
+but then in the paper it ended up being secondary.
+
+340
+00:21:49,680 --> 00:21:52,560
+I think in most people's eyes who are just interested in supervised learning,
+
+341
+00:21:52,560 --> 00:21:56,560
+right, like the bread and butter of the machine learning community is like I want to train a
+
+342
+00:21:56,560 --> 00:22:01,200
+giant classifier or something, and so we put that front and center because we knew that would
+
+343
+00:22:01,200 --> 00:22:08,240
+be a lot of broader interest, but the thing is that until we make noise faster or at least
+
+344
+00:22:08,240 --> 00:22:14,000
+as fast as standard architectures, I don't think people are going to, I don't think people should
+
+345
+00:22:14,000 --> 00:22:19,520
+use them, and so that's why that motivated the work with Jesse on regularizing them,
+
+346
+00:22:19,520 --> 00:22:20,800
+regularizing them to be fast.
+
+347
+00:22:20,800 --> 00:22:24,400
+We're still at the proof of concept stage there, we just got to working in some standard
+
+348
+00:22:24,400 --> 00:22:30,560
+endless sort of things, but right now I am really excited about the time series setting
+
+349
+00:22:30,560 --> 00:22:37,920
+for two reasons, so one is that it's really, right now, one of the main areas where you definitely
+
+350
+00:22:37,920 --> 00:22:42,080
+do need a continuous time model, or rather you definitely need differential equations, if you
+
+351
+00:22:42,080 --> 00:22:45,280
+start talking about continuous time, you're basically already said you're using differential
+
+352
+00:22:45,280 --> 00:22:49,760
+equations, like I don't want to go and shoehorn differential equations in where they don't
+
+353
+00:22:49,760 --> 00:22:55,680
+actually make sense empirically or practically just because it's like a cool thing, and so the other
+
+354
+00:22:55,680 --> 00:22:57,120
+thing is that I think the...
+
+355
+00:22:57,120 --> 00:23:04,480
+What is it about continuous time models or problems that necessitates differential equations?
+
+356
+00:23:04,480 --> 00:23:09,920
+Oh, well you need to be able to say how the system changes for any arbitrarily small amount of time,
+
+357
+00:23:09,920 --> 00:23:14,480
+and so once you've done that, the only way to do that is to basically describe the derivatives
+
+358
+00:23:14,480 --> 00:23:22,400
+of the state. Like maybe you don't like discrete time, the relationship is between something
+
+359
+00:23:22,400 --> 00:23:29,200
+happening at time n and something happening at time n plus one, whereas with continuous time,
+
+360
+00:23:29,920 --> 00:23:37,760
+you need a continuous function to relate things happening at different times, and if that's the case,
+
+361
+00:23:38,960 --> 00:23:40,880
+you hope that it's differentiable.
+
+362
+00:23:40,880 --> 00:23:45,680
+Yeah, or rather, if it is a continuous function that says how the thing changes, then that meets the
+
+363
+00:23:45,680 --> 00:23:48,880
+definition of a differential equation as far as like my turn. Like maybe there could be some...
+
+364
+00:23:48,880 --> 00:23:49,440
+Yeah, I got it.
+
+365
+00:23:49,440 --> 00:23:55,280
+But, and the funny thing is that I think the business community and like the medical community haven't,
+
+366
+00:23:55,280 --> 00:24:00,400
+I think kind of hilariously underserved by the machine learning community in the sense that almost
+
+367
+00:24:00,400 --> 00:24:07,120
+all the data sets that they... Like when I talk to the sponsors of vector or people at like
+
+368
+00:24:07,120 --> 00:24:11,120
+big companies, they say, okay, so my data looks like I have a bunch of interactions with my
+
+369
+00:24:11,120 --> 00:24:14,800
+customer that happen over years, and they're irregularly sampled and they're different types of
+
+370
+00:24:14,800 --> 00:24:19,120
+observations, and I want to be able to predict... I'm going to be able to model this data and deal
+
+371
+00:24:19,120 --> 00:24:22,400
+with the fact that it's like all missing... or almost all missing almost all the time.
+
+372
+00:24:23,600 --> 00:24:28,880
+How do I do this? And I say, well, I mean, I guess you could kind of shoehorn it into an R&N maybe,
+
+373
+00:24:28,880 --> 00:24:34,960
+like vending data. There's some nice work on deep common filters by David Santag and some other
+
+374
+00:24:34,960 --> 00:24:41,840
+people at NYU and MIT that said, okay, if you move things to discrete time, here's how to deal with
+
+375
+00:24:41,840 --> 00:24:48,000
+missing data. But it's really just like the bread and butter of like most of industry doesn't,
+
+376
+00:24:48,560 --> 00:24:54,400
+like their data sets just don't fit with what's coming out of most machine learning labs,
+
+377
+00:24:54,400 --> 00:24:58,800
+who are more focused on things like video or audio or text, where you really can't say that
+
+378
+00:24:58,800 --> 00:25:02,880
+there's an observation at every time step. Well, a lot of times don't we just throw away the
+
+379
+00:25:02,880 --> 00:25:09,840
+sequential nature of the problem and just treat each individual sample as, you know, unrelated
+
+380
+00:25:09,840 --> 00:25:14,000
+training data drawn from a distribution? Oh, yeah, that's one of the ways that you can force the
+
+381
+00:25:14,000 --> 00:25:18,720
+data to match your model. And I guess I'll just see, you know... But the point being that you,
+
+382
+00:25:18,720 --> 00:25:24,560
+yeah, if actually there's some sequence there, you're throwing away information. And what this
+
+383
+00:25:24,560 --> 00:25:30,720
+is doing is proposing a way to take advantage of that information yet still be tractable. Yeah,
+
+384
+00:25:30,720 --> 00:25:36,320
+exactly. We want to meet the data where it lives. I think in the future, like statisticians
+
+385
+00:25:36,320 --> 00:25:40,000
+should take some sort of Hippocratic oath where they swear not to just like destroy data.
+
+386
+00:25:42,560 --> 00:25:47,440
+I mean, I mean, you know, a lot of data is not particularly valuable, but the point is I see
+
+387
+00:25:47,440 --> 00:25:52,240
+oftentimes, including, you know, in my own work, if we don't have the tools, then you just say,
+
+388
+00:25:52,240 --> 00:25:56,000
+okay, well, we have to throw away a bunch of data and we're already crippling our ability to make
+
+389
+00:25:56,000 --> 00:26:02,560
+good predictions when you do that step. So that's kind of how I view, like maybe not just my recent
+
+390
+00:26:02,560 --> 00:26:07,040
+research, but how the field moves in general is how do we get closer and closer to the raw sensors
+
+391
+00:26:07,040 --> 00:26:11,680
+and put more and more of the modeling problem into the hands of one giant model that's jointly
+
+392
+00:26:11,680 --> 00:26:15,280
+looking at everything instead of a sequence of people who are each looking at their little piece
+
+393
+00:26:15,280 --> 00:26:20,000
+and throwing away what they think isn't necessary. So we've talked about the cheap differential
+
+394
+00:26:20,000 --> 00:26:28,400
+operator's paper. We've talked about the irregularly sample time series paper. There's a paper
+
+395
+00:26:28,400 --> 00:26:33,840
+residual flows for invertible generative modeling. Is that the residual flows paper that we talked
+
+396
+00:26:33,840 --> 00:26:37,360
+about or is that a different residual flows paper? Yes, that's confusing. So that's a different
+
+397
+00:26:37,360 --> 00:26:41,840
+residual flows paper. And it's kind of funny because so we had this follow up to the neural
+
+398
+00:26:41,840 --> 00:26:48,640
+ods paper called fjord, which was the continuous time version. And the cool thing about that was
+
+399
+00:26:48,640 --> 00:26:53,760
+that it let you use totally unrestricted neural network architectures. So I was talking before
+
+400
+00:26:53,760 --> 00:26:57,600
+about how sometimes you can restrict the architecture to allow you to have some nice property. So
+
+401
+00:26:57,600 --> 00:27:03,360
+that's what the normalizing flows community did from about 2015 to 2019. There's like real NDP,
+
+402
+00:27:03,360 --> 00:27:08,800
+slow, all these big models where they said, oh, if we restrict our architecture, we can compute the
+
+403
+00:27:08,800 --> 00:27:15,120
+change in density cheaply. But then it's kind of hard to figure out how to make these restrictions
+
+404
+00:27:15,120 --> 00:27:18,720
+without requiring a whole bunch of layers. And these models end up being very deep and
+
+405
+00:27:18,720 --> 00:27:23,040
+very expensive train. And so we said, oh, if you go to continuous time, you can just use any
+
+406
+00:27:23,040 --> 00:27:29,120
+network architecture. And it's fine. But then a couple years ago, Yorne Jacobson and Jens
+
+407
+00:27:29,120 --> 00:27:35,600
+Bareman came to the vector institute. And we're thinking about the same problems. And they said,
+
+408
+00:27:35,600 --> 00:27:41,680
+okay, well, fjord is great. But you know, people don't like to have an odsolver inside of their
+
+409
+00:27:41,680 --> 00:27:45,600
+model. And I think that's the reason of all thing to not want. Because now you have to fiddle,
+
+410
+00:27:45,600 --> 00:27:50,000
+you have to worry about some numeric issues. You have to choose an error tolerance.
+
+411
+00:27:50,880 --> 00:27:56,000
+There are similar issues with like floating point, but not as bad. Anyway, and they worked out,
+
+412
+00:27:56,000 --> 00:28:01,600
+they said, okay, well, what if we use the same math, but for discrete time, could we come up with
+
+413
+00:28:02,320 --> 00:28:06,640
+some version of fjord that actually used standard neural network architectures and fixed
+
+414
+00:28:06,640 --> 00:28:12,000
+number of layers and the sort of standard way of setting things up that we that everyone's comfortable
+
+415
+00:28:12,000 --> 00:28:16,480
+with, but inherited some of the nice mathematical properties. And then they did work it out and
+
+416
+00:28:17,200 --> 00:28:22,000
+found and basically worked out over the course of these two papers. Another way to get an unbiased
+
+417
+00:28:22,000 --> 00:28:28,480
+estimate of the change in density, but for finite time discrete flows. So it's kind of funny
+
+418
+00:28:28,480 --> 00:28:33,760
+because it's like this detour into continuous time led to a better discrete time model.
+
+419
+00:28:33,760 --> 00:28:41,040
+And that's the invertible generative modeling paper. Yeah, well, there's two. One of them,
+
+420
+00:28:41,040 --> 00:28:45,360
+it was called the newer one was called residual flows. And then the first one was called invertible
+
+421
+00:28:45,360 --> 00:28:50,080
+resonance. And maybe we were polluting the the namespace with all these like minor variations.
+
+422
+00:28:52,240 --> 00:28:58,560
+I mean, Miss, that what is the review the invertible characteristic for me?
+
+423
+00:28:58,560 --> 00:29:01,040
+Oh, well, so one thing. What is that saying?
+
+424
+00:29:01,040 --> 00:29:05,600
+Yeah, so what that means is that if I have two different possible inputs to my network,
+
+425
+00:29:06,720 --> 00:29:13,040
+they won't ever map to the same output. So if you want to use the change of variables formula,
+
+426
+00:29:13,040 --> 00:29:17,680
+you need to make sure that you never take the original density and somehow like
+
+427
+00:29:18,480 --> 00:29:24,640
+tear it or squish it into a point. All of these things cause sort of infinities in the in the
+
+428
+00:29:24,640 --> 00:29:31,120
+likelihood. It makes me think of like a some kind of hash relationship. Is there anything interesting
+
+429
+00:29:31,120 --> 00:29:35,200
+there? Yeah, maybe you could say we want to avoid we want to write a hash function that avoids
+
+430
+00:29:35,200 --> 00:29:39,200
+collisions. I mean, the thing is we don't necessarily want to scramble our density.
+
+431
+00:29:39,920 --> 00:29:43,440
+But yeah, we definitely do want to control when we lose information in these networks.
+
+432
+00:29:44,240 --> 00:29:47,760
+Because if we ever lose this right information, then we can't use this this change of variable
+
+433
+00:29:47,760 --> 00:29:57,600
+formula. And are you also saying that networks that are thus characterized if given a prediction,
+
+434
+00:29:57,600 --> 00:30:03,360
+you can go back to the original inputs? Is it that invertible? Yeah, yeah. So it's the same,
+
+435
+00:30:03,360 --> 00:30:07,760
+when we say an invertible function, it's the same like in one dimensional, like I say, for
+
+436
+00:30:07,760 --> 00:30:12,400
+instance, f of x equals x. Okay, that's a silly example. Okay, f of x equals three times x square
+
+437
+00:30:12,400 --> 00:30:16,240
+root and square, for example. Yeah, so square is not invertible. Well, that's not square
+
+438
+00:30:16,240 --> 00:30:21,840
+invertible because of the signs. Right, right. But okay, square root is invertible on the positive
+
+439
+00:30:21,840 --> 00:30:26,960
+reals square is not invertible because you can square the positive number or the negative number
+
+440
+00:30:26,960 --> 00:30:32,000
+and get the same answer. Right, right. It's a little bit getting into the weeds, but basically
+
+441
+00:30:32,960 --> 00:30:37,920
+the residual networks mean that we can use any architecture we want to train normalizing flows.
+
+442
+00:30:38,720 --> 00:30:43,600
+And this is in contrast to the previous methods like glow and real MVP that had to restrict the
+
+443
+00:30:43,600 --> 00:30:51,600
+architecture. And so the remaining of the four papers that you had at NURBS is efficient graph
+
+444
+00:30:51,600 --> 00:30:58,800
+generation with graph for current attention networks. Yeah. Is that also related to this ODE thread
+
+445
+00:30:58,800 --> 00:31:03,360
+or is that off on its own? No, and that was really, you know, one of the papers that,
+
+446
+00:31:04,160 --> 00:31:09,920
+well, it was driven mainly by the first author, Renji Lau, who's amazing. And there's been a sort of
+
+447
+00:31:09,920 --> 00:31:15,200
+race once people said, oh, you know, we could build generative models over graphs to try to make
+
+448
+00:31:15,200 --> 00:31:19,920
+them scale. And again, it's related to this question of how do we enforce some invariance? So
+
+449
+00:31:20,480 --> 00:31:23,680
+people are always trying to say, well, the funny thing about a graph is that the order of the
+
+450
+00:31:23,680 --> 00:31:28,480
+nodes doesn't matter. And this is sort of the central, this makes a lot of things hard because
+
+451
+00:31:28,480 --> 00:31:34,880
+if we like graph isomorphism is a standard sort of known to be harder than polynomial time. Oh,
+
+452
+00:31:34,880 --> 00:31:39,280
+I think it might have just been recently shown to be in some sort of like quasi polynomial time.
+
+453
+00:31:39,760 --> 00:31:43,840
+Anyway, it was thought to be hard for a long time. I forget the exact complexity classes in
+
+454
+00:31:45,360 --> 00:31:50,000
+which is given to graphs like a list of nodes and edges determined whether the same graph that's
+
+455
+00:31:50,000 --> 00:31:54,880
+that's not trivial. So we want to make sure that our models of graphs also don't care about the
+
+456
+00:31:54,880 --> 00:31:59,120
+ordering. And so we were building up some work recently that said, oh, well, there was a lot of progress
+
+457
+00:31:59,120 --> 00:32:02,960
+being made sort of by just ignoring the problem to some extent and saying, well, let's just choose
+
+458
+00:32:02,960 --> 00:32:08,720
+unordering. And as long as we can assign high likelihood to like one of the many orderings that
+
+459
+00:32:08,720 --> 00:32:15,040
+matches the data, that's probably good enough. And so people like Will Hamilton now at McGill was
+
+460
+00:32:15,040 --> 00:32:19,520
+using recurrent neural networks to gradually iteratively add one node to the graph as we generate
+
+461
+00:32:19,520 --> 00:32:26,400
+them. And he was sort of using recurrent networks both at each node addition. And then
+
+462
+00:32:26,400 --> 00:32:34,240
+within each iteration of node addition, he went over the existing nodes in the graph and it fixed
+
+463
+00:32:34,240 --> 00:32:40,400
+order with another RNN. So it was kind of like an RNN within an RNN. So completely breaking this
+
+464
+00:32:40,400 --> 00:32:45,280
+order and variance like like twice over. And then we did that paper says, oh, we actually only
+
+465
+00:32:45,280 --> 00:32:50,800
+have to bring it once. We have to choose an order. If we use graph neural networks, the great
+
+466
+00:32:50,800 --> 00:32:55,360
+thing about graph neural networks is that their answer doesn't depend on the order of the nodes in
+
+467
+00:32:55,360 --> 00:33:05,520
+the graph. Those were the papers that you had at Nureps more broadly. This neural ODE thing is
+
+468
+00:33:05,520 --> 00:33:12,160
+just kind of one of many things that you're focused on in your lab. I've got a list of those here.
+
+469
+00:33:12,160 --> 00:33:18,320
+Automatic chemical design using generative models. That is sounds more applied than anything that
+
+470
+00:33:18,320 --> 00:33:21,840
+we've talked about thus far. Yeah, maybe that's a little old. I mean, that was stuff that I did mostly
+
+471
+00:33:21,840 --> 00:33:26,320
+in my postdoc at Harvard. Oh, really? Working with the alumnus for music, who he's really
+
+472
+00:33:26,320 --> 00:33:31,360
+taking the mantle on that one. And now he actually moved to Toronto. Yeah. Well, maybe I should just
+
+473
+00:33:31,360 --> 00:33:36,160
+abandon this list and let you pop it up a level and tell us what are some of the other cool things
+
+474
+00:33:36,160 --> 00:33:40,320
+you're excited about? Yeah. Where did you publish on everything you were excited about at Nureps?
+
+475
+00:33:40,320 --> 00:33:44,320
+Oh, no, no. Yeah, still got. So we got lots of stuff. And the pipeline lots of stuff I still
+
+476
+00:33:44,320 --> 00:33:48,720
+don't even understand well enough to publish on. But one thing I'm kind of starting to appreciate
+
+477
+00:33:48,720 --> 00:33:52,480
+now as an academic in my like fourth year of being a professor is that once you're known for one
+
+478
+00:33:52,480 --> 00:33:56,480
+thing, the incentive to just double down on that one thing are enormous. And it's kind of you know,
+
+479
+00:33:56,480 --> 00:33:59,920
+like when a band like releases an album, but it has a different sound than the old one, everyone's
+
+480
+00:33:59,920 --> 00:34:04,400
+like, well, wait, I thought you were going to talk about that other line of work. But I'm really
+
+481
+00:34:04,400 --> 00:34:10,480
+trying to resist the incentives to pigeonhole myself just because in the really long run, you know,
+
+482
+00:34:10,480 --> 00:34:15,920
+things change. We have to keep it up in mind. So the general area that I've been excited about
+
+483
+00:34:15,920 --> 00:34:21,840
+for a few years, but it's really hard to make progress on is let's say learning to search.
+
+484
+00:34:21,840 --> 00:34:27,280
+So I just thought a grad topic course on this last term. As a way, grad topic courses are a great
+
+485
+00:34:27,280 --> 00:34:34,640
+way to get a feel for an area and several other recent papers and get some students to start projects.
+
+486
+00:34:34,640 --> 00:34:39,760
+And it totally worked out. So actually, and a lot of people at DeepMind have been working on
+
+487
+00:34:39,760 --> 00:34:47,120
+and are publishing similar ideas along this theme. It sounds like a kind of mash up between
+
+488
+00:34:47,120 --> 00:34:53,120
+meta learning and neural architecture search. Is that kind of the direction? Yeah, maybe those
+
+489
+00:34:53,120 --> 00:34:58,720
+are related things. I mean, the basic idea is that we have algorithms like Monte Carlo
+
+490
+00:34:58,720 --> 00:35:05,760
+research that now we're starting to understand how to embed in other hard machine learning problems
+
+491
+00:35:05,760 --> 00:35:11,040
+in particular inference and planning. So the idea is that most of what reinforcement learning has
+
+492
+00:35:11,040 --> 00:35:16,320
+done or meta learning just says, oh, yeah, I'll just sort of brute sort brute force try to learn
+
+493
+00:35:16,320 --> 00:35:21,200
+a policy that does the right thing in every situation. It has a giant lookup table of when you're
+
+494
+00:35:21,200 --> 00:35:25,760
+in this situation, you should take this action. And that works if you can train the policy, but it's
+
+495
+00:35:25,760 --> 00:35:29,760
+really expensive and it requires it puts a lot of strain on this one neural network, this policy.
+
+496
+00:35:30,480 --> 00:35:33,920
+And, you know, I think most people agree that what humans do is they have this hybrid approach
+
+497
+00:35:33,920 --> 00:35:37,760
+where they say, well, I know roughly what to do, but whenever I realize I'm in a tough or novel
+
+498
+00:35:37,760 --> 00:35:41,760
+situation, I'm going to stop and plan and I'm going to think imagine a few steps ahead.
+
+499
+00:35:42,640 --> 00:35:46,160
+What would happen if I did this, what would happen if I do that and then evaluate what I like
+
+500
+00:35:46,160 --> 00:35:51,760
+that outcome. And so doing a little bit of search on the day when you need to make a decision in
+
+501
+00:35:51,760 --> 00:35:55,520
+your mind takes a lot of pressure off the policy and makes you a much more powerful agent without
+
+502
+00:35:55,520 --> 00:36:01,120
+having to in your head prepare for every possible contingency ahead of time. And so like nothing
+
+503
+00:36:01,120 --> 00:36:06,240
+I'm saying is like new or groundbreaking. I'm just saying that now we finally have the tools
+
+504
+00:36:06,240 --> 00:36:10,320
+to build such systems. And there's been a lot of work coming out of deep mind in this way.
+
+505
+00:36:10,960 --> 00:36:16,320
+One paper that I feel like is waiting to be written is about intrinsic motivation or curiosity.
+
+506
+00:36:16,320 --> 00:36:21,760
+So there's all these papers talking about, oh, you know, how is it that people somehow know not
+
+507
+00:36:21,760 --> 00:36:27,040
+to not just pursue their goal directly, but also try to learn and do some exploration or stuff.
+
+508
+00:36:27,040 --> 00:36:32,080
+Maybe something of something evolution, something something like the value of randomness.
+
+509
+00:36:33,200 --> 00:36:37,760
+And it kind of so I think these papers are making sensible technical suggestions, but the
+
+510
+00:36:38,400 --> 00:36:43,040
+philosophical sort of speculation about why is this curiosity necessary and making it sound
+
+511
+00:36:43,040 --> 00:36:48,560
+like some serious thing bugs me because if you just say I am going to have to solve a task,
+
+512
+00:36:48,560 --> 00:36:52,640
+but I don't know exactly what it is yet or I don't know exactly what the dynamics of my environment
+
+513
+00:36:52,640 --> 00:36:59,040
+are, then the optimal plan will include doing some exploration, some learning, practicing skills.
+
+514
+00:37:00,320 --> 00:37:05,360
+So in particular, if we formalize this as a Palm D.P. partially observable Markov decision
+
+515
+00:37:05,360 --> 00:37:08,640
+process, this is like the bread and butter of reinforcement learning since like the 70s.
+
+516
+00:37:08,640 --> 00:37:12,720
+We can't solve these because it's too expensive, but if we could, all these behaviors would
+
+517
+00:37:12,720 --> 00:37:18,240
+emerge automatically. And it's not clear to me how much other people agree with me about this,
+
+518
+00:37:18,240 --> 00:37:21,840
+because for a long time I thought I was the only one who thought this. But then when I started
+
+519
+00:37:21,840 --> 00:37:26,320
+to talk to some other, and I thought that probably because the motivations of these curiosity papers
+
+520
+00:37:26,320 --> 00:37:30,320
+didn't seem to understand this point. But then when I talk to some of the serious RL people that I
+
+521
+00:37:30,320 --> 00:37:36,560
+know, they're like, oh yeah, of course, yes, that's I totally agree. So you know, it's that's
+
+522
+00:37:36,560 --> 00:37:39,840
+reassuring. It's also kind of sad because you want to be the one guy with the idea that no one
+
+523
+00:37:39,840 --> 00:37:48,720
+else realizes, right? So yeah, so right now we can't scale up these amortized planning algorithms
+
+524
+00:37:48,720 --> 00:37:54,240
+to do effective exploration in really tricky domains. Like what you'd like is if you put your agent
+
+525
+00:37:54,240 --> 00:37:58,560
+in a gym and you said, you know, you're going to have to play a game tomorrow. I'm not going to
+
+526
+00:37:58,560 --> 00:38:03,040
+tell you what it would, you know, learn to dribble a basketball or like, you know, pick up the soccer
+
+527
+00:38:03,040 --> 00:38:07,360
+ball and learn to kick it or, you know, just invent games that it might have to play and then
+
+528
+00:38:08,000 --> 00:38:11,520
+invent practice drills for itself to learn the dynamics of how it could, how it should play them.
+
+529
+00:38:12,160 --> 00:38:16,640
+And I think that's there's no remaining foundational problems there, but there's just a lot of
+
+530
+00:38:16,640 --> 00:38:20,800
+engineering problems for which we have now promising tools to tackle those.
+
+531
+00:38:21,920 --> 00:38:28,800
+Yeah, as a researcher, how do you approach engineering problems? And do you approach them differently
+
+532
+00:38:28,800 --> 00:38:32,560
+than an engineer might or, you know, is it about framing them?
+
+533
+00:38:33,120 --> 00:38:37,840
+Yeah, that's a great question. I mean, I would say the one of the blessings in the
+
+534
+00:38:37,840 --> 00:38:41,520
+curse of this job that really feels like a blessing most of the time is that I don't spend a lot
+
+535
+00:38:41,520 --> 00:38:45,920
+of time engineering. And I really like getting my hands dirty and coating up to the point of a
+
+536
+00:38:45,920 --> 00:38:51,680
+proof of concept, but it is a bit of a slog to get these things to work. And my students are
+
+537
+00:38:51,680 --> 00:38:57,200
+amazing at that. It's been said of my student, Will Graftwell, that he can get a potato to get
+
+538
+00:38:57,200 --> 00:39:05,920
+state of the arts on C-Far 100 if he has to. I mean, and of course, you don't want the engineering
+
+539
+00:39:05,920 --> 00:39:09,840
+skill to be the determiner of which method ends up looking best in your paper. You know, we take
+
+540
+00:39:09,840 --> 00:39:16,400
+that seriously. I'm just saying, the students here are really amazing at finding, diagnosing
+
+541
+00:39:16,400 --> 00:39:20,560
+these problems and getting them to work. It's still really fiddly. I feel like, you know,
+
+542
+00:39:20,560 --> 00:39:23,920
+we're still in the dark ages of understanding what's happening when we're training or on that
+
+543
+00:39:23,920 --> 00:39:32,160
+works or building models, even in, yeah. Is that something that you're focused on from our research
+
+544
+00:39:32,160 --> 00:39:37,120
+perspective? Yeah. So actually, one of the other ICML submissions we published yesterday,
+
+545
+00:39:37,120 --> 00:39:42,240
+or we didn't publish, we submitted yesterday, was a collaboration with Philip Henning trying
+
+546
+00:39:42,240 --> 00:39:48,880
+to automate the step size selection during training. And the idea is that we said, oh, well,
+
+547
+00:39:48,880 --> 00:39:53,040
+right now when we run stochastic gradient descent, we just, we, you know, if we'd have a
+
+548
+00:39:53,040 --> 00:39:56,400
+momentum or we do atom, we kind of have a little bit of averaging of the previous gradients.
+
+549
+00:39:57,120 --> 00:40:03,200
+But we actually know how to combine noisy observations of different things in, like,
+
+550
+00:40:03,200 --> 00:40:06,800
+perfectly well on principle with common filters. And this is just like a simple,
+
+551
+00:40:07,600 --> 00:40:12,720
+latent variable linear ocean model. And so Phil and his student Lucas were saying, oh, yeah,
+
+552
+00:40:12,720 --> 00:40:17,840
+and one cool thing that we can do now that we couldn't do, at least for modern autodip systems,
+
+553
+00:40:17,840 --> 00:40:22,320
+is get cheap hash and vector products and get them for every example in a mini batch.
+
+554
+00:40:22,320 --> 00:40:26,000
+Anyway, I'm getting into the weeds here, but the point is we can look at all the statistics of
+
+555
+00:40:26,000 --> 00:40:32,560
+the gradients within a mini batch that we're observing, put that in a really cheap and scalable model.
+
+556
+00:40:32,560 --> 00:40:37,520
+And now when we're trying to choose which direction to go and how far to go, we have a lot more
+
+557
+00:40:37,520 --> 00:40:43,760
+information available than normal. So our step size can trade off. You can say, okay, well,
+
+558
+00:40:44,400 --> 00:40:48,800
+I know I'm this certain about the gradients. But I also think there's curvature in this direction.
+
+559
+00:40:48,800 --> 00:40:54,800
+I also think there's, you know, I'm uncertain about the curvature. I think my future gradient
+
+560
+00:40:54,800 --> 00:40:58,640
+observations are going to have this much noise. You can trade off all those things to ask, like, what
+
+561
+00:40:58,640 --> 00:41:03,920
+direction and how far would give me the greatest expected improvement or probability of improvement
+
+562
+00:41:03,920 --> 00:41:08,800
+or whatever else you want. So we kind of hope that is it fair to characterize this as using
+
+563
+00:41:10,000 --> 00:41:16,000
+using a model within the machine learning training process in a place that you would otherwise
+
+564
+00:41:16,000 --> 00:41:22,480
+kind of hard code, hard code a parameter like step size or do like cyclical step sizes or
+
+565
+00:41:22,480 --> 00:41:26,160
+something like that. You got it exactly. And we just took a lot of care to make sure that there
+
+566
+00:41:26,160 --> 00:41:29,600
+was no inner training leap. Like we don't have to train this model. All the updates are closed
+
+567
+00:41:29,600 --> 00:41:34,000
+for them. So the algorithm looks like something like Adam where such a bunch of
+
+568
+00:41:34,000 --> 00:41:38,880
+vectorized operations that don't have any training leaps. Yeah. And then the hope is that
+
+569
+00:41:39,680 --> 00:41:42,640
+using this session information or this information that was always available, but we don't really
+
+570
+00:41:42,640 --> 00:41:48,320
+use it, we can design optimizers that at least always make progress. Maybe they, you know,
+
+571
+00:41:48,320 --> 00:41:53,360
+some fancy tuned hyper parameter schedule will be able to do better in principle. But if you could
+
+572
+00:41:53,360 --> 00:41:56,960
+say I'm just going to run my optimizer for a really long time and it's never going to stop
+
+573
+00:41:57,840 --> 00:42:02,880
+because the learning rate was stuck at being too high or too low. I hope we, you know,
+
+574
+00:42:03,600 --> 00:42:08,640
+we hope that that will make this sort of engineering struggle that every deep learning student
+
+575
+00:42:08,640 --> 00:42:13,760
+faces all day every day at least have one less hyper parameter. And you know, and it's a pretty
+
+576
+00:42:13,760 --> 00:42:22,080
+important hyper parameter. Is there a way to combine this with other methods that have been worked out
+
+577
+00:42:22,080 --> 00:42:27,840
+that, you know, it sounds like what you are fundamentally trying to solve or at least the result
+
+578
+00:42:27,840 --> 00:42:32,800
+you presented is that you're less likely to get stuck in some kind of local optima. Is it also
+
+579
+00:42:32,800 --> 00:42:39,280
+possible to to combine this with, you know, some kind of, you know, acceleration or momentum or
+
+580
+00:42:39,280 --> 00:42:44,720
+something like that so that you can both converge faster and not get stuck in a optima?
+
+581
+00:42:44,720 --> 00:42:48,560
+Yeah, that's a great question. And that's sort of where we left the research or that's how far
+
+582
+00:42:48,560 --> 00:42:53,280
+we've gotten so far is that we got this method to work. We got the step size to work. But
+
+583
+00:42:53,280 --> 00:42:57,680
+finding the enough, we've kind of found that it converges a little too well or rather that
+
+584
+00:42:58,160 --> 00:43:01,920
+so we have this one experiment where if we just want our automatic step size selection,
+
+585
+00:43:01,920 --> 00:43:06,640
+it makes a lot of progress really early and it ends up getting in stuck in a local optimum,
+
+586
+00:43:06,640 --> 00:43:09,760
+which is normally not really okay. I thought that's what I thought that was the
+
+587
+00:43:10,800 --> 00:43:15,920
+the opposite of what it was doing by the way you described it, you know, what it really does
+
+588
+00:43:15,920 --> 00:43:20,000
+as well is, you know, eventually converge. Yeah, well, exactly. Well, when we say converge,
+
+589
+00:43:20,000 --> 00:43:25,360
+though, you know, we can only talk, we only can guarantee local convergence. So these heuristics
+
+590
+00:43:25,360 --> 00:43:28,960
+for saying, oh, what maximizes my probability of improvement or expected improvement, that only
+
+591
+00:43:28,960 --> 00:43:33,600
+looks one step ahead. Yeah, in principle, we do need to somehow look ahead like multiple steps
+
+592
+00:43:33,600 --> 00:43:38,240
+ahead, but in practice, that's just always going to be really hard. It's like as hard as actually
+
+593
+00:43:38,240 --> 00:43:42,480
+solving the original problem. So, you know, we had some reason to believe that this might or to
+
+594
+00:43:42,480 --> 00:43:45,760
+expect that this might be a problem. There's like Roger Gross, my colleague here has some nice work
+
+595
+00:43:45,760 --> 00:43:50,720
+on the short horizon bias basically saying, if you optimize to do one, well, one step ahead, you won't
+
+596
+00:43:50,720 --> 00:43:54,560
+make good long term progress. So the thing is that there's also reason to believe that this wouldn't
+
+597
+00:43:54,560 --> 00:43:59,360
+be a problem because we think that the local optimum that we in training deep nets isn't such a big
+
+598
+00:43:59,360 --> 00:44:03,360
+problem. So, you know, we're not totally sure if these are actually local optimum or just places where
+
+599
+00:44:03,360 --> 00:44:09,200
+the optimizer can't make progress. But we did find that if we run for a fixed step size for a while
+
+600
+00:44:09,200 --> 00:44:13,280
+and then switch to our adaptive step size, that works the best. So it's one of these things where
+
+601
+00:44:14,320 --> 00:44:19,120
+we did get this thing to work better, but because it's myopic, like it only looks a few steps ahead,
+
+602
+00:44:19,120 --> 00:44:25,760
+if you have a really long computational budget, just using fixed step sizes for a while and then
+
+603
+00:44:25,760 --> 00:44:29,440
+switching works best. And so that's an unsatisfying answer. So I think that's the remaining question
+
+604
+00:44:29,440 --> 00:44:34,560
+to get this to be really practical is it could be that if we just run this adaptive thing for
+
+605
+00:44:34,560 --> 00:44:37,760
+long enough, it will be able to escape these local optimum. We haven't really looked into this
+
+606
+00:44:37,760 --> 00:44:44,160
+in depth yet. But anyway, I mean, I'm impressed that you identified the the weakness in this whole
+
+607
+00:44:44,160 --> 00:44:50,800
+story and just guessing it. Yeah, maybe taking a step back, you know, there's kind of a lot of
+
+608
+00:44:50,800 --> 00:44:58,240
+contemporary debate around, you know, the role that deep learning plays in artificial intelligence,
+
+609
+00:44:58,240 --> 00:45:04,320
+moving us to AGI. What kind of motivates you and where do you see this all going?
+
+610
+00:45:04,320 --> 00:45:11,120
+Right. So as I said, I think from a practical point of view in the short term, just being able to
+
+611
+00:45:11,120 --> 00:45:17,680
+meet the data where it is and deal with the actual huge piles of real problems and data sets that
+
+612
+00:45:17,680 --> 00:45:22,640
+can't even really be touched by standard deep learning or at least supervised deep learning or
+
+613
+00:45:22,640 --> 00:45:27,040
+discrete times here's models. That's like huge area of low hanging fruit. And there's a ton of
+
+614
+00:45:27,040 --> 00:45:32,240
+people who are just saying, oh, you know, I was promised that AI would revolutionize my industry,
+
+615
+00:45:32,240 --> 00:45:38,240
+but it's still kind of very bespoke and only can be applied here there. And then, but yeah,
+
+616
+00:45:38,240 --> 00:45:42,000
+that's sort of partly why I'm also spending a lot of time thinking more about these
+
+617
+00:45:42,800 --> 00:45:51,040
+amortized search and planning algorithms. Because I do think also that we are about to have a big
+
+618
+00:45:51,040 --> 00:45:55,760
+improvement in the sort of general reasoning abilities of machines. And I think this is still
+
+619
+00:45:55,760 --> 00:46:03,280
+going to be like mostly toy demos for a few years. And do you think that that mostly comes from a
+
+620
+00:46:03,280 --> 00:46:09,760
+reinforcement learning type of problem formulation? Well, the thing is that reinforcement learning is
+
+621
+00:46:09,760 --> 00:46:15,600
+such a vague word. And I guess I'll say model three reinforcement learning, you know, has it's like
+
+622
+00:46:16,240 --> 00:46:19,280
+now no one's excited about it. And everyone was super hyped about it like, you know, three or four
+
+623
+00:46:19,280 --> 00:46:26,720
+or even two years ago. I guess I would say right, like model-based planning or model-based control
+
+624
+00:46:27,520 --> 00:46:32,720
+is really starting to become practical now for the first time. I think a lot of people have said,
+
+625
+00:46:32,720 --> 00:46:36,960
+you know, been leaving in this for 40 years. There's this amazing book by Britsikis Neural
+
+626
+00:46:36,960 --> 00:46:40,240
+Linguistic Programming that basically outlines most of the methods that people are excited about
+
+627
+00:46:40,240 --> 00:46:45,120
+today. And I think it's from like the 80s. Yeah, but it's just that we now have a pile of
+
+628
+00:46:45,120 --> 00:46:49,680
+or a set of tools that we have an idea of how to combine. We're starting to understand how they can
+
+629
+00:46:49,680 --> 00:46:57,680
+be scaled up. So what I hear you saying is that you're mostly not placing bets on this kind of,
+
+630
+00:46:58,320 --> 00:47:04,480
+you know, what's going to get us to AGI kind of question and you're focused on like, you know,
+
+631
+00:47:04,480 --> 00:47:09,200
+how we can use this technology to solve current problems. Well, no, I guess I would say
+
+632
+00:47:10,400 --> 00:47:14,880
+working backwards from what gets us AGI is a really fun research agenda, right? And I love all
+
+633
+00:47:14,880 --> 00:47:22,000
+the papers of the Google machine. There's a recent work on logical inductors that try to sort of
+
+634
+00:47:22,000 --> 00:47:24,960
+sketch out what these would look like. And then they always have a part where it's like, and now
+
+635
+00:47:24,960 --> 00:47:28,000
+you do a search over all possible programs or something like that, which we don't know how to do.
+
+636
+00:47:28,560 --> 00:47:32,000
+But I love the idea of working backwards in there. And I guess I'll just say we also have a huge
+
+637
+00:47:32,000 --> 00:47:37,200
+amount of low-hanging fruit, like strong gradients saying, oh, if we combine these two tools that
+
+638
+00:47:37,200 --> 00:47:42,640
+we have, we can figure out how to do that. We know we'll have a big step towards more general
+
+639
+00:47:42,640 --> 00:47:47,440
+reasoning capabilities. So I think we don't even have to, we shouldn't think of you thinking hard,
+
+640
+00:47:47,440 --> 00:47:51,760
+but for the near future, I think we can make a bunch of progress without even thinking that hard
+
+641
+00:47:51,760 --> 00:47:57,680
+about the long term. Well, David, thanks so much for taking the time to update me on what you're
+
+642
+00:47:57,680 --> 00:48:04,400
+up to and, you know, generally share with all of us what you're working on at your lab and with
+
+643
+00:48:04,400 --> 00:48:13,360
+your students looking forward to catching your ICML papers. Oh, it's been a pleasure. Thank you, Sam.
+
+644
+00:48:15,760 --> 00:48:20,720
+All right, everyone. That's our show for today. For more information on today's show,
+
+645
+00:48:20,720 --> 00:48:37,520
+visit twomolai.com slash shows. As always, thanks so much for listening and catch you next time.
+

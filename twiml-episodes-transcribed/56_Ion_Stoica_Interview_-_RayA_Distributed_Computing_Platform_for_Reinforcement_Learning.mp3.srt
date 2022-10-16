@@ -1,0 +1,1640 @@
+1
+00:00:00,000 --> 00:00:15,920
+Hello and welcome to another episode of Twimble Talk, the podcast where I interview interesting
+
+2
+00:00:15,920 --> 00:00:20,880
+people doing interesting things in machine learning and artificial intelligence.
+
+3
+00:00:20,880 --> 00:00:23,560
+I'm your host Sam Charrington.
+
+4
+00:00:23,560 --> 00:00:27,760
+This show you are about to hear as part of a series of shows recorded in San Francisco
+
+5
+00:00:27,760 --> 00:00:32,280
+at the Artificial Intelligence Conference, which was hosted by our friends at O'Reilly
+
+6
+00:00:32,280 --> 00:00:34,480
+in Intel Nirvana.
+
+7
+00:00:34,480 --> 00:00:39,680
+In addition to their support for the event itself, Intel Nirvana is also our sponsor for this
+
+8
+00:00:39,680 --> 00:00:42,040
+series of podcasts from the event.
+
+9
+00:00:42,040 --> 00:00:46,280
+A huge thanks to them for their continued support of this show.
+
+10
+00:00:46,280 --> 00:00:51,280
+Make sure you check out my interview with Navine Rao, VP and GM of Intel's AI products
+
+11
+00:00:51,280 --> 00:00:56,600
+group, and Scott Appland, director of Intel's developer network, which you can find at
+
+12
+00:00:56,600 --> 00:01:00,800
+twimbleai.com slash talk slash 51.
+
+13
+00:01:00,800 --> 00:01:06,520
+At the AI conference, Intel Nirvana announced DevCloud, a cloud hosted hardware and software
+
+14
+00:01:06,520 --> 00:01:12,920
+platform for learning, sandboxing and accelerating the development of AI solutions.
+
+15
+00:01:12,920 --> 00:01:19,160
+The DevCloud will be available to 200,000 developers, researchers, academics and startups
+
+16
+00:01:19,160 --> 00:01:23,040
+via the Intel Nirvana AI Academy this month.
+
+17
+00:01:23,040 --> 00:01:29,640
+For more information on the DevCloud or the AI Academy, visit intelnervana.com slash
+
+18
+00:01:29,640 --> 00:01:31,720
+DevCloud.
+
+19
+00:01:31,720 --> 00:01:36,740
+In this episode, I talk with Ian Stoika, professor of computer science and director of the
+
+20
+00:01:36,740 --> 00:01:39,040
+RISE lab at UC Berkeley.
+
+21
+00:01:39,040 --> 00:01:45,480
+Ian joined us after he gave his talk, building reinforcement learning applications with Ray.
+
+22
+00:01:45,480 --> 00:01:52,080
+We dive into Ray, a new distributed computing platform for RL, as well as RL generally,
+
+23
+00:01:52,080 --> 00:01:57,400
+along with some of the other projects the RISE lab is working on, like Clipper and Tigra.
+
+24
+00:01:57,400 --> 00:01:59,640
+This was a pretty interesting talk.
+
+25
+00:01:59,640 --> 00:02:00,640
+Enjoy.
+
+26
+00:02:00,640 --> 00:02:13,800
+Alright everyone, I'm here at the AI conference, presented by O'Reilly and Intel Nirvana,
+
+27
+00:02:13,800 --> 00:02:17,120
+and I've got the pleasure of being seated with Ian Stoika.
+
+28
+00:02:17,120 --> 00:02:22,000
+Ian is the executive chairman and co-founder of Databricks, and also a professor
+
+29
+00:02:22,000 --> 00:02:25,600
+at Berkeley and director of the RISE lab.
+
+30
+00:02:25,600 --> 00:02:28,560
+Ian, welcome to this weekend machine learning in AI.
+
+31
+00:02:28,560 --> 00:02:29,560
+Thank you.
+
+32
+00:02:29,560 --> 00:02:30,560
+Thanks for having me.
+
+33
+00:02:30,560 --> 00:02:31,560
+Absolutely.
+
+34
+00:02:31,560 --> 00:02:35,160
+So why don't we get started by having you tell us a little bit about your background,
+
+35
+00:02:35,160 --> 00:02:42,120
+how you got interested in machine learning and what your area of research interest is?
+
+36
+00:02:42,120 --> 00:02:48,440
+I joined Berkeley in 2001, and at that time I was actually doing networking, and then
+
+37
+00:02:48,440 --> 00:02:55,080
+I moved around and did a little bit of peer-to-peer systems, and then started working on big
+
+38
+00:02:55,080 --> 00:02:56,080
+data.
+
+39
+00:02:56,080 --> 00:03:02,080
+On big data, in the context of another lab at Berkeley called Amplab, we developed a few
+
+40
+00:03:02,080 --> 00:03:09,760
+systems, including Apache Spark, Apache Mesos, and Alusio, formerly known as Stachion.
+
+41
+00:03:09,760 --> 00:03:16,400
+Basically, what happens is that we develop these systems because people get more and
+
+42
+00:03:16,400 --> 00:03:23,520
+more data and organizations ingest more and more data, and then once they have the data
+
+43
+00:03:23,520 --> 00:03:29,640
+whether it's user logs, machine logs, or any other data, they try to make sense of this
+
+44
+00:03:29,640 --> 00:03:30,640
+data.
+
+45
+00:03:30,640 --> 00:03:33,840
+They get to try to get some insights.
+
+46
+00:03:33,840 --> 00:03:40,640
+So Apache Spark was an effort to process large scales this kind of data.
+
+47
+00:03:40,640 --> 00:03:46,840
+Now also in the context of the Apache Spark, you look at what people do after they get
+
+48
+00:03:46,840 --> 00:03:51,920
+some insights of the data, they want to make some decisions to take some actions based
+
+49
+00:03:51,920 --> 00:03:58,280
+on the data, to improve our targeting, to do medical diagnosis, and things like that.
+
+50
+00:03:58,280 --> 00:04:04,880
+So now the next step again in getting value out of the data is basically applying AI, machine
+
+51
+00:04:04,880 --> 00:04:11,640
+learning to get intelligent, actionable decisions.
+
+52
+00:04:11,640 --> 00:04:18,280
+That's why I am now doing that research in the context of systems and machine learning
+
+53
+00:04:18,280 --> 00:04:19,960
+and AI.
+
+54
+00:04:19,960 --> 00:04:26,920
+And as part of that, we just started this new lab at Berkeley called Rise, where Rise stands
+
+55
+00:04:26,920 --> 00:04:34,440
+for real-time intelligence and secure execution, and this lab is about building systems
+
+56
+00:04:34,440 --> 00:04:44,320
+and tools and algorithms to support applications which make real-time decisions on live data with
+
+57
+00:04:44,320 --> 00:04:45,320
+strong security.
+
+58
+00:04:45,320 --> 00:04:46,320
+Okay.
+
+59
+00:04:46,320 --> 00:04:52,200
+And in fact, that's one of the areas that Spark really distinguished itself in that real-time,
+
+60
+00:04:52,200 --> 00:04:57,480
+streaming, interactive decision-making, at least relative to Hadoop, which was kind
+
+61
+00:04:57,480 --> 00:04:59,920
+of the incumbent system at the time.
+
+62
+00:04:59,920 --> 00:05:00,920
+Yes.
+
+63
+00:05:00,920 --> 00:05:01,920
+Yes.
+
+64
+00:05:01,920 --> 00:05:02,920
+Definitely.
+
+65
+00:05:02,920 --> 00:05:09,480
+So the truth, Spark was compared with, at that time, when we created it, compared with
+
+66
+00:05:09,480 --> 00:05:17,160
+MapReduce, provide great support for interactive queries, iterative computation like machine learning
+
+67
+00:05:17,160 --> 00:05:21,960
+algorithms, and later for streaming.
+
+68
+00:05:21,960 --> 00:05:30,240
+So right now, going forward, one big angle we are focusing on is security.
+
+69
+00:05:30,240 --> 00:05:36,240
+So everyone wants to take and to make personalized decisions.
+
+70
+00:05:36,240 --> 00:05:37,240
+Right.
+
+71
+00:05:37,240 --> 00:05:44,000
+So the question here, how can you make personalized decisions without violating the confidentiality
+
+72
+00:05:44,000 --> 00:05:47,440
+of the users, while preserving the confidentiality of the users?
+
+73
+00:05:47,440 --> 00:05:48,440
+Okay.
+
+74
+00:05:48,440 --> 00:05:50,200
+So this is one big challenge.
+
+75
+00:05:50,200 --> 00:05:58,800
+The other aspect is about, for instance, when you create this, with Spark, you create
+
+76
+00:05:58,800 --> 00:06:06,360
+these models using deep learning or many other approaches, machine learning approaches,
+
+77
+00:06:06,360 --> 00:06:10,600
+but this model eventually, you are going to serve that model.
+
+78
+00:06:10,600 --> 00:06:11,600
+Right?
+
+79
+00:06:11,600 --> 00:06:18,400
+So the users, you know, when the users contact you, the user make a query, look at the recommendation,
+
+80
+00:06:18,400 --> 00:06:24,600
+you get, you give back the inference part, it's a inference part, it's a give back right
+
+81
+00:06:24,600 --> 00:06:25,600
+answer.
+
+82
+00:06:25,600 --> 00:06:32,920
+So another direction is focusing on building this kind of prediction serving or model serving
+
+83
+00:06:32,920 --> 00:06:35,160
+systems.
+
+84
+00:06:35,160 --> 00:06:41,400
+And another direction is that, you know, when you look at the new generation of this machine
+
+85
+00:06:41,400 --> 00:06:47,960
+learning applications, like for round-dream enforcement learning, they have different patterns.
+
+86
+00:06:47,960 --> 00:06:53,400
+They do a lot of very small simulations, and you know, we build also systems for that,
+
+87
+00:06:53,400 --> 00:06:58,600
+which are a better fit for this kind of very fine-grained computations.
+
+88
+00:06:58,600 --> 00:06:59,600
+Okay.
+
+89
+00:06:59,600 --> 00:07:03,320
+And here at the conference, you were talking about Ray, which is one of the systems that
+
+90
+00:07:03,320 --> 00:07:04,320
+you built.
+
+91
+00:07:04,320 --> 00:07:08,520
+I was talking about Ray, which is in this category.
+
+92
+00:07:08,520 --> 00:07:18,640
+So think about Ray, is the ability to execute a lot of fine-grained tasks, which are dynamically
+
+93
+00:07:18,640 --> 00:07:25,960
+connected, dynamically depend from each other, like tasks of milliseconds, takes only milliseconds.
+
+94
+00:07:25,960 --> 00:07:31,160
+So you can be, you can run millions of this task per second, so it's very fine-grained.
+
+95
+00:07:31,160 --> 00:07:36,040
+And each of these tasks can be simulation, like simulations you play a game, right?
+
+96
+00:07:36,040 --> 00:07:41,120
+You move, you know, simulate the moves of the pieces, and then you see whether you own
+
+97
+00:07:41,120 --> 00:07:43,160
+or you lost, right?
+
+98
+00:07:43,160 --> 00:07:48,320
+And one of the workloads is reinforcement learning, which reinforcement learning, you can see
+
+99
+00:07:48,320 --> 00:07:54,880
+something like a generalization of supervised learning in which the labels of the action
+
+100
+00:07:54,880 --> 00:08:00,880
+you make is sparse, as sparse, not every action has a label, it's good or bad.
+
+101
+00:08:00,880 --> 00:08:04,960
+Like for instance, when you play a game, when you make a move, you don't necessarily know
+
+102
+00:08:04,960 --> 00:08:06,680
+whether this move is great.
+
+103
+00:08:06,680 --> 00:08:10,880
+You need to wait until the end of the game, maybe to see whether it's good or bad.
+
+104
+00:08:10,880 --> 00:08:13,240
+Also the feedback is delayed, right?
+
+105
+00:08:13,240 --> 00:08:19,640
+In supervised learning, in many times you know whether I show you some picture and you
+
+106
+00:08:19,640 --> 00:08:25,640
+give me, say, this is a cat or a dog, I know instantly whether it's good or bad.
+
+107
+00:08:25,640 --> 00:08:30,400
+And also it's about reinforcement learning, it's also assumed that you interact with
+
+108
+00:08:30,400 --> 00:08:34,240
+the environment continuously and you change the environment, right?
+
+109
+00:08:34,240 --> 00:08:40,840
+Like with, again, with playing games, self-driving cars or dialogue systems, right?
+
+110
+00:08:40,840 --> 00:08:46,360
+This is a dialogue, right, and you need to, it's continuously interacting and building
+
+111
+00:08:46,360 --> 00:08:52,800
+the context about our conversations and based your next actions, you know, next answers
+
+112
+00:08:52,800 --> 00:08:56,360
+and questions based on this context, right?
+
+113
+00:08:56,360 --> 00:09:01,560
+So that's basically, it is, and this reinforcement learning in many, one of the workload characteristics
+
+114
+00:09:01,560 --> 00:09:06,200
+all requires to handle this very small fine grain simulation.
+
+115
+00:09:06,200 --> 00:09:11,240
+Okay, so, yeah, we've actually talked about reinforcement learning on the podcast quite
+
+116
+00:09:11,240 --> 00:09:12,240
+a bit.
+
+117
+00:09:12,240 --> 00:09:14,240
+We've had Peter Avil and Sergei B.
+
+118
+00:09:14,240 --> 00:09:15,240
+Yeah, yeah.
+
+119
+00:09:15,240 --> 00:09:18,640
+That is an expert, I'm not sure how they cannot do that.
+
+120
+00:09:18,640 --> 00:09:24,720
+Well, you know, so what the question that comes up for me is, how does Ray compare to an
+
+121
+00:09:24,720 --> 00:09:31,200
+environment like OpenAI Gym or OpenAI Universe that are used also in context of reinforcement
+
+122
+00:09:31,200 --> 00:09:32,200
+learning?
+
+123
+00:09:32,200 --> 00:09:38,000
+It's very complementar, the OpenAI Gym and they provide you with virtual worlds, right,
+
+124
+00:09:38,000 --> 00:09:45,440
+and so forth, the simulators, the Ray which provides you with a plumbing to execute those
+
+125
+00:09:45,440 --> 00:09:52,760
+simulations and to get the results and to update the policies that is mapping between
+
+126
+00:09:52,760 --> 00:09:57,320
+the state of the environment or the observation of the environment and the action you are
+
+127
+00:09:57,320 --> 00:09:59,960
+going to take at large scale.
+
+128
+00:09:59,960 --> 00:10:04,880
+So, is it too simple to say that Ray is like a dupe for reinforcement learning, it sounds
+
+129
+00:10:04,880 --> 00:10:10,200
+like you've got a bunch of tasks or you're less than about a cluster and then mapping
+
+130
+00:10:10,200 --> 00:10:11,200
+the results back?
+
+131
+00:10:11,200 --> 00:10:15,280
+Yeah, you can say that in the first approximation and then you take the results and you update
+
+132
+00:10:15,280 --> 00:10:16,280
+the policy.
+
+133
+00:10:16,280 --> 00:10:17,280
+Right, right.
+
+134
+00:10:17,280 --> 00:10:21,520
+And then you repeat until the policy, you're happy with the policy, the policy converges.
+
+135
+00:10:21,520 --> 00:10:22,520
+Right, right.
+
+136
+00:10:22,520 --> 00:10:26,520
+So, you mentioned this attribution problem, right, you're playing this game, you've got
+
+137
+00:10:26,520 --> 00:10:33,560
+this reinforcement, this learner that's involved in this environment, a game, for example.
+
+138
+00:10:33,560 --> 00:10:40,160
+And you can't really know whether it's action, you know, is positive or negative until
+
+139
+00:10:40,160 --> 00:10:42,120
+much later on.
+
+140
+00:10:42,120 --> 00:10:47,000
+If you don't know the ultimate benefit, how do then do you gain any knowledge from these
+
+141
+00:10:47,000 --> 00:10:49,080
+micro simulations that you've been describing?
+
+142
+00:10:49,080 --> 00:10:54,680
+Yeah, because a simulation each game, it's, you take some actions after each action, you
+
+143
+00:10:54,680 --> 00:11:00,120
+have a state which is a modified state of the environment and eventually you have a reward.
+
+144
+00:11:00,120 --> 00:11:03,920
+With sometimes you do not know whether the reward can be zero, you don't know it's good
+
+145
+00:11:03,920 --> 00:11:05,760
+or bad, right?
+
+146
+00:11:05,760 --> 00:11:06,760
+Right.
+
+147
+00:11:06,760 --> 00:11:11,080
+And after you take, according to the current policy, you are going, which again, you fill
+
+148
+00:11:11,080 --> 00:11:16,360
+the state, takes the action, you get the next state and the reward, you feed again the
+
+149
+00:11:16,360 --> 00:11:18,680
+policy, you get the next action and so forth.
+
+150
+00:11:18,680 --> 00:11:24,080
+So, you get these trajectories, which is a succession of states and rewards.
+
+151
+00:11:24,080 --> 00:11:29,560
+So, now, eventually at the end, you are going to see whether you achieve your task or
+
+152
+00:11:29,560 --> 00:11:33,320
+not, whether you want the game or you lost the game.
+
+153
+00:11:33,320 --> 00:11:38,160
+If it's a robot, whether the task say you're moving on objects or a successful or not,
+
+154
+00:11:38,160 --> 00:11:41,360
+right, or solving a puzzle, right?
+
+155
+00:11:41,360 --> 00:11:48,040
+So then, once at the end, you, for instance, see that eventually see whether you're successful
+
+156
+00:11:48,040 --> 00:11:52,880
+or not, then if you are successful at a very high level, you are going to go back and
+
+157
+00:11:52,880 --> 00:12:00,320
+reinforce all these actions you've taken, meaning, reinforcing, meaning that next time
+
+158
+00:12:00,320 --> 00:12:06,600
+when you try, after you update the policy, it's a higher chance to take these actions.
+
+159
+00:12:06,600 --> 00:12:12,520
+If the actions led you to say, losing a game, then you are going to weaken these actions.
+
+160
+00:12:12,520 --> 00:12:16,560
+You make them less likely to be taken when you are in a similar situation.
+
+161
+00:12:16,560 --> 00:12:18,600
+That's basically what it is.
+
+162
+00:12:18,600 --> 00:12:19,600
+It's like humans, right?
+
+163
+00:12:19,600 --> 00:12:25,080
+It's like you play a game and so forth, and if you own, it's likely that you are going
+
+164
+00:12:25,080 --> 00:12:28,440
+to repeat some of the kind of moves you might.
+
+165
+00:12:28,440 --> 00:12:35,080
+If I'm playing Tik Tok To, the opening move is always in the middle.
+
+166
+00:12:35,080 --> 00:12:39,440
+That's very true.
+
+167
+00:12:39,440 --> 00:12:46,800
+I imagine a big part of what it's, or at least one part of what it's trying to do is,
+
+168
+00:12:46,800 --> 00:12:52,440
+and this is also, in a lot of ways, a dupe-like, is managing the state because you're shuffling
+
+169
+00:12:52,440 --> 00:12:57,440
+state for all of these little simulations that you're running all the time.
+
+170
+00:12:57,440 --> 00:13:00,120
+Human is a state as well.
+
+171
+00:13:00,120 --> 00:13:08,400
+There is an object store, so you keep that state in the object store, so tasks which run
+
+172
+00:13:08,400 --> 00:13:11,280
+on different nodes can have access to the state.
+
+173
+00:13:11,280 --> 00:13:18,320
+You also try to provide full tolerance if the node fails, so you make sure that the
+
+174
+00:13:18,320 --> 00:13:25,080
+computation still is going to make progress and doing that correctly.
+
+175
+00:13:25,080 --> 00:13:31,960
+These are some of the issues you need to deal with.
+
+176
+00:13:31,960 --> 00:13:36,960
+You were presenting on RAY specifically, so maybe what were some of the main points that
+
+177
+00:13:36,960 --> 00:13:40,840
+you wanted to lead with the attendees that you're talking?
+
+178
+00:13:40,840 --> 00:13:41,840
+Yes.
+
+179
+00:13:41,840 --> 00:13:47,480
+I think the high level point is that right now, over the past 10 years, there has been
+
+180
+00:13:47,480 --> 00:13:50,880
+a tremendous progress in AI, right?
+
+181
+00:13:50,880 --> 00:13:52,400
+Many great applications.
+
+182
+00:13:52,400 --> 00:13:59,320
+Right now, as we look forward, the application becomes more and more sophisticated.
+
+183
+00:13:59,320 --> 00:14:05,760
+While most of the applications we develop so far were based on supervised or unsupervised
+
+184
+00:14:05,760 --> 00:14:10,760
+learning, the new applications, we believe, they are going to be more and more
+
+185
+00:14:10,760 --> 00:14:15,320
+based on reinforcement learning, and again, the reason is that the new applications are
+
+186
+00:14:15,320 --> 00:14:21,480
+more about interacting with the environment, around them, learning from this interaction
+
+187
+00:14:21,480 --> 00:14:23,960
+and affecting the environment.
+
+188
+00:14:23,960 --> 00:14:28,720
+We talk about games, we talk about dialogue systems, but you can look, think about the
+
+189
+00:14:28,720 --> 00:14:29,720
+health applications.
+
+190
+00:14:29,720 --> 00:14:35,160
+You know, they're constantly monitoring you and then give you health services.
+
+191
+00:14:35,160 --> 00:14:40,560
+How about the next level of detail, so you talk about the experience of using RAY or
+
+192
+00:14:40,560 --> 00:14:41,560
+architecture?
+
+193
+00:14:41,560 --> 00:14:42,560
+Yes.
+
+194
+00:14:42,560 --> 00:14:46,840
+So basically, that's what I've started, but it's again, like you said, you know, for instance,
+
+195
+00:14:46,840 --> 00:14:54,560
+if you do not have a feedback after each action, after each move, that means that the space
+
+196
+00:14:54,560 --> 00:15:00,240
+you need to explore in terms of solution space is larger because I need to make a series
+
+197
+00:15:00,240 --> 00:15:03,720
+of moves because I know it's good or bad, right?
+
+198
+00:15:03,720 --> 00:15:07,120
+So more possibilities to go wrong, right?
+
+199
+00:15:07,120 --> 00:15:09,320
+So that's one of the characteristics.
+
+200
+00:15:09,320 --> 00:15:16,000
+The computation requirements are increasing, and that's why one way, if you cannot for simulations,
+
+201
+00:15:16,000 --> 00:15:20,600
+that's a very good way to do because you can do the simulation fast.
+
+202
+00:15:20,600 --> 00:15:25,320
+So now, like for instance, playing games or things like that, you do a lot of simulations,
+
+203
+00:15:25,320 --> 00:15:26,320
+right?
+
+204
+00:15:26,320 --> 00:15:31,560
+Even with robots, you try to simulate the physical world, right?
+
+205
+00:15:31,560 --> 00:15:34,240
+Because you can learn much faster, right?
+
+206
+00:15:34,240 --> 00:15:35,240
+So that's the key.
+
+207
+00:15:35,240 --> 00:15:40,520
+So the key is basically, then, the computation pattern is basically saying, I have a policy,
+
+208
+00:15:40,520 --> 00:15:44,640
+I'm going to evaluate the policy by running many simulations, right?
+
+209
+00:15:44,640 --> 00:15:51,560
+And I'm going to feed in their outputs, these trajectories, right, what happened, and update
+
+210
+00:15:51,560 --> 00:15:54,920
+the policy, and run again, right?
+
+211
+00:15:54,920 --> 00:16:00,920
+So that's kind of, it's a pretty regular computation because different simulations they can take
+
+212
+00:16:00,920 --> 00:16:05,880
+different amounts of time, like for instance, if you play a game of chess, I can lose in
+
+213
+00:16:05,880 --> 00:16:10,560
+three moves, or it may take 60 moves to win, right?
+
+214
+00:16:10,560 --> 00:16:17,040
+And you want to learn as soon as some of this simulation happen, you want to learn from
+
+215
+00:16:17,040 --> 00:16:18,440
+them and update the policies.
+
+216
+00:16:18,440 --> 00:16:23,200
+You don't want to, you know, if I run 100,000 simulations, evaluate the policy, I don't
+
+217
+00:16:23,200 --> 00:16:24,960
+want to wait for all of them, right?
+
+218
+00:16:24,960 --> 00:16:28,240
+So this is kind of a computation is more irregular.
+
+219
+00:16:28,240 --> 00:16:35,200
+Also, the other thing is that, you know, many of these policies are implemented by neural
+
+220
+00:16:35,200 --> 00:16:38,120
+networks, neural networks, which run on GPUs.
+
+221
+00:16:38,120 --> 00:16:45,320
+So you want also to support more heterogeneous hardware, and also the kind of patterns, you
+
+222
+00:16:45,320 --> 00:16:50,680
+are talking only about simulations, but then you want to search to be able to search the
+
+223
+00:16:50,680 --> 00:16:53,720
+space, the solution space, and things like that.
+
+224
+00:16:53,720 --> 00:17:02,840
+So you end up basically with a very fine grain computation graph, you want to execute on heterogeneous
+
+225
+00:17:02,840 --> 00:17:03,840
+hardware.
+
+226
+00:17:03,840 --> 00:17:04,840
+So that's what raised.
+
+227
+00:17:04,840 --> 00:17:09,880
+So how it's really achieving that, it's using this in memory object store to share the
+
+228
+00:17:09,880 --> 00:17:10,880
+data.
+
+229
+00:17:10,880 --> 00:17:14,400
+So it's very fast on a single machine, you share memory.
+
+230
+00:17:14,400 --> 00:17:18,800
+On the back end is a scheduling, where it totally distributes a scheduler.
+
+231
+00:17:18,800 --> 00:17:25,160
+Each note can schedule locally, and then when it's overloaded or the inputs of the task
+
+232
+00:17:25,160 --> 00:17:29,680
+are not available locally, it's only then it's going to contact a global scheduler.
+
+233
+00:17:29,680 --> 00:17:34,400
+We also replicate the global scheduler, so we do a lot of these kind of things to try
+
+234
+00:17:34,400 --> 00:17:37,480
+to scale and to have very high throughput.
+
+235
+00:17:37,480 --> 00:17:41,680
+And finally, we also provide the bindings in Python.
+
+236
+00:17:41,680 --> 00:17:42,680
+Why Python?
+
+237
+00:17:42,680 --> 00:17:50,840
+Because most of the AI community develops in Python, and now it seems to be the most popular
+
+238
+00:17:50,840 --> 00:17:51,840
+language.
+
+239
+00:17:51,840 --> 00:17:52,840
+Right.
+
+240
+00:17:52,840 --> 00:18:01,360
+Where Spark is Java and Scala, and also has binding, it was developed in Scala, so obviously
+
+241
+00:18:01,360 --> 00:18:05,600
+has API in Scala, but also has in Java and Python.
+
+242
+00:18:05,600 --> 00:18:09,720
+And Python actually is very popular API and of course SQL.
+
+243
+00:18:09,720 --> 00:18:14,240
+I guess early on I had the impression that some of those early efforts with Python were
+
+244
+00:18:14,240 --> 00:18:17,560
+kind of like second-class citizens, has it evolved to be more?
+
+245
+00:18:17,560 --> 00:18:18,560
+We're not evolving.
+
+246
+00:18:18,560 --> 00:18:25,920
+I think that a very large percentage of users use Python, so they're improving fast.
+
+247
+00:18:25,920 --> 00:18:30,400
+So where is Ray on the maturity cycle?
+
+248
+00:18:30,400 --> 00:18:32,640
+You know, it's still an early project.
+
+249
+00:18:32,640 --> 00:18:38,480
+We had a first release a few months ago, we are going to have soon the second release,
+
+250
+00:18:38,480 --> 00:18:44,000
+but it's still early, so we have just a few users.
+
+251
+00:18:44,000 --> 00:18:50,760
+But we believe that going forward, this reinforcement learning will play a major role in the future
+
+252
+00:18:50,760 --> 00:18:56,520
+of AI, and I think that the usage adoption of Ray will grow as well.
+
+253
+00:18:56,520 --> 00:18:59,720
+What size environments have you tested?
+
+254
+00:18:59,720 --> 00:19:05,400
+Oh, we tested these over hundreds of nodes, so we are at that level now.
+
+255
+00:19:05,400 --> 00:19:10,840
+But it's again, maturity is not only about how scalable it is, there are vastness, and
+
+256
+00:19:10,840 --> 00:19:18,040
+there's a kind of features you need, monitoring, and things like that, you need really to have
+
+257
+00:19:18,040 --> 00:19:20,800
+to deploy something like Ray in production.
+
+258
+00:19:20,800 --> 00:19:25,840
+Does Ray lend itself to being deployed in cloud environments?
+
+259
+00:19:25,840 --> 00:19:26,840
+No.
+
+260
+00:19:26,840 --> 00:19:31,160
+You can deploy equally like Spark and many others, you can deploy in the cloud or you can
+
+261
+00:19:31,160 --> 00:19:32,400
+deploy on-prem.
+
+262
+00:19:32,400 --> 00:19:33,400
+Okay.
+
+263
+00:19:33,400 --> 00:19:36,000
+Does it work with Spark in any particular way?
+
+264
+00:19:36,000 --> 00:19:37,000
+Of course, of course.
+
+265
+00:19:37,000 --> 00:19:38,520
+What are the uses there?
+
+266
+00:19:38,520 --> 00:19:43,640
+I mentioned about this object store, so actually for the object store, you use Apache
+
+267
+00:19:43,640 --> 00:19:44,800
+Arrow.
+
+268
+00:19:44,800 --> 00:19:52,560
+So it's easy to Apache Arrow to exchange the data between Spark and Ray.
+
+269
+00:19:52,560 --> 00:19:59,200
+So Ray has a much lower level API, it's again, it's targeted for this particular reinforcement
+
+270
+00:19:59,200 --> 00:20:02,080
+learning and distribute AI applications.
+
+271
+00:20:02,080 --> 00:20:09,760
+Well Spark has a higher level and it's in general, it's very, very mature API, very easy
+
+272
+00:20:09,760 --> 00:20:14,240
+to use when it comes to processing big amounts of data.
+
+273
+00:20:14,240 --> 00:20:20,120
+And thinking about that API, what's the kind of fundamental unit of work, or the unit
+
+274
+00:20:20,120 --> 00:20:21,120
+of work is a task.
+
+275
+00:20:21,120 --> 00:20:25,880
+A task, so you can add a decorator on a task and basically that task will be your Android
+
+276
+00:20:25,880 --> 00:20:26,880
+module.
+
+277
+00:20:26,880 --> 00:20:27,880
+Okay.
+
+278
+00:20:27,880 --> 00:20:35,080
+Moving from a task to reinforcement learner is all of that in user code or it is Ray provide
+
+279
+00:20:35,080 --> 00:20:39,480
+any abstractions for reinforcement learning in particular.
+
+280
+00:20:39,480 --> 00:20:44,200
+For reinforcement learning, right now, we are in the next release, we are going to add
+
+281
+00:20:44,200 --> 00:20:48,360
+a new library of reinforcement learning algorithms.
+
+282
+00:20:48,360 --> 00:20:49,360
+Okay.
+
+283
+00:20:49,360 --> 00:20:55,840
+It will be a small library as the beginning, but we are going to implement, it's going
+
+284
+00:20:55,840 --> 00:21:01,240
+to offer the implementation of some of the most common reinforcement learning algorithms
+
+285
+00:21:01,240 --> 00:21:03,040
+and we'll take it from there.
+
+286
+00:21:03,040 --> 00:21:04,040
+Okay.
+
+287
+00:21:04,040 --> 00:21:08,040
+And so you will be able to kind of use that with the same decorator model, you decorate
+
+288
+00:21:08,040 --> 00:21:12,880
+your task and then it will be, yeah, it will be some function calls, right?
+
+289
+00:21:12,880 --> 00:21:14,680
+So it will be an idea.
+
+290
+00:21:14,680 --> 00:21:15,680
+Okay.
+
+291
+00:21:15,680 --> 00:21:16,680
+Great.
+
+292
+00:21:16,680 --> 00:21:21,560
+Based on your experience with Spark, how do you see Ray evolving?
+
+293
+00:21:21,560 --> 00:21:26,120
+So you know, it's very hard to predict, right?
+
+294
+00:21:26,120 --> 00:21:31,800
+I mean, when we start this Spark, we never thought that he's going to become so popular
+
+295
+00:21:31,800 --> 00:21:34,480
+and it depends a lot of things.
+
+296
+00:21:34,480 --> 00:21:41,040
+So for us, for now is that we want to build as with Ray, we want to build a platform which
+
+297
+00:21:41,040 --> 00:21:48,200
+allows us to speed up the research and the application in reinforcement learning.
+
+298
+00:21:48,200 --> 00:21:50,880
+So that's our first goal.
+
+299
+00:21:50,880 --> 00:21:57,200
+And it's again, we are talking about only us at Berkeley, but obviously across the board,
+
+300
+00:21:57,200 --> 00:21:59,600
+you know, it's academia and industry.
+
+301
+00:21:59,600 --> 00:22:02,520
+So that's kind of, you know, our goal.
+
+302
+00:22:02,520 --> 00:22:07,480
+So your focus is on making a tool that helps accelerate research and if, you know, the
+
+303
+00:22:07,480 --> 00:22:12,360
+Spark-like success comes and the Spark-like success comes, but, you know, your focus
+
+304
+00:22:12,360 --> 00:22:17,120
+on the kind of the user problem is excellent, excellent.
+
+305
+00:22:17,120 --> 00:22:20,160
+Are there any companies offering like commercial support for Ray?
+
+306
+00:22:20,160 --> 00:22:21,160
+No, not yet.
+
+307
+00:22:21,160 --> 00:22:22,160
+So early for that.
+
+308
+00:22:22,160 --> 00:22:28,840
+There are some companies that are playing with it, but yeah, it's like I mentioned, in order
+
+309
+00:22:28,840 --> 00:22:32,640
+for someone to put in production, it still has a little bit to go.
+
+310
+00:22:32,640 --> 00:22:33,640
+Okay.
+
+311
+00:22:33,640 --> 00:22:36,120
+You know, we are moving fast.
+
+312
+00:22:36,120 --> 00:22:37,600
+It will take a bit of time.
+
+313
+00:22:37,600 --> 00:22:38,600
+Yeah.
+
+314
+00:22:38,600 --> 00:22:39,600
+Yeah.
+
+315
+00:22:39,600 --> 00:22:44,480
+So you mentioned some other projects around security and other things.
+
+316
+00:22:44,480 --> 00:22:48,960
+The projects all kind of tie together, like, can you think of like the Ryze Lab is creating
+
+317
+00:22:48,960 --> 00:22:53,160
+this platform and the security thing, talks to Ray, talks to the next thing, or are they
+
+318
+00:22:53,160 --> 00:22:54,160
+more or less?
+
+319
+00:22:54,160 --> 00:22:55,640
+So there are a bunch of projects.
+
+320
+00:22:55,640 --> 00:23:00,120
+I was actually surprised, like, you know, considering Ryze's relatively new lab, there
+
+321
+00:23:00,120 --> 00:23:02,680
+were a huge number of projects on the website.
+
+322
+00:23:02,680 --> 00:23:03,680
+Yes.
+
+323
+00:23:03,680 --> 00:23:04,680
+Yes.
+
+324
+00:23:04,680 --> 00:23:06,680
+We have quite a few people.
+
+325
+00:23:06,680 --> 00:23:08,440
+Quite a few students.
+
+326
+00:23:08,440 --> 00:23:12,600
+But it did start on this year, generally, officially at least.
+
+327
+00:23:12,600 --> 00:23:13,920
+So we have a few other projects.
+
+328
+00:23:13,920 --> 00:23:18,120
+Actually, there are some projects also, like you mentioned, you know, in the Spark-wise
+
+329
+00:23:18,120 --> 00:23:21,200
+also about real-time and so forth, streaming.
+
+330
+00:23:21,200 --> 00:23:24,040
+We have a few projects in the context of Spark.
+
+331
+00:23:24,040 --> 00:23:30,160
+One is about accelerating and reducing the latency of streaming, called Rizl.
+
+332
+00:23:30,160 --> 00:23:36,720
+And actually, there is a talk later today from Intel, which we collaborate with this platform
+
+333
+00:23:36,720 --> 00:23:42,480
+big deal, which is experimenting with Rizl and they are going to present some results
+
+334
+00:23:42,480 --> 00:23:44,480
+today.
+
+335
+00:23:44,480 --> 00:23:51,280
+And then there is another project called Tegra, it's about how to process time-evolving
+
+336
+00:23:51,280 --> 00:23:52,280
+graphs.
+
+337
+00:23:52,280 --> 00:23:57,720
+So you know that Spark also has graphics, which is in graph frames, which are some libraries
+
+338
+00:23:57,720 --> 00:24:00,120
+to provide graph processing.
+
+339
+00:24:00,120 --> 00:24:05,840
+So Tegra takes that at the next level and basically saying that most of the systems today
+
+340
+00:24:05,840 --> 00:24:08,760
+are processing static graphs.
+
+341
+00:24:08,760 --> 00:24:11,800
+So you want to process the graphs as they change.
+
+342
+00:24:11,800 --> 00:24:19,800
+And also, you want to be able to ask questions about past instances of the same graph.
+
+343
+00:24:19,800 --> 00:24:25,680
+So what are your friends, you know, January 15th this year, right?
+
+344
+00:24:25,680 --> 00:24:32,160
+And how are these friends changing over the former spirit, right, who are the new friends
+
+345
+00:24:32,160 --> 00:24:38,800
+you got, who are the friends, you know, like, so this is the kind of questions you want
+
+346
+00:24:38,800 --> 00:24:39,800
+to answer.
+
+347
+00:24:39,800 --> 00:24:42,240
+The Tegra project tried to answer.
+
+348
+00:24:42,240 --> 00:24:46,440
+On the security side, I would say it's one project called opaque.
+
+349
+00:24:46,440 --> 00:24:52,640
+So opaque, it actually, it's again, it's like taking Spark SQL and making it more secure.
+
+350
+00:24:52,640 --> 00:24:54,560
+What do I mean by that?
+
+351
+00:24:54,560 --> 00:25:00,040
+You know, today there are solutions, you encrypt the data address, maybe in motion, but
+
+352
+00:25:00,040 --> 00:25:05,440
+still they do not defend, for instance, if the operating system or other applications
+
+353
+00:25:05,440 --> 00:25:08,400
+are compromised, right?
+
+354
+00:25:08,400 --> 00:25:14,720
+So opaque uses, you know, new developments of hardware enclaves, which now is used by
+
+355
+00:25:14,720 --> 00:25:16,280
+many companies, right?
+
+356
+00:25:16,280 --> 00:25:21,360
+Also Apple is their Morrison announcement for this cheap, bionic chip right on the iPhone
+
+357
+00:25:21,360 --> 00:25:23,640
+to run their neural network.
+
+358
+00:25:23,640 --> 00:25:30,960
+But these enclaves basically defend the application, the code you run within the enclave, even
+
+359
+00:25:30,960 --> 00:25:34,720
+if the operating system high-pipervisor are compromised.
+
+360
+00:25:34,720 --> 00:25:40,160
+So basically we try, so zero, opaque is about providing Spark SQL, taking Spark SQL and
+
+361
+00:25:40,160 --> 00:25:46,200
+providing Spark SQL functionality, but now it's secured against this kind of very strong
+
+362
+00:25:46,200 --> 00:25:47,200
+attacks.
+
+363
+00:25:47,200 --> 00:25:53,040
+By running in a hardware enclave, running part of it, like the operators running the hardware
+
+364
+00:25:53,040 --> 00:25:54,040
+in place.
+
+365
+00:25:54,040 --> 00:25:55,040
+Okay.
+
+366
+00:25:55,040 --> 00:25:56,040
+Oh well.
+
+367
+00:25:56,040 --> 00:25:58,840
+So, and the last one, maybe I want to, well, there are two and one.
+
+368
+00:25:58,840 --> 00:26:04,680
+I want to mention one is Clipper, this is about prediction service, so there we develop
+
+369
+00:26:04,680 --> 00:26:12,280
+this very modular architecture, so you can serve models which are developed with very different
+
+370
+00:26:12,280 --> 00:26:13,280
+systems.
+
+371
+00:26:13,280 --> 00:26:21,280
+Like, you know, of course, Spark, it will be actually probably the first prediction serving
+
+372
+00:26:21,280 --> 00:26:26,960
+system which will provide native support for Spark models and develop in others, in many
+
+373
+00:26:26,960 --> 00:26:30,120
+other frameworks like TensorFlow and others.
+
+374
+00:26:30,120 --> 00:26:34,160
+So that's all that Clipper and the last one I want to mention is ground.
+
+375
+00:26:34,160 --> 00:26:36,720
+So ground, it's about managing the metadata.
+
+376
+00:26:36,720 --> 00:26:38,800
+This is one of very important problems, right?
+
+377
+00:26:38,800 --> 00:26:44,400
+You have data which is generated and modified, you know, think about an enterprise, different
+
+378
+00:26:44,400 --> 00:26:45,640
+source is different people.
+
+379
+00:26:45,640 --> 00:26:52,680
+So it's about really tracking the metadata and answering, being able to answer the questions
+
+380
+00:26:52,680 --> 00:26:56,640
+who create this data, where the data is coming from, who modifies the data, who do
+
+381
+00:26:56,640 --> 00:27:02,720
+it is the data, and then on top of that, of course, you can have access control and authorization.
+
+382
+00:27:02,720 --> 00:27:07,120
+So this is kind of a few projects we are working on.
+
+383
+00:27:07,120 --> 00:27:10,800
+Ground makes me think a little bit of, like, it might be an interesting blockchain application.
+
+384
+00:27:10,800 --> 00:27:15,120
+There's a blockchain application, there's another project which is based on blockchain
+
+385
+00:27:15,120 --> 00:27:19,000
+which is doing about authorization, yes, it's called WAVE.
+
+386
+00:27:19,000 --> 00:27:20,000
+WAVE?
+
+387
+00:27:20,000 --> 00:27:21,000
+WAVE.
+
+388
+00:27:21,000 --> 00:27:22,000
+Okay.
+
+389
+00:27:22,000 --> 00:27:23,000
+Interesting.
+
+390
+00:27:23,000 --> 00:27:24,000
+Great.
+
+391
+00:27:24,000 --> 00:27:26,080
+Well, before we finish up, is there anything else that you'd like to leave listeners
+
+392
+00:27:26,080 --> 00:27:27,080
+with?
+
+393
+00:27:27,080 --> 00:27:31,440
+Well, I think you're very nice here, as far as this question says, I know you don't
+
+394
+00:27:31,440 --> 00:27:35,920
+want to stay with this guy, hey, so I'll save something for the next time.
+
+395
+00:27:35,920 --> 00:27:36,920
+Great.
+
+396
+00:27:36,920 --> 00:27:37,920
+Well, thanks so much, Ian.
+
+397
+00:27:37,920 --> 00:27:38,920
+It was a pleasure having you on the show.
+
+398
+00:27:38,920 --> 00:27:39,920
+Thank you.
+
+399
+00:27:39,920 --> 00:27:40,920
+Thank you.
+
+400
+00:27:40,920 --> 00:27:47,680
+All right, everyone, that's our show for today.
+
+401
+00:27:47,680 --> 00:27:53,240
+Thanks so much for listening, and of course, for your ongoing feedback and support.
+
+402
+00:27:53,240 --> 00:27:58,080
+For more information on Ian, or any of the other topics covered in this episode, head
+
+403
+00:27:58,080 --> 00:28:03,200
+on over to twimlai.com slash talk slash 55.
+
+404
+00:28:03,200 --> 00:28:10,160
+For the rest of this series, head over to twimlai.com slash AI SF 2017.
+
+405
+00:28:10,160 --> 00:28:16,400
+And please, please, please send us any questions or comments that you may have for us or our guests,
+
+406
+00:28:16,400 --> 00:28:23,640
+via Twitter, at twimlai or at Sam Charington, or leave a comment on the show notes page.
+
+407
+00:28:23,640 --> 00:28:28,240
+There are a ton of great conferences coming up through the end of the year, to stay up to
+
+408
+00:28:28,240 --> 00:28:33,400
+date on which events will be attending, and hopefully to meet us there, check out our
+
+409
+00:28:33,400 --> 00:28:42,800
+new events page at twimlai.com slash events, twimlai.com slash events.
+
+410
+00:28:42,800 --> 00:28:54,280
+Thanks again for listening, and catch you next time.
+

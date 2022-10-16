@@ -1,0 +1,722 @@
+Hello and welcome to another episode of Twimble Talk, the podcast where I interview interesting
+people doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington.
+A big thanks to everyone who participated in last week's Twimble Online Meetup, and
+to Kevin T from SIGUP for presenting.
+You can find the slides for his presentation in the Meetup Slack channel, as well as in
+this week's show notes.
+Our final Meetup of the Year will be held on Wednesday, December 13th.
+Make sure to bring your thoughts on the top machine learning and AI stories for 2017
+for our discussion segment.
+For the main presentation, prior Twimble Talk guest Bruno Gonzalez will be discussing
+the paper understanding deep learning requires rethinking generalization, by Shi Huang Zhang
+from MIT and Google Brain and others.
+You can find more details and register at twimbleia.com slash Meetup.
+If you receive my newsletter, you already know this, but Twimble is growing and we're
+looking for an energetic and passionate community manager to help expand our programs.
+This position can be remote, but if you happen to be in St. Louis, all the better.
+If you're interested, please reach out to me for additional details.
+I should mention that if you don't already get my newsletter, you are really missing
+out and should visit twimbleia.com slash newsletter to sign up.
+Now, the show you're about to hear is part of our Strange Loop 2017 series, brought to
+you by our friends at Nexusos.
+Nexusos is a company focused on making machine learning more easily accessible to enterprise
+developers.
+Their machine learning API meets developers where they're at, regardless of their mastery
+of data science, so they can start cutting up predictive applications immediately and
+in their preferred programming language.
+It's as simple as loading your data and selecting the type of problem you want to solve.
+Their automated platform trains and selects the best model fit for your data and then outputs
+predictions.
+To learn more about Nexusos, be sure to check out the first episode in this series at
+twimbleia.com slash talk slash 69 where I speak with co-founders Ryan Sevy and Jason Montgomery.
+Be sure to also get your free Nexusos API key and discover how to start leveraging machine
+learning in your next project at nexosos.com slash twimble.
+In this episode, I speak with Sam Richie, a software engineer at Stripe.
+I caught up with Sam right after his talk at the conference where he covered his team's
+work on explaining black box predictions.
+In our conversation, we discuss how Stripe uses these predictions for fraud detection and
+he gives us a few use case examples.
+We then discuss Stripe's approach for explaining those predictions and briefly mention Carlos
+Guestren's work on the line paper, which he and I discuss in twimble talk number 7.
+Well hey everyone, I am here at the Strange Loop Conference in St. Louis and I've got the
+pleasure of being seated across from Sam Richie, who is a software engineer at Stripe.
+And Sam was in to talk about just so stories for AI, explaining black box predictions.
+And in fact, he just jogged over here from delivering his talk and it's like five blocks away
+at hustle.
+So welcome to the show, Sam.
+Yeah, thank you.
+Thanks for having me.
+Why don't we start by having you tell us a little bit about your background and how
+you got started working in AI and machine learning?
+Sure.
+Yeah, you want the just so story of exactly.
+So this is fairly new, I guess less year and a half I've been at Stripe, as I said, working
+on machine learning infrastructure.
+How did I get here?
+We were talking before this started about, you know, my kind of initial coding background
+is coming up in the functional programming world years ago, I guess the first thing that
+led to this was this large scale like deforestation monitoring system I worked on.
+This got me into like Hadoop and closure and this is sort of it was a machine learning
+application, I had no idea what I was doing when I was on this, right?
+And where were you working on that?
+So this was just a freelance thing with a guy I used to race like flat water kayaks
+with.
+And he moved off to the data science world.
+I was making apps like in my apartment in New York, I had a year in New York city.
+And yeah, just wanted to, well, the real, okay, so the reason I, it's like hard to put
+a narrative together in my life, man.
+The deforestation monitoring system was just this collaboration with a buddy who was doing
+work for the World Bank though, right?
+Okay.
+So the idea was to build like a model that could, on the basis of these studies that happen
+every like five years or so, build a logistic regression that could predict for certain pixels
+in the tropics.
+The idea was like any spot you looked at, the goal was to get out some prediction of the
+chance that that piece of forest would be deforested in the next month, right?
+Okay.
+And you're starting with satellite imagery?
+Exactly.
+Exactly.
+Okay.
+We came out every two weeks.
+The training data for this, again, I didn't know what I was doing at the time.
+The training data for this was a study that this guy Matt Hansen had done, which looked
+at, modus data from the year 2000, same data again in the year 2005.
+Okay.
+And then he just went through a manually like selected which pixels they thought were deforested
+in which work.
+So this is useful in the back, like a lot of policy, and there's a lot of work on, you
+know, reforestation and things like this, a lot of money that went out from this study,
+but the plan was to do it every five years.
+And so a lot of money went into Indonesia, for example, to like work on deforestation
+there.
+The next time he did the study or when our model came online, it was clear that like Indonesia
+was actually looking pretty good.
+It was not talking to charts anymore.
+Okay.
+And like me and Mar was now the issue.
+Okay.
+So the goal was to get new data every two weeks.
+So what we did is this is where the, you know, big data, functional programming stuff came
+in.
+Right.
+And then from satellite data, like time series of what was happening during that five
+year period, right?
+Okay.
+So use that as the training data.
+The prediction variable was what this guy Matt Hansen had said deforestation was.
+Right.
+And then we just marched the time series forward and predict, does this now look like deforestation?
+Does this now?
+You end up with a map that you can scroll through that just shows the trends of deforestation
+moving through the world.
+Oh wow.
+It's really amazing.
+Interesting.
+I don't know what's happened with that, but I think it's now the World Resources Institute
+was the organization that was sponsoring us.
+I think this is out as I can open data set now, but that's kind of my first taste of.
+And now I came at machine learning from the statistics side a little bit.
+And it turns out that these are like the same field.
+They just have different words for things.
+Right.
+So you move from one of the other.
+You don't really know if you can bring anything over.
+But yeah, that was the first thing.
+That took me, you know, I took all this like wonderful, non-profit, amazing work I was
+doing.
+And I let Twitter like recruit me to go do the same stuff on ads.
+The best minds of our world, that people put ads, right?
+That's it, man.
+Yeah.
+So it sold the soul for a little bit.
+But, you know, had a few years there building open source tech to do, again, like effectively
+the same sort of Hadoop based stuff that we were working on before.
+We ended up open sourcing a lot of that work as this library called Summingbird, which
+is, again, as we were saying, it's like all monads all the time.
+It's a library that lets you write these like big streaming data computations and then
+run them on Hadoop or on like a real-time streaming system or on both.
+And basically, like, separates what you want to compute from where you want to compute
+it.
+And it's only relevant really because the final piece of this puzzle is what drew me
+to stripe is that I was interested in machine learning.
+I was doing a lot of work on my own and studying and just trying to get up to speed and like,
+stripe had pulled this library in and was using it for their feature generation pipeline
+for a lot of their models internally.
+Okay.
+So it was like, I'm not the most qualified, like, I don't have this amazing like data science
+background.
+I did have a hook in the infrastructure side.
+And so a lot of the work I do now at this intersection between how do you make features?
+How do you run the stuff at production scale?
+How do you ship models?
+The intersection between that and like, what models are even worshipping?
+What should you care about?
+What should you put in the product?
+Super interesting for me and it's been a really fun, like, year and a half or so.
+Leading now to some work on this stuff we were talking about today.
+Okay.
+Awesome.
+Awesome.
+So why don't you tell us what you were talking about today?
+Yeah.
+So the talk today was on, in general, it was on this idea of how to explain the predictions
+that black box models make.
+Right.
+This is like a term that's tossed around like a black box model is a model, like, a neural
+network is a black box model, a random force is a black box model, right?
+Like, it's just kind of this term meant to express how, like, powerful and complicated
+these things are internally.
+The internal structure is very rich and varied.
+You know, a black box model is typically seen as difficult to understand or hard to explain.
+That's like, it's hard to know what that really means, right?
+Like, what does it mean to explain a black box model?
+So that was the general theme.
+The specific things I started with were the work we do at Stripe on fraud detection.
+You know, we use models that are as accurate as possible to try to catch fraud for merchants
+who sign up for Stripe.
+At the same time, this black box property of, we're just going to block charges and, you
+know, you as a merchant, like, you might know more about your business.
+We might block a charge that you think is a legit customer.
+And if we're just sort of telling you like, look, the world is a better place if you accept
+our decisions.
+It's not totally appropriate.
+And people don't trust us with this and often what they've done is not used our product
+and gone to the system of very manual rules.
+You know, you go in, you say what you think fraud looks like.
+You're probably like cutting a lot more tissue out than you should.
+But you know, you feel good about it because you made the decision.
+So there's a tension here between a black box model making decisions for you that you
+don't understand.
+And something is not as effective, just strictly, like, a merchant does not know as much about
+fraud as some like a big company that is dealing with tens of thousands of merchants can.
+So the talk was about some tech we developed at Stripe to give people alongside our internal
+sort of suggestion or decision about what we're going to block, an explanation of why we
+did that.
+Okay.
+So this is a subtle problem.
+It was about the solution we came up with for that.
+And then about why that solution is kind of not great and why it's not a real explanation,
+is it not?
+And then we talked about a bunch of other techniques that the goal was to build up in
+the mind of, I mean, I guess we'll talk about it here, like, there's a bunch of techniques
+to do this.
+And it turns out that black box models often are like the most explainable models.
+They have such a rich structure that you can ask so many questions that really tease
+apart subtleties of an individual example in a way that you absolutely cannot with something
+like a logistic regression or a very simple model that you can just simulate in your
+mind.
+As a human.
+That's counterintuitive.
+It is.
+Then a black box model, you'd consider black box models be the most explainable model.
+Yeah.
+And I mean, I do it by just taking the definition and twisting it a little, but I would argue
+that it's, it's fuzzy what people mean when they talk about this.
+Right.
+There's a number of ways to frame this problem of is a model explainable or not, right?
+And so when you, how are you defining it leading up to the conclusion you've drawn?
+So I think the way in which people think a black box model is not understandable, you
+know, is it's the same way that like, you could say, if you asked me why I decided to
+go or get straight for something else.
+And I just like printed out the contents of my brain and showed you the state of every
+neuron and every connection.
+This is not understandable, right?
+Like, it's the truth.
+This is why I did it, like the physical state of my mind just, I couldn't do otherwise if
+you buy a sort of free will argument.
+But that's not what people mean really when they talk about human explanations, right?
+Like, when you talk about a human explanation, you want to know, okay, well, give me some
+narrative, give me some plausible reason why in this case, like not the entire, your brain
+has information from everything you've ever done.
+Give me for this example, you know, maybe, maybe one way to explain the decision is what
+would have had to change to make you change your mind, right?
+So that's a form of explanation.
+That's a kind of question that you can sort of ask of a logistic regression.
+You can ask of simple models when you get to things like image processing, where the
+features, the inputs to the model are tens of thousands of different pixels, each of which
+has individual weights in say a logistic regression.
+Like, that ability to look at a feature and see how much it affected the output, that
+kind of stops being helpful, right?
+Whereas with a neural network or something like this, you can, for an individual example,
+you can start one technique I talked about in the talk, it's called line.
+And the idea here is that-
+That's Carlos Gastron's work.
+Yeah, yeah, it's so good.
+So the idea here is that for an individual example, you can probe the model and see what
+would have happened had any individual thing changed, right?
+So you can build effectively like a little local linear model inside of this wild space that
+the neural network is trained, right?
+So because of this rich internal representation, overall, totally with you, like, it's hard
+to explain why the model is doing what is doing in aggregate, just like it's hard to say
+why like, you know, the entire population of a country is doing something more.
+But for any individual case, you can, in fact, build a story or build more technically
+like a local linear model, which will tell you what the most important aspects of that
+particular example were.
+And it's been a while since I've talked to Carlos about this.
+We'll put a link to the podcast I did with him in the show notes.
+But I wasn't even impressed in that the line work, at least at that time, which was a year
+and change ago, like wasn't really being applied to neural nets.
+It was for, you know, other types of models.
+The stuff that we, that I mentioned in the talk is we're not using neural nets at strike.
+But the examples he's got are, like, his techniques don't really depend on, my understanding,
+the underlying model.
+The models themselves.
+Okay.
+Exactly.
+So you can sort of probe a neural net in that if you train a neural net, the example I
+showed in the talk was that he has actually in his paper, you have a neural net that recognizes
+Huskies, say, versus wolves.
+And so he had a beautiful example of a husky that was misclassified as a wolf.
+Right.
+And so you look at it and you go, yeah, they look kind of the same, like, I get why this
+is happening.
+Yeah.
+So the explanation that Lyme produces shows you the most relevant pixels to the decision.
+So like, what pixels that they change to have the most input?
+And in this pathological example, it's like the snow underneath the husky.
+Right.
+Interesting.
+Yeah.
+One example, and you can, it's clear that like the training set you used clearly just
+had every wolf associated with snow marked up on the wrong pattern.
+So you, you've explained this deep property of the neural net through one explanation, like
+just one image, right, which exposed this rich structure.
+Okay.
+One last thing.
+I'm not trying to make like a, this is this controversial claim that black boxes are actually
+easy to explain.
+It's more just for the things that we would care about at Stripe, which is how, like, that
+you care about with an image, like, why is this particular image misclassified?
+Right.
+Or why is this particular merchant getting blocked or why is this particular charge?
+You can come up with a much richer story about why that's true.
+And that seems to often have the property that if you look at enough of these and they're
+different enough, you can leach out some understanding of what the model is doing without
+actually having to go, you know, look at every path through every tree or the weights
+of every neuron.
+So you can treat the thing as a black box and get some insight into what patterns it
+extracted from the data set you gave it.
+Okay.
+So the, the line approach is doing what, I guess, sounds like almost like sensitivity
+analysis for the inputs, right?
+Is that maybe what I think about it?
+And then there are also approaches that are based on, you know, kind of introspecting the
+layers of a neural network, like deep dream and these other things trying to get, well,
+this, this network's looking at edges.
+And so if it's misclassifying something, it's because it sees an edge wrong or something
+like that.
+Did you develop your own technique or, okay, so tell me a little bit about that.
+Yeah.
+So the technique that we developed, the ones we were just talking about are really
+good for actually understanding, for some particular example of fraud or some merchant,
+why the model did what it did.
+So, or what would have to change to change the decision?
+Yeah.
+Now, you know, building a product that is meant to block fraud, you know, unfortunately,
+some of the merchants that sign up for Stripe, sign up to go just run stolen credit cards
+through the system and collect money.
+The whole issue is that there are people who are testing cards who are sort of committing
+fraud in this network, and because we're one level behind merchants, we have to be a
+bit careful about what we expose in terms of our explanations of why the models are doing
+what they're doing.
+If we were just to give, for every charge, our best sort of most beautiful explanation
+of what would have to be different to not get blocked, you know, there's, you could probably
+wait this, per merchant by trust and start to expose more and more as they're with you
+longer.
+You do that through, you know, individual like customer relationships, but as far as
+a product, like, what do you want to see on the screen when your card gets blocked?
+Like, the explanation that line produces is almost too good.
+It's like easy to game, right?
+Okay.
+So, the system we developed internally, I'll develop it here.
+It's a way that you can come up with an explanation for basically a post-hoc explanation
+of that looks like a rule that the merchant could have implemented themselves, where if
+they deployed that rule, like, it would have caught the charge and it would have agreed
+with the model in some high percentage of cases, right?
+But it's not necessarily tied to anything internal about the model structure.
+So I guess the subtlety here versus the other system is, and this is the title of the talk
+is just so stories for AI.
+The idea here is that you can develop a sort of, you know, ahead of time, it's hard to make
+predictions.
+That's why we have to use these models with rich internal structure.
+Once you know what's happened, once you know that the model thinks that this charge is
+fraudulent, it's much easier to go back and say, okay, given that I know that this is
+what the model said, I can go come up with an explanation for why the model did what it
+did.
+So, like, conspiracy theories are kind of an example of this, right?
+Once you know that the model went off in this particular building, you can come up with
+some crazy tale about how it got there and it's like a much easier problem.
+There's also different, many explanations that will fit some are more credible, some
+are less credible, but it's a much easier task than actually predicting a decision.
+Is what you're ultimately doing some form of, like, dimensionality reduction or dimension
+compression?
+Like, you've got all these internal variables in your model, but you're trying to, it sounds
+like you're trying to map your story down to, like, these four public facing, what aggregate
+thing.
+I wish it was, I'll tell you the algorithm, it's, yeah, I think it's a little as disciplined.
+Okay, so the simple way to say it, or the first pass of it, is that what we're trying
+to do is train, like, a decision tree on, it's basically a bad version of the model that's
+meant to predict what the model is going to do, right?
+So, we want it to look like a decision tree because we want to be able to present some,
+like, the form, the, the output, I guess, of this model, we want to be some set or, some
+rule that the user could, could see, or any, of course, using a decision tree because
+it's explainable.
+It's explainable, right?
+Exactly, exactly.
+It's not very good, but so, that's the shape of what we want and what the model looks
+like is basically a can set of potential explanations, any one of which, if it applies to some
+charge you give me, like, any one of which has a high precision with respect to what the
+model would have chosen, right?
+So, if my rule, if my explanation applies to some charge of the model calls fraudulent
+in the test set, I want to be sure that it also would have applied to many other charges,
+right?
+So, if you just tell me, like, if the explanation is, well, there was a charge on the card,
+this is very high recall, it catches a lot of fraud, it has incredibly low precision,
+right?
+There's no sort of information contained in that statement.
+So, again, the explanation model is a list of possible explanations sorted by their precision
+in descending order compared to the models, like, what the model claims.
+What we do then is, when a charge comes in, if the model claims that it's fraud, we then
+go to our explanation model and we just start looking through the explanations, and we find
+the first one that applies to the charge that has come in.
+So basically, like, what's a path through the decision tree?
+Looking at all the paths, not looking necessarily first at the features, just taking the outcomes
+and, like, trimming out anything that doesn't apply, which is the explanation that, as you
+go down the list, has the highest precision, but also applies to this one.
+That's the thing we exposed to the user, right?
+So, it's sort of like a decision tree, and then it has, it has the same structure as
+a decision tree, but you don't independently ask the explanation model and the forests
+and then present both of these.
+This probably wouldn't match, right? Because a lot of these explanations won't necessarily
+match up, but if you know what the model did, you can take your kind of bad model, your
+decision tree, you can trim all the paths that don't agree with the model and then show
+the highest precision path down to some leaf.
+Okay, so you've got your high fidelity model and your low fidelity model, the low fidelity
+model, the decision tree, you are, I mean, it sounds like you're running both of them parallel
+along your input data.
+Yeah, you run the first one and then the second one gets features as input, it runs its
+thing, and again, like, exactly like you're saying.
+So I'm not super clear on the part where you're trimming off the, like, you're pruning this
+decision tree in some way or...
+Okay, so let's see if I can, let's see if I can elaborate on that.
+Let's take a step back. So the input to this, the second model decision tree is, it's
+not your input data and it's not the output of the first models, the features of the first
+model.
+Are you talking about the training or the prediction process?
+The prediction process.
+So for prediction, yeah, it's, yeah, so the input is in fact, yeah, okay, let's step back
+and frame this.
+So your first, like you said, first model is the black box, right?
+Second model is the decision tree or another way to look at this list of predicates, right?
+So what you need to evaluate the second model is the output of your first model plus all
+the features, right?
+So the output of the...
+And my features are we referring to the inputs or, like, weights or some internal...
+Sorry, good call.
+See, again, the statistics machine learning, crazy terms, by features here, I mean, like,
+the things we know about the charge, like the dictionary, the inputs to the black box.
+Got it.
+Okay.
+So forget what's going on in the black box.
+You're totally right.
+Got your features as well.
+Okay.
+We're going to evaluate the charge, the variables.
+We first send those into the black box, we get out some decisions from the black box.
+Right.
+And we've chosen a threshold in advance, so all we care about is does the model think
+it's fraud or not?
+Right.
+Okay.
+Now, we take that, we go to the second model, we take the same inputs to the black box,
+and we go through this list, which is ordered from high precision to low precision, and
+we find the first path through the tree, again, like, it's important that they're ordered.
+We find the first path through the tree that one evaluates the true as well, so agrees
+with the black box model.
+Well, that's it.
+That agrees with the black box model.
+Okay.
+There might be multiple paths that agree with the black box model, right?
+So this is the difference between just evaluating the decision tree.
+So we find the one that has the highest precision that does agree, and we return that as the
+explanation model, or as the explanation user.
+Okay.
+How do you even measure the results from, I mean, if we're talking about, if we're talking
+about, you know, whether the fraud is the transaction as fraudulent or not, the easy to measure
+the results are.
+How do you measure like the explainability of the result?
+There's a couple answers to this.
+One is, I think, a good answer.
+One is kind of unfortunate.
+The first answer is the way you can evaluate your explanation model is you want each individual
+explanation to have high precision.
+You want overall the entire set of explanations to have I recall, right?
+So you want for any charge that comes in, you want a very high probability of having an
+explanation available, right?
+And then for each explanation that you give, you want that to be as high precision as possible.
+So internally, like, that's one way you can evaluate this.
+I think what you're actually getting at is like, what's the point of this?
+Like how can you evaluate the effect of giving these to merchants and seeing if they actually
+mean anything?
+That we were just kind of at the early days.
+We don't do a great job at this now.
+We don't have, I believe, much built into the product now to evaluate the actual thing
+we're trying to do, which is to take something that feels like a black box decision and give
+people some way to kind of relate or build a model in their mind for what this black box
+model is doing.
+Because again, each individual instance of fraud, they might be in a domain where they understand
+what's happening, right?
+They might be a charity site that is dealing with card testing.
+And if they see an instance of this and then the model gives them an explanation that's
+a rule that, you know, maybe it's not why the model did what it did, but it actually
+happens to match up in a lot of ways with the decisions the model would make for charges
+that look like this.
+Like that's a valuable piece of information that a merchant could then take that would
+one give them some insight into what fraud looks like and two, and this is probably the
+real thing you want down the road is to have people just trust what the model is doing
+in decision they understand less, right?
+Right.
+Now, a little bit of what I talked about in the talk is that this is a kind of pathological
+by itself, like you have to know, the explanation is there to get you to trust the black box.
+Right.
+But you shouldn't trust the explanation unless you have some reason already to trust
+the black box.
+So it's, it's like when Twitter says, oh, you should follow this person because, you
+know, Sam follows him and Oscar does too.
+Right.
+That's not a reason.
+Right.
+It's just, there's sort of an implied reason, but it's not what's actually happening behind
+the scenes.
+Well, I mean, part of what I was getting at was, you know, there's all kinds of questions
+that it raises, like how granular you want your explanations to be.
+The degree to which people actually care about the explanations, like there's, you know,
+the book influence, Robert Chaldeini, you know, basically we rejected this charge because
+we rejected this charge, like it's putting the word reject there.
+Yep.
+Just has a huge, you know, provides a huge degree of acceptance, just based on, you know,
+human biology and so how do you, how do you wrap your head around, like how granular
+you need these explanations to be or is it just like you started somewhere and that's
+kind of how much are you investing in that process, I guess?
+So internally, we care, well, we care internally and externally, but like the initial reason
+we created these, these kinds of models was to try to give our risk analysts and our,
+I guess account managers, some way to understand as deeply as they can, like what's happening
+with some decision with, you know, a charge that a merchant called to ask about.
+So this is a case where you're not really trying to persuade the risk analysts, they,
+they have a vested interest in learning as much as possible about this so that they can,
+you know, sound knowledgeable or be knowledgeable like when they're talking.
+But you still don't want to give them the internal representation of the black boss model.
+That's right.
+The case I've just described leaves it up to the, you know, the person on the phone to
+like hide information that seems sensitive.
+Right.
+Whereas when you have the model do it, you know, I don't have a great answer for this.
+We're not like, it's a, it's a really interesting question.
+What level of granularity, you know, what you're really trying to do for a merchant?
+How you, how you have them, how you give them the ability to like let you know what they
+care about or maybe you give them the ability to, you know, sort of request more information
+that you can expand this thing.
+Right.
+How many explanations do you have?
+Each model has roughly like 80 possible explanations.
+That usually gets like full coverage on this thing.
+Okay.
+There's like 80 possible explanations that could apply.
+Okay.
+I'm comparing it to like credit reporting.
+Yeah.
+There's like what all of eight explanations and these are ones that you commonly see.
+Yeah.
+And this, this might help us out that like the rest of the world is just like, there's
+a sort of argument by authority for like scary thing is happening in the world.
+Yeah.
+Go ahead and deal with it.
+So this is, I mean, the reason I kind of, I was interested in giving this talk and
+doing this work is, these are a lot of the open questions in this, in this field, right?
+Like, there's the goal here of getting a customer to trust us.
+That doesn't mean anything without some internal, you know, sense of accuracy or reason to
+actually trust the model.
+If you've got the Husky snow dog problem going on internally, but then you're talking
+people into accepting the decisions, that's kind of pathological.
+And so with the talk, what I, what I was interested in after this that kind of expands
+beyond stripe is that, though we probably will have to deal with this, or I probably will
+personally in the next year or so, you know, the EU has this, what's it, the general data
+GDPR?
+GDPR.
+Exactly.
+The GDPR, the GDPR gives you this, you know, right to an explanation.
+This is one of the clauses.
+Now, after working up to this talk and giving it one of the messages I have is, it's, it's
+not clear what this means, right?
+There's two forms of explanations, there's many forms, but of these two, if people are having
+a right to this sort of explanation, like you said, to just have some emotionally triggering
+word like rejected in their explanation that's meant to convince them of something that's
+going on, this is actually not good, like, I don't think this is the intent of what's
+in that law.
+Absolutely.
+And the other hand, on the other hand, if you're giving people like incredibly detailed
+explanations about why the model did what it did, well, this is good, but it's potentially
+gameable, you know, like, I guess the core issue here is that you started.
+There's an element of, I mean, like domain appropriateness for lack of a better term.
+If you, you know, you could, you know, one way to, you describe one way of kind of scurrying
+GDPR is by, by, you know, having just this, you know, this, you were rejected.
+That's the explanation, right?
+That's certainly not in the spirit of the law.
+You know, but on the other side, if you say, well, the, you know, the third neuron and,
+you know, layer five of our neural network, you know, spit out a 0.6, you know, that's
+why you're rejected.
+That's also inappropriate, even though it's way more detailed and way more granular.
+So I didn't really mean, though, it's, it's a good characterization of it.
+I wasn't necessarily saying that that would be a way to skirt the rule, though it certainly
+would, right?
+If you give people these, okay, you've been rejected, you know, that character of explanation
+though about, hey, we don't know why the model worked, but here's a plausible explanation.
+I guess in, in thinking about this, I think the problem with that, if you did, if that
+was what was adopted by say the courts or, you know, a car, for example, having to spit
+out an explanation of why it did, but it did the cost and damage.
+This doesn't teach you much about the core problem of, that I think we're trying to solve
+here, which is there are things we care about in the world.
+And then there are the goals that we give to our models when they get trained, right?
+You have some prediction target.
+And it's just the fact that we don't, we don't know enough about ourselves about what we
+care about, about how we work to encode all of our ethics, all of these things in the
+goals of a model.
+And so when you can ask a model, like, I think my understanding here, my interpretation
+of this is, when you can ask a model for an explanation of why it's doing what it's doing,
+what you're doing is you're monitoring whether or not it picked up the things you actually
+care about from the data that was easy to encode, right?
+And what do you do then?
+What you do if you find a mismatch, the only thing that makes sense is to take the thing
+that wasn't quite there and to figure out how to encode that in the goal of your model
+that you're training, right?
+So you have, on the one hand, this, again, kind of pathological case where models start
+optimizing for whatever they're optimizing for, right?
+Once you start feeding data back, like, model decisions back into its own training set,
+you start to get this odd effect of, like, putting a copy on the copy over and over.
+And then you've got this other parasitic model that's, like, just justifying whatever's
+happening under there.
+This is not good.
+Right.
+Right.
+That's the downside.
+So we're forced to really clarify what we care about in technical terms, right?
+Like, you can take these ethical concerns, this is what I guess the law attempts to do
+through almost like your sidecar model is like a, almost like a unit test for your regular
+model.
+Is it encoding the kind of the way of thinking about the relationship between the transactions
+and the judgments?
+Yep.
+Like in a conversation, if you explain, you say something to someone, they repeat it back
+in a slightly different way, what's the point of this?
+Or you're just demonstrating that you've absorbed the content, right, stating it in a different
+way.
+And if you go, yeah, totally get it, you know, and just say something insane, right?
+We get to talking again, you know?
+So that I think is what's so interesting about this tension between the different kinds
+of explanations, the subtleties of what's going on inside the model.
+Right.
+So one example of, like, an ethical concern that people have been talking about, there's
+a couple of folks internally, it's right, where actually speaking of the GDPR, like one
+concern for a model is that it's going to pick up on some kind of implicit like pattern
+in the data and start treating like people of different genders, different race, like
+different groups.
+It's going to have different considerations for them.
+Now this first kind of model, there's a Peter Norvik quote I gave in the talk, can give
+you an explanation that just kind of ignores what's actually going on and gives you a plausible
+reason why, you know, somebody might have been rejected from a job, like say it's right,
+we start turning a model loose on hiring, right?
+If you can figure out what is different about what you care about, which is this sense of,
+this kind of vague sense maybe that everyone like deserves a fair shot, et cetera, you
+find that your model is not doing that, you're then forced to encode this more formally.
+So Google has a great post which says this in a nice way, which is like one way to encode
+this is to say that along any split you care about, along any group, along any like business
+type or something like this, let's make sure that the false positive rate is identical
+across all these things.
+And so this then can get fed back into the, like once you realize that if this is not happening,
+you can then feed this back into the training process for your black box models, they then
+will kind of formally encode the ethics you care about in the world and then you move
+on to the next problem, of course, right?
+Yeah, it's really interesting, even circling back to the kind of the beginning, the notion
+of explainability, the model you're describing, like the second model, you could argue it's
+not really explaining the first model, it's explaining, it's offering a justification,
+right?
+And you kind of said that, but we talk about this broadly as solving the explainability
+problem, but it doesn't necessarily offer any insight whatsoever to what's actually
+happening inside your model.
+That's right, which I guess, you know, we're kind of getting into semantic land here,
+but you know, explainability of the model versus explainability of the output.
+But I think they're, you know, at the very least, I think, you know, for folks that are,
+you know, thinking about this stuff, it makes sense to at least try to be clear on which
+one you're trying to achieve.
+I think that's a great takeaway, I mean, to wrap back to what you, when you were talking
+about like, if you give someone an explanation on the state of the neurons, you know, one
+thing that comes up a lot in these, in these papers, these papers that are trying to talk
+about how to formally encode explanations is this idea that, or these casual references
+to how humans reason and how humans explain their own decisions.
+And it's just kind of taken for granted at this point that the way we work is separate
+from the explanations we give for our actions, right?
+And so this is one thing that comes up when you read about the GDPR is that one critique,
+I guess, of this clause is that we're asking for things from our black box models that
+we don't ask from judges, because there's just no conceivable answer, right?
+So it's like you said, it's sort of getting into semantics is kind of getting into sort
+of whatever philosophy I can sort of pull out of a software engineering career.
+But I think it's really important to contrast the two, right?
+And say, you know, what do we mean?
+What are we asking for?
+There's this naive idea that because it's a model, because it's an algorithm, there's
+like a clear answer to why it did what it did, or because it was something you could turn
+the crank on.
+Right.
+But that's not right at all.
+It's much more subtle than that.
+Awesome.
+Awesome.
+So is any of the work that you've done in this area published?
+We're planning in the next few weeks on writing more about this, and I think publishing
+the algorithm.
+Okay.
+That'd be great.
+Yeah, I'm sure folks would be very interested in learning more about it.
+And once again, we'll drop the link to Lime and the conversation with Carlos.
+And are there any other efforts at explainability that figured heavily into the work that you
+did there?
+I'll give you some links to put in the show notes too, but we've got, I mean, there's
+so much stuff going on.
+There's a DARPA program now, an explainable AI, Stuart Russell at Berkeley has, I think
+it's called, I cannot remember the name, not human compatible, maybe human compatible
+AI.
+Okay.
+There's a track at MIPS about this issue.
+I mean, this is really coming up as, of course, we have to get into this, it's coming up
+as one of the core approaches toward this problem of like AI and algorithmic safety, right?
+Which can often be this fuzzy, scary conversation.
+For me, I think there's grounds it very heavily, like what are we worried about kind of one
+thing is the leaching of meaning from just letting things that are loose that are really,
+really accurate, but haven't encoded the things you care about in the world, right?
+And explanations are kind of our tether on this.
+Yeah.
+So I'll send more links and I'm going to do some writing on this next week that I'll
+send over as well.
+Okay.
+Just the full brain dump.
+Awesome.
+Looking forward to it.
+Well, thanks so much, Sam.
+Always very to have another Sam on the show.
+Yeah.
+Thank you, sir.
+Enjoy the rest of the conversation.
+Thank you, Sam.
+All right, everyone, that's our show for today.
+Thanks so much for listening and for your continued feedback and support.
+For more information on Sam or any of the topics covered in this show, head on over
+to twomolei.com slash talk slash 73.
+To follow along with our Strange Loop 2017 series, visit twomolei.com slash ST loop.
+Of course, you can send along your feedback or question via Twitter to at twomolei or
+at Sam Charrington or leave a comment right on the show notes page.
+Thanks again to Nick Sosis for their sponsorship of the show.
+Check out twomolei.com slash talk slash 69 to hear my interview with the company founders
+and visit NickSosis.com slash twimmel for more information and to try their API for free.
+Thanks again for listening and catch you next time.

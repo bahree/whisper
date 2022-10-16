@@ -1,0 +1,2015 @@
+WEBVTT
+
+00:00.000 --> 00:16.320
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+
+00:16.320 --> 00:21.480
+people, doing interesting things in machine learning and artificial intelligence.
+
+00:21.480 --> 00:34.860
+I'm your host Sam Charrington. A couple of weeks ago, I had the pleasure of attending
+
+00:34.860 --> 00:40.200
+the NURPS conference in Montreal. I had a wonderful time there and of course, the highlight
+
+00:40.200 --> 00:45.880
+was the chance to meet a ton of Tummel listeners. I held two fun meetups at the conference. The
+
+00:45.880 --> 00:51.400
+first was focused on AI and production and AI platforms and infrastructure and it attracted
+
+00:51.400 --> 00:57.400
+a pretty nice crowd. We basically took over a dumpling restaurant in Chinatown right by the
+
+00:57.400 --> 01:02.440
+convention center. I also held a listener meetup one evening and got to hang out with listeners
+
+01:02.440 --> 01:08.200
+from all over the country and world. Of course, I took advantage of the opportunity to sit down
+
+01:08.200 --> 01:13.240
+with a few of the many great researchers attending and presenting the conference and this week on
+
+01:13.240 --> 01:21.960
+the show, we're excited to share our 2018 NURPS series. In this, the first episode of the series,
+
+01:21.960 --> 01:27.320
+we're joined by Coonlay Olucatune, professor in the department of electrical and computer science
+
+01:27.320 --> 01:33.800
+at Stanford University and chief technologist at San Bonova Systems. Coonlay was an invited speaker
+
+01:33.800 --> 01:38.840
+at the conference this year, presenting on designing computer systems for software 2.0.
+
+01:38.840 --> 01:44.840
+In our conversation, we discussed various aspects of designing hardware systems for machine and
+
+01:44.840 --> 01:51.240
+deep learning, touching on multi-core processor design, domain specific languages, and graph-based
+
+01:51.240 --> 01:55.480
+hardware. We covered the limitations of the current crop of machine learning hardware,
+
+01:56.040 --> 02:02.440
+such as GPUs, and peer a bit into the future as well. This was a fun one that I know you'll enjoy.
+
+02:02.440 --> 02:11.960
+And now on to the show. All right, everyone. I am here with Coonlay Olucatune. Coonlay is a
+
+02:11.960 --> 02:17.160
+professor of electrical engineering and computer science at Stanford University as well as the
+
+02:17.160 --> 02:22.600
+chief technologist at San Bonova Systems. Coonlay, welcome to this week in machine learning and AI.
+
+02:22.600 --> 02:31.960
+Thank you. So you just came from giving a talk on designing computer systems for software 2.0.
+
+02:31.960 --> 02:41.080
+Here at NURPS in Montreal, and I am really excited about digging into the topic of your talk. But
+
+02:41.080 --> 02:45.480
+before we do that, I'd love to learn a little bit more about your background. How did you get
+
+02:46.120 --> 02:52.280
+started in kind of this intersection of computer systems, architecture, and machine learning?
+
+02:52.280 --> 02:59.000
+Yeah, so I've been in computer architecture for a long time. I've been at Stanford for almost
+
+02:59.000 --> 03:07.880
+27 years. And I had done a lot of work in computer hardware. In fact, many of the ideas that
+
+03:07.880 --> 03:14.040
+underlie multi-core microprocessors were developed in my lab in the mid-90s before they became
+
+03:14.040 --> 03:22.680
+mainstream. And I did a company that started up. It was called a Farrow Web Systems. And we did some
+
+03:22.680 --> 03:30.440
+high-throughput processes for the data center. And it got acquired by a Sun Microsystems.
+
+03:31.640 --> 03:38.760
+Subsequently, Sun was acquired by Oracle. And all the big spark servers were basically based
+
+03:38.760 --> 03:46.120
+on the technology that was acquired back in 2002. So I have a long history of kind of doing
+
+03:46.120 --> 03:56.760
+hardware. About 10 years ago, after I came back from doing the first startup, I realized that the
+
+03:56.760 --> 04:04.280
+issue going forward wasn't so much building new hardware. It was actually getting programs to run
+
+04:04.280 --> 04:11.960
+efficiently on that hardware and getting programs at all. And so we've gone into the right ones
+
+04:11.960 --> 04:19.000
+run anywhere at Sun, right? Big cloud emission there. Yeah, of course the joke was right once
+
+04:19.000 --> 04:26.600
+debug everywhere. But yeah, I mean, I think Java didn't help the cause really.
+
+04:29.560 --> 04:36.760
+Many things worse from an efficiency point of view, right? So certainly, you could imagine that
+
+04:36.760 --> 04:43.960
+maybe it may develop as more productive, but that's arguable too. We're still garbage collecting
+
+04:43.960 --> 04:51.720
+to this day, right? Exactly. So anyway, about 12 years ago now, we started thinking about,
+
+04:51.720 --> 04:57.800
+how could we kind of make a difference to the application developer? How could we make their
+
+04:57.800 --> 05:08.440
+life easier? And you know, even go you go back to sort of 2006, 2007. And it was clear that
+
+05:08.440 --> 05:15.160
+the world of high performance hardware, which is the world that I have spent most of my life in,
+
+05:15.160 --> 05:23.640
+wasn't just parallel cores, right? It wasn't just multiple CPUs. It was also these new
+
+05:23.640 --> 05:33.240
+up and coming things called GPUs. And then, of course, it wasn't just shared memory, it was also
+
+05:33.240 --> 05:39.560
+clusters, right? And people wanted to program these things. And yet every programming,
+
+05:39.560 --> 05:46.120
+everything, everything, every program you needed to write needed to be different for the
+
+05:46.120 --> 05:54.520
+particular platform that you wanted to run on, right? And that, to me, seemed like a real problem
+
+05:54.520 --> 05:59.800
+from the point of view of the software developers. And so what we decided the right approach
+
+06:00.680 --> 06:07.880
+was to look at using domain-specific languages, right? So domain-specific languages had been around,
+
+06:07.880 --> 06:15.800
+and then you're probably familiar with them, but let me just define them, just to make sure that
+
+06:15.800 --> 06:20.760
+everybody understands what they are. So they, the domain-specific languages, as the name suggests,
+
+06:21.720 --> 06:26.520
+are designed for a particular domain, right? That was a particular problem domain that you
+
+06:26.520 --> 06:33.880
+want to solve. And so if you can give the programmer both the operators and the data types that
+
+06:33.880 --> 06:37.720
+match that domain, then they can, you make their life a lot easier, right? Really good example
+
+06:38.440 --> 06:43.000
+since we're talking about machine learning would be MATLAB, right? So matrix and linear algebra,
+
+06:43.000 --> 06:48.520
+you give yourself a bunch of matrix and linear algebra operators and data types, matrices,
+
+06:48.520 --> 06:54.200
+and vectors, and so on. And then now you can write your algorithms with linear algebra much
+
+06:54.200 --> 06:59.800
+more easily. So, you know, so it sounds like if I can interrupt, it sounds like you consider MATLAB
+
+06:59.800 --> 07:08.840
+to be a DSL, which suggests to me that there's a spectrum of domain specificity in the DSL world.
+
+07:08.840 --> 07:14.200
+Right, right, right, right. Yes, they're absolutely. So, I mean, there are other examples that are
+
+07:14.200 --> 07:18.280
+you know, different domains, sequels, and other examples, right? Different domain, but again,
+
+07:18.840 --> 07:23.800
+MATLAB may be a bad example since you could probably use it to program one more than anything,
+
+07:23.800 --> 07:28.120
+but the question is how efficient would, if you wanted to write an operating system using MATLAB?
+
+07:31.960 --> 07:37.400
+A good thing to do. So there's this notion that yeah, it really should fit the problem that you're
+
+07:37.400 --> 07:45.240
+trying to solve. But you know, the thing about MATLAB that is a good example of the kind of initial
+
+07:45.240 --> 07:49.240
+approach of domains with the languages is that they weren't really focused on performance,
+
+07:49.240 --> 07:55.960
+right? They focused on productivity and not performance, right? And it was almost a sense that hey,
+
+07:55.960 --> 08:02.280
+you couldn't, you had to give up one to get the other. And so the research approach that we
+
+08:02.280 --> 08:09.400
+took was to say, look, there's some real value by using the abstractions provided by the domain
+
+08:09.400 --> 08:14.120
+specific languages. They're higher level. They're more declarative. You're saying what you want
+
+08:14.120 --> 08:19.160
+rather than, you know, you know, how to get it, right? So that the example would be, you know,
+
+08:19.160 --> 08:24.520
+MATLAB says, hey, this is matrix multiply. If you do that and see you write a bunch of loops,
+
+08:24.520 --> 08:28.760
+right? I don't know what to do with a bunch of loops, right? But I do know what to do if you tell
+
+08:28.760 --> 08:35.320
+me it's matrix multiply. So that raising of the abstraction level was something that could be a
+
+08:35.320 --> 08:40.520
+driver for high performance if you knew what, if you had the right sort of compiler technology.
+
+08:41.320 --> 08:44.760
+So I don't want to rat hole on the compiler technology that we developed, but it was really
+
+08:44.760 --> 08:51.480
+cool and it did all sorts of things, including enable you to take a high level MATLAB like program
+
+08:51.480 --> 08:57.880
+and run it without modification on the whole range of computing devices you might see in the data
+
+08:57.880 --> 09:05.480
+center. So multi-core GPU cluster or any combination of the like. The running on them isn't usually the
+
+09:05.480 --> 09:09.400
+problem. The problem is taking advantage of them. Presumably it's taking, yeah, yeah, it's taking
+
+09:09.400 --> 09:12.920
+cool, but yeah, no, no, no, no, no, no, no, no, no, no, yeah, running, yeah, yeah, right, you can
+
+09:12.920 --> 09:18.360
+get that one good thread and it would be much good. Yeah, no, yeah, I'm just taking on, you know,
+
+09:18.360 --> 09:23.160
+all the apps that are running on my laptop and I just see one of the core, the core is, you know,
+
+09:23.160 --> 09:29.560
+no, no, by running. Yes, actually getting good performance, yeah. And hopefully close to what
+
+09:29.560 --> 09:35.240
+you would have gotten if you had written in this low-level thing. So, you know, if the low-level
+
+09:35.240 --> 09:40.120
+programming languages were CUDA for a GPU, could you take this high level representation and get to
+
+09:40.120 --> 09:44.920
+the performance level that you would have gotten had you written the CUDA, right? So that's what we're
+
+09:44.920 --> 09:46.120
+that we're talking about, right?
+
+09:46.120 --> 09:46.960
+Yeah.
+
+09:46.960 --> 09:48.280
+Has book, thank you for clarifying.
+
+09:48.280 --> 09:49.120
+Right.
+
+09:49.120 --> 09:50.440
+Right.
+
+09:50.440 --> 09:51.440
+Right.
+
+09:51.440 --> 09:54.440
+And then, but what that got us into
+
+09:54.440 --> 09:57.600
+was this whole realm of data analytics.
+
+09:57.600 --> 10:02.000
+And so we started looking at how to do SQL and Spark
+
+10:02.000 --> 10:04.120
+and machine learning.
+
+10:04.120 --> 10:08.960
+And we fact defined a new DSL for the machine learning
+
+10:08.960 --> 10:11.600
+well that we called optimal, you know,
+
+10:11.600 --> 10:19.840
+this is a play on, but it was spelled O-N-O-P-T-I-M-L, right?
+
+10:19.840 --> 10:22.640
+Of course, of course.
+
+10:22.640 --> 10:25.680
+And it was, you know, it was 2008 when we kind of defined it.
+
+10:25.680 --> 10:28.040
+It was so M-L hadn't really taken off then.
+
+10:28.040 --> 10:31.280
+But it was, it was so we like to think
+
+10:31.280 --> 10:33.360
+we were ahead of the curve, absolutely.
+
+10:33.360 --> 10:34.040
+It sounds like it.
+
+10:34.040 --> 10:35.880
+Yeah.
+
+10:35.880 --> 10:39.240
+So that was kind of the impetus for kind of our playing
+
+10:39.240 --> 10:41.280
+in this whole machine learning space, right?
+
+10:41.280 --> 10:41.780
+OK.
+
+10:41.780 --> 10:45.880
+There's an ocean that, hey, this, we can define DSLs.
+
+10:45.880 --> 10:51.400
+We can do machine learning algorithms.
+
+10:51.400 --> 10:52.520
+We can write them easily.
+
+10:52.520 --> 10:58.840
+We could run them efficiently on a whole range of architectures.
+
+10:58.840 --> 11:01.720
+I should note that the other piece of technology
+
+11:01.720 --> 11:06.160
+that we kind of relied on was all these DSLs
+
+11:06.160 --> 11:09.240
+were not what are called standalone DSLs.
+
+11:09.240 --> 11:11.640
+So an example of a standalone DSL
+
+11:11.640 --> 11:15.240
+would be the examples I gave before, map lab,
+
+11:15.240 --> 11:17.680
+SQL, they're standalone, right?
+
+11:17.680 --> 11:21.640
+An example of an embedded DSL would be something like TensorFlow.
+
+11:21.640 --> 11:26.280
+And so all our DSLs were embedded in Scala.
+
+11:26.280 --> 11:32.280
+And one thing that I mentioned in the talk and, you know,
+
+11:32.280 --> 11:34.120
+part, you know, I'm an academic.
+
+11:34.120 --> 11:37.760
+So it's all about sort of putting your stake in the ground
+
+11:37.760 --> 11:42.320
+for a few of an idea and then seeing, you know,
+
+11:42.320 --> 11:45.360
+what, what, you know, who came after, right?
+
+11:45.360 --> 11:46.960
+And did they cite you?
+
+11:46.960 --> 11:54.320
+So we did optimize this in 2008 and TensorFlow's later.
+
+11:54.320 --> 11:57.600
+But TensorFlow, you know, if you look
+
+11:57.600 --> 12:00.840
+at all of these data allocation machine learning,
+
+12:00.840 --> 12:03.160
+you'll see that, of course, essentially,
+
+12:03.160 --> 12:05.480
+you can describe them at some level of abstraction,
+
+12:05.480 --> 12:07.920
+as a set of operators with data flow
+
+12:07.920 --> 12:09.520
+ox between them, right?
+
+12:09.520 --> 12:10.760
+They all look like that way.
+
+12:10.760 --> 12:14.320
+And you define that the operators may look different,
+
+12:14.320 --> 12:16.440
+but they fundamentally all look that way.
+
+12:16.440 --> 12:18.960
+And so yeah, what we wanted at the end of the day
+
+12:18.960 --> 12:20.840
+was a data flow graph.
+
+12:20.840 --> 12:24.160
+And the question is how you get it and how you describe it.
+
+12:24.160 --> 12:28.480
+TensorFlow takes a very explicit way of describing
+
+12:28.480 --> 12:30.200
+your flow graph, right?
+
+12:30.200 --> 12:32.200
+But that's not the most natural thing to do.
+
+12:32.200 --> 12:35.600
+The most natural thing is just describe your program
+
+12:35.600 --> 12:38.480
+and then have the underlying infrastructure extract
+
+12:38.480 --> 12:39.560
+that graph.
+
+12:39.560 --> 12:41.080
+And so that's what we did, right?
+
+12:41.080 --> 12:43.440
+And so one of the slides in the talk, I said, you know,
+
+12:43.440 --> 12:46.280
+I say, here's Kving's clustering, right?
+
+12:46.280 --> 12:49.440
+Here's the four lines of code it takes in my DSL.
+
+12:49.440 --> 12:52.360
+And here's TensorFlow.
+
+12:52.360 --> 12:55.480
+It takes 20 because it's one of the four
+
+12:55.480 --> 12:57.720
+and optimal.
+
+12:57.720 --> 13:00.000
+What are the kinds of trying to get at the level?
+
+13:00.000 --> 13:07.440
+So you have a group by group, you know, group the samples
+
+13:07.440 --> 13:09.000
+by their distance to the means.
+
+13:09.000 --> 13:09.720
+OK.
+
+13:09.720 --> 13:10.240
+Great.
+
+13:10.240 --> 13:11.040
+You've done it.
+
+13:11.040 --> 13:12.520
+All of a sudden you've got clusters.
+
+13:15.920 --> 13:16.920
+Nice.
+
+13:16.920 --> 13:22.120
+And then the other one is OK, now go find the centroid
+
+13:22.120 --> 13:24.480
+of the clusters and you've got your new means.
+
+13:24.480 --> 13:26.920
+So I could describe it now.
+
+13:26.920 --> 13:29.200
+And anybody who kind of knows the group by operator,
+
+13:29.200 --> 13:32.360
+like you do, can drop it instantly, right?
+
+13:32.360 --> 13:35.680
+As opposed to constructing some graph.
+
+13:35.680 --> 13:36.480
+Right.
+
+13:36.480 --> 13:38.520
+So that's the difference in the extract.
+
+13:38.520 --> 13:38.880
+Yeah.
+
+13:38.880 --> 13:42.880
+And I think that's the idea that I was getting at with these,
+
+13:42.880 --> 13:46.760
+like the variations of domain specificity.
+
+13:46.760 --> 13:49.800
+Like you're operating at a way higher level of abstraction.
+
+13:49.800 --> 13:50.400
+Yeah.
+
+13:50.400 --> 13:57.760
+And so this DSL, you said, 2008, has this continued
+
+13:57.760 --> 14:01.600
+to be kind of central to some of the things
+
+14:01.600 --> 14:03.200
+you've been working on since?
+
+14:03.200 --> 14:04.240
+Or yeah.
+
+14:04.240 --> 14:08.280
+So I mean, I think it was an early, so let me kind of just
+
+14:08.280 --> 14:12.560
+trace the arc of what we did.
+
+14:12.560 --> 14:15.640
+And then I'll become clear where it sits.
+
+14:15.640 --> 14:19.360
+So yeah, that was kind of OK.
+
+14:19.360 --> 14:24.200
+We had these DSL's embedded in Scarlet.
+
+14:24.200 --> 14:28.280
+But our thesis was, if you want to develop a new application,
+
+14:28.280 --> 14:30.960
+one DSL wasn't going to do the job with the reason
+
+14:30.960 --> 14:33.560
+that you just described is they were specific to you know.
+
+14:33.560 --> 14:36.560
+So you say, OK, now I want a SQL piece.
+
+14:36.560 --> 14:38.600
+That means I need a SQL DSL.
+
+14:38.600 --> 14:39.800
+I want a machine learning piece.
+
+14:39.800 --> 14:41.680
+That means I need a machine learning DSL.
+
+14:41.680 --> 14:43.920
+I want to graph an analog piece.
+
+14:43.920 --> 14:45.880
+It means I need a graph DSL.
+
+14:45.880 --> 14:48.560
+And maybe I come up with something else, right?
+
+14:48.560 --> 14:50.400
+That you might need.
+
+14:50.400 --> 14:52.520
+And then you say, well, I've got this application
+
+14:52.520 --> 14:54.800
+that is going to use all of them in some way.
+
+14:54.800 --> 14:56.280
+We're going to argue whether they're
+
+14:56.280 --> 14:58.200
+going to use them sequentially.
+
+14:58.200 --> 15:00.880
+And the data's going to pass between whether the things
+
+15:00.880 --> 15:02.360
+are going to be more intertwined.
+
+15:02.360 --> 15:06.800
+But let's suppose that you have multiple DSL's.
+
+15:06.800 --> 15:10.720
+What you'd like to do is to be able to take
+
+15:10.720 --> 15:13.920
+a single application, compose the multiple DSL's,
+
+15:13.920 --> 15:16.440
+and do global optimization, right?
+
+15:16.440 --> 15:17.320
+That was, yeah.
+
+15:17.320 --> 15:18.080
+Yeah, OK.
+
+15:18.080 --> 15:20.160
+So that's what you want to do.
+
+15:20.160 --> 15:26.080
+And so in order to do that, the solution that comes to mind
+
+15:26.080 --> 15:31.920
+is to say, OK, why don't we capture the,
+
+15:31.920 --> 15:35.080
+since we said they're all up like graphs anyway, right?
+
+15:35.080 --> 15:38.520
+Could we figure out some underlying representation
+
+15:38.520 --> 15:40.880
+that's graph thankful like that?
+
+15:40.880 --> 15:43.400
+All of these DSL's could happen, right?
+
+15:43.400 --> 15:46.480
+So then you have dependencies, and you can parallelize.
+
+15:46.480 --> 15:49.080
+And then you could confuse across the boundaries
+
+15:49.080 --> 15:53.400
+of the DSL and get rid of intermediate data and data
+
+15:53.400 --> 15:56.920
+movement, which is the scourge of any high-performance
+
+15:56.920 --> 15:58.400
+implementation, right?
+
+15:58.400 --> 16:00.080
+And so that was the goal, right?
+
+16:00.080 --> 16:03.120
+To say, can we create, that was one of the goals.
+
+16:03.120 --> 16:08.320
+The other goal was this notion that, hey,
+
+16:08.320 --> 16:11.200
+you come up with a new domain area,
+
+16:11.200 --> 16:14.040
+but actually developing a high-performance DSL
+
+16:14.040 --> 16:15.160
+is a difficult problem.
+
+16:15.160 --> 16:21.000
+So what if we could kind of remove the burden
+
+16:21.000 --> 16:24.520
+of the high-performance apart from you
+
+16:24.520 --> 16:26.560
+by creating a framework that allows you
+
+16:26.560 --> 16:28.720
+to develop new DSL's?
+
+16:28.720 --> 16:32.800
+And then leverage all of this high-performance compiler
+
+16:32.800 --> 16:35.720
+optimization infrastructure on top of that.
+
+16:35.720 --> 16:36.680
+So that was the goal.
+
+16:36.680 --> 16:40.840
+And so our view was, so we developed this infrastructure.
+
+16:40.840 --> 16:42.680
+We developed the framework.
+
+16:42.680 --> 16:46.400
+The DSL optimal was kind of the poster child DSL wasn't
+
+16:46.400 --> 16:48.320
+the most work into.
+
+16:48.320 --> 16:51.960
+And at the end of the day, we figured the real value was
+
+16:51.960 --> 16:56.600
+in the optimization framework, not in the DSL itself.
+
+16:56.600 --> 17:03.920
+And so going forward, we said, so Scala has its issue.
+
+17:03.920 --> 17:09.520
+I think it has peaked and gone down in terms of popularity.
+
+17:09.520 --> 17:13.560
+It has all sorts of issues associated with the complexity
+
+17:13.560 --> 17:15.600
+of the language and the number of developers
+
+17:15.600 --> 17:18.040
+who are conversant with it.
+
+17:18.040 --> 17:22.120
+And so our view was it was too difficult
+
+17:22.120 --> 17:25.560
+to push a Scala-based DSL.
+
+17:25.560 --> 17:30.320
+But we could imagine pushing a Scala-based compilation
+
+17:30.320 --> 17:36.960
+infrastructure if the DSLs that you created came from someone
+
+17:36.960 --> 17:37.960
+else.
+
+17:37.960 --> 17:41.280
+So you can imagine to kind of fast forward to today
+
+17:41.280 --> 17:43.600
+and you want to optimize TensorFlow, right?
+
+17:43.600 --> 17:46.360
+So TensorFlow will give you a graph.
+
+17:46.360 --> 17:47.200
+You take that graph.
+
+17:47.200 --> 17:49.080
+You give it to our framework.
+
+17:49.080 --> 17:51.720
+And then we can optimize it.
+
+17:51.720 --> 17:54.000
+And is that theoretical idea?
+
+17:54.000 --> 17:55.360
+Is that actually what you're doing?
+
+17:55.360 --> 17:59.200
+That's actually what we're doing, yeah.
+
+17:59.200 --> 18:03.120
+OK, which is a whole huge part of the system
+
+18:03.120 --> 18:04.600
+that you don't have to worry about anymore.
+
+18:04.600 --> 18:07.520
+You just need to take these graphs and figure out how to do it.
+
+18:07.520 --> 18:11.960
+Right, so again, it's all about actually
+
+18:11.960 --> 18:15.680
+getting application developers to use any particular language
+
+18:15.680 --> 18:20.880
+as its own set of issues associated with it.
+
+18:20.880 --> 18:26.000
+And Google's a much bigger entity than we could ever be
+
+18:26.000 --> 18:27.360
+in pushing that sort of thing.
+
+18:27.360 --> 18:30.560
+So we're going to wind up right on top of that
+
+18:30.560 --> 18:33.440
+and provide the added advantage that, hey,
+
+18:33.440 --> 18:35.480
+not only can you take TensorFlow, but you
+
+18:35.480 --> 18:39.880
+can take PyTorch and you can take SQL and you can take whatever.
+
+18:39.880 --> 18:42.120
+And you can change it to this representation.
+
+18:42.120 --> 18:44.120
+I should say a little bit about the representation just
+
+18:44.120 --> 18:47.200
+because before you do that, a quick question.
+
+18:47.200 --> 18:52.760
+So the part of the vision here that was these very targeted
+
+18:52.760 --> 18:57.440
+domain-specific languages, TensorFlow doesn't really get you
+
+18:57.440 --> 18:58.200
+there.
+
+18:58.200 --> 18:59.840
+There are some things in some areas that
+
+18:59.840 --> 19:01.480
+might be built on top of TensorFlow that
+
+19:01.480 --> 19:03.000
+will kind of get you there.
+
+19:03.000 --> 19:05.120
+Or do you think it does?
+
+19:05.120 --> 19:09.280
+So I would view TensorFlow as a domain-specific language,
+
+19:09.280 --> 19:14.520
+where the domain again is matrix and then
+
+19:14.520 --> 19:18.600
+around it, but it's one of the DSLs
+
+19:18.600 --> 19:23.200
+that you might want to have a full system.
+
+19:23.200 --> 19:26.920
+Have you kind of moved away from the idea
+
+19:26.920 --> 19:31.840
+that folks will develop very specific DSLs for specific problem
+
+19:31.840 --> 19:33.840
+domains or do you think that that will happen
+
+19:33.840 --> 19:34.840
+on top of TensorFlow?
+
+19:34.840 --> 19:36.680
+It might happen on top of TensorFlow.
+
+19:36.680 --> 19:41.760
+It might be other languages to get developed.
+
+19:41.760 --> 19:46.320
+You ask sort of what the arc of the research is.
+
+19:46.320 --> 19:53.520
+I mean, when we decided that issue of what kinds of DSLs
+
+19:53.520 --> 19:59.440
+people want to develop, that is a very domain-specific
+
+19:59.440 --> 20:00.480
+question, right?
+
+20:00.480 --> 20:03.920
+And the question wrapped up in what languages people want
+
+20:03.920 --> 20:06.920
+to use and what abstractions really make sense.
+
+20:06.920 --> 20:16.920
+And we wanted to not have to develop new languages
+
+20:16.920 --> 20:20.640
+ourselves and get traction on those languages.
+
+20:20.640 --> 20:22.880
+And so rather, we thought, OK, if there
+
+20:22.880 --> 20:27.240
+is existing languages, how can we accelerate them?
+
+20:27.240 --> 20:29.360
+And how can we provide a platform that
+
+20:29.360 --> 20:32.960
+might cut across a bunch of existing languages?
+
+20:32.960 --> 20:34.680
+OK.
+
+20:34.680 --> 20:39.200
+So then, guessing that this platform serves
+
+20:39.200 --> 20:45.200
+as both a center point for your research group at Stanford,
+
+20:45.200 --> 20:48.360
+but also ties to what you're doing at Sambanova?
+
+20:48.360 --> 20:51.200
+Yeah, to some of the ideas.
+
+20:51.200 --> 20:54.880
+Definitely, Sambanova has their own platform, which
+
+20:54.880 --> 20:56.960
+is different from other things.
+
+20:56.960 --> 21:00.680
+But certainly, some of the core ideas.
+
+21:00.680 --> 21:00.880
+OK.
+
+21:00.880 --> 21:04.240
+So then we can maybe come back to more
+
+21:04.240 --> 21:05.720
+on what Sambanova is doing.
+
+21:05.720 --> 21:11.160
+So please continue the thread on the system.
+
+21:11.160 --> 21:13.880
+We started talking about the connection
+
+21:13.880 --> 21:16.480
+between the software and hardware.
+
+21:16.480 --> 21:20.880
+And we kind of left off at optimizing the software.
+
+21:20.880 --> 21:25.040
+So let me fast forward to more recently at about ML.
+
+21:25.040 --> 21:26.480
+And let's talk about.
+
+21:26.480 --> 21:33.600
+So about six years ago, Chris Ray showed up at Stanford.
+
+21:33.600 --> 21:40.040
+And he is a database machine learning expert.
+
+21:40.040 --> 21:42.560
+And we got chatting.
+
+21:42.560 --> 21:45.960
+And we started working together with a bunch of joint students.
+
+21:45.960 --> 21:48.800
+And he is a math whiz.
+
+21:48.800 --> 21:55.000
+And he knows all about theory, which I don't do.
+
+21:55.000 --> 22:00.280
+I was more of a hands-on builder kind of guy.
+
+22:00.280 --> 22:03.280
+And we started working together.
+
+22:03.280 --> 22:06.280
+And we started thinking about what one could do
+
+22:06.280 --> 22:09.520
+with machine learning algorithms to optimize them
+
+22:09.520 --> 22:11.720
+for modern hardware.
+
+22:11.720 --> 22:15.680
+And he came from Wisconsin.
+
+22:15.680 --> 22:19.680
+And one of the things he did was an idea
+
+22:19.680 --> 22:22.240
+for training machine learning algorithms
+
+22:22.240 --> 22:28.040
+using Tocastic Grand Accent SGD that allows them
+
+22:28.040 --> 22:30.440
+to be paralyzed much more efficiently.
+
+22:30.440 --> 22:33.600
+But the interesting thing about his innovation
+
+22:33.600 --> 22:38.000
+is an innovation that nobody who didn't know anything
+
+22:38.000 --> 22:40.120
+about the algorithm would make.
+
+22:40.120 --> 22:43.480
+Because they would look to that and said,
+
+22:43.480 --> 22:46.720
+if I do this, the algorithm's going to be incorrect.
+
+22:46.720 --> 22:53.120
+Not something we want, right?
+
+22:53.120 --> 22:56.960
+So I think to tell a little story.
+
+22:56.960 --> 23:02.600
+So I teach at course in parallel software at Stanford.
+
+23:02.600 --> 23:06.800
+And there's one rule that I tell the students about parallel
+
+23:06.800 --> 23:11.160
+programming in a what's called shared memory.
+
+23:11.160 --> 23:13.640
+Is this something your listeners would understand?
+
+23:13.640 --> 23:14.240
+Some of them.
+
+23:14.240 --> 23:14.840
+OK.
+
+23:14.840 --> 23:15.600
+All right.
+
+23:15.600 --> 23:16.360
+All right.
+
+23:16.360 --> 23:20.200
+So programming with shared memory, first rule.
+
+23:20.200 --> 23:23.960
+If you touch shared data, you should put synchronization
+
+23:23.960 --> 23:24.520
+around.
+
+23:24.520 --> 23:26.800
+You should put locks around it, right?
+
+23:26.800 --> 23:28.760
+There's a whole set of concurrency issues.
+
+23:28.760 --> 23:29.760
+You do, yeah.
+
+23:29.760 --> 23:32.320
+But basically locks me.
+
+23:32.320 --> 23:36.520
+It's like going to slow mode, right?
+
+23:36.520 --> 23:39.640
+Essentially, that means that when you've got a lock,
+
+23:39.640 --> 23:41.920
+there's only one problem.
+
+23:41.920 --> 23:44.600
+What you'd like is as much parallelism as possible.
+
+23:44.600 --> 23:46.800
+Whenever you take a lock on a piece of data,
+
+23:46.800 --> 23:51.200
+only one processor can actually be touching the data at the time.
+
+23:51.200 --> 23:52.960
+So a multiple processes want to touch it,
+
+23:52.960 --> 23:54.640
+the others have to wait, right?
+
+23:54.640 --> 23:58.920
+And that means you're slowing things down.
+
+23:58.920 --> 24:02.840
+And just a bit of size, if we talk about locking,
+
+24:02.840 --> 24:08.720
+what you would like to do is not use too much locking.
+
+24:08.720 --> 24:10.280
+Because if you do too much locking,
+
+24:10.280 --> 24:12.880
+you'll create too much overhead.
+
+24:12.880 --> 24:14.520
+But if you don't do enough locking,
+
+24:14.520 --> 24:16.960
+you'll create what are called data races, right?
+
+24:16.960 --> 24:19.600
+Where you touch the data without locking.
+
+24:19.600 --> 24:23.200
+Well, so the general conventional wisdom
+
+24:23.200 --> 24:26.720
+is, if you touch shared data, you should take locks.
+
+24:26.720 --> 24:32.800
+But if you actually parallelize SGD by using locking,
+
+24:32.800 --> 24:38.760
+you do so little work based on when you take a lock
+
+24:38.760 --> 24:41.640
+that your turn, find out the all your time
+
+24:41.640 --> 24:43.120
+will be spent locking.
+
+24:43.120 --> 24:44.760
+That's all you'll ever do all day long.
+
+24:44.760 --> 24:47.680
+And that will just basically mean your program
+
+24:47.680 --> 24:50.480
+won't run very fast in power.
+
+24:50.480 --> 24:53.200
+So Chris Ray and his student came up
+
+24:53.200 --> 25:00.200
+with an idea they called hog wild with an exclamation mark.
+
+25:00.480 --> 25:03.280
+And the idea is pretty simple.
+
+25:03.280 --> 25:08.280
+It says, throw out the locks, okay?
+
+25:08.280 --> 25:11.040
+And you say, that can't be correct.
+
+25:11.040 --> 25:13.160
+What you mean, I'm just going to touch the data,
+
+25:13.160 --> 25:15.320
+willy nilly, I don't know.
+
+25:15.320 --> 25:16.440
+So sequentially, right?
+
+25:16.440 --> 25:20.400
+You're going to touch the data one iteration
+
+25:20.400 --> 25:22.240
+after the next to your SGD.
+
+25:22.240 --> 25:24.400
+Everything looks very reasonable.
+
+25:24.400 --> 25:26.880
+Now you've got a bunch of parallel processes
+
+25:26.880 --> 25:32.200
+which are updating the model in any fashion whatsoever.
+
+25:32.200 --> 25:34.960
+They're getting stale data, right?
+
+25:34.960 --> 25:40.440
+There is no sequential order to the updates that you could match.
+
+25:40.440 --> 25:43.920
+Maybe there is, but it certainly isn't the case
+
+25:43.920 --> 25:47.120
+that I read something in the previous iteration,
+
+25:47.120 --> 25:49.840
+and I'm updating it that, this iteration could be,
+
+25:49.840 --> 25:53.200
+I read it, and iterations before.
+
+25:53.200 --> 25:55.080
+The day is already be updated,
+
+25:55.080 --> 25:59.720
+and now I'm going to change the model based on this, right?
+
+25:59.720 --> 26:01.440
+So all kinds of mayhem.
+
+26:01.440 --> 26:03.880
+In other words, an idea that goes against the fiber
+
+26:03.880 --> 26:06.840
+of any distributed computing parallel program.
+
+26:06.840 --> 26:09.560
+Exactly, exactly, exactly, you got it.
+
+26:09.560 --> 26:15.480
+It's anathema to anybody who knows about programming.
+
+26:15.480 --> 26:16.800
+And you're saying, what the hell?
+
+26:16.800 --> 26:18.760
+What is this?
+
+26:18.760 --> 26:19.840
+But it works.
+
+26:19.840 --> 26:20.840
+And why does it work?
+
+26:20.840 --> 26:24.040
+You can prove it works as long as you don't delay updates too much,
+
+26:24.040 --> 26:27.280
+and it's back to this noise argument that we were having before.
+
+26:27.280 --> 26:30.240
+Fundamentally, Stochastic Green descent
+
+26:30.240 --> 26:32.640
+is a stochastic algorithm, and it has a bunch of noise
+
+26:32.640 --> 26:38.240
+associated with things, but the model's solution bounces around.
+
+26:38.240 --> 26:39.920
+So this is just a quick note.
+
+26:39.920 --> 26:42.440
+We were having that talk before we started recording,
+
+26:42.440 --> 26:43.920
+so you should walk us through that again,
+
+26:43.920 --> 26:45.800
+because it comes up, not just here,
+
+26:45.800 --> 26:47.960
+but also when we talk about quantization.
+
+26:47.960 --> 26:49.920
+Yeah, okay, all right, all right.
+
+26:49.920 --> 26:53.640
+So there's no notion about these algorithms.
+
+26:53.640 --> 26:55.800
+Stochastic Green is sent in, in particular,
+
+26:55.800 --> 27:00.200
+which is the workhorse of machine learning training.
+
+27:00.200 --> 27:04.680
+And, you know, the basic idea, as you all know,
+
+27:04.680 --> 27:10.760
+is maybe some of you know, is you've got a big data set.
+
+27:10.760 --> 27:12.320
+You take one of the elements of data set,
+
+27:12.320 --> 27:15.720
+you estimate the gradient and you move in the opposite direction,
+
+27:15.720 --> 27:18.680
+and you update the model based on that.
+
+27:18.680 --> 27:22.760
+Now, if you have lots of processes,
+
+27:22.760 --> 27:24.440
+lots of threads that are doing this,
+
+27:24.440 --> 27:29.840
+then what you'd like to do is you'd like to lock each piece
+
+27:29.840 --> 27:31.600
+of the model as you update it,
+
+27:31.600 --> 27:34.000
+so you make sure that only one processor,
+
+27:34.000 --> 27:38.080
+the processes all see a consistent view of the model.
+
+27:38.080 --> 27:41.640
+So, as I said, fundamentally, this update product,
+
+27:41.640 --> 27:43.520
+sometimes you compute a gradient,
+
+27:43.520 --> 27:45.080
+because you're only estimating the gradient,
+
+27:45.080 --> 27:47.520
+and the gradient sends you in the wrong direction, right?
+
+27:47.520 --> 27:49.760
+So you don't actually get, you know,
+
+27:49.760 --> 27:52.920
+if you were doing, if you weren't doing stochastic gradient descent,
+
+27:52.920 --> 27:57.920
+then you would always go down until you get got to the optimum,
+
+27:57.920 --> 28:03.840
+the optimum, which would be a global optimal function with convex.
+
+28:03.840 --> 28:05.920
+But if you're doing stochastic gradient descent,
+
+28:05.920 --> 28:08.560
+you can sometimes go uphill and you bounce around.
+
+28:08.560 --> 28:14.120
+So there's fundamentally noise associated with stochastic gradient descent,
+
+28:14.120 --> 28:17.440
+and you can prove, if you are so inclined,
+
+28:17.440 --> 28:23.920
+about how much noise you will see in a convex optimization problem,
+
+28:23.920 --> 28:26.920
+not deep learning, deep learning's non-convex.
+
+28:26.920 --> 28:29.720
+So the question then is,
+
+28:29.720 --> 28:37.720
+if you do anything to perturb the process of getting to the optimum,
+
+28:37.720 --> 28:39.680
+you will add noise.
+
+28:39.680 --> 28:42.720
+And the question is, how much noise do you add,
+
+28:42.720 --> 28:46.600
+and can you bound that noise to be below the inherent noise
+
+28:46.600 --> 28:49.200
+associated with stochastic gradient descent?
+
+28:49.200 --> 28:54.720
+If you can prove that the noise you add is less than the noise
+
+28:54.720 --> 28:58.720
+that is already there, then you'll say you're not affecting the solution.
+
+28:58.720 --> 29:00.720
+So that's the nature of the proof,
+
+29:00.720 --> 29:03.320
+all about reasoning about noise.
+
+29:03.320 --> 29:05.520
+Okay, so with that proof,
+
+29:05.520 --> 29:11.320
+you can think about how much noise you add based on how stale the updates are,
+
+29:11.320 --> 29:15.520
+and then you can prove that things will converge to the right answer
+
+29:15.520 --> 29:18.720
+at roughly the same rate as it would be if you had the locks in.
+
+29:18.720 --> 29:20.720
+Even if you go hog-wise.
+
+29:20.720 --> 29:23.720
+Even if you go hog-wise.
+
+29:23.720 --> 29:25.720
+So interesting.
+
+29:25.720 --> 29:29.720
+So that's, and everybody uses it these days.
+
+29:29.720 --> 29:32.720
+Google uses it, Microsoft uses it.
+
+29:32.720 --> 29:41.720
+Everybody goes hog-wise because doing anything else will slow you down dramatically.
+
+29:41.720 --> 29:43.720
+Okay, where were we?
+
+29:43.720 --> 29:45.720
+We were getting to hardware, I think.
+
+29:45.720 --> 29:46.720
+Oh, getting to hardware.
+
+29:46.720 --> 29:48.720
+Okay, that's right.
+
+29:48.720 --> 29:51.720
+So again, so we were talking about,
+
+29:51.720 --> 29:57.720
+so that was the nature of a bunch of work we did together with Chris Ray,
+
+29:57.720 --> 30:03.720
+this notion of, sort of, what can you do with stochastic-grang descent
+
+30:03.720 --> 30:09.720
+to improve its behavior on modern hardware?
+
+30:09.720 --> 30:13.720
+Okay, so modern hardware likes to be very parallel.
+
+30:13.720 --> 30:20.720
+It likes to not have to idea you'd like to not use too much memory.
+
+30:20.720 --> 30:29.720
+Modern hardware likes to do things on small data types,
+
+30:29.720 --> 30:35.720
+think eight-bit integers, rather than 64-bit floating point, right?
+
+30:35.720 --> 30:41.720
+So that is the key thing about modern hardware.
+
+30:41.720 --> 30:49.720
+The other thing that was interesting about the work with Chris Ray was
+
+30:49.720 --> 30:58.720
+related to the things that I talked about at designing my talk,
+
+30:58.720 --> 31:01.720
+designing computer systems for software talk 2.0.
+
+31:01.720 --> 31:06.720
+I was just in this notion that there are two big trends in computing today.
+
+31:06.720 --> 31:12.720
+One is exemplified by the thousands of people at NURPS, right?
+
+31:12.720 --> 31:16.720
+Which is the interest in machine learning and the broad applicability
+
+31:16.720 --> 31:23.720
+of the approaches and the dramatic improvements in applications,
+
+31:23.720 --> 31:26.720
+especially kind of high-end applications that have to do with doing things
+
+31:26.720 --> 31:28.720
+that humans traditionally have been good at.
+
+31:28.720 --> 31:32.720
+And that, of course, is causing everybody to get excited.
+
+31:32.720 --> 31:39.720
+And one of the things that is true of building complex machine learning models
+
+31:39.720 --> 31:42.720
+is that they take lots of computation.
+
+31:42.720 --> 31:46.720
+And if you look at why machine learning has been successful,
+
+31:46.720 --> 31:49.720
+it's because the computation has been available, right,
+
+31:49.720 --> 31:52.720
+to actually train these large networks, right?
+
+31:52.720 --> 31:56.720
+So if you, the ideas are all, maybe the data wasn't there,
+
+31:56.720 --> 32:01.720
+but even if the data was there, the computing computation certainly wasn't there, right?
+
+32:01.720 --> 32:06.720
+So you've got this situation where machine learning
+
+32:06.720 --> 32:12.720
+needs lots of computation. At the same time, Moore's Law is basically slowing down, right?
+
+32:12.720 --> 32:20.720
+So Moore's Law, as most people know, talks about the doubling of transistors
+
+32:20.720 --> 32:23.720
+every 18 to two months to two years.
+
+32:23.720 --> 32:27.720
+But what people don't know is that Moore's Law may be slowing down,
+
+32:27.720 --> 32:29.720
+but that's not the real problem.
+
+32:29.720 --> 32:39.720
+The real problem is this other related law or scaling factor called denod scaling.
+
+32:39.720 --> 32:42.720
+So denod scaling basically says,
+
+32:42.720 --> 32:46.720
+if I double the number of transistors on a chip,
+
+32:46.720 --> 32:51.720
+if I scale things the right way, I can keep the power the same.
+
+32:51.720 --> 32:55.720
+So I can double the number of transistors and keep the power the same.
+
+32:55.720 --> 33:00.720
+Now, if I take denod scaling away, I double the number of transistors
+
+33:00.720 --> 33:02.720
+and my power doubles too.
+
+33:02.720 --> 33:07.720
+That's, that was screwed, right?
+
+33:07.720 --> 33:09.720
+And that's the position we've been in, right?
+
+33:09.720 --> 33:12.720
+Which is why processes haven't been getting faster,
+
+33:12.720 --> 33:16.720
+because they're not the ways that you speed up conventional processes
+
+33:16.720 --> 33:18.720
+and not power efficient.
+
+33:18.720 --> 33:23.720
+And we're already at the limit of our power dissipation, right?
+
+33:23.720 --> 33:27.720
+Especially, you know, in almost anything you talk about, right?
+
+33:27.720 --> 33:32.720
+Whether it be your desktop or your laptop or your mobile device.
+
+33:32.720 --> 33:38.720
+And so we're tapped out in terms of sort of what we can do with general purpose processes,
+
+33:38.720 --> 33:40.720
+given that we're power limited.
+
+33:40.720 --> 33:44.720
+So the question then becomes, what do you do instead, right?
+
+33:44.720 --> 33:48.720
+And I think that is why it's such an interesting time in computer systems,
+
+33:48.720 --> 33:54.720
+because we've got this convergence of these two big trends,
+
+33:54.720 --> 33:59.720
+this need for insatiable amounts of computation to build machine learning models
+
+33:59.720 --> 34:05.720
+at the same time, the conventional ideas for improvement performance are basically stored.
+
+34:05.720 --> 34:13.720
+And so this is kind of motivating all kinds of exploration into alternatives
+
+34:13.720 --> 34:18.720
+for general purpose processes. GPUs was an early-entrant,
+
+34:18.720 --> 34:23.720
+but there are lots of companies investing, or lots of investment going in.
+
+34:23.720 --> 34:31.720
+So one of the questions after the talk was, how much investment do I think has gone into new hardware for AI?
+
+34:31.720 --> 34:34.720
+And I estimate billions.
+
+34:34.720 --> 34:35.720
+I can say that.
+
+34:35.720 --> 34:36.720
+Yeah.
+
+34:36.720 --> 34:42.720
+I mean, hardware companies typically take in much larger amounts than software
+
+34:42.720 --> 34:45.720
+and I can think of it doesn't easily.
+
+34:45.720 --> 34:46.720
+Yeah.
+
+34:46.720 --> 34:47.720
+Yeah, exactly.
+
+34:47.720 --> 34:48.720
+Right.
+
+34:48.720 --> 34:49.720
+You know.
+
+34:49.720 --> 34:50.720
+So, yeah.
+
+34:50.720 --> 34:52.720
+Sabanova was well-funded too.
+
+34:52.720 --> 34:57.720
+So I just need to follow that.
+
+34:57.720 --> 35:02.720
+You quickly get to building this.
+
+35:02.720 --> 35:08.720
+So I'm working with Chris Ray has been all about playing these games,
+
+35:08.720 --> 35:15.720
+with efficiency and noise and so on, to get higher.
+
+35:15.720 --> 35:22.720
+So when doing SGD, it's all about how many iterations does it take to a certain level of accuracy?
+
+35:22.720 --> 35:26.720
+And then what you really care about is not just how many iterations,
+
+35:26.720 --> 35:30.720
+but how long does each of those iterations take?
+
+35:30.720 --> 35:37.720
+So the definition of the number of iterations is what we call statistical efficiency.
+
+35:37.720 --> 35:43.720
+And then the amount of time each iteration takes, we call hardware efficiency.
+
+35:43.720 --> 35:50.720
+So no kinds of games about as you play with the noise, you affect statistical efficiency.
+
+35:50.720 --> 35:53.720
+But you're also potentially improving hardware efficiency.
+
+35:53.720 --> 35:58.720
+If you make hardware efficiency worse and statistical efficiency worse, then of course you screwed up.
+
+35:58.720 --> 36:05.720
+But what typically you can do is make hardware efficiency much better without affecting statistical efficiency too much.
+
+36:05.720 --> 36:07.720
+So hog wild would be an example, right?
+
+36:07.720 --> 36:13.720
+You threw away the locks and iterations got faster.
+
+36:13.720 --> 36:18.720
+And now you didn't have to do too many extra and you got to the same accurate result.
+
+36:18.720 --> 36:25.720
+It strikes me that there's also economic efficiency in there that is not always perfectly correlated with either of those other two.
+
+36:25.720 --> 36:28.720
+What efficiency would that be?
+
+36:28.720 --> 36:32.720
+In terms of meaning, the cost of getting the result that you ultimately want.
+
+36:32.720 --> 36:40.720
+Right. Right. Right. Right. Right. Right. Right. Right. Right. Yeah. Yeah. Yeah.
+
+36:40.720 --> 36:45.720
+So that kind of led you down to, you know, into the hardware and kind of designing.
+
+36:45.720 --> 36:51.720
+Yeah. So yeah, instead of always been an hardware guy, but it's always been about.
+
+36:51.720 --> 36:58.720
+So I just have set up this problem that, hey, CPUs are kind of not going to improve anymore.
+
+36:58.720 --> 37:03.720
+CPUs are better, but they still fundamentally have issues.
+
+37:03.720 --> 37:15.720
+You know, the question is, you know, how can you design something that is both very efficient, especially in terms of power efficient.
+
+37:15.720 --> 37:18.720
+And also very flexible. Right.
+
+37:18.720 --> 37:22.720
+Because the most power efficient thing you could design would be exactly what you want. Right.
+
+37:22.720 --> 37:30.720
+So you say, oh, here's my algorithm. I'm going to cost it directly into hardware. And I'm going to go fab a chip based on that.
+
+37:30.720 --> 37:39.720
+As long as that algorithm never changes. Now that's the problem. Right. Right. Right.
+
+37:39.720 --> 37:56.720
+You know, there's a chart that I showed. So Moore's Law says a number of transistors doubles every every year. And if you look at the machine learning papers on archive, that's exceeding Moore's Law.
+
+37:56.720 --> 38:10.720
+So how many of those ideas are any good? Who knows? Right. But this is probably some good ideas in that. How many of those make that way to software let alone hardware.
+
+38:10.720 --> 38:14.720
+Exactly. Exactly. Good point.
+
+38:14.720 --> 38:29.720
+So what you really do need is a way to get both high efficiency and flexibility at the same time, because hey, you need to be able to come up with new ideas and be able to implement them quickly.
+
+38:29.720 --> 38:36.720
+You know, implement them both quickly in terms of performance and quickly in terms of how much time it took you to implement.
+
+38:36.720 --> 38:48.720
+You mentioned that the GPUs aren't perfect. And I happened to be overhearing a conversation here at NURPS yesterday the day before.
+
+38:48.720 --> 38:59.720
+It was kind of like, well, you know, CPUs didn't work so well for this. But then we have GPUs and they solve all the problems. And it was kind of this always well.
+
+38:59.720 --> 39:10.720
+So maybe it's worth talking about what are some of the challenges of GPUs? Well, GPUs, of course, were designed for graphics.
+
+39:10.720 --> 39:22.720
+And they still, of course, have some of the baggage associated with graphics, but GPUs, such as, well, they've got extra hardware for doing graphics that you care less about.
+
+39:22.720 --> 39:32.720
+So you think about Silicon areas as finite resource that you want to use. And you care about machine learning if I use 20% of it to make graphics go fast.
+
+39:32.720 --> 39:36.720
+You say, hey, why are you taking my resources to do things I don't care about, right?
+
+39:36.720 --> 39:58.720
+So they still have those specific things, but more fundamentally, they are these architecture is designed to execute matrix multiply very efficiently.
+
+39:58.720 --> 40:20.720
+Okay, so it sounds like a good thing. We need to do that. We need to do that. So the question then becomes is matrix multiply what you want ultimately ultimately what you might want is some variant of matrix multiply that isn't quite what GPUs are good at.
+
+40:20.720 --> 40:29.720
+You might also want something that does sparse computation, right? They're doing dense matrix multiply very efficiently. Maybe you want something that does sparse.
+
+40:29.720 --> 40:35.720
+Maybe you want to be able to fuse lots of operators together to create this very weird function.
+
+40:35.720 --> 40:40.720
+And you would like to be able to do that without having to write some custom code of action function.
+
+40:40.720 --> 40:57.720
+If I can delve into some of the intricacies, I mean, so when talking about efficiency, you know, it has to do with how much of the silicon area actually goes into doing real look, right?
+
+40:57.720 --> 41:13.720
+So how much of the silicon area actually does multiply add? How much of the silicon area provides the memory resources for those those multiply add units? And how much of the silicon area goes into what we call overhead, right?
+
+41:13.720 --> 41:34.720
+Managing threads, managing register, register contacts, doing things that are not really required to move the computation forward, but are necessary to support the programming model that came with GPUs, right?
+
+41:34.720 --> 41:49.720
+And then, you know, what are some of the things that GPUs are lacking, right? So going back to this model of data analytics is being a set of data flow operators, right?
+
+41:49.720 --> 41:58.720
+So ideally, what you'd like to be able to do is cast that data flow graph directly into hardware.
+
+41:58.720 --> 42:16.720
+GPUs actually make that difficult because of the way that the memory is organized. So but if you could do that efficiently, then there's all sorts of things that you could do that to make your computation be faster and more importantly to make it be much more efficient, right?
+
+42:16.720 --> 42:31.720
+Everybody talks about peterroflops, but that's not the story really. It really is about how optimally you can map any particular application to your hardware and what efficiency do you get?
+
+42:31.720 --> 42:48.720
+On a bunch of applications, the efficiencies of which GPUs gets are maybe, you know, less than 10%, right? So that means less than 10% of the time you're actually kind of using the full capabilities of the GPU.
+
+42:48.720 --> 43:03.720
+So what that means is I could potentially build a machine that has a quarter of the capability, but if I could use it 90% of the time, I might be better off. I'm not saying I said, well, I will build that with that kind of machine.
+
+43:03.720 --> 43:23.720
+So, you know, what you say, what's the matter with GPUs? It's a fairly technical argument, but one that has real ramifications about what performance you get out of the end of the day. So you kind of combine these issues of sort of, you know, overhead for doing things that are not machine learning.
+
+43:23.720 --> 43:39.720
+So, overhead for supporting a threading mix, a thread of three graphics, overhead for kind of supporting this programming model associated with CUDA, not very efficient mapping of a bunch of these different networks.
+
+43:39.720 --> 43:44.720
+And then you see why there's room for other players to come in.
+
+43:44.720 --> 43:58.720
+So I think I pulled you down to depression. It's what I'm glad to talk about, but it's one that requires some level of understanding of what GPUs are.
+
+43:58.720 --> 44:05.720
+Presumably, a big part of what you're working on are things that fix all of the above.
+
+44:05.720 --> 44:22.720
+Yes, exactly. How do you give them? Yeah. And so it sounds like then one of the maybe interesting bits here is what it means to build a computing architecture that's kind of more natively graph aware.
+
+44:22.720 --> 44:25.720
+Yeah, yeah, yeah. Can you talk a little bit about that?
+
+44:25.720 --> 44:37.720
+Yeah, yes. So I think some of the things that we found out was that it is about graphs, but it's about hierarchical graphs.
+
+44:37.720 --> 44:48.720
+So what you typically see when you kind of look below the colors of these graphs is that what you see is these operators.
+
+44:48.720 --> 44:58.720
+And the operators that you're probably familiar with from maybe the distributed execution world is map and reduce, right?
+
+44:58.720 --> 45:07.720
+So these are pretty basic operators and depending on what functions you are operating over, they can be made fairly general.
+
+45:07.720 --> 45:25.720
+And so we take operators like that, producing a few others and we nest them and that gives you a lot more capability. And then once you have that graph, right, then you can think about how could you optimize that graph so that uses memory very efficiently.
+
+45:25.720 --> 45:37.720
+So the communication is string lines so you can pipeline operations very efficiently. And then you think about how can I make that graph work very efficiently in hardware? What do I need to do?
+
+45:37.720 --> 45:46.720
+So that's what what it's about. And we at Stanford, we worked on an architecture that we call plasticine.
+
+45:46.720 --> 45:58.720
+It's named after a children's modeling clay that is popular in Europe. I grew up in London and so I played with it as a little boy.
+
+45:58.720 --> 46:02.720
+We're in Canada now. I'm sure they've got it in Canada.
+
+46:02.720 --> 46:20.720
+The closest thing to it in the States is called Play-Doh. Everybody played with Play-Doh. The key difference, and I think it's an important one from the naming point of view, is that if you leave Play-Doh out, it becomes a rock.
+
+46:20.720 --> 46:34.720
+Well, it turns out the plasticine's oil base, so it never, and it's like a puddy stuff. It's like a puddy eggs and stuff. It's never hard. But it's not silly. It doesn't maintain your shape.
+
+46:34.720 --> 46:52.720
+No, it's about gradations. It's not a new one. It's not a new one. So if you're going to see the movie Wilson and Grovitt, or the Clay Nation sort of thing, gummy. Yeah, gummy is probably plasticine.
+
+46:52.720 --> 47:04.720
+Keep it in shape. Take a picture of it. Yeah, exactly. So yeah, so plasticine is before the record. Gumby was before my time, but SNL...
+
+47:04.720 --> 47:06.720
+Oh, what a cracker!
+
+47:06.720 --> 47:12.720
+It wasn't before mine. I can't say.
+
+47:12.720 --> 47:26.720
+So yeah, so plasticine's an architecture that was designed to execute these hierarchical data flow graphs, very efficiently. So it's kind of native execution mode. It's a hierarchical data flow graph.
+
+47:26.720 --> 47:36.720
+But there are a whole bunch of things that you want to do to do efficient machine learning execution. You want to do data flow graphs. You want to deal with sposity, right?
+
+47:36.720 --> 47:44.720
+It's a quick way to like rattle off what it means to do graphs and hardware. Like are there kind of key principles?
+
+47:44.720 --> 47:58.720
+So I mean, I think you can think of execution units as these nodes, right? And the ways of communicating between them so that you can map these graphs directly onto these execution units, right?
+
+47:58.720 --> 48:10.720
+And then the way that you think about moving data through these is in terms of a pipeline of data moves through it, right? So if you're only going to do things once, then you'd be wasting your time, right?
+
+48:10.720 --> 48:20.720
+But think of it as a multi-part intersecting assembly line, right? That's the way to think about how to set things up.
+
+48:20.720 --> 48:29.720
+Really all kind of thinking about the cause being the data and the kind of moves through this assembly line and kind of at the end, the cause is complete, right?
+
+48:29.720 --> 48:42.720
+But maybe they're doing, you know, is there some notion of like having if you've got some large graph and you're kind of mapping it to this more static substrate that you're kind of swapping in parts of the graph?
+
+48:42.720 --> 48:53.720
+Yeah, yeah. So that's a very good question, right? So, you know, there's some machine that your TensorFlow initially had no way. I mean, you've got a static graph right? You've done.
+
+48:53.720 --> 49:02.720
+And from a hardware point of view, you say, array, that's what I want. I can optimize the hell out of it. I map it to my substrate and I'm not going to change it.
+
+49:02.720 --> 49:13.720
+But then you come along and say, ah, I don't sometimes I want to do this part of graph. Sometimes I want to do that part of the graph. So you have to have some way of reprogramming things, right?
+
+49:13.720 --> 49:20.720
+And so a critical element of any architecture like this is how long does it take you to reprogram it, right?
+
+49:20.720 --> 49:33.720
+So that is a consideration, right? Because you're talking about a reprogrammable thing as opposed to a general purpose. Yeah, yeah. So think of it, you know, as like, you know, the assembly line metaphor is pretty good, right?
+
+49:33.720 --> 49:40.720
+On the factory floor, you set up the assembly line and you're going to make the set of cars and it's going to be this way for months, right?
+
+49:40.720 --> 49:53.720
+So you set it up and then you let it go, right? But if every of you, you know, well, back when I used to be a graduate student at Michigan, people were talking about these flexible manufacturing lines, right?
+
+49:53.720 --> 50:10.720
+Because, you know, Michigan's course Michigan, right? So, and so then maybe, maybe you're doing different things where we come, right? So now you have to have some way of adding some flexibility, having some reprogrammability.
+
+50:10.720 --> 50:23.720
+And so yes, now it's more flexible. But there's a truism in hardware design and I get goes back to something I said before about the fact that, you know, you could be more efficient if you only had to do one thing.
+
+50:23.720 --> 50:36.720
+And anytime you add flexibility, you are losing efficiency, right? And so as always, this game was okay. How much extra flexibility am I going to add and how what's it going to do to my efficiency?
+
+50:36.720 --> 50:46.720
+Yeah, at some point you go too far, you say, you know, screw it. And CPUs, of course, are at the extreme of that of that spectrum, right?
+
+50:46.720 --> 50:49.720
+Very flexible on the flexibility side with huge amounts of overhead.
+
+50:49.720 --> 50:54.720
+And the other side would be, oh, this is the model that I want to bake in the silicon.
+
+50:54.720 --> 51:10.720
+And silicon, I can't change it. Yeah, probably efficient, but then. So you get the spectrum. And you're saying, you're saying, you know, what, you know, what's the ingenuity about what I do about what I, what, what, what things I can change and what things are fixed, right?
+
+51:10.720 --> 51:16.720
+And so that's the game. And then what, what's my compiler tool chain to target that, right?
+
+51:16.720 --> 51:26.720
+Right. Compile tool chains for CPUs are very well established, right? There's, you know, C, L of the M, you know, what have you?
+
+51:26.720 --> 51:38.720
+You can, CUDA is pretty, pretty well established too. And some of these other architectures that you could imagine, if you didn't have, you know, A, they have many more degrees of freedom.
+
+51:38.720 --> 51:49.720
+So actually coming up with, with the right thing is, is more difficult and B, they're just weird, you know, in fact, we're in a good way in that.
+
+51:49.720 --> 51:56.720
+And then one of the things that they don't have is explicit instructions, right?
+
+51:56.720 --> 52:08.720
+So I mean, well, it means that, so an instruction would say, like explicit instruction that, you know, shift and move and allow level stuff.
+
+52:08.720 --> 52:21.720
+Right. Well, they have them, but they're done spatially, right? So you say, you say, okay, I'm going to, instead of this, this particular clock cycle, I'm going to do an ad.
+
+52:21.720 --> 52:29.720
+And I'm going to do a shift and then I've got an executing instruction. Then you say, no, you send it up. You're always going to do a shift at the end of time.
+
+52:29.720 --> 52:33.720
+It's more like configuration. That's what you're going to do. And I'm just just what I put in.
+
+52:33.720 --> 52:38.720
+Yeah, I'm going to feed you data and you're going to do what you do, right?
+
+52:38.720 --> 52:43.720
+And you're not going to change. And then the next step is going to do something else, right?
+
+52:43.720 --> 52:55.720
+And so, and so this is how you get these things. So why, how do you make the data flow so that everything gets to the right place so that the things that do their thing, you need a network.
+
+52:55.720 --> 53:05.720
+Right. Right. So now you understand how you're building your building up kind of hardware, which has some flexibility, but, but, but, but, but not too much, right?
+
+53:05.720 --> 53:20.720
+The key thing is, is where you put the flexibility and how you actually generate code. Okay. Interesting. Interesting. And so, but I should say it's all driven by the relatively static nature of at least the early machine learning.
+
+53:20.720 --> 53:31.720
+Right. Right. It's become more flexible, but it's still relatively static compared to say, pick your favorite software in space. Right. Right. Right. Yeah.
+
+53:31.720 --> 53:44.720
+And so, how does this tie into what you're doing at some an over? So at seven over, we are doing a bunch of things. We are figuring out how to create a new platform for AI. Right.
+
+53:44.720 --> 53:49.720
+And what is platform can mean a lot of things. So, so how low do you go? How high do you go?
+
+53:49.720 --> 54:04.720
+Well, let me do low those easy because we're going all the way to silicon. Exactly. Hi. You know, we're going to come up all the way to to the frameworks.
+
+54:04.720 --> 54:12.720
+Okay. Yeah. Okay. And be very broad. My understanding is still early. So I can't say what we're actually doing.
+
+54:12.720 --> 54:22.720
+But, you know, if I can, I can talk about the founding team and sort of what capable is they bring in that kind of, but we don't need to go into the team.
+
+54:22.720 --> 54:34.720
+Yeah. Well, I think it's kind of interesting about this interview is that I'm not sure we ever transition from your like background to, you know, to your, to your talk.
+
+54:34.720 --> 54:45.720
+We kind of at all wove together and chronologically in time. We end up it ended up at what you're doing now. Yeah. And so I, I have covered what I, what I talked in my.
+
+54:45.720 --> 54:57.720
+I did it. Yeah. We, we, we, we, we, we, we, we, we covered the whole space. And so, and, and maybe I should recap. And then there'll be clear. So the recap is, okay.
+
+54:57.720 --> 55:06.720
+I started out by saying, hey, we're in it. We're in this, this era where machine learning is ascended and more is Laura's.
+
+55:06.720 --> 55:20.720
+Yeah, it's gone. Right. We need to do things differently. We need new algorithms based around these ideas of, of, of, of trading off this is called efficiency for hardware efficiency.
+
+55:20.720 --> 55:37.720
+We need to make specific languages for encoding them. We need optimizing compilers for generating code for a variety of different architectures, including new hardware accelerators, which are defined on top of these data flow operators.
+
+55:37.720 --> 55:57.720
+And then plastic seat being an example. So we're gonna go build that. Yeah. Yeah. Yeah. Yeah. Nice. Nice. Also, well, cool. Thank you so much for taking the time to chat with me and we'll thank you for reaching out to speed of pleasure. Fantastic. Yeah.
+
+55:57.720 --> 56:11.720
+All right, everyone. That's our show for today. For more information on Kuhnle or any of the topics covering in this episode, visit twimmelai.com slash talk slash 211.
+
+56:11.720 --> 56:29.720
+You can also follow along with our NURP series at twimmelai.com slash NURP's 2018. As always, thanks so much for listening and catch you next time.
+

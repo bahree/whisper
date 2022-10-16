@@ -1,0 +1,2264 @@
+WEBVTT
+
+00:00.000 --> 00:16.320
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+
+00:16.320 --> 00:21.480
+people, doing interesting things in machine learning and artificial intelligence.
+
+00:21.480 --> 00:35.360
+I'm your host Sam Charrington. Hey everyone, Sam again with another quick Twimble
+
+00:35.360 --> 00:41.440
+Con update. One of the things that's been especially exciting to see is the number of organizations
+
+00:41.440 --> 00:47.320
+sending multiple people in some cases entire teams to Twimble Con to learn about scaling
+
+00:47.320 --> 00:52.280
+and operationalizing machine learning. A full third of the companies attending are sending
+
+00:52.280 --> 00:59.400
+groups in many cases three four and five people. This is awesome. Seeing so many teams attending
+
+00:59.400 --> 01:03.680
+is a great indicator that folks really see the opportunity associated with improving the
+
+01:03.680 --> 01:08.040
+efficiency of their data science and machine learning operations and are excited about
+
+01:08.040 --> 01:12.520
+the conversations we'll be curating at the event. If you'd like to attend Twimble
+
+01:12.520 --> 01:18.920
+Con with your team just reach out to me at Sam at Twimlai.com and let's make it happen.
+
+01:18.920 --> 01:22.560
+Of course you're welcome to reach out to me if you want to attend as an individual or
+
+01:22.560 --> 01:29.240
+just head over to twimblecon.com slash register to sign up.
+
+01:29.240 --> 01:33.800
+I hearty thanks to our friends at Qualcomm for sponsoring today's show. As you hear in
+
+01:33.800 --> 01:38.160
+my conversation with time in Qualcomm has been actively involved in AI research for
+
+01:38.160 --> 01:43.400
+well over a decade leading to advances in power efficient on device AI through efficient
+
+01:43.400 --> 01:48.560
+neural network quantization and compression and more. Of course Qualcomm power some of
+
+01:48.560 --> 01:52.960
+the latest and greatest Android devices with their Snapdragon chipset family. From this
+
+01:52.960 --> 01:57.960
+strong foundation in the mobile chipset space Qualcomm now has the goal of scaling AI across
+
+01:57.960 --> 02:03.600
+devices and making it ubiquitous. To learn more about what Qualcomm is up to including
+
+02:03.600 --> 02:10.600
+their AI research platforms and developer tools visit twimlai.com slash Qualcomm.
+
+02:10.600 --> 02:16.760
+All right everyone I am on the line with time in Blunk of War. Time in as a staff engineer
+
+02:16.760 --> 02:22.600
+at Qualcomm leading the compression and quantization research team. Time in welcome to this
+
+02:22.600 --> 02:23.880
+week in machine learning and AI.
+
+02:23.880 --> 02:27.000
+Hey, it's great to be here. Nice to meet you all.
+
+02:27.000 --> 02:30.960
+Great to have you on the show. I'm looking forward to our conversation and digging into
+
+02:30.960 --> 02:36.200
+the topic of quantization and compression. But before we do that, I'd love to hear
+
+02:36.200 --> 02:38.800
+a little bit about your background.
+
+02:38.800 --> 02:45.640
+Yeah, so I have a background to bachelor's degree in mathematics from Light University.
+
+02:45.640 --> 02:50.600
+And then I moved to Artificial Intelligence in Amsterdam and during my master's I started
+
+02:50.600 --> 02:55.960
+my own company together with the Professor Maxwelling which been on the show before I think.
+
+02:55.960 --> 03:01.000
+And after, yeah, and that was quite successful. So our AI started got acquired by Qualcomm.
+
+03:01.000 --> 03:04.960
+And now I'm here already since two years now working in Qualcomm.
+
+03:04.960 --> 03:08.240
+Awesome. What was your role with with Cypher?
+
+03:08.240 --> 03:13.120
+So at Cypher, we're basically co-founder officially called CTO. I did a lot of the technical
+
+03:13.120 --> 03:19.480
+stuff leading the technical team. But I also did a lot of like going to different companies
+
+03:19.480 --> 03:23.000
+talking to them about their problems that we could potentially solve a deep learning,
+
+03:23.000 --> 03:27.440
+not stage a lot, doing some sales. I mean, if you feel like a small starter, you have to
+
+03:27.440 --> 03:29.200
+do everything, right? So I did everything.
+
+03:29.200 --> 03:31.320
+We're a lot of hats. Absolutely.
+
+03:31.320 --> 03:32.320
+Yes, exactly.
+
+03:32.320 --> 03:39.240
+And so Qualcomm now your focus has it been on quantization and compression research the
+
+03:39.240 --> 03:43.480
+entire time or have you done a variety of things in a couple of years?
+
+03:43.480 --> 03:48.760
+Yeah, that's been it for me. So basically two years ago when I joined, I found this topic
+
+03:48.760 --> 03:53.600
+of neural network compression and quantization incredibly interesting. So I started working
+
+03:53.600 --> 03:59.800
+on that both on the research and in the application end. And then as I went, the team was growing
+
+03:59.800 --> 04:03.920
+and the topic became more and more important. So yeah, basically the last two years of my
+
+04:03.920 --> 04:07.120
+life have been making neural networks more efficient.
+
+04:07.120 --> 04:15.400
+Awesome. And so quantization and compression, what are defined for us this topic and are
+
+04:15.400 --> 04:22.320
+they the same thing or are they different things? What are those terms mean? Let's start
+
+04:22.320 --> 04:23.320
+from the top.
+
+04:23.320 --> 04:29.360
+Yeah, that's good. So in general, what we're talking about is deep learning in an efficient
+
+04:29.360 --> 04:36.000
+way, right? So instead of having very big large neural networks that's a convry run on,
+
+04:36.000 --> 04:39.160
+for example, a cell phone, we want to make them as small as possible as they're very
+
+04:39.160 --> 04:43.720
+efficient and through very, very power efficient that they are quick and fast, et cetera.
+
+04:43.720 --> 04:47.800
+So there's a couple of ways that you can do this, right? You can take a network and make
+
+04:47.800 --> 04:53.720
+the architecture more efficient, for example, or you can optimize the kernels that execute
+
+04:53.720 --> 04:58.120
+or you can develop like a specific hardware from making a neural network more efficient.
+
+04:58.120 --> 05:02.320
+And specifically what we're looking into is, well, also of course, those topics are
+
+05:02.320 --> 05:05.440
+quite common, looking into all of those things. And specifically, my team is looking
+
+05:05.440 --> 05:10.800
+compression and quantization, compression being, let's say, take any pre-trained network.
+
+05:10.800 --> 05:14.840
+So a network that somebody trained for a task, you spend a lot of time on this, right?
+
+05:14.840 --> 05:18.920
+And then comes the question, like, how can we run this more efficiently? And with that
+
+05:18.920 --> 05:21.920
+question, you want to make sure that that same network that you have, and that you've trained
+
+05:21.920 --> 05:26.200
+to put a lot of sweat in, and that you make that one as small as possible. So the idea
+
+05:26.200 --> 05:31.280
+with compression is to remove individual weights, or perhaps even better, remove complete
+
+05:31.280 --> 05:35.280
+feature maps, complete neurons, complete convolutional channels from your network to make
+
+05:35.280 --> 05:40.360
+it more efficient, right? And parallel to that, another way of making a network more efficient
+
+05:40.360 --> 05:44.160
+is quantization. And normally, when you train a neural network, it's done in like floating
+
+05:44.160 --> 05:50.400
+point 32. So that means that every number is like 32-bit value. Now, you can calculate
+
+05:50.400 --> 05:54.560
+a lot more effectively and efficiently. And you have a lot less memory transfer and energy
+
+05:54.560 --> 05:59.120
+consumption, if you would use less bits for each of the weights and the activations in your
+
+05:59.120 --> 06:04.480
+neural network. So the idea is that you can do calculations in 8 bits, quantize your
+
+06:04.480 --> 06:09.360
+whole network, both the weights and all the operations in between to 8-bit operations.
+
+06:09.360 --> 06:13.600
+And then you're a lot more efficient. So both work together, compression quantization,
+
+06:13.600 --> 06:17.200
+to kind of skill models down. And sometimes you can do this with like a factor 80 that your
+
+06:17.200 --> 06:21.440
+model becomes a lot and a lot smaller than the original model that you started with.
+
+06:21.440 --> 06:28.840
+And now, how dependent on that compression factor is the specific model that you're working
+
+06:28.840 --> 06:33.040
+with? So like, you mean how much you can compress it?
+
+06:33.040 --> 06:36.960
+Yeah, absolutely. Yeah. Yeah. Yeah. Yeah. Yeah. It's very important what Motivus
+
+06:36.960 --> 06:41.120
+start with. I think there's this running joke in the compression literature that everybody
+
+06:41.120 --> 06:45.800
+always tests their models on like VGG because the VGG architecture is so inefficient that
+
+06:45.800 --> 06:50.520
+you always get these huge numbers like, oh, I compress my models by a factor 20 or something
+
+06:50.520 --> 06:57.000
+like that. So those models can be really, really efficiently compressed. More recently,
+
+06:57.000 --> 07:01.920
+the smaller models are not as you can get those big compression numbers. But very frequently
+
+07:01.920 --> 07:06.440
+we've seen, for example, MobileNet V2, which is already a very efficient fast network
+
+07:06.440 --> 07:11.560
+can still be compressed by factor two sometimes. And that's not affected to less energy that
+
+07:11.560 --> 07:14.960
+you're using, right? Or speed up into your latency. So that's quite significant.
+
+07:14.960 --> 07:24.280
+And so a lot of the networks that I've heard you toss out are our CNNs. Is that the primary
+
+07:24.280 --> 07:30.720
+place that we're focused on quantization and compression? Or does it really span the
+
+07:30.720 --> 07:36.840
+gamut in terms of the types of models? Yeah. I think like any model that you want to run
+
+07:36.840 --> 07:41.840
+on a phone or you want to run efficiently the clouds, be it like neural network translation,
+
+07:41.840 --> 07:46.560
+image models, computer vision models, like cement limitation, like for all of these,
+
+07:46.560 --> 07:50.840
+it's very, very, very important to run them efficiently. I think there's like a general
+
+07:50.840 --> 07:54.280
+tendency in the research and compression quantization that they're focusing on computer
+
+07:54.280 --> 07:59.160
+vision architectures. And there's some literature from like RNNs and transformers, but it's
+
+07:59.160 --> 08:07.120
+a very large amount. But in general, what's driving that? Is that because they're starting
+
+08:07.120 --> 08:15.000
+out very inefficient or big or power hungry? Or is it just that's what we're using more
+
+08:15.000 --> 08:20.480
+of? I think it's also what we're using a lot of, right? Like if you look at deep learning
+
+08:20.480 --> 08:25.000
+algorithms on the phone, yes, there's some like neural machine translation models, etc.
+
+08:25.000 --> 08:30.440
+The large bill of data is starting in the cloud, but a lot of camera algorithms are already
+
+08:30.440 --> 08:35.200
+on phones nowadays. So I think most of your efficiency work because of that is in the
+
+08:35.200 --> 08:39.440
+computer vision area. And also if you look at conferences, right? Like the biggest conferences
+
+08:39.440 --> 08:44.880
+are computer vision conferences. And those people do a lot on these efficiency compression
+
+08:44.880 --> 08:48.720
+kind of algorithms. And so I think it's just because of the necessity of the market.
+
+08:48.720 --> 08:53.720
+But slowly bit steadily, once more algorithms make their way to efficient devices, I think
+
+08:53.720 --> 08:59.800
+we'll see like more work on like sequence models and other types of models.
+
+08:59.800 --> 09:07.080
+And so the impression that I'm getting from hearing you describe compression is that,
+
+09:07.080 --> 09:16.840
+you know, I may start with kind of an off-the-shelf model for computer vision like a VGG and then
+
+09:16.840 --> 09:21.920
+kind of train it to, you know, solve whatever problem I'm trying to solve and then put
+
+09:21.920 --> 09:29.000
+it through this compression process as opposed to starting with a compressed network and
+
+09:29.000 --> 09:36.280
+train it. Is that correct? Or is the way that we're trying to get to smaller computer
+
+09:36.280 --> 09:42.120
+vision networks starting by training big networks and then compressing them? And, you
+
+09:42.120 --> 09:46.840
+know, as an alternative, is there a path to like just starting with the smaller network
+
+09:46.840 --> 09:50.920
+architecture and training it? And if not, you know, why doesn't that work? What are the
+
+09:50.920 --> 09:54.280
+issues associated with the way we approach this problem?
+
+09:54.280 --> 09:59.320
+I think that's a great question, very fundamental to the kind of work we're doing and deep learning
+
+09:59.320 --> 10:05.720
+in general, perhaps. And so basically, if you want to do that like make a efficient network
+
+10:05.720 --> 10:10.440
+architecture, I would always start with just making your network smaller for something
+
+10:10.440 --> 10:13.960
+I got, right? You know, you don't want to have a network that's like 20 times too big
+
+10:13.960 --> 10:17.520
+and then say, okay, now we're going to compress it. I would rather say, well, if that's
+
+10:17.520 --> 10:21.960
+the case, just tweak your architecture in some kind of way and get a more efficient architecture
+
+10:21.960 --> 10:27.080
+and use that. But then afterwards, like if you have this efficient already efficient
+
+10:27.080 --> 10:31.720
+architecture like a mobile network, for example, or an efficient net, it still helps a lot
+
+10:31.720 --> 10:36.880
+to compress it afterwards. And there's this theory, like this theoretical paper got a
+
+10:36.880 --> 10:42.680
+lottery ticket hypothesis that was recently published. And this kind of positive also proves
+
+10:42.680 --> 10:47.840
+to a certain extent that you're better off like training a large neural network, something
+
+10:47.840 --> 10:52.640
+that's like over parameterized. There's a lot of filters and a lot of parameters at training
+
+10:52.640 --> 10:57.440
+that first and then making it smaller afterwards. And that's generally better than training
+
+10:57.440 --> 11:03.480
+that smaller resulting architecture from scratch. So I think currently literature or the
+
+11:03.480 --> 11:06.600
+quicker consensus is that it's better to do that. Just start with the big model and
+
+11:06.600 --> 11:13.840
+then make it smaller. And why is that? What is that paper at least suggests is the reasoning
+
+11:13.840 --> 11:21.480
+for that? The paper suggests that basically you want to find like a lottery ticket. So
+
+11:21.480 --> 11:27.280
+the lottery ticket is basically a network architecture that's very good for your problem.
+
+11:27.280 --> 11:31.600
+And every feature will have like a certain probability of being a good feature to use.
+
+11:31.600 --> 11:36.000
+So what the neural network is doing during training is that you want to find features that
+
+11:36.000 --> 11:40.840
+are initialized close to good features and those will be used. And then during training
+
+11:40.840 --> 11:46.040
+the rest will be like pruned away or like removed or set to zero because of your regularization.
+
+11:46.040 --> 11:48.840
+And now the more parameters you have, the more feature maps you have, the higher the
+
+11:48.840 --> 11:54.280
+probability you have of finding those optimal features that you can find. So because of
+
+11:54.280 --> 11:57.280
+that, you're better off training with a large network that is very of a parameterized.
+
+11:57.280 --> 12:02.160
+You have more shots that find the correct architecture and then removing or regularizing
+
+12:02.160 --> 12:09.760
+away the smaller ones. So each year parameters is buying a lottery ticket and a network that
+
+12:09.760 --> 12:15.040
+works well for your problem is a winning lottery ticket. And so they're theorizing that
+
+12:15.040 --> 12:20.240
+it's better to start with a winning lottery ticket and find a way to make it better than
+
+12:20.240 --> 12:27.200
+it is to start with a smaller network fewer shots at finding that winning lottery ticket.
+
+12:27.200 --> 12:31.600
+Yeah, exactly. It's like as if you were looking at, for example, you have a hole in
+
+12:31.600 --> 12:36.480
+the big, in the big table and you can, you can randomly distribute balls over this table.
+
+12:36.480 --> 12:40.800
+And if you want one ball in the table, you want to minimize the distance that takes you
+
+12:40.800 --> 12:44.360
+to roll the ball from one part of the table to the, to the, to the hole, then you're better
+
+12:44.360 --> 12:49.440
+off having 50 balls in the table to and then pick the smallest and the closest ball and
+
+12:49.440 --> 12:53.200
+putting that in the hole, then you might have to move a few centimeters rather than picking
+
+12:53.200 --> 12:57.440
+one ball, putting it randomly on the table and then you have like a very large distance.
+
+12:57.440 --> 13:01.560
+So you're basically, you're trying to minimize the distance between your optimal features
+
+13:01.560 --> 13:03.440
+and what you initialize.
+
+13:03.440 --> 13:08.760
+And so this, the lottery ticket hypothesis kind of flies in the face of your previous
+
+13:08.760 --> 13:13.880
+advice, which is to not start with something that's massive and, and start with something
+
+13:13.880 --> 13:18.920
+that's smaller. How do you rationalize those two perspectives?
+
+13:18.920 --> 13:25.240
+Yeah, so I think it's, it's a part of skill. Like, I think if you started the network
+
+13:25.240 --> 13:30.520
+that's like 20 times too big for what you're eventually want, then you get to this point
+
+13:30.520 --> 13:33.800
+where it's actually pretty difficult to create algorithms that compress these networks
+
+13:33.800 --> 13:34.800
+efficiently.
+
+13:34.800 --> 13:38.320
+At least on my experience, the current tools that we have to compress networks are not
+
+13:38.320 --> 13:42.680
+very well equipped to prune a network by such significant amounts, because you have to
+
+13:42.680 --> 13:48.120
+imagine that that removing parts of the network and, and then training it while removing parts
+
+13:48.120 --> 13:51.800
+is also a very difficult task for the network to do, a lot of discreet optimization going
+
+13:51.800 --> 13:55.800
+on there, it's very difficult to train networks and prune them at the same time.
+
+13:55.800 --> 14:00.040
+So those numbers are too big, but definitely if your network is two times or three times
+
+14:00.040 --> 14:04.480
+too big for the original size, then yeah, just train it on the larger size and then prune
+
+14:04.480 --> 14:06.280
+it down and make it smaller.
+
+14:06.280 --> 14:11.200
+And so how, how do you know if the network is two or three times too big or 20 times too
+
+14:11.200 --> 14:12.200
+big?
+
+14:12.200 --> 14:18.200
+I think that's trial and error. So, I mean, one of the most basic things that you can do
+
+14:18.200 --> 14:22.320
+is just stake your network that you've already designed and see what happens if you remove
+
+14:22.320 --> 14:27.120
+the amount of channels by a factor half, like you reduce everything by 50%.
+
+14:27.120 --> 14:30.960
+Then I remove and then reduce it to 25% or 12.5%, etc.
+
+14:30.960 --> 14:34.080
+And that's kind of already, if you're a pretty good idea of how over pyramids write
+
+14:34.080 --> 14:35.080
+your network is.
+
+14:35.080 --> 14:36.080
+Yeah, it's funny.
+
+14:36.080 --> 14:42.560
+I talk to a lot of people, particularly folks that are on the applied side of things,
+
+14:42.560 --> 14:48.160
+so they're not in research, they're not trying to develop new network architectures,
+
+14:48.160 --> 14:55.280
+and 90% of the time what they're doing is they're picking up some standard network architecture
+
+14:55.280 --> 15:00.320
+off the shelf, training it, and it kind of works.
+
+15:00.320 --> 15:04.080
+And they're like, thumbs up, hey, we've got something that works here.
+
+15:04.080 --> 15:05.080
+Yeah, let's go.
+
+15:05.080 --> 15:06.080
+Let's put it in a product.
+
+15:06.080 --> 15:07.560
+Let's put it in a product, right?
+
+15:07.560 --> 15:12.400
+And so, granted, most of the time, they're not working on putting it in a phone, but
+
+15:12.400 --> 15:23.840
+let's say that they are, they've developed something that can look at a medical image
+
+15:23.840 --> 15:30.760
+and identify some kind of feature in that medical image, fairly successfully on a computer,
+
+15:30.760 --> 15:37.400
+and they want to get that onto a phone, and they've trained it using something off the
+
+15:37.400 --> 15:46.960
+shelf like a VGG or a ResNet, what are the specific steps that they would take to get
+
+15:46.960 --> 15:55.720
+from there to a model that is more efficient running on that phone?
+
+15:55.720 --> 16:01.040
+Do they toss that out and start from scratch on something smaller and then optimize that,
+
+16:01.040 --> 16:05.920
+or do they kind of play with it in certain kind of ways, walk us through the way that
+
+16:05.920 --> 16:07.840
+you should approach this?
+
+16:07.840 --> 16:12.800
+I think generally those types of architectures are already quite, well, I'm part of VGG,
+
+16:12.800 --> 16:16.880
+of course, but the ResNet architectures are generally already quite efficient for the
+
+16:16.880 --> 16:23.640
+task that they're designed for, and the classification, or cement expectation, or object detection.
+
+16:23.640 --> 16:27.560
+For those of you who start with compression, just take your model that you've created,
+
+16:27.560 --> 16:31.440
+and then there's multiple algorithms that you can apply, things like tensor factorization
+
+16:31.440 --> 16:36.800
+algorithms that decompose like one layer into multiple layers, or channel pruning type of
+
+16:36.800 --> 16:41.680
+architectures where you're actually removing complete channels from your network, and there's
+
+16:41.680 --> 16:45.600
+some libraries out there, right, and a lot of papers on these topics that you can look
+
+16:45.600 --> 16:46.600
+into.
+
+16:46.600 --> 16:51.560
+So apply these two type algorithms, and you can make your model two or three times smaller
+
+16:51.560 --> 16:52.560
+than original.
+
+16:52.560 --> 16:57.160
+That's generally what we see for most applications.
+
+16:57.160 --> 17:03.080
+You mentioned a couple of these algorithms, tensor factorization, channel pruning, are
+
+17:03.080 --> 17:05.080
+there other major ones?
+
+17:05.080 --> 17:07.640
+I think those are the large categories.
+
+17:07.640 --> 17:11.400
+I mean, it kind of really depends on what you're compressing your network for, right?
+
+17:11.400 --> 17:13.120
+Are you compressing it for latency?
+
+17:13.120 --> 17:16.960
+Are you compressing it for power consumption reduction, or do you just want a smaller model
+
+17:16.960 --> 17:18.960
+to transfer to some other device?
+
+17:18.960 --> 17:23.120
+But generally, if you're looking at things like latency or power consumption reduction,
+
+17:23.120 --> 17:26.840
+then yeah, those are the major ones for compression.
+
+17:26.840 --> 17:31.520
+And afterwards, the quantization step is arguably even more impactful, and then even bigger
+
+17:31.520 --> 17:33.040
+numbers in terms of efficiency.
+
+17:33.040 --> 17:38.960
+Before we get to quantization, let's stick with compressing here, so you're compressing
+
+17:38.960 --> 17:46.440
+for latency or power, and you've got these couple of methods, tensor factorization, and channel
+
+17:46.440 --> 17:53.680
+pruning, are they, are these kind of blunt tools that you're just kind of throwing at
+
+17:53.680 --> 17:59.520
+your model, like you, you know, go to to GitHub or something and download a tensor factorization
+
+17:59.520 --> 18:05.280
+script, and you just run it and, you know, it spits something out, or is this a process
+
+18:05.280 --> 18:09.000
+that you're kind of exercising with some degree of care?
+
+18:09.000 --> 18:13.240
+Yeah, so one of the interesting things that we're working on is to make all of these
+
+18:13.240 --> 18:17.840
+kind of algorithms work very easily out of the box, so that you can just apply it to
+
+18:17.840 --> 18:20.000
+any, any type of algorithm, right?
+
+18:20.000 --> 18:23.640
+Any type of deep learning network, and then without any efforts actually doing this.
+
+18:23.640 --> 18:29.120
+But this is still not completely solved yet, there's not a really a lot of good libraries
+
+18:29.120 --> 18:34.680
+that you can just download and use, and then without any hassle compressing your network.
+
+18:34.680 --> 18:39.320
+The generally it's still a process of applying these techniques, either factorizing your
+
+18:39.320 --> 18:43.080
+rate matrix or removing some channels with some smart algorithm, and then doing a lot
+
+18:43.080 --> 18:46.880
+of fine tuning and a lot of handcraft tuning on top of it.
+
+18:46.880 --> 18:50.200
+So I wish it was as easy as just downloading a library and applying it, but generally it
+
+18:50.200 --> 18:53.720
+still takes a week or a few weeks to get this done properly.
+
+18:53.720 --> 18:59.280
+Okay, so you need to understand a little bit about these different techniques in order
+
+18:59.280 --> 19:02.400
+to actually apply them at this point.
+
+19:02.400 --> 19:08.240
+So maybe walk us through tensor factorization, you know, when you're starting this process,
+
+19:08.240 --> 19:10.280
+you know, what is it that you're actually doing?
+
+19:10.280 --> 19:12.680
+How do you need to think about the process?
+
+19:12.680 --> 19:14.200
+Yeah, sure.
+
+19:14.200 --> 19:18.360
+So the tensor factorization is basically a deal of decomposing your weight tensor into something
+
+19:18.360 --> 19:20.080
+smaller.
+
+19:20.080 --> 19:24.440
+And then in the end, what you end up with is instead of having one layer where you just
+
+19:24.440 --> 19:30.160
+do one convolution, for example, or in the case of RNN's one matrix multiplication, is
+
+19:30.160 --> 19:34.680
+that you do two smaller convolutions or two smaller matrix multiplication.
+
+19:34.680 --> 19:36.960
+That's the general gist of it.
+
+19:36.960 --> 19:37.960
+So what do you do?
+
+19:37.960 --> 19:43.880
+Well, you take a network, then you have to somehow decide for each of the layers in
+
+19:43.880 --> 19:47.040
+your network how much you want to prune them, so how much do you want to reduce them in
+
+19:47.040 --> 19:48.040
+size?
+
+19:48.040 --> 19:51.040
+There's some smart algorithms for choosing this setting.
+
+19:51.040 --> 19:55.880
+And I have to have done that for each of the layers, you compress it, basically by applying
+
+19:55.880 --> 19:56.880
+SVD on it.
+
+19:56.880 --> 20:01.280
+So SVD is like a very standard algorithm of doing tensor factorization, especially for
+
+20:01.280 --> 20:02.280
+convolutional neural networks.
+
+20:02.280 --> 20:05.520
+SVD leading singular value decomposition.
+
+20:05.520 --> 20:06.520
+Exactly, that's it.
+
+20:06.520 --> 20:07.520
+Yeah.
+
+20:07.520 --> 20:11.600
+So you basically apply a single value decomposition on it, gets two smaller sub matrices
+
+20:11.600 --> 20:13.840
+with a lower rank.
+
+20:13.840 --> 20:18.080
+And then you have two layers instead of one, and after you've done that for the whole network,
+
+20:18.080 --> 20:22.680
+you fine tune it for multiple epochs to get back to the original accuracy.
+
+20:22.680 --> 20:23.880
+That's generally how that's done.
+
+20:23.880 --> 20:24.880
+Okay.
+
+20:24.880 --> 20:29.600
+And you mentioned there are some algorithms to tell you which of the layers in your network
+
+20:29.600 --> 20:32.280
+you want to apply this to.
+
+20:32.280 --> 20:38.240
+What are those algorithms and what's the general kind of intuition behind where you want
+
+20:38.240 --> 20:39.240
+to apply this?
+
+20:39.240 --> 20:40.240
+Yeah.
+
+20:40.240 --> 20:42.480
+So I mean, there's a couple of them.
+
+20:42.480 --> 20:47.480
+I think one of the most recent ones that's interesting is called automatic model compression
+
+20:47.480 --> 20:51.640
+or ANC, which is from Songhound Group at MIT.
+
+20:51.640 --> 20:56.480
+And this algorithm basically applies a reinforcement learning algorithm on top of the network.
+
+20:56.480 --> 21:03.240
+So it tells you, based on reinforcement learning, every iteration gives you a value, namely
+
+21:03.240 --> 21:06.440
+what is the accuracy of your network after compression.
+
+21:06.440 --> 21:09.840
+And your reinforcement learning agent optimizes the primary shows for each layer.
+
+21:09.840 --> 21:14.040
+So how much am I compressing each layer, such that your accuracy still stays very high.
+
+21:14.040 --> 21:16.520
+So that's like one way to do it, for example.
+
+21:16.520 --> 21:22.040
+And is it is it deep reinforcement learning or is it more traditional RL?
+
+21:22.040 --> 21:24.040
+It's like an extra critic model.
+
+21:24.040 --> 21:25.040
+It's not very deep.
+
+21:25.040 --> 21:26.040
+Okay.
+
+21:26.040 --> 21:27.040
+Got it.
+
+21:27.040 --> 21:28.040
+Got it.
+
+21:28.040 --> 21:29.040
+Okay.
+
+21:29.040 --> 21:30.040
+Pretty standard, but still recent.
+
+21:30.040 --> 21:31.040
+Okay.
+
+21:31.040 --> 21:32.040
+Yeah.
+
+21:32.040 --> 21:33.040
+That's one way of doing that.
+
+21:33.040 --> 21:34.040
+Are there others that are worth knowing about?
+
+21:34.040 --> 21:35.040
+Yeah.
+
+21:35.040 --> 21:37.680
+So one of the things that works very well is just looking at the singular values of your
+
+21:37.680 --> 21:42.000
+layers, if you're doing tensor factorization, for example, that also works very well.
+
+21:42.000 --> 21:44.800
+You're basically looking at the residual energy.
+
+21:44.800 --> 21:49.240
+So I don't know how technical or in depth I should go here, but let's do it.
+
+21:49.240 --> 21:51.680
+So let's go deeper.
+
+21:51.680 --> 21:56.200
+Well, just look at the singular values, I think that that's as deep as we, we perhaps
+
+21:56.200 --> 21:57.200
+should be going.
+
+21:57.200 --> 22:02.520
+So the singular values are like a rough indication of the residual after doing the tensor
+
+22:02.520 --> 22:03.520
+factorization.
+
+22:03.520 --> 22:08.120
+So you're basically looking at the forbidden norm of your rate matrix or even better of
+
+22:08.120 --> 22:11.440
+your activation, set of activation.
+
+22:11.440 --> 22:16.760
+So generally you fit some data to your network, you look at the output tensor for that, and
+
+22:16.760 --> 22:18.800
+then you decompose that.
+
+22:18.800 --> 22:23.720
+And so you can look at the residual, basically residual energy, so that the singular values
+
+22:23.720 --> 22:25.600
+give you an indication of that.
+
+22:25.600 --> 22:32.840
+But now we're applying this to determine which of the layers of our network we want
+
+22:32.840 --> 22:38.800
+to apply SVD2, I thought it sounds circular here.
+
+22:38.800 --> 22:43.000
+Now it's not really a witch layer, so every layer you probably want to decompose, in
+
+22:43.000 --> 22:49.000
+terms of all layers should have some redundancy in them, but some more than others.
+
+22:49.000 --> 22:51.440
+Sometimes you have a neural network layer that is very redundant.
+
+22:51.440 --> 22:54.480
+It almost didn't learn any useful features.
+
+22:54.480 --> 22:58.400
+Sometimes you can even completely cut out layers out of the network, right?
+
+22:58.400 --> 23:02.400
+Especially residual networks that happen sometimes, if they're very deep.
+
+23:02.400 --> 23:07.520
+So it's really, what you want to do is try to figure out what the prune ratio is for
+
+23:07.520 --> 23:08.520
+each of the layers.
+
+23:08.520 --> 23:10.840
+So for each layer, how much should I reduce it?
+
+23:10.840 --> 23:15.480
+Yeah, and so you're applying this layer by layer, but in order to determine these prune
+
+23:15.480 --> 23:20.960
+ratios, you need to be looking across different layers to try to get at what the redundancy
+
+23:20.960 --> 23:27.520
+is of a given layer, as opposed to within layers independent of the other layers.
+
+23:27.520 --> 23:28.520
+Is that right?
+
+23:28.520 --> 23:29.520
+Yeah, sort of.
+
+23:29.520 --> 23:30.520
+Yeah.
+
+23:30.520 --> 23:34.440
+And sometimes you can look at the layers independently, but it's definitely better to look
+
+23:34.440 --> 23:38.040
+somehow at the data distributions of each of the layers.
+
+23:38.040 --> 23:42.080
+And you're most better off starting at the start of the network, putting that one first
+
+23:42.080 --> 23:46.560
+seeing what effect it has on the whole network, and then doing it iteratively from the start
+
+23:46.560 --> 23:47.560
+to the end of the network.
+
+23:47.560 --> 23:48.560
+Yeah, okay.
+
+23:48.560 --> 23:49.560
+Got it.
+
+23:49.560 --> 23:50.560
+Yeah.
+
+23:50.560 --> 23:54.600
+Okay, so that's center factorization, and then there's channel pruning.
+
+23:54.600 --> 23:57.200
+Yeah, that's a channel pruning is basically the same idea.
+
+23:57.200 --> 24:03.560
+So except for you don't do any factorization, would you say, hey, which channels from a
+
+24:03.560 --> 24:06.080
+network can I safely remove?
+
+24:06.080 --> 24:09.680
+So I mean, every network is going to have some redundant channels.
+
+24:09.680 --> 24:15.720
+If you look at a standard rest next architecture from PyTorch, for example, you'll find that
+
+24:15.720 --> 24:20.920
+some of the layers in there, you can remove half of the features and not decrease your performance
+
+24:20.920 --> 24:21.920
+at all.
+
+24:21.920 --> 24:24.600
+So networks generally have a lot of channels that are useless.
+
+24:24.600 --> 24:29.160
+And so when we're talking about channels, we're talking about the width of the network essentially
+
+24:29.160 --> 24:30.160
+at the demo.
+
+24:30.160 --> 24:31.160
+Yeah, yeah, exactly.
+
+24:31.160 --> 24:33.160
+Yeah, so input and output channels, right?
+
+24:33.160 --> 24:39.040
+So each residual block, for example, has like 64 and 28 channels, and then a lot of
+
+24:39.040 --> 24:42.760
+those can be removed without losing any accuracy or your network.
+
+24:42.760 --> 24:50.240
+And so what are the kind of practices for determining which of those can be removed?
+
+24:50.240 --> 24:55.480
+Is it kind of a most significantly significant ordering, and you can just kind of draw lines
+
+24:55.480 --> 25:00.360
+somewhere and see how the network performs, or do you have to look at it on a channel
+
+25:00.360 --> 25:06.240
+by channel basis to see what the importance of a given channel is?
+
+25:06.240 --> 25:09.080
+Yeah, there's a few different indications.
+
+25:09.080 --> 25:13.560
+So you can look at the weight magnitude of each of the, let's say you want to have
+
+25:13.560 --> 25:18.600
+prune an input channel and you want to prune, let's say, 10 out of 128, and you can just
+
+25:18.600 --> 25:23.600
+find the ones that in terms of magnitude, the weights of the input channels, the lowest
+
+25:23.600 --> 25:29.000
+value, you prune those, those are generally the ones that are less, less, less important.
+
+25:29.000 --> 25:34.400
+There's some ways of calculating the sensitivity of each of the input channels based on the
+
+25:34.400 --> 25:40.200
+Hessian, or like a recent paper called eigendamage, does this based on like a chronic
+
+25:40.200 --> 25:41.200
+factorization?
+
+25:41.200 --> 25:42.200
+eigendamage, yeah.
+
+25:42.200 --> 25:45.440
+That's a great paper name.
+
+25:45.440 --> 25:51.040
+Yeah, it's an ICML paper from this year, it's a really cool paper, it's definitely recommended
+
+25:51.040 --> 25:52.040
+to read.
+
+25:52.040 --> 25:58.040
+So this looks at the sensitivity function, so basically you calculate the Hessian of the
+
+25:58.040 --> 26:01.640
+illustration, and it says, okay, which ones are more important or which ones are less
+
+26:01.640 --> 26:02.640
+important, right?
+
+26:02.640 --> 26:04.840
+And then the least important ones you throw away.
+
+26:04.840 --> 26:11.440
+And so you're throwing away these various channels, you made a comment about if you want
+
+26:11.440 --> 26:18.960
+to throw away 10 out of your 128, are you generally starting with some idea of the number
+
+26:18.960 --> 26:25.040
+of channels you want to throw away, and then kind of testing the, so starting with an
+
+26:25.040 --> 26:30.640
+idea of the number, then determining of the, which do you throw away to get to that number
+
+26:30.640 --> 26:35.320
+and then testing performance, and then just kind of iterating that loop to determine
+
+26:35.320 --> 26:39.880
+what the best number is, or how many you can get away with throwing away.
+
+26:39.880 --> 26:45.600
+Yeah, basically like that, or you could take this AMC approach, for example, to automatically
+
+26:45.600 --> 26:49.880
+with reinforcement learning, figure out what the prune ratios are of the layer, you can
+
+26:49.880 --> 26:55.200
+make it dependent on the sensitivity metric that I just mentioned, there's some different
+
+26:55.200 --> 26:56.200
+ways.
+
+26:56.200 --> 26:58.720
+So generally, how you do it, as you see now, let's test this out.
+
+26:58.720 --> 27:01.840
+I want to compress my model by a factor two, right?
+
+27:01.840 --> 27:06.000
+And then the algorithm automatically finds, or finds in some way how to set the prune ratios
+
+27:06.000 --> 27:11.000
+for each of the layers, such that I guess to a latency reduction of save effect of two.
+
+27:11.000 --> 27:16.000
+And then you take that, and then you remove those channels, make a model smaller, and it's
+
+27:16.000 --> 27:17.320
+going to be two times smaller.
+
+27:17.320 --> 27:19.640
+Yeah, yeah.
+
+27:19.640 --> 27:24.600
+And so you mentioned that we're not quite at the point where, you know, we've got kind
+
+27:24.600 --> 27:33.880
+of auto compression for these networks, and yet it sounds like a very kind of iterative
+
+27:33.880 --> 27:38.840
+process that we could, you know, apply automatically to networks.
+
+27:38.840 --> 27:42.440
+What's really in the way of doing that?
+
+27:42.440 --> 27:44.800
+Yeah, that's a great question.
+
+27:44.800 --> 27:51.080
+I think just the literature in compression is just very recent and very new.
+
+27:51.080 --> 27:56.920
+We have to figure out like a proper relationship between, for example, what type of error do
+
+27:56.920 --> 28:01.040
+we introduce in the network when we compress a layer?
+
+28:01.040 --> 28:04.000
+And if we look at that error, how does it propagate over the rest of the network, right?
+
+28:04.000 --> 28:07.000
+How does it leads to a loss at the end of the network?
+
+28:07.000 --> 28:12.160
+Because generally, for example, you can compress a layer and exactly figure out how to compress
+
+28:12.160 --> 28:17.360
+the layer and minimize the residual error that you get when doing so.
+
+28:17.360 --> 28:20.920
+But sometimes errors are very impactful at the end of the network, right?
+
+28:20.920 --> 28:22.680
+And sometimes errors are not.
+
+28:22.680 --> 28:27.000
+And trying to figure these things out, I don't think that has been sensibly done yet to
+
+28:27.000 --> 28:29.640
+really solve this issue of how to do this automatically.
+
+28:29.640 --> 28:36.640
+And so maybe asking you a different way, if, you know, let's say compute wasn't an issue
+
+28:36.640 --> 28:41.440
+and obviously it always is and that's a big part of the challenge, but let's imagine
+
+28:41.440 --> 28:45.880
+a world where compute was free, you know, it sounds like what we're doing here is just
+
+28:45.880 --> 28:50.960
+kind of, you know, a big loop of loop of loops kind of thing, it could be done iteratively
+
+28:50.960 --> 28:53.280
+and you could reinforce it.
+
+28:53.280 --> 28:58.160
+And so do we have any kind of intuition for, you know, if we started with some kind of
+
+28:58.160 --> 29:05.800
+reasonable, you know, reasonable defaults or something for a given class of network,
+
+29:05.800 --> 29:12.240
+like what the, you know, the ratio between the brute force compute that we would use versus
+
+29:12.240 --> 29:16.200
+the compute we would use if we take a more reasoned approach.
+
+29:16.200 --> 29:21.800
+Yeah, yeah, I mean, a completely brute force, which is be a prune every channel, a fine tune
+
+29:21.800 --> 29:24.640
+for complete epoch for every pruning that you do.
+
+29:24.640 --> 29:29.160
+And yeah, I mean, what skill do you want it? I think you can, I can create an algorithm
+
+29:29.160 --> 29:36.600
+for you that's going to take like a hundred million years to do this and or cost you a million
+
+29:36.600 --> 29:37.600
+euros.
+
+29:37.600 --> 29:43.840
+But hey, if I can have this thing running for a hundred million years and it only costs
+
+29:43.840 --> 29:46.360
+me a million euros, that sounds like a pretty good deal.
+
+29:46.360 --> 29:51.720
+We're going to do it on a very efficient Qualcomm chip there.
+
+29:51.720 --> 29:56.600
+Yeah, I have no idea about this question, sorry.
+
+29:56.600 --> 29:57.600
+Yeah, yeah, yeah.
+
+29:57.600 --> 29:58.600
+Okay.
+
+29:58.600 --> 29:59.600
+No good intuition here.
+
+29:59.600 --> 30:04.720
+Yeah, I guess, you know, I'm trying to get at like where the, you know, the intuition
+
+30:04.720 --> 30:13.280
+is in this process that we just don't know how to encode versus, you know, what is just
+
+30:13.280 --> 30:19.520
+kind of researchers and data scientists applying, you know, wrote lead that the computer
+
+30:19.520 --> 30:24.720
+could do itself. And I don't feel like I've fully captured like what the intuitive process
+
+30:24.720 --> 30:29.800
+is here that, you know, requires us to manually do this.
+
+30:29.800 --> 30:34.560
+Yeah, I also don't know yet to be 100% honest.
+
+30:34.560 --> 30:37.680
+So I think parts of this can definitely be be automated.
+
+30:37.680 --> 30:40.640
+And they're like a set, for example, this, this aim sees automatic reinforcement learning
+
+30:40.640 --> 30:43.000
+based algorithm is marshy automating it, right?
+
+30:43.000 --> 30:44.000
+Right.
+
+30:44.000 --> 30:47.320
+I'll be it with a reinforcement learning algorithm that that's just trying a lot of things
+
+30:47.320 --> 30:52.920
+in a smart way, rather than as having a proper understanding of what it means for a layer
+
+30:52.920 --> 30:58.720
+to, to add a certain amount of information to your, to your, to your presentation, for
+
+30:58.720 --> 31:04.800
+example, or how much expressive power that doesn't, doesn't neural network layer or like
+
+31:04.800 --> 31:10.600
+group of layers need to have to really do the job that it needs to do, right?
+
+31:10.600 --> 31:11.600
+Mm-hmm.
+
+31:11.600 --> 31:14.800
+These are all very, very good sport questions and deep learning at the moment I feel.
+
+31:14.800 --> 31:15.800
+Yeah, yeah.
+
+31:15.800 --> 31:21.920
+Well, I feel like deep learning there, you know, even before we get to compression, deep
+
+31:21.920 --> 31:25.680
+learning has a lot of unexplored issues and we're, we're managing to figure it out and
+
+31:25.680 --> 31:27.440
+automate a lot of it.
+
+31:27.440 --> 31:32.360
+Anyway, so those are, that's kind of the compression side of things.
+
+31:32.360 --> 31:38.160
+And we, you know, let's, let's walk through quantization in the same way.
+
+31:38.160 --> 31:46.960
+So quantization is, what, you gave us a summary earlier, essentially trying to reduce the
+
+31:46.960 --> 31:51.480
+number of bits we're using in each of these channels, right, as opposed to removing channels,
+
+31:51.480 --> 31:53.080
+now we're moving bits per channels.
+
+31:53.080 --> 31:55.160
+Is that a fair way to look at it?
+
+31:55.160 --> 32:01.520
+Yeah, in essence, you're, you're reducing the amount of bits of your weights, no network,
+
+32:01.520 --> 32:03.160
+and you're doing it for the calculations.
+
+32:03.160 --> 32:08.240
+So instead of doing calculations or floating points, 32, you could do your calculations
+
+32:08.240 --> 32:09.640
+in int8, right?
+
+32:09.640 --> 32:15.960
+And then you're like four times more energy efficient and it comes to memory transfer
+
+32:15.960 --> 32:19.840
+and you're going to be 16 times more efficient when it comes to doing the actual calculations
+
+32:19.840 --> 32:20.840
+itself.
+
+32:20.840 --> 32:25.760
+So just by going from floating point 32, where you're doing all the calculations, if
+
+32:25.760 --> 32:32.400
+you have some kind of MAC array, let's eat it, like unscience or science or whatever,
+
+32:32.400 --> 32:35.520
+then they're going to build up more efficient, which is one of the most impactful things
+
+32:35.520 --> 32:39.640
+that you can do to make a network run more efficiently on devices.
+
+32:39.640 --> 32:41.320
+And that might be easier.
+
+32:41.320 --> 32:42.320
+Okay, yeah.
+
+32:42.320 --> 32:50.120
+And at my sense of where things are with regard to quantization is that a few years ago,
+
+32:50.120 --> 32:58.960
+when I talked to folks, I think my interview with Shibos and Gupta, a very early one,
+
+32:58.960 --> 33:06.440
+he was talking about his experiences at Baidu building their neural machine translation
+
+33:06.440 --> 33:13.280
+system and they were experimenting with quantization and it was a very manual process, right?
+
+33:13.280 --> 33:18.280
+They had to spend a lot of time figuring out where in their networks, they wanted to
+
+33:18.280 --> 33:23.760
+apply quantization, how to do it without introducing too much noise, all that kind of thing.
+
+33:23.760 --> 33:29.800
+My impression is that over the span of a couple of years, we've come a long way from
+
+33:29.800 --> 33:41.000
+that and a lot of cases, the infrastructure and the libraries, on top of that infrastructure,
+
+33:41.000 --> 33:46.560
+TensorFlow, for example, gives us some of that stuff for free.
+
+33:46.560 --> 33:53.920
+We can flip a bit and quantize our network and achieve reasonable performance, is that
+
+33:53.920 --> 33:54.920
+the case?
+
+33:54.920 --> 34:01.720
+And if so, in a qualified way, what's the envelope around that qualification?
+
+34:01.720 --> 34:02.720
+What does that work?
+
+34:02.720 --> 34:03.720
+When doesn't it work?
+
+34:03.720 --> 34:09.520
+Yeah, so that's actually a very, very interesting question, something that we've been really deeply
+
+34:09.520 --> 34:10.520
+looking into.
+
+34:10.520 --> 34:13.880
+Yes, some networks can be very easily quantized.
+
+34:13.880 --> 34:20.040
+If you pick almost all of the ImageNet train networks, even though ones that are like
+
+34:20.040 --> 34:24.360
+an okay detection or semantic segmentation on top of the base network, many of those
+
+34:24.360 --> 34:28.680
+can just be a bit quantized with your standard TensorFlow tools, sometimes you have to find
+
+34:28.680 --> 34:32.440
+you in a little bit with your operations in place and train the network, but generally
+
+34:32.440 --> 34:34.280
+those, those are okay.
+
+34:34.280 --> 34:37.440
+And some networks seem to have a lot of issues.
+
+34:37.440 --> 34:41.520
+You can look at mobile nets, for example, so most of the mobile nets out there, like
+
+34:41.520 --> 34:46.640
+mobile nets V2, even if V3 version, if you just not easily quantize it with the TensorFlow
+
+34:46.640 --> 34:48.800
+operations, everything breaks.
+
+34:48.800 --> 34:52.280
+You could like 0% accuracy.
+
+34:52.280 --> 34:57.800
+And sometimes, so we've also looked at things like ImageToImageNetworks, networks that
+
+34:57.800 --> 35:04.640
+do, for example, like things like style, transfer, or super resolution, or have these
+
+35:04.640 --> 35:05.640
+types of networks.
+
+35:05.640 --> 35:10.240
+And then sometimes in network, these networks, you can't just eat a bit quantize, no problem
+
+35:10.240 --> 35:11.240
+with all.
+
+35:11.240 --> 35:15.240
+And some networks don't, at all.
+
+35:15.240 --> 35:18.680
+And it's very difficult to put our finger on why exactly that is.
+
+35:18.680 --> 35:26.040
+And so do we have any kind of intuition at all, or are we still, you know, we recognize
+
+35:26.040 --> 35:32.280
+that there's this distinction between the different types of networks, but really have no idea
+
+35:32.280 --> 35:34.240
+what or why it's happening.
+
+35:34.240 --> 35:40.120
+Yeah, so in our recent paper called Data Frequentization, we've investigated a lot of these issues
+
+35:40.120 --> 35:44.240
+on what, why some networks are very difficult to quantize.
+
+35:44.240 --> 35:49.160
+One of the biggest issues generally has to do with the ranges that you send.
+
+35:49.160 --> 35:53.480
+So you have to create some kind of quantization grids where you say, these are the values
+
+35:53.480 --> 35:57.680
+I'm going to represent with the 8 bits that I have, let's say.
+
+35:57.680 --> 36:01.360
+Now for this grid, you have to choose like a minimum and a maximum, right?
+
+36:01.360 --> 36:05.680
+And generally everything, all of the points in between are equidistantly spaced, and those
+
+36:05.680 --> 36:10.080
+are the values that you can represent, both for your weight center activations.
+
+36:10.080 --> 36:16.200
+Now, how you choose that range, the minimum and the maximum is incredibly important.
+
+36:16.200 --> 36:20.920
+For example, you could have some outlier with weights, and those weights then determine
+
+36:20.920 --> 36:24.600
+what your minimum max could be, if you just set your minimum max of the quantization
+
+36:24.600 --> 36:28.960
+range to the exact minimum of your weight tensor, there could be one big outlier somewhere,
+
+36:28.960 --> 36:32.200
+and that could ruin the representative power for the rest of your weights.
+
+36:32.200 --> 36:37.160
+So a lot of, you can only guy with a few points that are representable in the weights that
+
+36:37.160 --> 36:41.960
+are small, and then the big one is taking a lot of the bandwidth.
+
+36:41.960 --> 36:46.880
+So a lot of issues in quantization come from that, the fact that you set your ranges
+
+36:46.880 --> 36:49.720
+in properly.
+
+36:49.720 --> 36:54.600
+And the second one is that while you're quantizing, is that you can sometimes quantize
+
+36:54.600 --> 36:57.120
+in a not-so-smart way.
+
+36:57.120 --> 37:01.040
+For example, you could have a bias in your quantization, especially in mobile nets, if you have
+
+37:01.040 --> 37:06.040
+like a three by three filter that maps an input to the output.
+
+37:06.040 --> 37:11.560
+So by accident, you quantize all the values of your three by three filter down, then your
+
+37:11.560 --> 37:15.480
+average output of that channel is going to be lower, and you're going to incur a lot
+
+37:15.480 --> 37:19.480
+more loss than if everything was like randomly flipped.
+
+37:19.480 --> 37:22.360
+So those are like two major issues when it comes to quantization.
+
+37:22.360 --> 37:27.440
+Does the data free quantization paper that you referenced, does it propose an approach
+
+37:27.440 --> 37:29.320
+for addressing these issues?
+
+37:29.320 --> 37:30.320
+Yeah, definitely.
+
+37:30.320 --> 37:34.080
+Yeah, so there's multiple things in there that we've looked into.
+
+37:34.080 --> 37:40.800
+Basically, the data free quantization paper was born out of this idea that many methods
+
+37:40.800 --> 37:44.960
+that help with quantization require a lot of effort, right?
+
+37:44.960 --> 37:49.400
+So generally, how this works is that somebody tells you, okay, change this neural network
+
+37:49.400 --> 37:53.040
+architecture to this architecture, and then it's easier to quantize.
+
+37:53.040 --> 37:57.200
+Or do a lot of fine tuning on top of your architecture and a lot of training with a lot
+
+37:57.200 --> 37:59.760
+of hyperparameters, et cetera.
+
+37:59.760 --> 38:05.560
+Now if you want to make sure that like 8-bit networks can be run everywhere, it's very important
+
+38:05.560 --> 38:07.640
+that this is as hassle-free as possible, right?
+
+38:07.640 --> 38:12.080
+If I'm a cloud provider and I want to run my customers' models in 8 bits, I don't want
+
+38:12.080 --> 38:15.920
+to require them that they're like, they got their PhDs in quantization just so that they
+
+38:15.920 --> 38:16.920
+can work more efficient models.
+
+38:16.920 --> 38:21.520
+You just want to make something that's basically you snap your finger and then have your
+
+38:21.520 --> 38:23.320
+networks gone, right?
+
+38:23.320 --> 38:25.480
+And it's like two times smaller.
+
+38:25.480 --> 38:29.080
+So that's kind of the idea of the paper, and then we said like, what can we do to make
+
+38:29.080 --> 38:30.080
+that even further, right?
+
+38:30.080 --> 38:32.400
+Can we do this without using any data at all?
+
+38:32.400 --> 38:36.800
+So many methods use data to set the ranges, et cetera.
+
+38:36.800 --> 38:40.240
+And then the idea of our paper is like, okay, what can we do to make sure that this is
+
+38:40.240 --> 38:41.240
+as easy as possible?
+
+38:41.240 --> 38:44.800
+Because you don't even have to give data to the algorithm to quantize it.
+
+38:44.800 --> 38:50.400
+And when you say give data to it, meaning the quantization happens as part of a training
+
+38:50.400 --> 38:54.800
+loop or process, or is there some other process that is being applied?
+
+38:54.800 --> 38:56.640
+Yeah, it's very often that, right?
+
+38:56.640 --> 39:00.440
+So you take like a hundred batches, you run them through the network, you get some idea
+
+39:00.440 --> 39:04.880
+of the activation ranges, right, that you get, that you get, and the activation ranges
+
+39:04.880 --> 39:10.040
+help you inform what your mini or max setting is for the tenser that you're quantizing.
+
+39:10.040 --> 39:11.640
+It's basically that idea.
+
+39:11.640 --> 39:15.160
+Yeah, so give a couple of hundred batches to the algorithm to figure out those ranges.
+
+39:15.160 --> 39:17.320
+Or to even find you in a little bit, right?
+
+39:17.320 --> 39:22.520
+And so this paper proposes a way to allow you to skip that.
+
+39:22.520 --> 39:27.320
+And avoid an approach that requires that you do this with regard to data.
+
+39:27.320 --> 39:29.120
+Exactly, yeah.
+
+39:29.120 --> 39:32.880
+And so the complete data free part is more of like a mental exercise.
+
+39:32.880 --> 39:36.720
+It's very interesting for the, for, for, for like a paper, and we were able to get really
+
+39:36.720 --> 39:40.920
+good results like state-of-the-art results on compressing things like mobile nets or some
+
+39:40.920 --> 39:45.320
+object detection networks with even that hardware strength in place.
+
+39:45.320 --> 39:50.040
+Now in practice, you can often just use a couple of batches and improve, improve your quantization
+
+39:50.040 --> 39:51.040
+performance.
+
+39:51.040 --> 39:56.720
+But basically the algorithms we, we put in the paper can be used for either case.
+
+39:56.720 --> 39:59.640
+The most important part is that you don't have to do any fine tuning.
+
+39:59.640 --> 40:04.480
+So this is the difference between like getting a network quantized within an hour or having
+
+40:04.480 --> 40:08.680
+to spend like a couple of weeks with like an expert in the field to make sure that your
+
+40:08.680 --> 40:11.400
+algorithms quantize properly.
+
+40:11.400 --> 40:13.360
+And so how do the algorithms work?
+
+40:13.360 --> 40:18.560
+Is it multiple algorithms or is there one algorithm?
+
+40:18.560 --> 40:24.360
+Yeah, there's a couple that that we kind of stitch together to form like a complete quantization
+
+40:24.360 --> 40:25.360
+pipeline.
+
+40:25.360 --> 40:30.720
+So for this paper, one of the things we do is equalization.
+
+40:30.720 --> 40:33.400
+So remember, remember these ranges that I talked about, right?
+
+40:33.400 --> 40:36.200
+That sometimes these outliers can cause some of the issues.
+
+40:36.200 --> 40:37.200
+Right.
+
+40:37.200 --> 40:42.520
+Now, for networks that are Raylu or Kraylu-based, what you can do, you can actually move scaling
+
+40:42.520 --> 40:44.080
+factors around the network.
+
+40:44.080 --> 40:49.280
+So for layer one, for layer one, if you have, if you look at the output, you can multiply
+
+40:49.280 --> 40:51.200
+that with a certain scaling factor.
+
+40:51.200 --> 40:55.120
+And then for the next layer, which is the, which takes the, as input, the output of a previous
+
+40:55.120 --> 40:59.400
+layer, you can multiply it with one divided by that scaling factor and you get mathematically
+
+40:59.400 --> 41:00.920
+exactly the same network.
+
+41:00.920 --> 41:06.400
+And by moving these scaling factors around, we can make the general min-max ranges.
+
+41:06.400 --> 41:10.800
+So these, these big ranges, we can make them smaller, such that the network is easier
+
+41:10.800 --> 41:11.800
+to quantize.
+
+41:11.800 --> 41:20.800
+And so these min-max ranges, are you applying them on a, a tensor by tensor basis, or is it
+
+41:20.800 --> 41:22.520
+across the entire network?
+
+41:22.520 --> 41:23.520
+Yeah.
+
+41:23.520 --> 41:26.640
+So there's multiple ways of doing this.
+
+41:26.640 --> 41:30.880
+So depending on the hardware that you're looking at, you can do it in different ways.
+
+41:30.880 --> 41:34.720
+But generally, there's two major categories that you do for quantization.
+
+41:34.720 --> 41:36.360
+One is that you do it per tensor.
+
+41:36.360 --> 41:40.640
+So each layer has its own set of min-max ranges.
+
+41:40.640 --> 41:44.760
+So that that in turn translates to its own set of, offset vectors when you do all the
+
+41:44.760 --> 41:45.760
+calculations.
+
+41:45.760 --> 41:51.520
+But setting that aside, you can do it per tensor or something that was more recently introduced
+
+41:51.520 --> 41:55.120
+by a guy called Ragooh-Krishnamurti.
+
+41:55.120 --> 42:00.280
+And he introduced, sorry, he's from Google, he introduced per channel quantization.
+
+42:00.280 --> 42:03.280
+So each individual channel has its own min-max range.
+
+42:03.280 --> 42:04.800
+And that's all some of the issues.
+
+42:04.800 --> 42:06.280
+Okay.
+
+42:06.280 --> 42:11.720
+So presumably requiring a more complex training process because you have a lot more of these
+
+42:11.720 --> 42:15.880
+offsets to keep track of.
+
+42:15.880 --> 42:20.800
+I think the larger drawback of it, is that not all hardware supports it?
+
+42:20.800 --> 42:25.200
+So you have to make sure that your hardware supports, and the kernels for that as well,
+
+42:25.200 --> 42:29.840
+supports the calculation of per channel min-max ranges.
+
+42:29.840 --> 42:31.640
+And not all hardware does that.
+
+42:31.640 --> 42:32.640
+Okay.
+
+42:32.640 --> 42:38.960
+So that dependent on hardware as opposed to the training process or something else that
+
+42:38.960 --> 42:42.800
+can be taking care of and software.
+
+42:42.800 --> 42:47.040
+I mean, if you run things on like a CPU, of course, you can see me at everything on the
+
+42:47.040 --> 42:48.560
+CPU and we're in a efficient lane.
+
+42:48.560 --> 42:54.600
+But if you have like dedicated hardware for inference, you're doing low-level operations
+
+42:54.600 --> 43:02.400
+and pushing everything down to those low-level hardware modules for speed, then you're
+
+43:02.400 --> 43:04.880
+kind of stuck with what they're able to do.
+
+43:04.880 --> 43:05.880
+Exactly.
+
+43:05.880 --> 43:06.880
+Yes.
+
+43:06.880 --> 43:07.880
+Okay.
+
+43:07.880 --> 43:08.880
+So that's one possibility.
+
+43:08.880 --> 43:14.240
+And another thing we do in the paper is that we correct for this bias that I mentioned
+
+43:14.240 --> 43:15.240
+before.
+
+43:15.240 --> 43:20.800
+So sometimes because of rounding issues, you have to choose either rounding up or am I rounding
+
+43:20.800 --> 43:24.680
+down, each of the weight factors.
+
+43:24.680 --> 43:29.080
+You can kind of correct for some bias that you might introduce in doing that.
+
+43:29.080 --> 43:32.120
+And that's an algorithm we dubbed bias correction.
+
+43:32.120 --> 43:38.200
+Those two together really make most of the networks that we've tried make them very easy
+
+43:38.200 --> 43:40.200
+to quantize.
+
+43:40.200 --> 43:41.200
+Okay.
+
+43:41.200 --> 43:50.160
+And are there any kind of dependencies on the training approach you're taking in terms
+
+43:50.160 --> 43:56.760
+of, you know, things like, you know, whether you're applying dropout or like you're learning
+
+43:56.760 --> 44:00.800
+rate, you know, if you're doing cyclical learning rates or anything like that, or is
+
+44:00.800 --> 44:03.560
+this all independent of the way you train your network?
+
+44:03.560 --> 44:04.560
+Yeah.
+
+44:04.560 --> 44:05.760
+I think it's completely independent.
+
+44:05.760 --> 44:09.280
+So this approach is a state of free quantization approach.
+
+44:09.280 --> 44:12.720
+In essence, you can just take any network.
+
+44:12.720 --> 44:16.360
+You can equalize it if there's like really impregnated in it.
+
+44:16.360 --> 44:19.880
+And then the bias correction you can always apply.
+
+44:19.880 --> 44:21.880
+And that should give you better quantization performance.
+
+44:21.880 --> 44:23.200
+And we do it without any fine tuning.
+
+44:23.200 --> 44:24.480
+So there's no hyperparameters.
+
+44:24.480 --> 44:27.120
+You just, it's like a simple API call.
+
+44:27.120 --> 44:29.200
+You just throw your model to like an API call.
+
+44:29.200 --> 44:32.520
+You optimize it for quantization and then you get a quantized network.
+
+44:32.520 --> 44:37.520
+It is hardware independent or are there dependencies on the hardware with this method?
+
+44:37.520 --> 44:39.480
+Nope, not at all.
+
+44:39.480 --> 44:42.160
+So it's all for a tensor quantization that we do in a paper.
+
+44:42.160 --> 44:46.360
+So that's implemented in every hardware that I know of.
+
+44:46.360 --> 44:51.400
+So yeah, that's that's optimizes it for any any architecture.
+
+44:51.400 --> 44:57.240
+And so what kind of results did you see relative to other ways that you might quantize?
+
+44:57.240 --> 45:02.120
+Yeah, so one of the problems that you have, for example, with mobile SV2 is that you
+
+45:02.120 --> 45:08.080
+actually get no performance after naive quantization with like T of light, for example.
+
+45:08.080 --> 45:12.160
+And we gain in our paper almost all of the performance.
+
+45:12.160 --> 45:16.720
+So usually go from like 71.7% down to zero.
+
+45:16.720 --> 45:17.720
+We go to 71.2%.
+
+45:17.720 --> 45:25.040
+So that's only like half the percent loss when going from flow 32 to int 8.
+
+45:25.040 --> 45:29.360
+And that's of course like going from flow 32 to int 8 is tremendous gain in terms of power
+
+45:29.360 --> 45:32.520
+efficiency and in terms of latency.
+
+45:32.520 --> 45:42.960
+And to what degree it is that result generalize to other models or is it just you know, just
+
+45:42.960 --> 45:49.560
+working for mobile net V2, you know, sufficiently applicable that you think it's important.
+
+45:49.560 --> 45:54.840
+I think any so we we we've also not papers in gains and residual net architectures.
+
+45:54.840 --> 46:00.320
+We've seen it on multiple tasks like object detection, semantic segmentation.
+
+46:00.320 --> 46:06.200
+So we really because when you're doing equalization, your network stays mathematically equivalent.
+
+46:06.200 --> 46:08.400
+So there's definitely no loss.
+
+46:08.400 --> 46:11.600
+And it can only help for quantization.
+
+46:11.600 --> 46:15.760
+Similarly for for the bias correction, there's no negative drawbacks to this.
+
+46:15.760 --> 46:21.160
+So in most settings, it will help you rather than there's like no real probability that
+
+46:21.160 --> 46:22.160
+it's going to hurt you.
+
+46:22.160 --> 46:26.600
+And so you can always test it and I think in many of the cases we've seen this far, this
+
+46:26.600 --> 46:27.600
+re-helps a lot.
+
+46:27.600 --> 46:28.600
+Awesome.
+
+46:28.600 --> 46:33.240
+So, you know, given this paper, which is relatively recently and some of the other things that
+
+46:33.240 --> 46:37.840
+we've discussed, you know, in terms of where the field is overall, what are you most excited
+
+46:37.840 --> 46:38.840
+about?
+
+46:38.840 --> 46:41.040
+Where do you see this all going?
+
+46:41.040 --> 46:43.920
+The whole model efficiency at point you think, you mean?
+
+46:43.920 --> 46:48.320
+Yeah, yeah, just in terms of our ability to, you know, take these models which are getting
+
+46:48.320 --> 46:54.280
+bigger and bigger and have them work on devices which we want to last longer and longer from
+
+46:54.280 --> 46:58.560
+the battery perspective and have user experiences that are faster and faster.
+
+46:58.560 --> 47:03.680
+Yeah, I think all of this stuff on model efficiency is like key for the adaptation of neural
+
+47:03.680 --> 47:07.560
+networks in many practical applications, right?
+
+47:07.560 --> 47:13.240
+I think on the cell phone, we're always bound by power and amount of power that you can use.
+
+47:13.240 --> 47:15.840
+Nobody wants to have their battery ranges in half an hour, right?
+
+47:15.840 --> 47:23.600
+We all expect our phones to last the whole day and the same goes for robotics and even
+
+47:23.600 --> 47:30.120
+for cloud players, if you could reduce your amount of energy that you're using by factored
+
+47:30.120 --> 47:33.880
+too, that would be a tremendous decrease in the energy bill that you're paying.
+
+47:33.880 --> 47:40.560
+So, I think a lot of our performance of algorithms is very restrained by, I mean, in practical
+
+47:40.560 --> 47:43.880
+settings, it's constrained by how efficient our algorithms are.
+
+47:43.880 --> 47:47.440
+So, the more efficient we can make our algorithms, from a compression point of view and a
+
+47:47.440 --> 47:51.640
+quantization point of view, the higher the adaptation of these algorithms will be.
+
+47:51.640 --> 47:56.840
+We all know these numbers also about how the training and network, for example, how training
+
+47:56.840 --> 48:03.200
+and network is like neural architecture search costs like the same CO2 output of 10 jumbo
+
+48:03.200 --> 48:07.680
+jets flying back and forth, like 10 or two trips or something like that.
+
+48:07.680 --> 48:12.080
+If you can do quantized training, like training in 8 bits, we can reduce that power consumption
+
+48:12.080 --> 48:13.080
+by a factor 4.
+
+48:13.080 --> 48:17.680
+So, I think all these things are crucial for the adaptation of deep learning.
+
+48:17.680 --> 48:23.000
+And are there specific directions that you're excited about, either in your research or
+
+48:23.000 --> 48:28.320
+in the research that other folks are doing that you think are particularly promising in
+
+48:28.320 --> 48:29.840
+helping us get there?
+
+48:29.840 --> 48:30.840
+Yeah, definitely.
+
+48:30.840 --> 48:35.720
+One of the important trends I've been seeing in the compression literature, some things
+
+48:35.720 --> 48:45.440
+from Songhands lab or Vivian says lab at MIT, is coupling the hardware and the compression
+
+48:45.440 --> 48:48.360
+and quantization and model efficiency together.
+
+48:48.360 --> 48:54.360
+So that you can design algorithms, like deep learning algorithms specifically for hardware.
+
+48:54.360 --> 48:59.000
+And then you can totally different results if you optimize for the CPU versus if you optimize
+
+48:59.000 --> 49:03.200
+them for your GPU versus if you optimize them for like a DSP and a quantum device, for
+
+49:03.200 --> 49:04.200
+example.
+
+49:04.200 --> 49:11.520
+So, if you're looking at a CPU algorithm, because all of the calculations are that sequentially,
+
+49:11.520 --> 49:15.520
+these architectures are usually very deep and have like three by three convolutions.
+
+49:15.520 --> 49:20.880
+But if you create an algorithm that's optimized for the GPU, you generally get larger, larger
+
+49:20.880 --> 49:24.680
+layers, like five by five, seven by seven convolutions, for example.
+
+49:24.680 --> 49:29.360
+So, I think it's a really interesting trend where given the hardware that you're going
+
+49:29.360 --> 49:32.520
+to run it on, can we optimize the algorithm to run efficiently on that?
+
+49:32.520 --> 49:34.360
+I think that's really cool.
+
+49:34.360 --> 49:35.360
+Cool.
+
+49:35.360 --> 49:39.640
+So, it's a better marriage between the hardware and the algorithms that we have.
+
+49:39.640 --> 49:40.640
+Uh-huh.
+
+49:40.640 --> 49:48.400
+And hopefully, ultimately, this gets us to a point where as a model developer, I have
+
+49:48.400 --> 49:52.640
+to think less about, you know, these kinds of issues and it all just kind of works for
+
+49:52.640 --> 49:53.640
+me.
+
+49:53.640 --> 49:58.000
+Yeah, especially for quantization, I think that's very, very much in reach.
+
+49:58.000 --> 50:02.400
+So, some of my vision is that literally every neural network architecture can be run
+
+50:02.400 --> 50:03.400
+in 8 bits.
+
+50:03.400 --> 50:04.400
+Uh-huh.
+
+50:04.400 --> 50:05.400
+I think that that's very possible.
+
+50:05.400 --> 50:06.400
+Uh-huh.
+
+50:06.400 --> 50:11.320
+And currently, we're seeing almost all algorithms are still being run in 16 bits, right?
+
+50:11.320 --> 50:12.320
+Uh-huh.
+
+50:12.320 --> 50:16.120
+So, getting that to 8 bits would be like two times more power efficient than many cases.
+
+50:16.120 --> 50:19.440
+And then we can run a lot more AI in our phones.
+
+50:19.440 --> 50:20.440
+Awesome.
+
+50:20.440 --> 50:21.440
+Awesome.
+
+50:21.440 --> 50:25.440
+Well, Simon, thank you so much for taking the time to chat with us about what you're
+
+50:25.440 --> 50:26.440
+up to.
+
+50:26.440 --> 50:27.440
+Yeah.
+
+50:27.440 --> 50:28.440
+Thanks for having me.
+
+50:28.440 --> 50:30.720
+It was great explaining all the compression and quantization stuff we've been working
+
+50:30.720 --> 50:31.720
+on.
+
+50:31.720 --> 50:32.720
+Absolutely.
+
+50:32.720 --> 50:33.720
+Absolutely.
+
+50:33.720 --> 50:34.720
+Thank you.
+
+50:34.720 --> 50:35.720
+All right, everyone.
+
+50:35.720 --> 50:38.600
+That's our show for today.
+
+50:38.600 --> 50:43.120
+If you like what you've heard, please do us a favor and tell your friends about the show.
+
+50:43.120 --> 50:47.640
+And if you haven't already hit that subscribe button yourself, make sure you do so you don't
+
+50:47.640 --> 50:50.840
+miss any of the great episodes we've got in store for you.
+
+50:50.840 --> 50:54.600
+Thanks once again to Qualcomm for their sponsorship of today's episode.
+
+50:54.600 --> 50:58.880
+Check them out at twomolei.com slash Qualcomm.
+
+50:58.880 --> 51:02.160
+As always, thanks so much for listening and catch you next time.
+

@@ -1,0 +1,1406 @@
+WEBVTT
+
+00:00.000 --> 00:16.200
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+
+00:16.200 --> 00:21.320
+people, doing interesting things in machine learning and artificial intelligence.
+
+00:21.320 --> 00:34.240
+I'm your host Sam Charrington. In this episode of our Strada Data Conference series, we're
+
+00:34.240 --> 00:40.960
+joined by Essen Ashrough, data scientist at Pinterest. In our conversation, Essen and I discuss
+
+00:40.960 --> 00:46.880
+his presentation from the conference, diversification and recommender systems, using topical variety
+
+00:46.880 --> 00:52.840
+to increase user satisfaction. We cover the various experiments his team ran to explore
+
+00:52.840 --> 00:58.480
+the impact of diversification in user boards. The methodology is team used to incorporate
+
+00:58.480 --> 01:03.520
+variety into the Pinterest recommendation system, the metrics they monitored throughout the
+
+01:03.520 --> 01:07.880
+process, and how they performed sensitivity and sanity testing.
+
+01:07.880 --> 01:13.320
+Before we move on, I'd like to send a huge shout out to our friends at Capital One and
+
+01:13.320 --> 01:18.800
+Cloud era for their continued support of the podcast and their sponsorship of this series.
+
+01:18.800 --> 01:23.720
+At the NIPPS conference in Montreal in December, Capital One will be co-hosting a workshop
+
+01:23.720 --> 01:29.040
+focused on challenges and opportunities for AI and financial services, and the impact
+
+01:29.040 --> 01:35.240
+of fairness, explainability, accuracy and privacy. A call for papers is open now through
+
+01:35.240 --> 01:43.000
+October 25th. For more information or submissions, visit twimbleai.com slash C1 NIPPS. That's
+
+01:43.000 --> 01:46.840
+the letter C, the number one NIPS.
+
+01:46.840 --> 01:51.920
+Cloud era is a modern platform for machine learning and analytics optimized for the cloud
+
+01:51.920 --> 01:59.600
+that you build and deploy AI solutions at scale efficiently and securely anywhere you want.
+
+01:59.600 --> 02:05.360
+In addition, Cloud era Fast Forward Labs expert guidance helps you realize your AI future
+
+02:05.360 --> 02:11.840
+faster. To learn more, visit Cloud era's machine learning resource center at cladera.com
+
+02:11.840 --> 02:17.880
+slash ML. Now, if you're a fan of this show, you've got to love our sponsors because they
+
+02:17.880 --> 02:22.640
+help make it possible. So, please take a look at what they're up to and be sure to let
+
+02:22.640 --> 02:29.520
+them know that twimble sends you. And now, onto the show.
+
+02:29.520 --> 02:36.640
+I am here in New York City with SN Ashraf. SN is a data scientist with Pinterest. SN
+
+02:36.640 --> 02:42.920
+welcome to this week in machine learning and AI. Thanks, Sam. So, you gave a talk yesterday
+
+02:42.920 --> 02:48.440
+on the way you do recommendation systems at Pinterest. What was the specific title of
+
+02:48.440 --> 02:53.840
+the talk? So, the talk was called diversification and recommender systems and how we can use
+
+02:53.840 --> 02:59.200
+content diversity to try and increase user satisfaction. Awesome. Before we get into that,
+
+02:59.200 --> 03:04.880
+a little bit about your background, you have a PhD in physics. PhDs in physics are not
+
+03:04.880 --> 03:11.360
+unfamiliar to this podcast. There are a lot of physics PhDs in ML and AI. How did you get
+
+03:11.360 --> 03:17.560
+from physics to machine learning? Yeah. So, my background, as he said, is in physics.
+
+03:17.560 --> 03:22.640
+I used to study condensed matter physics and the physics of complex systems. So, complex
+
+03:22.640 --> 03:28.880
+systems are often systems that are kind of hard to define using simple equations and physicists,
+
+03:28.880 --> 03:33.880
+as you might know, I really love to put an equation to everything. We like to say, hey,
+
+03:33.880 --> 03:41.080
+this is how the world works. I can put that on a t-shirt. So, complex systems are often
+
+03:41.080 --> 03:46.840
+systems that have a lot of interacting, a lot of moving parts essentially. I've always
+
+03:46.840 --> 03:53.160
+been interested in those kinds of systems. A system like Pinterest is similar to that.
+
+03:53.160 --> 03:59.620
+Before that, I also studied a little bit in neural networks and worked in sort of soft
+
+03:59.620 --> 04:04.600
+matter physics, which is polymer physics, and anything, any other materials that don't
+
+04:04.600 --> 04:09.200
+behave as we might expect. And you also were an insight fellow. I know
+
+04:09.200 --> 04:17.080
+Ross and Emmanuel and some of the other folks that have gone through that program. How
+
+04:17.080 --> 04:22.640
+you made the transition into machine learning and AI? Yeah, absolutely. So, towards the end
+
+04:22.640 --> 04:26.480
+of my PhD, I started realizing that a lot of the work that I was doing was quite relevant
+
+04:26.480 --> 04:32.800
+to the stuff that people were doing out in the Bay Area. It was a great way for me to
+
+04:32.800 --> 04:39.280
+be able to transition into data science. Awesome. So, what's your focus at Pinterest?
+
+04:39.280 --> 04:45.480
+Yeah. So, at Pinterest, we have a sort of small data science team. I worked very closely
+
+04:45.480 --> 04:52.560
+with the ranking and blending team, and they essentially build what we call our main
+
+04:52.560 --> 04:57.480
+home feed. And so, when you land at Pinterest, you kind of see a set of bins, and that feed
+
+04:57.480 --> 05:02.480
+is what we call the home feed. So, what powers that feed is a set of interacting machine
+
+05:02.480 --> 05:08.200
+learning technologies. And one of our teams is responsible for kind of the ranking and
+
+05:08.200 --> 05:12.880
+the blending of a lot of that content, and I work really closely with those engineers.
+
+05:12.880 --> 05:20.880
+Okay. And so, the project that you described in your talk was on introducing diversification
+
+05:20.880 --> 05:25.000
+into that feed. What motivated you to start looking at that?
+
+05:25.000 --> 05:32.360
+Yeah. So, that's a great question. So, machine learning systems often are a burping system.
+
+05:32.360 --> 05:38.280
+Recommender systems try to say, I have this user and app, this item, and how likely is this
+
+05:38.280 --> 05:45.960
+user to engage with or to click on or to whatever your system might be with this specific
+
+05:45.960 --> 05:50.200
+item. And the interesting thing is that they don't often are at least naive or simple
+
+05:50.200 --> 05:57.560
+the recommender systems don't often think about looking at things as a set of bins.
+
+05:57.560 --> 06:02.480
+Most recommender systems try to think of stuff as a burping or a burping item basis.
+
+06:02.480 --> 06:08.320
+But we obviously as human beings can feel that if, so the example that I gave in my talk
+
+06:08.320 --> 06:14.080
+was that personally, I love using Pinterest for street art. And, you know, one of my favorite
+
+06:14.080 --> 06:19.780
+street artists is Banksy. And the recommender system can learn that I like Banksy, but what
+
+06:19.780 --> 06:24.520
+ends up happening is that rather than just giving me one Banksy pin, it ends up giving me
+
+06:24.520 --> 06:30.800
+a hundred of them. And so recommender systems say, hey, if I know what this person likes,
+
+06:30.800 --> 06:35.760
+I'm going to give you a thousand of these things. But obviously, we have the notion of
+
+06:35.760 --> 06:40.000
+diminishing returns, right? So, this is a pretty standard thing in economics where if
+
+06:40.000 --> 06:44.160
+you give me one of something, I might really like it, but by the hundred one, the additive
+
+06:44.160 --> 06:49.680
+value that you're giving me by showing me that piece of content is actually pretty low.
+
+06:49.680 --> 06:54.680
+And so that's kind of the primary motivation behind thinking about entropy or thinking
+
+06:54.680 --> 07:00.640
+about randomness and sort of diverse content diversification within recommender systems.
+
+07:00.640 --> 07:06.300
+And to maybe jump to the punchline a little bit and I'll elaborate on why, did you in
+
+07:06.300 --> 07:11.640
+fact find that diversification provided some additional lift or engagement?
+
+07:11.640 --> 07:18.040
+Yeah, absolutely. So, that's actually, I like to do that as well where I try to give
+
+07:18.040 --> 07:24.360
+away the punchline. And so, yeah, the punchline is the diversity makes users happy, right?
+
+07:24.360 --> 07:31.400
+And the reason why is that Pinterest specifically is a visual search engine, right? People come
+
+07:31.400 --> 07:35.600
+into Pinterest to discover and do what the things that they love. And so they want to be
+
+07:35.600 --> 07:40.800
+able to, they want to be introduced to a bunch of content that they can explore and browse
+
+07:40.800 --> 07:45.960
+and then kind of dive deep into the things that they really enjoy. And sometimes the things
+
+07:45.960 --> 07:49.920
+that you really find, I mean, if you think about the last time someone recommended a good
+
+07:49.920 --> 07:56.440
+book to you or a good art show to you, it often happens by chance. And the word for
+
+07:56.440 --> 08:01.160
+it is serendipity, right? And so what we want to do is we want to create serendipitous
+
+08:01.160 --> 08:06.720
+experiences on Pinterest where people come on and they're able to define those things.
+
+08:06.720 --> 08:10.040
+And when there's more diversity, that is more likely to happen.
+
+08:10.040 --> 08:18.120
+So what prompted the question was, in fact, another interview that I had with the speaker
+
+08:18.120 --> 08:25.520
+at Stratta from Reuters who looked at essentially recommendations, they were trying to determine
+
+08:25.520 --> 08:33.560
+the best articles to surface to a user in their infinite scroll redesign. So you go to
+
+08:33.560 --> 08:39.640
+an article and when you're finished with that article, you see the next article automatically.
+
+08:39.640 --> 08:45.640
+And they looked at a couple of different experiments. One was surfacing similar articles, another
+
+08:45.640 --> 08:51.920
+was surfacing dissimilar articles. And the third was surfacing articles, just top world
+
+08:51.920 --> 08:58.840
+news articles. And they found that, in fact, in their case, similar articles had the greatest
+
+08:58.840 --> 09:05.880
+performance as opposed to dissimilar, which is kind of analogous to the diversification
+
+09:05.880 --> 09:10.240
+that you're describing. But I think I guess all this speaks to the fact that it's really
+
+09:10.240 --> 09:13.480
+about your users and the way they want to use your site.
+
+09:13.480 --> 09:17.240
+Yeah, absolutely. I mean, that's a really interesting point. So the interesting thing about
+
+09:17.240 --> 09:23.480
+Reuters, are any news, or most news agencies, I should say, is that they're not personalized
+
+09:23.480 --> 09:27.000
+usually, right? Like Reuters is just trying to, and they are not exactly.
+
+09:27.000 --> 09:31.640
+So they're trying to give you content. Most of the content that they serve the users will
+
+09:31.640 --> 09:37.680
+probably be homogenous. However, for us, if you look at a specific user's home feed,
+
+09:37.680 --> 09:44.840
+it's entirely personalized to that specific user. From the language that that user speaks
+
+09:44.840 --> 09:48.280
+to the type of content that they've engaged with in the past, to the users that they follow
+
+09:48.280 --> 09:54.840
+to all these different things. And therefore, for us, diversification is actually a really
+
+09:54.840 --> 10:02.160
+important part of that. And I should also caveat that I don't think that the extreme end
+
+10:02.160 --> 10:06.000
+of this, like if you could take it to the, to the, you know, an infinitive, it would
+
+10:06.000 --> 10:10.000
+be that everything should be random. And that's not what I'm saying either, right? There's
+
+10:10.000 --> 10:15.200
+some sweet spots. So in machine learning, we use the term explore versus exploit. And
+
+10:15.200 --> 10:20.160
+the idea is that if you really personalize, if you really say, hey, this user really likes
+
+10:20.160 --> 10:23.700
+Banksy Street art, all I'm going to show this user is Banksy Street art, that's like
+
+10:23.700 --> 10:29.480
+extreme exploitation. And extreme exploration is randomness. And there's some sweet spot
+
+10:29.480 --> 10:33.480
+between those two, which allows for this kind of discovery experience that we want to
+
+10:33.480 --> 10:39.040
+try and give our users. And so how did you organize the presentation?
+
+10:39.040 --> 10:45.800
+Yeah. So basically, I start off by talking generally about the motivation. And then I
+
+10:45.800 --> 10:52.040
+sort of give a few examples of how do we actually measure this diversity. So one of the really
+
+10:52.040 --> 10:58.600
+important problems within, like in the past and literature as well as now is we can intuitively
+
+10:58.600 --> 11:03.360
+feel that, like I can tell you that this was a Banksy Street art pen. But how do you actually
+
+11:03.360 --> 11:08.600
+give that information to a machine learning algorithm as a number or as something that
+
+11:08.600 --> 11:15.520
+could be an input to your, to your system? And so I primarily focused like more than half
+
+11:15.520 --> 11:19.320
+my talk was trying to focus on how do we measure that? And what are the kinds of tests
+
+11:19.320 --> 11:26.360
+that we can do to be able to understand that this measure is actually working for us?
+
+11:26.360 --> 11:32.920
+And so these things are things like is my metrics stable, which means that how, as I
+
+11:32.920 --> 11:39.000
+give it more information, does it actually kind of converge to a specific value? And how
+
+11:39.000 --> 11:42.920
+quickly does it converge? Because that's an important thing as well. Like I don't, I want
+
+11:42.920 --> 11:50.120
+to be able to give it, you know, 10 pins or a few pins, pins here are just our basic
+
+11:50.120 --> 11:56.720
+unit of content on Pinterest. And it should be able to give me a pretty good value. So
+
+11:56.720 --> 12:01.320
+that's stability. The second thing is giving it 10 pins and it's giving you a pretty good
+
+12:01.320 --> 12:09.320
+value of what? Of diversity. Okay. Yeah. So you can imagine that with one image, so let's
+
+12:09.320 --> 12:15.240
+imagine we have a thousand pins, right? There's some value of diversity that I can give
+
+12:15.240 --> 12:20.840
+that set of pins. And so you can, for example, if all those thousand pins were related to
+
+12:20.840 --> 12:25.240
+street art, the diversity of that would be pretty low because they're all street art.
+
+12:25.240 --> 12:29.320
+If they were entirely random, the diversity should be pretty high. So the number that I
+
+12:29.320 --> 12:34.760
+give it should be pretty high. Now, if I sub sample, let's say one pin from that thousand
+
+12:34.760 --> 12:41.240
+set of pins, maybe it's randomly happens to be not a street art pin, right? And then now
+
+12:41.240 --> 12:47.400
+I take two samples and now I can maybe get a better value of diversity. Now I take three
+
+12:47.400 --> 12:52.680
+and so on and so forth. And so how many pins do I need in order to be able to get to that number
+
+12:52.680 --> 12:59.000
+pretty quickly? This is what I mean, my stability. Okay. And then the second important aspect of it
+
+12:59.000 --> 13:05.960
+is sensitivity, which means that does it behave the way we wanted to behave? So the example here
+
+13:05.960 --> 13:10.920
+would be again, like let's say I have a set of pins and a hundred percent of them are
+
+13:10.920 --> 13:17.560
+taxi street art, right? And so the diversity value here should be pretty low. Now let's say we
+
+13:17.560 --> 13:22.920
+start introducing a completely orthogonal topic into this set of pins. So imagine something like
+
+13:23.640 --> 13:28.920
+scooters or cars or whatever. Something that we think is like different. And then
+
+13:28.920 --> 13:33.240
+we introduce some of these pins into this system. And we should see this diversity value kind of
+
+13:33.240 --> 13:39.960
+go up. When we're at 50, 50 where we have 50 percent like scooters, 50 percent street art,
+
+13:39.960 --> 13:44.440
+then this diversity value should be at its max. And then as you keep introducing more and more
+
+13:44.440 --> 13:48.760
+scooters into it until we have a hundred percent scooters, then this diversity value should come
+
+13:48.760 --> 13:54.120
+down again. And so if this measure doesn't move very much or it doesn't move the way we actually
+
+13:54.120 --> 14:00.520
+be expected to behave, then it's not working. And so this kind of a study of trying to understand
+
+14:00.520 --> 14:06.440
+if the measure is working is a sensitivity analysis. And so I talk a little bit about this.
+
+14:06.440 --> 14:13.560
+One quick question on that. So you said that when you have this 50, 50 distribution of
+
+14:14.520 --> 14:21.800
+pin topics, assuming we know how to find those, that this diversity measure should be at its max,
+
+14:21.800 --> 14:27.720
+that's like one, that's a design decision, right? You could also argue that the diversity
+
+14:27.720 --> 14:32.760
+metric should be at its max when every pin is of a different topic. Yeah, absolutely. Yeah,
+
+14:32.760 --> 14:40.200
+so what I mean by saying max is max in this spectrum of mixing these two topics. So you're
+
+14:40.200 --> 14:45.160
+absolutely right that if I introduced a third topic into this, now that value should be even higher
+
+14:45.160 --> 14:50.360
+than if I only have two topics. So that's actually another analysis that I didn't talk about in my
+
+14:50.360 --> 14:56.600
+talk, but we did do, which is that let's say I have 50, 50, two topics, and now we have 30, 30,
+
+14:56.600 --> 15:03.000
+33 topics. And then let's say we keep going with like 25, 25, 25, like four topics and so on.
+
+15:03.000 --> 15:08.360
+We actually keep seeing that this value increases until some max point where it flatens out.
+
+15:08.360 --> 15:13.320
+And so that's also another aspect of sensitivity, which we also checked.
+
+15:13.320 --> 15:16.120
+Okay. Yeah, but that's a great, that's a great question.
+
+15:16.120 --> 15:22.200
+Okay. And so that's a word. Yeah. And so the last thing is basically, in physics, we just call
+
+15:22.200 --> 15:27.000
+the sanity checking, right? So we want to make sure that this metric is sensible for the system
+
+15:27.000 --> 15:32.920
+that we have now constructed. So in Pinterest, we have something called boards. Boards are collections
+
+15:32.920 --> 15:39.640
+of bins or collections of these units of images that people that our users have kind of put together.
+
+15:40.600 --> 15:45.960
+And these are thematically often quite similar. So users create boards, for example, for
+
+15:45.960 --> 15:51.240
+you know, flowers for their wedding. And so all of the, depends on that, on that board,
+
+15:51.240 --> 15:55.960
+will be like purple flowers or something of that sort. People will create a board for scooters.
+
+15:55.960 --> 16:00.040
+People, I have a board, for example, for street art, you know, and so on and so forth.
+
+16:00.040 --> 16:05.160
+And we, we generally know that these boards should be thematically quite consistent and quite
+
+16:05.160 --> 16:12.920
+similar. So one of the things that I did was I sampled lots of users boards and tried to give
+
+16:12.920 --> 16:20.040
+those set of bins a value for diversity. And that creates a distribution. And this distribution now
+
+16:21.000 --> 16:28.520
+should be lower than the lower in diversity from the distribution, if I just randomly sample bins
+
+16:28.520 --> 16:34.680
+from our corpus, from our system. And so we basically created multiple distributions like this,
+
+16:34.680 --> 16:39.640
+just to make sure that the distribution for boards is actually like the mean and everything is
+
+16:39.640 --> 16:45.320
+much lower than the distribution for random bins. And then the distribution for sessions,
+
+16:45.320 --> 16:50.280
+or when users come on, what does this see on Pinterest? It's actually kind of overlapping
+
+16:50.280 --> 16:55.000
+between those two things, because sometimes users come on to see pretty random content,
+
+16:55.000 --> 16:59.640
+but sometimes users may come on just to see something very specific. And so we see that the sessions,
+
+17:00.280 --> 17:05.400
+not only is the, the mean kind of that distribution making sense, but the standard deviations a
+
+17:05.400 --> 17:10.040
+lot bigger too. And so we know that it's more spread out. And that generally kind of makes sense as
+
+17:10.040 --> 17:17.000
+well. And so given those three checks of stability, sensitivity and sanity, we can then become
+
+17:17.000 --> 17:23.560
+quite confident that this measure is something that we can use. We're able to look for boards that
+
+17:23.560 --> 17:30.920
+were titled miscellaneous or random and compare them to compare them in diversity to other types of
+
+17:30.920 --> 17:37.400
+boards. Yeah, that's a good question. I tried doing some stuff where I looked at specific topics and
+
+17:37.400 --> 17:46.200
+saw that within, within boards, topics of, you know, one, boards of one topic can be different in
+
+17:46.200 --> 17:52.680
+diversity than boards of a different topic. Okay. I think the meaning consistently. Yeah, exactly.
+
+17:52.680 --> 17:57.560
+Or in general, like if you create those distributions, they often are non-overlapping,
+
+17:57.560 --> 18:05.000
+one being greater than the other. I can't remember right now what a specific example, but like one
+
+18:05.000 --> 18:10.520
+of the, one of the things I think was that crockpot recipes, which much lower in diversity,
+
+18:10.520 --> 18:16.440
+than a board title, it's like wedding or a board title, you know, something like that. And I guess
+
+18:16.440 --> 18:20.920
+the thing is that wedding is a much broader category like you could have, you know, anything from
+
+18:20.920 --> 18:25.240
+dresses to flowers to all sorts of stuff in wedding. Whereas if you're, if you have crockpot
+
+18:25.240 --> 18:31.560
+recipes, they're quite specific. I guess. So things like that we definitely saw.
+
+18:31.560 --> 18:36.120
+But that's a good point about boards type being titled random. And if they were, in fact,
+
+18:36.120 --> 18:42.920
+random or not. Yeah. Yeah. You may be coming to this, but I'm curious how you got at what the
+
+18:42.920 --> 18:48.680
+pin's content was. Did you, you know, we're looking at metadata? Are we doing deep learning on
+
+18:48.680 --> 18:55.000
+the images? Yeah. So that's a great question. So when we, when users put a pin onto our
+
+18:55.000 --> 19:00.520
+system, they generally put it on a specific board, which has a title and a description and stuff.
+
+19:00.520 --> 19:05.720
+And, and then the pin itself has a description to where users can write some stuff about,
+
+19:05.720 --> 19:11.400
+about the images that they've uploaded. And then often, pins actually have a web page is associated
+
+19:11.400 --> 19:17.800
+with the content, right? And so when you, when you try to, what, when we have all this information
+
+19:17.800 --> 19:25.240
+about the pin, we can actually associate certain words with these pins. And so the example that I
+
+19:25.240 --> 19:31.000
+gave was, if you have a street art pin, the words that are associated with this are things like art
+
+19:31.000 --> 19:37.080
+and graffiti or a bank see and so on and so forth. And we call these words associated with
+
+19:37.080 --> 19:44.600
+pins pin annotations. And so that's kind of step one, which is that try to get to the key topics
+
+19:44.600 --> 19:50.280
+of the pin. And we do this by, by, by this kind of tokenization off of these words that we can
+
+19:50.280 --> 19:55.400
+get from the descriptions, the board titles, the web age of sounds of worth. Once we have these
+
+19:55.400 --> 20:01.320
+annotations, we can actually use, so I walked in my, in my talk, I walk through several measures of
+
+20:01.320 --> 20:06.760
+diversity that they, that you can use. One of the problems with words, though, is that there's
+
+20:06.760 --> 20:13.160
+synonyms. And so when, when, when you say like art versus street art versus graffiti or something
+
+20:13.160 --> 20:20.200
+of that sort, these have overlapping meanings. And because of that, we actually couldn't get very
+
+20:20.200 --> 20:27.000
+stable measures of diversity using purely words, using purely annotations. So there's a lot of
+
+20:28.520 --> 20:33.880
+work on lexical diversity in linguistics literature. And then so you can use some of those
+
+20:33.880 --> 20:38.680
+standard techniques. We also tried using some techniques like entropy or the gene coefficient,
+
+20:38.680 --> 20:44.920
+which are from like physics or economics. And then, but at the core of it, the issue is that
+
+20:44.920 --> 20:50.520
+annotations or words can often have synonyms. And there's, there's the inherent instability in that.
+
+20:50.520 --> 20:56.200
+And so what we ended up doing was creating these embeddings using a matrix factorization. And so
+
+20:56.200 --> 21:02.120
+what embeddings try to do is that they try to map these words onto vectors, right? And not just
+
+21:02.120 --> 21:06.840
+any vectors, but something quite special vectors in the sense that you can add and subtract these
+
+21:06.840 --> 21:11.560
+vectors and they still have meaning. So the very standard example that people give is that if you
+
+21:11.560 --> 21:18.040
+have the vector for king, you can subtract man and add a woman and then get queen out of that.
+
+21:18.040 --> 21:22.920
+And the fact that that works actually still blows my mind because it's quite incredible that we
+
+21:22.920 --> 21:29.240
+can do that in such a such a such a way that that we can still interpret it makes a lot of sense.
+
+21:30.200 --> 21:36.040
+And so we actually do exactly that where we take these annotations and we know that annotations
+
+21:36.040 --> 21:41.960
+on a specific border related to each other. And so we use that matrix of annotations as columns
+
+21:41.960 --> 21:48.680
+and boards as rows and factorize that to be able to get annotation embeddings. And so once we
+
+21:48.680 --> 21:54.520
+have these annotation embeddings and we know that the the each pin has associated like let's say we
+
+21:54.520 --> 22:00.440
+take the top 10 annotations for each pin. Now, because of the fact that these these embeddings
+
+22:00.440 --> 22:04.600
+can be added and subtracted and stuff, we can actually just take the average of it and that
+
+22:04.600 --> 22:10.280
+average still has meaning. And that embedding we call the pin embedding. And so once we have that
+
+22:10.280 --> 22:16.040
+pin embedding, now we can actually do simple things like calculate the similarity or dissimilarity
+
+22:16.040 --> 22:24.360
+in this case of different pins and be able to give that kind of get that embedding diversity value
+
+22:24.360 --> 22:29.000
+out of that. Is there a single pin embedding at Pinterest or do you have multiple different types
+
+22:29.000 --> 22:33.320
+of pin embeddings that use like is that a pin annotation embedding and there are other types of
+
+22:33.320 --> 22:37.400
+pin embeddings? Yeah, that's a great question. I mean, we definitely have a lot of embeddings
+
+22:37.400 --> 22:42.680
+and we're trying to converge to a single unified embedding which encapsulates everything. And so a
+
+22:42.680 --> 22:48.200
+lot of the stuff that I've talked about so far has been about the words that are on the pin,
+
+22:48.200 --> 22:52.840
+but you can imagine that there's there's a visual embedding right embedding that's purely based on
+
+22:53.720 --> 22:58.360
+the image itself. And we definitely have a team that entirely focuses in trying to create a
+
+22:58.360 --> 23:04.040
+visual embedding. And we actually recently launched something which tries to combine the two
+
+23:05.000 --> 23:09.720
+and there's a block post about that that I can link at some point.
+
+23:10.920 --> 23:21.400
+So you talk for the properties of the metric and then you're using embeddings to develop the
+
+23:21.400 --> 23:27.160
+metric. What else did you talk about? Or what was next in your talk? I mean, so the final step
+
+23:27.160 --> 23:34.680
+obviously is that we have the problem, we've kind of motivated it. We have sort of the solution
+
+23:34.680 --> 23:39.240
+which is how do we measure the diversity? But then the final step is how do we actually implement
+
+23:39.240 --> 23:46.040
+this into our system? How do we use it? And actually before you jump into that, you mentioned
+
+23:47.480 --> 23:55.000
+a couple of alternatives, some lexical work from the linguistic space and entropy and things from
+
+23:55.000 --> 23:59.400
+physics. How far did you go down those paths? What did you kind of look down those paths and say,
+
+23:59.400 --> 24:05.480
+hey, we don't want to go down there? Well, we definitely, we went far enough where we were able to
+
+24:05.480 --> 24:09.480
+understand what the pros and cons of those approaches are and whether it works for us.
+
+24:10.120 --> 24:14.280
+And when we found that something doesn't work for us, we kind of moved on from there. And so
+
+24:15.080 --> 24:19.320
+the very first example, you know, there's something called the type token ratio, which just takes
+
+24:19.320 --> 24:23.800
+the unique number of annotations and divides the total. And so this is something that's like very
+
+24:23.800 --> 24:29.560
+easy to understand. And that's, I think, there are, that is the pro of some of these approaches,
+
+24:29.560 --> 24:34.600
+which is that, you know, interpredability is in a really important aspect in machine learning,
+
+24:34.600 --> 24:40.680
+which people sometimes ignore these days. But that does have its value and merits. And so,
+
+24:41.240 --> 24:48.280
+I think the point is being that like, you kind of have to try it out, see what the pros and cons
+
+24:48.280 --> 24:53.400
+are, see if it, you know, matches the three conditions that I mentioned of like stability, sensitivity,
+
+24:53.400 --> 24:58.120
+and sanity. And if it doesn't, then you kind of move on to the next approach and stop where you
+
+24:58.120 --> 25:05.000
+find something that works. So this type token, for example, pretty simple, but it really trips up
+
+25:05.000 --> 25:12.520
+with the synonyms. Exactly. Yeah. And so you can imagine that if I have some two pins that are
+
+25:12.520 --> 25:18.120
+there that are quite different, but then, you know, might have overlapping annotations, it'll, it just
+
+25:18.120 --> 25:24.040
+won't understand. Or if they're quite similar, like imagine slow cooker and crock bot, which are
+
+25:24.040 --> 25:28.840
+two separate words, but, you know, I have quite the same meaning. It'll actually think that
+
+25:28.840 --> 25:32.840
+they're very different. And so it just doesn't behave the way that we wanted to behave. Right.
+
+25:32.840 --> 25:38.440
+Right. So the implementation of the system, for where some of the big challenges there. Yeah.
+
+25:38.440 --> 25:43.800
+So before jumping into the implementation, I'll just quickly describe what our recommendations
+
+25:43.800 --> 25:49.160
+stack looks like. Okay. And so we start off with, you know, our pin corpus, which is sort of
+
+25:49.160 --> 25:56.120
+billions and billions of pins. We narrow that down to a state called Canada generation, where we
+
+25:56.120 --> 26:01.560
+have a bunch of different ways of generating candidates for, you know, recommendations. And so
+
+26:01.560 --> 26:06.120
+some of these involve purely content to content type recommendations, but some of them involve
+
+26:06.120 --> 26:10.840
+more like collaborative filtering type approaches, and so on and so forth. Like we have a lot of
+
+26:10.840 --> 26:15.720
+these different approaches. And at this stage, we kind of get about off the order of thousands of
+
+26:15.720 --> 26:25.720
+pins for users. The next step is pure ranking. Meaning for a given user's home feed, you'll get
+
+26:25.720 --> 26:31.320
+thousands of candidate pins. Exactly. Okay. So when a user comes onto Pinterest, we're doing all
+
+26:31.320 --> 26:36.040
+of this stuff in the background before they even land on the on the home feed. So the next
+
+26:36.040 --> 26:41.240
+step is ranking where we just blend all of the, or put all of these things together and try to say,
+
+26:41.240 --> 26:46.520
+well, how do they actually perform against each other? What is the probability that this user
+
+26:46.520 --> 26:52.280
+will in fact engage with this specific thing or not? And then the final step is actually blending.
+
+26:52.280 --> 26:59.880
+And at this stage, where we're taking content from the users followers, from the users, from the
+
+26:59.880 --> 27:07.480
+the user that the viewer follows, from the topics that they're interested in, and finally from their
+
+27:07.480 --> 27:11.640
+recommendations, which are these machine learning systems. And we're putting them all together
+
+27:11.640 --> 27:19.800
+into a single feed or creating a chunk as we call it. And so at this final step, you can imagine
+
+27:19.800 --> 27:26.120
+that there's a lot more control in trying to tune this explore exploit balance of, do we want to
+
+27:26.120 --> 27:31.880
+try and show users 100% things that we know that they will engage with? Or do we want to sneak in
+
+27:31.880 --> 27:39.080
+some more exploratory stuff? And so this is the stage at where we started adding this diversification.
+
+27:39.720 --> 27:44.280
+And the way that we essentially did it was that we would calculate this embedding
+
+27:44.280 --> 27:49.880
+dissimilarity metric for all the pins that we were about to show the user. And we said,
+
+27:49.880 --> 27:55.400
+is it too similar? Is it the first few pins that this user's going to see? Are they all very,
+
+27:55.400 --> 28:01.080
+very similar? And if they are, then we push some of the pins down and we actually introduce more
+
+28:01.080 --> 28:06.840
+sort of randomness and more entropy into the system. Do you consider this at all a personalization
+
+28:06.840 --> 28:13.000
+parameter? Like user A wants more diversification in their field than user B? Yeah, that's a great
+
+28:13.000 --> 28:19.880
+question. So we did, we are also trying other approaches of introducing diversity. And so one of
+
+28:19.880 --> 28:27.160
+the ways of doing that is actually adding it into our ranking function essentially. And these
+
+28:27.160 --> 28:32.440
+things are often called submodular functions. And so there is an approach of doing something like
+
+28:32.440 --> 28:38.520
+that as well. We specifically found that this approach of just kind of looking at the final product
+
+28:38.520 --> 28:43.400
+and then seeing if it's too similar and just, you know, penalizing at that step works slightly
+
+28:43.400 --> 28:48.840
+better than actually trying to do it the other way. That's not to say that it won't work for anyone
+
+28:48.840 --> 28:54.200
+else. I think it's just a matter of the system and how it behaves. But that's definitely one of
+
+28:54.200 --> 29:02.120
+the options as well. So the pin embeddings did that pre-exist this particular project? Was it
+
+29:02.120 --> 29:07.080
+already available for you? Did you have to create that as part of building out this system?
+
+29:07.080 --> 29:12.280
+So we actually had to create new pin embeddings for this. And the reason why often is again,
+
+29:12.280 --> 29:18.760
+the characteristics of the embeddings that you want can often differ from different use cases,
+
+29:18.760 --> 29:24.440
+from use case to use case. And so the given pin embedding, the embeddings that we already had
+
+29:25.000 --> 29:30.520
+just didn't behave the way that we wanted them to behave. And this is again the thing of
+
+29:31.720 --> 29:40.040
+any, for a lot of these systems, the technologies are often already out there. You kind of just have
+
+29:40.040 --> 29:44.840
+to pick and choose like what works for me and what is the problem that I'm really trying to solve.
+
+29:44.840 --> 29:51.720
+At the end of the day, you know, it is great to try and build at something new, but at the same time,
+
+29:51.720 --> 29:56.840
+if something already works, you just use that. And in this case, we just realized that, you know,
+
+29:56.840 --> 30:01.400
+we had to create something new to be able to solve this problem.
+
+30:01.400 --> 30:09.560
+So you haven't talked much about kind of the operating characteristics,
+
+30:09.560 --> 30:14.120
+scalability requirements. I mean, clearly, you talked about how many pins there are and
+
+30:15.080 --> 30:21.640
+the number of candidates did the solution that you, the direction you started going,
+
+30:21.640 --> 30:28.760
+did it just kind of work fine or did it have to be massaged in order to get it to perform
+
+30:28.760 --> 30:35.560
+it to meet the requirements of the site? Yeah, that's actually a great question. So when we think
+
+30:35.560 --> 30:39.560
+about the pros and cons between, let's say like the annotation diversity that I talked about in
+
+30:39.560 --> 30:44.840
+the embedding diversity, that was actually a big thing that we took into account when deciding
+
+30:44.840 --> 30:50.200
+on which approach to choose. And so the reason why, and so in this case, embedding diversity actually
+
+30:50.200 --> 30:56.520
+does, it is better in terms of scalability. And the reason why is because embeddings are numbers.
+
+30:56.520 --> 31:01.080
+And numbers are easier to, you know, store and add and subtract and do all these things to,
+
+31:01.080 --> 31:05.480
+instead of actual words, which are the annotations. So each pin has, you know,
+
+31:05.480 --> 31:09.720
+hundreds of annotations associated with it and we're trying to find what's the overlap between
+
+31:09.720 --> 31:14.280
+two things. You literally have to go through every single one and kind of, you know, see which
+
+31:14.280 --> 31:18.120
+one's overlap. And then that's actually a very expensive process if you want to do it at scale.
+
+31:18.920 --> 31:24.120
+And so for embeddings, which are just vectors, we can actually add and subtract them fairly easily.
+
+31:24.120 --> 31:28.280
+And there's libraries that do matrix factorization and stuff like that pretty, pretty fairly.
+
+31:29.720 --> 31:35.640
+Having said that, matrix factorization is actually something that's very hard to do at scale.
+
+31:35.640 --> 31:42.040
+And in that case, what comes into play is sampling, but sampling in the correct way,
+
+31:42.760 --> 31:47.160
+in the sense of like, sampling in a way that doesn't introduce biases into your system.
+
+31:47.160 --> 31:51.880
+And that in itself is a topic that's really hard to do. We ended up using reservoir sampling.
+
+31:51.880 --> 31:58.120
+But can you elaborate on this whole area? What are you using sampling in place of
+
+31:58.760 --> 32:01.880
+creating embeddings for every pin? Is that what you're suggesting?
+
+32:01.880 --> 32:06.760
+No, so what I'm, I guess, if you come back to the matrix that we're factorizing, we're essentially
+
+32:06.760 --> 32:13.880
+looking at annotations as the columns and the rows being boards here. And so the reason why we're
+
+32:13.880 --> 32:19.560
+using boards is because we think boards are more thematically similar. And if we do it on boards,
+
+32:19.560 --> 32:24.360
+we're able to actually get at the meaning of that annotation a little bit better,
+
+32:24.360 --> 32:28.920
+or the vector that we're going to associate with this annotation a little bit better.
+
+32:28.920 --> 32:31.880
+And so the sampling that I'm talking about is actually at that board level,
+
+32:32.680 --> 32:37.320
+which is that how many boards do we sample? What are the topics that we sample these boards from?
+
+32:37.320 --> 32:41.560
+And you can imagine that if I just do it randomly, I might create biases for
+
+32:42.600 --> 32:46.280
+things that people create, a lot of boards for versus things that people don't create,
+
+32:46.280 --> 32:51.240
+all right, and so we have to be quite smart about that when we're when we're trying to do this.
+
+32:51.240 --> 32:54.600
+Makes sense. And how did you approach that?
+
+32:55.480 --> 33:01.240
+Yeah, so I mean, obviously we started simple, we started with the, you know, trying to do it the
+
+33:01.240 --> 33:08.120
+very simple way where we just did a random sample, recognize what is a granularity at which we
+
+33:08.120 --> 33:13.880
+want to be able to find differences between these boards, and then try to skew it in the opposite
+
+33:13.880 --> 33:20.040
+way of that. So if we have a lot of boards from a specific piece of content, we try to sample less
+
+33:20.040 --> 33:24.120
+from there and then we over sample places where we don't have enough content.
+
+33:24.120 --> 33:30.520
+If you have a lot of boards from, meaning a lot of boards that a specific piece of content belongs to,
+
+33:32.520 --> 33:39.320
+a lot of boards that are thematically quite similar. And so the idea here is that let's say,
+
+33:39.320 --> 33:46.200
+we have a lot of users creating wedding boards. And so it could be that if I just sample randomly,
+
+33:46.200 --> 33:53.320
+I end up getting just a lot of wedding boards. But, you know, we also want to make sure that we have
+
+33:53.320 --> 33:58.520
+boards for scooters or boards for street art and all this other stuff. And then if there's not
+
+33:58.520 --> 34:03.560
+enough boards that are just being created for that type of content, we actually have to over sample
+
+34:03.560 --> 34:09.480
+there and under sample boards that are being created just, just in volume a lot more.
+
+34:11.000 --> 34:16.760
+Is there, would it be a reasonable approach to look at creating an embedding space for boards
+
+34:16.760 --> 34:21.800
+and then using that embedding space for boards to try to determine diverse boards and then using
+
+34:21.800 --> 34:29.320
+that to feed into your pin embedding? Yeah, I mean, so at Pinterest we are actually by lucky where
+
+34:29.320 --> 34:35.960
+we have this really nice graph of, you know, a user creating a board and that board having a bunch
+
+34:35.960 --> 34:43.320
+of pins on it and then often these pins overlap with other boards. The most smallest unit in this
+
+34:43.320 --> 34:49.080
+obviously is the pin. And so we can roll up to the boards if we want. But, but you're right in
+
+34:49.080 --> 34:53.240
+the sense that we could we could do it at the board level and then roll it up to the user or something
+
+34:53.240 --> 34:58.920
+of that sort. But given that we have the pin embeddings, we can actually just roll it up to the user,
+
+34:58.920 --> 35:05.640
+roll it up to the board and then be able to get that value for the board as well. And so it's often
+
+35:05.640 --> 35:11.320
+good to be able to start at the most basic unit and kind of roll it up if needed because then you
+
+35:11.320 --> 35:17.720
+have the granularity, right? Yeah, I guess that makes sense. And so implementation.
+
+35:17.720 --> 35:25.400
+Yeah, so as I said, at the blending level, we're able to kind of tune this Explorer exploit balance.
+
+35:26.440 --> 35:33.960
+And the idea here simply is that we take this out of pins and what's basically known as first
+
+35:33.960 --> 35:40.040
+page optimization. And so the idea is that one of the things that we'd found with these embeddings
+
+35:40.040 --> 35:45.880
+is that the top of user's feeds are often the least diverse in the sense that
+
+35:45.880 --> 35:51.640
+recommender systems often try to shove everything that they think that the user will really engage with
+
+35:51.640 --> 35:55.800
+right at the top of the feed, which kind of makes sense because again, recommender systems are
+
+35:55.800 --> 36:00.920
+trying to do this at a per item or a per pin basis. They're not really thinking too much about
+
+36:00.920 --> 36:06.120
+like what does the page look like? How does this pin look like in association with the pins that
+
+36:06.120 --> 36:12.280
+it's surrounded by? And so that's the reason why this is actually quite effective at that
+
+36:12.280 --> 36:17.800
+blender level because now we have a set of pins. Now we have this page that before we show the
+
+36:17.800 --> 36:21.960
+user, we can kind of take a look at and be like, hey, does this kind of look good together?
+
+36:22.840 --> 36:29.640
+And so the lower diversity of the top of the feed actually often makes users feel that,
+
+36:29.640 --> 36:34.120
+you know, this is all the stuff that I'm going to see. But if you actually scroll a little bit lower,
+
+36:34.120 --> 36:38.200
+there is a lot of content that's more diverse. We're just not showing it right at the top.
+
+36:38.200 --> 36:42.760
+And so if you actually push some of that content further up the feed, you know, you can kind of
+
+36:42.760 --> 36:48.280
+users are able to be exposed to more diversity right at the top, which kind of encourages them to
+
+36:48.280 --> 36:57.000
+explore more. And so when you talk about this, the focus being this first page diversity, does that
+
+36:57.000 --> 37:03.160
+mean that after the first page of recommendations, you're not going through this same process and
+
+37:03.160 --> 37:09.800
+assuming that the recommended is already going to produce a more diverse feed? So we do go through
+
+37:09.800 --> 37:15.160
+the process even after the first page, but it becomes more crucial right at the top right because
+
+37:15.160 --> 37:22.440
+that's where the issue that we found was. We also found that the issue was actually more severe in
+
+37:22.440 --> 37:28.520
+users that are the most active. So the more active that you are, the more we know about you and the
+
+37:28.520 --> 37:33.880
+more we're able to kind of overoptimized on the interests that we know you have as opposed to
+
+37:33.880 --> 37:40.920
+the interests that you may or may not have. Right. And so there's a bunch of things here that
+
+37:41.480 --> 37:46.760
+the quantitative measure of diversity allowed us to do. And so the first thing as I mentioned is
+
+37:46.760 --> 37:51.560
+the fact that we understood and recognized that the problem was more severe at the top of the
+
+37:51.560 --> 37:58.040
+feed versus lower down. The problem was more severe, for example, for users that was the most active.
+
+37:58.040 --> 38:02.920
+And then we can also do things like try to understand, well, is this problem more severe for
+
+38:04.040 --> 38:11.800
+users that speak a different language or users that there's a lot of other properties of this
+
+38:11.800 --> 38:16.520
+that we can now kind of understand a little bit more and tackle those problems head on as opposed
+
+38:16.520 --> 38:22.120
+to just kind of thinking about diversity as a more qualitative problem. We can try to focus on
+
+38:22.120 --> 38:29.080
+specific quantitative approaches of doing that. All of this is based on understanding what
+
+38:29.080 --> 38:35.960
+engagement means for these pins. And there are kind of the obvious things like
+
+38:36.760 --> 38:46.520
+likes, thumbs ups, those kinds of things, comments. But when thinking about the board and diversity
+
+38:46.520 --> 38:52.360
+on the board, you know, a lot of times it's just, you know, what you see when the board comes up
+
+38:52.360 --> 38:57.480
+and that having a qualitative, making a qualitative impression on the user.
+
+38:57.480 --> 39:03.720
+Did you do user studies or things like that outside of just kind of the pure click engagement metrics?
+
+39:04.280 --> 39:11.240
+Yeah, absolutely. So this issue actually was, so we have a entire team that's devoted to try
+
+39:11.240 --> 39:15.240
+and talk to users. There is do a lot of qualitative research to be able to understand what are the
+
+39:15.240 --> 39:19.560
+problems that users are facing. And then we obviously listened to a lot of the comments and stuff
+
+39:19.560 --> 39:25.960
+that users give us as well. And so this problem actually we studied quite in depth where we got a
+
+39:25.960 --> 39:31.880
+bunch of users to come in from varying backgrounds and we tried to understand what are the problems
+
+39:31.880 --> 39:38.120
+that you're facing? How, you know, and so that in my talk, I actually give a few quotes from some
+
+39:38.120 --> 39:42.840
+of our users that specifically talk about this problem where users say, oh, I see the same stuff
+
+39:42.840 --> 39:49.320
+all the time or I want to more diversity and I want to more type new type of new content or new
+
+39:49.320 --> 39:54.600
+topics and, you know, I want Pinterest to kind of broaden the types of things that it shows me and
+
+39:54.600 --> 40:00.840
+stuff like that. And so we kind of approach it from a bunch of different ways like we, you know,
+
+40:00.840 --> 40:06.120
+we have very like in-depth studies where we sit down and talk to users for an hour. We have,
+
+40:06.120 --> 40:10.680
+you know, a way for users to write to us and do all sorts of stuff like that. And then we have
+
+40:10.680 --> 40:15.000
+user surveys, which are sort of quick responses. And then finally, we have the experiments that we
+
+40:15.000 --> 40:21.800
+run where we try something out. And in this case, we tried this specific approach that I described
+
+40:22.440 --> 40:28.680
+at an actual experiment. And then we try to see, do one users come back more often? And two,
+
+40:28.680 --> 40:34.440
+when they do come back, do they spend more time? And do they actually like feel like they're engaging
+
+40:34.440 --> 40:41.560
+more? And so we saw a lot of these approaches kind of converging on the same thing, which kind
+
+40:41.560 --> 40:50.760
+of tells us that we're doing something right. So another way to come at that is that for this
+
+40:50.760 --> 40:59.320
+type of problem, you're optimizing more on site engagement and then cart, then pin engagement,
+
+40:59.320 --> 41:05.800
+per se. Is that fair? Yeah, I think that's fair. I think often those two things correlate
+
+41:06.840 --> 41:12.120
+where site engagement often correlates with how often people engage more with content.
+
+41:12.840 --> 41:17.640
+But, you know, users come on for a bunch of various reasons. And users have different ways
+
+41:17.640 --> 41:22.440
+of engaging. So some users may come in and, you know, check a lot or what we call repending,
+
+41:22.440 --> 41:27.160
+which is that they take pins that they see and put them on their own boards. But then some
+
+41:27.160 --> 41:32.760
+users just come on to explore, right? Like, users are coming on to like, you know, design things and
+
+41:32.760 --> 41:37.160
+actually take actions on those things. But they're also just coming to, you know, for entertainment.
+
+41:37.160 --> 41:41.320
+They just want to see a bunch of content. They want to try and explore new new ideas or explore
+
+41:41.320 --> 41:47.640
+new aspects of themselves. And we kind of want to we don't want to over optimize on one specific
+
+41:47.640 --> 41:52.520
+type of user base. We try want to try and do it more holistically. And site engagement is a good
+
+41:52.520 --> 42:00.120
+proxy for that. So you've inserted this into your pipeline. You've got it up and running on the
+
+42:00.120 --> 42:07.400
+site. You didn't done some experiments. You know, we know that you found that increased diversity
+
+42:07.400 --> 42:15.880
+worked. But, you know, how well, how exactly did you measure that? Yeah. So finally we did an
+
+42:15.880 --> 42:20.440
+experiment. We actually did a bunch of series of experiments. And the final one that we decided
+
+42:20.440 --> 42:28.120
+to launch was was one where, as I mentioned, a users are coming back more often to the site.
+
+42:28.120 --> 42:33.640
+And so that's one of that that basically tells us inherently that users did find value when the
+
+42:33.640 --> 42:38.200
+when they came once and therefore they've decided to come back. And that's a really important
+
+42:38.200 --> 42:43.800
+measure for us. And then the second thing is when they do come on, do do they engage more to
+
+42:43.800 --> 42:50.360
+the reap and more do they spend more time. And so we actually saw that we increased time spent
+
+42:50.360 --> 42:55.240
+by about 1%, which is quite huge. And then we were also able to increase the number of pin
+
+42:55.240 --> 42:59.800
+impressions that that users were seeing. So that just meant that every time they came in,
+
+42:59.800 --> 43:04.920
+they actually scrolled deeper and had longer and hopefully more meaningful sessions.
+
+43:05.560 --> 43:09.960
+And that was finally our sort of proxy for saying that this is this is something that's actually
+
+43:09.960 --> 43:17.080
+providing the idea to users. But to kind of start to wrap up any, what were the key takeaways
+
+43:17.080 --> 43:25.640
+that you left the audience with? Yeah. So sort of the main thing that I think that this shows is
+
+43:25.640 --> 43:33.000
+that measuring content diversity, a measuring diversity in any recommender system is incredibly
+
+43:33.000 --> 43:39.720
+important. And the reason why it's important is because it's not just a tack on that you can
+
+43:39.720 --> 43:45.080
+put right at the end of your system. It's actually something that's inherently fixing a pretty
+
+43:45.080 --> 43:51.240
+common flaw that recommender systems have, which is that recommendations are often per bin or per
+
+43:51.240 --> 43:57.720
+item. And they're not taking into account things like, you know, diminishing returns or how do people
+
+43:57.720 --> 44:03.400
+look at something when they see lots of stuff at the same page, which is how we as human beings
+
+44:03.400 --> 44:07.400
+actually interact with the content. We don't see things like, hey, look at this one thing and
+
+44:07.400 --> 44:13.160
+then looks at something and so on and so forth. We actually often see things in a holistic view.
+
+44:13.160 --> 44:19.080
+So it's incredibly important. It's non-trivial in the sense that it has, you can't just use the
+
+44:19.080 --> 44:23.800
+first thing that comes to mind. You often have to do a lot of analysis and a lot of like kind of
+
+44:23.800 --> 44:29.560
+deep studies in terms of stability, sensitivity, and things like that to be able to understand
+
+44:29.560 --> 44:36.040
+is this measure right for the system that I'm working with. And then finally, it's important,
+
+44:36.040 --> 44:41.080
+it's non-trivial. And then when it's actually done well, it can have a lot of real user impact.
+
+44:41.080 --> 44:46.120
+It can make your users much happier. And this is something that we finally showed through these
+
+44:46.120 --> 44:52.280
+experiments and this implementation that we had. But the final takeaway just is that measuring
+
+44:52.280 --> 44:57.880
+diversity in recommender systems is actually important, non-trivial, and can have real user impact.
+
+44:58.520 --> 45:03.720
+Awesome. Awesome. Well, as in, thank you so much for taking the time to share this with us.
+
+45:03.720 --> 45:11.640
+Yeah, thank you so much. All right, everyone, that's our show for today.
+
+45:11.640 --> 45:15.880
+For more information on Essen or any of the topics covered in this show,
+
+45:15.880 --> 45:22.360
+visit twimlai.com slash talk slash 187. For more information on the entire
+
+45:22.360 --> 45:28.440
+Stratidata podcast series, visit twimlai.com slash strata and y 2018.
+
+45:28.440 --> 45:34.280
+Thanks again to our sponsors Capital One and Cladera for their sponsorship of this series.
+
+45:34.280 --> 46:04.120
+As always, thanks so much for listening and catch you next time.
+

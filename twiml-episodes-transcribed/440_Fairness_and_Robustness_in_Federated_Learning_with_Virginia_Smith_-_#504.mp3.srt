@@ -1,0 +1,704 @@
+1
+00:00:00,000 --> 00:00:21,320
+All right, everyone. I'm here with Virginia Smith. Virginia is an assistant professor of machine learning at Carnegie Mellon University Virginia. Welcome to the Twoma AI podcast.
+
+2
+00:00:22,080 --> 00:00:23,480
+Thanks. Thanks so much for having me.
+
+3
+00:00:23,480 --> 00:00:32,480
+Hey, I'm looking forward to diving into our conversation. We are going to be focusing on federated learning and some other topics.
+
+4
+00:00:32,480 --> 00:00:39,480
+But before we do, I'd love to have you share a little bit about your background and how you came to work in the field.
+
+5
+00:00:39,480 --> 00:00:52,480
+Yeah, absolutely. So I think for me, I always enjoyed math. I always wanted to take as many math classes as I could. But I think one question I had is, you know, how can I really put this math to use?
+
+6
+00:00:52,480 --> 00:01:01,480
+And just before my senior year in undergrad, I took my first computer science class and absolutely loved it.
+
+7
+00:01:01,480 --> 00:01:13,480
+And that's kind of what I wanted to focus on in my PhD, something at the intersection of computer science and math. And I think what she learning was a really natural fit.
+
+8
+00:01:13,480 --> 00:01:29,480
+In my PhD, there was around the time I started a lot of excitement around big data and deep learning was also taking off. And so there was a lot of focus on how to make models more accurate and how to make them more efficient.
+
+9
+00:01:29,480 --> 00:01:36,480
+And that was kind of what I focused on in my in my PhD is techniques for distributed learning and distributed optimization.
+
+10
+00:01:36,480 --> 00:01:48,480
+So taking a lot of the machine learning methods we knew and loved in the in the small scale setting and getting them to work across, you know, large data centers and massive amounts of data.
+
+11
+00:01:48,480 --> 00:02:01,480
+And since then, in my research as well, you know, as a lot of other researchers, I think we realized that, you know, big data is not just big. It's also very complex. And there's a lot more to ensure than just efficiency and accuracy.
+
+12
+00:02:01,480 --> 00:02:09,480
+So a lot of my recent work has been focusing on other constraints as well, things like robustness and fairness and privacy.
+
+13
+00:02:09,480 --> 00:02:31,480
+And one application that I think really makes these points salient and grounds these ideas is the application of a federated learning where the goal is to go beyond the data center and train across networks of remote remote devices or across, you know, private data silos like across different organizations.
+
+14
+00:02:31,480 --> 00:02:39,480
+And I think that this is, you know, a really exciting and ongoing area of research.
+
+15
+00:02:39,480 --> 00:02:51,480
+Awesome. Awesome. So you think of federated learning as an application that kind of grounds your research is there an application of federated learning that you like to think about when you're, you know, thinking about your research.
+
+16
+00:02:51,480 --> 00:03:01,480
+Yeah. So I think there's one thing to note is that I guess there's become a kind of important dichotomy in terms of the applications of a federated learning.
+
+17
+00:03:01,480 --> 00:03:08,480
+So there are applications and in cross device federated learning where the goal is to train across a large network of remote devices.
+
+18
+00:03:08,480 --> 00:03:24,480
+And there are also applications in what is known as cross silo federated learning where the goal might be to train again in a privacy preserving way, but across say a group of, you know, 10 organizations or, you know, could be hospitals or financial institutions.
+
+19
+00:03:24,480 --> 00:03:32,480
+And so I've done some work on both types of applications, but more of my work tends to be in the cross device federated learning setting.
+
+20
+00:03:32,480 --> 00:03:47,480
+Okay. And the main distinction between those is kind of a one to many set of concerns about privacy versus a few to few.
+
+21
+00:03:47,480 --> 00:03:49,480
+Is that a good way to characterize it?
+
+22
+00:03:49,480 --> 00:03:54,480
+Yeah. So there can be differences in terms of what you care about from a privacy point of view.
+
+23
+00:03:54,480 --> 00:04:09,480
+And the major difference is just the scale. So in the cross device setting, you're talking about maybe, you know, thousands to millions of devices that you're learning over each of those devices could be really, you know, constrained from a computational point of view.
+
+24
+00:04:09,480 --> 00:04:26,480
+The cross silo setting, it could be like a, like I said, 10, 10 hospitals that you're training over and you might have more compute power at each of those hospitals, but there could be similar concerns about, you know, not sharing private information across the organizations or across the devices.
+
+25
+00:04:26,480 --> 00:04:36,480
+So in that way, you know, they're fundamentally distributed learning problems. It's just a difference in terms of the scale. And then, as you mentioned, the kind of privacy characteristics.
+
+26
+00:04:36,480 --> 00:04:42,480
+Right, right. And how much of your research is focused on the.
+
+27
+00:04:42,480 --> 00:04:58,480
+Or even, you know, beyond your research, you know, in terms of where the field is today, the distributed learning aspect of these problems, relative to the privacy aspects of these problems.
+
+28
+00:04:58,480 --> 00:05:07,480
+We've done a number of interviews on privacy preserving machine learning differential privacy techniques like that.
+
+29
+00:05:07,480 --> 00:05:19,480
+And I'm curious if that's kind of the bulk of of your research versus, you know, are we still trying to figure out better ways to do the core learning itself across devices.
+
+30
+00:05:19,480 --> 00:05:32,480
+Yeah, that's a great question. It's really, it's both. And I think in federated learning, privacy is really a first class that isn't. So it's one of the main motivations for performing this, you know, distributed learning problem.
+
+31
+00:05:32,480 --> 00:05:37,480
+You don't want to move all of the raw data that you have from these user devices to some central location.
+
+32
+00:05:37,480 --> 00:05:42,480
+There can be some, you know, downstream privacy benefits for keeping that raw data local.
+
+33
+00:05:42,480 --> 00:05:50,480
+And so this is a privacy is a really important consideration. And I think a lot of the exciting work in federated learning is thinking exactly about this.
+
+34
+00:05:50,480 --> 00:06:00,480
+So how do we take the privacy, you know, notions that we've thought about in simpler centralized settings and understand them in this distributed learning context.
+
+35
+00:06:00,480 --> 00:06:04,480
+But certainly it's my work focuses on on both problems.
+
+36
+00:06:04,480 --> 00:06:12,480
+And it sounds like they're, you know, from a practical perspective, fairly tightly intertwined.
+
+37
+00:06:12,480 --> 00:06:21,480
+Yes, yes, they can be very related. So I think, you know, as I mentioned, privacy helps to motivate why we would want to perform this distributed learning problem.
+
+38
+00:06:21,480 --> 00:06:38,480
+So why we want to keep data on these devices as opposed to moving them, but it also makes it difficult to perform the distributed learning because you want to make sure that the information that you do send over the network doesn't reveal any any sensitive information.
+
+39
+00:06:38,480 --> 00:06:51,480
+One of the areas you've been focusing on from a research perspective is fairness and robustness. You've got an ICML paper on that topic.
+
+40
+00:06:51,480 --> 00:07:01,480
+Let's start with what fairness means in this context, because I think it's different from the type of fairness we think about from AI ethics perspective.
+
+41
+00:07:01,480 --> 00:07:14,480
+Yeah, that's a really great point. And I think this goes back to this earlier point I mentioned, which is one thing I think is interesting to me about federated learning is it helps to kind of ground these notions in a specific way.
+
+42
+00:07:14,480 --> 00:07:20,480
+And certainly I should say there are multiple notions of fairness that you could consider in federated settings.
+
+43
+00:07:20,480 --> 00:07:39,480
+One of the notions that we've been looking at and that we touch on in this work is related to the idea of representation disparity. And the idea is is basically that if you have a network of heterogeneous devices, so different user devices might be generating data that looks slightly different across the network.
+
+44
+00:07:39,480 --> 00:07:51,480
+You could imagine, you know, a network of mobile phones, people might be interacting with those phones in slightly different ways. And for that reason, the data might look slightly different across the network.
+
+45
+00:07:51,480 --> 00:08:01,480
+But you want to train a model that performs ideally equally well across these possibly differing diverse devices that you have in the network.
+
+46
+00:08:01,480 --> 00:08:19,480
+And so this is related to the idea of representation disparity. We want to, I think, a good way to phrase that is at a high level, you want to ensure some reasonable quality of service across the entire network. So you want to train a model that performs reasonably well across all of the different devices.
+
+47
+00:08:19,480 --> 00:08:40,480
+And so the premise is that if you apply, if you apply, apply distributed or or federated learning techniques without considering the specific needs of fairness, it's likely that you're going to run into problems where the results aren't fair in that way.
+
+48
+00:08:40,480 --> 00:08:49,480
+What are the particulars of the failure modes and why do you see them when you're not worried about them?
+
+49
+00:08:49,480 --> 00:08:58,480
+So what can happen is typically when we're training a model and a federated network, one of the most common objectives to consider is just traditional empirical risk optimization.
+
+50
+00:08:58,480 --> 00:09:21,480
+So you're trying to minimize the average error across the different devices in the network. And the concern is that if you just look at the average performance, it could be that you perform quite well on average, but at the expense of performing maybe very poorly on a small subset of the devices.
+
+51
+00:09:21,480 --> 00:09:35,480
+There are situations where if you have a small set of devices that differ in some way, then you can have a model that performs well on many of the devices, but could perform catastrophically on some of these devices.
+
+52
+00:09:35,480 --> 00:09:45,480
+And this is why you would care about looking at alternatives to empirical risk optimization and encoding this kind of notion of fairness for federated learning.
+
+53
+00:09:45,480 --> 00:10:05,480
+And when you're thinking about fairness in this way, is it independent of the, you know, what's the relationship between the model or the thing that you're trying to optimize across these the different devices.
+
+54
+00:10:05,480 --> 00:10:27,480
+Yeah, so the issue is that if you're training just kind of one model to perform well across all of these devices, and you have differing data coming from these different devices and the data might differ in some meaningful way, then there can be limited capacity for one model to kind of capture all of this diversity.
+
+55
+00:10:27,480 --> 00:10:46,480
+And this is where you can can have issues with with fairness being a concern. And this I shouldn't this can particularly happen because, you know, in federated settings, we're thinking about training models that we can deploy often on device that can run very efficiently and perform often, you know, kind of real time machine learning.
+
+56
+00:10:46,480 --> 00:11:06,480
+And that naturally limits the types of models that we were able to deploy any settings. And so this is a scenario where even, you know, if we have expressive models, there can be a real limit to how, how just a single model can capture this entire realm of diversity across the network.
+
+57
+00:11:06,480 --> 00:11:18,480
+And now fairness is, you know, just one of many attributes that you're looking to balance when you're training a model or, you know, federated or not.
+
+58
+00:11:18,480 --> 00:11:29,480
+Can you talk about some of the other the trade offs that you're making, in particular, your work focuses on trade off between fairness and robustness.
+
+59
+00:11:29,480 --> 00:11:44,480
+Yeah, so robustness is another really important concern in federated settings. And the idea here is that because you're using user devices as a computing substrate, there can be practical issues that happen with these devices.
+
+60
+00:11:44,480 --> 00:11:59,480
+So one might turn their phone off or you could potentially have an adversary in the network. And so we want to develop models that are robust to things like device failures or possibly to corrected data.
+
+61
+00:11:59,480 --> 00:12:14,480
+So what's interesting though is that if you think about the issue that I just talked about with fairness, which is that we want our model to get well possibly to diverse or heterogeneous looking data. This can be directly at odds with this issue of robustness.
+
+62
+00:12:14,480 --> 00:12:23,480
+So a common way that people handle robustness is they look at that diverse data or, you know, the outlier data that they're seeing and they get rid of it.
+
+63
+00:12:23,480 --> 00:12:35,480
+Maybe data coming from a corrupted device or a device where there's been some failure. And so an easy way to to think about encoding robustness is just to say let's ignore that information.
+
+64
+00:12:35,480 --> 00:12:52,480
+And the reason I'm saying this can be at odds with fairness is from a fairness point of view, if that data is actually, you know, just coming from a device, maybe that's generating some different looking data, then that's exactly the, you know, the device that we want to up wait that we want to ensure that our model fits well to.
+
+65
+00:12:52,480 --> 00:13:00,480
+And so this is why these these two notions can can be at odds in federated learning.
+
+66
+00:13:00,480 --> 00:13:19,480
+And so the big part of your research and this paper that I refer to the ICML paper is looking at the tradeoffs and how to ensure fairness while managing robustness kind of walk us through the, the approach that you take.
+
+67
+00:13:19,480 --> 00:13:35,480
+Yeah, so one of the insights that we have in this work is that if you're training, as I mentioned, just a single model across the entire network, there's limited capacity for this one model to be able to both ensure fairness and ensure robustness simultaneously.
+
+68
+00:13:35,480 --> 00:13:56,480
+And one of the techniques that we propose to help address both of these constraints is something called multitask learning and the idea is basically that intuitively if you have data that differs across the federated network, it makes sense to not just train a single model, but possibly to train multiple models.
+
+69
+00:13:56,480 --> 00:14:10,480
+So to personalize the model to the local data and multitask learning is one way of doing personalized federated learning, the idea that you're just solving multiple tasks, you're solving from multiple models simultaneously.
+
+70
+00:14:10,480 --> 00:14:28,480
+And this is something that I think again, it's intuitive, but what we've seen is that it's actually quite powerful on how this simple technique, we're not trying to do anything specific regarding fairness or robustness, we're just implementing actually a very simple multitask learning framework.
+
+71
+00:14:28,480 --> 00:14:39,480
+And does multi task learning always denote to models as opposed to a single model that's trained to do two things.
+
+72
+00:14:39,480 --> 00:14:43,480
+So multitask learning has many meanings for different applications.
+
+73
+00:14:43,480 --> 00:14:56,480
+So, you know, I think we're commonly in deep learning, people might think about multitask learning is learning across actually very diverse tasks, like you're training some NLP models simultaneously with an image classifier.
+
+74
+00:14:56,480 --> 00:15:14,480
+And here, the notion that I'm referring to for multitask learning is that we can view each device as being its own learning task. And so the overall learning objective can be similar between them, you could still be training just a single image classifier.
+
+75
+00:15:14,480 --> 00:15:31,480
+But the notion of a task is with respect to the local data set on the individual device. So you're still trying to train and image classifier, but now you have multiple different devices that are generating data and you model each of those devices as an individual task.
+
+76
+00:15:31,480 --> 00:15:57,480
+And so then you are, I'm trying to put the pieces together, I was thinking about it in the kind of the way I traditionally think of multitask learning where, as you might have, you know, one objective function that's focused on, you know, fairness and another that's focused on robustness and another that's focused on whatever your core task is.
+
+77
+00:15:57,480 --> 00:16:06,480
+And multitask is, you know, the way you are kind of optimizing across these three objectives, but it sounds like that's not really what we're talking about here.
+
+78
+00:16:06,480 --> 00:16:19,480
+No, yes. And that's what we're showing here. And I should say one of the reasons that we look at multitask learning in particular is that this is something that's been shown to improve just the accuracy.
+
+79
+00:16:19,480 --> 00:16:33,480
+So forgetting about fairness and robustness, just learning and accurate model in federated settings, multitask learning has and other forms of personal federated learning have been shown to really improve just the raw accuracy.
+
+80
+00:16:33,480 --> 00:16:39,480
+And the reason is exactly kind of this point that we mentioned earlier, which is that the data might differ across the network.
+
+81
+00:16:39,480 --> 00:16:48,480
+And so learning models that are personalized to each of the individual devices can help to improve the overall accuracy.
+
+82
+00:16:48,480 --> 00:16:59,480
+So, but what we show in this work is that there are also important benefits in terms of fairness and robustness, and especially when you care about both of these things simultaneously.
+
+83
+00:16:59,480 --> 00:17:11,480
+So basically, what's going on is that if you're learning models that are personalized to the individual devices, then those models have more capacity to to learn to the heterogeneous data.
+
+84
+00:17:11,480 --> 00:17:25,480
+Right, so you can learn models that are more fair to data that looks diverse, and you can also separate this kind of tension of having just a single global model that you're learning, which helps to deal with issues like robustness.
+
+85
+00:17:25,480 --> 00:17:37,480
+Right, so you can learn a separate model for all of the corrected data in a network, for example, and then that corrupted model doesn't affect the other parts of the network where you've learned other personalized models.
+
+86
+00:17:37,480 --> 00:17:56,480
+And is there something as simple as like a hyper parameter that you can dial that you can tune that waits the locally learned model or the, you know, the model trained on local data versus the centralized.
+
+87
+00:17:56,480 --> 00:18:08,480
+Yes, yes, I'm imagining there's multiple ways to do that you can kind of tune that model at inference time, as well as at training time.
+
+88
+00:18:08,480 --> 00:18:22,480
+Yeah, yeah, so we actually in this work, I think this is a much broader kind of research direction, which is looking at all the multi task learning for for federated learning or other forms of personalized federated learning.
+
+89
+00:18:22,480 --> 00:18:36,480
+But in this work, we actually look at a very simple objective, which is similar to what you're saying, so basically what the objective does is it's a simple form of multi task learning where there's there's basically two tasks there's a global model, so there's the model trained across all of the devices.
+
+90
+00:18:36,480 --> 00:18:51,480
+And then there's a local model, so the model that's personalized to the local data and there's a simple hyper parameter that you can tune to adjust how much you want to rely on the global model versus just your own local model that's just fitting to local data.
+
+91
+00:18:51,480 --> 00:19:05,480
+And I think, you know, the tension there is that the whole promise of federated learning, the reason that we care about doing this is that, you know, ideally we're getting something from sharing all this information across the network.
+
+92
+00:19:05,480 --> 00:19:19,480
+We would hope that the global model is providing some some useful information, but we also want to be able to trade off between learning just that one global model and learning more personalized or kind of local behavior on each of these devices.
+
+93
+00:19:19,480 --> 00:19:23,480
+This is this is exactly what you can do with this with this hyper parameter.
+
+94
+00:19:23,480 --> 00:19:30,480
+Nice and to when you've got this hyper parameter.
+
+95
+00:19:30,480 --> 00:19:48,480
+Does the are you is the implications of the local data confined to the local model, which is trained on the device and it stays on the device, and that's how you kind of ensure this separation between the local data.
+
+96
+00:19:48,480 --> 00:19:58,480
+And the central data or, you know, what ways do you.
+
+97
+00:19:58,480 --> 00:20:10,480
+And what ways are you kind of leveraging the local data and creating the centralized you still are you still sending the data are you sending weights like how is the centralized model trained.
+
+98
+00:20:10,480 --> 00:20:20,480
+Yeah, yeah, so there's two parts of training this this multitask objective. So there's the global component and then there's the local components.
+
+99
+00:20:20,480 --> 00:20:35,480
+So the local component and actually this hyper parameter that I just mentioned is trained completely, you know, in a distributed fashion on completely local data, so ignoring the information from all of the other devices and you can tune lambda just looking at local validation data.
+
+100
+00:20:35,480 --> 00:20:45,480
+That's all happening locally. What happens, you know, across the network where you end up sharing information is when you're training the global component of the multitask objective.
+
+101
+00:20:45,480 --> 00:20:52,480
+And what you can do here is you can apply basically a bunch of work and in federated learning to think about how to train this global component.
+
+102
+00:20:52,480 --> 00:21:10,480
+What you end up sharing is kind of exactly what you're I think you alluded to you end up sharing model updates that are curated based on the local data. So you're trying to basically you're trying to find one global model by aggregating a bunch of smaller model updates from each of the devices.
+
+103
+00:21:10,480 --> 00:21:25,480
+Got it got it. Very cool. And how do you what's the, you know, what what types of data sets do you evaluate this on.
+
+104
+00:21:25,480 --> 00:21:38,480
+And in fact, what you know, talk a little bit about evaluation of federated learning in general, what are the kind of the standard benchmarks and metrics that you're looking at.
+
+105
+00:21:38,480 --> 00:21:53,480
+I think this is a really important problem. Federated learning is very much an ongoing area of research, a lot of new applications coming out. And I think as such, it's really critical that we have a reasonable set of benchmarks to look at.
+
+106
+00:21:53,480 --> 00:22:14,480
+So this is actually some some motivation for me and as well as some collaborators at Carnegie Mellon and at Google, we came together and we created something called the leaf benchmark, which can be for evaluating federated learning on common common kind of applications that you would see in practice of federated learning.
+
+107
+00:22:14,480 --> 00:22:32,480
+So it includes a suite of open source data sets that you can use for evaluation, as well as complimentary sort of metrics that you would care about. So you could, you know, validate things like looking at the average accuracy across devices, or you could look at notions of fairness, for example, as well.
+
+108
+00:22:32,480 --> 00:22:47,480
+So that's kind of part of the benchmark that we developed in terms of evaluating what performance looks like looks like we're trying to simulate what performance looks like when you're actually running this on say a network of mobile phones.
+
+109
+00:22:47,480 --> 00:23:13,480
+There are a couple strategies here, so I think one of the most common ones is to train this in something like a data center setting, but then simulate what the performance might be if you were running it on a device. So you can, you can think about gathering kind of the raw metrics from training this in a data center, and then you can scale those in various ways, depending on what sorts of constraints you want to add to that, add to that training process.
+
+110
+00:23:13,480 --> 00:23:27,480
+Another one I should mention is that there's also some a few actually benchmarks that have come up from other groups one from Google is TensorFlow federated and the goal is is to make this.
+
+111
+00:23:27,480 --> 00:23:39,480
+I think, you know, easier for people to actually run on device so they provide some tools that you could potentially run these techniques on device as well.
+
+112
+00:23:39,480 --> 00:24:02,480
+Maybe even more fundamentally, what's the, is there kind of a well accepted metric for fairness and a network or robustness and a network, you know, a lot of blue score for, for these types of metrics or,
+
+113
+00:24:02,480 --> 00:24:15,480
+or is that still evolving? Yeah, I think there's still a lot of work to be done to make this more rigorous and to evaluate a lot of different metrics for fairness, I think it's.
+
+114
+00:24:15,480 --> 00:24:31,480
+I think there's more of a clear answer here right now and that a lot of the work and fairness has focused on this, this notion of representation representation disparity that I mentioned, and so the goal is to try to ensure a more uniform performance across the different devices.
+
+115
+00:24:31,480 --> 00:24:48,480
+So you could measure this by looking at say the variance of the test accuracy distribution, or you could look at the worst performing accuracy, so you could look at like the minimax performance, try to find the worst performing device and make sure that's above some threshold.
+
+116
+00:24:48,480 --> 00:25:02,480
+So those are those are two common metrics for fairness for robustness, there's a lot of different things you could think about, so you could could look at robustness to device failures, as I mentioned, so you could see what happens when devices drop out of the network.
+
+117
+00:25:02,480 --> 00:25:17,480
+Or you could look at all sorts of different attacks, and I think a lot of the attacks here mirror what you see in centralized settings, so you can look at traditional kind of data or model poisoning attacks, but just as applied in the federal setting.
+
+118
+00:25:17,480 --> 00:25:34,480
+Got it, got it, awesome, and then separately you've got another paper at ICML that's focused on unsupervised or federated learning and more of an unsupervised setting, can you tell us a little bit about that paper.
+
+119
+00:25:34,480 --> 00:25:56,480
+Yeah, so the motivation for this paper was actually that I think they were there two key motivations, one is that in practice for a lot of these federated learning applications, you don't have labeled data, and I think for that reason we wanted to to spearhead some work and unsupervised federated learning specifically looking at this idea of clustering and federated networks.
+
+120
+00:25:56,480 --> 00:26:13,480
+The second major motivation for the work is that so far a lot of the problems I've discussed revolve around this issue that data is diverse and federated networks, you have this issue of heterogeneity that the devices might be generating differing data.
+
+121
+00:26:13,480 --> 00:26:39,480
+This can result in a lot of problems, it can break the assumptions that we have for traditional distributed optimization methods, it can result in issues of unfairness, it can make it difficult to provide robustness, but what we show in this work is that there for a certain set of problems, there can actually be benefits of heterogeneity, and I think intuitively clustering is one where diversity can be beneficial.
+
+122
+00:26:39,480 --> 00:27:03,480
+And what I mean by that is the method that we propose in this work, which looks at federated clustering is a simple one shot clustering scheme where basically what you do is you cluster locally on each of the devices and then you aggregate that clustered information to form one global clustering of the data.
+
+123
+00:27:03,480 --> 00:27:12,480
+And intuitively, if you have data that's diverse across the different devices, this can actually make that method more effective.
+
+124
+00:27:12,480 --> 00:27:22,480
+So if you have some diversity, if you already sort of have natural clusters that form on the devices, it can be easier to do this in a totally distributed fashion.
+
+125
+00:27:22,480 --> 00:27:35,480
+And this is what we are kind of making rigorous in this work is the benefits that might exist of clustering in a federated network, specifically when you have heterogeneous data.
+
+126
+00:27:35,480 --> 00:28:00,480
+And so meaning the paper is not specifically focused on the techniques, but looking at kind of performance bounds, it's more theoretical paper, is that the idea? Yeah, yeah, so it's, it's good to both. We do propose this one shot communication scheme, it's, it's, it's basically just a distributed version of Lloyd's method, which is a very common method for canines clustering.
+
+127
+00:28:00,480 --> 00:28:12,480
+But then I think that the meat of it is really analyzing the performance guarantees for that method and showing in particular that this issue of heterogeneity can be beneficial for the analysis.
+
+128
+00:28:12,480 --> 00:28:26,480
+Okay, and what's the, can you kind of summarize the intuition around how this method.
+
+129
+00:28:26,480 --> 00:28:34,480
+You know, makes heterogeneity beneficial or kind of unlocks the power of the native heterogeneity and the data.
+
+130
+00:28:34,480 --> 00:28:52,480
+Yeah, yeah, so I think that the main idea is basically that if you, if you want to do this, this kind of simple, very communication efficient type of clustering, which makes a lot of sense in federated learning, you know, if you're training across a million devices, it makes sense to try to reduce the communication as much as possible.
+
+131
+00:28:52,480 --> 00:28:58,480
+So this technique that we're looking at is, is a, I think a really simple heuristic for how you might want to perform clustering and practice.
+
+132
+00:28:58,480 --> 00:29:09,480
+Basically, you can cluster your data locally on each device, send it to some central server, and then you can aggregate those, those local clusters into one global clustering.
+
+133
+00:29:09,480 --> 00:29:24,480
+And the reason I'm saying that heterogeneity can be beneficial for this process is that in clustering, the goal is basically right to, to split your model into separate separate, split into these separate clusters.
+
+134
+00:29:24,480 --> 00:29:39,480
+And if your data is heterogeneous, in some way, it's already, it's already been distributed based on these clusters, right? So you wouldn't, and that some devices might only have data from a small subset of the total clusters.
+
+135
+00:29:39,480 --> 00:30:04,480
+And given that, then it helps to, to make this process more decoupled, it makes it easier to distribute the clustering across the devices. And so this is the, this is the way that heterogeneity can, can benefit this, this analysis, specifically look at this idea that each of the devices only has data from a small number of clusters, which would, it's, it's an intuitive way to, to think about how the data might be heterogeneous.
+
+136
+00:30:04,480 --> 00:30:10,480
+Right, there's a small number of clusters that belong to each one of the devices basically.
+
+137
+00:30:10,480 --> 00:30:27,480
+And what we show then is just that by, by, by performing this one shot clustering scheme, with this heterogeneity assumption, you can show that the, the results are, are basically better than if you were performing it on, like totally randomly IID partition data.
+
+138
+00:30:27,480 --> 00:30:40,480
+Okay, okay. When you, how do you characterize the heterogeneity of your, your data and this, what's the assumption you're making in the paper?
+
+139
+00:30:40,480 --> 00:30:50,480
+Yeah, so in this paper, we're, we're making, exactly, so we're making this assumption that each device contains data from a small number of the underlying clusters.
+
+140
+00:30:50,480 --> 00:31:01,480
+So say that you know that all of your data is coming from, I don't know, 100 different clusters, then the assumption could be that every device contains data from only three of those clusters.
+
+141
+00:31:01,480 --> 00:31:13,480
+And this is, this, this is one notion of, of heterogeneity, but it makes sense in the, in the clustering context, if, you know, if you're, if your, if your goal is to perform clustering, it makes sense to think about heterogeneity in terms of the underlying clusters.
+
+142
+00:31:13,480 --> 00:31:26,480
+And so this is the, this is the notion that, that we look at is basically that there is, there's a small number of clusters that generate each of the local data sets at each of the devices.
+
+143
+00:31:26,480 --> 00:31:42,480
+And is the, is there a lot of prior work that has gone into this idea of thinking like local ID versus global ID and federated environments.
+
+144
+00:31:42,480 --> 00:31:54,480
+So I would say that there's a lot of work thinking about this issue of heterogeneity in, in federated setting. So this is really, I think it's a finding characteristic of federated learning compared compared to something like the data center setting.
+
+145
+00:31:54,480 --> 00:32:07,480
+And the reason is that in the data center, the idea is that even though you're still solving a distributed learning problem, you own and can access all of that data and you can repartition it anyway you want to.
+
+146
+00:32:07,480 --> 00:32:20,480
+Major difference in the federated setting is that each of these devices say a mobile phone, you're generating data on that phone and then you're not moving that data or repartitioning it across the network in any way.
+
+147
+00:32:20,480 --> 00:32:38,480
+And what this means is that, you know, in the data center, even though you were still distributing your data across different machines, you could partition that data in an IID manner and an independent and I can typically distributed manner across the machines in the federated setting.
+
+148
+00:32:38,480 --> 00:32:51,480
+You're getting the data as is well different devices might be generating different data and that results in this, you know, this issue of non IID or heterogeneous data across the network.
+
+149
+00:32:51,480 --> 00:33:10,480
+And I think I mentioned this earlier, but there's there's been work in thinking about how this affects fairness and robustness, but another major issue is that this can affect some of the convergence guarantees that we have for communication efficient optimization methods in federated settings.
+
+150
+00:33:10,480 --> 00:33:28,480
+So one of the main assumptions that you know it's typically made when you're performing distributed computing is that the data is is IID distributed across nodes. And so this actually breaks kind of a fundamental assumption in some of the common methods and analyses that are used for distributed learning.
+
+151
+00:33:28,480 --> 00:33:48,480
+Yeah, and I guess I drew a parallel between, you know, one of these, you know, devices are a subset of devices with heterogeneous data and, you know, what I thought I was like local ID, do you see that, you know, within one of these heterogeneous segments.
+
+152
+00:33:48,480 --> 00:33:58,480
+Yeah, there is an ID property and do you rely on that or do you assume that ID is just broken and it's replaced with this local notion of heterogeneity.
+
+153
+00:33:58,480 --> 00:34:09,480
+Yeah, so I think a good way to frame it would be that each device is generating data in an IID way, but according to its own separate distribution.
+
+154
+00:34:09,480 --> 00:34:19,480
+The distributions can differ across the devices, but each device might be generating data in an IID fashion, just according to its own unique distribution.
+
+155
+00:34:19,480 --> 00:34:35,480
+You know, one of the motivations for something like multitask learning would be that the distributions between different devices might be similar, so it makes sense to train them simultaneously and to learn about, you know, how these different devices might differ from one another.
+
+156
+00:34:35,480 --> 00:34:40,480
+And they, they differ in a meaningful way, so it's also just not to just train one model.
+
+157
+00:34:40,480 --> 00:34:43,480
+Yeah.
+
+158
+00:34:43,480 --> 00:35:12,480
+We talked a little bit about kind of, you know, applications of this work and federated learning generally, when you're looking at the kind of unsupervised setting, what are some specific applications there, is it something along the lines that you, you know, have an army of mobile devices and you're trying to segment them by type or something like that.
+
+159
+00:35:12,480 --> 00:35:23,480
+Yeah. So actually one, this relates to this idea of multitask learning and personalized learning more generally, a simple way to perform multitask learning is just to first cluster your devices into clusters.
+
+160
+00:35:23,480 --> 00:35:32,480
+Right. So if you knew that there was a natural clustering between the devices, then you could learn models specific to each of those clusters.
+
+161
+00:35:32,480 --> 00:35:48,480
+So that this would provide you this one shot clustering scheme that we, that we look at provides you a simple way to do multitask learning, you can just use this clustering procedure, and then you can learn models that are personalized to the individual clusters and the network.
+
+162
+00:35:48,480 --> 00:36:04,480
+But beyond that, I mean, clustering is also, as you know, clustering is obviously widely used for a lot of applications and in machine learning just as an important kind of pre processing tool to understand and analyze, you know, the underlying data distributions that you have.
+
+163
+00:36:04,480 --> 00:36:13,480
+And so this could also just be used as maybe a pre processing step to, to get a sense of what the data looks like in the network.
+
+164
+00:36:13,480 --> 00:36:42,480
+Does your, your first point kind of suggest a hierarchical kind of model tearing where you've got this, you know, centralized model, then you've got this intermediate type of model that's based on clusters, and then you've got a local device model, you know, all of the first conversation about robustness and fairness and instead of your one lambda parameter, now you've got kind of two that you're
+
+165
+00:36:42,480 --> 00:36:44,480
+focusing across these different models.
+
+166
+00:36:44,480 --> 00:36:56,480
+Yeah, you know, that's an interesting point. We haven't looked at that, but I think that's a very natural way that you could think about applying these things. Yeah, you could have maybe multitask learning happening within each of the clusters as well.
+
+167
+00:36:56,480 --> 00:37:23,480
+And I think, and this is something that we haven't looked at as well, but I think it makes sense. Another benefit of these multitask objectives or things like clustering is that you could also help to reduce communication in a meaningful way. So you could only in the scenario that you're describing, maybe you could have this nice hierarchical structure where you only actually communicate within a small cluster within the network as opposed to, you know, sending everything to this one central location.
+
+168
+00:37:23,480 --> 00:37:34,480
+Right, right. Awesome. So what, you know, what are some of the future research directions that you're looking at and excited about your work.
+
+169
+00:37:34,480 --> 00:37:41,480
+So one direction that we, I think we started at and then I just want to circle back to is the idea of privacy.
+
+170
+00:37:41,480 --> 00:38:00,480
+This is something that is really important in embedded settings. And in particular, you know, the common notion of privacy that's considered is that we want to be able to train models across these devices without necessarily being able to to know that any one device participated in the training procedure.
+
+171
+00:38:00,480 --> 00:38:18,480
+So a common tool to address this is through techniques like differential privacy. Some recent work that that I've been looking at and I think is really important is to think about how privacy then connects with issues of fairness and robustness and personalization. So a lot of the other topics that I, that I touched on.
+
+172
+00:38:18,480 --> 00:38:35,480
+And in particular, you know, one area we've been looking at recently is defining notions of privacy for multitask learning. So for these, for these personalized objectives, there's a real lack of work understanding how to make those models differently private.
+
+173
+00:38:35,480 --> 00:38:48,480
+So I think that's a really important area of work to ensure that we can, you know, simultaneously address all of these constraints, not just fairness and robustness and efficiency and accuracy with also the constraints of privacy.
+
+174
+00:38:48,480 --> 00:38:49,480
+Awesome. Awesome.
+
+175
+00:38:49,480 --> 00:38:56,480
+Well, Virginia, thanks so much for taking the time to chat. It's been great learning a bit about your research and what you've been up to.
+
+176
+00:38:56,480 --> 00:39:06,480
+Yeah, thank you so much. Thanks again for the opportunity. Thank you. Bye. Bye.
+

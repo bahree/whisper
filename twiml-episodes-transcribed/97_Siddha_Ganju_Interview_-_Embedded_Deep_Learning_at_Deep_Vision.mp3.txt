@@ -1,0 +1,391 @@
+Hello and welcome to another episode of Twimble Talk, the podcast where I interview interesting
+people doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington.
+Just a couple of quick announcements today related to the Twimble Online Meetup.
+First, the video from our December meetup has been posted and it's now available on our
+YouTube channel and at twimbleai.com slash meetup.
+It was a great meetup, so if you missed it, you'll definitely want to check it out.
+But you definitely don't want to miss our next meetup either.
+On Tuesday, January 16th at 3 o'clock Pacific, we'll be joined by Microsoft Research's
+Timnett Gebru, who will be presenting her paper using deep learning and Google Street
+View to estimate the demographic makeup of neighborhoods across the United States, which
+has received national media attention for some of its findings.
+Timnett will be digging into those results as well as the pipeline she used to identify
+22 million cars and 50 million Google Street View images.
+I'm anticipating a very lively discussion segment as well to kick off the session, so make
+sure to bring your AI resolutions and predictions for 2018.
+For links to the paper, or to join the Meetup group, visit twimbleai.com slash meetup.
+Alright, now a bit about today's show.
+In this episode, we hear from Siddha Gangesu, data scientist at computer vision startup
+deep vision.
+Siddha joined me at the AI conference a while back to chat about the challenges of developing
+deep learning applications, quote unquote, at the edge.
+In other words, those targeting compute and power constrained environments.
+In our conversation, Siddha provides an overview of deep vision's embedded processor, which
+is optimized for ultra low power requirements.
+And we dig into the data processing pipeline and network architecture process that she
+uses to support sophisticated models in embedded devices.
+We dig into the specific hardware and software capabilities and restrictions, typical
+of edge devices, and how she utilizes techniques like model pruning and compression to create
+embedded models that deliver needed performance levels in those resource constrained environments.
+We also discuss use cases such as facial recognition, scene description, and activity recognition.
+Siddha's research interests also include natural language processing and visual question
+answering, and we spend some time discussing those as well, and now on to the show.
+Alright everyone, I am here at the Artificial Intelligence Conference in San Francisco,
+and I'm with Siddha Gangesu, who is a data scientist at deep vision.
+And Siddha, welcome to the show, it was a pleasure to have you.
+Hi, thank you very much, thanks for having me.
+Absolutely, absolutely, so why don't we start by having you tell us a little bit about
+your background and how you got interested and started in machine learning.
+So I think I got started in machine learning during my undergrad days.
+So I had gone to a hackathon and I met this mentor there, his name is Anirth Kohl, and
+we worked on a project there which was called orphan locator, which is basically trying
+to locate missing children using the police databases, and we used a very simple image matching
+algorithm there.
+So I think that was my first introduction to machine learning, then after the hackathon
+when I came back to college, I was like, I want to know more about it, so I think like
+everybody else I started doing the Coursera course on machine learning.
+The Enduring course?
+Yeah, I guess after that I applied for a master's degree in data science, so I just graduated
+this year from Carnegie Mellon with a master's in data science, and then at CMU I worked
+on what is called visual question answering.
+So that's an AI hard task which basically provides an image to a computer and a user
+or a human is expected to ask a question about the image.
+Now this question can be about any activity or the number of people or something related
+to the image or the scene within the image, and the computer or the AI system is expected
+to provide an accurate answer to that question.
+Okay.
+Now there are many uses of VQA of visual question answering.
+One is obviously for the visually impaired, but another use is for people in situationally
+impaired, for example, like if you're in a car and you're driving, so you don't want
+to be looking at your phone, so your phone can basically give you a description of the
+images that somebody just sent you, or if you're a security analyst then you don't have
+to comb through hours of video footage, you can just query like what did the man take
+from that shopping mall.
+So you can just you know, you can just describe the situation sort of to a system and the
+system can provide you those frames in which that happened.
+So these are some of the examples of VQA, and our research was focused on how can we
+use visual questions as a form of supervision for improving computer vision models, because
+in the future it will become common for humans to ask visual questions to computers like
+where did I leave my keys or what breed of dog is this.
+Now if you look at this question, there is a lot of information already provided in
+the question itself, like the object or the animal we're talking about is a dog, and
+like, etc.
+So that's primarily where the research was focused.
+Okay.
+Yeah.
+Okay, interesting.
+And here at the conference, you're you did a talk, or you're I forget you're doing
+or you did it yesterday, right, right, right.
+And but that talk wasn't on VQA, that talk.
+Yeah.
+That was actually on embedded deep learning, which is how you can take deep learning algorithms
+which are compute intensive, and they are pretty, they are pretty big in size, and how you
+can take them to embedded devices, because embedded devices have limited compute available
+and they have limited storage.
+Right.
+So how can you run these algorithms at inference time on these devices?
+So this is basically the work that I'm doing currently at my company deep vision.
+Okay.
+And is that the focus at deep vision, or is that just one of the many things that the
+company is working on?
+So that is the focus of deep vision, basically, to tell us a little bit about the company.
+Yeah, sure.
+So the company was founded by two Stanford PhD graduates, Rehan and Vajahad, and the
+hardware or the processor that they developed was during their PhD itself at Stanford.
+And this hardware is basically, it has high performance per watt.
+At the same time, it is programmable enough so you can run a wide range of algorithms,
+which includes both traditional computer vision algorithms and deep learning algorithms
+on the same device itself.
+Okay.
+So if you look at most of the processor these days, if you want high performance, then
+it's ideal to develop what is called a custom hardware or a fixed function hardware, which
+is built basically for that one particular operation that you want.
+And on the other hand, if you want a broad spectrum device, which is programmable, so
+you can run a lot of things on it, it will be not as efficient as the fixed function hardware.
+And an example of programmable devices are the GPUs of the graphical processing units,
+but these have a high cost, so they're expensive.
+And they're also really big, so you can't actually put them on embedded devices.
+So they were able to figure out a way to bridge the gap between performance and programmability
+through which they developed this processor.
+Okay.
+Interesting.
+And so does the company compete with or play in the space, same space as the Intel Movidius?
+It's actually a little different because we are building both the hardware and the software.
+Okay.
+And I don't think Movidius follows that plan.
+Okay.
+Yeah.
+Okay.
+So, but the hardware is specifically focused, I'm inferring from the name DeepVision on visual
+types of problems and like CNNs, for example.
+So we can run like CNNs, we can also run LSTMs on it, so it's not particularly just the
+convolutions.
+Okay.
+So yeah, like a broad range of deep learning basic systems can be run on it.
+Okay.
+So why don't you walk us through your talk and the major points that you were trying to
+convey to the audience there?
+Sure.
+As I already mentioned about the hardware innovation, which is bridging the gap between the
+performance and the programmability.
+So one of the basic ideas behind this is that the convolution operation that basically
+belongs to one of the classes of those computations for which it's possible to build efficient hardware
+when you build it in ASIC format or application specific integrated circuits.
+So that's basically what they did and they were able to basically optimize this convolution.
+Now if you look at traditional computer vision methods, most of them have like a overlapping
+stencil or like a sliding window on which they run operations, which if you think about
+it is similar to a convolution.
+So and additionally, it's also similar in like MapReduce operations.
+It's also like a window and you're repeating the method over and over again over different
+windows.
+So this is basically how they got the idea to optimize this one particular class of functions.
+And it has wide applicability over traditional computer vision and deep learning algorithms.
+And the other thing that I mentioned in the talk was that why are we focusing on embedded
+devices or edge devices? And if you look at the data available for embedded devices, it's
+approximately more than 150 zetabytes of video data.
+So if you think about where this is coming from like airports, surveillance cameras, traffic
+light cameras, basically all the cameras that you see anywhere, they have embedded devices
+in them and they need someone to be looking at the videos right now.
+But it is a hope that these can be automated eventually.
+So that's where you will need these devices to be intelligent enough to perform real-time
+analysis.
+So the idea is that you've got tons and increasing amounts of surveillance data all over from
+security devices, you know, home security, you know, down the home security and eventually
+maybe our phone cameras will be always on right now.
+I don't know.
+You know, there's some people worried about scenarios like that.
+But yeah, in any case, there's just tons and tons of video data all over the place.
+And right now people are reviewing that manually and you would, the company is kind of building
+towards a model where you're training models to, you know, identify various, you know, features
+like, you know, objects or people or things like that and you would deploy those models
+out to devices, inference engines that live at the edge and can basically raise flags when
+different things are happening.
+When more thing is that the models that you train like for home security, it will be
+different than for example, airport security because in home systems, you need to recognize
+like five or six people, not more than that.
+But in airport, you need to recognize like thousands of people instantaneously.
+So the way of training the models and developing the models in both these scenarios is completely
+different.
+So we're also looking into how to train each one and how to make each one dense enough
+so that the model is extremely small so that we can fit it onto these embedded devices.
+At the same time, they should be accurate enough that we are getting the correct results.
+So is the, you mentioned the number of people that you're, that you're trying to identify.
+So it sounds like one of the main use cases is, you know, in the security scenario, you
+know, I see this person, you know, in this frame here, pull up other frames and videos
+where that person appears, where you're, so the salient point being not just, you know,
+identifying one there are people, but it's identifying specific people like maybe what
+are the specific use cases or, you know, that tie to specific kind of model classes, I
+guess.
+So I think once the technology is in place, the possible use cases are endless, but right
+now we're focusing on two main ones. And again, I talked about both of these yesterday.
+So these are face recognition and scene description. So face recognition is basically finding out
+the name of a particular person based on the image of that particular person.
+And scene description is giving out a caption or a description for a scene, which is within
+the image. Now scene description has uses in home security systems, because right now
+the home security systems are such that they alert you that there is motion detected
+outside your house or something is happening, but they don't tell you what is happening.
+And sometimes for example, the UPS is here with the package.
+Yeah. So like our system can say, okay, the UPS guy is here with the package and it's
+dropped on your front door or like similar things like that. And again, face recognition
+can say if like say you save your son or your daughter's face in your system, you know
+that they're coming home. And so the system just tells you, okay, this person has reached
+home.
+Okay.
+So that's another use case.
+Okay.
+Yeah.
+It's interesting. I think at least for me as you were describing, you know, what you
+were trying to do, it's easy to get carried away and imagine like tons of use cases, but
+they're all when you think through like the kinds of models that they would require, they're
+all really different. And so you have to really focus at least now on some very specific
+use cases.
+Yes, that's true. But another thing is that in order to develop, say even activity recognition,
+you need to have some basic recognition capabilities. For example, you need to define
+like what an arm is or any other body parts. So that recognition capability comes from
+like what is possible again in face recognition? Okay. So what I'm saying is, yeah. So that's
+basically like when you have one face recognition model in place, the only thing you have to
+do is tweak it a little bit to make it into activity recognition. Like in place of images
+in face recognition, you would need a time sequence or a frame sequence in activity recognition.
+Are you talking here about transfer learning, meaning you've trained a model on on faces
+and now you can use it to identify arms or are we talking more about sequence related
+things or something totally different? I think it's something totally different. Yeah.
+Great. So what I mean is that once you have the basic capability in place like being
+able to recognize faces, it is just parts of this algorithm or parts of this model that
+you would be reusing in other models like activity recognition. Now you won't be using
+the exact same weights because that would be completely different and you would have
+to retrain the or actually not retrain trained from scratch, the activity recognition model.
+But that said, the basic elements in both of these are the same like the convolutions
+or the LSTMs. Okay. So you're building up the model architecture
+share a lot of common characteristics? Yeah. Something like that. Something like that
+would not quite that. I didn't actually understand what you said.
+So the model architecture share a lot of common characteristics, meaning you're using the
+same general model architectures, you know, the different types of layers. Yeah, that's
+a very easy way to explain it. Yeah. Okay. I should have said that. So interesting. So I
+guess what I'm curious about is you develop models. I'm assuming that the the way that
+you would go about this is you want to develop facial recognition models and you, you know,
+survey the literature, figure out what are the best performing model architectures to do
+that, you know, implement those, train those. And then you've got this this model that probably
+doesn't fit on your embedded device. Yeah. And so there's a process that you go through
+to go from that model to one that fits like walk us through, you know, how how much of that
+is art and how much of that is science and walk us through like the thinking as you do that.
+Yeah, sure. So this process is actually called pruning. So how you can go from like a big
+model to something that is just 11, like reduced to 11 times its original size. So the way
+to do this is so pruning basically has three different steps in it. Well, I think there
+are three different steps. So first is you need to statistically analyze your model to
+ensure that the weights follow a bell curve distribution, like a normal distribution.
+I get that part. I think you're responding to me looking up like, okay, why is it important
+that your weights are distributed in that way? Because when you're going to prune it,
+you're going to use some thresholds. Now you calculate these thresholds using the standard
+deviation. And the assumptions of standard deviation are that it needs to be a bell
+curve. Right. And is it is it typical or common that your weights do follow the bell curve?
+Yeah, for all the models that I've tried it with, they almost always fall into a bell
+curve. Okay. Yeah. So once you know that it's a bell curve, you move on to the next step,
+which is the actual pruning stage. So you calculate the standard deviation of the weight
+matrices. Then you find the quartiles of each weight matrix. So that's basically standard
+deviation multiplied by one, two, three, four, and so on. Now for each weight matrix,
+for example, if you're using a scene description model, that will have an image model and a language
+model. So for each of these, you will calculate their thresholds. Then you can remove all
+the weights, which are less than that threshold. So like the first threshold you calculated
+said was zero. So any number less than zero, you can remove it. Okay. So this is essentially
+a technique to identify and rank the contribution of individual weights in your model. Yes. Yes.
+Yeah. Okay. And so then you rank order these weights in terms of their contribution and
+you have some cut off and you just remove the weights that are that fall beneath that cut
+off it. Now it, I'm imagining when you do that, there are ripple effects in terms of
+your. That's why you need to load these weights back into the model. Okay. And then retrain
+it. Okay. Yeah. All right. And then so then you, was that your third step? Yes. Retraining
+is the third step. Yeah. Yeah. And then you can basically repeat this entire process
+until you reach the most dense model. Okay. And is there empirical work that shows that
+pruning leads to optimal compact solutions relative to, you know, some other process
+that, you know, maybe starts from a smaller, more compact model and trains those from scratch
+or something. So there are actually different kinds of pruning strategies available. So I
+remember there's, there are a couple of papers from Stanford that talk about this method
+and there are a couple of papers from University of Washington and Allen Institute that talk
+about just removing one complete branch. So zeroing out everything in one convolution.
+Okay. And then retraining it. So it really depends on what kind of model you have and
+what results you want to attain. Okay. Yeah. All right. Interesting. Can you give us a sense
+for the kinds of results where you mentioned that your, your models after the pruning process
+can be like 10% of the size of the original models. What, you know, in real numbers,
+like what is that? Sure. So, so if you talk about the scene description model that we,
+we worked on, it's average inference time. It came down from eight milliseconds to two
+milliseconds. And the accuracy also increased. So for scene description, there are different
+metrics like meteor blue, rouge and cider. So there was an increase of approximately five
+steps on these metrics, blue, rouge, and cider. Yeah. CIDR. Yeah. And BLEU. So these are
+some image captioning metrics. Okay. These are originally machine translation metrics,
+but they have been adapted to image captioning metrics. There's also a new metric called
+spice, which is used for image captioning. Okay. And so you're saying that you can train a model,
+measure it against these metrics, prune the model, and then increase performance. Yeah,
+because you will have a dense network. Like you can change some things in a network,
+like change the image model to something smaller and retrain it. And because you're starting
+from like trained weights, so you have a good initialization in your system when you retrain
+it. So that basically helps in going above the previously attained accuracy level.
+And just to make sure I'm understanding the previously attained accurately accuracy
+level for an unconstrained by size model. Yeah. That is counterintuitive to me. I, the
+way I envision this is that, you know, the best performance you're going to get is when
+you've got a model that's not constrained by, you know, memory power, et cetera. And
+then you prune it and you make some compromises and you get adequate performance, but with
+a foot, a model with a footprint that can fit on your embedded device. And what I hear
+you saying is that you can actually increase your performance and shrink your model down
+at the same time. Is that what you're saying? Yes. As an example of, again, the same
+description model. So if you start from something like neural talk, that has a VGG network
+for its image model and a pretrained LSTM for its language model. Now, if you remove
+this VGG network and replace it by something smaller, like GoogleNet, and GoogleNet and
+VGGNet both lie within the same top 1% accuracy range. But if you use GoogleNet and the
+same pretrained LSTM and retrain this entire system, you can actually get a higher accuracy.
+And so for, you know, folks that are doing research in this area and are, you know, competing
+on accuracy, why don't they all just add another step in their process of pruning to come
+up with a better performing model or at least try that? Because I think that's not their
+main aim. Like accuracy is their main aim, but pruning is not their main aim. Right,
+but you're saying accuracy can improve, but it calls you prune. Yes, that's true. But
+that's, I know that because I tried that out as an experiment. Okay. So I mean, if you're
+a PhD student, I doubt you will have time to experiment with pruning just for fun. Okay.
+Yeah. And so how, so that I'm not making assumptions here, are you are serving that? Yeah, maybe
+I'm jumping to conclusions and you're not asserting that increased performance is or
+accuracy is a general result as opposed to just having to see this. It's not a general.
+Yeah, that's true. Yeah, I think that's general result. It's not going to happen all the
+time. It's not going to happen all the time. But there are some cases like in this case,
+because the accuracy of both image models lies in the same top one person range. That could
+be one possible reason why we're seeing the increase in accuracy. But if I would use
+some other image model, the same results might not be repeated and the accuracy might actually
+decrease. Okay. Yeah. That makes more sense. Yeah. Okay. So were there other things that
+you covered in your talk? So you went through your three steps. Yeah, that's pruning.
+And I think that's about it. I mean, there were a lot of other things, but there's not much
+related to what we're talking about right now. Okay. Yeah. What were the other things? So
+like for the face recognition pipeline, that is mostly two steps like face detection and
+the actual recognition part. Okay. So can you improve on each one of these individually?
+Mm-hmm. So for face detection, if you use a standard library or a traditional computer
+vision system as opposed to something trained on neural networks, can you improve the accuracy,
+the inference time and the model size? So for face detection, we saw improvement on all these
+three verticals. Okay. And on face recognition, we trained different models using somewhat similar
+architecture. Mm-hmm. So Google had released a face net paper which describes the NN2
+architecture. So we built several models around the NN2 architecture and trained it with different
+input sizes and saw that, you know, there's different inference time, different accuracy that
+it attains and different model sites that all of these three, oh, sorry, all of these two parameters
+can change. So that's something that I also mentioned in the doc. Okay. So the takeaway there is
+then that if you are developing a pipeline for something like facial recognition or some of these
+other, you know, let's maybe generalize it to, if you're developing a pipeline, generally,
+and you want to get that pipeline to run well in an embedded environment. Yeah. You want to be
+optimizing like each portion of the pipeline individually. Right. Yeah. As opposed to just optimizing,
+you know, being fixed on your, your, your end pipeline and optimizing that. But that said, it's
+important to like after you're optimizing each little bit of it. Right. You need to go over,
+over like a retraining step for the entire pipeline. Okay. That like this end step is,
+I think, the most important step. Okay. Okay. So you don't want to skip optimizing the individual
+pieces. Yeah. But you want to once you've done that. Yeah. Optimize the end piece. And
+is the idea that you start your optimization of the end to end system with better initial weights
+for the individual pieces. Yeah. That's what I understand. Yeah. Okay. Based on like all the experiments
+that I've done. Okay. All right. Interesting. Interesting. Can you walk us through? We talked a
+little bit about VQA. Can you walk us through? Is that something that you work on at deep vision as
+well or is it? So I think VQA will come in eventually because like I said, a scene description
+is something that we use right now. But eventually you would also want people to be asking questions
+to the system so that the system can give you an answer. Okay. Yeah. And can you walk us through
+kind of what the, what the current state of the art is with VQA? What are the approaches
+the folks are using and kind of generally how they take on that problem? Sure. So I don't quite
+remember what is the state of the art now. But generally the approaches that you take an image model
+and you somehow interface or communicate it with a language model which takes the question
+as input. And when you're interfacing these two matrices together, the result will be a single
+vector which will be the answer to the question that you have. Okay. So you can replace the image
+model with ResNet, Inception, GoogleNet or basically anything or like a combination of all of these.
+And the language model usually is an LSTM or you can also have it as a bag of words vector
+or any other representation of the text. Now most of the work from VQA is coming from
+Devi Parikin through Batra's lab. Now they also started using reinforcement learning in this.
+So they're just trying to give adversarial answers and questions and having the other computer
+or the other agent within the same environment, trying to figure out which of these is incorrect
+and which of these is correct. Okay. So that's sort of like a brief overview of what's happening
+in VQA. Okay. Yeah. Interesting. Interesting. And there are some, I don't remember the,
+maybe you can remind us the name of them. There are some popular datasets that folks are using
+from VQA. For VQA? Yeah, it's called the MSCoco dataset. MSCoco? Yeah, it's released by Microsoft
+and it's the common objects in context. Okay. Now the images in MSCoco are actually really different
+from ImageNet because ImageNet focuses on one particular object in image and whatever the
+object is in focus, it usually occupies most of the area within the image. But in the cocoa images,
+they're like normal scenes, like say this room, for example, it doesn't have a specific object
+or there's no specific person in focus. It's like random, not random, but scenes which have a lot
+of information in them. And in fact, there's also a release of the second version of the MSCoco
+dataset that happened this year. Okay. So that dataset actually fixes some of the errors in,
+not the errors, but actually the biases in the first dataset. For example, in the first dataset,
+if you had a number of questions like how many apples are on the table, most generally the answer
+would be three, or if the question is what color is anything, most generally the answer would be red.
+So if you train on this, you develop a model that overfits on three reasons. So they actually
+trained like an image blind model, which never saw the images, only saw the questions and the answers.
+So this kind of model would just learn that if this is the question, this is the most probable answer.
+Okay. And even that performed considerably well. So that's why. Yes, exactly. Yeah. So that's
+why they developed the MSCoco version two dataset. Yeah. Great. Great. Awesome. Well, thank you so
+much for taking a few minutes to chat with me. I really appreciate it. Thank you for having me.
+And I didn't mention this at the intro, but we initially got connected because you listened to the
+podcast. Yeah. I had actually listened to Chelsea's podcast, Chelsea fans. Yeah. And that's how I
+really got interested. And I listened to, there was an NLP podcast from someone. I don't remember her name,
+but it was pretty recent around Chelsea's podcast. And I was like, wow, there's so many things that I
+don't know. Okay. That was Ornita. Yeah. Maybe. Yeah. It was a difficult name for me to remember.
+Yeah. Awesome. Awesome. Well, thanks so much for listening. And thanks very much for, you know,
+spending some time. Yeah. Well, thank you for, for having this great idea. And thank you for
+having me today. Awesome. Thank you. All right, everyone. That's our show for today.
+Thanks so much for listening and for your continued feedback and support. Thanks to your support.
+This podcast finished the year as a top 40 technology podcast on Apple podcast.
+My producer says that one of his goals this year is to crack the top 10. And to do that,
+we need you to head over to your podcast app, rate the show. Hopefully we've earned your five stars
+and leave us a glowing review. And more importantly, share the podcast with your friends,
+family, co-workers, the Starbucks barista, your Uber driver, everyone who might be interested. Every
+review, rating, and share goes a long way. So thanks in advance. For more information on SIDA
+or any of the topics covered in this episode, head on over to twimmelai.com slash talk slash 95.
+Of course, we would love to hear from you. Either via a comment on the show notes page
+or via Twitter to at Sam Charrington or at Twimmelaii or at Twimmelaii. Thanks once again
+for listening and catch you next time.

@@ -1,0 +1,1852 @@
+1
+00:00:00,000 --> 00:00:15,360
+All right, everyone. I am here with Michael McCourt. Michael is the head of engineering at Sigopt.
+
+2
+00:00:15,360 --> 00:00:21,440
+Michael, welcome to the Twomo AI podcast. Thank you, Sam. It's a great pleasure to be here today.
+
+3
+00:00:21,440 --> 00:00:29,920
+I'm really looking forward to our chat. We, of course, have chatted and met multiple times in person,
+
+4
+00:00:29,920 --> 00:00:35,520
+typically, but we haven't had the opportunity to get you on the show yet. That is changing now
+
+5
+00:00:36,240 --> 00:00:40,400
+to get us started. I'd love to have you introduce yourself to our audience.
+
+6
+00:00:40,960 --> 00:00:43,600
+Absolutely. How would your story, how'd you get started in the field?
+
+7
+00:00:43,600 --> 00:00:50,240
+You know, I've been very fortunate. I'm very fortunate to be here today because when I started out,
+
+8
+00:00:50,240 --> 00:00:58,080
+I was actually not doing ML at all. I was doing mathematics and I did undergrad and graduate
+
+9
+00:00:58,080 --> 00:01:05,520
+degree in mathematics undergrad at the Illinois Institute of Technology in Chicago grad school
+
+10
+00:01:05,520 --> 00:01:11,040
+at Cornell. And then as part of my graduate program, I actually had an opportunity to work
+
+11
+00:01:11,040 --> 00:01:16,320
+at Argonne National Labs, which is where I really got started doing a lot of high performance
+
+12
+00:01:16,320 --> 00:01:24,400
+computing, some heavy-duty writing software, which was a great opportunity to learn how to write
+
+13
+00:01:24,400 --> 00:01:28,640
+software as part of a big project. A project that a lot of people are contributing to and most
+
+14
+00:01:28,640 --> 00:01:32,960
+of it has been written before you even got there, which has been great prep for the work that I'm
+
+15
+00:01:32,960 --> 00:01:40,000
+doing now. After I finished a postdoc, also still doing mathematics, a friend of mine, Scott Clark,
+
+16
+00:01:40,000 --> 00:01:46,160
+who founded the company, Sigopt, reached out and said, Mike, started a company and we're working
+
+17
+00:01:46,160 --> 00:01:51,760
+on the same topic that you've been doing research on for a while. Now, I didn't appreciate that
+
+18
+00:01:51,760 --> 00:01:58,160
+at the time because I had just been doing in what in my mind was sort of pure mathematics or applied
+
+19
+00:01:58,160 --> 00:02:04,400
+mathematics. I often referred myself as a theoretically applied mathematician in the sense that I hope
+
+20
+00:02:04,400 --> 00:02:10,000
+somebody applies it, but it's not going to be me. And then I had the opportunity really to take it
+
+21
+00:02:10,000 --> 00:02:17,360
+and put it to use here, as part of my time at Sigopt, where we've been using some of the kernel
+
+22
+00:02:17,360 --> 00:02:22,720
+methods and Gaussian processes work that I had been working on for more of the mathematics and
+
+23
+00:02:22,720 --> 00:02:29,440
+the computational statistics side. And now I'm seeing it also put to work in the ML perspective
+
+24
+00:02:29,440 --> 00:02:36,720
+and having this new technology available to our customers so that they can have sort of as
+
+25
+00:02:36,720 --> 00:02:42,960
+good an experience as possible. So my own journey is a sort of a weird one, but I'm so so so so
+
+26
+00:02:42,960 --> 00:02:48,400
+fortunate to be here and be able to work with such amazing people and meet outstanding people in
+
+27
+00:02:48,400 --> 00:02:55,360
+the ML community, such as yourself, Sam. Awesome. Awesome. So Mike, one of the conversation topics that
+
+28
+00:02:55,360 --> 00:03:03,520
+I wanted to jump in with you is this broad topic of optimization. You spent a lot of time working
+
+29
+00:03:03,520 --> 00:03:12,320
+on that as the Sigopt broadly. And one of the questions that maybe a place to start is,
+
+30
+00:03:12,320 --> 00:03:17,520
+you know, how do you think about optimization relative to machine learning? Optimization
+
+31
+00:03:17,520 --> 00:03:24,080
+is obviously a part of machine learning, but it's also a standalone technique. How do you think about
+
+32
+00:03:24,080 --> 00:03:27,440
+the differences between these techniques and when and where they're applied?
+
+33
+00:03:27,440 --> 00:03:34,880
+Very, very intricate there. I think there's a lot of interplay between a lot of different elements.
+
+34
+00:03:35,760 --> 00:03:41,120
+At its core, I think some people might argue that machine learning is a
+
+35
+00:03:42,880 --> 00:03:50,560
+branchary, segment of statistical learning theory in sort of its core genesis. I think you can
+
+36
+00:03:50,560 --> 00:03:56,240
+also argue that nowadays machine learning also has obviously this very strong engineering
+
+37
+00:03:56,240 --> 00:04:02,000
+element to it. We're talking about the flow of data, data structures, the ability to deal with
+
+38
+00:04:03,760 --> 00:04:09,200
+not just noisy data, but somehow data which is beyond the scope of the core assumptions
+
+39
+00:04:09,200 --> 00:04:15,040
+in statistical learning theory. So as a result, I think there are a variety of even different ways
+
+40
+00:04:15,040 --> 00:04:19,920
+to just talk about machine learning as its own entity. And then in addition to that, you throw
+
+41
+00:04:19,920 --> 00:04:26,800
+in the topic of optimization, I think on one hand, there was a famous paper, if I recall correctly,
+
+42
+00:04:26,800 --> 00:04:34,160
+learning to learn by gradient descent. And that sort of was a cute play on words, but was a
+
+43
+00:04:34,160 --> 00:04:39,360
+fundamental point of discussion there. A lot of the time when we talk about many of these machine
+
+44
+00:04:39,360 --> 00:04:45,040
+learning methods, not all of them, but many of them, we ask ourselves, can we learn this not just
+
+45
+00:04:45,040 --> 00:04:52,560
+with the model, but with gradient descent. So when we talk about learning at all, in a sense,
+
+46
+00:04:52,560 --> 00:04:57,760
+what we are talking about is gradient descenting our way sometimes down to an answer. Now that's not
+
+47
+00:04:57,760 --> 00:05:03,120
+necessarily required. Of course, we could look at, let's say, linear or logistic regression,
+
+48
+00:05:03,120 --> 00:05:07,760
+there may be a closed form solution to that in a classical sense. I don't know if anybody would
+
+49
+00:05:07,760 --> 00:05:12,960
+still use that in a very large data setting, but that definitely exists. When we talk about support
+
+50
+00:05:12,960 --> 00:05:18,240
+vector machines, we might talk about quadratic programming. Quadratic programming is optimization,
+
+51
+00:05:18,240 --> 00:05:21,760
+but it's not necessarily gradient descent, or maybe there's gradient descent mechanism
+
+52
+00:05:21,760 --> 00:05:27,360
+for solving a quadratic program, but usually there's another mechanism for it. So there are,
+
+53
+00:05:27,360 --> 00:05:33,120
+I think, a variety of ways just to talk about optimization in as much as it supports the process
+
+54
+00:05:33,120 --> 00:05:38,480
+of learning. And then to push that a step further, of course, when I talk about optimization in
+
+55
+00:05:38,480 --> 00:05:45,200
+the context of sigopt, that's even another step beyond mathematical programming, beyond gradient
+
+56
+00:05:45,200 --> 00:05:50,880
+based optimization strategies. What we're thinking about inside sigopt, when we say the words
+
+57
+00:05:50,880 --> 00:05:56,720
+optimization or sample efficient optimization, what we're talking about really are problems where
+
+58
+00:05:56,720 --> 00:06:00,800
+we have no knowledge of the structure of the problem to do mathematical programming. You have to
+
+59
+00:06:00,800 --> 00:06:05,520
+have a solid knowledge of the structure, maybe that it's quadratic, or that the constraints
+
+60
+00:06:05,520 --> 00:06:10,960
+fit a specific format in a gradient based setting. You need that gradient information, at least
+
+61
+00:06:10,960 --> 00:06:19,120
+an approximation to it. Whereas when we're thinking about optimization here, it's more of an
+
+62
+00:06:19,120 --> 00:06:25,680
+aspiration. We're sort of saying, I aspire to find the optimum, but I don't actually have any
+
+63
+00:06:25,680 --> 00:06:31,680
+delusions of finding the optimum in any sort of finite or reasonable amount of time.
+
+64
+00:06:31,680 --> 00:06:38,400
+The goal for us when we do optimization is to try and identify as higher performing outcome as
+
+65
+00:06:38,400 --> 00:06:46,080
+possible, in as rapid a fashion as possible. But without necessarily any real guarantees of
+
+66
+00:06:46,080 --> 00:06:51,840
+performance. Now, there are some great articles that are talking about performance guarantees
+
+67
+00:06:51,840 --> 00:06:57,040
+or regret minimization for Bayesian optimization. There's some fantastic papers. I think the ICML
+
+68
+00:06:57,040 --> 00:07:04,640
+2020 test to time paper, 2021 test to time paper this year was the article talking about
+
+69
+00:07:05,760 --> 00:07:10,720
+defining regret in a Bayesian optimization setting through the banded literature. So I think
+
+70
+00:07:10,720 --> 00:07:16,400
+that there is an opportunity to do that, but from a practical circumstance. When we talk about
+
+71
+00:07:16,400 --> 00:07:22,880
+optimization for what we are doing, we're not talking about optimization for the purposes of
+
+72
+00:07:22,880 --> 00:07:29,360
+learning an ML model. What we're usually talking about is optimization, maybe for this tuning
+
+73
+00:07:29,360 --> 00:07:38,960
+process. And in addition to that, optimization that uses learning itself to power the optimization
+
+74
+00:07:38,960 --> 00:07:44,000
+process. I mean, internally inside of a Bayesian optimization algorithm, you probably have a Gaussian
+
+75
+00:07:44,000 --> 00:07:48,640
+processes at play or maybe a neural network that you're using your modeling on. Obviously,
+
+76
+00:07:48,640 --> 00:07:54,560
+these need to be learned. There's information theory, perhaps that's powering the acquisition
+
+77
+00:07:54,560 --> 00:08:03,120
+function element of your Bayesian optimization. But in reality, what I sort of think of this as
+
+78
+00:08:03,120 --> 00:08:09,120
+is more just an intelligent search process, an intelligent learning process learning about the
+
+79
+00:08:09,120 --> 00:08:14,320
+optimum. So yeah, it definitely is doing learning. But when we talk about optimization, it is very
+
+80
+00:08:14,320 --> 00:08:19,840
+different than this gradient-based optimization that I think many people in the community would think
+
+81
+00:08:19,840 --> 00:08:25,120
+of when they first think of optimization. You aren't lying when you said there was an intricate
+
+82
+00:08:25,120 --> 00:08:34,640
+relationship between those. We've got optimization, which is used in the context of machine learning as
+
+83
+00:08:34,640 --> 00:08:45,200
+part of the process of learning. We've got optimization, which is separate from machine learning in the
+
+84
+00:08:45,200 --> 00:08:54,400
+sense of we're trying to identify an optimal solution to some problem that we don't have as much
+
+85
+00:08:54,400 --> 00:09:00,880
+information about as we might if we were doing applying machine learning. And then we've got
+
+86
+00:09:00,880 --> 00:09:09,920
+machine learning embedded into the optimization process to try to optimize it in a sense.
+
+87
+00:09:09,920 --> 00:09:17,360
+I mean, very realistically, yeah, that's what's happening. I guess it's no surprise than that it
+
+88
+00:09:17,360 --> 00:09:27,520
+is a bit confusing in that at least this word optimization is overloaded in a lot of different
+
+89
+00:09:27,520 --> 00:09:35,600
+ways. You mentioned in there one aspect of optimization that Seagop does spend a lot of time on
+
+90
+00:09:35,600 --> 00:09:42,080
+and that's, you know, specifically, it's applied to the hyper parameters in a machine learning problem.
+
+91
+00:09:44,400 --> 00:09:51,920
+But you also are increasingly doing other types of optimization like in a, you know,
+
+92
+00:09:51,920 --> 00:09:59,760
+HPC style. Is that and what are those and those types of problems are I think one that I've
+
+93
+00:09:59,760 --> 00:10:07,040
+talked about previously with Gustavo on your team. An example of that is like identifying the best
+
+94
+00:10:07,040 --> 00:10:12,320
+materials. It was a it was a piece of glass. It was trying to come up with the right materials
+
+95
+00:10:13,040 --> 00:10:20,000
+with which to additively manufacture a special type of glass. And I think it's for solar like for
+
+96
+00:10:20,000 --> 00:10:26,400
+solar power. Exactly right. These these optoelectronic devices. It doesn't have to be solar. Your cell
+
+97
+00:10:26,400 --> 00:10:31,440
+phone theoretically is using this as well. But yeah, you're exactly right. Got it, got it. And so,
+
+98
+00:10:32,080 --> 00:10:40,000
+yeah, maybe from kind of a, you know, optimization 101 perspective when we're, you know, we've got
+
+99
+00:10:40,880 --> 00:10:45,280
+you know, a problem and we can contextualize it in the context of this materials problem or if
+
+100
+00:10:45,280 --> 00:10:49,920
+you've got a kind of a simpler context conceptual problem for us to start with.
+
+101
+00:10:51,920 --> 00:10:57,440
+You know, how how how do folks typically start when they're thinking about an optimization problem
+
+102
+00:10:57,440 --> 00:11:04,800
+and kind of what's the path of, you know, maybe increasing complexity like what's the simplest
+
+103
+00:11:04,800 --> 00:11:09,200
+approach and then, you know, where do you go from there to try to do a better job? I think
+
+104
+00:11:09,200 --> 00:11:19,200
+it starts with a initial formulation of what it is that's trying to be addressed. And when I say
+
+105
+00:11:19,200 --> 00:11:26,640
+that, I mean that it's actually maybe two different parts of the formulation. There's the initial
+
+106
+00:11:26,640 --> 00:11:31,280
+formulation, which is the the physical world, the physical manifestation, whatever it is you're
+
+107
+00:11:31,280 --> 00:11:36,720
+working on, whether it is manufacturing something like a like a coffee cup or whether it is designing
+
+108
+00:11:36,720 --> 00:11:42,080
+an ML algorithm that you're going to put into production to give recommendations. Both of these
+
+109
+00:11:42,080 --> 00:11:48,960
+require an initial statement of what is it that we're trying to accomplish? And what is it that
+
+110
+00:11:48,960 --> 00:11:59,520
+we're willing to do in order to accomplish that? If if we were willing to have some brilliant
+
+111
+00:11:59,520 --> 00:12:06,880
+artisan come in and design this mug and spend hours crafting each one, that's very different
+
+112
+00:12:06,880 --> 00:12:11,040
+than hey, I need to get 10 million of these manufactured in any given time. The same thing is
+
+113
+00:12:11,040 --> 00:12:17,840
+true realistically of an ML algorithm as well. If you're willing to spend years and years and years
+
+114
+00:12:17,840 --> 00:12:23,040
+building these up, that's very different than hey, we need this to get out in three weeks and we
+
+115
+00:12:23,040 --> 00:12:26,880
+need it not just to get out, we need to be in production and be stable and be monitored and
+
+116
+00:12:26,880 --> 00:12:33,680
+feel confident that we're not really hurting our business here. So I think that that's sort of
+
+117
+00:12:33,680 --> 00:12:39,840
+the first side of stating this this formulation and explaining the world in which you're willing
+
+118
+00:12:39,840 --> 00:12:47,280
+to live. And then the second step is the actual to some degree phrasing of the problem as an
+
+119
+00:12:47,280 --> 00:12:53,200
+optimization problem. What metric or potentially metrics is that you're interested in considering
+
+120
+00:12:53,200 --> 00:12:59,760
+in this situation? What domain? How is it that you can parameterize this space of decisions
+
+121
+00:12:59,760 --> 00:13:05,840
+that you're willing to make? And to some degree also, what is your your budget here? When I say
+
+122
+00:13:05,840 --> 00:13:12,720
+budget, it could be a financial budget, it could be a time budget, it could be a experts time budget.
+
+123
+00:13:12,720 --> 00:13:19,840
+So so both of these elements are I think key to to progressing the problem forward. And once that
+
+124
+00:13:19,840 --> 00:13:25,760
+initial discussion has taken place with not just the person who's being assigned or people who
+
+125
+00:13:25,760 --> 00:13:29,920
+are being assigned to do the modeling, but also whoever the stakeholders are in this, whoever
+
+126
+00:13:29,920 --> 00:13:33,760
+we're going to make the final decision, yeah, this can this can be a winner or no, it can't be a winner.
+
+127
+00:13:33,760 --> 00:13:38,960
+They all need to agree and ideally that all kind of happens at the start because if you wait until
+
+128
+00:13:38,960 --> 00:13:42,560
+the end, you might have wasted three weeks, three months, three years trying to build something that
+
+129
+00:13:42,560 --> 00:13:50,720
+people actually decide isn't acceptable. And so you've got this problem formulation. And
+
+130
+00:13:52,320 --> 00:13:58,960
+when I hear the way you describe that, I'm thinking like English, you know, or a natural language
+
+131
+00:13:58,960 --> 00:14:05,760
+more properly and like in a document as opposed to a mathematical formulation of the problem,
+
+132
+00:14:05,760 --> 00:14:11,760
+is that what you're describing? I think that's the split there between the two formulas. I think
+
+133
+00:14:11,760 --> 00:14:16,480
+on one hand, you need to have an agreement and maybe formulation is honestly probably the wrong
+
+134
+00:14:16,480 --> 00:14:21,520
+word, which again, I think even the optimization community sometimes uses optimization too broadly.
+
+135
+00:14:21,520 --> 00:14:25,920
+I'm probably using formulation too broadly here, but yeah, on one hand, you need the English
+
+136
+00:14:25,920 --> 00:14:30,800
+language document. You need a bunch of people who aren't going to be need deep in the project to
+
+137
+00:14:30,800 --> 00:14:36,560
+still agree with the goals of the project and allocate the necessary resources, but then you also do
+
+138
+00:14:36,560 --> 00:14:42,640
+need to some degree this rigorous mathematical formulation. You need to be able to compute things.
+
+139
+00:14:42,640 --> 00:14:47,280
+If you have things you can't compute, if you have things you can't measure, it's going to be very
+
+140
+00:14:47,280 --> 00:14:53,440
+hard to optimize though, not necessarily impossible. We can talk about that a little bit later, but
+
+141
+00:14:53,440 --> 00:15:02,880
+I think it's an ill-defined situation if you go forward and try to not have very explicit
+
+142
+00:15:02,880 --> 00:15:08,480
+statement of these are the metrics I'm studying at the very least studying. If you can't state that,
+
+143
+00:15:08,480 --> 00:15:12,480
+it's going to be very hard to feel confident that you're doing things successful.
+
+144
+00:15:12,480 --> 00:15:23,200
+And so in the case of the the glass or the mug, do you you've got some property that you want to
+
+145
+00:15:23,200 --> 00:15:36,000
+optimize and you've got some set of parameters that influence that property. I don't imagine that
+
+146
+00:15:36,000 --> 00:15:43,600
+you always have a straight line mathematical equation between those parameters and the ultimate
+
+147
+00:15:43,600 --> 00:15:48,080
+property that you're trying to optimize. Very rarely, very rarely. And when you do,
+
+148
+00:15:48,080 --> 00:15:54,080
+you probably have some very nice clean way to try and do the optimization.
+
+149
+00:15:56,080 --> 00:15:59,840
+I'll say that there's a few different sets of circumstances that can pop up here.
+
+150
+00:16:00,880 --> 00:16:06,720
+The relationship between these parameters, these choices you can make and the resulting
+
+151
+00:16:06,720 --> 00:16:15,280
+metrics of interest to you is in some sense always defined by a physical outcome. I build the mug,
+
+152
+00:16:15,280 --> 00:16:22,640
+I drop the mug on the ground, I watch whether it cracks or not. Much more often,
+
+153
+00:16:22,640 --> 00:16:28,320
+you're going to see people using some sort of computational simulation to help accelerate the
+
+154
+00:16:28,320 --> 00:16:34,720
+process because presumably running something on the computer is going to be faster than actually
+
+155
+00:16:34,720 --> 00:16:40,480
+manufacturing, fabricating whatever device or tool or object that it is. Not always,
+
+156
+00:16:40,480 --> 00:16:47,040
+but usually. And that's why, of course, people are buying more and more computers and moving more
+
+157
+00:16:47,040 --> 00:16:53,600
+and more of their testing process into the computational world. As far as understanding this relationship
+
+158
+00:16:53,600 --> 00:17:01,040
+between choices you can make and resulting metrics, it's sometimes you have a great insight
+
+159
+00:17:01,040 --> 00:17:06,320
+into this as an expert, somebody's been working in the field for 20, 30 years. Sometimes you don't.
+
+160
+00:17:06,320 --> 00:17:11,120
+And sometimes even if you do, you want to get beyond your intuition, because your intuition
+
+161
+00:17:11,120 --> 00:17:16,320
+got you to where you are now. If you're trying to do something new, somehow you need to get beyond
+
+162
+00:17:17,040 --> 00:17:22,320
+where you would initially, naturally be guided to act and the decisions you'd naturally be guided
+
+163
+00:17:22,320 --> 00:17:31,120
+to make. And I think that that's a key element of what the sort of mathematical and statistical
+
+164
+00:17:31,120 --> 00:17:37,200
+formulation of optimization brings to the table is you can leverage your prior beliefs, your prior
+
+165
+00:17:37,200 --> 00:17:42,480
+sense of the world if you want to. But you also can drown that out. The computer doesn't have to
+
+166
+00:17:42,480 --> 00:17:48,960
+have any prior beliefs about things. So the computer, the optimization algorithm, will figure out
+
+167
+00:17:48,960 --> 00:17:56,480
+whatever it can figure out. And that can expose you to some new ideas, some new strategies,
+
+168
+00:17:56,480 --> 00:18:01,760
+which are, I think, what everybody's really trying to go after when they're building a new model
+
+169
+00:18:01,760 --> 00:18:06,720
+when they're designing a new coffee mug or the glass, for example. And really, I think one of the
+
+170
+00:18:06,720 --> 00:18:11,680
+interesting things about that project was it wasn't to one metric problem. It wasn't one objective.
+
+171
+00:18:11,680 --> 00:18:16,240
+We were interested in there were actually a lot of objectives of interest. And the relationship
+
+172
+00:18:16,240 --> 00:18:20,640
+between the parameters and the metrics were complicated. And then the metrics themselves,
+
+173
+00:18:20,640 --> 00:18:25,440
+of course, competed with each other. One of the key metrics we were interested in studying there,
+
+174
+00:18:25,440 --> 00:18:31,280
+we need the glass to be low haze light has to pass through and not get scattered, which obviously
+
+175
+00:18:31,280 --> 00:18:34,400
+if the light gets scattered you're not going to be able to see what's on the other side of the glass.
+
+176
+00:18:34,400 --> 00:18:39,760
+So light that's coming in from the sun might not actually be as efficient in the solar panel
+
+177
+00:18:39,760 --> 00:18:44,560
+or you're not going to be able to see what your phone is trying to show you. But on the other side
+
+178
+00:18:44,560 --> 00:18:51,280
+of that, you want the glass to be very easy to clean, which was this term super omnipobic glass.
+
+179
+00:18:51,280 --> 00:18:56,800
+We don't want oil or sand in the case of solar panels, oil in the case of your fingerprints on
+
+180
+00:18:56,800 --> 00:19:00,240
+your computer screen. You don't want that stick into the glass. And if it does touch the glass,
+
+181
+00:19:00,240 --> 00:19:04,800
+you want it to be wiped right off very quickly, not to need some very harshest stringent to get it
+
+182
+00:19:04,800 --> 00:19:09,120
+off of the solar panels. But these things are at odds. I mean, when you think to yourself,
+
+183
+00:19:09,120 --> 00:19:13,280
+what sort of thing does oil not stick to? Gee, a cooking pan. Could I make my phone out of a
+
+184
+00:19:13,280 --> 00:19:17,840
+cooking pan? Teflon? No, obviously you can't do that. So when you try to maximize one metric,
+
+185
+00:19:17,840 --> 00:19:22,640
+you're hurting the other metric. And that sort of balance that understanding the exploration
+
+186
+00:19:22,640 --> 00:19:29,280
+of how the decisions you make demand these trade-offs in your resulting models or your resulting
+
+187
+00:19:29,280 --> 00:19:36,160
+solar panels or whatever. That's a really key part of what I'd call the modern optimization
+
+188
+00:19:36,160 --> 00:19:43,680
+process or maybe the modern intelligent experimentation process. So you formulated your problem
+
+189
+00:19:43,680 --> 00:19:51,680
+identified the things you care about and your constraints. You've identified the
+
+190
+00:19:52,640 --> 00:20:01,440
+relationship as best you can between the knobs and dials you have and the quantities
+
+191
+00:20:01,440 --> 00:20:09,680
+that you care about. And then I'm imagining the next step is some type of optimization approach.
+
+192
+00:20:09,680 --> 00:20:19,680
+And maybe the easiest one is like, hey, we'll just try every value of every knob and write down
+
+193
+00:20:19,680 --> 00:20:26,480
+what the outputs are and see where we get, but that is quite expensive. And so then we can get
+
+194
+00:20:26,480 --> 00:20:30,960
+more sophisticated approach. That's the crux of the problem. There it is. No, but I think you've
+
+195
+00:20:30,960 --> 00:20:36,000
+hit the nail squarely on the head. At the end of the day, if you want to find out what works best,
+
+196
+00:20:36,000 --> 00:20:42,480
+try a bunch of things, whichever works the best is the winner. And realistically, that will work.
+
+197
+00:20:42,480 --> 00:20:48,720
+That absolutely will work and every day of the week people do this all the time. How do you
+
+198
+00:20:48,720 --> 00:20:53,360
+pick the toothpaste you like the best? I don't know about you. I try this toothpaste. I try this
+
+199
+00:20:53,360 --> 00:20:57,200
+toothpaste. I try this eventually one of them I like and I'm like, okay, I'll take that toothpaste.
+
+200
+00:20:57,200 --> 00:21:04,720
+That's fine. I think that that strategy is a perfectly reasonable strategy in certain circumstances.
+
+201
+00:21:04,720 --> 00:21:11,920
+But as we get to these more complicated decision spaces, as we get to a point where we're trying
+
+202
+00:21:11,920 --> 00:21:18,080
+to design coffee mug. Now we're talking about not just the shape, but we're also talking about maybe
+
+203
+00:21:18,080 --> 00:21:24,960
+the material. We're talking about how hot it's put into the fire for. We're talking about the color
+
+204
+00:21:24,960 --> 00:21:28,880
+on the outside. You're talking about increasingly complicated space. You just can't try them all.
+
+205
+00:21:28,880 --> 00:21:37,760
+You absolutely cannot try them all. So you need some intelligent strategy to search the space.
+
+206
+00:21:38,720 --> 00:21:45,840
+And in particular, the way that strategy is going to be intelligent is by figuring out
+
+207
+00:21:46,400 --> 00:21:52,960
+whatever relationships exist between the parameters you're studying and the metric that you're
+
+208
+00:21:52,960 --> 00:21:59,440
+interested in optimizing. And that's really the difficult point. You mentioned earlier, could somebody
+
+209
+00:21:59,440 --> 00:22:06,560
+go through and define this relationship? Absolutely. Maybe that is possible. But in most circumstances,
+
+210
+00:22:06,560 --> 00:22:10,720
+that's not going to be possible for all sorts of reasons. Most of these objectives are very noisy.
+
+211
+00:22:10,720 --> 00:22:15,440
+In most of these problems, you have some limited amount of precision with which you can set these
+
+212
+00:22:15,440 --> 00:22:21,600
+parameters. In reality, the metric you're trying to optimize is probably not the metric that you
+
+213
+00:22:21,600 --> 00:22:28,000
+are doing the optimization on. If I run a computer simulation for something, I'm doing pretty well
+
+214
+00:22:28,000 --> 00:22:32,160
+as far as approximating the real world, but it's not the real world. When I go through to actually
+
+215
+00:22:32,160 --> 00:22:38,560
+manufacture or when I go through to actually put my model in production tomorrow or the day after,
+
+216
+00:22:38,560 --> 00:22:42,560
+tomorrow and the day after are going to act differently than today. So even if I have the best
+
+217
+00:22:42,560 --> 00:22:48,080
+data possible, it's just not going to be possible to actually optimize the thing that I'm trying to
+
+218
+00:22:48,080 --> 00:22:54,400
+study. So as a result, we're going to need to move as quickly as we can in our optimization process
+
+219
+00:22:54,400 --> 00:23:00,560
+so that we can figure out the best thing for today and then retune in the future as new information
+
+220
+00:23:00,560 --> 00:23:04,880
+pops up, as new strategies pop up, as I want to design something different because it turns out
+
+221
+00:23:04,880 --> 00:23:10,880
+customer taste of change. All of these things are key elements in what is going to be a successful
+
+222
+00:23:10,880 --> 00:23:16,960
+optimization process. And what we do internally in what many of these Bayesian optimization methods
+
+223
+00:23:16,960 --> 00:23:23,680
+use is some sort of modeling strategies we talked about basically ML on the inside to come up with
+
+224
+00:23:23,680 --> 00:23:29,040
+what this relationship between parameters and metrics are. The better we can understand that
+
+225
+00:23:29,040 --> 00:23:34,960
+relationship, the more quickly we can point ourselves towards where the high performing outcomes are.
+
+226
+00:23:35,600 --> 00:23:42,880
+I want to maybe take a digress for a second kind of returning back to the earlier
+
+227
+00:23:42,880 --> 00:23:52,720
+conversation around machine learning versus optimization as approaches to solving a particular
+
+228
+00:23:52,720 --> 00:23:59,280
+problem. Is optimization something that you might apply when you haven't collected as much
+
+229
+00:23:59,280 --> 00:24:05,280
+historical data relative to machine learning? Or does that not have anything to do with it?
+
+230
+00:24:05,280 --> 00:24:14,240
+Ultimately, when you're trying to build the mug that has the strength that you want given
+
+231
+00:24:14,240 --> 00:24:20,720
+whatever your constraints, there's some parameters that you're trying to figure out that optimize
+
+232
+00:24:20,720 --> 00:24:29,040
+the strength and whatever other targets you have. What is it that says that you shouldn't try to
+
+233
+00:24:29,040 --> 00:24:36,400
+machine learn those parameters? Rather, you should optimize and find those parameters that way.
+
+234
+00:24:36,400 --> 00:24:45,360
+It is very much this desire for sample efficiency. And you could absolutely test one design,
+
+235
+00:24:45,360 --> 00:24:53,040
+the next design, the next design, the next design. You could try and do this for 4,000 times,
+
+236
+00:24:53,040 --> 00:24:59,040
+8,000 times, 50,000 times. However many times it would take to learn your whatever it is,
+
+237
+00:24:59,040 --> 00:25:03,440
+XGBoost model, neural network, whatever. And then, of course, once you have an XGBoost model,
+
+238
+00:25:03,440 --> 00:25:09,040
+neural network, optimizing that, finding the optimal value for that, it's very, very cheap because
+
+239
+00:25:09,040 --> 00:25:14,320
+evaluating an XGBoost model, neural network, support vector, and evaluating that's very cheap.
+
+240
+00:25:14,320 --> 00:25:18,800
+The key here is that the cost of each piece of data is so high.
+
+241
+00:25:18,800 --> 00:25:23,680
+So it's the same thing. It's the same thing. You know, as with machine learning, you need a label
+
+242
+00:25:23,680 --> 00:25:30,720
+data set. Oh, very true. These are your inputs. Yes. This is your strength. You know, this is
+
+243
+00:25:30,720 --> 00:25:39,360
+your whatever. Those are your out your labels. Yes. And for the types of physical world problems
+
+244
+00:25:39,360 --> 00:25:44,720
+that we're talking about, primarily, you just don't have that. Exactly. Or if you do, it's very small.
+
+245
+00:25:44,720 --> 00:25:51,440
+It's a very small set. And you don't have the amount of time required to make a very large data set.
+
+246
+00:25:51,440 --> 00:25:55,440
+Yeah. Exactly right. Forgive me. That should have been obvious, but it wasn't falling.
+
+247
+00:25:55,440 --> 00:26:01,680
+No, no, no, no, no, no. That's a great point. And let me tie that in with a small branch of
+
+248
+00:26:01,680 --> 00:26:05,920
+machine, I shouldn't say a small branch, but a branch of machine learning called active learning.
+
+249
+00:26:06,480 --> 00:26:14,000
+Active learning is very much a key driving force behind Bayesian optimization.
+
+250
+00:26:14,000 --> 00:26:20,080
+Right. In an active learning setting, you are trying to do machine learning on this relationship
+
+251
+00:26:20,080 --> 00:26:25,120
+between parameters and metrics, but you're doing it in such a way that you acquire each piece of
+
+252
+00:26:25,120 --> 00:26:29,760
+data sort of in a sequential fashion or maybe in batches, but you don't have all the data at the
+
+253
+00:26:29,760 --> 00:26:35,120
+start. You're trying to accumulate more data. The goal there, though, is to exactly as you're
+
+254
+00:26:35,120 --> 00:26:42,800
+talking about learn this model. The goal in Bayesian optimization is to sequentially accumulate data,
+
+255
+00:26:42,800 --> 00:26:48,560
+but not to learn the model only to learn about the optimum or high performing outcomes.
+
+256
+00:26:48,560 --> 00:26:55,440
+Even if our internal models are very bad, it doesn't matter as long as they're pointing us
+
+257
+00:26:55,440 --> 00:26:59,920
+in the right direction, as long as they're identifying high performing outcomes, the model itself
+
+258
+00:26:59,920 --> 00:27:05,840
+could actually be garbage, just totally terrible, totally useless, not predictive in any fashion,
+
+259
+00:27:05,840 --> 00:27:10,880
+as long as it points you in the right direction. And that's, I think, the key benefit of applying
+
+260
+00:27:10,880 --> 00:27:16,400
+Bayesian optimization, as opposed to, let's say, active learning, is that you have a different
+
+261
+00:27:16,400 --> 00:27:21,920
+goal. If your goal is a simpler goal, find the optimum, that's simpler than learn the whole
+
+262
+00:27:21,920 --> 00:27:27,600
+function over the whole domain. And you can do it in a more sample efficient fashion because of that.
+
+263
+00:27:28,720 --> 00:27:34,720
+That was super helpful. I'm remembering back to my conversation with Gustavo. I don't remember
+
+264
+00:27:34,720 --> 00:27:44,880
+if it was, if this was part of the published interview or a prior pre-call. But I remember not
+
+265
+00:27:46,880 --> 00:27:51,040
+really understanding the connection with active learning and thinking that it was a bit of a
+
+266
+00:27:51,040 --> 00:27:56,320
+stretch, like, yeah, or just not like, is that kind of a marketing association? Or like, what's the
+
+267
+00:27:56,320 --> 00:28:03,120
+relationship between optimization and active learning? But what you said just help kind of frame
+
+268
+00:28:03,120 --> 00:28:14,880
+that for me with, in both cases, you're kind of doing sequential optimization, estimate, you're
+
+269
+00:28:17,120 --> 00:28:24,320
+trying to go from your inputs to your outputs sequentially and evaluating how close you got to
+
+270
+00:28:24,320 --> 00:28:31,360
+where you're trying to go and feeding them back to help you determine where to go next. And in
+
+271
+00:28:31,360 --> 00:28:39,680
+the active learning case, your goal is to create a model that you can then take and apply independent
+
+272
+00:28:39,680 --> 00:28:45,600
+of this incremental process in your optimization case. You just want the values at the end that tell
+
+273
+00:28:45,600 --> 00:28:51,280
+you what to go try in the real world. Exactly right. No, you've nailed it. And these aren't,
+
+274
+00:28:52,400 --> 00:28:56,800
+I think they're very closely related communities. I think the people who are doing active learning
+
+275
+00:28:56,800 --> 00:29:00,800
+are very closely related to people who are doing optimization. I think there's a minor offshoot
+
+276
+00:29:00,800 --> 00:29:05,520
+of active learning, this active search topic that Roman Garnett has been working on for a little
+
+277
+00:29:05,520 --> 00:29:12,320
+bit, which is like optimization, except that your metric is not numerical, it's a zero one metric.
+
+278
+00:29:12,320 --> 00:29:18,160
+So all you're trying to find is the highest number of successes possible. You might hear people
+
+279
+00:29:18,160 --> 00:29:22,640
+talk about every once in a while active differential inference. I need to be able to understand the
+
+280
+00:29:22,640 --> 00:29:29,360
+state of the world in as sample a fashion, a sample efficient fashion as possible. In particular,
+
+281
+00:29:29,360 --> 00:29:33,120
+this pops up sometimes in medical diagnostics. If you're running a test on somebody,
+
+282
+00:29:33,120 --> 00:29:37,840
+especially let's say a test that has some sort of radiological element to it, you want to do so
+
+283
+00:29:37,840 --> 00:29:44,000
+in as sample efficient a fashion as possible. You can use these active differential inference
+
+284
+00:29:44,000 --> 00:29:49,920
+methods for this. There's a field called Bayesian quadrature that's the active estimation of
+
+285
+00:29:49,920 --> 00:29:55,120
+integrals through exactly the same way. Let me accumulate some data. Let me do so in a way,
+
+286
+00:29:55,120 --> 00:30:00,960
+which gets me the most accurate integral, the most accurate understanding of the world as fast
+
+287
+00:30:00,960 --> 00:30:05,680
+as possible. The only question is what's your goal? Is it learning? Is it optimization? Is it
+
+288
+00:30:05,680 --> 00:30:11,520
+inference? Is it quadrature? Is it search? These are all parts of, in my mind, the same spoke.
+
+289
+00:30:12,480 --> 00:30:18,880
+Now, could you say that this is all strongly related to sequential decision making and in particular
+
+290
+00:30:18,880 --> 00:30:24,560
+the topic is sequential is going to make it maybe in the real world? I would argue, yes,
+
+291
+00:30:24,560 --> 00:30:28,960
+some people in sequential decision making community may argue no reinforcement learning is a different
+
+292
+00:30:28,960 --> 00:30:35,840
+thing. I think that in reality, I think that many of these things are closely related,
+
+293
+00:30:35,840 --> 00:30:42,240
+but they do have practical enough differences, perhaps, that they're certainly worthy of studying
+
+294
+00:30:42,240 --> 00:30:46,480
+in and of themselves. I don't think there's any need to merge all of these topics, but I do think
+
+295
+00:30:46,480 --> 00:30:52,560
+that knowing about the literature in each of these fields has helped each of these fields progress
+
+296
+00:30:52,560 --> 00:30:55,280
+faster than they would if they were just coistered off on their own.
+
+297
+00:30:56,720 --> 00:31:05,840
+So we're starting to get to, where I hope we get to, which is kind of like the, we've defined
+
+298
+00:31:05,840 --> 00:31:12,320
+optimization kind of framed it relative to machine learning and we're starting to talk about
+
+299
+00:31:12,320 --> 00:31:18,240
+like what's the research frontier in optimization? What are the open questions? I mean, optimization is
+
+300
+00:31:18,240 --> 00:31:26,480
+way older than machine learning, right? And so it's a much more mature field
+
+301
+00:31:30,000 --> 00:31:35,280
+beyond kind of mentioning, you know, some adjacent areas like you did, is there a way for you to
+
+302
+00:31:35,280 --> 00:31:43,680
+characterize like what's almost taxonomized kind of the, you know, the research frontiers of
+
+303
+00:31:43,680 --> 00:31:48,240
+optimization, like how and how are folks thinking about what are the interesting open questions
+
+304
+00:31:48,240 --> 00:31:57,440
+in optimization? What I'd say is I think that there is a division of the optimization community,
+
+305
+00:31:57,440 --> 00:32:03,840
+and for the record, it lives also within a lot of different communities. I think that a large chunk
+
+306
+00:32:03,840 --> 00:32:08,720
+of people who would say they do optimization and do research on optimization live purely within
+
+307
+00:32:08,720 --> 00:32:13,920
+mathematics departments, they're thinking about what I would call sort of the classical mathematical
+
+308
+00:32:13,920 --> 00:32:18,160
+optimization. And you're right, that predates machine learning, that predates statistics, that
+
+309
+00:32:18,160 --> 00:32:22,240
+predates, well, they're statistics, the concept, but at least the field of statistics starting,
+
+310
+00:32:22,240 --> 00:32:26,560
+let's say 1910 or something like that. So yeah, there are people who have been thinking about
+
+311
+00:32:26,560 --> 00:32:34,400
+optimization since forever Newton's method is optimization. So I think that you can, you can look
+
+312
+00:32:34,400 --> 00:32:41,760
+at that and say that there is a massive field, a huge bunch of literature, continuing research,
+
+313
+00:32:41,760 --> 00:32:46,720
+thinking about different implications of smoothness, quasi-convexity, various different things.
+
+314
+00:32:47,360 --> 00:32:51,760
+I think that you've got another branch of the community that is optimization, but thinks of it
+
+315
+00:32:51,760 --> 00:32:56,000
+in terms of what's called mathematical programming. And those people may live in a math department,
+
+316
+00:32:56,000 --> 00:33:03,040
+they may live in operations research groups, they many different places can be thinking about linear
+
+317
+00:33:03,040 --> 00:33:07,760
+programming, dynamic programming, stochastic programming, all those. And quadratic programming,
+
+318
+00:33:07,760 --> 00:33:13,840
+exactly right, mixed integer nonlinear programming. And in many cases, those people are sometimes
+
+319
+00:33:13,840 --> 00:33:18,880
+addressing problems that may be very close to some of these problems that we might address with
+
+320
+00:33:18,880 --> 00:33:22,880
+sample efficient methods, but the goal may be different. In the case of doing mixed integer nonlinear
+
+321
+00:33:22,880 --> 00:33:29,040
+programming, the goal may be prove that I have the answer. I have the answer with a perfect guarantee
+
+322
+00:33:29,040 --> 00:33:35,680
+or I have a answer which is within blank of the true answer with some guarantee or something like
+
+323
+00:33:35,680 --> 00:33:41,200
+that. I think that both of those are sets of optimization. And then I think there's this topic,
+
+324
+00:33:41,200 --> 00:33:46,640
+maybe that we're working on now, which is more of the the quote-unquote black box optimization
+
+325
+00:33:46,640 --> 00:33:51,040
+community, which is a bunch of evolutionary algorithms. And of course, those evolutionary
+
+326
+00:33:51,040 --> 00:33:56,240
+algorithms are, I think, often very poorly represented at ML communities, but are a massive
+
+327
+00:33:56,240 --> 00:34:01,520
+bunch of literature and there's some outstanding work going on there right now in the evolutionary
+
+328
+00:34:01,520 --> 00:34:08,400
+field. And then you've got these statistically motivated sample efficient optimization methods,
+
+329
+00:34:08,400 --> 00:34:15,440
+which are probably the most common ones you'll see talked about by myself and in some of the
+
+330
+00:34:15,440 --> 00:34:19,280
+context of the literature that I'm referring to. I think obviously you're still seeing a huge
+
+331
+00:34:19,280 --> 00:34:24,960
+amount of gradient descent literature in the NURPS community. So that's sort of the taxonomy
+
+332
+00:34:24,960 --> 00:34:29,440
+that I'd split it on. Are you doing something that's yet in this in this group here that is
+
+333
+00:34:30,320 --> 00:34:34,640
+gradient descent? Are you doing mathematical programming? Are you doing something evolutionary
+
+334
+00:34:34,640 --> 00:34:38,880
+or are you doing something in one of these sample efficient categories, the Bayesian optimization
+
+335
+00:34:38,880 --> 00:34:48,240
+category? Got it, got it. And you mentioned NURPS, are you kind of up to date on some of the
+
+336
+00:34:48,240 --> 00:34:52,080
+optimization conversations that are happening at NURPS? What does that look like?
+
+337
+00:34:52,080 --> 00:34:58,480
+Yeah, and I think that in particular, I can characterize how I'm thinking about it, especially
+
+338
+00:34:58,480 --> 00:35:03,360
+a lot with the workshops. See, there's a workshop that is on optimization in ML. It's literally
+
+339
+00:35:03,360 --> 00:35:07,440
+the name of the workshop. They've been having it for a long time, a lot of great research going
+
+340
+00:35:07,440 --> 00:35:14,880
+on there, but that is more focused on either many of these gradient descent style methods or
+
+341
+00:35:14,880 --> 00:35:19,680
+elements of mathematical programming. There are some articles in there that are on more of these
+
+342
+00:35:19,680 --> 00:35:23,840
+sample efficient methods. In particular, I think National University of Singapore had an article
+
+343
+00:35:24,560 --> 00:35:28,080
+or someone from, I shouldn't say the University, someone from National University of Singapore
+
+344
+00:35:28,080 --> 00:35:34,400
+had an article on BIO for a simulation, catlibrating simulation models. That's what it was.
+
+345
+00:35:34,400 --> 00:35:40,480
+So there is some amount in there, but in reality, that workshop I definitely would say is more focused
+
+346
+00:35:40,480 --> 00:35:47,200
+on the gradient, the SCASTIC gradient descent methodologies. I think that you're seeing, though,
+
+347
+00:35:47,200 --> 00:35:54,560
+a widespread of workshops right now, which are trying to take AI out of AI's community and get
+
+348
+00:35:54,560 --> 00:36:00,560
+it out into other segments of the community. There's the ML for physical sciences or ML and the
+
+349
+00:36:00,560 --> 00:36:06,800
+physical sciences workshop. There's the one tackling climate change with machine learning, one of
+
+350
+00:36:06,800 --> 00:36:14,800
+this obviously, not just three timely, but I think is a really exciting opportunity to get out of
+
+351
+00:36:14,800 --> 00:36:20,880
+the AI world and immediately be helping things and have an positive impact. There's the AI for
+
+352
+00:36:20,880 --> 00:36:26,880
+the sciences, or maybe it's called AI for science, workshops as well, which you said, it sounds like,
+
+353
+00:36:26,880 --> 00:36:31,520
+okay, ML for physical sciences, AI for science. What's the difference? I mean, in reality,
+
+354
+00:36:31,520 --> 00:36:36,400
+I think this is just a sort of embarrassment of riches here. There's so many people doing so
+
+355
+00:36:36,400 --> 00:36:43,280
+much great work that we have a lot of different workshops that are on close topics. And I think
+
+356
+00:36:43,280 --> 00:36:50,480
+this is giving us a chance to really encourage participation, not just by the people who have been
+
+357
+00:36:50,480 --> 00:36:56,800
+doing this for a long time, but anybody wants to get in the game. Anybody wants to be taking AI and
+
+358
+00:36:56,800 --> 00:37:03,760
+putting a convolutional known networks or maybe reinforcement learning and put them out in the
+
+359
+00:37:03,760 --> 00:37:08,240
+world there, or people who want to be doing sample efficient stuff, the Bayesian optimization
+
+360
+00:37:08,240 --> 00:37:13,600
+stuff. There's some great papers in some of these workshops on BO. I think there's one from some
+
+361
+00:37:13,600 --> 00:37:20,720
+authors at Shanghai Tiao Tong at the ML and the physical sciences workshop trying to talk about
+
+362
+00:37:20,720 --> 00:37:32,160
+thermal photovoltaics, I think. There was a Carrie Ann Bergen at the AI for sciences workshop.
+
+363
+00:37:32,160 --> 00:37:38,800
+She's part of a panel, but I mean, she's been doing good work recently, especially trying to say,
+
+364
+00:37:38,800 --> 00:37:43,600
+hey, how we're using ML to deal with earthquakes. And as somebody who lives in Hawaii, something I'm
+
+365
+00:37:43,600 --> 00:37:48,000
+very concerned about. I really want to make sure that we're dealing with earthquakes. Well,
+
+366
+00:37:48,000 --> 00:37:53,920
+so I just, I love to see it. It's really exciting for me. And it's exciting to see people out there
+
+367
+00:37:54,880 --> 00:37:59,360
+taking advantage of ML in the sciences, but also specifically, yeah, the sample efficient
+
+368
+00:37:59,360 --> 00:38:04,800
+optimization in the sciences out in the real world, making big things happen. I'm excited.
+
+369
+00:38:05,840 --> 00:38:14,160
+And so a pattern, the, you know, clear pattern here is that when you're trying to apply
+
+370
+00:38:14,160 --> 00:38:22,800
+machine learning in ways that kind of interface with the physical world, optimization,
+
+371
+00:38:24,080 --> 00:38:28,560
+does, would you, is it too strong to say the optimization plays a bigger role or is more important
+
+372
+00:38:28,560 --> 00:38:35,280
+than, you know, when you're optimizing, you know, ad revenue or something that's, you know, purely
+
+373
+00:38:35,280 --> 00:38:42,240
+physical, I'm sorry, digital based. I think, I think everybody's led to have their own opinions
+
+374
+00:38:42,240 --> 00:38:48,000
+about what's the most important thing, the most exciting thing. I know I personally find it
+
+375
+00:38:48,000 --> 00:38:53,280
+incredibly exciting. And as I mentioned before, I didn't grow up in the ML community. I grew up
+
+376
+00:38:53,280 --> 00:39:00,560
+doing theoretically applied mathematics. And what we worked on back in the day was a few different
+
+377
+00:39:00,560 --> 00:39:05,520
+things in particular, some magneto hydrodynamics. And we're seeing, we're seeing even now,
+
+378
+00:39:05,520 --> 00:39:09,840
+nuclear fusion trying to, trying to bubble up, trying to be a little exciting right now.
+
+379
+00:39:09,840 --> 00:39:14,640
+ML is playing a little bit of a role in that. I'm excited by that because, you know, it's,
+
+380
+00:39:15,600 --> 00:39:20,160
+it's a, it's a moment right now. There's a moment where ML is starting to mature and it's
+
+381
+00:39:20,160 --> 00:39:25,840
+starting to see its capabilities expand beyond. Sure, yeah, let's say recommender systems.
+
+382
+00:39:25,840 --> 00:39:31,040
+Now, the people working at whoever using these recommender systems, I am, I guarantee they're
+
+383
+00:39:31,040 --> 00:39:36,000
+excited to make that money. They should be. That is, that is their job. I personally find it
+
+384
+00:39:36,000 --> 00:39:42,320
+incredibly exciting to say, hey, let's get out there and deal with drug discovery, a place where
+
+385
+00:39:42,320 --> 00:39:48,640
+sample efficient optimization, active search in particular has been really exciting so far.
+
+386
+00:39:48,640 --> 00:39:55,120
+I love the idea of dealing with construction and how to make construction more environmentally
+
+387
+00:39:55,120 --> 00:39:59,680
+friendly. There are versions of that problem that can be addressed with sample efficient
+
+388
+00:39:59,680 --> 00:40:06,640
+optimization. And in particular, as we see more and more fields moving away from maybe the,
+
+389
+00:40:06,640 --> 00:40:10,720
+the classical way of doing business where it's just an expert tells you this is what you do and
+
+390
+00:40:10,720 --> 00:40:14,800
+then you do it. And saying, now let's use a data driven approach. And in particular,
+
+391
+00:40:14,800 --> 00:40:19,200
+let's explore the space of possible options. We have to find the one that works the best.
+
+392
+00:40:19,200 --> 00:40:23,120
+That's where sample efficient methodologies is going to play a big role. That's where things
+
+393
+00:40:23,120 --> 00:40:27,440
+like basic optimization are going to play a really, really, really big role because when you're
+
+394
+00:40:27,440 --> 00:40:34,800
+talking about new strategies for construction or new, new flows for a canal or how to deal with
+
+395
+00:40:35,680 --> 00:40:39,680
+displacement of wildlife or any number of different things. We talked about solar panels before.
+
+396
+00:40:39,680 --> 00:40:46,240
+How to best design solar panels or as energy efficient as possible. These are problems that can take,
+
+397
+00:40:46,240 --> 00:40:51,040
+I mean, for some of these things, you're talking about days, weeks, months to test some of these
+
+398
+00:40:51,040 --> 00:40:56,960
+hypotheses. You need to do as much as possible in the computer at first. And even those simulations,
+
+399
+00:40:56,960 --> 00:41:01,440
+those numerical simulations can be on the order of hours or days to run these climate simulations
+
+400
+00:41:01,440 --> 00:41:06,720
+that are being run at NCAR right now. You're talking about months for some of these simulations
+
+401
+00:41:06,720 --> 00:41:12,320
+to try and predict the impact of additional rainfall in certain parts of the world or something
+
+402
+00:41:12,320 --> 00:41:18,800
+like that. So you really need the sample efficient methodology. So as to help guide what is going
+
+403
+00:41:18,800 --> 00:41:24,080
+to be put into production in the eventual real version world, what we're actually going to go out
+
+404
+00:41:24,080 --> 00:41:28,080
+and test because you only have so many shots of that. You only, if each of those tests that you're
+
+405
+00:41:28,080 --> 00:41:32,320
+going to run is going to take a year, three years, five years or something like that, you really need
+
+406
+00:41:32,320 --> 00:41:38,640
+to have the right guidance to put that in play. And that's, for me, that's where the optimization,
+
+407
+00:41:38,640 --> 00:41:43,280
+the Bayesian optimization, the active learning, the sample efficient methodologies are just going
+
+408
+00:41:43,280 --> 00:41:48,000
+to play a massive role. And you're already seeing it at the workshops right now. You're starting
+
+409
+00:41:48,000 --> 00:41:54,240
+to see it, especially in these application journals. In each of these fields, you're seeing articles
+
+410
+00:41:54,240 --> 00:41:59,920
+being published, Bayesian optimization, intelligent ML, sample efficient ML, a surrogate assisted
+
+411
+00:41:59,920 --> 00:42:08,320
+optimization for construction, for manufacturing, for safety for vehicles. You're seeing it all
+
+412
+00:42:08,320 --> 00:42:12,640
+over the place. And it's just, it's a great time. It's a great time to be in the field. I think
+
+413
+00:42:12,640 --> 00:42:17,680
+we have a chance to do some really cool stuff. And I'm lucky to be a part of a company that wants
+
+414
+00:42:17,680 --> 00:42:24,480
+to be a part of that. I think I ran into that name collision overloading of optimization again
+
+415
+00:42:24,480 --> 00:42:33,040
+and asking that question. What I was trying to point at is there's this application of sample
+
+416
+00:42:33,040 --> 00:42:39,200
+efficiency. You've got some machine learning problem. You want to optimize that problem.
+
+417
+00:42:39,200 --> 00:42:43,600
+You know, hyperparameter optimization is a way to do that. You want to do that as efficiently
+
+418
+00:42:43,600 --> 00:42:49,920
+as possible. There's an element of sample efficiency there. And that's applicable whether you're
+
+419
+00:42:49,920 --> 00:42:56,400
+dealing with, you know, the ad optimization problem, you know, pure digital or not. Then there's
+
+420
+00:42:56,400 --> 00:43:05,280
+this other type of problem that the, again, for lack of a clearer way to articulate this,
+
+421
+00:43:06,400 --> 00:43:14,880
+seems to be highly correlated with real world and expensive experimentation. And I'm thinking of
+
+422
+00:43:14,880 --> 00:43:21,760
+my recent interview with Kim Branson, who's the global head of AI at GlaxoSmithCline. And he,
+
+423
+00:43:21,760 --> 00:43:31,440
+you know, the thing he's most excited about them having built is this data driven experimentation
+
+424
+00:43:31,440 --> 00:43:36,960
+process because they can't just run all the experiments. It's too expensive. So they have to
+
+425
+00:43:36,960 --> 00:43:44,720
+use data to guide the way, you know, to guide their scientists, you know, work in the lab. And
+
+426
+00:43:46,400 --> 00:43:51,040
+and that's a, it's a different, it's still sample efficiency, but it's a different kind of
+
+427
+00:43:51,040 --> 00:43:57,200
+sample efficiency. It's, you know, it's kind of this, you know, intelligent experimentation is
+
+428
+00:43:57,200 --> 00:44:09,360
+one way to to think about it. It's in a sense, it's, yeah, I'm wanting to like, think about it
+
+429
+00:44:09,360 --> 00:44:16,320
+in terms of the relationship between, I want to think about it like on this side, maybe ML is
+
+430
+00:44:16,320 --> 00:44:20,880
+the front end and optimization is the backend and here optimization is the front end and ML is
+
+431
+00:44:20,880 --> 00:44:28,240
+the backend. I don't know if that is what I would say is. And in this case, maybe there is a bit
+
+432
+00:44:28,240 --> 00:44:33,120
+of a backend front end relationship. Obviously, I have no idea what the outstanding researchers at
+
+433
+00:44:33,120 --> 00:44:37,920
+GlaxoSmithCline are working on internally right now, but I'm going to, you know, not dissimilar
+
+434
+00:44:37,920 --> 00:44:41,840
+from the materials problem. I think exactly right. I think exactly right. And I think that
+
+435
+00:44:41,840 --> 00:44:54,880
+there's, there's not a, there's not a massive sort of disconnect here between how this ML model
+
+436
+00:44:54,880 --> 00:45:00,960
+is being built and optimization. The question is, how is this ML model then sort of being used?
+
+437
+00:45:00,960 --> 00:45:07,520
+And let's say you have some sort of ML model talking about different design methodologies or,
+
+438
+00:45:07,520 --> 00:45:13,680
+and I think for many of these sort of traditional engineering fields, what you have is not an ML model,
+
+439
+00:45:13,680 --> 00:45:18,880
+what you have is probably a PDE simulation, a differential equation simulation, some sort of
+
+440
+00:45:19,440 --> 00:45:26,560
+computational simulation, which for them is maybe taking taking the place of this ML model that
+
+441
+00:45:26,560 --> 00:45:33,520
+somebody else may have to construct in the absence of any of these abinitio principles that guide
+
+442
+00:45:33,520 --> 00:45:39,680
+the development of a PDE model or some maybe some sort of stochastic simulation. So in both of those
+
+443
+00:45:39,680 --> 00:45:46,960
+circumstances though, the question is how do you use that model to tell your, your people in the
+
+444
+00:45:46,960 --> 00:45:53,280
+wet lab, your people out there going the construction, hey, why don't you try this next? What is the next
+
+445
+00:45:53,280 --> 00:45:58,880
+best thing to try? What is the, what is the best possible thing to try? So, so you are still using
+
+446
+00:45:58,880 --> 00:46:05,120
+maybe an ML model which is meant to predict how two chemicals are going to interact with each other,
+
+447
+00:46:05,120 --> 00:46:09,760
+or you're using your numerical simulation to predict, hey, I've designed this airplane wing,
+
+448
+00:46:09,760 --> 00:46:15,680
+this is how much turbulence it's going to generate or something like that. And you use this,
+
+449
+00:46:15,680 --> 00:46:23,280
+and you, you conduct your, I think, Bayesian optimization on the outcome of these ML models to say,
+
+450
+00:46:23,280 --> 00:46:29,680
+hey, here is what the, the next best thing to go out and actually build is. Here's, here's the,
+
+451
+00:46:29,680 --> 00:46:35,680
+the one or three or five things to spend the next year manufacturing and testing under the hope
+
+452
+00:46:35,680 --> 00:46:40,400
+that one of them is going to end up being the winner. So maybe to some degree, there's a,
+
+453
+00:46:40,400 --> 00:46:45,920
+a bit of a multi-scale element here. You've got your ML model, that takes time to build,
+
+454
+00:46:45,920 --> 00:46:50,160
+but then predictions from it can come quickly. Same thing with the numerical simulation,
+
+455
+00:46:50,160 --> 00:46:54,000
+predictions from that can come quickly or at least faster than the actual manufacturing process.
+
+456
+00:46:54,000 --> 00:47:00,320
+So you run your optimization, I think, oftentimes on the, the outcome of the ML model or on the
+
+457
+00:47:00,320 --> 00:47:04,240
+outcome of your numerical simulation, and that guides you to, hey, this is what you should spend
+
+458
+00:47:04,240 --> 00:47:15,840
+the next year do. Awesome, awesome. Very cool stuff. Very, very cool stuff and helped me kind of
+
+459
+00:47:15,840 --> 00:47:21,360
+think through maybe, I don't know, this interview may be more than, than some others is kind of me
+
+460
+00:47:21,920 --> 00:47:28,080
+trying to reconcile a lot of conversations I've had recently and I appreciate you participating
+
+461
+00:47:28,080 --> 00:47:34,800
+in that with me. Sure, it's my pleasure. And, you know, I absolutely love talking about this topic
+
+462
+00:47:34,800 --> 00:47:42,720
+and I especially love being able to talk with you about this topic. Hey, thanks so much.
+
+463
+00:47:42,720 --> 00:47:49,680
+And I appreciate you coming on the show and sharing with us. Absolutely. Thank you.
+

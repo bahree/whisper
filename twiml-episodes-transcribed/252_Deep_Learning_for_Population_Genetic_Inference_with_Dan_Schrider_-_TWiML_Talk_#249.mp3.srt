@@ -1,0 +1,2276 @@
+1
+00:00:00,000 --> 00:00:16,320
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+
+2
+00:00:16,320 --> 00:00:21,480
+people, doing interesting things in machine learning and artificial intelligence.
+
+3
+00:00:21,480 --> 00:00:31,720
+I'm your host Sam Charrington.
+
+4
+00:00:31,720 --> 00:00:36,240
+Today we're joined by Dan Schreider, Assistant Professor in the Department of Genetics at
+
+5
+00:00:36,240 --> 00:00:39,840
+the University of North Carolina at Chapel Hill.
+
+6
+00:00:39,840 --> 00:00:45,320
+My discussion with Dan starts with an overview of population genomics and from there, digs
+
+7
+00:00:45,320 --> 00:00:50,600
+into his application of machine learning in the field, allowing us to, for example, better
+
+8
+00:00:50,600 --> 00:00:56,480
+understand population size changes and gene flow from DNA sequences.
+
+9
+00:00:56,480 --> 00:01:01,720
+We then dig into Dan's recent paper, the unreasonable effectiveness of convolutional neural networks
+
+10
+00:01:01,720 --> 00:01:07,320
+in population genetic inference, which was published in the molecular biology and evolution
+
+11
+00:01:07,320 --> 00:01:08,320
+journal.
+
+12
+00:01:08,320 --> 00:01:13,800
+The paper examines the idea that CNNs are capable of outperforming expert derived statistical
+
+13
+00:01:13,800 --> 00:01:17,920
+methods for some key problems in the field.
+
+14
+00:01:17,920 --> 00:01:23,800
+Before we dive in, a quick thanks to our friends at Pegasystems, sponsors of today's show.
+
+15
+00:01:23,800 --> 00:01:28,240
+Pegaworld, the company's annual digital transformation conference, which will be held
+
+16
+00:01:28,240 --> 00:01:34,360
+at the MGM Grand in Las Vegas from June 2nd to 5th, is just a couple of months away now.
+
+17
+00:01:34,360 --> 00:01:39,600
+I'll be attending the event as I did last year and will once again be presenting.
+
+18
+00:01:39,600 --> 00:01:43,640
+In addition to hearing from me, the event is a great opportunity to learn how AI has
+
+19
+00:01:43,640 --> 00:01:48,360
+applied to the customer experience at real-pecker customers.
+
+20
+00:01:48,360 --> 00:01:54,360
+As a Twimble listener, you can use the promo code Twimble19 for $200 off of your registration.
+
+21
+00:01:54,360 --> 00:01:56,760
+Again, that code is Twimble19.
+
+22
+00:01:56,760 --> 00:01:58,320
+Hope to see you there.
+
+23
+00:01:58,320 --> 00:02:00,240
+And now on to the show.
+
+24
+00:02:00,240 --> 00:02:02,560
+Alright, everyone.
+
+25
+00:02:02,560 --> 00:02:04,480
+I am on the line with Dan Schreider.
+
+26
+00:02:04,480 --> 00:02:10,200
+Dan is an assistant professor in the Department of Genetics at the University of North Carolina
+
+27
+00:02:10,200 --> 00:02:11,480
+at Chapel Hill.
+
+28
+00:02:11,480 --> 00:02:14,280
+Dan, welcome to this week in Machine Learning and AI.
+
+29
+00:02:14,280 --> 00:02:15,280
+Hi, Sam.
+
+30
+00:02:15,280 --> 00:02:16,280
+Thanks for having me.
+
+31
+00:02:16,280 --> 00:02:17,280
+Awesome.
+
+32
+00:02:17,280 --> 00:02:18,760
+It's great to have you on the show.
+
+33
+00:02:18,760 --> 00:02:25,440
+So you have an undergraduate degree in computer science, but you are now an evolutionary
+
+34
+00:02:25,440 --> 00:02:26,440
+biologist.
+
+35
+00:02:26,440 --> 00:02:31,560
+Can you tell us about that transition and how it led you to work in machine learning?
+
+36
+00:02:31,560 --> 00:02:32,560
+Sure.
+
+37
+00:02:32,560 --> 00:02:33,560
+Yeah.
+
+38
+00:02:33,560 --> 00:02:35,160
+So it's actually sort of a series of transitions.
+
+39
+00:02:35,160 --> 00:02:39,280
+And it started when I was in undergrad, I was studying computer science.
+
+40
+00:02:39,280 --> 00:02:43,280
+I got into that field because I liked to write code in high school.
+
+41
+00:02:43,280 --> 00:02:45,840
+I didn't really know what I was going to do with it.
+
+42
+00:02:45,840 --> 00:02:53,240
+And during, I believe, my sophomore year, I started going to seminars about sort of
+
+43
+00:02:53,240 --> 00:02:55,080
+various topics in computational research.
+
+44
+00:02:55,080 --> 00:02:57,600
+And I heard about this thing called bioinformatics.
+
+45
+00:02:57,600 --> 00:03:02,280
+And it turned out that you could write code to do research in biology.
+
+46
+00:03:02,280 --> 00:03:03,680
+And I thought that sounded amazing.
+
+47
+00:03:03,680 --> 00:03:07,760
+I always sort of liked the idea of being a scientist, though I didn't know much about
+
+48
+00:03:07,760 --> 00:03:09,240
+biology at the time.
+
+49
+00:03:09,240 --> 00:03:15,960
+And the night after that seminar, I immediately started looking into taking biology courses
+
+50
+00:03:15,960 --> 00:03:17,880
+and sort of shifting focus.
+
+51
+00:03:17,880 --> 00:03:25,680
+And from that moment forward, I was training to become a biological researcher as well as
+
+52
+00:03:25,680 --> 00:03:29,240
+a, you know, someone with computer programming skills.
+
+53
+00:03:29,240 --> 00:03:32,800
+I was not sort of keen on the idea of being a software engineer.
+
+54
+00:03:32,800 --> 00:03:38,640
+And yeah, when I heard that, oh, someone like me can, you know, be a biologist.
+
+55
+00:03:38,640 --> 00:03:39,880
+I thought that was really cool.
+
+56
+00:03:39,880 --> 00:03:42,200
+So I started doing that.
+
+57
+00:03:42,200 --> 00:03:48,760
+And when I wrapped up my degree, I decided to stay at Indiana University and started working
+
+58
+00:03:48,760 --> 00:03:53,880
+there with Matthew Hahn, who is my PhD advisor there.
+
+59
+00:03:53,880 --> 00:04:03,040
+And our area of research was population genetics, which is a subfield of evolutionary biology
+
+60
+00:04:03,040 --> 00:04:11,360
+where you're sort of looking at the evolutionary dynamics of gene sequences, especially in
+
+61
+00:04:11,360 --> 00:04:12,960
+the recent evolutionary history.
+
+62
+00:04:12,960 --> 00:04:17,840
+And you do this by looking at sort of the patterns of genetic variation that are present
+
+63
+00:04:17,840 --> 00:04:19,480
+within a population.
+
+64
+00:04:19,480 --> 00:04:24,360
+So you go out to nature, sample a bunch of individuals, sequence their genomes, and see
+
+65
+00:04:24,360 --> 00:04:28,600
+what sense you can make of all the variation there.
+
+66
+00:04:28,600 --> 00:04:32,680
+Started that at the beginning of grad school, fell in love with it, and haven't really looked
+
+67
+00:04:32,680 --> 00:04:42,120
+away since now you might be gathering that this involves a lot of data analysis, a lot
+
+68
+00:04:42,120 --> 00:04:44,360
+of sequence analysis.
+
+69
+00:04:44,360 --> 00:04:49,440
+And we're interested in population genetics with trying to tease apart the different
+
+70
+00:04:49,440 --> 00:04:54,400
+evolutionary forces that are shaping patterns of genetic variation, things like natural
+
+71
+00:04:54,400 --> 00:05:00,280
+selection or demographic events such as population size changes, like population crashes
+
+72
+00:05:00,280 --> 00:05:05,800
+or expansions, and all of these things sort of leave their footprints in patterns of genetic
+
+73
+00:05:05,800 --> 00:05:09,120
+variation within species.
+
+74
+00:05:09,120 --> 00:05:13,760
+So we're sort of interested in going backwards, taking these patterns of variation and making
+
+75
+00:05:13,760 --> 00:05:17,640
+inferences about the evolutionary forces at play.
+
+76
+00:05:17,640 --> 00:05:21,400
+And it turns out that machine learning is a great way to go about doing this because
+
+77
+00:05:21,400 --> 00:05:26,000
+you have a lot of high dimensional data and we're trying to sort of, you know, churn out
+
+78
+00:05:26,000 --> 00:05:28,280
+as much information from it as we can.
+
+79
+00:05:28,280 --> 00:05:29,280
+Very cool.
+
+80
+00:05:29,280 --> 00:05:34,920
+One question that just jumps out at me is you mentioned that your study or maybe evolutionary
+
+81
+00:05:34,920 --> 00:05:42,680
+biology in general is focused on recent changes in genomes.
+
+82
+00:05:42,680 --> 00:05:44,520
+What does that mean in this concept?
+
+83
+00:05:44,520 --> 00:05:46,600
+Yeah, certainly clarify.
+
+84
+00:05:46,600 --> 00:05:51,880
+Population genetics, my sort of subfueled within evolutionary allergies, is often more
+
+85
+00:05:51,880 --> 00:05:55,640
+concerned with recent changes because the recent evolutionary events, because those are
+
+86
+00:05:55,640 --> 00:06:00,400
+the things that shape present-day patterns of genetic variation.
+
+87
+00:06:00,400 --> 00:06:04,080
+And so how recent is that in this context?
+
+88
+00:06:04,080 --> 00:06:09,880
+Yeah, so it depends on the organism and, you know, there's sort of theoretical expectations
+
+89
+00:06:09,880 --> 00:06:15,280
+for sort of how far back in time you can see based on present-day patterns of variation
+
+90
+00:06:15,280 --> 00:06:21,800
+and without going into the theory, the idea is essentially that if you take one, we'll
+
+91
+00:06:21,800 --> 00:06:26,800
+start with one human individual, so humans have two copies of each chromosome, one from
+
+92
+00:06:26,800 --> 00:06:35,720
+mom, one from dad, and if you compare those two copies, you'll see a bunch of differences,
+
+93
+00:06:35,720 --> 00:06:41,600
+and that is because these two chromosomes, at some point in the past, were derived from
+
+94
+00:06:41,600 --> 00:06:46,960
+the same ancestor, but enough time has passed since then that mutations have occurred and
+
+95
+00:06:46,960 --> 00:06:51,800
+everything, and therefore you see differences between the two.
+
+96
+00:06:51,800 --> 00:06:59,680
+So we expect that those two chromosomes will have been separated, you know, on separate
+
+97
+00:06:59,680 --> 00:07:05,600
+sort of evolutionary trajectories for the last two end generations, wherein is the population
+
+98
+00:07:05,600 --> 00:07:09,040
+size, so that's sort of the expectations.
+
+99
+00:07:09,040 --> 00:07:14,720
+For humans that turns into something like a scale of hundreds of thousands of years,
+
+100
+00:07:14,720 --> 00:07:20,760
+and using populations, genetic approaches, you have more resolution to say something about
+
+101
+00:07:20,760 --> 00:07:27,360
+kind of the more medium, the intermediate and recent subset of that range, so up until
+
+102
+00:07:27,360 --> 00:07:32,800
+the last 50,000 years or so, we have a lot more power to see what's going on, and once
+
+103
+00:07:32,800 --> 00:07:36,800
+you get back sort of half a million years ago, you're sort of running out of information
+
+104
+00:07:36,800 --> 00:07:40,240
+there with that, that's sort of the time range that we're talking about.
+
+105
+00:07:40,240 --> 00:07:46,560
+And to put that in some context, half a million years in humans, you know, they can compare
+
+106
+00:07:46,560 --> 00:07:51,840
+that to the time since our split with chimpanzees, which was about five to six million years
+
+107
+00:07:51,840 --> 00:07:52,840
+ago.
+
+108
+00:07:52,840 --> 00:08:00,920
+Maybe walk us through some of the biological concepts that might be handy in kind of
+
+109
+00:08:00,920 --> 00:08:04,880
+exploring what you do and how you apply machine learning.
+
+110
+00:08:04,880 --> 00:08:16,480
+Sure, so I think sort of the key concept is that we're dealing with a sample of genomes,
+
+111
+00:08:16,480 --> 00:08:24,160
+so it's not cost effective to sequence every genome in the population, so we draw some
+
+112
+00:08:24,160 --> 00:08:30,720
+random subset and sample them, and then what we get is a string of letters, A, C, G, and
+
+113
+00:08:30,720 --> 00:08:35,040
+T is for for each of the individuals that we've sequenced, and then we're sort of putting
+
+114
+00:08:35,040 --> 00:08:41,680
+that together into this matrix where each row in the matrix is one genome sequence, and
+
+115
+00:08:41,680 --> 00:08:45,920
+each column in the matrix is one site along that genome as we're moving along.
+
+116
+00:08:45,920 --> 00:08:51,120
+So that the human genome, for example, is about three billion of these sites.
+
+117
+00:08:51,120 --> 00:08:53,800
+Now not every one of those sites will exhibit variations.
+
+118
+00:08:53,800 --> 00:08:57,240
+There's not always useful information there that we're going to look at, but you know,
+
+119
+00:08:57,240 --> 00:09:01,480
+there's a lot of columns in this matrix.
+
+120
+00:09:01,480 --> 00:09:07,880
+So that's sort of the data that we're dealing with, then there are a number of questions
+
+121
+00:09:07,880 --> 00:09:11,920
+that we're interested in answering with that data, one area of research that has been
+
+122
+00:09:11,920 --> 00:09:17,720
+a major focus of mind for the last several years is looking for the signatures of natural
+
+123
+00:09:17,720 --> 00:09:18,720
+selection.
+
+124
+00:09:18,720 --> 00:09:25,320
+So if a new mutation shows up in a population and is harmful, then it will be rapidly
+
+125
+00:09:25,320 --> 00:09:29,840
+removed by natural selection because individuals bearing that mutation will be less likely
+
+126
+00:09:29,840 --> 00:09:31,560
+to reproduce.
+
+127
+00:09:31,560 --> 00:09:37,800
+And therefore in that region of the genome, you might expect to see a deficit of diversity.
+
+128
+00:09:37,800 --> 00:09:44,480
+If on the other hand, a new mutation appears and it's beneficial, then it will rapidly increase
+
+129
+00:09:44,480 --> 00:09:50,200
+in frequency because individuals harboring it are more likely to survive reproduce and
+
+130
+00:09:50,200 --> 00:09:57,120
+leave offspring. So after some number of generations, this mutation has increased in frequency
+
+131
+00:09:57,120 --> 00:10:05,520
+to the point where it has replaced the ancestral version of that site in the genome.
+
+132
+00:10:05,520 --> 00:10:13,720
+And this will also create a sort of distinct characteristic signature of selection that
+
+133
+00:10:13,720 --> 00:10:17,480
+we can try to uncover by using some of these computational techniques.
+
+134
+00:10:17,480 --> 00:10:24,120
+So yeah, there are a whole number of other interesting areas in population genetics that
+
+135
+00:10:24,120 --> 00:10:28,120
+are doing similar types of research.
+
+136
+00:10:28,120 --> 00:10:34,600
+We're taking this sort of input matrix and trying to infer what is going on there.
+
+137
+00:10:34,600 --> 00:10:39,040
+But the natural selection question has been one that's especially near and dear to my
+
+138
+00:10:39,040 --> 00:10:41,960
+heart over the last few years.
+
+139
+00:10:41,960 --> 00:10:51,360
+Does that depend on or assume that you are doing a complete sequence of the genome for the
+
+140
+00:10:51,360 --> 00:10:57,720
+samples that you're working with or are you able to make inferences based on partial
+
+141
+00:10:57,720 --> 00:10:59,280
+sequences as well?
+
+142
+00:10:59,280 --> 00:11:00,800
+You can use partial sequences.
+
+143
+00:11:00,800 --> 00:11:07,520
+In fact, population genetics as an empirical discipline has existed for quite some time
+
+144
+00:11:07,520 --> 00:11:12,480
+long before we were able to sequence entire genomes, especially if organisms like humans
+
+145
+00:11:12,480 --> 00:11:16,320
+where we have this large complex genome.
+
+146
+00:11:16,320 --> 00:11:20,640
+Yeah, there's sort of, we refer to this as kind of a shift from population genetics to
+
+147
+00:11:20,640 --> 00:11:25,480
+population genomics because for much of the field's history, we were interested in what's
+
+148
+00:11:25,480 --> 00:11:31,360
+going on at say one gene rather than looking at patterns of variation across an entire genome.
+
+149
+00:11:31,360 --> 00:11:39,080
+But now with increases and the speed and cost effectiveness of DNA sequencing technologies
+
+150
+00:11:39,080 --> 00:11:43,720
+were now able to look at variation at genome-wide scale.
+
+151
+00:11:43,720 --> 00:11:51,160
+So yeah, you're not limited to cases where you have whole genome data, but it's getting
+
+152
+00:11:51,160 --> 00:11:56,840
+to the point now where anybody can sequence a gene, anybody who has a lab and modest research
+
+153
+00:11:56,840 --> 00:12:01,280
+funding can sequence a fairly large sample of genomes.
+
+154
+00:12:01,280 --> 00:12:07,200
+And when you're doing the type of experiments that you describe or you're trying to understand
+
+155
+00:12:07,200 --> 00:12:14,680
+natural selection, is the implication of what you describe that you're kind of fundamentally
+
+156
+00:12:14,680 --> 00:12:21,160
+looking at stable sections of the genome as opposed to those sections of the genome that
+
+157
+00:12:21,160 --> 00:12:26,680
+tend to exhibit a lot of variation, or are you looking at those as well for different
+
+158
+00:12:26,680 --> 00:12:27,680
+things?
+
+159
+00:12:27,680 --> 00:12:33,080
+Yeah, so in my work, a lot of what I do is I'm sort of trying to walk along the genome
+
+160
+00:12:33,080 --> 00:12:36,880
+and look at how sort of the landscape of variation changes.
+
+161
+00:12:36,880 --> 00:12:41,920
+So you'll have some areas where there's a lot of variation, somewhere there is not.
+
+162
+00:12:41,920 --> 00:12:48,840
+And we try to make sense of that by sort of segmenting the genome into these different
+
+163
+00:12:48,840 --> 00:12:50,680
+classes or evolutionary models.
+
+164
+00:12:50,680 --> 00:12:55,800
+So this chunk of the genome looks like it's being shaped by positive selection, which
+
+165
+00:12:55,800 --> 00:13:01,520
+is that scenario where beneficial mutation has recently increased in frequency, or this
+
+166
+00:13:01,520 --> 00:13:06,360
+region of the genome seems to be experiencing negative or purifying selection where harmful
+
+167
+00:13:06,360 --> 00:13:09,040
+mutations are being removed.
+
+168
+00:13:09,040 --> 00:13:14,120
+And this region of the genome seems to be evolving relatively free from selection.
+
+169
+00:13:14,120 --> 00:13:17,600
+So mutations don't really affect fitness.
+
+170
+00:13:17,600 --> 00:13:21,920
+They're just kind of drifting around randomly over time.
+
+171
+00:13:21,920 --> 00:13:26,560
+So their frequencies are fluctuating, but it does nothing to do with any sort of selective
+
+172
+00:13:26,560 --> 00:13:30,920
+benefit or harm caused by the mutation.
+
+173
+00:13:30,920 --> 00:13:37,880
+So yeah, basically I'm trying to figure out how much of the genome is evolving under
+
+174
+00:13:37,880 --> 00:13:41,920
+one particular model of evolution versus another, and so on and mentioned in the landscape
+
+175
+00:13:41,920 --> 00:13:44,680
+as you move across chromosomes.
+
+176
+00:13:44,680 --> 00:13:50,400
+And so you recently published a paper called the unreasonable effectiveness of convolutional
+
+177
+00:13:50,400 --> 00:13:57,360
+neuron networks in population genetic inference, actually they came out earlier this month.
+
+178
+00:13:57,360 --> 00:14:00,800
+We're speaking at middle of February.
+
+179
+00:14:00,800 --> 00:14:04,080
+And that was published in molecular biology and evolution.
+
+180
+00:14:04,080 --> 00:14:09,840
+Can you talk a little bit about that particular paper and what it is trying to convey?
+
+181
+00:14:09,840 --> 00:14:17,960
+Yeah, so this paper is purely methodological and focused and that we're sort of interested
+
+182
+00:14:17,960 --> 00:14:23,160
+in the different statistical and computational methods that population geneticists have been
+
+183
+00:14:23,160 --> 00:14:25,320
+using over the years.
+
+184
+00:14:25,320 --> 00:14:32,480
+And a major focus of my work over the last five years has been to try to incorporate
+
+185
+00:14:32,480 --> 00:14:38,000
+machine learning techniques into population genetic inference.
+
+186
+00:14:38,000 --> 00:14:42,640
+And I should probably start there before I get into this paper because this is kind of
+
+187
+00:14:42,640 --> 00:14:44,720
+the culmination of a lot of that.
+
+188
+00:14:44,720 --> 00:14:50,160
+I was wondering just that if it was a culmination of a trajectory of things that you tried
+
+189
+00:14:50,160 --> 00:14:57,920
+in machine learning applied to population genetics or if you, you know, I also talk to scientists
+
+190
+00:14:57,920 --> 00:15:04,680
+that kind of, you know, just luck into hearing about her finding out about CNNs and deep
+
+191
+00:15:04,680 --> 00:15:10,040
+learning and apply it to their problem and damage as works and they kind of start there.
+
+192
+00:15:10,040 --> 00:15:12,080
+So how did that evolve for you?
+
+193
+00:15:12,080 --> 00:15:16,360
+Though, the way this evolved for me was around the time that I was finishing up in grad
+
+194
+00:15:16,360 --> 00:15:20,600
+school and getting started with my postdoctoral research.
+
+195
+00:15:20,600 --> 00:15:24,840
+I was becoming increasingly interested in this question of, you know, how much can we
+
+196
+00:15:24,840 --> 00:15:31,960
+learn about natural selection from looking at genomic data and the methods for doing this
+
+197
+00:15:31,960 --> 00:15:38,680
+in population genetics I found were, to me, they seemed a little bit antiquated in
+
+198
+00:15:38,680 --> 00:15:44,520
+that they were often focused on taking your alignments, you know, this matrix that I'm
+
+199
+00:15:44,520 --> 00:15:50,360
+talking about, this matrix of genome sequences and sort of boiling it down to a single number.
+
+200
+00:15:50,360 --> 00:15:56,120
+So describing your sequence data by a single statistic, which is descriptive, it tells
+
+201
+00:15:56,120 --> 00:16:01,160
+you something about how much variation is there in this alignment or what are the frequencies
+
+202
+00:16:01,160 --> 00:16:06,120
+of mutations in this alignment are some of them very common within the population or
+
+203
+00:16:06,120 --> 00:16:10,400
+they're very rare, to what extent are two mutations correlated?
+
+204
+00:16:10,400 --> 00:16:16,440
+That is, if an individual has a mutation at site one, how does that tell you something
+
+205
+00:16:16,440 --> 00:16:22,360
+about whether he also has a mutation at site two, there are a large number of statistics
+
+206
+00:16:22,360 --> 00:16:28,080
+that all sort of captured different somewhat redundant but somewhat complementary patterns
+
+207
+00:16:28,080 --> 00:16:34,040
+of a variation and there's kind of this cottage industry and population genetics of coming
+
+208
+00:16:34,040 --> 00:16:37,360
+up with a new statistic that you think is the best one for answering the question that
+
+209
+00:16:37,360 --> 00:16:42,000
+you're looking at and sort of describing the theoretical expectations for the statistic
+
+210
+00:16:42,000 --> 00:16:46,320
+under various evolutionary models and, you know, applying this to some data and seeing
+
+211
+00:16:46,320 --> 00:16:47,320
+what you can learn.
+
+212
+00:16:47,320 --> 00:16:53,240
+Well, that's all great, but, you know, you can imagine that if you take this large matrix
+
+213
+00:16:53,240 --> 00:16:57,480
+of genome sequence data and boil it down to a single number, you're probably throwing
+
+214
+00:16:57,480 --> 00:17:00,840
+out a lot of useful information, right?
+
+215
+00:17:00,840 --> 00:17:06,360
+So the work that I was doing during my postdoc and there's some other labs that are doing
+
+216
+00:17:06,360 --> 00:17:11,760
+this too, I'm not the only one doing this, but it was sort of a small group of population
+
+217
+00:17:11,760 --> 00:17:17,840
+geneticists doing this and we were just trying to incorporate as much of this information
+
+218
+00:17:17,840 --> 00:17:25,560
+as we could into a method and one way to do that is to, instead of using one of these
+
+219
+00:17:25,560 --> 00:17:32,080
+statistics, use a large vector of them, throw them all in to a vector and try something
+
+220
+00:17:32,080 --> 00:17:36,240
+like support vector machine or random forest so you can use a support vector machine and
+
+221
+00:17:36,240 --> 00:17:41,800
+train it to distinguish between natural selection or no natural selection.
+
+222
+00:17:41,800 --> 00:17:45,760
+Yeah, if I can jump in just to make sure I understand what you're doing, you've got kind
+
+223
+00:17:45,760 --> 00:17:52,040
+of this underlying set of data, which is essentially these alignments, you've got genomes or
+
+224
+00:17:52,040 --> 00:18:02,600
+genome samples that are aligned with one another and the first thing you did was you took the
+
+225
+00:18:02,600 --> 00:18:08,720
+traditional metrics that have been applied to these alignments and you kind of calculated
+
+226
+00:18:08,720 --> 00:18:17,000
+all of them, put those into a vector and then use machine learning to, for example, identify
+
+227
+00:18:17,000 --> 00:18:24,280
+clusters within the vector space that you created of these summary statistics.
+
+228
+00:18:24,280 --> 00:18:25,280
+Is that correct?
+
+229
+00:18:25,280 --> 00:18:26,280
+Yeah, that's right.
+
+230
+00:18:26,280 --> 00:18:31,560
+So the idea is rather than arguing over which one of these summary statistics is best,
+
+231
+00:18:31,560 --> 00:18:35,480
+we should see how well we can do if we use all of them at once and machine learning
+
+232
+00:18:35,480 --> 00:18:41,320
+is one way for you to do that because you can use it for higher dimensional data.
+
+233
+00:18:41,320 --> 00:18:46,000
+So when you say how well you do, what was the specific problem or what are the types of
+
+234
+00:18:46,000 --> 00:18:47,600
+problems that you're trying to solve?
+
+235
+00:18:47,600 --> 00:18:52,880
+Is it just clustering them together or are there other problems that you apply this
+
+236
+00:18:52,880 --> 00:18:53,880
+technique to?
+
+237
+00:18:53,880 --> 00:19:01,160
+Yeah, so a lot of population genetic inference is about discriminating between different
+
+238
+00:19:01,160 --> 00:19:02,960
+evolutionary models.
+
+239
+00:19:02,960 --> 00:19:11,680
+So let's go back to this question of can we find whether there has been a recent beneficial
+
+240
+00:19:11,680 --> 00:19:17,160
+mutation that has increased in frequency and become what we call fixed or ubiquitous
+
+241
+00:19:17,160 --> 00:19:18,800
+within the population?
+
+242
+00:19:18,800 --> 00:19:24,600
+So a little bit of terminology, we call this a selective sweep because this mutation is
+
+243
+00:19:24,600 --> 00:19:27,400
+selected and it sweeps through the population.
+
+244
+00:19:27,400 --> 00:19:35,320
+So this problem of finding selective sweeps is a very difficult one, but it's one that's
+
+245
+00:19:35,320 --> 00:19:40,480
+sort of central to pop general research because we're interested in how much recent
+
+246
+00:19:40,480 --> 00:19:46,760
+adaptation, you know, particular species might be having whether it's humans or anything
+
+247
+00:19:46,760 --> 00:19:51,920
+else, you know, how are we responding to the selective environment that we're in?
+
+248
+00:19:51,920 --> 00:19:58,160
+So you can use this information to tell you something about how much adaptation is there,
+
+249
+00:19:58,160 --> 00:20:02,120
+which parts of the genome are responsible for this adaptation, but it all boils down
+
+250
+00:20:02,120 --> 00:20:03,480
+to this model selection thing.
+
+251
+00:20:03,480 --> 00:20:08,440
+Can I discriminate between regions of the genome that are experiencing a sweep and those
+
+252
+00:20:08,440 --> 00:20:10,160
+that are not?
+
+253
+00:20:10,160 --> 00:20:17,720
+So the way that I have gone about this model selection is by treating a classifier to
+
+254
+00:20:17,720 --> 00:20:18,920
+do it.
+
+255
+00:20:18,920 --> 00:20:25,760
+Is the data just the sequences, at least at this point in your application of machine
+
+256
+00:20:25,760 --> 00:20:33,960
+learning, is it just the sequences or is it the sequences, for example, and I guess
+
+257
+00:20:33,960 --> 00:20:39,560
+I'm curious about if there's some element of time that's captured like the, you know,
+
+258
+00:20:39,560 --> 00:20:43,960
+birth or death or eight, you know, the timestamp of the sequence or something like that.
+
+259
+00:20:43,960 --> 00:20:47,520
+And you're looking at these sequences over a long period of time.
+
+260
+00:20:47,520 --> 00:20:53,400
+Is it like a time series thing or are you able to infer these sweeps just by looking
+
+261
+00:20:53,400 --> 00:20:59,680
+at t equals zero set of samples and the way that they're distributed?
+
+262
+00:20:59,680 --> 00:21:00,680
+Sure.
+
+263
+00:21:00,680 --> 00:21:01,680
+Yeah, that's a great question.
+
+264
+00:21:01,680 --> 00:21:07,120
+So generally we do, you know, think about the scenario where you only have sampling from
+
+265
+00:21:07,120 --> 00:21:09,200
+one time point.
+
+266
+00:21:09,200 --> 00:21:15,240
+So, you know, you've randomly sampled from some population, you know, last year and
+
+267
+00:21:15,240 --> 00:21:20,800
+you have this data set and you're trying to use it to make these inferences about, you
+
+268
+00:21:20,800 --> 00:21:23,280
+know, recent evolutionary history.
+
+269
+00:21:23,280 --> 00:21:25,960
+And a large reason for that, I mean there are two reasons for that.
+
+270
+00:21:25,960 --> 00:21:33,160
+One is the practical cost of accumulating sequence data and that cost has gone down.
+
+271
+00:21:33,160 --> 00:21:35,200
+I'll come back to that in a second.
+
+272
+00:21:35,200 --> 00:21:40,560
+And the other is that if you want to do this sort of time series thing, you need to say
+
+273
+00:21:40,560 --> 00:21:43,040
+you want to sample every generation.
+
+274
+00:21:43,040 --> 00:21:46,720
+Well, if you're doing that in humans, then, you know, each generation, you know, might
+
+275
+00:21:46,720 --> 00:21:48,600
+be 25, 30 years or so.
+
+276
+00:21:48,600 --> 00:21:54,760
+So to sort of capture any interesting patterns or you have to be accumulating data over a long
+
+277
+00:21:54,760 --> 00:21:56,320
+period of time.
+
+278
+00:21:56,320 --> 00:22:02,360
+Now, some organisms have much more rapid generation times.
+
+279
+00:22:02,360 --> 00:22:07,720
+They also work on fruit flies and mosquitoes and, you know, these things rather than having
+
+280
+00:22:07,720 --> 00:22:14,440
+one generation every few dozen years they'll have a, you know, a dozen or so generations
+
+281
+00:22:14,440 --> 00:22:15,440
+in one year.
+
+282
+00:22:15,440 --> 00:22:19,360
+So over the course of a few years, you're going to accumulate a large number of generations
+
+283
+00:22:19,360 --> 00:22:21,200
+and create time series data.
+
+284
+00:22:21,200 --> 00:22:26,200
+And this is something that's becoming feasible now with improvements in sequencing technology.
+
+285
+00:22:26,200 --> 00:22:32,400
+So I would say that that's kind of a small subset of the kind of landscape of pop chin research
+
+286
+00:22:32,400 --> 00:22:36,600
+right now, but you're going to be seeing that changing very rapidly.
+
+287
+00:22:36,600 --> 00:22:37,600
+I think so.
+
+288
+00:22:37,600 --> 00:22:40,880
+So you'll see a lot of this time series analysis, but right now it's mostly just looking at
+
+289
+00:22:40,880 --> 00:22:42,560
+this one snapshot.
+
+290
+00:22:42,560 --> 00:22:49,840
+So at this stage where you're creating a classifier, you've got this data as we discussed, it tends
+
+291
+00:22:49,840 --> 00:22:55,960
+to be from a single period of time or a period of time I'm assuming that where you can
+
+292
+00:22:55,960 --> 00:23:01,400
+kind of, they're close enough that you can kind of ignore time as a big factor.
+
+293
+00:23:01,400 --> 00:23:06,880
+And you've collected this data, can you talk a little bit about the data collection process?
+
+294
+00:23:06,880 --> 00:23:13,280
+So in, this is where it gets a little bit tricky because in sort of more traditional applications
+
+295
+00:23:13,280 --> 00:23:18,240
+of machine learning, you want to collect training data.
+
+296
+00:23:18,240 --> 00:23:24,560
+And here we can't do that, you know, we collect data that we can apply something to, right,
+
+297
+00:23:24,560 --> 00:23:29,080
+we can sequence a bunch of human genomes that we want to run our classifier on.
+
+298
+00:23:29,080 --> 00:23:33,560
+But how do we get a data set where we know what the ground truth is?
+
+299
+00:23:33,560 --> 00:23:38,320
+And you know, that can be tricky and evolutionary biology because, you know, while we are doing
+
+300
+00:23:38,320 --> 00:23:44,560
+our best to make evolutionary inferences, it's difficult to nail down with absolute certainty,
+
+301
+00:23:44,560 --> 00:23:45,560
+right?
+
+302
+00:23:45,560 --> 00:23:50,520
+What is the evolutionary history of, you know, this species, this population or this gene?
+
+303
+00:23:50,520 --> 00:23:57,480
+So what we do is we simulate.
+
+304
+00:23:57,480 --> 00:24:05,240
+So there are these nice idealized models of evolution that allow you to simulate an
+
+305
+00:24:05,240 --> 00:24:10,520
+evolving population and sequences within this population.
+
+306
+00:24:10,520 --> 00:24:15,760
+So you can produce synthetic data that one can then use to train a classifier.
+
+307
+00:24:15,760 --> 00:24:20,360
+And then the tricky part is, you know, how do we simulate this thing?
+
+308
+00:24:20,360 --> 00:24:25,320
+How do we parameterize these simulations and, you know, you have to be careful to sort
+
+309
+00:24:25,320 --> 00:24:30,920
+of try to make these simulations match your data as best as you can.
+
+310
+00:24:30,920 --> 00:24:35,800
+But if you knew exactly how your data, you know, how your organism of interest was evolving,
+
+311
+00:24:35,800 --> 00:24:40,280
+then you wouldn't be needing to do the research anyway, right, because you already know everything.
+
+312
+00:24:40,280 --> 00:24:46,320
+So it's kind of analogous to doing some sort of Bayesian inference where you've got, you
+
+313
+00:24:46,320 --> 00:24:48,320
+know, these priors.
+
+314
+00:24:48,320 --> 00:24:52,440
+And, you know, here we're simulating onto those priors to generate training data.
+
+315
+00:24:52,440 --> 00:24:59,400
+And you have to examine what is the robustness of this classifier to model a specification.
+
+316
+00:24:59,400 --> 00:25:03,520
+What if I'm wrong about the, you know, the parameters of the simulation?
+
+317
+00:25:03,520 --> 00:25:08,000
+What if I, you know, I thought the population size of this organism was 1 million, but
+
+318
+00:25:08,000 --> 00:25:14,440
+actually it's half a million, how does that affect the accuracy of my downstream analysis?
+
+319
+00:25:14,440 --> 00:25:17,080
+So you have to take all these things into account.
+
+320
+00:25:17,080 --> 00:25:23,000
+Is there some like prototypical human genome that you use as the starting place for your
+
+321
+00:25:23,000 --> 00:25:31,040
+simulation or some kind of standard human, how does that work?
+
+322
+00:25:31,040 --> 00:25:32,040
+Yeah.
+
+323
+00:25:32,040 --> 00:25:33,040
+So, yeah, there is.
+
+324
+00:25:33,040 --> 00:25:34,040
+That's a great question.
+
+325
+00:25:34,040 --> 00:25:38,680
+So we typically refer to these as reference genomes.
+
+326
+00:25:38,680 --> 00:25:46,280
+So for the way that sequencing started out like this approach was that you would go and
+
+327
+00:25:46,280 --> 00:25:52,000
+create one very high quality genome sequence for your species.
+
+328
+00:25:52,000 --> 00:25:57,560
+So we did this in humans and it took over a decade and a billion dollars to sequence
+
+329
+00:25:57,560 --> 00:26:01,520
+the first human genome, which we call the reference genome, but it's this very high quality
+
+330
+00:26:01,520 --> 00:26:10,080
+sequence and you can use that by using these cheap and fast DNA sequencing technologies,
+
+331
+00:26:10,080 --> 00:26:17,200
+which produce a bunch of very tiny chunks of DNA sequence that you then search against
+
+332
+00:26:17,200 --> 00:26:18,200
+that reference genome.
+
+333
+00:26:18,200 --> 00:26:23,600
+So that's this, that's how you create these alignments that I was referring to by doing
+
+334
+00:26:23,600 --> 00:26:27,880
+sequence searches and figuring out, okay, this tiny little chunk here that goes to this
+
+335
+00:26:27,880 --> 00:26:32,480
+part on chromosome one, I can figure that out by searching it against the reference genome.
+
+336
+00:26:32,480 --> 00:26:38,000
+So there are sort of these two different tiers of genome sequences, are these very high
+
+337
+00:26:38,000 --> 00:26:45,920
+quality reference genomes and then there are these genomes produced from these rapid sequencing
+
+338
+00:26:45,920 --> 00:26:51,040
+technologies that are mapped against the reference genome in order to reveal variation
+
+339
+00:26:51,040 --> 00:26:55,160
+because you take this tiny chunk from this individual sequence, you map it to the reference
+
+340
+00:26:55,160 --> 00:27:01,320
+and you see, okay, this little chunk or read, we call it, it's identical to this portion
+
+341
+00:27:01,320 --> 00:27:04,760
+of the reference genome except for this one difference.
+
+342
+00:27:04,760 --> 00:27:08,720
+And if you accumulate enough evidence for those differences, then you know, okay, that
+
+343
+00:27:08,720 --> 00:27:12,120
+is a mutation that's present in my population.
+
+344
+00:27:12,120 --> 00:27:17,960
+And then you referenced needing to make sure you get the population size right.
+
+345
+00:27:17,960 --> 00:27:24,560
+In the case of humans, for example, where does the complexity come in there and is it
+
+346
+00:27:24,560 --> 00:27:30,920
+correct relative to this reference genome and the specifics of the population you're sampling
+
+347
+00:27:30,920 --> 00:27:33,520
+or what kind of resolution do you need there?
+
+348
+00:27:33,520 --> 00:27:39,360
+Yeah, I mean, that's a good question and it's still a very open area of research.
+
+349
+00:27:39,360 --> 00:27:47,880
+So you can go get the census population size of humans today or pretty good approximation
+
+350
+00:27:47,880 --> 00:27:52,600
+of it, but that has not been the size of our population over much of our history.
+
+351
+00:27:52,600 --> 00:27:57,440
+There's been dramatic changes, of course, growth most recently, but in many populations
+
+352
+00:27:57,440 --> 00:28:04,880
+there were contractions, especially with those populations that migrated out of Africa.
+
+353
+00:28:04,880 --> 00:28:09,480
+That migration was associated with a large population bottleneck.
+
+354
+00:28:09,480 --> 00:28:17,840
+So the population size history in humans is, it's messy, it's non-monotonic and it concludes
+
+355
+00:28:17,840 --> 00:28:22,440
+with this very rapid, super-exponential explosion that's been going on for the last
+
+356
+00:28:22,440 --> 00:28:24,480
+few hundred years now.
+
+357
+00:28:24,480 --> 00:28:33,480
+So to what extent can we accurately model these population size changes, that's another
+
+358
+00:28:33,480 --> 00:28:41,120
+area of research that actually touch upon a little bit in the CNN paper that we'll be
+
+359
+00:28:41,120 --> 00:28:42,120
+talking about.
+
+360
+00:28:42,120 --> 00:28:43,120
+Yeah.
+
+361
+00:28:43,120 --> 00:28:45,120
+I don't know if I answered your question.
+
+362
+00:28:45,120 --> 00:28:47,120
+No, I think you did.
+
+363
+00:28:47,120 --> 00:28:50,160
+I think my takeaway was it's complicated.
+
+364
+00:28:50,160 --> 00:28:54,520
+Yeah, okay, then I think I did a good job.
+
+365
+00:28:54,520 --> 00:28:56,520
+Yeah.
+
+366
+00:28:56,520 --> 00:29:03,080
+So you're doing this simulation, you're applying kind of Bayesian types of methods, you're
+
+367
+00:29:03,080 --> 00:29:11,080
+trying to apply probability distributions at different points in the simulation process.
+
+368
+00:29:11,080 --> 00:29:16,040
+I guess the question is, are you doing that per read or SNP or something like that?
+
+369
+00:29:16,040 --> 00:29:23,040
+Are you doing that on a sequence level like do you, are we at the point where we're modeling,
+
+370
+00:29:23,040 --> 00:29:31,240
+variability and distributions on a kind of subsequent level or is it kind of a more
+
+371
+00:29:31,240 --> 00:29:34,080
+coarse-grained model today?
+
+372
+00:29:34,080 --> 00:29:35,080
+Yeah.
+
+373
+00:29:35,080 --> 00:29:39,520
+So for the most part, Rich, and sort of zooming in and looking at relatively small regions
+
+374
+00:29:39,520 --> 00:29:45,360
+of the GNOME, so that's kind of what we're simulating, yeah, to sort of come up with
+
+375
+00:29:45,360 --> 00:29:53,200
+expectations for patterns of variation within, you know, say a size of the genome that's
+
+376
+00:29:53,200 --> 00:29:58,600
+spanning, you know, a few dozen genes, something like that or less, sometimes something on
+
+377
+00:29:58,600 --> 00:30:00,000
+the order of a single gene.
+
+378
+00:30:00,000 --> 00:30:06,200
+So yeah, typically we're looking at smaller regions, but for some questions, especially
+
+379
+00:30:06,200 --> 00:30:12,000
+this question of trying to infer demographic changes like population size changes, we
+
+380
+00:30:12,000 --> 00:30:16,880
+want to be looking at patterns of variation across the whole genome because if there's
+
+381
+00:30:16,880 --> 00:30:21,200
+a population crash, that affects the amount of genetic variation across the entire genome.
+
+382
+00:30:21,200 --> 00:30:25,360
+So we want to use as much of that data as possible.
+
+383
+00:30:25,360 --> 00:30:33,160
+So yeah, another development in our field in recent years has become feasible to simulate
+
+384
+00:30:33,160 --> 00:30:36,040
+larger and larger genomes.
+
+385
+00:30:36,040 --> 00:30:44,040
+So we can sort of capture the expected dynamics genome-wide, not just, you know, at a gene
+
+386
+00:30:44,040 --> 00:30:45,040
+or a few genes.
+
+387
+00:30:45,040 --> 00:30:47,840
+So we do the whole gamut, I guess.
+
+388
+00:30:47,840 --> 00:30:48,840
+Okay.
+
+389
+00:30:48,840 --> 00:30:49,840
+Okay.
+
+390
+00:30:49,840 --> 00:31:00,000
+And so this approach to training a classifier based on the sequences and simulated results
+
+391
+00:31:00,000 --> 00:31:05,360
+to provide your ground truth was one of your first steps in the direction of applying machine
+
+392
+00:31:05,360 --> 00:31:11,160
+learning to pop-gen, you know, the CNN, the next step, or did you have a few more steps
+
+393
+00:31:11,160 --> 00:31:12,160
+to get there?
+
+394
+00:31:12,160 --> 00:31:13,160
+Yeah.
+
+395
+00:31:13,160 --> 00:31:18,120
+So I played around with this approach on, I guess, a few different problems.
+
+396
+00:31:18,120 --> 00:31:23,240
+You know, I was mostly interested in this natural selection question, but I branched out
+
+397
+00:31:23,240 --> 00:31:25,360
+to a few different areas.
+
+398
+00:31:25,360 --> 00:31:34,320
+You know, I kind of got a little bit caught up in trying to push along a cultural change
+
+399
+00:31:34,320 --> 00:31:36,320
+in our field in population genetics.
+
+400
+00:31:36,320 --> 00:31:42,080
+I was trying to make the point to people that these machine learning methods are not scary.
+
+401
+00:31:42,080 --> 00:31:47,680
+We should consider trying to use them for, you know, every question where it is appropriate
+
+402
+00:31:47,680 --> 00:31:51,680
+and then see how well they compare to our more traditional methods.
+
+403
+00:31:51,680 --> 00:32:00,600
+So another question that I was looking into was this question of finding gene flow.
+
+404
+00:32:00,600 --> 00:32:05,480
+So this is the scenario where you have two different populations.
+
+405
+00:32:05,480 --> 00:32:13,040
+They diverge to some time ago, you know, say African and non-African humans, you know,
+
+406
+00:32:13,040 --> 00:32:18,400
+they split some time ago when non-Africans migrated out of the African continent and,
+
+407
+00:32:18,400 --> 00:32:21,160
+you know, colonized your Asia.
+
+408
+00:32:21,160 --> 00:32:27,640
+And we want to know, after that split, did these populations come back into contact at
+
+409
+00:32:27,640 --> 00:32:31,480
+a certain time point and exchanged genetic material?
+
+410
+00:32:31,480 --> 00:32:36,840
+And if so, can we find like the genomic regions where there has been this gene flow?
+
+411
+00:32:36,840 --> 00:32:41,880
+So yeah, probably the African non-African question is the best example of this because
+
+412
+00:32:41,880 --> 00:32:49,240
+that the genetic exchange is across the entire genome in cases where there has been the
+
+413
+00:32:49,240 --> 00:32:55,200
+secondary contact like African-Americans, for example, have European ancestry across
+
+414
+00:32:55,200 --> 00:32:59,200
+the entire genome, as well as African ancestry.
+
+415
+00:32:59,200 --> 00:33:06,640
+A better example is probably Neanderthals, so you may have heard it's been reported in
+
+416
+00:33:06,640 --> 00:33:16,320
+the news that we now know that Neanderthals have donated genetic material to Eurasian
+
+417
+00:33:16,320 --> 00:33:26,720
+Asians and Europeans, humans. So a typical European individual has maybe two to four percent
+
+418
+00:33:26,720 --> 00:33:32,040
+of their DNA tracing its ancestry back to Neanderthals.
+
+419
+00:33:32,040 --> 00:33:40,000
+So after the split between, you know, the ancestral population that gave rise to modern humans
+
+420
+00:33:40,000 --> 00:33:49,400
+and also Neanderthals, these two species eventually found themselves in the same location,
+
+421
+00:33:49,400 --> 00:33:53,680
+and there was interbreeding there, and we can sort of see the genetic remnants of that
+
+422
+00:33:53,680 --> 00:33:58,080
+in certain parts of the human genome.
+
+423
+00:33:58,080 --> 00:34:05,440
+So I got into this question of detecting regions where there has been regions of the
+
+424
+00:34:05,440 --> 00:34:13,040
+genome, where there has been the flow of genetic material from one population into another.
+
+425
+00:34:13,040 --> 00:34:20,160
+And of course, here there have been a large number of statistical approaches devised
+
+426
+00:34:20,160 --> 00:34:28,440
+over the years to detect these patterns, and I took the same approach of creating a machine
+
+427
+00:34:28,440 --> 00:34:36,320
+learning classifier that uses a vector of these statistics to discriminate between these
+
+428
+00:34:36,320 --> 00:34:38,400
+different models of, so here are three models where there is no gene flow between these two
+
+429
+00:34:38,400 --> 00:34:44,680
+populations, or within this genomic window there is gene flow from population one to population
+
+430
+00:34:44,680 --> 00:34:52,440
+two and vice versa. And of course, it works much better than any method that is using
+
+431
+00:34:52,440 --> 00:34:56,800
+just one statistic because you're throwing out all that information, so if you incorporate
+
+432
+00:34:56,800 --> 00:35:03,640
+as much information as you can, the feature vector you produce more accurate inferences.
+
+433
+00:35:03,640 --> 00:35:11,200
+So I was going around talking about that work, going to conferences, trying to sell this
+
+434
+00:35:11,200 --> 00:35:17,920
+stuff to people, say this machine learning stuff works, which here is the evidence.
+
+435
+00:35:17,920 --> 00:35:26,520
+And somebody in the audience of that talk was interested and went and looked at my code,
+
+436
+00:35:26,520 --> 00:35:30,760
+and thought, well, what happens if I get rid of this part that calculates all the statistics
+
+437
+00:35:30,760 --> 00:35:37,080
+and just replace it with a convolutional neural network? So let a neural net come up with
+
+438
+00:35:37,080 --> 00:35:41,880
+its own statistics and see how well it can answer this question. And this person was
+
+439
+00:35:41,880 --> 00:35:48,880
+Lex Flagel who was the first author on that paper published in MBE, and Lex sent me an
+
+440
+00:35:48,880 --> 00:35:55,920
+email one day, and yet the day I opened up this email was the most exciting day of my professional
+
+441
+00:35:55,920 --> 00:35:59,520
+life. He opened this up and said, hey, I got this result. I was playing around with the
+
+442
+00:35:59,520 --> 00:36:05,840
+convolutional neural net, and thought I'd see how it did. And here are the results. Is
+
+443
+00:36:05,840 --> 00:36:11,840
+this good? So I pull up my data and I'm comparing and I'm like, huh, this is better than mine.
+
+444
+00:36:11,840 --> 00:36:20,800
+So, yeah, so there had been a few conversations I'd had in the years leading up to this
+
+445
+00:36:20,800 --> 00:36:26,680
+about this idea of maybe using deep learning or some approach to say, well, act directly
+
+446
+00:36:26,680 --> 00:36:32,920
+on the alignment rather than pre-digesting it into a bunch of features or summary statistics.
+
+447
+00:36:32,920 --> 00:36:36,560
+But I never had a chance to get around to it. And then suddenly there on my screen was
+
+448
+00:36:36,560 --> 00:36:42,080
+the evidence that not only can you do this, but it works really well better than what
+
+449
+00:36:42,080 --> 00:36:47,680
+I was trying at the time. So we knew right away, or I knew right away that we had to try
+
+450
+00:36:47,680 --> 00:36:52,960
+this out on a bunch of different problems in population genetics to see if this approach
+
+451
+00:36:52,960 --> 00:36:59,840
+would work in general. And that was the work that led to the MBE paper.
+
+452
+00:36:59,840 --> 00:37:05,680
+In the paper you're doing just that, you're trying CNNs out on a bunch of these different
+
+453
+00:37:05,680 --> 00:37:13,080
+problems. Do each of these problems represent one of the statistics that you were kind
+
+454
+00:37:13,080 --> 00:37:18,680
+of aggregating together in your previous work? Or are the problems kind of at a higher level
+
+455
+00:37:18,680 --> 00:37:22,720
+and the statistics, you know, informed approaches to the problems?
+
+456
+00:37:22,720 --> 00:37:27,160
+Yeah, so these problems have been major areas of research and pension for quite some
+
+457
+00:37:27,160 --> 00:37:32,480
+time. So the different problems we touch on in the paper are this problem of finding
+
+458
+00:37:32,480 --> 00:37:43,080
+selective sweeps, this problem of finding gene flow. We try to infer population size changes
+
+459
+00:37:43,080 --> 00:37:51,840
+and the other is inferring the rate of our combination. So our combination is when
+
+460
+00:37:51,840 --> 00:37:58,160
+during myosis you're two different chromosome copies, exchange, genetic material, one
+
+461
+00:37:58,160 --> 00:38:07,720
+another. So it sort of breaks up the association between mutations along a chromosome. So you
+
+462
+00:38:07,720 --> 00:38:11,240
+would think that if you're looking at say chromosome one in the human genome, like if you take
+
+463
+00:38:11,240 --> 00:38:17,120
+one of your copies of chromosome one as you're going back in time, that whole chromosome
+
+464
+00:38:17,120 --> 00:38:22,240
+should have the same evolutionary history, you know, as you trace it back through ancestor
+
+465
+00:38:22,240 --> 00:38:28,960
+to ancestor, but recombination breaks that up. Different chunks of the chromosome have different
+
+466
+00:38:28,960 --> 00:38:38,920
+ancestors. And it's a longstanding problem in population genetics trying to infer how
+
+467
+00:38:38,920 --> 00:38:43,120
+much of this recombination happens in different parts of the genome. So can you infer the
+
+468
+00:38:43,120 --> 00:38:49,280
+recombination rate landscape across the genome? And you can try to do this using population
+
+469
+00:38:49,280 --> 00:38:56,480
+genetic data. So a bunch of methods exist for doing that. All of these problems have gotten
+
+470
+00:38:56,480 --> 00:39:00,160
+a lot of attention from researchers over the years. So there's not just one statistic for
+
+471
+00:39:00,160 --> 00:39:08,800
+each of them. There are dozens for many of them. So we were comparing our approach of just
+
+472
+00:39:08,800 --> 00:39:15,440
+throwing it all into a CNN and then seeing what answer comes out to many of these statistics
+
+473
+00:39:15,440 --> 00:39:20,480
+that have been used or vectors of those statistics, you know, like the approach I had been using
+
+474
+00:39:20,480 --> 00:39:24,320
+up to that point of throwing them all into a classifier and using something like a random
+
+475
+00:39:24,320 --> 00:39:30,720
+forest. Can you talk a little bit about the approach to making your data fit well within
+
+476
+00:39:30,720 --> 00:39:34,720
+the paradigm of CNNs? Did you need to do anything special there?
+
+477
+00:39:34,720 --> 00:39:41,920
+Yeah, you certainly do. And because we wanted this to sort of be a proof of principle,
+
+478
+00:39:41,920 --> 00:39:47,440
+we were focusing on simulated data in this paper just to show that this can work in principle,
+
+479
+00:39:47,440 --> 00:39:52,160
+and it can work better than some of the best methods that we have at our disposal right
+
+480
+00:39:52,160 --> 00:39:58,240
+now. We didn't want to get too deep into the rabbit hole of all the things that you have
+
+481
+00:39:58,240 --> 00:40:07,120
+to do when you're working with real data that can be messy. So yeah, one problem with,
+
+482
+00:40:07,120 --> 00:40:10,960
+so we kind of skipped a lot of this stuff or just pointed out that these are issues that
+
+483
+00:40:10,960 --> 00:40:16,880
+won't have to deal with. But I think that the deep learning approach is probably better suited
+
+484
+00:40:16,880 --> 00:40:19,840
+for dealing with a lot of these problems than some of the more traditional approaches.
+
+485
+00:40:20,480 --> 00:40:27,760
+Because what are some of those problems? Yeah, so a common problem is that there can be
+
+486
+00:40:29,120 --> 00:40:33,440
+piece parts of the genome where you just don't have a lot of information where, you know,
+
+487
+00:40:33,440 --> 00:40:37,520
+you've mapped these reads, but you're not exactly sure where they go or the reads are of
+
+488
+00:40:37,520 --> 00:40:43,920
+localities, so you're not exactly sure what nucleotide is there with the bases. So there's
+
+489
+00:40:43,920 --> 00:40:50,880
+low confidence data or missing data, and you have to sort of mask these out. So dealing with this,
+
+490
+00:40:50,880 --> 00:40:55,520
+I think, is actually pretty straightforward. In this machine learning framework, you take a look
+
+491
+00:40:55,520 --> 00:41:00,960
+at your actual data and see like sort of what's the distribution of missing data along my genome,
+
+492
+00:41:00,960 --> 00:41:09,440
+and then just adjust your simulations accordingly, synthetically mask some portion of your training
+
+493
+00:41:09,440 --> 00:41:17,840
+data and your simulated test data, and then train. It's a lot more easy to do this when your input
+
+494
+00:41:17,840 --> 00:41:24,400
+is just the sequence matrix rather than some statistic that has been calculated across the matrix,
+
+495
+00:41:24,400 --> 00:41:31,360
+and it might not be designed to deal with missing data. You know, we don't really have to deal
+
+496
+00:41:31,360 --> 00:41:36,640
+with that. We just have to supply training data that we think kind of matches what the input
+
+497
+00:41:36,640 --> 00:41:44,640
+data look like. You know, we think of CNS, we most frequently think of image data that has kind of
+
+498
+00:41:46,640 --> 00:41:52,080
+you know, often square or two dimensional or two three dimensional channels kind of structure.
+
+499
+00:41:52,080 --> 00:42:00,560
+How did your sequence data map to that? Yeah, so we were using two dimensional data where each
+
+500
+00:42:00,560 --> 00:42:11,120
+row in your matrix is a genome sequence in each column is one site. Yeah, the shape of this matrix
+
+501
+00:42:11,120 --> 00:42:16,880
+is different from what you might find in like a typical image or something like, you know,
+
+502
+00:42:16,880 --> 00:42:25,200
+the image database because you might have something like 50 rows, you know, 50 is a fairly
+
+503
+00:42:25,200 --> 00:42:29,600
+small number of pixels, but you may have thousands of columns, you know, maybe 10,000. So,
+
+504
+00:42:31,200 --> 00:42:37,440
+you know, you get these very oblong matrices that you're that you're shoving in there. So,
+
+505
+00:42:37,440 --> 00:42:47,760
+yeah, we're actually using primarily one D convolutions within the paper kind of treating these
+
+506
+00:42:47,760 --> 00:42:55,120
+more as time series data than as image data. And myself have also played around with applying
+
+507
+00:42:55,120 --> 00:43:00,800
+different flavors of RNNs. And I know some other researchers that are doing that as well now.
+
+508
+00:43:02,480 --> 00:43:07,120
+So they don't look exactly, you know, in terms of their shape, like a typical image that you'd
+
+509
+00:43:07,120 --> 00:43:15,520
+be throwing a CNN app. This is kind of a, a net, I guess, but did you, I'm curious if you
+
+510
+00:43:16,160 --> 00:43:21,680
+did like a one-hot encoding on your proteins or your gene, individual genes?
+
+511
+00:43:22,560 --> 00:43:29,280
+The way that we encode the sequence data is basically zeros and ones. In a lot of population
+
+512
+00:43:29,280 --> 00:43:33,520
+genetics, we are only concern ourselves of what we call biolilic sites. Those sites where there
+
+513
+00:43:33,520 --> 00:43:40,720
+are two different variants. So, you know, maybe I have an A and, you know, you have a G at this site.
+
+514
+00:43:41,920 --> 00:43:45,920
+You know, we'll just think of those two different alleles as zero and one. So, just a matrix
+
+515
+00:43:45,920 --> 00:43:52,960
+of zeros and ones. And, you know, if we are trying to use that information to find selective sweeps,
+
+516
+00:43:52,960 --> 00:43:59,200
+then we'll have different classes. You know, there are a few different types of selective sweeps.
+
+517
+00:43:59,200 --> 00:44:04,400
+So, you know, like say zero for one particular type of sweep, one for another and, you know, two for
+
+518
+00:44:04,400 --> 00:44:09,520
+a neutrally evolving region of the genome. Those are our class labels and it'll make a one-hot
+
+519
+00:44:09,520 --> 00:44:17,760
+and coded vector of those classes. But yeah, the input matrix is just a 2D matrix of zeros and ones.
+
+520
+00:44:17,760 --> 00:44:24,560
+Okay. For now. But I mean, there's a lot of, you know, other different ways of encoding that one
+
+521
+00:44:25,280 --> 00:44:29,120
+could try out here. And I think it's important to stress here. And I'm sure a lot of listeners
+
+522
+00:44:29,120 --> 00:44:36,480
+of your podcast will gather that we are very far behind the machine learning field, the deep learning
+
+523
+00:44:36,480 --> 00:44:41,520
+field. When it comes to population genetics, we're, you know, just sort of trying things out right
+
+524
+00:44:41,520 --> 00:44:48,560
+now and we're trying out neural nets that, you know, are at least five years or more behind the
+
+525
+00:44:48,560 --> 00:44:52,320
+state of the art. So, there's a lot of catching up to do and a lot of experimentation with
+
+526
+00:44:52,320 --> 00:44:59,440
+different network architectures, different input encodings and things like that that we have to try out.
+
+527
+00:44:59,440 --> 00:45:05,040
+So, can you give us a summary of the results you saw for these four different types of problems?
+
+528
+00:45:05,040 --> 00:45:15,360
+Yeah. Yeah. So, that's basically deep learning. If trained carefully, it can, it can at least match
+
+529
+00:45:15,360 --> 00:45:22,960
+the current state of the art methods. If not, handle the outperform them for most of the problems
+
+530
+00:45:22,960 --> 00:45:28,720
+that we've looked at. So, the one case where I think there's a lot more work to be done that we just
+
+531
+00:45:28,720 --> 00:45:37,440
+sort of gave a simple first attempt at was this question of trying to infer population size histories.
+
+532
+00:45:38,560 --> 00:45:44,000
+You know, it's the method we came up with worked fairly well there, but we want to be able to scale
+
+533
+00:45:44,000 --> 00:45:53,840
+up to genome scale data and you know, a simple CNN approach where you have an image that encompasses
+
+534
+00:45:53,840 --> 00:46:00,080
+an entire genome of billions of base fares is at least beyond our capabilities at the moment
+
+535
+00:46:00,080 --> 00:46:06,000
+computationally and it's probably not the appropriate method for that anyway. Something like a
+
+536
+00:46:06,000 --> 00:46:11,920
+recurrent neural net of some kind might be more appropriate, but for, you know, these questions of
+
+537
+00:46:11,920 --> 00:46:18,160
+finding gene flow, finding selective sweeps, inferring or combination rates, the results were
+
+538
+00:46:18,160 --> 00:46:28,000
+pretty stunningly amazing. And, you know, that's why we gave it the title, you know,
+
+539
+00:46:28,000 --> 00:46:33,120
+in reference to the, you know, the popular unreasonable effectiveness meme in statistics.
+
+540
+00:46:34,240 --> 00:46:37,280
+Yeah, I mean, we were certainly blown away about how well this stuff works and,
+
+541
+00:46:37,280 --> 00:46:44,720
+yeah, we wanted to share that enthusiasm with the field and get people to consider these types
+
+542
+00:46:44,720 --> 00:46:50,080
+of methods in the future for their own work. Awesome. Awesome. And so where do you go from here?
+
+543
+00:46:51,520 --> 00:47:00,560
+Yeah, so I have started my lab here at UNC almost a year ago and we're continuing some work along
+
+544
+00:47:00,560 --> 00:47:09,120
+these lines. So I have a postdoc right now who's very interested in trying to dive deeper into
+
+545
+00:47:09,120 --> 00:47:17,120
+this question of population size changes and try out a variety of methods, including deep learning
+
+546
+00:47:17,120 --> 00:47:24,720
+methods to to answer these and other demographic questions. So yeah, the deep learning is definitely
+
+547
+00:47:24,720 --> 00:47:32,960
+still a part of it. I have another postdoc who is working on phylogenomic questions. So here,
+
+548
+00:47:32,960 --> 00:47:38,560
+phylogenomics is different field of ocean biology where you're looking at sequences from
+
+549
+00:47:38,560 --> 00:47:44,720
+different species rather than sequences within one population within one species and try to make
+
+550
+00:47:44,720 --> 00:47:49,680
+inferences like just inferring the species tree that, you know, connects them. So figuring out the
+
+551
+00:47:49,680 --> 00:47:59,120
+relationship among species, you know, trying to fill out the tree of life. And he's also trying out
+
+552
+00:47:59,120 --> 00:48:04,560
+deep learning methods there. Yeah, it's not my plan to have a lab that's entirely based on
+
+553
+00:48:04,560 --> 00:48:11,360
+machine learning and deep learning, but when you've had some success using these methods and,
+
+554
+00:48:12,400 --> 00:48:17,360
+you know, they've got the cool buzzwords. So it attracts talent and, you know, I have people,
+
+555
+00:48:17,360 --> 00:48:22,000
+the people who want to join are interested in doing deep learning. So I guess that's what I'm
+
+556
+00:48:22,000 --> 00:48:28,720
+going to do, right? You're limited by who you can recruit. So, but no, we're enjoying it a lot,
+
+557
+00:48:29,280 --> 00:48:35,360
+sort of trying to push the envelope to see how much we can learn by applying these methods to
+
+558
+00:48:35,360 --> 00:48:41,040
+genomic data. Yeah, there's other stuff that I am interested in doing that it's not at all
+
+559
+00:48:41,040 --> 00:48:48,240
+related to machine learning, but yeah, that's probably a topic for a different conversation.
+
+560
+00:48:48,240 --> 00:48:53,200
+Well, Dan, thanks so much for taking the time to chat with us about your work. It's really
+
+561
+00:48:53,200 --> 00:49:00,640
+exciting to see how deep learning and machine learning in general is applied to these types of
+
+562
+00:49:00,640 --> 00:49:06,400
+problems in population genetics. Yeah, my pleasure. Thanks for having me, Sam. And I'm looking
+
+563
+00:49:06,400 --> 00:49:10,960
+forward to seeing how this stuff evolves over the next few years because, you know, I want to be clear,
+
+564
+00:49:10,960 --> 00:49:16,800
+there are some other labs working on this as well. And I want to see where they where they take it.
+
+565
+00:49:16,800 --> 00:49:17,680
+Thank you. Thanks.
+
+566
+00:49:20,800 --> 00:49:26,480
+All right, everyone. That's our show for today for more information on Dan or any of the topics
+
+567
+00:49:26,480 --> 00:49:33,840
+covered in today's episode. Visit twimmelai.com slash talks slash 249. Be sure to register for
+
+568
+00:49:33,840 --> 00:49:41,120
+Peggo World using the code twimmel19 for $200 off of registration. As always, thanks so much
+
+569
+00:49:41,120 --> 00:50:06,400
+for listening and catch you next time.
+

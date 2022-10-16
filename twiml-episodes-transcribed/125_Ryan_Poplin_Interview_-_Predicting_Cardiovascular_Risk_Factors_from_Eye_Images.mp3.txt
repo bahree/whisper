@@ -1,0 +1,697 @@
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+people, doing interesting things in machine learning and artificial intelligence.
+I'm your host, Sam Charrington, in this episode I'm joined by Google Research Scientist
+Ryan Poplin, who recently co-authored the paper, prediction of cardiovascular risk factors
+from retinal, fundous photographs via deep learning.
+In our conversation, Ryan details his work training a deep learning model to predict various
+patient risk factors for heart disease, including some surprising ones like age and gender.
+We also dive into some interesting findings he discovered with regards to multitask
+learning, as well as his use of attention mechanisms to provide explainability.
+This was a really interesting discussion that I'm sure you'll enjoy.
+Before we get to the show, this past Saturday I spent some time at the scaled machine learning
+conference which was held on the Stanford campus in Palo Alto.
+I had a great time, heard some great speakers, met a few listeners, and tweeted a ton.
+So for more of my thoughts from the conference, head on over to my Twitter feed at at Sam
+Charrington.
+This week I'm at Nvidia's GTC conference, so be sure to hit that follow button for more
+news and views.
+And now on to the show.
+All right, everyone, I've got Ryan Poplin on the line, Ryan is a research scientist
+at Google and the lead author on the recent paper, prediction of cardiovascular risk factors
+from retinal fundous photographs via deep learning.
+Ryan, welcome to this week in machine learning and AI.
+Thank you so much.
+Thank you for having me.
+Absolutely.
+So tell us a little bit about how you got involved and interested in machine learning.
+What's your background?
+Sure, I'm a computer scientist by training.
+And what really drew me to machine learning was this idea that I could have an impact in
+a variety of scientific domains through statistics and through knowing about computer science
+and machine learning.
+And it allows me to sort of apply these methods to a variety of domains without having
+to sort of derive, you know, domain expert features about these problems.
+And so did you have a formal education in AI, where did you, how did you kind of come
+up to speed on the tools and techniques that you use today?
+Right.
+So I did a bachelor's degree in computer science in Indiana.
+This was at the Rose Home and Institute of Technology where I studied computer science
+and mathematics.
+And then for graduate work, I was at Carnegie Mellon University, where I was in a pretty
+fun computational neuroscience program, which was a fun way to combine sort of stats, computer
+science, and the study of neuroscience.
+That's sort of where I picked up the statistical machine learning techniques.
+Awesome.
+And does your work today, do you spend a lot of time applying the machine learning in neuroscience
+and in related fields, or do you work pretty broadly, you know, across domains?
+Right.
+So I like to work broadly across a variety of domains.
+So I've been having fun, you know, applying these, these methods, which are pretty general
+to problems in genomics, problems in medical imaging, which is a subject of this paper
+on a variety of other scientific domains.
+Awesome.
+Awesome.
+So why don't we get started by having you tell us a little bit about this paper?
+Sure.
+So this is, this was an effort to using the, the UK biobank, which is the set of fundus
+photography images that were annotated with patient metadata, try to take those images,
+send them through a neural network, and try to see what we could predict from it.
+And what we found was actually quite surprising.
+You could predict quite a wide variety of aspects of a person's health just by looking at this
+fundus photo.
+Why don't we get started by talking about what is a fundus?
+Yeah.
+Sure.
+So a fundus photograph is, is a pretty routine thing actually that I'm sure most of the listeners
+of this, of this show have actually had taken themselves.
+So it's simply a picture of the back of the eye.
+So, you know, a specialist would use a camera called a fundoscope, they, they take a picture
+of the back of the eye, and that's, and that's the retina.
+So if you go to the ophthalmologist, you probably have this taken, you're to routinely kind
+of once a year.
+So is this the thing that happens when they, like, blow the burst of air in your eye?
+Not quite.
+It is a camera.
+So you, you know, it's just a normal, you know, picture.
+It's actually, you know, very pleasant and non-invasive.
+You simply take a picture of the back of the eye.
+You can see in the image, you can see things like the optic disc and blood vessels sort
+of emanating out of that, and doctors use this to look for a wide variety of eye diseases.
+And what we're showing in this paper is that you can look at other diseases as well.
+Awesome.
+One of the things that I gleaned from the paper was that, you know, I've seen a bunch
+of articles about the paper and they all kind of focus on your ability to predict some
+interesting cardiovascular risk factors.
+But one of the things that's seen most interesting was that, and that didn't get picked up in
+a lot of these articles is that you didn't really go in with a direct correlation between
+a lot of the things that you were able to predict in the data set meaning, you know,
+it wasn't already known that looking at these retinal images, you could predict things
+like age and gender and stuff like that, but you discovered that through the research.
+Is that the correct interpretation?
+Yeah, that's exactly right.
+So we started, you know, the background work from my current team is that we've been
+using these images to look at a variety of eye diseases.
+So predicting diabetic retinopathy, for example, at the level of accuracy of a doctor.
+And so when we started using this data set, that's exactly where we started was trying
+to predict, look at eye diseases.
+And then what we noticed is that there's a wide variety of metadata about the patient
+available in this data set.
+And so we sort of added those variables to the model in really kind of a diagnostic kind
+of way.
+So these are things like age and gender and all kinds of other things.
+And we felt like those variables, they should be a, you know, very high fidelity in the
+data set because it's very easy to measure someone's age or ask their gender.
+And so we felt like it was a great sort of control or ground truth that we could add
+to the model.
+But then what we discovered as we were training the model was actually we were able to
+predict these things with remarkably high accuracy.
+And in fact, in the beginning, we thought it was a bug in the model, it was a problem
+because, you know, you look at a gender AUC of.97 and you show that to someone and they
+say to you, it must be, you must have a bug in your model because there's no way you
+can predict that with such high accuracy, right?
+And you can't ignore an AUC of.97, especially when the classes are balanced.
+This is quite a robust prediction from the model.
+And in fact, as we dug more and more into it, we discovered that this wasn't a bug in
+the model, it was actually a real prediction.
+And so drilling a little bit more on the kind of that, the realization, I'm imagining
+that you're at what I'm hearing you say is that you started by actually using this, you
+know, the things that you ultimately found you could predict as features of your model
+so as inputs.
+And then, you know, at some point along the way, you found that they were highly dependent
+on the images themselves.
+Is that kind of the way it came about?
+Sort of, so the input to the model was always simply the images in the fundus, so always
+using the pixels of the image.
+And then alongside it though, you can predict many things simultaneously.
+And actually what we found just through our research is that when you give the model many,
+many things to predict simultaneously, it actually does better overall.
+It's sort of like giving the model something to do with all of its capacity.
+And so as a result, we would throw in things like, why don't you try to predict the age,
+the gender, and actually all kinds of other things that we thought it probably couldn't
+predict, so it would serve as a nice control.
+But in reality, what we found is it's doing quite well.
+And so we started with gender, that was the most, that was a very surprising one.
+And we realized that it, in fact, was a real prediction.
+It was actually doing such a good job.
+And then we discovered age.
+And here, here it's slightly a different prediction, you're, you're regressing to a floating
+point value.
+And what we found is that age you were actually correct within something like three years
+up the person's actual age, which was just remarkable, because when we talked to doctors,
+they would tell us, sure, I can tell the difference between an old eye or a young eye.
+But then we tell them we're actually able to tell you the age within three years.
+And they're quite surprised by that.
+Yeah.
+So you said something in passing that I wanted to drill in on a bit.
+You found that the model was, you, you improve the model, maybe you can be more specific
+or kind of restate the, what you said.
+But it sounded like you were saying you improved the model's overall performance across a bunch
+of measures.
+Like each time you asked it to do something new, it got better overall.
+Is that what you're saying?
+Yeah, that's right.
+So, so this is called multi-task learning.
+What we found is that, so given a fixed model, as you add more and more features that
+you wanted to predict, you're sort of giving, giving the model something to do or letting
+it use its capacity.
+And so it has a tendency, you, it can't possibly overfit because it's being asked to predict
+so many things.
+And as a result, you sort of improve the performance of the model overall.
+Oh, interesting.
+And you didn't apply necessarily or go out of your way to apply kind of multi-task learning,
+you know, techniques or anything like that to try to improve the performance.
+But rather, this was just, you know, you got better performance for free by asking the
+model to do more stuff.
+That's right.
+And, and that's sort of a feature of this particular data set in which there are many,
+many metadata values that we could try to predict, you know, it probably may not work
+in every possible problem or every domain, but this was one and where to, and actually
+worked.
+Now that you have seen this, if you're working on a problem, you would, you know, would
+one of your steps in optimization be just trying to come up with other stuff for the network
+to do?
+Like is that a rational way of thinking about it?
+It is absolutely.
+This is a technique we're applying to a lots of different problems, actually.
+So another example where this worked really well was in our efforts to predict diabetic
+retinopathy.
+So in this case, you sort of have this grade that's given by the doctors, are you one of
+these five classes of the disease diabetic retinopathy, but there's all kinds of other
+things you can predict about the image, such as, is it the image quality?
+So would the grader say that this is a high quality image or a low or an unusable image,
+or things like, is this a left eye or a right eye, which is, you know, not that useful
+of a prediction, but adding this extra extra stuff into the into the model actually helped
+it a little quite a bit.
+Mm-hmm.
+I had a note to ask about kind of right versus left eye, and I didn't see that mentioned
+in the paper at all.
+Did that come into play at all in this recent paper?
+Yeah.
+So that's another feature that we try to predict alongside of, you know, age and gender
+and smoking status, you also predicted this image of a left eye or a right eye.
+Okay.
+And now how, you know, how arbitrary can you, can you get with this, like, can you, you
+know, could you, for example, I guess you'd need a label, but could you come up with, you
+know, some arbitrary metric like the, you know, the vascular density of a retina image
+or, you know, the color shading or something like that and try to, you know, maybe find
+some mechanical way to produce labels and then ask the network to try to match to that
+as well.
+Absolutely.
+I think it's a very fruitful avenue of research for when you have a problem when you're
+trying to optimize your model to do better, I think this is one way to try that.
+It doesn't work in every case, like the features need to be sort of informative or correlative
+or interesting, like I think creating synthetic features that actually aren't correlated
+with what you're trying to predict probably won't help as much.
+But it's definitely a fruitful array of research for sure.
+Can you give me a sense for like the effect that this had, you know, what are we talking
+about in terms of performance lifts ultimately, you know, is this, you know, a few percent
+or is this, you know, how significant does it?
+Right.
+It's something like a few percent.
+These are the kind of things where when you're, when you're sort of at the middle to
+the end of a project and you're trying to eke out, you know, all the possible gains
+in a data set, this would be a strategy to try to use.
+You know, it's not going to transform the problem because ultimately all your learning
+are sort of the correlations between the features anyway.
+But it does, you know, help a couple percent.
+And there are many other techniques that we try to use to try to eke out that kind of
+last percent in model performance.
+So I guess as often happens here, I kind of, you know, argued into a particular interesting
+detail, but we got a little bit off of track and talking about the project as a whole.
+So you, one of the things that I noticed in addition to predicting, you know, developing
+this model that predicted all of these factors, as well as the kind of core factors that you
+were looking at the cardiovascular risk factors, you also tried to address the explainability
+challenge that is often faced by deep learning models.
+Can you talk a little bit about how you did that?
+Yeah, absolutely.
+You know, so as you mentioned, it's often the case that criticism of these kinds of models
+is that they're so-called black boxes.
+And I think there's a very long and growing body of research showing that these models
+are actually shouldn't be called black boxes.
+They're actually quite explainable in many different ways.
+And the technique that we used here is called soft attention.
+And so the idea is to create a network such that you're sort of successively zooming in
+on the pixels.
+And then you kind of asked the model which were the pixels that made you make that prediction.
+And then you, then you can project those pixels onto the original image and get an idea
+for why the model made the choice that it did.
+And so when we did that with this paper, we looked at a variety of cardiovascular risk
+factors and created these heat maps of what were the pixels in the image that led you
+to make that prediction.
+And what we found was actually pretty cool.
+So there are some predictions in which the predominantly the blood vessels were where
+the informative features.
+And so you can see these as these, in the paper, we use these green heat maps and they
+sort of snake along and follow the blood vessels that they're emanating out of the altidisk.
+And so a few of those predictions in particular are the prediction of the age and the prediction
+of the blood pressure.
+And so the blood pressure makes a lot of sense.
+If you want to predict the blood pressure, you need to look at the blood vessels.
+And then the other predictions.
+So for example, the gender prediction were actually focused on quite different features.
+So there we saw things like the macula and the size of the altidisk.
+And when you go back and like show these images to doctors, they can sort of, you know,
+provide feedback and sort of back up some of these findings.
+So when you show these heat maps to doctors about gender, they say, oh, yeah, there's
+this research about the ratio of the sizes of the altidisk and the caliber of the blood
+vessels as they emanate out.
+And that's predictive of gender.
+And so this sort of gives a bit of validity to the predictions and also makes people feel
+much more comfortable.
+When you're applying this soft attention mechanism, do you, are you ultimately training kind
+of multiple models in parallel, or is it, you know, one big network that has a bunch
+of different outputs?
+Yes.
+So in this particular case, it's two separate networks.
+We had, we used the inception V3 architecture to do the majority of the predictions.
+And that network has the highest AUCs in the best accuracy.
+And then we trained a separate model, which is this smaller soft attention model to do
+the model explanation.
+For this particular paper, that was done just because the inception architecture had
+had a better performance and we wanted to report the best performance.
+But it could, it could have been the same model doing both actually.
+Okay.
+Yeah.
+So it is sort of a question of like what the goal of the, of the prediction is.
+So if your goal is to be able to show these heat maps and sort of give an idea to someone
+of why you made these predictions that maybe a network like the soft attention network is
+the way to go.
+And the, and the accuracy is actually only slightly worse than if you use a much bigger model
+like the inception V3.
+Okay.
+And did you, did you test a bunch of different models or did you start with, you know, start
+and finish with inception, you know, with some prior knowledge that it would probably
+perform the best?
+Right.
+So in terms of broad like architecture, what we found is that pretty much in every problem
+that we tried, the inception architecture simply works the best.
+And so it's hard to move away from it because it, it seems to predominantly always
+work the best.
+You know, and this is the network that's, you know, running lots of products all around
+Google, such as Google Photos and things.
+And so it's simply the case that when you send it a lot of images, that architecture seems
+to do the best.
+Now there's lots and lots of hyper parameter optimizations that can be done to that network.
+Things like, you know, the sizes of things as you grow out the layers and all kinds of
+things that we definitely explored as part of this, as part of this work.
+And predominantly, the inception architecture seems to work the best across a wide variety
+of problems.
+And that's true, not only in medical imaging, it's also working for us in genomics and
+radiology and other other things.
+One of the other things I noticed was that you use transfer learning here.
+Can you talk a little bit about that?
+Yeah.
+So it's a pretty standard technique nowadays for when you don't have as much data as you
+would training data as you would like.
+And so there's actually a benefit to training this model on cats and dogs and pictures of
+flowers and buildings and things.
+And then starting from those weights and telling the model, you know, forget about cats and
+dogs now and actually learn about retinas.
+And now you're going to start from those weights, but still update as you look at millions
+and millions of retinas.
+It sounds like the fact that that, you know, helped you, you know, bootstrap your training
+process.
+That's not a surprise.
+You do that a lot as well.
+Yeah.
+So that technique is used actually quite a bit across products here and across products
+basically everywhere now.
+And it's a, it's a small boost, certainly having more retinas pictures of retinas would
+be way better than having pictures of cats and dogs, but it is the fact that these retinas
+are actually closer to natural images than they are to random images.
+And so you do get, you do get some boost by training on doing this pre-training on other
+data sets.
+Yeah, I had a conversation with someone recently, I forget, I forget the specific context.
+We didn't have a chance to go into a lot of detail, but he made kind of a passing comment
+that transfer learning, you know, almost like transfer learning had been debunked or something
+like that or it doesn't work in practice.
+Clearly, you know, it does for these kinds of problems and you see it a lot.
+Do you have any, you know, care to guess at what that might be referring to?
+Have you seen, you know, frustrations in applying it to certain types of problems or anything
+like that?
+Yeah.
+A couple of things.
+So one is that the benefit you're going to get is actually much, much smaller than you
+would like.
+You know, it's not like you're adding millions of more training points to your data
+set, you're actually, it's a much smaller factor because it is the fact that you want these
+models to be optimized to learn about retinas, right, and the patterns in retinas.
+But it's just a matter of sort of bootstrapping those image like features and maybe the lower
+layers of the network and you just sort of get some benefit from that.
+So that's the first thing is that the benefits actually much smaller than you would hope for.
+The next thing is, it kind of depends on how close your problem is to the, to the problem
+in the of these natural images.
+So for example, if you're, if your data set is sort of synthetic images or experimental
+images or, or things that don't look like pictures of cats and dogs, then it will help
+much, much less.
+And that, I would expect that to be the case with these retinal images.
+But you, you kind of characterize them as, as being similar in some ways is, is it just
+kind of the naturalness of the image as opposed to, for example, like a computer generated
+image?
+Exactly.
+These definitely aren't random images.
+These are, they have lighting features that you could maybe learn, they have, they certainly
+have color correlations and spatial correlations that you could learn.
+So I do think it's the case that these images are closer to natural images than to just sort
+of starting from random weights, yeah.
+And when you say writing features, do you mean like metadata, like capture time and maybe
+capture location or things like that that are kind of burned into the image?
+You know, it could be because these are, you know, these are cameras, a fundoscope is
+a camera.
+And so there, there are definitely a camera related artifacts that you could probably
+learn and pick up on, even if they were, you know, this camera versus, versus other
+camera images of natural images.
+Maybe I, maybe I misheard you when you said writing.
+If in fact that, you know, there were like optical, you know, characters writing on these
+images like the, you know, patient name or whatever, you know, would you, would you have
+thought to do, you know, either mask those or, you know, do you worry about the network
+learning like, I don't know, you know, times, time of year, you know, types of names,
+that kind of thing.
+Yeah.
+So definitely when you're working with medical images, that's something to definitely worry
+about.
+So we have this process by which we try to de-identify those images.
+So we would first run it through a process to sort of ask, is there, is there writing
+on the images?
+Is one common way to do it?
+So.
+Okay.
+And these are standard sort of like OCR kind of techniques like, do you see any kind of
+writing?
+What is the writing?
+And if there is, we would mess that out.
+Yeah.
+Interesting.
+So do the, the transfer learning you mentioned kind of using the, using a network trained
+on image net and kind of bootstrapping with the, the weights from that network.
+I've also talked to folks about kind of a, you know, what I guess is another kind of
+transfer learning where you're kind of training a network and then kind of chopping off the
+last layers and replacing the last layers with something else that's more specific to
+your domain.
+Do you, I guess this is a bit of an aside.
+Are there kind of more specific names for each of those two things or would you, would
+you call them both transfer learning?
+I think they're both called transfer learning.
+We, we do that procedure as well where we're chopping off, you know, if you have a network
+trained on thousands of classes such as cats and dogs and buildings and flowers, then
+it's natural to sort of chop off that last layer and add sort of, you know, predictions
+for, you know, gender, which is, you know, a classifier prediction and then age, which
+is a floating point regression prediction, prediction, and you sort of add these extra layers
+to the top of the network.
+And then those layers have to be pre-initialized with sort of random weights.
+So those things definitely need to be learned as you optimize the, as you optimize the network.
+But I think in both cases, it's sort of called transfer learning.
+And there are lots of other machine learning techniques we try to do to augment the data.
+There's like random flipping of the images and, and brightness, random brightness changes
+and things.
+And these are ways to sort of augment your training data in small ways.
+And I imagine that you have a standard kind of script or, you know, or a pipeline that
+you send images through that does all this or do you, more kind of hand apply these things
+on a problem by problem basis.
+But now it's somewhat standard because these techniques like, you know, flipping and rotations
+and brightness changes, those are, those are can be applied to any kind of image, whether
+it's an image of a retina or other things.
+And so those techniques are pretty standard and everything we've done is built on top of
+TensorFlow.
+And these are using TensorFlow ops to do those image manipulations.
+But the code is shared amongst many, many teams here now.
+And so if things like flipping and changing brightness and like, are you also doing like
+kind of random crops and that kind of stuff is, you know, how, how many or how big is
+this pipeline of kind of augmentation operations?
+Is it a handful or is it a bunch of things?
+It's quite extensive.
+It can be, it can be a bunch of things.
+It sort of depends a little bit on the problem domain.
+So just one example is for us, the crop, the random crops and things didn't quite work
+out as well because the camera image is actually pretty standard in terms of its size and
+its field of view and things because, you know, it's a patient setting where the patient
+puts their face into the camera.
+And so the field of view is actually pretty, pretty set.
+And these images are taken by, you know, professional ophthalmologist.
+And so that kind of stuff, so adding crops doesn't quite help as much.
+So it's a matter of sort of capturing the natural variability of the training data.
+And so those sort of augmentations can be turned on or off depending on what your problem
+domain is.
+You briefly mentioned the data sets and kind of how that data was sourced.
+And the paper, you, there, I recall you mentioning one of the data sets, the UK data
+source.
+But in the paper, you mentioned two, one from the UK and one from the US.
+That's right.
+Yeah.
+Um, we started primarily by looking at the UK biobank because this is, this was a pretty
+fun data set that had lots and lots of metadata about the patient.
+And then when the, when we wanted to sort of validate these predictions, we used another
+data set called the I-PACS data set, which is a set of images from a US tele-optimology
+service where, um, you know, these images are sent out.
+They're graded by professional ophthalmologists.
+And they also had, they also had some of the same metadata associated with it.
+So we could validate some of these predictions.
+One of the things that I noticed in the paper was that you, in reporting performance and
+result and the like, you, uh, always treated these data sets separately.
+And I was wondering whether, uh, you, for example, combined the data sets and evaluated
+performance on or trained on the combined data set and evaluated performance on kind of
+a randomized sample from these data sets, you know, you know, and or kind of what your
+general thinking is about that whole line of thought.
+Yeah, so we had to be a little bit careful here because some of the data sets had some
+of the, uh, some of the variables and others didn't.
+So just for an example, systolic and diastolic blood pressure, those were available in UK
+biobank.
+And so we trained on those, but they aren't available in I-PACS.
+And so we couldn't report the results there.
+We actually, you know, we couldn't train the model on that because that data wasn't available.
+Um, and so that's one reason why it's sort of very carefully split between the two things.
+Um, there are actually looks like only ages common to the two data sets and gender, yeah,
+age and gender.
+Okay.
+Yeah, yeah.
+And so, um, yeah, that's just an unfortunate feature of the data.
+We were still working on trying to collect other data sets, which have these other metadata
+available.
+Um, one cool thing about I put the I-PACS data set was they had HBA 1C level measured
+for their patients.
+Mm-hmm.
+And so this is a measure of blood glucose.
+Um, and so it was really cool to be able to try to predict that, but that, but that,
+uh, feature is not available in UK biobank.
+So we had to play a little, a little bit there.
+Mm-hmm.
+Uh, and it looks like, uh, that was the, the only feature that, you know, for what you
+didn't consistently outperform the baseline.
+Is that right?
+And what, what's your intuition around that?
+Yeah.
+So I think the, uh, the mean is sort of slightly better than the baseline, but if you look
+at, um, 90% conference intervals, they're, they're basically overlapping.
+And so what I think it's saying is that there are some features in the images, which are
+correlated with HBA 1C, but, you know, it's not, it's not a slam dunk prediction that
+you would want to sort of, uh, bet the house on.
+Mm-hmm, as is the case with, you know, age where you've got this, you know, very accurate,
+uh, set of predictions.
+Right.
+Exactly.
+And we tried to be very careful about producing the 95% conference intervals to give someone
+an idea of how, how accurate we thought these predictions were and whether they were
+actually, um, you know, predicting something real or just sort of regressing to the, to
+the mean values in the data set.
+Mm-hmm.
+So how did you produce the confidence intervals and the p values and the statistical measures
+like that that you, um, that you mentioned in the paper?
+Mm-hmm.
+So all the confidence intervals are done through bootstrapping of the eVAL sets.
+You sort of randomly select from that eVAL set many, many times and then from that you
+have a distribution of AUC values.
+And then you can report the 95% confidence interval of those.
+And that's true for, um, the AUCs and, and, and also the mean squared errors and things.
+Um, um, you, you, and, and Google more broadly alone are doing a ton of work in this area
+specifically applying deep learning to not just image-based predictions, but, you know,
+healthcare predictions more broadly.
+But in the, you know, maybe starting specifically with the domain of image-based, uh, predict,
+predictions and diagnostics, you know, what are your, what are your, what's your sense
+of what the, you know, where are we, I guess, is the question, what are the limitations?
+What, what are we able to do very well right now and, and kind of, what do you think the
+path is to making this kind of a standard tool in the physicians toolkit?
+Mm-hmm.
+So one thing that I think that we're able to do very well right now in the medical imaging
+domain is to automate the diagnoses of diseases in which doctors can sort of look at an image,
+give you a diagnosis and be very confident in their diagnosis.
+So from that data, we can sort of collect many, many diagnoses from doctors, train models
+to replicate that performance and, and sort of automate that, that doctor-level diagnosis
+and make it sort of radically available, you know, throughout the world in which the people
+may not have access to that level of expert care.
+The places where we're still need work are in the sort of more researchy or experimental
+type predictions like the ones we're talking about here, in which we've shown that there's
+like some tantalizing correlations, but the data sets, they only have a couple hundred
+cardiovascular events, for example, and so we weren't able to prove that we're able
+to predict these things at high accuracy, but they're sort of tantalizing evidence that
+maybe there's something there.
+And so you could imagine a future in which this, this fundus image is actually, you know,
+taken like more like a, a vital sign like, like your, your, your blood pressure when you
+go into the doctor's office where you take this snapshot of the eye, it's a very non-invasive
+thing, very easy to do, and you get this sort of overall view of someone's health.
+And so we need, there's lots of work that needs to be done to sort of validate those predictions
+and those ideas, but that that's one, one area that I could go.
+And in terms of making this more sort of broadly accepted or available, I think one way to
+do this is to focus on this explanation of the predictions, and so it gives sort of
+get doctors more like on your side about the prediction, like by providing an explanation,
+they sort of can trust it, they can believe in what the model is doing.
+Did you out of curiosity, did you interface directly with the doctors for this study?
+Absolutely, yeah, we work with, we have lots of doctors that we work with through our,
+our eye disease initiatives, and we also work with cardiologists as well to sort of bounce
+ideas off of them, show them, and early results, and sort of get their feedback on the predictions,
+yeah.
+And were there, were there any particular, you know, conversations or reactions that
+jumped out at you for, you know, when you presented, maybe, you know, with and without presenting,
+you know, the, the soft attention results like, did you have those the entire time or
+did you have some conversations with doctors, you know, before you had the explanations
+from the attention mechanisms and some after and like, can you, did you see a market difference
+in kind of the way they react?
+Yeah, absolutely.
+So you can imagine trying to show a doctor, tell them that you have an AUC of.97 for
+gender, and they kind of, they kind of laugh at you, they don't believe it.
+But then when you show them that heat map and sort of show that it's focusing on the
+optic disc or maybe features around the optic disc, then they say, oh, yeah, of course we
+knew that, that, that, of course you can see that.
+And so it really does, by, by, by showing where in the image, the model is using to make
+this prediction, it really does provide a level of, of trust and also, you know, a level
+of validity to the results.
+Can you tell us a little bit about the, the broader research landscape in this area?
+What are, you know, you've mentioned a bunch of the research that you're doing.
+Where do you think the most interesting and important activity in this space is happening
+right now?
+So the future work for, for the cardiovascular effort is, is certainly in validating
+in more data, so more data sets, trying to find data sets which have more cardiovascular
+events so we can sort of validate those approaches.
+And I think as we gather together more and more data, that we'll be able to, you know,
+narrow those, those confidence intervals and try to decide if this is actually working.
+So that's the, so the future in that respect is certainly gathering more data.
+And that's true across a wide variety of domains actually.
+We have a lot of, you know, initial predictions and initial results, but we need lots and
+lots more data in order to validate those things.
+You know, that almost makes me think that, that the, the take is that, you know, we've
+kind of solves a lot of the machine learning bits of this.
+You know, we've got inception, we've got, you know, transfer learning from ImageNet,
+we've got, you know, attention mechanisms and the like to, to help with explainability.
+It sounds like you're, you're saying that, you know, in terms of kind of core, you
+know, evolving the way we think about our capabilities on the machine learning side,
+you know, we're kind of as far as we need to be and now we just need more data.
+Is that taking it too far or do you agree with that?
+I think in terms of medical imaging, I think that's more or less true.
+There's still research that's happening for sure on better ways, better and more valid
+ways to do the model explanation, ways to incorporate many more predictions simultaneously
+and things like this.
+But I think for, for medical imaging, I think there's definitely a path forward that we see
+that is more or less guaranteed to work at this point.
+We've done the early work to show that it's going to work.
+We just need to execute.
+I think the areas in which it's less clear are in other domains, so things like working
+with medical records and things like working with the genomics data and in other sort
+of health, health biomedicine data.
+There, there's still some more fundamental work that needs to happen around the network
+architectures and machine learning models and alike.
+That's right.
+Exactly.
+Because there, for example, on the medical record space, you're working with sort of time
+as a dimension that you need to add to the model in some way.
+There's a lot of unstructured notes and things.
+So there's sort of a much wider variety of model architectures that are needed to be
+explored there, for sure.
+Interesting.
+In terms of that data challenge, how involved were you in that?
+Did you come on this project and the data was there and it sounds like you've used this
+data set quite a bit.
+But do you have any experience trying to source this data and does that lead you, leave
+you with any advice for folks that are interested in doing work in this field, but need to get
+their hands on a data set?
+Yeah.
+So data is definitely the key.
+You can't really, can't do anything in this data.
+And so, you know, when this project started, it started with literally the word UK biobank.
+Is there something interesting there?
+Yes or no?
+We'd have no idea.
+And so it was a matter of sort of starting from that, with that data from scratch and sort
+of deciding what was in it and learning how all the different fields are encoded and
+learning like when the data was trustworthy and which fields were encoded in different
+ways and things.
+And so there's definitely a lot of work in terms of cleaning up the data, parsing and
+downloading and making it widely available to the team and things.
+So there's a lot of engineering work and data science work that goes into that for sure.
+Can you maybe give us a sense of the, you know, the timeframes involved in a project like
+this?
+It sounds like you didn't start from a cold start, so it may be a little bit difficult
+because you've got, you know, certainly a tool chain in place, this data set you've
+worked with for a while.
+But in terms of, you know, starting from, you know, the idea to research this project
+to publishing the paper recently, like, what was that time frame like?
+Mm-hmm.
+So it's something, I think, a little over a year.
+So it's roughly, you know, four to six months of, you know, digging through the data and
+deciding what's there, you know, understanding why when I load up the JPEG, it looks, you
+know, reversed or whatever and learning the specifics of the encoding and things like
+this, you know, that takes time diving into the data.
+And so that's, you know, roughly four to six months of digging in and trying things.
+I think our earliest predictions on the gender and AUC were within maybe three to four months.
+And then you dive into, then you branch out and look at these other predictions like
+blood pressure and BMI and cardiovascular events and things.
+And, you know, and doing this sort of statistical analysis to prove that that was actually working,
+that probably took another three to four months or something.
+And then there's, of course, a lot of work that goes into publishing manuscript.
+And so, you know, we went through rounds of peer reviews and things to get that out
+there.
+Sure.
+Sure.
+And this particular data set, the Biobank data set, or either of them, really, are they
+publicly available or are there hoops that you needed to jump through to get access to
+them?
+They're publicly available to qualified researchers.
+It's a process of applying for access and basically stating that you have a stated
+research goal in mind and then they decide to grant you access to that data and you can
+use it.
+Yeah.
+Interesting.
+And are there other interesting data sets on your radar?
+Oh, okay.
+So, just to talk about the UK Biobank again, they're adding, currently adding genomics data
+to the data set.
+And that'll be really exciting to see what's there and what we can predict from it.
+And in terms of fundus imagery, there are other data collections that are available.
+You know, they're these things like sort of Kaggle-like competitions or machine learning
+competitions and like a few of them are on fundus imagery and so those data sets are
+available.
+Awesome.
+Well, Ryan, this has been super interesting.
+Do you have any final thoughts or words for folks or anything that we didn't cover?
+Any questions that I should have asked?
+Yes.
+It's been super fun.
+Thank you so much.
+One parting thing maybe is I'm super excited about the fact that this work was done in
+sort of feature lists kind of unbiased way in which I am certainly not an ophthalmologist
+and don't know anything about retinus, but we were able to sort of tell the model to
+use its features to learn about a patient's health.
+And then we surprisingly learned about a bunch of different statistical correlations that
+were in the data that we wouldn't have found if we had sort of went into it like sort
+of presupposing what the features might be and looking at things like the width of the
+blood vessels or things.
+And so I do like that this is potentially a method of scientific discovery that could
+be used in the future and people should think about trying that.
+Yeah, that sounds like a general advertisement for deep learning and you know kind of a data
+first as opposed to a feature first approach.
+Is that is that kind of where you're headed?
+Yeah, that's right.
+Awesome.
+Awesome.
+Well, once again, Ryan.
+Thank you so much.
+I appreciate you taking the time.
+Thank you.
+All right, everyone.
+That's our show for today.
+For more information on Ryan or any of the topics covered in this episode, you'll find
+the show notes at twimmolai.com slash talk slash 122.
+We heard from a lot of you over the weekend about our last episode on the reproducibility
+crisis and the philosophy of data and we really appreciate your comments.
+If you want to get in on the conversation, be sure to hit us up at Sam Charrington or
+at twimmolai on Twitter or via the show notes page, which we'll link to in the notes for
+this show.
+Thanks once again for listening and catch you next time.

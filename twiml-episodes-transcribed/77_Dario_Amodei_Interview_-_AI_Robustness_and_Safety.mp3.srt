@@ -1,0 +1,1836 @@
+1
+00:00:00,000 --> 00:00:15,920
+Hello and welcome to another episode of Twimble Talk, the podcast where I interview interesting
+
+2
+00:00:15,920 --> 00:00:20,880
+people doing interesting things in machine learning and artificial intelligence.
+
+3
+00:00:20,880 --> 00:00:25,680
+I'm your host Sam Charrington, a bit about the show you're about to hear.
+
+4
+00:00:25,680 --> 00:00:29,840
+This show is part of a series that I'm really excited about in part because I've been
+
+5
+00:00:29,840 --> 00:00:34,880
+working to bring it to you for quite a while now. The focus of this series is a sampling
+
+6
+00:00:34,880 --> 00:00:40,800
+of the really interesting work being done over at OpenAI, the independent AI research lab
+
+7
+00:00:40,800 --> 00:00:46,880
+founded by Elon Musk, Sam Altman, and others. A few quick announcements before we dive into the show.
+
+8
+00:00:47,760 --> 00:00:53,520
+In a few weeks we'll be holding our last Twimble Online Meetup of the year. On Wednesday,
+
+9
+00:00:53,520 --> 00:00:58,880
+December 13th, please join us and bring your thoughts on the top machine learning and AI
+
+10
+00:00:58,880 --> 00:01:05,920
+stories of 2017 for our discussion segment. For our main presentation, formal Twimble Talk guest,
+
+11
+00:01:05,920 --> 00:01:11,680
+Bruno Gensalves, we'll be discussing the paper, understanding deep learning requires rethinking
+
+12
+00:01:11,680 --> 00:01:18,400
+generalization, by Shi Wan Zhang from MIT and Google Brain and others. You can find more details
+
+13
+00:01:18,400 --> 00:01:25,600
+and register at twimlai.com slash meetup. Also, we need to build out our 2018 presentation
+
+14
+00:01:25,600 --> 00:01:30,960
+schedule for the meetup. So if you'd like to present your own work or your favorite third-party
+
+15
+00:01:30,960 --> 00:01:38,880
+paper, please reach out to us via email at teamattwimlai.com or ping us on social media and let us know.
+
+16
+00:01:39,760 --> 00:01:44,480
+If you receive my newsletter, you already know this, but Twimble is growing and we're looking
+
+17
+00:01:44,480 --> 00:01:50,080
+for an energetic and passionate community manager to help managing grow programs like the podcast
+
+18
+00:01:50,080 --> 00:01:56,000
+and meetup and some other exciting things we've got in store for 2018. This is a full-time role
+
+19
+00:01:56,000 --> 00:02:00,800
+that can be done remotely. If you're interested in learning more, reach out to me for additional
+
+20
+00:02:00,800 --> 00:02:06,800
+details. I should mention that if you don't already get my newsletter, you are really missing out
+
+21
+00:02:06,800 --> 00:02:13,840
+and you should visit twimlai.com slash newsletter to sign up. In this episode, I'm joined by Dario
+
+22
+00:02:13,840 --> 00:02:20,560
+Amadeh, team lead for safety research at OpenAI. While in San Francisco a few months ago, I spent
+
+23
+00:02:20,560 --> 00:02:25,360
+some time at the OpenAI office during which I sat down with Dario to chat about the work happening
+
+24
+00:02:25,360 --> 00:02:31,680
+at OpenAI around AI safety. In our conversation, Dario and I dive into the two areas of AI
+
+25
+00:02:31,680 --> 00:02:37,600
+safety that he and his team are focused on, robustness and alignment. We also touch on his research
+
+26
+00:02:37,600 --> 00:02:43,440
+with the Google DeepMind team, the OpenAI Universe tool, and how human interactions can be
+
+27
+00:02:43,440 --> 00:02:48,880
+incorporated into reinforcement learning models. This is a great conversation, and along with the
+
+28
+00:02:48,880 --> 00:02:54,320
+others in this series, this is a Nerd Alert Worthy show. A quick note before we jump in,
+
+29
+00:02:54,320 --> 00:02:59,760
+support for this OpenAI series is brought to you by our friends at NVIDIA, a company which is
+
+30
+00:02:59,760 --> 00:03:06,160
+also a supporter of OpenAI itself. If you're listening to this podcast, you already know about NVIDIA
+
+31
+00:03:06,160 --> 00:03:10,000
+and all the great things they're doing to support advancements in AI research and practice.
+
+32
+00:03:10,000 --> 00:03:15,760
+What you may not know is that the company has a significant presence at the NIPS conference going
+
+33
+00:03:15,760 --> 00:03:22,320
+on next week in Long Beach, California, including four accepted papers. To learn more about the NVIDIA
+
+34
+00:03:22,320 --> 00:03:28,960
+presence at NIPS, head on over to twimlai.com slash NVIDIA and be sure to visit them at the conference.
+
+35
+00:03:29,600 --> 00:03:34,560
+Of course, I'll be at NIPS as well, and I'd love to meet you if you'll be there, so please
+
+36
+00:03:34,560 --> 00:03:43,440
+reach out if you will. And now on to the show.
+
+37
+00:03:45,760 --> 00:03:53,120
+All right, everyone. I am here at the OpenAI offices, and I am with Dario Amade. Dario is a team
+
+38
+00:03:53,120 --> 00:03:58,400
+lead for the Safety Research team here at OpenAI. Dario, welcome to the show.
+
+39
+00:03:58,400 --> 00:04:03,280
+Thanks for inviting me. Absolutely. It's great to have you on. So why don't we get started by
+
+40
+00:04:03,280 --> 00:04:07,760
+having you tell us a little bit about your background and how you got interested in AI
+
+41
+00:04:07,760 --> 00:04:13,120
+and AI safety in particular? Yeah, so actually, my background was in computational neuroscience.
+
+42
+00:04:13,120 --> 00:04:19,120
+I did a PhD in kind of biophysics and computational neuroscience. I've always been interested in AI
+
+43
+00:04:19,120 --> 00:04:25,840
+and how intelligence works, but I felt like a lot of our AI systems 10 years ago weren't working
+
+44
+00:04:25,840 --> 00:04:30,640
+that well, and so I decided I wanted to study the brain, and then of course the deep learning
+
+45
+00:04:30,640 --> 00:04:35,440
+revolution came round, and I looked at it, and I said, oh, these systems are actually starting
+
+46
+00:04:35,440 --> 00:04:41,440
+to work. I want to be part of this. This now seems like the most interesting thing, so I ended
+
+47
+00:04:41,440 --> 00:04:46,400
+up working in Andrewings Group at Baidu for about a year, and then I worked at Google for about a
+
+48
+00:04:46,400 --> 00:04:51,760
+year, did a variety of stuff, speech recognition, natural language processing, and then
+
+49
+00:04:51,760 --> 00:04:56,960
+then I came here, and the way I got into AI safety was one of the things I noticed about
+
+50
+00:04:56,960 --> 00:05:02,320
+neural nets is there's this mixture of, they're very powerful, but they can be very opaque and
+
+51
+00:05:02,320 --> 00:05:08,080
+unreliable. When I was developing speech recognition systems, you train a system with an American
+
+52
+00:05:08,080 --> 00:05:12,000
+accent, and then it hasn't been trained in a British accent in speech, you give it some British
+
+53
+00:05:12,000 --> 00:05:20,880
+accent in speech, and it gets totally confused. This mixture of power, opacity, and very unpredictable
+
+54
+00:05:20,880 --> 00:05:26,320
+failures and weakness is kind of what made me think that we need to be careful to make sure
+
+55
+00:05:26,320 --> 00:05:31,360
+that these technologies do what we want them to do and don't do something unpredictable or even
+
+56
+00:05:31,360 --> 00:05:39,120
+dangerous. Nice. So maybe we can get started by having you give us a little overview of
+
+57
+00:05:39,120 --> 00:05:45,360
+kind of the research that you've been working on, like the broad brushstroke of the research that
+
+58
+00:05:45,360 --> 00:05:51,360
+you've been taking on. Yeah, sure. So I would say there's kind of two general areas that I think
+
+59
+00:05:51,360 --> 00:05:57,120
+about when I think about safety. One of them is what you might call robustness, which is the problem
+
+60
+00:05:57,120 --> 00:06:03,520
+that you have when you train a machine learning system, like a neural network on some problem,
+
+61
+00:06:03,520 --> 00:06:10,480
+like speech recognition or self-driving cars, and then you put it to work in some actual context,
+
+62
+00:06:10,480 --> 00:06:15,920
+and the distribution of inputs that you're facing changes in some way, for instance, the change in
+
+63
+00:06:15,920 --> 00:06:21,760
+the change in the speech accents, the change in conditions of a self-driving car, or if you have
+
+64
+00:06:21,760 --> 00:06:25,920
+a reinforcement learning agent exploring the environment, what it sees changes. So dealing with
+
+65
+00:06:25,920 --> 00:06:31,440
+that, and we've done a little bit on that, we've done kind of more on sort of the second thing,
+
+66
+00:06:31,440 --> 00:06:37,520
+which is what we call kind of like alignment with human goals. So I think a big concern, particularly
+
+67
+00:06:37,520 --> 00:06:45,040
+as AI systems get more and more powerful, is making sure that the AI systems have a sophisticated
+
+68
+00:06:45,040 --> 00:06:51,520
+high-level understanding of what humans want them to do, and that we can already see examples today
+
+69
+00:06:51,520 --> 00:06:58,480
+where AI systems, it's much easier to have a simple goal than it is to have a complex goal,
+
+70
+00:06:58,480 --> 00:07:03,040
+and I can get into a little more detail of why that's true for today's AI systems,
+
+71
+00:07:03,040 --> 00:07:07,280
+and that kind of really sets the stage for systems to kind of go off and kind of
+
+72
+00:07:07,280 --> 00:07:12,960
+maniacally pursue very kind of pathological simple goals. And I think we should instead have AI
+
+73
+00:07:12,960 --> 00:07:18,720
+systems that are as good at understanding what humans want them to do as they are accomplishing
+
+74
+00:07:18,720 --> 00:07:22,400
+what, you know, whatever tasks they've decided, it's important to do.
+
+75
+00:07:22,400 --> 00:07:28,560
+I think one of the best examples of that was from, I think it was some of the initial work that you
+
+76
+00:07:28,560 --> 00:07:34,240
+did with Google on this, where the example was you've got a robotic housekeeper, and you do it
+
+77
+00:07:34,240 --> 00:07:38,880
+to clean the room. Like, you don't want the robot sweeping all the dust under the rug.
+
+78
+00:07:38,880 --> 00:07:43,920
+Yeah. Yeah. Yeah. Yeah. Yeah. I mean, it's kind of an example of what we call or this term
+
+79
+00:07:43,920 --> 00:07:49,120
+from economics, actually, good-hard slot, which is that once a metric becomes a target, it ceases
+
+80
+00:07:49,120 --> 00:07:53,280
+to be a good metric. What that means is if you have a way of kind of passively measuring something,
+
+81
+00:07:53,280 --> 00:07:58,400
+it seems good, but then if you optimize it really hard, you might get something that, you know,
+
+82
+00:07:58,400 --> 00:08:01,040
+that you don't expect. So actually, you know what?
+
+83
+00:08:01,040 --> 00:08:05,920
+It isn't that all we're doing in AI is like optimizing it around a metric really hard.
+
+84
+00:08:05,920 --> 00:08:10,080
+Yeah. That's the problem. Yeah. I'm not going to argue with that. So we actually have,
+
+85
+00:08:10,080 --> 00:08:14,080
+since I came to open AI, we got kind of an even more vivid example of this that we got to
+
+86
+00:08:14,080 --> 00:08:19,680
+occur in an actual AI system. So, you know, we were kind of playing with training simple video games,
+
+87
+00:08:19,680 --> 00:08:24,240
+and you know, we had this boat race game where, you know, you're trying to complete a course
+
+88
+00:08:24,240 --> 00:08:29,440
+with a boat. And the only kind of easy way we have of measuring progress, again, the only simple
+
+89
+00:08:29,440 --> 00:08:34,000
+way we have of measuring progress is it gets these points when it knocks down these targets along
+
+90
+00:08:34,000 --> 00:08:39,040
+the course. You know, so kind of naively looking at it, you know, it's something like, well,
+
+91
+00:08:39,040 --> 00:08:43,440
+you know, it has to knock down these targets to complete the course. So okay, we're, you know,
+
+92
+00:08:43,440 --> 00:08:48,000
+we're going to give it, give it train reinforcement learning system, give it points for knocking
+
+93
+00:08:48,000 --> 00:08:51,920
+down the targets. And so great, it'll complete the course. And then I just, I just, you know,
+
+94
+00:08:51,920 --> 00:08:56,480
+I just set it in motion, didn't do anything for, you know, 24 hours. And then when I came back,
+
+95
+00:08:56,480 --> 00:09:00,720
+and I looked at it, the thing was going around in circles because it found this lagoon where it could
+
+96
+00:09:00,720 --> 00:09:05,840
+just get the maximum possible density of points. And, you know, of saying that example. Of course,
+
+97
+00:09:05,840 --> 00:09:10,080
+you can say, well, I don't know, you get what you ask for. The game was just broken. But I think
+
+98
+00:09:10,080 --> 00:09:16,000
+the difficulty is that the mapping between what we think we're likely to get when we set the training
+
+99
+00:09:16,000 --> 00:09:20,560
+process in motion and what we actually get, it's very discontinuous. It's not, you know,
+
+100
+00:09:20,560 --> 00:09:25,920
+mysterious or magical anything. You do, indeed, get what you ask for. But what worries me is this
+
+101
+00:09:25,920 --> 00:09:30,880
+kind of, you know, very, very unpredictable mapping between here's what we think we're trying to
+
+102
+00:09:30,880 --> 00:09:35,520
+get a system to do. And here is what the system actually actually ends up doing. And in retrospect,
+
+103
+00:09:35,520 --> 00:09:40,320
+of course, it made sense that it did that. But perspective predictability is a property that I'd
+
+104
+00:09:40,320 --> 00:09:43,520
+like our our systems to have. And that I believe they currently don't have.
+
+105
+00:09:44,960 --> 00:09:50,480
+So one of the first things that you did around this research was to publish a paper again. It's
+
+106
+00:09:50,480 --> 00:09:54,240
+the same paper I'm referring to with, I think it was in partnership with Google and another
+
+107
+00:09:54,240 --> 00:10:01,680
+organization. I forget the name of you essentially outline a set of rules like or do you think of them
+
+108
+00:10:01,680 --> 00:10:06,880
+as rules or goals or kind of general general research areas. So just to make sure there's kind of
+
+109
+00:10:06,880 --> 00:10:12,880
+two kind of major papers that we did in the last about year and a quarter. The first one was I did
+
+110
+00:10:12,880 --> 00:10:18,320
+while I was still at Google and it was done in collaboration with Google OpenAI Stanford Berkeley.
+
+111
+00:10:18,320 --> 00:10:23,600
+And this was kind of this agenda paper that kind of outlined various directions for for AI
+
+112
+00:10:23,600 --> 00:10:29,280
+safety. And then more recently about I think was what three three months ago now we published this
+
+113
+00:10:29,280 --> 00:10:34,240
+paper called Learning from Human Preferences, which was kind of our you know research kind of
+
+114
+00:10:34,240 --> 00:10:39,360
+attacking some some subset of those those problems. So it's kind of like that that paper from a
+
+115
+00:10:39,360 --> 00:10:43,760
+year ago was kind of the agenda doc that that laid out. And that's the one I'm referring to. Yeah,
+
+116
+00:10:43,760 --> 00:10:49,760
+you dig into the next one. Okay. Okay. But maybe you can take a second to kind of if you remember,
+
+117
+00:10:49,760 --> 00:10:54,400
+like working through that those points in the agenda because they're almost like, you know,
+
+118
+00:10:54,400 --> 00:10:59,760
+in some way is it fair to think of them as like azamaz new laws for the the neural network age or
+
+119
+00:10:59,760 --> 00:11:04,080
+something like that. A little bit. Yeah, I mean, they're in a sense trying to solve the same problem,
+
+120
+00:11:04,080 --> 00:11:10,160
+although it's less things a specific machine should should do as kind of areas of research where,
+
+121
+00:11:10,160 --> 00:11:14,400
+you know, to address particular types of problematic behavior that that could arise.
+
+122
+00:11:14,400 --> 00:11:18,080
+There were kind of five research areas that that we talked about and they were kind of divided
+
+123
+00:11:18,080 --> 00:11:23,840
+into into two topics similar to this kind of, you know, robustness versus value alignment things.
+
+124
+00:11:23,840 --> 00:11:28,320
+So, you know, kind of the schema we used was, you know, you have you have a machine learning system,
+
+125
+00:11:28,320 --> 00:11:31,840
+you want it to do something and something goes wrong and it does something other than what what
+
+126
+00:11:31,840 --> 00:11:35,600
+you intended it to do. Where do things go wrong? Things to go wrong because you had the wrong
+
+127
+00:11:35,600 --> 00:11:40,800
+objective function and you optimized it really hard. Or things to go wrong because you had the
+
+128
+00:11:40,800 --> 00:11:44,800
+right objective function, but something about the way you trained it went wrong. So that would be
+
+129
+00:11:44,800 --> 00:11:49,760
+like, you know, the self-driving car that's put in a new environment or, you know, the kind of robot
+
+130
+00:11:49,760 --> 00:11:54,560
+robot helicopter that, you know, is trying out behaviors and then destroys itself and, you know,
+
+131
+00:11:54,560 --> 00:11:58,720
+they kind of wasn't in the algorithm. So on the first one, the problem we talked about the
+
+132
+00:11:58,720 --> 00:12:02,640
+first one was reward hacking. So this is kind of the thing we demonstrated in the boat race where,
+
+133
+00:12:02,640 --> 00:12:07,600
+you know, you have you have this this measure, you optimize it really hard and you just you get
+
+134
+00:12:07,600 --> 00:12:12,800
+the wrong thing. The second one in that area that we talked about was what we call negative side
+
+135
+00:12:12,800 --> 00:12:19,040
+effects. So the idea is, you know, the world's the world's really big and basically it's a bit
+
+136
+00:12:19,040 --> 00:12:25,200
+similar to reward hacking, basically any simple objective that I can come up with probably refers to,
+
+137
+00:12:25,200 --> 00:12:30,160
+you know, very small set of things, right? So if I ask you to move this chair, I'm implicitly
+
+138
+00:12:30,160 --> 00:12:34,720
+not referring to just every other thing under the sun that that could be in the world and so,
+
+139
+00:12:34,720 --> 00:12:40,560
+right without breaking that window. Yeah, but by default, I'm kind of like not specifying all this
+
+140
+00:12:40,560 --> 00:12:46,560
+common sense stuff. So, so you might say side effects are really bad by default in AI systems.
+
+141
+00:12:46,560 --> 00:12:50,880
+And so, yeah, that was that was kind of the second the second problem in that in that category. So
+
+142
+00:12:50,880 --> 00:12:55,760
+those two are kind of like broad reasons why, you know, I picked out an objective function,
+
+143
+00:12:55,760 --> 00:13:00,160
+seemed innocent, seemed good and something went went very wrong with it. The third problem,
+
+144
+00:13:00,160 --> 00:13:04,640
+which is kind of between the categories is a thing we called scalable supervision, which,
+
+145
+00:13:04,640 --> 00:13:09,680
+you know, we dealt dealt with that some in the later paper, which is, you know, even even if I know,
+
+146
+00:13:09,680 --> 00:13:14,560
+you know, if I, if I were there for everything in AI system did, even if I could coach it and
+
+147
+00:13:14,560 --> 00:13:19,360
+tell it to do the right thing, if I could supervise every decision that it made, you know, make,
+
+148
+00:13:19,360 --> 00:13:23,200
+make sure it never got out of my sight and never did anything, I don't really have the bandwidth
+
+149
+00:13:23,200 --> 00:13:28,480
+to do that. How do I handle situations where I kind of know what I want the AI system to do,
+
+150
+00:13:28,480 --> 00:13:32,560
+but I have very, very limited, it's, it's not feasible for me to have more than limited
+
+151
+00:13:32,560 --> 00:13:37,280
+interaction with it. How do I handle that? That situation. So those were the three on the kind of,
+
+152
+00:13:37,280 --> 00:13:41,360
+like, you know, how do I get the right objective function? And then I have the right objective
+
+153
+00:13:41,360 --> 00:13:46,560
+function. How do I, how do I make sure something bad doesn't happen? The two problems were safe
+
+154
+00:13:46,560 --> 00:13:51,840
+exploration. So safe exploration is the idea that, you know, I have some objective function like
+
+155
+00:13:51,840 --> 00:13:57,120
+fly a helicopter. And even if that's right, even if I've set my system up in a way so that if I
+
+156
+00:13:57,120 --> 00:14:02,240
+give it enough time, learns how to fly the helicopter right, in the real world, if I have a robot
+
+157
+00:14:02,240 --> 00:14:06,880
+helicopter and it crashes, maybe it breaks and it is never able to fly again. So I have this
+
+158
+00:14:06,880 --> 00:14:11,520
+kind of expensive at the very least. Yeah, you have what's called an asymptotic guarantee that
+
+159
+00:14:11,520 --> 00:14:16,000
+you eventually get the right behavior, but it doesn't help you if you die before, before you get,
+
+160
+00:14:16,000 --> 00:14:21,040
+you get to the asymptotic limit. And, you know, so that's an area that's, it's gotten some attention
+
+161
+00:14:21,040 --> 00:14:26,480
+in machine learning, machine learning already, but I think as with many things, you know, kind of
+
+162
+00:14:26,480 --> 00:14:31,200
+neural nets and kind of very powerful policies and new tasks have just come along in the last three
+
+163
+00:14:31,200 --> 00:14:36,240
+or four years. And so the safe exploration literature is, you know, just kind of catching up to this.
+
+164
+00:14:36,240 --> 00:14:39,760
+And so one of the things we were saying in the paper was, you know, there's, there's an urgency
+
+165
+00:14:39,760 --> 00:14:45,600
+to making sure that, you know, the safety, the work on safety issues catches up with the work
+
+166
+00:14:45,600 --> 00:14:49,680
+in other areas that's kind of kind of hurtling ahead. Right. And we kind of, we kind of already
+
+167
+00:14:49,680 --> 00:14:54,240
+seen it. I mean, the one example I give is, you know, at OpenAI, we had this tool called universe
+
+168
+00:14:54,240 --> 00:14:58,720
+we were using for a while that lets you basically, you know, have a reinforcement learning system
+
+169
+00:14:58,720 --> 00:15:06,320
+that connects to the web and has as its kind of actions and abilities seen the screen moving the cursor
+
+170
+00:15:06,320 --> 00:15:10,560
+and clicking on it and anything. Reinforcement learning systems when they when you initialize them
+
+171
+00:15:10,560 --> 00:15:16,480
+tend to explore randomly. So the first time I ever trained a reinforcement learning system on
+
+172
+00:15:16,480 --> 00:15:23,440
+universe, it immediately opened up Chrome, right clicked, opened the Chrome developer tools kit,
+
+173
+00:15:23,440 --> 00:15:29,920
+changed the code in there, closed it, crashed Chrome and caused some kind of segmentation fault on my
+
+174
+00:15:29,920 --> 00:15:36,480
+computer. The first time, you know, just, just random behavior. So if your environment is complicated
+
+175
+00:15:36,480 --> 00:15:40,640
+enough, you really, really have to think about these issues. Yeah. You know, I could say the same
+
+176
+00:15:40,640 --> 00:15:44,960
+thing about, you know, Google's, Google's done some work on, I think it's, it's well known now
+
+177
+00:15:44,960 --> 00:15:50,640
+optimizing data centers and, you know, using reinforcement learning to, to optimize data center
+
+178
+00:15:50,640 --> 00:15:54,640
+energy usage and, you know, of course, there, there's some knobs you could turn there that would
+
+179
+00:15:54,640 --> 00:15:58,160
+break the data centers. And so that is an issue that I think they've had to think about as well.
+
+180
+00:15:58,160 --> 00:16:02,640
+Right. And then kind of the last issue was this distributional shift thing, which I, you know,
+
+181
+00:16:02,640 --> 00:16:07,680
+kind of alluded to a number of times and, you know, has to do with, you know, the environment
+
+182
+00:16:07,680 --> 00:16:12,880
+in your self-driving car changes or, you know, the, you train your, your speech system on one accent
+
+183
+00:16:12,880 --> 00:16:17,920
+and you change it to another accent. One situation which it came up was the infamous Google
+
+184
+00:16:17,920 --> 00:16:23,280
+guerrilla incident, you know, Google photos tagged some, some African-American individuals as guerrillas
+
+185
+00:16:23,280 --> 00:16:26,800
+and it was kind of a problem with the training set that, you know, the, the training set had been
+
+186
+00:16:26,800 --> 00:16:31,680
+awaited towards Caucasian individuals and so, you know, it got confused. It had no idea what,
+
+187
+00:16:31,680 --> 00:16:36,480
+what racism was about or, or any of these things. So here are failures of kind of already happened
+
+188
+00:16:36,480 --> 00:16:40,320
+and how, how can we better about, be better about machine learning systems kind of knowing,
+
+189
+00:16:40,320 --> 00:16:44,960
+knowing what they don't know. So that's kind of the overview of the, the problems. And so the,
+
+190
+00:16:44,960 --> 00:16:52,160
+the, the second paper is one that's kind of diving into kind of the first few of these problems.
+
+191
+00:16:52,160 --> 00:16:56,720
+Yeah, yeah, a couple, a couple of the first problems. So, you know, as with most things, we wrote this
+
+192
+00:16:56,720 --> 00:17:00,640
+kind of grand agenda and then we were like, oh, you know, we have so many ideas for how we could
+
+193
+00:17:00,640 --> 00:17:05,120
+work on any of these, which, which should we start on? So the thing we eventually settled on was,
+
+194
+00:17:05,120 --> 00:17:10,320
+you know, the kind of the reward hacking and scalable supervision stuff, having, having the wrong,
+
+195
+00:17:10,320 --> 00:17:14,960
+the wrong objective function and, you know, with, with that, what we wanted to think about was,
+
+196
+00:17:14,960 --> 00:17:19,680
+well, if you're trying to learn an objective function that's in line with what humans would want,
+
+197
+00:17:19,680 --> 00:17:23,520
+then you should probably learn that objective function straight from humans, right? Because,
+
+198
+00:17:24,000 --> 00:17:27,680
+you know, if you have some kind of hard to explain the static thing that, you know,
+
+199
+00:17:27,680 --> 00:17:32,000
+that it's hard to encode into a system, instead of trying to encode it, you kind of let the
+
+200
+00:17:32,000 --> 00:17:36,480
+human be the teacher, right? And in some sense, whenever we do supervised learning, we're doing
+
+201
+00:17:36,480 --> 00:17:40,560
+that a little bit, you know, a human has to label all the images to tell us, well, you know,
+
+202
+00:17:40,560 --> 00:17:45,840
+this is, this is what a duck is, this is what an ostrich is. But it hasn't been done very much in
+
+203
+00:17:45,840 --> 00:17:49,840
+the setting of reinforcement learning and kind of that's the setting that, you know, I think,
+
+204
+00:17:49,840 --> 00:17:54,960
+has both the most promise and that we should worry, worry the most about, right? Are you saying letting
+
+205
+00:17:54,960 --> 00:18:02,720
+the human be the teacher necessarily by observation or by the human communicating a set of rules?
+
+206
+00:18:02,720 --> 00:18:07,040
+By the human communicating. So, I'll kind of explain a little bit how it works and how we set it
+
+207
+00:18:07,040 --> 00:18:12,560
+up in our paper. So, for those who don't know, the usual setup with reinforcement learning is,
+
+208
+00:18:12,560 --> 00:18:18,720
+you know, you have kind of an agent that's interacting in an intertwined way with environment. And,
+
+209
+00:18:18,720 --> 00:18:23,920
+you know, you have some notion of rewards. So, you know, in the deep mind system that played,
+
+210
+00:18:23,920 --> 00:18:29,440
+played go, it's, you know, did you win or did you lose in the tarry? It's the score. And because
+
+211
+00:18:29,440 --> 00:18:34,880
+you're training the system, you know, by trial and error for, you know, many millions of iterations
+
+212
+00:18:34,880 --> 00:18:38,880
+through, it's actually very important in the way we currently train the system to have a kind of
+
+213
+00:18:38,880 --> 00:18:45,040
+programmatically evaluable reward function, right? So, you know, with go, if I had to have a human
+
+214
+00:18:45,040 --> 00:18:49,520
+look at the end of every game and say, did you win or did you lose, it would be very hard, right? It's
+
+215
+00:18:49,520 --> 00:18:53,040
+it's very important that I can just write a little script that says, yep, I have more territory
+
+216
+00:18:53,040 --> 00:18:57,600
+than you, therefore I won, you have more territory than me, therefore you won. And so, in general,
+
+217
+00:18:57,600 --> 00:19:02,000
+these systems are trained without much human, human intervention because there isn't time for,
+
+218
+00:19:02,000 --> 00:19:06,320
+and what that means is that the goals have to be something you can write in a simple program.
+
+219
+00:19:06,320 --> 00:19:12,320
+And so, the way we changed this was, you know, what if you have a human every once in a while
+
+220
+00:19:12,320 --> 00:19:17,200
+give some feedback on what the right goals are and whether the system is behaving in the way
+
+221
+00:19:17,200 --> 00:19:21,680
+that it should behave? So, the idea is, you know, with my reinforcement learning system, I take out
+
+222
+00:19:21,680 --> 00:19:28,640
+the reward function and I replace it with a model of what the right thing to do is that is trained
+
+223
+00:19:28,640 --> 00:19:33,840
+from a human. So, concretely, the way it works is, you know, I have my reinforcement learning system,
+
+224
+00:19:33,840 --> 00:19:38,400
+it starts out by acting randomly as all reinforcement learning systems do. And then every once in a
+
+225
+00:19:38,400 --> 00:19:43,600
+while, I take two clips of its behavior, just two randomly selected clips, give them to a human,
+
+226
+00:19:43,600 --> 00:19:49,200
+and the human takes a look at them and says, okay, this is a little more like what I want than that.
+
+227
+00:19:49,200 --> 00:19:54,160
+And, you know, the human has in mind some behavior that it wants the AI system to engage in. At the
+
+228
+00:19:54,160 --> 00:19:59,120
+beginning, neither of the two video clips is going to be particularly good. But, you know, the
+
+229
+00:19:59,120 --> 00:20:04,000
+humans like, yeah, this is a little more like what I want. Then, you know, the AI system has kind of
+
+230
+00:20:04,000 --> 00:20:09,360
+a reward predictor that it trains that that models the human choices. It tries to come up with a
+
+231
+00:20:09,360 --> 00:20:14,480
+reward that's consistent with what the human chooses. It goes off and optimizes that for a while.
+
+232
+00:20:14,480 --> 00:20:18,800
+Then it presents the human with two more video clips and the human says, this is better than that.
+
+233
+00:20:18,800 --> 00:20:24,640
+Updates the systems model and then the system goes off and, you know, plays around in the environment
+
+234
+00:20:24,640 --> 00:20:29,040
+and tries to achieve that goal better. So, instead of kind of careening off, you know,
+
+235
+00:20:29,040 --> 00:20:34,320
+optimizing a particular goal really hard, you have this interplay where the system optimizes a goal,
+
+236
+00:20:34,320 --> 00:20:39,120
+comes to the human and says, am I going in the right direction? The human, you know, reinforces it
+
+237
+00:20:39,120 --> 00:20:44,640
+or corrects it and then it optimizes some more. And so via this interplay, you can make sure that
+
+238
+00:20:44,640 --> 00:20:49,440
+you're kind of gradually training the system that stays in the direction the human wants it to go.
+
+239
+00:20:49,440 --> 00:20:54,080
+Well, at the same time, you know, every time the human interacts, they're kind of imparting,
+
+240
+00:20:54,080 --> 00:20:58,240
+you know, a little piece of what they have in mind to the AI system.
+
+241
+00:20:58,240 --> 00:21:05,120
+So can I jump in with a couple of questions here? So if the only source of, you know, data for
+
+242
+00:21:05,120 --> 00:21:08,720
+the system to optimize around is the input it's getting from the human. Yeah.
+
+243
+00:21:08,720 --> 00:21:12,480
+Like, what's it doing between the times that it's getting input from the human? And like,
+
+244
+00:21:12,480 --> 00:21:17,920
+does it work if you just compress that and take it out? Yeah. No, it actually doesn't because
+
+245
+00:21:17,920 --> 00:21:23,360
+if you kind of think about, you know, so maybe good to have an example. So let's say of a video game
+
+246
+00:21:23,360 --> 00:21:27,760
+where you're kind of trying to shoot spaceships and keep them from shooting you. So there's two
+
+247
+00:21:27,760 --> 00:21:32,560
+different parts to it, right? There's understanding that the goal of the game is to shoot the spaceships
+
+248
+00:21:32,560 --> 00:21:38,400
+and not be shot by enemy spaceships. And there's, there's the actual mechanical dexterity to find
+
+249
+00:21:38,400 --> 00:21:44,080
+the spaceships, shoot them and avoid them. So we can start to learn how to do that stuff. Yeah. So,
+
+250
+00:21:44,080 --> 00:21:49,200
+so basically what the system needs to do is it needs to figure out from you what its goal should be,
+
+251
+00:21:49,200 --> 00:21:54,560
+namely shooting the spaceships. And as it figures out that goal, then it needs to on its own,
+
+252
+00:21:54,560 --> 00:21:58,720
+you know, practice in the environment in order to learn how to achieve that goal. In practice,
+
+253
+00:21:58,720 --> 00:22:02,800
+it's a little bit more of an interplay, you know, it first, it understands that, you know,
+
+254
+00:22:02,800 --> 00:22:06,880
+it should be avoiding these shots that are coming down. And then it kind of goes off and
+
+255
+00:22:06,880 --> 00:22:11,360
+optimizes that. And then it gives you some some trajectories where it avoids the shots, but
+
+256
+00:22:11,360 --> 00:22:14,960
+doesn't actually score any points. And you're like, oh, this isn't any good. And then every once in
+
+257
+00:22:14,960 --> 00:22:18,240
+a while, it accidentally scores a point and you're like, yeah, yeah, you should do more of that.
+
+258
+00:22:18,240 --> 00:22:22,640
+Then it kind of figures out, oh, I need to not just avoid the shots, I need to actually shoot,
+
+259
+00:22:22,640 --> 00:22:27,600
+shoot the enemies. And then it takes some additional time to figure out how to do that. So it's
+
+260
+00:22:27,600 --> 00:22:32,400
+an interplay between, you know, the system learning what you want and the system learning how to
+
+261
+00:22:32,400 --> 00:22:38,160
+achieve what you want. And kind of that's why there's that interplay. So, you know, you only ever
+
+262
+00:22:38,160 --> 00:22:43,760
+see about, you know, in our paper, it was about 0.1% of what the system actually does. We trained it
+
+263
+00:22:43,760 --> 00:22:47,920
+on, you know, tasks like Atari, you know, Atari is a common benchmark, Atari games or a common
+
+264
+00:22:47,920 --> 00:22:52,960
+benchmark for reinforcement learning. So, you know, we trained it on, we trained it on some Atari
+
+265
+00:22:52,960 --> 00:22:58,560
+games and the human only had to see about 0.1% of what the actual agent saw, which is good because
+
+266
+00:22:58,560 --> 00:23:03,520
+the agent sees, you know, days of experience or so and we don't have time to, you know, to have
+
+267
+00:23:03,520 --> 00:23:09,520
+human sees, see all of that. Okay. What is the human evaluating? And, you know, in a simple game,
+
+268
+00:23:09,520 --> 00:23:14,960
+like the spaceship game you described, I'm imagining, what is the human evaluating the two frames on?
+
+269
+00:23:14,960 --> 00:23:19,920
+Like, is it just looking at the score? Is it a proxy for, you know, some way to detect the score?
+
+270
+00:23:19,920 --> 00:23:24,080
+So we link out the score because it's a little bit of a confounder. But, you know, we just,
+
+271
+00:23:24,080 --> 00:23:28,640
+we just say to a human, we're kind of in some ways trying to develop a pipeline such that
+
+272
+00:23:28,640 --> 00:23:32,880
+you could take a task and actually farm it out to humans who understand the task. So,
+
+273
+00:23:32,880 --> 00:23:36,800
+we blank out the score and, you know, we just, we gave it to some contractors and we said,
+
+274
+00:23:36,800 --> 00:23:41,200
+this is a game where, you know, you're trying to shoot enemy spaceships and avoid getting shot
+
+275
+00:23:41,200 --> 00:23:45,920
+by enemy spaceships. You know, you're going to see two video clips and, you know, click on the
+
+276
+00:23:45,920 --> 00:23:49,840
+video clip that you think does a better job of that, that particular one. So their video,
+
+277
+00:23:49,840 --> 00:23:54,320
+then that stills that out. Yeah, there, there are video clips that are a couple seconds long.
+
+278
+00:23:54,320 --> 00:23:59,040
+And so, you know, for many tasks, we're able to get, get a good sense of that. We were also able
+
+279
+00:23:59,040 --> 00:24:04,640
+to do tasks where, you know, there's no, no, so for Atari, you know, there is a score that you
+
+280
+00:24:04,640 --> 00:24:08,000
+could learn from and our point was that, you don't need it, you could learn without it.
+
+281
+00:24:08,000 --> 00:24:13,120
+There are also tasks, particularly kind of, you know, tasks, you know, like, that simulated robot
+
+282
+00:24:13,120 --> 00:24:18,640
+animals do where, you know, you want them to perform some trick that it's really hard to describe
+
+283
+00:24:18,640 --> 00:24:23,600
+mathematically, but that a human can recognize. So we, we taught kind of like little, little simulated
+
+284
+00:24:23,600 --> 00:24:28,640
+robot walkers to do kind of back flips in front flips. You know, we taught like walkers with two
+
+285
+00:24:28,640 --> 00:24:33,680
+legs to kind of like balance on their hind legs or, you know, do ballerina moves or, or things
+
+286
+00:24:33,680 --> 00:24:37,680
+like that. And so, you know, the, the exciting thing is usually if you want to train something with
+
+287
+00:24:37,680 --> 00:24:42,160
+reinforcement learning, you have to say, okay, what's the behavior I want? How do I write a mathematical
+
+288
+00:24:42,160 --> 00:24:46,560
+function that assesses whether that behavior was right or not? Whereas here, it's just, okay,
+
+289
+00:24:46,560 --> 00:24:51,280
+what's the behavior I want? Let me look at some video clips and, and try and reinforce that
+
+290
+00:24:51,280 --> 00:24:56,800
+behavior, which I think, you know, requires more human labor, but particularly if we farm it out,
+
+291
+00:24:56,800 --> 00:25:02,240
+it allows you to do a much wider variety of tasks. Yeah. Have you looked at,
+
+292
+00:25:03,840 --> 00:25:09,760
+it sounds like you're pulling two random clips. Have you explored like, selecting the clips based
+
+293
+00:25:09,760 --> 00:25:13,840
+on maximal distance or information or something? Yep. Yep. No, that's, that's a really great question.
+
+294
+00:25:13,840 --> 00:25:18,640
+So we actually did include that in the paper and it helped a little. So we actually,
+
+295
+00:25:18,640 --> 00:25:24,960
+instead of having kind of a single predictor of the human, the human preferences from the data,
+
+296
+00:25:24,960 --> 00:25:28,560
+one of the things we tried was having ensemble of three predictors that are trained on
+
+297
+00:25:28,560 --> 00:25:33,280
+subsets of the data. So this is kind of, you know, common statistical validation technique. And
+
+298
+00:25:33,280 --> 00:25:38,560
+then you look at cases where different predictors disagree with each other about which clip,
+
+299
+00:25:38,560 --> 00:25:43,280
+which clip they think the human would think was better. And that disagreement is a good proxy for,
+
+300
+00:25:43,280 --> 00:25:47,840
+oh, this is a hard case. This is a hard case to figure out. So then we kind of mine for hard
+
+301
+00:25:47,840 --> 00:25:52,720
+cases and preferentially present the human with hard cases instead of easy cases, right? So in
+
+302
+00:25:52,720 --> 00:25:57,120
+the spaceship example would be like, you know, you've really, you know, let's say, you know,
+
+303
+00:25:57,120 --> 00:26:00,720
+let's say the agent has really figured out that, you know, if you get shot by the ship, it's,
+
+304
+00:26:00,720 --> 00:26:04,480
+it's really bad, right? But then there are some intermediate cases where, you know,
+
+305
+00:26:04,480 --> 00:26:08,880
+the ship's laser is shooting at you and it almost hits you versus the one where it actually does
+
+306
+00:26:08,880 --> 00:26:13,040
+hit you. And like, you know, maybe your predictor hasn't quite, hasn't quite figured out the difference
+
+307
+00:26:13,040 --> 00:26:17,280
+between those then. And so you really want to show those to the humans. The human can, can
+
+308
+00:26:17,280 --> 00:26:22,720
+disambiguate. And we found that that indeed did speed speed things up, you know, on more tasks
+
+309
+00:26:22,720 --> 00:26:27,120
+than it, than it slowed things down. It wasn't a huge improvement and we're actually looking for
+
+310
+00:26:27,120 --> 00:26:31,200
+kind of more, more intelligent ways of doing this because, you know, I mean, that, that's really
+
+311
+00:26:31,200 --> 00:26:37,360
+getting into having systems be active and ask us questions about the things they're confused about
+
+312
+00:26:37,360 --> 00:26:41,680
+instead of receiving passive information about what we think they're, they're confused about.
+
+313
+00:26:41,680 --> 00:26:44,960
+So, you know, I think, I think in the future, that's going to be a big part of it that, you know,
+
+314
+00:26:44,960 --> 00:26:50,160
+we want such teaching to be a dialogue between, you know, the machine and us just like it would be
+
+315
+00:26:50,160 --> 00:26:54,880
+a dialogue between the teacher and the student or a parent and the child or, or, or something like that.
+
+316
+00:26:54,880 --> 00:26:59,600
+Now, the other interesting thing that jumped out at me in describing and in you describing
+
+317
+00:26:59,600 --> 00:27:05,840
+that last example is like the ambiguity from the humans perspective. Like, if the laser just
+
+318
+00:27:05,840 --> 00:27:10,640
+misses the ship, is that like, oh, bad because the ship was too close to the laser? Oh, that's
+
+319
+00:27:10,640 --> 00:27:15,280
+awesome. The ship was able to like, avoid the laser, you know, that it was really close. Like,
+
+320
+00:27:15,280 --> 00:27:19,120
+have you characterized that part of the problem at all? Yeah, I mean, I think there were some kind of
+
+321
+00:27:19,120 --> 00:27:25,600
+technical issues we ran into, which is, you know, how do you define goal of the task, right? So,
+
+322
+00:27:25,600 --> 00:27:30,400
+another example, like the example you gave is, you know, what if, what if your spaceship just
+
+323
+00:27:30,400 --> 00:27:34,640
+in a particular few second clip doesn't, doesn't encounter any enemy spaceships at all? So in other
+
+324
+00:27:34,640 --> 00:27:39,280
+words, it doesn't see anything. There's nothing, there's nothing it has to do. Is that good behavior
+
+325
+00:27:39,280 --> 00:27:43,520
+because it did what it was supposed to do, which is nothing? Right. Or is it bad behavior because
+
+326
+00:27:43,520 --> 00:27:49,120
+it's worse than a clip where it actually shot, shot the spaceship? In the formal reward formalism,
+
+327
+00:27:49,120 --> 00:27:53,840
+you're basically supposed to say that that's worse behavior because, you know, it didn't, it didn't
+
+328
+00:27:53,840 --> 00:27:58,640
+get the reward as opposed to the behavior where there was, it was a ship and, and did get the reward.
+
+329
+00:27:58,640 --> 00:28:03,200
+But of course, if I'm a human thinking about it, it's kind of, it's kind of ambiguous. And so,
+
+330
+00:28:03,200 --> 00:28:08,800
+we kind of tried to give the instructions in, you know, in such a way as to kind of, you know,
+
+331
+00:28:08,800 --> 00:28:13,520
+resolve, resolve those ambiguities. You know, we wanted to focus on, you know, can we incentivize
+
+332
+00:28:13,520 --> 00:28:18,800
+this behavior with clear one or two sentence instructions? But I think, you know, and the technical
+
+333
+00:28:18,800 --> 00:28:23,280
+description of it is, you know, there's a difference between the reward, which is the immediate reward,
+
+334
+00:28:23,280 --> 00:28:29,200
+you get the return, the advantage, which is how good a particular action is. So, you know, which
+
+335
+00:28:29,200 --> 00:28:33,840
+of these technical concepts and reinforcement learning do we actually want humans to reinforce?
+
+336
+00:28:33,840 --> 00:28:39,120
+And there's a question of how easy is it for humans to understand these different settings versus
+
+337
+00:28:39,120 --> 00:28:42,880
+how much does it, does it help the algorithm? So, these are all kind of things that like, you know,
+
+338
+00:28:42,880 --> 00:28:47,280
+have been explored a little bit in the literature, but again, you know, never, never with the level
+
+339
+00:28:47,280 --> 00:28:51,520
+of difficulty of tasks. So, this is kind of one of the areas that that we want to explore more.
+
+340
+00:28:51,520 --> 00:28:55,440
+And we consider really unexplored, right? This was really just a first paper. And, you know,
+
+341
+00:28:55,440 --> 00:28:59,280
+all these are like really great questions that we've, you know, we kind of ran into and thought
+
+342
+00:28:59,280 --> 00:29:05,840
+about some, but you definitely haven't fully answered. And so is the plan to, like, you kind of peel
+
+343
+00:29:05,840 --> 00:29:11,280
+off two of those, is the plan to go even deeper on those two or to peel off another one? So, you
+
+344
+00:29:11,280 --> 00:29:16,080
+know, I think this direction we're pretty excited about. And so I think we're going to do a lot of
+
+345
+00:29:16,080 --> 00:29:20,000
+things, you know, that kind of follow up on this human preference learning, you know, we see
+
+346
+00:29:20,000 --> 00:29:26,160
+applications to robotics, tasks like, you know, time, particular types of, of knots in rope. You
+
+347
+00:29:26,160 --> 00:29:30,640
+know, it's another task where the reward function is very hard to describe and people try and
+
+348
+00:29:30,640 --> 00:29:35,520
+specify it, but I think that that may be the weak link. So, you know, maybe, maybe we can do things
+
+349
+00:29:35,520 --> 00:29:40,720
+like that, things that physical robots do in the world, things like dialogue system, you know,
+
+350
+00:29:40,720 --> 00:29:46,240
+Microsoft made this dialogue system called TA that ended up kind of spewing racist nonsense,
+
+351
+00:29:46,240 --> 00:29:50,800
+you know, whether, whether a comment is offensive or not is precisely the kind of high-level
+
+352
+00:29:50,800 --> 00:29:55,600
+aesthetic concept that you can't learn really well with a simple objective function, you know,
+
+353
+00:29:55,600 --> 00:30:01,760
+so could you train a restricted dialogue system to, you know, to understand what, you know, racist
+
+354
+00:30:01,760 --> 00:30:06,400
+or sexist or offensive comments are and never make them. You know, some of that is simple,
+
+355
+00:30:06,400 --> 00:30:10,480
+it's just not using certain words, but, you know, but the concept of something being offensive
+
+356
+00:30:10,480 --> 00:30:15,600
+is also more subtle, right? I can say something that, you know, that doesn't use any offensive words,
+
+357
+00:30:15,600 --> 00:30:19,200
+but the content of what I'm saying might, might, might still be offensive. So, you know, can we,
+
+358
+00:30:19,200 --> 00:30:24,000
+can we, can we train a system to understand those, those distinctions? Actually, even things like
+
+359
+00:30:24,000 --> 00:30:28,400
+safe exploration, what it means for exploration to be safe, maybe that's something that we could
+
+360
+00:30:28,400 --> 00:30:33,280
+learn through human, human preference learning. There's been a lot, so there's, there's been a lot
+
+361
+00:30:33,280 --> 00:30:38,400
+of work on kind of learning, learning to learn and so you could imagine kind of learning to learn
+
+362
+00:30:38,400 --> 00:30:44,640
+safely. So, if I'm a human and I am learning to play an Atari game, right? You could think of
+
+363
+00:30:44,640 --> 00:30:50,480
+copying what the human does, but you could also think of copying the human's process of exploring
+
+364
+00:30:50,480 --> 00:30:55,280
+the Atari game, right? And there are different ways to explore, right? I can explore recklessly,
+
+365
+00:30:55,280 --> 00:31:00,080
+doing a lot of things with trial and error, or I can explore very carefully, making sure that nothing
+
+366
+00:31:00,080 --> 00:31:05,360
+bad ever happens. For instance, if I'm a human, you know, remote controlling a helicopter,
+
+367
+00:31:05,360 --> 00:31:09,520
+I'm not going to just try random things. I'm going to, you know, kind of gingerly try a few
+
+368
+00:31:09,520 --> 00:31:13,840
+things at first that you don't make the helicopter crash, particularly if I think that it'll break,
+
+369
+00:31:13,840 --> 00:31:18,400
+if it crashes, you know, and then, then I'll kind of gradually get more bold. And so, can we,
+
+370
+00:31:18,400 --> 00:31:25,680
+can we train machine learning systems to learn in the same safe way that humans learn? And could we,
+
+371
+00:31:25,680 --> 00:31:31,760
+could we do that by giving them feedback or examples or demonstrations of how, of how humans learn?
+
+372
+00:31:31,760 --> 00:31:35,760
+And, you know, then, then could we solve that, that problem? That way, we've also thought about
+
+373
+00:31:35,760 --> 00:31:40,560
+kind of richer, richer forms of human feedback. So, right now, it's just like is left better or
+
+374
+00:31:40,560 --> 00:31:46,160
+right is better? Sometimes, what I'm training these, you know, one of those systems, I'm just like,
+
+375
+00:31:46,160 --> 00:31:50,720
+I wanted to, I want to tell you that that thing you did is really, really good. And all I can do is
+
+376
+00:31:50,720 --> 00:31:54,480
+just just give that one, let's click, but like really, really, this was the great thing you did.
+
+377
+00:31:54,480 --> 00:31:58,720
+When you're giving the example of the models doing back flips and things like that, I was thinking
+
+378
+00:31:58,720 --> 00:32:02,960
+like, you need the Olympic panel with the 10s and the 9s and 8.5s and all that. So,
+
+379
+00:32:02,960 --> 00:32:07,520
+scalar, having a scalar dial is one thing. Ultimately, I just like to be able to give linguistic
+
+380
+00:32:07,520 --> 00:32:13,120
+feedback. I'd like, you know, I'd like to be say on this one, nice job. Do that again or nice job,
+
+381
+00:32:13,120 --> 00:32:17,120
+but go a little to the right. You know, nice job. That's only the first part of the move after you
+
+382
+00:32:17,120 --> 00:32:22,880
+do this. You need to do a flip. Right. And, you know, currently, our natural language processing
+
+383
+00:32:22,880 --> 00:32:27,440
+isn't really up to that task, but that's kind of a kind of long-term goal we'd work towards.
+
+384
+00:32:27,440 --> 00:32:32,720
+And, you know, the real long-term vision would be you have an AI system that is persistent in the
+
+385
+00:32:32,720 --> 00:32:37,200
+world is doing things on your behalf. And then you make sure that it always does the right things
+
+386
+00:32:37,200 --> 00:32:42,320
+instead of the wrong thing by this continuous dialogue between you and it where you teach it,
+
+387
+00:32:42,320 --> 00:32:47,360
+what you want it to do. And, you know, it gives you information and executes the things that
+
+388
+00:32:47,360 --> 00:32:52,480
+it understands that, you know, that you want it to do. And we've been talking mostly about
+
+389
+00:32:52,480 --> 00:32:58,080
+explicit feedback. Are you also thinking about like the explicit versus implicit feedback might
+
+390
+00:32:58,080 --> 00:33:03,200
+play into this? What do you mean by implicit feedback? So, for example, you know, maybe the
+
+391
+00:33:03,200 --> 00:33:10,640
+the TAY example. And all of the examples we've been talking about, you know, you are telling the
+
+392
+00:33:11,280 --> 00:33:16,240
+system, you know, this is good. This is bad. And we started with kind of this binary, you know,
+
+393
+00:33:16,240 --> 00:33:21,360
+good bad. And we talked about, you know, scalar, continuous, you know, degrees of goodness and
+
+394
+00:33:21,360 --> 00:33:27,360
+badness. But it's still like you're telling it explicitly. And I guess I'm wondering if there are
+
+395
+00:33:27,360 --> 00:33:33,520
+ways to either, you know, maybe I'm thinking also of like some of the emotional intelligence,
+
+396
+00:33:33,520 --> 00:33:38,480
+like pick up from your reaction. Like someone reacts in a way where they don't like what I'm doing,
+
+397
+00:33:38,480 --> 00:33:41,920
+but you know, they're not going to explicitly say, you know, that was a bad thing. And I guess at
+
+398
+00:33:41,920 --> 00:33:46,400
+some point, you know, it's all, it's all numbers, you know, feeding in some models. So, yeah. So,
+
+399
+00:33:46,400 --> 00:33:50,880
+I mean, I think the natural language feedback is a little bit getting it. It's kind of starting
+
+400
+00:33:50,880 --> 00:33:55,680
+to get at that, right? Where, you know, I mean, if, you know, people have kind of, you know,
+
+401
+00:33:55,680 --> 00:34:00,000
+people have ways of, you know, like, politely disagreeing or politely giving, giving negative
+
+402
+00:34:00,000 --> 00:34:04,320
+feedback. And those are, you know, patterns that that a machine learning system could
+
+403
+00:34:04,320 --> 00:34:09,200
+in principle pick up on at the same time. You know, I think in the end, if we ever want something
+
+404
+00:34:09,200 --> 00:34:14,560
+like that to happen, we're going to have to go kind of beyond just receiving feedback from
+
+405
+00:34:14,560 --> 00:34:20,080
+humans to actually having models of humans. So a human says something. And the AI system says,
+
+406
+00:34:20,080 --> 00:34:24,720
+okay, here's my picture of the human. And here are my hypotheses about why the human would say that
+
+407
+00:34:24,720 --> 00:34:28,400
+particular thing. And, you know, one of them is that it doesn't, doesn't want me to do this
+
+408
+00:34:28,400 --> 00:34:32,400
+thing. It wants me to do something else. And so, you know, that, that gets to kind of, you know,
+
+409
+00:34:32,400 --> 00:34:37,040
+modeling of other minds, right? Theory of mind is something we talk about a lot, a lot of neuroscience.
+
+410
+00:34:37,040 --> 00:34:41,680
+So, you know, this is, this is one of these things that I think AI systems will be able to get AI
+
+411
+00:34:41,680 --> 00:34:46,320
+systems to do that once they have some kind of rudimentary theory of mind. You know, I mean,
+
+412
+00:34:46,320 --> 00:34:50,000
+even you're saying that kind of makes you think of all the complexities like the model trend on
+
+413
+00:34:50,000 --> 00:34:54,480
+the Brit could not be used to interact with the American, right? Yep. Yep. But on the other hand,
+
+414
+00:34:54,480 --> 00:34:58,560
+you know, simple, simple animals have, you know, theory of mind, right? If you have, if you have pets,
+
+415
+00:34:58,560 --> 00:35:03,040
+you know, dogs can do this, even mice can do this. They have very complicated pictures of,
+
+416
+00:35:03,040 --> 00:35:06,960
+you know, how, how the humans around them work. They, they need to in order to, you know,
+
+417
+00:35:06,960 --> 00:35:10,400
+in order to survive. They need to know when humans are going to feed them. They need to know when,
+
+418
+00:35:10,400 --> 00:35:14,640
+you know, humans, humans are going to be, going to be unhappy with them. So, you know, I think
+
+419
+00:35:14,640 --> 00:35:19,920
+there's some hope of, you know, building systems that have some understanding of that short of full
+
+420
+00:35:19,920 --> 00:35:25,440
+human level intelligence. Yeah. Oh, cool, cool. Anything else that you guys are working on that you
+
+421
+00:35:25,440 --> 00:35:30,720
+wanted to talk about? Yeah. You know, I think we're going in several directions with kind of the
+
+422
+00:35:30,720 --> 00:35:35,680
+human human feedback stuff. You know, we have a kind of small team so far, but we're growing. So,
+
+423
+00:35:35,680 --> 00:35:42,320
+there's a lot of kind of project starting that are either, either offshoots of this or kind of
+
+424
+00:35:42,320 --> 00:35:46,800
+different, different directions on safety, but they're all pretty early. So, there's not not so much
+
+425
+00:35:46,800 --> 00:35:51,440
+to say, to say yet, but, you know, I'm hoping that a, that, you know, in a few months will kind of
+
+426
+00:35:51,440 --> 00:35:56,000
+have another batch of results that are kind of follow up some of the human feedback stuff and also
+
+427
+00:35:56,000 --> 00:36:02,240
+kind of new, new direction. Nice. Nice. There's a website that's like 10,000 hours or something like
+
+428
+00:36:02,240 --> 00:36:08,320
+that that like looks at, you know, these, I think looks pretty broadly at what they think are like
+
+429
+00:36:08,320 --> 00:36:14,480
+career opportunities. Oh, this is 80,000 hours. I actually did a podcast with them under, underestimated
+
+430
+00:36:14,480 --> 00:36:19,920
+it. I think that it is 8,000 hours is the length of a career, I think that's why I think that's
+
+431
+00:36:19,920 --> 00:36:25,360
+why they chose that number. So yeah, like their top career or their like top opportunity is AI
+
+432
+00:36:25,360 --> 00:36:31,760
+safety. Yeah. So, I mean, yeah, I don't have any opinions on like, I would never claim that,
+
+433
+00:36:31,760 --> 00:36:35,520
+you know, what I'm doing is like the most impactful thing you could, you could possibly do.
+
+434
+00:36:35,520 --> 00:36:39,920
+You know, I, so did a podcast with them. You know, I would, I would say instead that, you know,
+
+435
+00:36:39,920 --> 00:36:44,640
+the world has a lot of problems and, you know, and, and, and a lot of issues and, you know,
+
+436
+00:36:44,640 --> 00:36:49,760
+unfortunately, like multiple, incredibly serious issues. But, you know, one thing that I think
+
+437
+00:36:49,760 --> 00:36:55,280
+is, is true about about AI safety is that, you know, if I, if I look ahead to the next, you know,
+
+438
+00:36:55,280 --> 00:36:59,920
+two decades or so, I believe it could be a really serious issue. And I believe that, you know, not,
+
+439
+00:36:59,920 --> 00:37:04,960
+not that many people are thinking about it seriously in the sense of doing actual technical work on it.
+
+440
+00:37:04,960 --> 00:37:08,960
+You know, I think for a long time, it was, it was, you know, dismissed maybe with some,
+
+441
+00:37:08,960 --> 00:37:13,760
+some justification as kind of a kind of a crack potty thing. You know, I think that, that is,
+
+442
+00:37:13,760 --> 00:37:18,080
+that is starting to change. And so, I actually see opportunity there and that there's this important
+
+443
+00:37:18,080 --> 00:37:23,360
+problem that hasn't really been thought about in a careful enough way yet. And so, you know,
+
+444
+00:37:23,360 --> 00:37:27,840
+to me, that creates an opportunity to work on a problem that's very important to the world that,
+
+445
+00:37:27,840 --> 00:37:32,480
+you know, there, there aren't a giant number of smart people already kind of descending on it. And,
+
+446
+00:37:32,480 --> 00:37:36,720
+you know, because there's been kind of less thought about it, you know, maybe, maybe by,
+
+447
+00:37:36,720 --> 00:37:40,960
+by acting early, we can actually come up with, you know, we can actually come up with real solutions.
+
+448
+00:37:40,960 --> 00:37:46,160
+So, so to me, that's, that's kind of my rationale for feeling that it's, you know, a high-impact thing
+
+449
+00:37:46,160 --> 00:37:50,560
+for me to work on, that it, it's, it seems important and it seems like there aren't already 100,000
+
+450
+00:37:50,560 --> 00:37:54,720
+people working on it. Awesome. Awesome. Well, Daria, thank you very much.
+
+451
+00:37:54,720 --> 00:38:03,200
+Yeah, thanks. Thanks again for enlightening. All right, everyone. That's our show for today.
+
+452
+00:38:03,200 --> 00:38:07,600
+Thanks so much for listening and for your continued feedback and support.
+
+453
+00:38:08,240 --> 00:38:12,560
+For more information on Daria or any of the topics covered in this episode,
+
+454
+00:38:12,560 --> 00:38:20,480
+head on over to twimlai.com slash talk slash 75. To follow along with our OpenAI series,
+
+455
+00:38:20,480 --> 00:38:27,440
+visit twimlai.com slash open AI. Of course, you can send along your feedback or questions via
+
+456
+00:38:27,440 --> 00:38:34,000
+Twitter to add Twimlai or at Sam Charrington or leave a comment right on the show notes page.
+
+457
+00:38:35,200 --> 00:38:40,320
+Thanks once again to Nvidia for their support of this series. To learn more about what they're
+
+458
+00:38:40,320 --> 00:38:48,800
+doing at Nips, visit twimlai.com slash Nvidia. And of course, thanks once again to you for listening
+
+459
+00:38:48,800 --> 00:38:58,800
+and catch you next time.
+

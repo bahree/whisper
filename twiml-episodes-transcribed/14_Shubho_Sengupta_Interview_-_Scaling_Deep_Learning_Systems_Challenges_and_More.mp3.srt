@@ -1,0 +1,3612 @@
+1
+00:00:00,000 --> 00:00:15,800
+Hello and welcome to another episode of Twimble Talk, the podcast where I interview interesting
+
+2
+00:00:15,800 --> 00:00:20,640
+people, doing interesting things in machine learning and artificial intelligence.
+
+3
+00:00:20,640 --> 00:00:23,840
+I'm your host, Sam Charington.
+
+4
+00:00:23,840 --> 00:00:27,640
+I'd like to start off by thanking everyone who's taken the time to check out our new Facebook
+
+5
+00:00:27,640 --> 00:00:30,280
+and YouTube pages over the past couple of weeks.
+
+6
+00:00:30,280 --> 00:00:35,840
+We really enjoy hearing from listeners, whether via Facebook, YouTube, Twitter, or email,
+
+7
+00:00:35,840 --> 00:00:39,200
+so please, please, please continue reaching out to us.
+
+8
+00:00:39,200 --> 00:00:43,160
+We'd also like to say thanks to the folks over at O'Reilly, who provided us a ticket to
+
+9
+00:00:43,160 --> 00:00:47,480
+giveaway for next week's Strata plus a Duke World Conference.
+
+10
+00:00:47,480 --> 00:00:50,920
+With that being said, we do have a winner to announce.
+
+11
+00:00:50,920 --> 00:00:53,120
+Congratulations to Evan Wright.
+
+12
+00:00:53,120 --> 00:00:58,480
+Evan is a Principal Data Scientist at Security Startup Anomaly, and he'll be receiving a bronze
+
+13
+00:00:58,480 --> 00:01:02,480
+pass to the conference, looking forward to meeting you, Evan.
+
+14
+00:01:02,480 --> 00:01:09,040
+Thanks to all who participated and be on the lookout for more contests in the near future.
+
+15
+00:01:09,040 --> 00:01:13,320
+Speaking of events, last week I announced one that I'm organizing, and I hope you'll
+
+16
+00:01:13,320 --> 00:01:14,320
+check it out.
+
+17
+00:01:14,320 --> 00:01:19,040
+It's called the Future of Data Summit, and it'll be taking place in Las Vegas and May
+
+18
+00:01:19,040 --> 00:01:22,200
+at the Interop ITX Conference.
+
+19
+00:01:22,200 --> 00:01:25,960
+To give you a taste of the great content I'm pulling together for you at the event,
+
+20
+00:01:25,960 --> 00:01:30,840
+last week's podcast featured James McCaffrey of Microsoft Research, who's just one of
+
+21
+00:01:30,840 --> 00:01:34,160
+the 15 great speakers you're here from at the summit.
+
+22
+00:01:34,160 --> 00:01:38,240
+We'll be covering a bunch of really exciting topics, including of course machine learning
+
+23
+00:01:38,240 --> 00:01:45,400
+in AI, but also IoT and edge computing, augmented and virtual reality, blockchain, algorithmic
+
+24
+00:01:45,400 --> 00:01:48,760
+IT operations, data security, and more.
+
+25
+00:01:48,760 --> 00:01:54,840
+You can learn more about the summit at twimmolai.com slash future of data.
+
+26
+00:01:54,840 --> 00:01:56,960
+And now about today's show.
+
+27
+00:01:56,960 --> 00:02:02,360
+This week my guest is Shubo Sengupta, Research Scientist at Baidu.
+
+28
+00:02:02,360 --> 00:02:07,040
+I had the pleasure of meeting Shubo at the rework Deep Learning Summit earlier this year,
+
+29
+00:02:07,040 --> 00:02:11,480
+where he delivered a presentation on systems challenges for deep learning, and we dig into
+
+30
+00:02:11,480 --> 00:02:13,800
+this topic in the interview.
+
+31
+00:02:13,800 --> 00:02:18,680
+Shubo has tons of insights to share into how to do deep learning at scale, and even
+
+32
+00:02:18,680 --> 00:02:23,640
+if you're not operating at the scale of Baidu, I think you'll learn a ton from our conversation
+
+33
+00:02:23,640 --> 00:02:30,200
+about architecting, productionalizing, and operationalizing deep learning systems.
+
+34
+00:02:30,200 --> 00:02:34,040
+We also spent some time discussing the role of GPUs and hardware in building scalable
+
+35
+00:02:34,040 --> 00:02:38,520
+machine learning systems, and that's an area he has a lot to say about, as the author
+
+36
+00:02:38,520 --> 00:02:44,400
+of the KUDPP library, the KUDA Data Parallel Primitives Library, which was the first parallel
+
+37
+00:02:44,400 --> 00:02:47,440
+programming library for GPUs.
+
+38
+00:02:47,440 --> 00:02:49,440
+And now on to the show.
+
+39
+00:02:49,440 --> 00:03:03,600
+Hello everyone, I am on the line with Shubo Sengupta, a Research Scientist at Baidu.
+
+40
+00:03:03,600 --> 00:03:09,720
+Shubo and I met at the rework Deep Learning Summit in San Francisco last month.
+
+41
+00:03:09,720 --> 00:03:15,560
+I really enjoyed his presentation on systems challenges for deep learning, which did a great
+
+42
+00:03:15,560 --> 00:03:21,840
+job of talking through some of the challenges associated with deep learning at scale.
+
+43
+00:03:21,840 --> 00:03:27,880
+And I'm very grateful to Shubo for agreeing to join me on the podcast to discuss his presentation
+
+44
+00:03:27,880 --> 00:03:31,600
+at the summit, as well as some of his other work.
+
+45
+00:03:31,600 --> 00:03:36,400
+So welcome Shubo, and thanks so much for joining me on the podcast.
+
+46
+00:03:36,400 --> 00:03:38,840
+Thank you Sam, thanks for having me.
+
+47
+00:03:38,840 --> 00:03:42,280
+Yeah, I'm really looking forward to this conversation.
+
+48
+00:03:42,280 --> 00:03:48,640
+There were a bunch of really good presentations at the summit, but as a guy who found his
+
+49
+00:03:48,640 --> 00:03:55,120
+way to machine learning and AI, but also spends a lot of time thinking about cloud and big
+
+50
+00:03:55,120 --> 00:03:58,040
+data infrastructure, yours really spoke to me.
+
+51
+00:03:58,040 --> 00:04:01,120
+So I'm looking forward to digging into it.
+
+52
+00:04:01,120 --> 00:04:06,320
+Thanks, I was a little bit afraid that people won't like it, because it was a little bit
+
+53
+00:04:06,320 --> 00:04:08,320
+off track in some sense.
+
+54
+00:04:08,320 --> 00:04:12,160
+I thought it was fantastic.
+
+55
+00:04:12,160 --> 00:04:17,880
+Why don't we start with having you share a little bit about your current role at Baidu
+
+56
+00:04:17,880 --> 00:04:22,640
+and some of the things you've done previously and how you got involved in machine learning
+
+57
+00:04:22,640 --> 00:04:23,640
+and AI?
+
+58
+00:04:23,640 --> 00:04:31,760
+Sure, so as you said, I'm a research scientist at Baidu Silicon Valley AI lab, and I've
+
+59
+00:04:31,760 --> 00:04:35,960
+been with the lab for the past two and a half years, a little bit more than two and a
+
+60
+00:04:35,960 --> 00:04:40,080
+half years, almost since the inception of the lab.
+
+61
+00:04:40,080 --> 00:04:48,080
+I primarily work in speech and language, I would say more speech than language, over the
+
+62
+00:04:48,080 --> 00:04:52,880
+last two and a half years I've primarily worked on what is called ASR, which is the piece
+
+63
+00:04:52,880 --> 00:05:01,000
+of technology that takes voice as we speak and then converts it into text.
+
+64
+00:05:01,000 --> 00:05:10,960
+And we have built one of the best English ASR systems and by far the best Mandarin ASR systems
+
+65
+00:05:10,960 --> 00:05:16,280
+which powers most of our products in China.
+
+66
+00:05:16,280 --> 00:05:20,760
+And currently I'm starting to work on other things like speech synthesis, a little bit
+
+67
+00:05:20,760 --> 00:05:26,840
+of language modeling to keep in the same domain.
+
+68
+00:05:26,840 --> 00:05:29,800
+Surprisingly enough, I actually did not start in speech.
+
+69
+00:05:29,800 --> 00:05:33,920
+I started my career, so to speak, in computer graphics.
+
+70
+00:05:33,920 --> 00:05:40,040
+I was very, very interested in special effects and films and I know this sounds a little
+
+71
+00:05:40,040 --> 00:05:46,800
+bit like a fairy tale, but I came to do a PhD in computer science to this country because
+
+72
+00:05:46,800 --> 00:05:50,880
+I was so blown away by the films that Pixar was making.
+
+73
+00:05:50,880 --> 00:05:56,880
+So my goal was if I get to grad school, maybe I'll get to work at Pixar at some point.
+
+74
+00:05:56,880 --> 00:05:58,800
+And did you ever work at Pixar?
+
+75
+00:05:58,800 --> 00:05:59,800
+I did.
+
+76
+00:05:59,800 --> 00:06:07,120
+I spent six months as an intern at Pixar developing some of the early kind of GPU-assisted
+
+77
+00:06:07,120 --> 00:06:08,600
+what are called relighting tools.
+
+78
+00:06:08,600 --> 00:06:13,880
+These tools give you a fast preview of the film scenes that the lighting designers are
+
+79
+00:06:13,880 --> 00:06:16,000
+using to relight the scene.
+
+80
+00:06:16,000 --> 00:06:17,000
+Okay.
+
+81
+00:06:17,000 --> 00:06:18,480
+And that was an incredible experience.
+
+82
+00:06:18,480 --> 00:06:21,480
+I still very fondly look back on that experience.
+
+83
+00:06:21,480 --> 00:06:27,720
+I think it was back in 2006, so a while ago, but it still sticks in memory.
+
+84
+00:06:27,720 --> 00:06:34,120
+And that's kind of what I started taking these GPUs that were only used for playing games
+
+85
+00:06:34,120 --> 00:06:40,760
+and starting to use them for doing a general purpose compute because, you know, I thought
+
+86
+00:06:40,760 --> 00:06:43,800
+of graphics as just another computation domain.
+
+87
+00:06:43,800 --> 00:06:50,800
+So during my PhD, I came up with all the basic parallel algorithms that people used to program
+
+88
+00:06:50,800 --> 00:06:51,800
+GPUs.
+
+89
+00:06:51,800 --> 00:06:57,040
+So I was very lucky that I was very early in this field and made a lot of impact with
+
+90
+00:06:57,040 --> 00:06:58,040
+the author.
+
+91
+00:06:58,040 --> 00:06:59,040
+Yeah.
+
+92
+00:06:59,040 --> 00:07:05,840
+Was the author of the first parallel programming library for GPUs and did a lot of basic algorithm
+
+93
+00:07:05,840 --> 00:07:07,440
+work on GPUs.
+
+94
+00:07:07,440 --> 00:07:12,680
+So, you know, I've been with GPUs for 12 years now almost since the early days when there
+
+95
+00:07:12,680 --> 00:07:18,280
+was there were very, very hard to program for general purpose compute that were primarily
+
+96
+00:07:18,280 --> 00:07:19,520
+used for graphics.
+
+97
+00:07:19,520 --> 00:07:27,000
+So it's very heartening to see that, you know, so many different areas being so positive
+
+98
+00:07:27,000 --> 00:07:31,520
+and impacted by GPUs on that.
+
+99
+00:07:31,520 --> 00:07:34,880
+What was the name of the library that you worked on?
+
+100
+00:07:34,880 --> 00:07:38,800
+CUDPP, CUDA data parallel primitives library.
+
+101
+00:07:38,800 --> 00:07:45,440
+It's still around and not so much popular anymore because a lot of other libraries like thrust
+
+102
+00:07:45,440 --> 00:07:49,960
+et cetera, which is good because other people have, I mean, once you leave grad school,
+
+103
+00:07:49,960 --> 00:07:56,040
+it's very hard to keep on contributing code to that library because you have other engagements
+
+104
+00:07:56,040 --> 00:07:59,080
+a full-time job, et cetera.
+
+105
+00:07:59,080 --> 00:08:03,800
+But my advisor and his students are still putting in new algorithms into the library.
+
+106
+00:08:03,800 --> 00:08:06,960
+So it's still around, people still use it.
+
+107
+00:08:06,960 --> 00:08:12,360
+And that library itself has spawned other efforts like thrust from Nvidia and modern GPU also
+
+108
+00:08:12,360 --> 00:08:13,360
+from Nvidia.
+
+109
+00:08:13,360 --> 00:08:14,360
+Okay.
+
+110
+00:08:14,360 --> 00:08:20,760
+And I, yeah, and I should also give a shout out to Nvidia because Nvidia had been extremely
+
+111
+00:08:20,760 --> 00:08:25,560
+kind in financial terms and in resources throughout my research career and they still work
+
+112
+00:08:25,560 --> 00:08:28,800
+closely with Nvidia even though I don't work there.
+
+113
+00:08:28,800 --> 00:08:33,280
+But I work with a lot of people in Nvidia on almost a day-to-day basis.
+
+114
+00:08:33,280 --> 00:08:38,120
+Well, feel free to give that shout out to Nvidia because in fact, I was at a conference
+
+115
+00:08:38,120 --> 00:08:43,480
+last week where Speaker from Nvidia gave a shout out to this podcast.
+
+116
+00:08:43,480 --> 00:08:44,480
+Awesome.
+
+117
+00:08:44,480 --> 00:08:45,480
+Awesome.
+
+118
+00:08:45,480 --> 00:08:46,480
+Yeah.
+
+119
+00:08:46,480 --> 00:08:48,640
+I mean, Nvidia has supported my career ever since.
+
+120
+00:08:48,640 --> 00:08:50,640
+I mean, literally my first day of grad school.
+
+121
+00:08:50,640 --> 00:08:56,640
+My first day, I think my first week in this country, I was at a talk at Nvidia because
+
+122
+00:08:56,640 --> 00:08:58,160
+my advisor was there.
+
+123
+00:08:58,160 --> 00:09:02,120
+One of his students was giving a talk so it was in 2004.
+
+124
+00:09:02,120 --> 00:09:05,680
+So it's been a while, but the relationship is strong.
+
+125
+00:09:05,680 --> 00:09:07,000
+That's great.
+
+126
+00:09:07,000 --> 00:09:13,920
+So I, you know, what my thinking for this conversation was about, was that we would
+
+127
+00:09:13,920 --> 00:09:18,720
+really dive into the systems types of issues.
+
+128
+00:09:18,720 --> 00:09:27,000
+And given your expertise in GPUs, I have so many questions about kind of GPUs and how
+
+129
+00:09:27,000 --> 00:09:32,320
+they're used in ML and AI and some of the libraries that support them.
+
+130
+00:09:32,320 --> 00:09:37,680
+So at some point, we want to make sure to touch on that stuff as well.
+
+131
+00:09:37,680 --> 00:09:38,680
+Yep.
+
+132
+00:09:38,680 --> 00:09:40,920
+Absolutely.
+
+133
+00:09:40,920 --> 00:09:47,920
+So in your talk, you gave a specific example of a speech recognition that you worked
+
+134
+00:09:47,920 --> 00:09:52,000
+on that had some interesting challenges.
+
+135
+00:09:52,000 --> 00:09:56,360
+Can you talk a little bit about that project or one of the, you know, a specific type of
+
+136
+00:09:56,360 --> 00:09:58,560
+project that you can talk about?
+
+137
+00:09:58,560 --> 00:09:59,560
+Yeah, sure.
+
+138
+00:09:59,560 --> 00:10:04,600
+So we have primarily been working on ASR, which is essentially speech recognition for
+
+139
+00:10:04,600 --> 00:10:08,000
+the past two years or so.
+
+140
+00:10:08,000 --> 00:10:13,200
+And when we started, one interesting thing about our lab was we didn't have any speech
+
+141
+00:10:13,200 --> 00:10:14,200
+experts.
+
+142
+00:10:14,200 --> 00:10:17,640
+We still really don't have any speech experts.
+
+143
+00:10:17,640 --> 00:10:22,520
+So we decided that since we don't have any experts, then we'll have the data kind of guide
+
+144
+00:10:22,520 --> 00:10:23,520
+us.
+
+145
+00:10:23,520 --> 00:10:27,640
+So we knew, we kind of, I wouldn't say new, but we were confident that if we could get
+
+146
+00:10:27,640 --> 00:10:33,040
+a lot of data, and we knew how to train really deep networks, and we will be able to
+
+147
+00:10:33,040 --> 00:10:35,520
+build these systems.
+
+148
+00:10:35,520 --> 00:10:40,320
+So one thing that kind of was a challenge from us for us, at least in the very beginning,
+
+149
+00:10:40,320 --> 00:10:42,360
+was we had to do a lot of experimentation.
+
+150
+00:10:42,360 --> 00:10:49,640
+And we still do at scale to give you an idea, typically a publicly available data set.
+
+151
+00:10:49,640 --> 00:10:53,240
+I think the largest one is 3,000 hours.
+
+152
+00:10:53,240 --> 00:10:57,960
+And we typically do all our experimentation of multiple of tens of thousands of hours.
+
+153
+00:10:57,960 --> 00:11:03,600
+So it's an order of, yeah, so it's an order of magnitude difference, and this is hours
+
+154
+00:11:03,600 --> 00:11:05,440
+of speech data that we're talking about.
+
+155
+00:11:05,440 --> 00:11:06,800
+Yeah, hours of speech data, yes.
+
+156
+00:11:06,800 --> 00:11:11,120
+So it's millions of training examples, essentially.
+
+157
+00:11:11,120 --> 00:11:19,680
+So typically around 14 million utterances is about 10,000 hours if that gives you an idea.
+
+158
+00:11:19,680 --> 00:11:25,760
+So we have many millions of these training examples that we need to train our networks
+
+159
+00:11:25,760 --> 00:11:27,880
+on.
+
+160
+00:11:27,880 --> 00:11:30,360
+And we know that deep learning is a very empirical field.
+
+161
+00:11:30,360 --> 00:11:32,960
+I mean, nobody tells you that this is the network.
+
+162
+00:11:32,960 --> 00:11:38,400
+You have to kind of hunt around and figure out what the network actually is.
+
+163
+00:11:38,400 --> 00:11:43,200
+Which means running a lot of experiments, each of our experiments takes anywhere from
+
+164
+00:11:43,200 --> 00:11:45,760
+20 to 50 x-flops.
+
+165
+00:11:45,760 --> 00:11:53,560
+So that's like, you know, XI is 10 to the power 18, so it's a lot of flops for one experiment.
+
+166
+00:11:53,560 --> 00:11:59,400
+And typically, you would want to finish an experiment within three weeks is pretty much the
+
+167
+00:11:59,400 --> 00:12:01,960
+patience we have.
+
+168
+00:12:01,960 --> 00:12:07,120
+So early on, we had to like build the systems that is very, very high-performance.
+
+169
+00:12:07,120 --> 00:12:12,280
+And it still is, in my opinion, from what the numbers have seen is the fastest training
+
+170
+00:12:12,280 --> 00:12:19,360
+system in the industry by at least twice as fast of what the best number have seen publicly
+
+171
+00:12:19,360 --> 00:12:21,360
+so far.
+
+172
+00:12:21,360 --> 00:12:26,840
+And we kind of had to invent this thing because there is nothing when we started in late
+
+173
+00:12:26,840 --> 00:12:32,480
+014 around October of 014 is when we started September, October, that time frame.
+
+174
+00:12:32,480 --> 00:12:35,880
+So we build this thing and we are, I think we're still are ahead.
+
+175
+00:12:35,880 --> 00:12:40,680
+And what we are doing is slowly kind of open sourcing parts of this framework.
+
+176
+00:12:40,680 --> 00:12:47,480
+So we want to kind of take our ideas in some sense, infect the field or infect the community
+
+177
+00:12:47,480 --> 00:12:53,400
+with all these high-performance computing ideas, which I think are very, very appropriate
+
+178
+00:12:53,400 --> 00:12:55,120
+for deep learning.
+
+179
+00:12:55,120 --> 00:12:58,960
+Deep learning is this problem that needs a lot of compute.
+
+180
+00:12:58,960 --> 00:13:03,680
+And that's kind of what also differentiates our group is not only do we do deep learning,
+
+181
+00:13:03,680 --> 00:13:08,560
+but we do this deep learning through this very high-performance computing approach.
+
+182
+00:13:08,560 --> 00:13:14,720
+And we do all our experimentation set at big scale, which kind of separates us.
+
+183
+00:13:14,720 --> 00:13:15,920
+And other people are catching on.
+
+184
+00:13:15,920 --> 00:13:21,840
+I mean, you see now Google and Facebook and others of a lot of data have kind of come
+
+185
+00:13:21,840 --> 00:13:25,440
+around to this kind of high-performance centric approach.
+
+186
+00:13:25,440 --> 00:13:28,960
+Yeah, and one funny thing, there's an anecdote and it is true.
+
+187
+00:13:28,960 --> 00:13:34,360
+What I like to tell is when we first started training in Mandarin and built a very decent
+
+188
+00:13:34,360 --> 00:13:39,520
+Mandarin ASR system, not the best, but very decent, there was not a single Mandarin-speaking
+
+189
+00:13:39,520 --> 00:13:40,840
+person in the group.
+
+190
+00:13:40,840 --> 00:13:41,840
+Wow.
+
+191
+00:13:41,840 --> 00:13:46,480
+But this is the power of data.
+
+192
+00:13:46,480 --> 00:13:50,240
+You can look at a training curve and you know that if the training curve is going down,
+
+193
+00:13:50,240 --> 00:13:51,240
+you're doing well.
+
+194
+00:13:51,240 --> 00:13:55,480
+You don't need to know the language.
+
+195
+00:13:55,480 --> 00:14:02,480
+My colleague, Ryan and I started doing it over, I think the Christmas of O-14, when we
+
+196
+00:14:02,480 --> 00:14:06,480
+got our first big Mandarin data set, we started training and immediately we started getting
+
+197
+00:14:06,480 --> 00:14:07,480
+very good results.
+
+198
+00:14:07,480 --> 00:14:08,480
+That's incredible.
+
+199
+00:14:08,480 --> 00:14:16,720
+And essentially the same network architecture does both English and Mandarin, which you
+
+200
+00:14:16,720 --> 00:14:25,160
+know kind of validates your belief that the neural network will learn the differences
+
+201
+00:14:25,160 --> 00:14:28,280
+in the languages by itself.
+
+202
+00:14:28,280 --> 00:14:33,800
+And English and Mandarin are very different languages, I mean, they're so different.
+
+203
+00:14:33,800 --> 00:14:39,080
+And the fact that almost the same neural network architecture does both is still to me,
+
+204
+00:14:39,080 --> 00:14:41,480
+you know, I've been doing this for two and a half years, is still to me one of the
+
+205
+00:14:41,480 --> 00:14:48,520
+biggest surprises and kind of validates our approach that led the data guide you.
+
+206
+00:14:48,520 --> 00:14:55,360
+So when you're approaching one of these problems and you're trying to kind of iterate to a
+
+207
+00:14:55,360 --> 00:14:58,920
+neural network architecture, where do you tend to start?
+
+208
+00:14:58,920 --> 00:15:06,800
+Do you start from, you know, published research like Google Med or one of the, you know,
+
+209
+00:15:06,800 --> 00:15:13,080
+published network architectures that is kind of known good in a given class of problem
+
+210
+00:15:13,080 --> 00:15:20,880
+or, you know, at this point, do you have, you know, your own best practices or proprietary
+
+211
+00:15:20,880 --> 00:15:21,880
+network architectures?
+
+212
+00:15:21,880 --> 00:15:25,880
+How do you tend to approach the network architecture problem?
+
+213
+00:15:25,880 --> 00:15:28,560
+Yeah, that's a very good question.
+
+214
+00:15:28,560 --> 00:15:33,200
+And speech is a little bit different from identifying images like you said, an image
+
+215
+00:15:33,200 --> 00:15:38,320
+net and a Google net kind of architectures, which are stacks of convolutional networks,
+
+216
+00:15:38,320 --> 00:15:41,200
+because speech has a time dependency, right?
+
+217
+00:15:41,200 --> 00:15:47,800
+You can think of a speech as a sequence of audio samples, typically a good practice is
+
+218
+00:15:47,800 --> 00:15:50,440
+to choose audio samples that are 10 milliseconds each.
+
+219
+00:15:50,440 --> 00:15:53,840
+So every 10 milliseconds, you've got to get an audio sample.
+
+220
+00:15:53,840 --> 00:15:55,800
+But there is a time dependency, right?
+
+221
+00:15:55,800 --> 00:16:01,560
+Because what you say, you know, at time t equals something is dependent on what you said,
+
+222
+00:16:01,560 --> 00:16:03,520
+t minus something.
+
+223
+00:16:03,520 --> 00:16:09,000
+So the styles of network that we had to train was what are called recurrent nets.
+
+224
+00:16:09,000 --> 00:16:11,880
+And recurrent nets have been actually around for a long time.
+
+225
+00:16:11,880 --> 00:16:17,400
+But when we first started in 2014, I don't think anybody had used recurrent nets that
+
+226
+00:16:17,400 --> 00:16:23,160
+widely in speech, but we kind of had a gut feeling that since recurrent nets captured
+
+227
+00:16:23,160 --> 00:16:26,680
+this time dependency, that's where we should start.
+
+228
+00:16:26,680 --> 00:16:33,040
+So we started off doing very vanilla bidirectional recurrent nets, which actually bidirectional
+
+229
+00:16:33,040 --> 00:16:35,280
+means they go backward and forward in time.
+
+230
+00:16:35,280 --> 00:16:39,960
+So there's one layer, which goes backward, multiple layers, which goes backward in time and
+
+231
+00:16:39,960 --> 00:16:43,360
+other multiple layers, which was forward in time.
+
+232
+00:16:43,360 --> 00:16:45,840
+That's kind of where we started off with.
+
+233
+00:16:45,840 --> 00:16:52,840
+And Aoni Hanun, who is now back at Stanford, he had done some initial work on speech and
+
+234
+00:16:52,840 --> 00:16:55,640
+he was at play around with your recurrent networks a bit.
+
+235
+00:16:55,640 --> 00:17:00,400
+So he was the proponent of using recurrent networks.
+
+236
+00:17:00,400 --> 00:17:06,040
+And since then we have evolved to be used gated recurrent units, which are a little bit fancier
+
+237
+00:17:06,040 --> 00:17:09,320
+recurrent networks, LSTMs.
+
+238
+00:17:09,320 --> 00:17:16,320
+On top of that, you can use even fancier constructs like potential models, which kind of look
+
+239
+00:17:16,320 --> 00:17:19,880
+at capturing some sort of memory inside these networks.
+
+240
+00:17:19,880 --> 00:17:26,640
+So in these networks, in some sense, are capturing memory of what you've said in the past.
+
+241
+00:17:26,640 --> 00:17:31,440
+So yeah, you kind of look at your problem and then there are wide classes of these networks.
+
+242
+00:17:31,440 --> 00:17:40,200
+So convolutional networks kind of capture features in kind of an image space, in a 2D space.
+
+243
+00:17:40,200 --> 00:17:46,400
+And this recurrent networks kind of capture features in time dimension.
+
+244
+00:17:46,400 --> 00:17:50,680
+So depending on where your problem lies, that's where you would start.
+
+245
+00:17:50,680 --> 00:17:56,720
+For example, tomorrow, for example, I have to, you know, I'm trying to do something in video.
+
+246
+00:17:56,720 --> 00:17:57,720
+Where would I start?
+
+247
+00:17:57,720 --> 00:18:02,280
+I would probably start with a recurrent network as a first guess, because video also has
+
+248
+00:18:02,280 --> 00:18:04,960
+a concept of time.
+
+249
+00:18:04,960 --> 00:18:07,920
+So that's kind of where you start off with.
+
+250
+00:18:07,920 --> 00:18:09,520
+And nothing is actually proprietary.
+
+251
+00:18:09,520 --> 00:18:14,840
+I mean, one good thing about the communities, people are very open about sharing architectures.
+
+252
+00:18:14,840 --> 00:18:21,760
+Like all our architectures are public, I mean, we publish yearly almost, yearly cadence.
+
+253
+00:18:21,760 --> 00:18:26,520
+What networks we have been using, and they're all like standard known networks.
+
+254
+00:18:26,520 --> 00:18:30,600
+Just the architecture is different, like how they're connected, how many layers, what
+
+255
+00:18:30,600 --> 00:18:33,640
+is the cost function and so on and so forth.
+
+256
+00:18:33,640 --> 00:18:41,160
+So what's the relationship between the network architecture and underlying systems that
+
+257
+00:18:41,160 --> 00:18:42,320
+support them?
+
+258
+00:18:42,320 --> 00:18:50,640
+That's a good question, typically, you know, a lot of people, I think, because Google
+
+259
+00:18:50,640 --> 00:18:57,160
+Net and because ImageNet has become such a widely known competition that people focus
+
+260
+00:18:57,160 --> 00:19:04,760
+on these stacks of convolutional nets a lot, recurrent nets because they go in time, they're
+
+261
+00:19:04,760 --> 00:19:11,040
+a little bit difficult because say you have a really long audio transcript, which means
+
+262
+00:19:11,040 --> 00:19:16,320
+it will be kind of enrolled in time, you can think of it as a for loop.
+
+263
+00:19:16,320 --> 00:19:21,160
+So depending on how long the audio transcript is, you have to kind of unroll that loop in
+
+264
+00:19:21,160 --> 00:19:29,560
+time, which makes it a little bit more challenging compared to like convolutional networks.
+
+265
+00:19:29,560 --> 00:19:37,880
+So their memory kind of blows up because you have these long utterances that you're transcribing.
+
+266
+00:19:37,880 --> 00:19:44,680
+Sometimes your deployment can be a challenge because you are doing this small matrix multiplies
+
+267
+00:19:44,680 --> 00:19:50,240
+which are not very high performance depending on how you do the inference, inference is when
+
+268
+00:19:50,240 --> 00:19:53,080
+you actually deploy these models.
+
+269
+00:19:53,080 --> 00:19:57,600
+And you're also, and users are also very, very sensitive to latency, so which means you
+
+270
+00:19:57,600 --> 00:19:58,760
+have to do it.
+
+271
+00:19:58,760 --> 00:20:03,560
+Like when you're talking to Siri, for example, you spoke something to Siri and Siri took,
+
+272
+00:20:03,560 --> 00:20:08,800
+I don't know, one minute to answer, obviously you're not going to be a very happy user.
+
+273
+00:20:08,800 --> 00:20:10,800
+We've moved on by that point.
+
+274
+00:20:10,800 --> 00:20:11,800
+Yeah, exactly.
+
+275
+00:20:11,800 --> 00:20:16,680
+So you have to think about all these issues when you're doing inference for these kind
+
+276
+00:20:16,680 --> 00:20:18,000
+of recurrent networks.
+
+277
+00:20:18,000 --> 00:20:25,000
+And then very recently there are network architectures that are incredibly challenging things like
+
+278
+00:20:25,000 --> 00:20:31,360
+wave net and byte net, which came out of Google DeepMind and PixelCNN, PixelRNN.
+
+279
+00:20:31,360 --> 00:20:37,320
+So what these networks are doing, they're generating one sample at a time, and this sample
+
+280
+00:20:37,320 --> 00:20:45,080
+is at a very fine time granularity, which means they're generating one sample every 61
+
+281
+00:20:45,080 --> 00:20:52,160
+microsecond, which basically 61 microsecond is basically one over 16,000, like a 16 kilohertz
+
+282
+00:20:52,160 --> 00:20:53,160
+audio.
+
+283
+00:20:53,160 --> 00:20:56,840
+So these networks are used to send us to the opposite problem.
+
+284
+00:20:56,840 --> 00:21:00,080
+So given a text, you're synthesizing speech.
+
+285
+00:21:00,080 --> 00:21:09,800
+So the denure incredibly latency bound, you have to generate an audio sample every 61 microseconds.
+
+286
+00:21:09,800 --> 00:21:17,080
+And this entire network is like 40 layers, 50 layers, deep, something like that.
+
+287
+00:21:17,080 --> 00:21:21,560
+So this is actually a research frontier, like how do you make things like wave nets and
+
+288
+00:21:21,560 --> 00:21:24,280
+byte nets, synthesize things.
+
+289
+00:21:24,280 --> 00:21:29,520
+Same thing happens with the pictures, like the PixelCNN paper if you look at, I think
+
+290
+00:21:29,520 --> 00:21:32,120
+it was presented last year's ICML.
+
+291
+00:21:32,120 --> 00:21:38,560
+They're synthesizing images, one pixel at a time, and to generate each pixel, you have
+
+292
+00:21:38,560 --> 00:21:45,240
+to do this inference through this deep, really deep network of 40, 50 layers, which makes
+
+293
+00:21:45,240 --> 00:21:47,000
+this very, very challenging.
+
+294
+00:21:47,000 --> 00:21:55,640
+So from the system side, I think these networks are kind of at the forefront of difficulty
+
+295
+00:21:55,640 --> 00:22:00,080
+and challenge of deploying these kind of networks.
+
+296
+00:22:00,080 --> 00:22:04,480
+Now having been in the field for so long, does it still amaze you that any of this stuff
+
+297
+00:22:04,480 --> 00:22:05,480
+works?
+
+298
+00:22:05,480 --> 00:22:08,280
+Oh, on a daily basis.
+
+299
+00:22:08,280 --> 00:22:15,360
+And I think it's an Achilles heel, in some sense, that the interpretability of these networks
+
+300
+00:22:15,360 --> 00:22:18,880
+is extremely hard, especially for speech.
+
+301
+00:22:18,880 --> 00:22:26,240
+If you look at some of the work that has happened in the Google net kind of world where you
+
+302
+00:22:26,240 --> 00:22:33,480
+can kind of deconvolve a layer and kind of say, okay, this layer is detecting like a
+
+303
+00:22:33,480 --> 00:22:34,480
+face.
+
+304
+00:22:34,480 --> 00:22:39,640
+This layer is detecting like a, I don't know, the chin or something, because humans, visually,
+
+305
+00:22:39,640 --> 00:22:40,640
+we are very rich.
+
+306
+00:22:40,640 --> 00:22:43,440
+We can look at these patterns visually.
+
+307
+00:22:43,440 --> 00:22:48,640
+I have no idea how to visualize a recurrent network, so how do you visualize it?
+
+308
+00:22:48,640 --> 00:22:57,000
+Audio form, I mean, I don't know, because audio has in some sense much less information
+
+309
+00:22:57,000 --> 00:23:02,800
+compared to like an image, it literally is a picture of a thousand words, right?
+
+310
+00:23:02,800 --> 00:23:08,280
+So in our domain, it's almost impossible to gain any sort of interpretability in the
+
+311
+00:23:08,280 --> 00:23:14,280
+networks we train, which makes our life really hard, because we see almost every daily
+
+312
+00:23:14,280 --> 00:23:20,400
+basis, we see these, you know, some, something we see that is like, how did that happen?
+
+313
+00:23:20,400 --> 00:23:23,240
+And, you know, it's very hard to gain insight into these networks.
+
+314
+00:23:23,240 --> 00:23:27,440
+They're very much a black box, which makes them quite hard.
+
+315
+00:23:27,440 --> 00:23:34,200
+It's incredible to think that this, the neural network is looking at, you know, milliseconds
+
+316
+00:23:34,200 --> 00:23:39,440
+of speech and is able to do anything with it, you know, let alone create words and have
+
+317
+00:23:39,440 --> 00:23:41,320
+them be partially intelligible.
+
+318
+00:23:41,320 --> 00:23:44,600
+Yeah, and it's doing for two languages, which are completely unrelated.
+
+319
+00:23:44,600 --> 00:23:49,800
+I mean, we do like, when we first start in Mandarin, people were saying, oh, you need
+
+320
+00:23:49,800 --> 00:23:54,680
+to do explicit tone modeling, because Mandarin is a tonal language and all that stuff, right?
+
+321
+00:23:54,680 --> 00:23:58,760
+And you're like, you know, we're not linguists, we are not language experts or speech experts,
+
+322
+00:23:58,760 --> 00:24:02,400
+you're like, no, we're not going to do it and we're going to just try kind of the quote
+
+323
+00:24:02,400 --> 00:24:06,680
+unquote brute force method of like feeding it to the neural network and see if the neural
+
+324
+00:24:06,680 --> 00:24:10,480
+network can figure out the tonality of the languages.
+
+325
+00:24:10,480 --> 00:24:11,480
+And it does.
+
+326
+00:24:11,480 --> 00:24:17,480
+I mean, you know, if you ask me what layer of the neural network is learning these tones,
+
+327
+00:24:17,480 --> 00:24:21,480
+I have no idea.
+
+328
+00:24:21,480 --> 00:24:28,200
+Well, I had a, I had a guest on the show Pascal Fung, who works on, who spent quite a
+
+329
+00:24:28,200 --> 00:24:32,720
+bit of time in her career working on speech.
+
+330
+00:24:32,720 --> 00:24:40,120
+And she quoted, I forget the name of the researcher, who's one of the pioneers in statistical
+
+331
+00:24:40,120 --> 00:24:46,960
+modeling of speech, who said something to the effect of my speech recognition, accuracy
+
+332
+00:24:46,960 --> 00:24:51,440
+goes up every time I fire a linguist from my lab or something like that.
+
+333
+00:24:51,440 --> 00:24:52,440
+Yeah.
+
+334
+00:24:52,440 --> 00:24:58,720
+That's a very popular saying and we kind of jokingly say it inside of her, especially when
+
+335
+00:24:58,720 --> 00:25:03,240
+we first started that we had like no clue what to do with.
+
+336
+00:25:03,240 --> 00:25:07,480
+So your accuracy should be at the top, right?
+
+337
+00:25:07,480 --> 00:25:12,640
+But I think that as you get, I mean, going from say 80, when we first started, I think
+
+338
+00:25:12,640 --> 00:25:16,280
+we were 80% accurate, 75% accurate.
+
+339
+00:25:16,280 --> 00:25:24,280
+Going from that to 95, 96% is actually easier than going from 96% or 99%.
+
+340
+00:25:24,280 --> 00:25:25,280
+Of course.
+
+341
+00:25:25,280 --> 00:25:27,080
+It's that famous sigmoid core, right?
+
+342
+00:25:27,080 --> 00:25:32,960
+I mean, you have to 10x more work to get, I don't know, 1% more better accuracy.
+
+343
+00:25:32,960 --> 00:25:33,960
+Right.
+
+344
+00:25:33,960 --> 00:25:41,040
+Because making Androang gives us really nice example that it's very hard to build systems
+
+345
+00:25:41,040 --> 00:25:44,200
+that are better than humans in accuracy.
+
+346
+00:25:44,200 --> 00:25:49,760
+Because then you kind of lose sense of like, normally when you develop the systems, you
+
+347
+00:25:49,760 --> 00:25:52,560
+kind of get a sense of why the system is failing.
+
+348
+00:25:52,560 --> 00:25:56,280
+Maybe the system is failing because it can, because it has background noise or something
+
+349
+00:25:56,280 --> 00:25:57,280
+like that.
+
+350
+00:25:57,280 --> 00:26:01,520
+But once it's into the range where the humans will make mistakes, but then you can judge
+
+351
+00:26:01,520 --> 00:26:06,040
+something that is already better than you, because then you don't know what these
+
+352
+00:26:06,040 --> 00:26:07,480
+failure cases are.
+
+353
+00:26:07,480 --> 00:26:08,480
+Right.
+
+354
+00:26:08,480 --> 00:26:13,000
+So the last 3% or the last 2% is really hard to bridge.
+
+355
+00:26:13,000 --> 00:26:16,440
+And that's kind of where we are now.
+
+356
+00:26:16,440 --> 00:26:21,200
+And becoming increasingly hard, we're making progress, but it's not as rapid of a progress.
+
+357
+00:26:21,200 --> 00:26:23,920
+We are, we want to close the gap.
+
+358
+00:26:23,920 --> 00:26:29,040
+And I think we can close the gap, but it's going to be incredibly challenging.
+
+359
+00:26:29,040 --> 00:26:33,720
+And the flip side is, I don't think until you get to that 99% accuracy level, you can't
+
+360
+00:26:33,720 --> 00:26:38,200
+really have a technology that kind of gives you the sense of magic, right?
+
+361
+00:26:38,200 --> 00:26:39,200
+You know, right?
+
+362
+00:26:39,200 --> 00:26:40,200
+It just works.
+
+363
+00:26:40,200 --> 00:26:41,200
+Right.
+
+364
+00:26:41,200 --> 00:26:42,800
+You're not there yet with ASR.
+
+365
+00:26:42,800 --> 00:26:43,800
+Right.
+
+366
+00:26:43,800 --> 00:26:44,800
+Right.
+
+367
+00:26:44,800 --> 00:26:47,080
+It's amazing how close we're getting though.
+
+368
+00:26:47,080 --> 00:26:48,080
+Yeah.
+
+369
+00:26:48,080 --> 00:26:49,080
+Yeah.
+
+370
+00:26:49,080 --> 00:26:52,480
+You said a couple of things that I thought were pretty interesting that I'd like to go
+
+371
+00:26:52,480 --> 00:27:02,520
+back to, one was that you were starting to see results that were 2x better than, you
+
+372
+00:27:02,520 --> 00:27:06,760
+know, what you were seeing publicly.
+
+373
+00:27:06,760 --> 00:27:12,120
+Were those results in terms of accuracy, or I think it was training time that you were
+
+374
+00:27:12,120 --> 00:27:13,120
+what were those.
+
+375
+00:27:13,120 --> 00:27:15,760
+So those were training times, right?
+
+376
+00:27:15,760 --> 00:27:16,760
+Yeah.
+
+377
+00:27:16,760 --> 00:27:22,360
+Training so from the very outset, what we have focused on was not just absolute training
+
+378
+00:27:22,360 --> 00:27:26,600
+time, but one thing that I learned from NVIDIA while I was NVIDIA is what is called
+
+379
+00:27:26,600 --> 00:27:28,560
+the speed of light.
+
+380
+00:27:28,560 --> 00:27:33,240
+The speed of light is basically under ideal circumstances, what is the fastest you can
+
+381
+00:27:33,240 --> 00:27:34,240
+go?
+
+382
+00:27:34,240 --> 00:27:38,400
+And that typically is if your processor is running at full speed all the time, which obviously
+
+383
+00:27:38,400 --> 00:27:39,880
+doesn't happen.
+
+384
+00:27:39,880 --> 00:27:45,440
+So then what you should aim for is what fraction of the speed of light are you at?
+
+385
+00:27:45,440 --> 00:27:49,880
+And typically for any real world application, especially for applications that run for
+
+386
+00:27:49,880 --> 00:27:55,320
+three weeks, if you are at 50% of speed of light, which means, you know, a GPU has a speed
+
+387
+00:27:55,320 --> 00:28:00,360
+of light of, typically, are on six terraflops if you take a Titan X GPU.
+
+388
+00:28:00,360 --> 00:28:05,320
+So if you can sustain three terraflops, that's actually incredibly good.
+
+389
+00:28:05,320 --> 00:28:10,920
+So instead of focusing on absolute training time, we look at what fraction of speed of light
+
+390
+00:28:10,920 --> 00:28:12,600
+are we?
+
+391
+00:28:12,600 --> 00:28:16,480
+Because that's a good measure of efficiency, right?
+
+392
+00:28:16,480 --> 00:28:23,840
+So we target at 50% and I just saw, I think, a paper couple of days back.
+
+393
+00:28:23,840 --> 00:28:27,320
+I believe from Google, it's a very good paper, it's on a mixture of experts, and they're
+
+394
+00:28:27,320 --> 00:28:30,720
+I think getting around 25% efficiency.
+
+395
+00:28:30,720 --> 00:28:36,280
+So the field is in some sense moving there that people are caring about things like efficiency
+
+396
+00:28:36,280 --> 00:28:37,280
+efficiency.
+
+397
+00:28:37,280 --> 00:28:39,600
+I've been 25% of speed of light, basically.
+
+398
+00:28:39,600 --> 00:28:44,720
+And we have been at 50% of speed of light since at least a year and a half.
+
+399
+00:28:44,720 --> 00:28:49,280
+So in that sense, we have been 2x or more ahead of the field.
+
+400
+00:28:49,280 --> 00:28:54,720
+And this is something that we as a group have been trying to kind of evangelize that it's
+
+401
+00:28:54,720 --> 00:28:59,920
+not just important to tell you the absolute number, but also what fraction of speed of light
+
+402
+00:28:59,920 --> 00:29:00,920
+are you?
+
+403
+00:29:00,920 --> 00:29:06,520
+Because otherwise, it's hard to measure how efficient you are.
+
+404
+00:29:06,520 --> 00:29:08,960
+And that's a different kind of thinking I feel.
+
+405
+00:29:08,960 --> 00:29:13,320
+And I think it, I actually learned it from Nvidia when I was at Nvidia because it's a
+
+406
+00:29:13,320 --> 00:29:14,320
+game.
+
+407
+00:29:14,320 --> 00:29:19,640
+When you're developing these algorithms for games, games also have this kind of a hard requirement
+
+408
+00:29:19,640 --> 00:29:23,280
+that you have to generate a frame every 30th of a second, because it's typically a game
+
+409
+00:29:23,280 --> 00:29:24,280
+for 30th.
+
+410
+00:29:24,280 --> 00:29:25,280
+Yes.
+
+411
+00:29:25,280 --> 00:29:26,280
+Right.
+
+412
+00:29:26,280 --> 00:29:30,520
+So then you need to do it very, very efficiently, with a computer game, for example.
+
+413
+00:29:30,520 --> 00:29:31,520
+Right.
+
+414
+00:29:31,520 --> 00:29:32,520
+Right.
+
+415
+00:29:32,520 --> 00:29:36,360
+And do you, does your tea, is it reflected in your team composition as well?
+
+416
+00:29:36,360 --> 00:29:41,960
+Do you have more or folks from a systems background than you would typically find doing
+
+417
+00:29:41,960 --> 00:29:43,960
+in an AI research group or?
+
+418
+00:29:43,960 --> 00:29:44,960
+Absolutely.
+
+419
+00:29:44,960 --> 00:29:47,720
+So this was also something that is very unique to our group.
+
+420
+00:29:47,720 --> 00:29:54,880
+When we first started kind of formulating the lab, Adam Coates and Andrew kind of understood
+
+421
+00:29:54,880 --> 00:29:59,960
+that the systems would be a really important aspect of deep learning.
+
+422
+00:29:59,960 --> 00:30:02,560
+So we have a really deep engine system.
+
+423
+00:30:02,560 --> 00:30:07,920
+We don't have a lot of people, but the people we have in our group, I think combined have
+
+424
+00:30:07,920 --> 00:30:14,240
+like 30, 40 years experience in building very, very high performance systems.
+
+425
+00:30:14,240 --> 00:30:19,640
+And it's also a unique opportunity, because there's a group that people can wear different
+
+426
+00:30:19,640 --> 00:30:22,320
+hats, in fact, encourage to wear different hats.
+
+427
+00:30:22,320 --> 00:30:26,480
+So I come from a GPU background, other people come from GPU background, we learn about
+
+428
+00:30:26,480 --> 00:30:30,840
+speech, about deep learning, about ML, and then ML people and the deep learning to come
+
+429
+00:30:30,840 --> 00:30:36,720
+from the ML or no more ML deal background, they learn about how to build these systems.
+
+430
+00:30:36,720 --> 00:30:41,240
+I mean, you can't just write code and, you know, hope for the best.
+
+431
+00:30:41,240 --> 00:30:45,120
+I mean, you know, depending on what code you write and how you write it or how you architect
+
+432
+00:30:45,120 --> 00:30:49,880
+it, your training run might take two months in sort of three weeks.
+
+433
+00:30:49,880 --> 00:30:50,880
+Right.
+
+434
+00:30:50,880 --> 00:30:51,880
+Right.
+
+435
+00:30:51,880 --> 00:30:53,880
+And good luck with that.
+
+436
+00:30:53,880 --> 00:31:00,040
+So it's a very interesting composition of our lab and I don't think it exists anywhere
+
+437
+00:31:00,040 --> 00:31:04,960
+else, but I think other people like Google, Facebook, etc, they're all seeing the value
+
+438
+00:31:04,960 --> 00:31:09,520
+of this kind of an approach and they're all kind of ramping up, I mean, the TensorFlow
+
+439
+00:31:09,520 --> 00:31:15,080
+team is incredible and they're, they're also have a lot of really great systems people
+
+440
+00:31:15,080 --> 00:31:19,160
+and they're, they've kind of realized the value of this as well.
+
+441
+00:31:19,160 --> 00:31:20,640
+It's interesting.
+
+442
+00:31:20,640 --> 00:31:26,400
+I had an opportunity to hear Andrew speak at this conference that I was at last week.
+
+443
+00:31:26,400 --> 00:31:33,640
+I was at Giga OM AI conference and one of the things that he said that was really interesting
+
+444
+00:31:33,640 --> 00:31:42,080
+was that, you know, in Silicon Valley, we've got various established practices for, you
+
+445
+00:31:42,080 --> 00:31:48,880
+know, lots of things, building web apps, building mobile apps, you know, building backend infrastructures
+
+446
+00:31:48,880 --> 00:31:56,240
+for those kinds of systems like even as, even in spite of how fast those things are moving,
+
+447
+00:31:56,240 --> 00:32:02,040
+like we have these established, you know, principles and architectures and like, you know, DevOps,
+
+448
+00:32:02,040 --> 00:32:08,200
+we've got a team composition that kind of works and an AI, we're kind of inventing all
+
+449
+00:32:08,200 --> 00:32:14,160
+that stuff over again and don't have, you know, people, everyone's doing things differently,
+
+450
+00:32:14,160 --> 00:32:17,360
+trying to experiment and figure out what works and what works best.
+
+451
+00:32:17,360 --> 00:32:19,800
+Yeah, I think that's absolutely true.
+
+452
+00:32:19,800 --> 00:32:25,840
+I think the, there is a notion of what an AI product should be, but I don't think AI
+
+453
+00:32:25,840 --> 00:32:29,120
+products have had their, what I call the Photoshop moment, right?
+
+454
+00:32:29,120 --> 00:32:35,480
+For the Photoshop was one of those early desktop apps, so to speak, which kind of defined
+
+455
+00:32:35,480 --> 00:32:43,520
+what a desktop application should be or, or a, you know, a word perfect or the early days
+
+456
+00:32:43,520 --> 00:32:48,800
+of Microsoft Word, where, you know, these applications is defined what a desktop publishing
+
+457
+00:32:48,800 --> 00:32:52,040
+or a desktop content generation application should look like.
+
+458
+00:32:52,040 --> 00:32:53,040
+Right.
+
+459
+00:32:53,040 --> 00:33:00,320
+I don't think AI product has had that defining moment that this app or product or service,
+
+460
+00:33:00,320 --> 00:33:04,800
+people will say, oh, my God, this is how, you know, AI products and services should be
+
+461
+00:33:04,800 --> 00:33:05,800
+built.
+
+462
+00:33:05,800 --> 00:33:10,200
+And again, yeah, there's a lot of experimentation, there's a lot of experimentation and personal
+
+463
+00:33:10,200 --> 00:33:17,320
+assistance, bots, things like Siri and Google Voice and our, our services in China of doing
+
+464
+00:33:17,320 --> 00:33:23,560
+a SAR, but I don't think I, I don't get the sense that we have had that Photoshop moment
+
+465
+00:33:23,560 --> 00:33:24,560
+yet.
+
+466
+00:33:24,560 --> 00:33:32,800
+So another interesting point you made early on was talking about, you talked about some
+
+467
+00:33:32,800 --> 00:33:39,240
+of the deployment challenges of the neural networks that you work on.
+
+468
+00:33:39,240 --> 00:33:45,080
+And we often, we often overlook those, like a lot of the conversation I think is around
+
+469
+00:33:45,080 --> 00:33:52,640
+training and the training challenges, just because it's so time and tense, but you mentioned
+
+470
+00:33:52,640 --> 00:34:00,800
+some of the matrix multiplication challenges and other things, you know, what do you find
+
+471
+00:34:00,800 --> 00:34:05,800
+to be, how do you address those challenges and how do you, like, how do you more fully
+
+472
+00:34:05,800 --> 00:34:07,280
+characterize them?
+
+473
+00:34:07,280 --> 00:34:13,760
+Yeah, I think the deployment challenges are driven quite a lot by the, the application
+
+474
+00:34:13,760 --> 00:34:20,920
+themselves, like as I said, any kind of service, like speech or, for example, you're doing
+
+475
+00:34:20,920 --> 00:34:27,280
+image tagging, for example, in an app, for example, say an app, let's you tag pictures
+
+476
+00:34:27,280 --> 00:34:34,680
+of food or something, users care, like all these services are very user-facing and, you
+
+477
+00:34:34,680 --> 00:34:39,880
+know, our attention span or what we expect from a service has decreased over years, like
+
+478
+00:34:39,880 --> 00:34:45,480
+we really want everything to be very, very snappy, especially for things like speech, right?
+
+479
+00:34:45,480 --> 00:34:49,760
+Speech is like our interface, like when I talk to you, expect an answer, I don't expect
+
+480
+00:34:49,760 --> 00:34:54,320
+the silence, like you, you're not going to speak to me after a minute, after I've been
+
+481
+00:34:54,320 --> 00:34:55,320
+speaking.
+
+482
+00:34:55,320 --> 00:34:57,680
+So latency becomes really, really important.
+
+483
+00:34:57,680 --> 00:35:03,000
+And then this is a challenge if the, the models are deployed in the data center, because
+
+484
+00:35:03,000 --> 00:35:07,160
+if you're using a mobile phone, then they need to take into account the time that takes
+
+485
+00:35:07,160 --> 00:35:11,520
+for the request to come to your data center, and then you run the model, generate the
+
+486
+00:35:11,520 --> 00:35:16,240
+output, whatever you want is given, give to the user, and then you send it back.
+
+487
+00:35:16,240 --> 00:35:21,440
+And for speech, it also depends on like, you know, you're doing, taking a, you know,
+
+488
+00:35:21,440 --> 00:35:25,680
+speech segment and converting into text, like when do you start dropping up these speech
+
+489
+00:35:25,680 --> 00:35:26,680
+segments?
+
+490
+00:35:26,680 --> 00:35:32,320
+So to the user, it feels like it's a completely seamless kind of interaction.
+
+491
+00:35:32,320 --> 00:35:37,640
+Ideally, you would want these models to be pushed out to the edge, right?
+
+492
+00:35:37,640 --> 00:35:44,400
+You, I would want my speech recognition engine, the ASR engine, to be running on my phone.
+
+493
+00:35:44,400 --> 00:35:45,920
+It has not quite happened.
+
+494
+00:35:45,920 --> 00:35:49,960
+So what people do is they take kind of a split model, where a part of the model is running
+
+495
+00:35:49,960 --> 00:35:54,960
+on the phone, and the reason you can run it on these devices is because usually they're
+
+496
+00:35:54,960 --> 00:36:01,000
+so compute intensive, I mean, I can actually take our model and run it on the, on the iPhone
+
+497
+00:36:01,000 --> 00:36:04,960
+or Android phone or whatever, a top of the line Android phone, but I can bet you that
+
+498
+00:36:04,960 --> 00:36:10,240
+you're the, I'll drain the battery in like 20 minutes.
+
+499
+00:36:10,240 --> 00:36:12,640
+And that won't be a very happy user, right?
+
+500
+00:36:12,640 --> 00:36:13,640
+Right.
+
+501
+00:36:13,640 --> 00:36:15,160
+So people kind of split the model.
+
+502
+00:36:15,160 --> 00:36:20,280
+So maybe a part of the model that does hey Siri or hey Alexa or whatever is resident on
+
+503
+00:36:20,280 --> 00:36:23,720
+the device, and that only does that, that bit.
+
+504
+00:36:23,720 --> 00:36:28,920
+And then whatever you say after a Siri gets shipped up to the cloud and then transcribed
+
+505
+00:36:28,920 --> 00:36:31,720
+there and then brought back.
+
+506
+00:36:31,720 --> 00:36:36,280
+So those are the kind of, so I think more and more as the devices get more capable and
+
+507
+00:36:36,280 --> 00:36:41,480
+the other thing that people are also looking at is these neural networks that are very
+
+508
+00:36:41,480 --> 00:36:42,480
+over parameterized.
+
+509
+00:36:42,480 --> 00:36:46,840
+I mean, you know, typically a neural network would be say 100 million parameters.
+
+510
+00:36:46,840 --> 00:36:51,200
+So after you train it, it turns out that you can actually shrink it down a lot.
+
+511
+00:36:51,200 --> 00:36:56,920
+You can compress the models down to really small models without losing a lot of accuracy.
+
+512
+00:36:56,920 --> 00:37:01,760
+So people have been, and we are doing it as well, taking a network and shrinking it down
+
+513
+00:37:01,760 --> 00:37:05,800
+and seeing if we can deploy it to an edge device.
+
+514
+00:37:05,800 --> 00:37:10,520
+And going back to the matrix multiplies, in training, what you do is this thing called
+
+515
+00:37:10,520 --> 00:37:14,360
+mini batching rates and mini batch, you take a bunch of training examples, shove it into
+
+516
+00:37:14,360 --> 00:37:23,960
+like one big, big matrix because big matrices are easier to get very high performance on.
+
+517
+00:37:23,960 --> 00:37:28,560
+When you're doing speech recognition in the cloud for user-facing services, you can't
+
+518
+00:37:28,560 --> 00:37:32,320
+really take a lot of utterances and shove it into this large matrix because then you have
+
+519
+00:37:32,320 --> 00:37:34,320
+to wait.
+
+520
+00:37:34,320 --> 00:37:37,160
+So, and, you know, users don't like to wait.
+
+521
+00:37:37,160 --> 00:37:42,320
+So then you have this problem of then you are ending up multiplying what I call skinny
+
+522
+00:37:42,320 --> 00:37:45,880
+matrices having one or two examples, which are not fast.
+
+523
+00:37:45,880 --> 00:37:51,600
+So then you have to kind of write these special matrix, multiply, multiplication, routines
+
+524
+00:37:51,600 --> 00:37:57,160
+that are not optimized for fat matrices or normal matrices, but for skinny matrices.
+
+525
+00:37:57,160 --> 00:37:58,160
+And everybody's doing it.
+
+526
+00:37:58,160 --> 00:38:04,040
+I mean, Google has a team, I believe, that who does this kind of, you know, special coming
+
+527
+00:38:04,040 --> 00:38:08,840
+up with special libraries, which are optimized for the skinny matrix multiplication, read
+
+528
+00:38:08,840 --> 00:38:10,160
+all the same.
+
+529
+00:38:10,160 --> 00:38:15,480
+So, yeah, the training side is kind of a different world and has its own kind of challenges
+
+530
+00:38:15,480 --> 00:38:18,400
+that I think doesn't get talked about a whole lot.
+
+531
+00:38:18,400 --> 00:38:23,480
+But it's also extremely important because this is where you can, I mean, this is where
+
+532
+00:38:23,480 --> 00:38:24,960
+kind of the rubber meets the road, right?
+
+533
+00:38:24,960 --> 00:38:28,520
+This is where, you know, users start using your model to do something useful.
+
+534
+00:38:28,520 --> 00:38:29,520
+Right.
+
+535
+00:38:29,520 --> 00:38:30,520
+Right.
+
+536
+00:38:30,520 --> 00:38:31,520
+Right.
+
+537
+00:38:31,520 --> 00:38:37,840
+The architecture you were describing or at least the end goal of the architecture you
+
+538
+00:38:37,840 --> 00:38:45,160
+were describing starts to sound a lot to me like, you know, almost like, if you think
+
+539
+00:38:45,160 --> 00:38:49,760
+about Hadoopland, in one of your first slides in your presentation, there's a picture of
+
+540
+00:38:49,760 --> 00:38:51,080
+the Hadoop elephant, right?
+
+541
+00:38:51,080 --> 00:38:58,400
+In Hadoopland, there's kind of this, you know, migration from batch processing, map reduced
+
+542
+00:38:58,400 --> 00:39:01,840
+to Spark and streaming processing.
+
+543
+00:39:01,840 --> 00:39:07,520
+It almost sounds like you're describing a similar migration that many AI apps are taking
+
+544
+00:39:07,520 --> 00:39:09,600
+or will need to take over time.
+
+545
+00:39:09,600 --> 00:39:14,720
+Yeah, I think I haven't heard the characterization before, but that is exactly right.
+
+546
+00:39:14,720 --> 00:39:22,000
+Yeah, during, increasingly during, when you deploy, you are, you're, you're, it's some
+
+547
+00:39:22,000 --> 00:39:26,960
+kind of streaming and when you're streaming, you are very, very latency sensitive, especially
+
+548
+00:39:26,960 --> 00:39:30,040
+if there's a user that's using the service.
+
+549
+00:39:30,040 --> 00:39:34,600
+And typically during training, you are batching stuff up into these things called mini batches
+
+550
+00:39:34,600 --> 00:39:39,040
+to get much more computational efficiency.
+
+551
+00:39:39,040 --> 00:39:43,640
+And typically one, I think one of the first lessons I learned when I joined grad school
+
+552
+00:39:43,640 --> 00:39:47,920
+as my advisor said, latency problems are really hard to solve.
+
+553
+00:39:47,920 --> 00:39:53,760
+I mean, it's, if a problem has high latency and user scare about low latency, that those
+
+554
+00:39:53,760 --> 00:39:59,040
+problems typically end up taking a lot of engineering effort, it's harder to parallelize
+
+555
+00:39:59,040 --> 00:40:01,080
+your way out of a latency problem.
+
+556
+00:40:01,080 --> 00:40:02,080
+It is very hard.
+
+557
+00:40:02,080 --> 00:40:07,400
+You have to think about, you know, different algorithms and yeah, it's all like different
+
+558
+00:40:07,400 --> 00:40:08,400
+hardware.
+
+559
+00:40:08,400 --> 00:40:09,600
+It's, it's a mess.
+
+560
+00:40:09,600 --> 00:40:15,360
+Like, if your problem is bandwidth challenged or flop challenged, you can, you can try,
+
+561
+00:40:15,360 --> 00:40:21,480
+you can solve it relatively easily, then trying to solve something that is latency challenged.
+
+562
+00:40:21,480 --> 00:40:28,960
+And user scare about latency, I mean, it is, we want stuff to work instantly.
+
+563
+00:40:28,960 --> 00:40:34,560
+We'd be have very little patience for something that is, especially for things like ASR and
+
+564
+00:40:34,560 --> 00:40:37,840
+then these kind of things.
+
+565
+00:40:37,840 --> 00:40:44,240
+One of the techniques you described in your presentation was the graph transformation
+
+566
+00:40:44,240 --> 00:40:45,880
+of some of these problems.
+
+567
+00:40:45,880 --> 00:40:52,680
+Can you talk a little bit about the problem space there, the motivation and what you found?
+
+568
+00:40:52,680 --> 00:40:53,680
+Yeah.
+
+569
+00:40:53,680 --> 00:40:56,040
+So I think it was pretty forward looking.
+
+570
+00:40:56,040 --> 00:40:59,720
+In fact, after the talk, I met some people who said, you guys are five years ahead of
+
+571
+00:40:59,720 --> 00:41:00,720
+the field.
+
+572
+00:41:00,720 --> 00:41:01,720
+Nobody cares.
+
+573
+00:41:01,720 --> 00:41:05,280
+So, so what's really happening?
+
+574
+00:41:05,280 --> 00:41:08,640
+It was a good place to be, right?
+
+575
+00:41:08,640 --> 00:41:13,840
+So what we are seeing is you have, I mean, you can think of a neural network as an execution
+
+576
+00:41:13,840 --> 00:41:14,840
+graph.
+
+577
+00:41:14,840 --> 00:41:18,200
+I mean, execution graph has some operations that you're doing in the nodes and then you're
+
+578
+00:41:18,200 --> 00:41:20,720
+sending some data across the edges.
+
+579
+00:41:20,720 --> 00:41:26,520
+It's a very generic way or a very flexible way of saying what you're doing.
+
+580
+00:41:26,520 --> 00:41:33,080
+What we have found out is as we develop these very, very interesting architectures, they
+
+581
+00:41:33,080 --> 00:41:35,720
+are becoming pretty hard to scale.
+
+582
+00:41:35,720 --> 00:41:39,080
+So typically, what we would do is we come up with a really interesting architecture.
+
+583
+00:41:39,080 --> 00:41:43,520
+We start training in TensorFlow or any of the different frameworks because specifying
+
+584
+00:41:43,520 --> 00:41:48,520
+these architectures is very easy thanks to the work that all the different tool vendors
+
+585
+00:41:48,520 --> 00:41:49,520
+have done.
+
+586
+00:41:49,520 --> 00:41:52,040
+We have excellent tooling for specifying architectures.
+
+587
+00:41:52,040 --> 00:41:53,040
+So we get up and running.
+
+588
+00:41:53,040 --> 00:41:56,400
+We are training on, say, 1,000, 2,000 hours of data.
+
+589
+00:41:56,400 --> 00:42:02,200
+And now we need to scale to what we call our native datasets, which are tens of thousands
+
+590
+00:42:02,200 --> 00:42:03,840
+of hours.
+
+591
+00:42:03,840 --> 00:42:09,640
+This making this jump from very, doing experimentation on a couple of thousand hours of data to tens of
+
+592
+00:42:09,640 --> 00:42:15,200
+thousands of hours of data becomes very, very hard.
+
+593
+00:42:15,200 --> 00:42:20,120
+Because once you have to take these kind of graphs, which tens of locals graph dev and
+
+594
+00:42:20,120 --> 00:42:26,440
+various tool vendors of their own name, into a bunch of cores, I mean, you can think
+
+595
+00:42:26,440 --> 00:42:30,480
+of all these GPUs, this bunch of cores, and inside the GPU, there are also another bunch
+
+596
+00:42:30,480 --> 00:42:34,440
+of cores, this mapping gets incredibly hard.
+
+597
+00:42:34,440 --> 00:42:39,960
+So what we do is then a bunch of people, we get together and try to hand tune it, hand
+
+598
+00:42:39,960 --> 00:42:43,520
+map it down to these kind of cores.
+
+599
+00:42:43,520 --> 00:42:50,400
+Usually it takes us anywhere between eight months to a year where we can take the networks
+
+600
+00:42:50,400 --> 00:42:56,720
+that we want that we are training on, say, a small amount of data, which is a couple of
+
+601
+00:42:56,720 --> 00:43:03,360
+thousand hours of data to like a massive amounts of data, to a lot of hand engineering, hand
+
+602
+00:43:03,360 --> 00:43:09,640
+tooling, which ideally I want to shorten it, like ideally I want to shorten it to two
+
+603
+00:43:09,640 --> 00:43:14,560
+months, where typically we are looking at, say, a wave net or a bite net or an intentional
+
+604
+00:43:14,560 --> 00:43:19,600
+model, which are this very, very flexible, very interesting architectures, but also very
+
+605
+00:43:19,600 --> 00:43:22,560
+complicated to scale.
+
+606
+00:43:22,560 --> 00:43:29,160
+So that's what I was trying to get at, is like, we really don't have this kind of intermediate
+
+607
+00:43:29,160 --> 00:43:36,560
+layer, which takes a graph specification from a framework, be TensorFlow or MXNet or
+
+608
+00:43:36,560 --> 00:43:44,520
+PyTorch or Torch, and takes this graph and then kind of efficiently maps it down to your
+
+609
+00:43:44,520 --> 00:43:49,800
+GPUs or CPUs or what have you, and scale transparently.
+
+610
+00:43:49,800 --> 00:43:54,040
+I mean, today you are doing an experiment on one GPU, tomorrow you flip a switch, you're
+
+611
+00:43:54,040 --> 00:44:00,960
+doing an experiment on 64 GPUs, and you see no performance hit whatsoever.
+
+612
+00:44:00,960 --> 00:44:06,160
+We just don't have it, and now it's a very extremely painful process.
+
+613
+00:44:06,160 --> 00:44:10,280
+And then this really kind of gets at productivity of a group.
+
+614
+00:44:10,280 --> 00:44:16,760
+I mean, we do it because there's no other way, but ideally, it's kind of a wake up call
+
+615
+00:44:16,760 --> 00:44:21,160
+for the community, for the community to come together and build this software tooling
+
+616
+00:44:21,160 --> 00:44:25,200
+or the software middle layer that's absent.
+
+617
+00:44:25,200 --> 00:44:29,120
+And as I said, in full generality, it's an intractable problem.
+
+618
+00:44:29,120 --> 00:44:39,560
+So you have to figure out what sort of restrictions you want to place, so you can kind of do both
+
+619
+00:44:39,560 --> 00:44:44,480
+things that you can get the flexibility of looking at the networks that you want to
+
+620
+00:44:44,480 --> 00:44:50,080
+look at and also be able to scale these networks out to the data set that you want to scale
+
+621
+00:44:50,080 --> 00:44:51,080
+at.
+
+622
+00:44:51,080 --> 00:44:52,400
+And they're usually opposing goals.
+
+623
+00:44:52,400 --> 00:44:59,320
+So you have to carefully figure out what compromises you have to put in the system.
+
+624
+00:44:59,320 --> 00:45:03,680
+Let's talk a little bit more about the eight months and what goes into that.
+
+625
+00:45:03,680 --> 00:45:14,880
+Is it that it's a computationally iterative approach to solving this problem, meaning
+
+626
+00:45:14,880 --> 00:45:23,800
+you've got this model that after one computationally iterative cycle of training a model and coming
+
+627
+00:45:23,800 --> 00:45:32,720
+up with a model that you think works, you then are having to run it at scale, figure out
+
+628
+00:45:32,720 --> 00:45:36,960
+where it breaks, tweak it, and then are you remodeling, I guess?
+
+629
+00:45:36,960 --> 00:45:46,200
+Are you retraining in that process, or are there other steps taking place to get to
+
+630
+00:45:46,200 --> 00:45:48,720
+a model that runs at scale?
+
+631
+00:45:48,720 --> 00:45:54,280
+And now it's usually the same model, you just have to re-implemented, say you take an
+
+632
+00:45:54,280 --> 00:45:58,760
+attentional model, for example, these are pretty complicated models.
+
+633
+00:45:58,760 --> 00:46:04,520
+And typically what happens is you run out of memory because these models are large, there
+
+634
+00:46:04,520 --> 00:46:10,520
+is so much intermediate computation and so much intermediate state that you have to save.
+
+635
+00:46:10,520 --> 00:46:15,520
+You make the models larger, I mean when I say I make the model larger means the individual
+
+636
+00:46:15,520 --> 00:46:20,800
+layer sizes changes, so the connectivity stays the same, but the individual layer sizes
+
+637
+00:46:20,800 --> 00:46:30,760
+say go from a dimension of say 256 to say 1024, and when you increase the dimension, stuff
+
+638
+00:46:30,760 --> 00:46:36,560
+increases by a square, because it's a matrix, so now you're suddenly out of memory, and
+
+639
+00:46:36,560 --> 00:46:40,840
+then if you're suddenly out of memory, you can run on the GPU.
+
+640
+00:46:40,840 --> 00:46:46,040
+And then you have to look at the graph of this and figure out, typically as I said, every
+
+641
+00:46:46,040 --> 00:46:50,360
+edge in the graph is something that stores memory, you need to figure out, okay, I need
+
+642
+00:46:50,360 --> 00:46:55,160
+to collapse this graph, and collapsing this graph essentially means writing a new program,
+
+643
+00:46:55,160 --> 00:47:00,920
+because you can think of the nodes as essentially small programs, like a matrix multiply or something,
+
+644
+00:47:00,920 --> 00:47:04,840
+so then you have to start fusing these nodes in some interesting way, or think about how
+
+645
+00:47:04,840 --> 00:47:09,760
+do I partition this graph over two different GPUs, right now this entire graph doesn't fit
+
+646
+00:47:09,760 --> 00:47:14,760
+on one GPU, so now I have to partition this graph over two GPUs, so as soon as you think
+
+647
+00:47:14,760 --> 00:47:19,120
+of partitioning a graph over two GPUs, it's like, okay, how do I communicate?
+
+648
+00:47:19,120 --> 00:47:28,640
+All right, all these problems start coming up, it's extremely handcrafted in that sense.
+
+649
+00:47:28,640 --> 00:47:35,560
+Right, I understand, it sounds like you're starting with this, again, this model that you've
+
+650
+00:47:35,560 --> 00:47:42,880
+constructed using these tools that isn't necessarily designed for scale, and then you systematically
+
+651
+00:47:42,880 --> 00:47:47,280
+have to, if we think about this in a context of traditional compute, you systematically
+
+652
+00:47:47,280 --> 00:47:55,840
+are denormalizing your database, distributing out, and rewriting everything in assembly.
+
+653
+00:47:55,840 --> 00:48:00,920
+Yeah, pretty much, I mean, at the end of the day for some of the networks, we just have
+
+654
+00:48:00,920 --> 00:48:06,040
+to rewrite an assembly because they're not fast enough, otherwise, so it's a very like,
+
+655
+00:48:06,040 --> 00:48:11,520
+it's almost like an artisan chipping away at a problem, and in some sense, I mean,
+
+656
+00:48:11,520 --> 00:48:14,880
+as soon as you have an artisan chipping away at a problem, it doesn't scale, right?
+
+657
+00:48:14,880 --> 00:48:21,240
+It slows you down, I mean, that's why we invented compilers because people are tired of writing
+
+658
+00:48:21,240 --> 00:48:29,840
+assembly by hand, so yeah, so that layer doesn't exist.
+
+659
+00:48:29,840 --> 00:48:43,160
+It's interesting to think about, as we think about general AI and the path to getting towards
+
+660
+00:48:43,160 --> 00:48:52,680
+it, to having an existence, a totally generalized AI, yeah, I think we think about a lot of things,
+
+661
+00:48:52,680 --> 00:48:57,080
+but I'm not sure that in that conversation, at least I've not heard it explicitly called
+
+662
+00:48:57,080 --> 00:49:03,040
+out, in order to do that, this system is going to have to be on the cloud, it's going to
+
+663
+00:49:03,040 --> 00:49:08,480
+have to be massive, it's going to have to be trained on massive amounts of data, it's
+
+664
+00:49:08,480 --> 00:49:12,120
+probably not going to be, well, there's certainly a lot of algorithmic work that needs to
+
+665
+00:49:12,120 --> 00:49:17,240
+be done, and lots of other types of work that to be done, data, data management, et cetera,
+
+666
+00:49:17,240 --> 00:49:24,920
+but there are huge systems problems, fundamental systems problems that we're so far from solving.
+
+667
+00:49:24,920 --> 00:49:31,320
+Yeah, so that's why I was trying to say it's kind of trying to wake up call or whatever.
+
+668
+00:49:31,320 --> 00:49:36,360
+I think one of the problems also is we as a research community have done a fairly bad
+
+669
+00:49:36,360 --> 00:49:43,000
+job of having massive amount of publicly available data set, the only big publicly available
+
+670
+00:49:43,000 --> 00:49:49,240
+data set is ImageNet, and the architectures to do well on ImageNet are actually fairly simple.
+
+671
+00:49:50,120 --> 00:49:55,720
+We know how to run them fast, very fast, in fact, I mean, I would not be surprised if ImageNet
+
+672
+00:49:55,720 --> 00:50:00,680
+like networks get embedded in an ASIC and be available in your form and your camera and whatnot.
+
+673
+00:50:00,680 --> 00:50:07,480
+Right. But a lot of the problems that we deal with in speech generation and speech synthesis
+
+674
+00:50:07,480 --> 00:50:13,080
+or speech recognition in language understanding, there are no public data sets. I mean,
+
+675
+00:50:13,080 --> 00:50:19,240
+there are no public data sets that are big. So people do, we look at the research that happens
+
+676
+00:50:19,240 --> 00:50:25,560
+in network architecture exploration, if you look at the papers that come out in ICLR or ICML
+
+677
+00:50:25,560 --> 00:50:30,680
+and NIPs, they are all working on really small data sets, so they don't face the challenge of scale.
+
+678
+00:50:30,680 --> 00:50:34,360
+And I don't blame them, it's not that they're doing it purposefully, just just no data.
+
+679
+00:50:35,000 --> 00:50:41,960
+I mean, yeah, so that's also, I think, is a challenge that I didn't talk about in that talk
+
+680
+00:50:41,960 --> 00:50:47,000
+itself because it wasn't the right thing, but this I feel is a really big challenge that we don't
+
+681
+00:50:47,000 --> 00:50:52,840
+really have good, large, publicly available data sets for stuff that's not ImageNet.
+
+682
+00:50:52,840 --> 00:50:59,560
+Because if you are thinking about AGI or whatever, we need a lot of publicly available data
+
+683
+00:51:00,200 --> 00:51:04,440
+where we can actually scale. Unless we come up with algorithms that will work at small scale,
+
+684
+00:51:04,440 --> 00:51:11,960
+which people are working on that too, but we haven't made as much progress as we have in other fields.
+
+685
+00:51:13,560 --> 00:51:22,040
+I've heard this, someone described this problem to me as the industry having overfitted
+
+686
+00:51:22,040 --> 00:51:28,760
+on ImageNet and some of these other data sets. I totally tell that. I mean, I tell that to people
+
+687
+00:51:28,760 --> 00:51:33,640
+like whoever is willing to listen, that look, you're overfitting on ImageNet. I tell that to every
+
+688
+00:51:33,640 --> 00:51:37,720
+vendor we work with, they came up with like every, we work with a lot of different hardware vendors
+
+689
+00:51:37,720 --> 00:51:43,640
+and stuff. And they all come up with like all these results that look, we are XYZ fast on ImageNet
+
+690
+00:51:43,640 --> 00:51:50,680
+and like, we don't care. We just don't care, it's a solved problem. I mean, ImageNet is solved.
+
+691
+00:51:50,680 --> 00:51:55,400
+I mean, it just did. I mean, as I said, it's solved enough to the point that I expect to see it in A6.
+
+692
+00:51:56,440 --> 00:52:06,760
+Yeah. Yeah. Wow. So we are, we're getting close to the end of our hour, but I'd love to hear you
+
+693
+00:52:08,440 --> 00:52:12,920
+talk through, actually, I had one more question related to the separate talking about.
+
+694
+00:52:12,920 --> 00:52:21,000
+So all of these system things that we're describing has what's the best way to ask this question.
+
+695
+00:52:21,000 --> 00:52:28,360
+You have an HPC background, which is, you know, I think increasingly rare in the, you know,
+
+696
+00:52:28,360 --> 00:52:32,760
+the, in a world where people are coming up from kind of web-based architectures.
+
+697
+00:52:32,760 --> 00:52:39,240
+Yeah. Yeah. And I don't hear a lot about that in deep learning necessarily and machine learning.
+
+698
+00:52:39,240 --> 00:52:45,400
+Can you talk about how that kind of thinking is influenced what you've done and where you're
+
+699
+00:52:46,360 --> 00:52:54,600
+directly pulling from HPC? It's been a while since I've been involved in HPC community,
+
+700
+00:52:54,600 --> 00:52:59,960
+but does it lead you, for example, to use like Infiniband and some of the exotic HPC stuff,
+
+701
+00:52:59,960 --> 00:53:05,080
+or how does it influence you? Oh, yes. I mean, Infiniband is not exotic in our world.
+
+702
+00:53:05,080 --> 00:53:11,400
+It's, it's pretty standard. I mean, when we first started building stuff,
+
+703
+00:53:12,200 --> 00:53:19,240
+we started using Infiniband. So the HPC kind of thing is, as I said, as efficiency and speed
+
+704
+00:53:19,240 --> 00:53:24,200
+of light is extremely important to us. So, as I said, the first thing we think about is how
+
+705
+00:53:24,200 --> 00:53:29,800
+efficient we are in terms of the processor flops. So if the processor is, say, as I said,
+
+706
+00:53:29,800 --> 00:53:36,120
+six terraflops or seven terraflops, how close to that number can we get over a period of time?
+
+707
+00:53:36,120 --> 00:53:41,160
+I mean, it just doesn't have to be bursty. So if you say that, oh, I can reach seven terraflops,
+
+708
+00:53:41,160 --> 00:53:45,800
+but I can only reach it for like, I don't know, two seconds while my whole application takes two hours.
+
+709
+00:53:45,800 --> 00:53:53,800
+That's no good. So how much can you sustain over the entirety of an application runtime?
+
+710
+00:53:53,800 --> 00:54:00,280
+Right. Which in, as I said, in our example, isn't many weeks. So that's, I think, the driving kind of
+
+711
+00:54:00,280 --> 00:54:06,920
+HPC thought is how efficient can I get? And when you think about efficiency, you tend to build systems
+
+712
+00:54:06,920 --> 00:54:11,720
+that are what I call our tightly coupled, which means, you know, a loosely coupled system is kind
+
+713
+00:54:11,720 --> 00:54:18,520
+of a web style system, right? You have this one, you blades are connected by probably a gigabit
+
+714
+00:54:18,520 --> 00:54:25,240
+Ethernet or maybe 10 gig, I don't know, I think it's still gigabit. But we build like really fat
+
+715
+00:54:25,240 --> 00:54:30,280
+nodes, like each of our node is like eight GPUs in it because we want this computing elements.
+
+716
+00:54:30,280 --> 00:54:35,240
+If you think of a GPU as a computing element, we want them to be as close together as possible
+
+717
+00:54:35,240 --> 00:54:40,200
+because we know that, you know, there's a fundamental physical limit on how fast you can move
+
+718
+00:54:40,200 --> 00:54:45,960
+electrons over a wire. So if you want to move stuff fast, you want the wire to be very close to
+
+719
+00:54:45,960 --> 00:54:52,360
+each other, similarly with infinity band. So, um, infinity band, we have like infinity band switches
+
+720
+00:54:52,360 --> 00:54:58,120
+in our rack. So we don't have many racks. Um, but each of our rack is pushing like 30 kilowatt,
+
+721
+00:54:58,920 --> 00:55:06,360
+of, of power. And then typical, you know, data center rack in Google, um, Facebook or even us,
+
+722
+00:55:06,360 --> 00:55:10,840
+I mean, our webst, I mean, we have huge data centers in China for web style workloads.
+
+723
+00:55:10,840 --> 00:55:17,320
+Um, they're like at less than 10 kilowatts. Right. So it's a very different kind of mindset,
+
+724
+00:55:17,320 --> 00:55:22,920
+which is a mindset that, okay, I need to push, you know, orders of exoflops. So if I have to push
+
+725
+00:55:22,920 --> 00:55:29,560
+orders of exoflops, I need to be maximally efficient on, uh, on my system and I have to build
+
+726
+00:55:29,560 --> 00:55:36,040
+system that have very, uh, small distances to transfer data, like really short wire distances.
+
+727
+00:55:36,040 --> 00:55:42,520
+So you tend to build what I call fat nodes that are, we're very closely connected, uh, to each
+
+728
+00:55:42,520 --> 00:55:47,480
+other using, um, in usually infinity band or, you know, Ethernet is also catching up, but there's
+
+729
+00:55:47,480 --> 00:55:53,000
+also like, uh, also telling somebody that I would like to see more research in interconnects,
+
+730
+00:55:53,000 --> 00:55:58,280
+because low latency interconnect is becoming really important with deep learning. And you see,
+
+731
+00:55:58,840 --> 00:56:03,480
+research in that with, um, uh, not only from infinity band, from melanox, with also the
+
+732
+00:56:03,480 --> 00:56:10,040
+mandeling from, uh, Nvidia and then omnipad from Intel. And I think, uh, we will see more and more
+
+733
+00:56:10,040 --> 00:56:14,120
+of these low latency interconnects, uh, for workloads like deep learning.
+
+734
+00:56:14,920 --> 00:56:23,080
+Hmm. Great. Great. Uh, so you tell me, uh, based on your time, do we have time to run through?
+
+735
+00:56:23,080 --> 00:56:34,040
+Yeah, yeah. Ladies and GPU and, um, okay. Awesome. Yeah. So, you know, maybe we should start with, uh, you
+
+736
+00:56:34,040 --> 00:56:41,800
+know, the, at the highest level, the evolution that you've seen and how folks are applying GPUs to
+
+737
+00:56:41,800 --> 00:56:50,360
+these types of workloads, why they're important, um, you know, frameworks, uh, QDNN, I can only
+
+738
+00:56:50,360 --> 00:56:54,680
+assume is related to the, the kuda stuff that you were working on. Like, how does all that
+
+739
+00:56:54,680 --> 00:57:02,520
+stuff fit together? Um, so it, in some sense, uh, you know, deep learning is a, is a problem area that
+
+740
+00:57:02,520 --> 00:57:07,960
+is, is squarely in the comfort zone of the GPU, because if you look at the fundamental operation
+
+741
+00:57:07,960 --> 00:57:15,560
+in deep learning, uh, it is a major regular matrix matrix map. And if you look at graphics,
+
+742
+00:57:15,560 --> 00:57:21,640
+it is also regular matrix map. And it's smaller matrices, but, but, uh, but it's also matrix
+
+743
+00:57:21,640 --> 00:57:27,000
+map. So if you have dense matrix algebra, um, which is what essentially deep learning is, almost
+
+744
+00:57:27,000 --> 00:57:32,120
+every operation and deep learning is a dense matrix map, it's squarely in the comfort zone of the
+
+745
+00:57:32,120 --> 00:57:39,640
+GPU. And that is why GPUs are doing so well in this space. Um, and then toolkits like QDNN is
+
+746
+00:57:39,640 --> 00:57:45,800
+essentially taking, uh, things like this special convolutions. I mean, a convolution is in some
+
+747
+00:57:45,800 --> 00:57:51,800
+sense a dense matrix map, which is what, how kudianN does it? Um, so what kudianN is doing is taking
+
+748
+00:57:51,800 --> 00:57:57,960
+the special kind of convolutions that can be in four dimensions, um, that is used in deep learning
+
+749
+00:57:57,960 --> 00:58:02,520
+and putting it in a library, which is exactly the right thing to do. Um, because they're different
+
+750
+00:58:02,520 --> 00:58:09,160
+from the convolutions that's used in say traditional, uh, vision or traditional, um, graphics or so.
+
+751
+00:58:09,160 --> 00:58:14,920
+So these are special kind in that sense. Um, and then what kudianN is doing is also kind of moving
+
+752
+00:58:14,920 --> 00:58:21,560
+up the stack. For example, now kudianN has, um, a GRE implementation, for example, a batch norm
+
+753
+00:58:21,560 --> 00:58:25,560
+implementations. In some sense, I think kudianN is going to do a pivot and change its name because
+
+754
+00:58:26,360 --> 00:58:32,440
+it does, it does a lot more than just, um, convolutions and stuff that's used in image net.
+
+755
+00:58:32,440 --> 00:58:37,320
+There's a more and more they're putting in stuff, um, that's used in, uh, recurrent nets. And then
+
+756
+00:58:37,320 --> 00:58:45,880
+you have these, uh, frameworks like TensorFlow and PyTorch and, uh, MxNet and Tiano, um, and many more
+
+757
+00:58:45,880 --> 00:58:52,440
+who, uh, they're probably 20 odd frameworks, uh, that layer over, uh, these frameworks like kudianN,
+
+758
+00:58:52,440 --> 00:59:00,920
+like mkldnN that I think intel has. Um, and then what these frameworks are doing is let's you, um,
+
+759
+00:59:00,920 --> 00:59:08,840
+kind of very easily, uh, specify this network architectures, like an image net or a wave net or
+
+760
+00:59:08,840 --> 00:59:15,400
+a bite net or a intentional net or a recurrent net. Um, uh, and you can think of each one of the, um,
+
+761
+00:59:15,400 --> 00:59:21,000
+the nodes in these networks as something as a call into kudianN in some sense.
+
+762
+00:59:21,000 --> 00:59:26,360
+Okay. Um, and they're all in python because python has kind of become the defect to, um, kind of
+
+763
+00:59:26,360 --> 00:59:36,440
+language in the AI world or the DL world. So, so kuda itself is the API for programming the GPUs,
+
+764
+00:59:36,440 --> 00:59:41,400
+basically. Yeah. So kuda is both, uh, kuda is a big thing. I mean, different people think of kuda's
+
+765
+00:59:41,400 --> 00:59:46,760
+different thing ways. Um, kuda is also language in some sense. Okay. Um, it's got a little bit of
+
+766
+00:59:46,760 --> 00:59:53,320
+its own syntax. It's very much like cc++, uh, and a little bit more syntax. Um, so kuda is a whole
+
+767
+00:59:53,320 --> 01:00:00,360
+like you can, uh, so you use that and it also has a bunch of API calls that you call into the GPU.
+
+768
+01:00:00,360 --> 01:00:07,000
+So it's both like a programming framework as API and also this language itself, uh, for programming
+
+769
+01:00:07,000 --> 01:00:14,680
+the GPUs. Yeah. Okay. Okay. And then kudianN sits on top of that, uh, to provide higher level, uh,
+
+770
+01:00:14,680 --> 01:00:20,920
+primitives for programming deep neural nets. And then the frameworks, uh,
+
+771
+01:00:20,920 --> 01:00:26,520
+uh, tors, Deano, TensorFlow sit on top of that. Yep. That's exactly right. Okay. And kudianN is
+
+772
+01:00:26,520 --> 01:00:31,400
+written, could be written as in kuda, definitely written as in kuda. You can also, I mean, for, uh,
+
+773
+01:00:31,400 --> 01:00:35,320
+spiss reasons of speed, you can even write an assembly, which they might have done, but yeah,
+
+774
+01:00:35,320 --> 01:00:41,000
+that's the right picture to have in mind. It's kuda, kudianN framework. Yeah. Going from bottom to top.
+
+775
+01:00:41,000 --> 01:00:47,720
+Okay. And so where do you see the, what do you see things going on the hardware side? Um,
+
+776
+01:00:47,720 --> 01:00:54,040
+you know, Intel is trying to, uh, work on some things. Um, the Google has their tensor processing
+
+777
+01:00:54,040 --> 01:01:01,560
+unit. Um, how do you see how do you see all that's evolving? Yeah. That's a little bit of a hard
+
+778
+01:01:01,560 --> 01:01:07,080
+question to answer, but it's the future. The future is kind of unclear in some sense. I mean,
+
+779
+01:01:07,080 --> 01:01:13,160
+the sense that, uh, the network architectures are evolving so fast that it's kind of hard for
+
+780
+01:01:13,160 --> 01:01:19,160
+the processors to kind of keep up. Um, so far, what has happened is, you know, everything is
+
+781
+01:01:19,160 --> 01:01:26,520
+this nice matrix multiply thing that works really well on GPUs, but we do have, um, networks
+
+782
+01:01:27,320 --> 01:01:32,040
+that are actually pretty hard to do on GPUs. For example, WaveNet is one such network.
+
+783
+01:01:33,400 --> 01:01:39,480
+So I think for the, the chip meant, I mean, ideally you want both to like,
+
+784
+01:01:39,480 --> 01:01:44,440
+co evolve like the hardware architecture would evolve with the network architecture,
+
+785
+01:01:45,000 --> 01:01:50,440
+but the problem is, um, it's very easy for me to come up with a very interesting looking
+
+786
+01:01:50,440 --> 01:01:56,520
+network, um, using TensorFlow, but it's all, it's very hard to build hardware. Uh, building
+
+787
+01:01:56,520 --> 01:02:04,200
+hardware is this incredibly, um, you know, in resource intensive, money intensive, uh, process.
+
+788
+01:02:04,200 --> 01:02:10,600
+Um, so it's a little bit hard to see where the hardware is going to evolve. I think the way
+
+789
+01:02:10,600 --> 01:02:15,400
+Nvidia and Intel are approaching the problem is, okay, let's just make it fast for, uh,
+
+790
+01:02:15,400 --> 01:02:20,760
+matrixes of some sizes. And we have this benchmark out called deep bench, which tells what
+
+791
+01:02:20,760 --> 01:02:27,640
+matrix sizes it should be for some of, uh, our networks. And then Google has, uh, developed
+
+792
+01:02:27,640 --> 01:02:32,360
+TensorFlow, which it's not a lot of details out, but what I suspect it is is more towards inference.
+
+793
+01:02:32,360 --> 01:02:38,840
+And doing very low power inference, but not so much for training, uh, for some specific models.
+
+794
+01:02:38,840 --> 01:02:43,320
+So you could know that I was saying that as networks like Google net and things like that
+
+795
+01:02:43,320 --> 01:02:47,400
+mature, you'll probably see them burnt into a sick and then shipped in a phone or a camera or
+
+796
+01:02:47,400 --> 01:02:53,320
+wherever you're doing some kind of image or object segmentation. Um, so yeah, I think people
+
+797
+01:02:53,320 --> 01:02:58,120
+are kind of just hedging their bets and trying to see how the networks are going to mature. And
+
+798
+01:02:58,120 --> 01:03:02,920
+it kind of affects both ways because I won't make a network, I won't come up to the network that
+
+799
+01:03:02,920 --> 01:03:10,600
+is not efficient on any processor that I can run on. Right, right. So you have no incentive to
+
+800
+01:03:10,600 --> 01:03:15,320
+push to envelope, uh, for the hardware folks and the hardware folks have no incentives to push to
+
+801
+01:03:15,320 --> 01:03:19,640
+envelope because they don't have any networks to run on their stuff. Right. So like, uh, I wouldn't
+
+802
+01:03:19,640 --> 01:03:23,800
+say no incentive, but I would say they're both looking at each other kind of rarely. Right,
+
+803
+01:03:23,800 --> 01:03:30,760
+right. Who's going to dump the billions into this science project? Yeah. Exactly. Yeah.
+
+804
+01:03:30,760 --> 01:03:35,000
+It's an interesting spot to be in. Yeah. I mean, it's going to cost billions. I mean, let's not
+
+805
+01:03:35,000 --> 01:03:40,360
+get ourself. I mean, you know, that that's where it costs to build like fabs and yeah, all of that
+
+806
+01:03:40,360 --> 01:03:48,360
+stuff. Yeah. Um, and one of the issues that comes up, uh, at least in, you know, Intel talking about
+
+807
+01:03:48,360 --> 01:03:55,720
+uh, uh, night's bridge and their advanced processors that are trying to solve this problem or at least,
+
+808
+01:03:55,720 --> 01:04:02,920
+um, you know, cut off and video at the past is the issue of floating point versus in eight.
+
+809
+01:04:02,920 --> 01:04:07,480
+Like, can you kind of talk through what that's all about? Yeah. So reduced precision is this
+
+810
+01:04:07,480 --> 01:04:12,680
+really interesting thing. And this is also why I feel the industry is optimizing towards Google net.
+
+811
+01:04:12,680 --> 01:04:19,320
+So what? Yeah. We have been trying to do reduced precision for two and a half years.
+
+812
+01:04:19,880 --> 01:04:25,240
+And doing reduced precision, like, which is what Intel is instead of say float 32 for
+
+813
+01:04:25,240 --> 01:04:32,840
+recurrent nets like speech is incredibly hard. Uh, we have it is incredibly hard. So I thought,
+
+814
+01:04:32,840 --> 01:04:43,240
+yeah, just to jump in here. Um, what I had envisioned this as a simplification of the chip that
+
+815
+01:04:43,240 --> 01:04:52,680
+allows Intel, for example, to stuff more, uh, you know, to make a, a given silicon die able to
+
+816
+01:04:52,680 --> 01:04:57,960
+do more math. I hadn't really thought of it as something that's harder. You're basically float 32
+
+817
+01:04:57,960 --> 01:05:06,600
+is your 32 bit floating point. Uh, yeah. So what, when I say hard, I mean, um, uh, getting it.
+
+818
+01:05:06,600 --> 01:05:12,600
+So if I say a train a network in reduced positions in float 16 or in data in software 32, uh,
+
+819
+01:05:12,600 --> 01:05:19,080
+that network will not perform in terms of accuracy as well as a float network trained in float 32.
+
+820
+01:05:19,080 --> 01:05:25,000
+That's what I meant. Um, so if, if I have chips that, you know, can only do reduced precision,
+
+821
+01:05:25,000 --> 01:05:31,000
+then it doesn't help me at all because my models don't perform well. And why is that I was under
+
+822
+01:05:31,000 --> 01:05:37,480
+the impression that the reason why in eight was great, we're using integers was great was because
+
+823
+01:05:37,480 --> 01:05:42,440
+the networks themselves don't inherently take advantage of floating point. Is that, I guess that
+
+824
+01:05:42,440 --> 01:05:48,680
+doesn't really make sense, right? That only makes sense in the Google net world. This is why I
+
+825
+01:05:48,680 --> 01:05:58,920
+does. Yeah. Uh, it does not so far has made sense in, in recurrent nets. Um, we may be seeing some
+
+826
+01:05:58,920 --> 01:06:04,760
+light at the end of the tunnel very early days. Uh, recurrent nets for speech, I feel are some
+
+827
+01:06:04,760 --> 01:06:10,360
+of the hardest networks you can train. Uh, they're very, very hard to train. Uh, in float 32,
+
+828
+01:06:10,360 --> 01:06:14,120
+we have figured out quite well, but we have been trying for at least two and a half years to do
+
+829
+01:06:14,120 --> 01:06:20,600
+a reduced precision. Um, and we have not been able to do it. And when I say have not been able to do
+
+830
+01:06:20,600 --> 01:06:26,520
+it, what I mean is the models we train using reduced precision is not as good as the models we train
+
+831
+01:06:26,520 --> 01:06:31,800
+is in float 32. Uh, and if it's not as good, I'm not going to deploy. I mean, right, right.
+
+832
+01:06:32,840 --> 01:06:39,560
+So that's, that's, I think reduced precision is another case of the industry, um, optimizing on
+
+833
+01:06:39,560 --> 01:06:45,560
+Google map, um, which, which may be fine because they might have customers, uh, all they want is
+
+834
+01:06:45,560 --> 01:06:50,760
+object detection, say automated driving, for example, object detection, object segmentation. So
+
+835
+01:06:50,760 --> 01:06:57,640
+they have a market where they can sell these chips and, um, but, uh, it's not appropriate for
+
+836
+01:06:57,640 --> 01:07:01,800
+all neural nets, especially not recurrent neural nets yet. I mean, we might able to figure out
+
+837
+01:07:01,800 --> 01:07:08,600
+how to do it, but we're not there yet. And so I can make sure I understand, um, when we're talking
+
+838
+01:07:08,600 --> 01:07:17,720
+about training, uh, network and float 32 versus N8 is the issue or it is the issue that, uh,
+
+839
+01:07:17,720 --> 01:07:23,880
+between the neurons in our neural network, we've got, you know, these weights and the weights are,
+
+840
+01:07:23,880 --> 01:07:29,000
+you know, multiplied by states to give us outputs. Is it that the weights are integers versus
+
+841
+01:07:29,000 --> 01:07:33,880
+floats and or the states are integers versus floats? So all that. So, yeah. So,
+
+842
+01:07:33,880 --> 01:07:39,240
+that's like, I mean, you, you have touched upon a very interesting thing. Like there are many
+
+843
+01:07:39,240 --> 01:07:44,680
+things in the neural net that you can choose to keep in low position. Do you want to keep the weights
+
+844
+01:07:44,680 --> 01:07:48,280
+in low position? Do you want to keep the intermediate state that you generate in low position?
+
+845
+01:07:48,280 --> 01:07:52,840
+Do you want to keep both in low precision? Uh-huh. But do you want to keep only the gradients in low
+
+846
+01:07:52,840 --> 01:07:59,000
+precision? I mean, there are many design choices you can make. Um, and there are,
+
+847
+01:07:59,000 --> 01:08:05,960
+uh, all kinds of funny, interesting, unexplainable results depending on what you choose to do when
+
+848
+01:08:05,960 --> 01:08:12,040
+we train these networks for speech. Uh, typically, uh, at the end of the training process, you spit
+
+849
+01:08:12,040 --> 01:08:17,320
+out a model, which is basically the weights. Um, so typically you just want the weights to be,
+
+850
+01:08:17,880 --> 01:08:23,320
+in low precision. But, uh, in recurrent nets, uh, the convergence is extremely sensitive
+
+851
+01:08:23,320 --> 01:08:28,040
+because you're doing this serial operation through time. Right. Uh, this is, this is extremely
+
+852
+01:08:28,040 --> 01:08:33,240
+sensitive floated floating point error. Um, to the point that if we take an algorithm and move
+
+853
+01:08:33,960 --> 01:08:39,560
+from CPU to GPU, the floating point mat is now floating point addition, uh, is not associated,
+
+854
+01:08:39,560 --> 01:08:43,480
+which means the sequence in which you do the addition. If it's different, you'll get a different
+
+855
+01:08:43,480 --> 01:08:48,920
+number. Um, so say, uh, you move an algorithm from CPU to GPU, you will get a slightly different
+
+856
+01:08:48,920 --> 01:08:54,360
+result. Uh-huh. And sometimes that can make and break a model. And that has happened with us
+
+857
+01:08:54,360 --> 01:09:02,360
+a few times. Um, yeah. So that that space is, I think, it's, uh, it's, it's, it's a field of research.
+
+858
+01:09:02,360 --> 01:09:08,040
+Like, how do we think of floating point in this new world of, uh, training neural nets? Um,
+
+859
+01:09:08,040 --> 01:09:12,680
+and I wish people who deal with this kind of stuff, like, uh, the floating point committee or
+
+860
+01:09:12,680 --> 01:09:21,160
+whatever, um, wouldn't research this more. And in terms of the, the architectures, the GPUs
+
+861
+01:09:21,160 --> 01:09:30,120
+are more optimized for the lower precision, uh, but they also do. Yeah. So typically GPUs have
+
+862
+01:09:30,120 --> 01:09:35,800
+only done float because that's what games and games don't need anything better or more than float.
+
+863
+01:09:35,800 --> 01:09:40,040
+Uh-huh. And then, then GPUs started getting used in oil and gas, for example,
+
+864
+01:09:40,680 --> 01:09:45,480
+oil and gas needs doubles, uh, for the different partial differential equations they're solving.
+
+865
+01:09:46,120 --> 01:09:50,360
+And then comes along deep learning. And deep learning is saying that I can do with float and for
+
+866
+01:09:50,360 --> 01:09:56,360
+things like Google net, I can get away with intake or float 16. Uh, so the GPUs are now starting
+
+867
+01:09:56,360 --> 01:10:02,840
+to support float 16 as well natively. Um, so that, so the, so the now the GPU vendors have to kind
+
+868
+01:10:02,840 --> 01:10:07,320
+of target three different markets, one which uses float and other which uses double and other,
+
+869
+01:10:07,320 --> 01:10:20,280
+a part of the market. Wow. Okay. So this has been super interesting. Uh, before we go,
+
+870
+01:10:20,280 --> 01:10:25,560
+anything, um, you know, what are you excited about? Anything that you're working on or anything
+
+871
+01:10:25,560 --> 01:10:31,080
+that, any asks for the community, the industry? Uh, how would you like to close us out?
+
+872
+01:10:32,040 --> 01:10:37,960
+Um, I, I am personally interested a lot in, in speech synthesis. I think, um, you know,
+
+873
+01:10:37,960 --> 01:10:44,520
+you can build really natural interfaces. You need, um, speech that sounds natural. Um,
+
+874
+01:10:45,240 --> 01:10:49,800
+we are far from there. Like that's why you have this robotic voice that talks to you for
+
+875
+01:10:49,800 --> 01:10:55,560
+various devices. I think there's a lot of research to be done on very natural sounding, um,
+
+876
+01:10:55,560 --> 01:11:01,400
+speech from all these devices that interact with voice. And, and, and going far out, I mean,
+
+877
+01:11:01,400 --> 01:11:06,040
+I would really like to see like, you know, a conversation being a first class UI element with
+
+878
+01:11:06,040 --> 01:11:12,200
+all the devices that we use. Right. Because as I said, conversation is our UI. Um, that'll be,
+
+879
+01:11:12,200 --> 01:11:16,680
+uh, incredibly nice if we see it and say the next five years or so, it's challenging. It's going
+
+880
+01:11:16,680 --> 01:11:24,520
+to be very challenging. Um, so that's kind of my, my dream in some sense. And, and in the shorter
+
+881
+01:11:24,520 --> 01:11:28,920
+term, of course, the systems, uh, goals that I talked about, like this kind of a middleware or
+
+882
+01:11:28,920 --> 01:11:34,440
+middle ground where we take these graph transformation. And starting to happen a little bit,
+
+883
+01:11:34,440 --> 01:11:38,760
+TensorFlow has this thing called the XLA, uh, which is really, uh, kind of the first step in that
+
+884
+01:11:38,760 --> 01:11:43,000
+direction, the XLA compiler that came out with the TensorFlow one release that was last week,
+
+885
+01:11:43,000 --> 01:11:49,240
+I think. Yep. Um, so the, uh, yeah, so people are starting to take note. And hopefully we are,
+
+886
+01:11:49,240 --> 01:11:53,160
+they're not like five years ahead of it. Maybe things will get softer,
+
+887
+01:11:53,160 --> 01:12:01,880
+the next couple of years. Wow. Awesome. Well, Shubo, uh, how can folks find you online? How can they
+
+888
+01:12:01,880 --> 01:12:07,480
+follow the work that you're doing? Um, so the work that I do at Baidu, we have a website,
+
+889
+01:12:07,480 --> 01:12:14,440
+research at Baidu.com, where, um, let me see if I have the URL right. Um, uh, and a lot of the work
+
+890
+01:12:14,440 --> 01:12:20,200
+is there. Um, I'm, you know, I'm very easily findable on LinkedIn, Shubo's and Gupta,
+
+891
+01:12:20,200 --> 01:12:28,120
+S H U B H O and S E N G U P T A. Um, yeah, I'm happy for people to get in touch with me,
+
+892
+01:12:28,120 --> 01:12:32,760
+ask me questions, whatever, I'd be happy to elaborate. And thank you for your,
+
+893
+01:12:32,760 --> 01:12:36,920
+thank you for your time and this platform. Awesome. Well, thank you so much. I really
+
+894
+01:12:36,920 --> 01:12:41,800
+appreciate you taking the time to join, uh, join in the show and I really enjoyed the discussion.
+
+895
+01:12:42,360 --> 01:12:44,760
+Yeah, me too. Thank you. Thanks. Bye.
+
+896
+01:12:48,600 --> 01:12:54,040
+All right, everyone. That's our show for today. Thanks again to Shubo for an amazing conversation.
+
+897
+01:12:54,040 --> 01:12:59,640
+I hope you all enjoyed it. Once again, thanks so much for listening and for your continued support.
+
+898
+01:13:00,280 --> 01:13:05,080
+Please remember that we want to hear from you. You can comment on the show via the show notes page,
+
+899
+01:13:05,080 --> 01:13:12,440
+via the at Twomlai Twitter handle or my own at Sam Charrington handle via our new Facebook and
+
+900
+01:13:12,440 --> 01:13:19,720
+YouTube pages or just good old fashioned email to Sam at Twomlai.com. Your likes and subscriptions
+
+901
+01:13:19,720 --> 01:13:26,920
+really help support the show. So keep them coming. The notes for this show will be up on Twomlai.com
+
+902
+01:13:26,920 --> 01:13:33,720
+slash top slash 14 where you'll find links to Shubo and the various resources mentioned in the show.
+
+903
+01:13:33,720 --> 01:13:37,240
+Thanks so much for listening and catch you next time.
+

@@ -1,0 +1,410 @@
+Hello and welcome to another episode of Twimble Talk, the podcast where I interview interesting
+people doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington.
+This show you are about to hear as part of a series of shows recorded in San Francisco
+at the Artificial Intelligence Conference, which was hosted by our friends at O'Reilly
+in Intel Nirvana.
+In addition to their support for the event itself, Intel Nirvana is also our sponsor for this
+series of podcasts from the event.
+A huge thanks to them for their continued support of this show.
+Make sure you check out my interview with Navine Rao, VP and GM of Intel's AI products
+group, and Scott Appland, director of Intel's developer network, which you can find at
+twimbleai.com slash talk slash 51.
+At the AI conference, Intel Nirvana announced DevCloud, a cloud hosted hardware and software
+platform for learning, sandboxing and accelerating the development of AI solutions.
+The DevCloud will be available to 200,000 developers, researchers, academics and startups
+via the Intel Nirvana AI Academy this month.
+For more information on the DevCloud or the AI Academy, visit intelnervana.com slash
+DevCloud.
+In this episode, I talk with Ian Stoika, professor of computer science and director of the
+RISE lab at UC Berkeley.
+Ian joined us after he gave his talk, building reinforcement learning applications with Ray.
+We dive into Ray, a new distributed computing platform for RL, as well as RL generally,
+along with some of the other projects the RISE lab is working on, like Clipper and Tigra.
+This was a pretty interesting talk.
+Enjoy.
+Alright everyone, I'm here at the AI conference, presented by O'Reilly and Intel Nirvana,
+and I've got the pleasure of being seated with Ian Stoika.
+Ian is the executive chairman and co-founder of Databricks, and also a professor
+at Berkeley and director of the RISE lab.
+Ian, welcome to this weekend machine learning in AI.
+Thank you.
+Thanks for having me.
+Absolutely.
+So why don't we get started by having you tell us a little bit about your background,
+how you got interested in machine learning and what your area of research interest is?
+I joined Berkeley in 2001, and at that time I was actually doing networking, and then
+I moved around and did a little bit of peer-to-peer systems, and then started working on big
+data.
+On big data, in the context of another lab at Berkeley called Amplab, we developed a few
+systems, including Apache Spark, Apache Mesos, and Alusio, formerly known as Stachion.
+Basically, what happens is that we develop these systems because people get more and
+more data and organizations ingest more and more data, and then once they have the data
+whether it's user logs, machine logs, or any other data, they try to make sense of this
+data.
+They get to try to get some insights.
+So Apache Spark was an effort to process large scales this kind of data.
+Now also in the context of the Apache Spark, you look at what people do after they get
+some insights of the data, they want to make some decisions to take some actions based
+on the data, to improve our targeting, to do medical diagnosis, and things like that.
+So now the next step again in getting value out of the data is basically applying AI, machine
+learning to get intelligent, actionable decisions.
+That's why I am now doing that research in the context of systems and machine learning
+and AI.
+And as part of that, we just started this new lab at Berkeley called Rise, where Rise stands
+for real-time intelligence and secure execution, and this lab is about building systems
+and tools and algorithms to support applications which make real-time decisions on live data with
+strong security.
+Okay.
+And in fact, that's one of the areas that Spark really distinguished itself in that real-time,
+streaming, interactive decision-making, at least relative to Hadoop, which was kind
+of the incumbent system at the time.
+Yes.
+Yes.
+Definitely.
+So the truth, Spark was compared with, at that time, when we created it, compared with
+MapReduce, provide great support for interactive queries, iterative computation like machine learning
+algorithms, and later for streaming.
+So right now, going forward, one big angle we are focusing on is security.
+So everyone wants to take and to make personalized decisions.
+Right.
+So the question here, how can you make personalized decisions without violating the confidentiality
+of the users, while preserving the confidentiality of the users?
+Okay.
+So this is one big challenge.
+The other aspect is about, for instance, when you create this, with Spark, you create
+these models using deep learning or many other approaches, machine learning approaches,
+but this model eventually, you are going to serve that model.
+Right?
+So the users, you know, when the users contact you, the user make a query, look at the recommendation,
+you get, you give back the inference part, it's a inference part, it's a give back right
+answer.
+So another direction is focusing on building this kind of prediction serving or model serving
+systems.
+And another direction is that, you know, when you look at the new generation of this machine
+learning applications, like for round-dream enforcement learning, they have different patterns.
+They do a lot of very small simulations, and you know, we build also systems for that,
+which are a better fit for this kind of very fine-grained computations.
+Okay.
+And here at the conference, you were talking about Ray, which is one of the systems that
+you built.
+I was talking about Ray, which is in this category.
+So think about Ray, is the ability to execute a lot of fine-grained tasks, which are dynamically
+connected, dynamically depend from each other, like tasks of milliseconds, takes only milliseconds.
+So you can be, you can run millions of this task per second, so it's very fine-grained.
+And each of these tasks can be simulation, like simulations you play a game, right?
+You move, you know, simulate the moves of the pieces, and then you see whether you own
+or you lost, right?
+And one of the workloads is reinforcement learning, which reinforcement learning, you can see
+something like a generalization of supervised learning in which the labels of the action
+you make is sparse, as sparse, not every action has a label, it's good or bad.
+Like for instance, when you play a game, when you make a move, you don't necessarily know
+whether this move is great.
+You need to wait until the end of the game, maybe to see whether it's good or bad.
+Also the feedback is delayed, right?
+In supervised learning, in many times you know whether I show you some picture and you
+give me, say, this is a cat or a dog, I know instantly whether it's good or bad.
+And also it's about reinforcement learning, it's also assumed that you interact with
+the environment continuously and you change the environment, right?
+Like with, again, with playing games, self-driving cars or dialogue systems, right?
+This is a dialogue, right, and you need to, it's continuously interacting and building
+the context about our conversations and based your next actions, you know, next answers
+and questions based on this context, right?
+So that's basically, it is, and this reinforcement learning in many, one of the workload characteristics
+all requires to handle this very small fine grain simulation.
+Okay, so, yeah, we've actually talked about reinforcement learning on the podcast quite
+a bit.
+We've had Peter Avil and Sergei B.
+Yeah, yeah.
+That is an expert, I'm not sure how they cannot do that.
+Well, you know, so what the question that comes up for me is, how does Ray compare to an
+environment like OpenAI Gym or OpenAI Universe that are used also in context of reinforcement
+learning?
+It's very complementar, the OpenAI Gym and they provide you with virtual worlds, right,
+and so forth, the simulators, the Ray which provides you with a plumbing to execute those
+simulations and to get the results and to update the policies that is mapping between
+the state of the environment or the observation of the environment and the action you are
+going to take at large scale.
+So, is it too simple to say that Ray is like a dupe for reinforcement learning, it sounds
+like you've got a bunch of tasks or you're less than about a cluster and then mapping
+the results back?
+Yeah, you can say that in the first approximation and then you take the results and you update
+the policy.
+Right, right.
+And then you repeat until the policy, you're happy with the policy, the policy converges.
+Right, right.
+So, you mentioned this attribution problem, right, you're playing this game, you've got
+this reinforcement, this learner that's involved in this environment, a game, for example.
+And you can't really know whether it's action, you know, is positive or negative until
+much later on.
+If you don't know the ultimate benefit, how do then do you gain any knowledge from these
+micro simulations that you've been describing?
+Yeah, because a simulation each game, it's, you take some actions after each action, you
+have a state which is a modified state of the environment and eventually you have a reward.
+With sometimes you do not know whether the reward can be zero, you don't know it's good
+or bad, right?
+Right.
+And after you take, according to the current policy, you are going, which again, you fill
+the state, takes the action, you get the next state and the reward, you feed again the
+policy, you get the next action and so forth.
+So, you get these trajectories, which is a succession of states and rewards.
+So, now, eventually at the end, you are going to see whether you achieve your task or
+not, whether you want the game or you lost the game.
+If it's a robot, whether the task say you're moving on objects or a successful or not,
+right, or solving a puzzle, right?
+So then, once at the end, you, for instance, see that eventually see whether you're successful
+or not, then if you are successful at a very high level, you are going to go back and
+reinforce all these actions you've taken, meaning, reinforcing, meaning that next time
+when you try, after you update the policy, it's a higher chance to take these actions.
+If the actions led you to say, losing a game, then you are going to weaken these actions.
+You make them less likely to be taken when you are in a similar situation.
+That's basically what it is.
+It's like humans, right?
+It's like you play a game and so forth, and if you own, it's likely that you are going
+to repeat some of the kind of moves you might.
+If I'm playing Tik Tok To, the opening move is always in the middle.
+That's very true.
+I imagine a big part of what it's, or at least one part of what it's trying to do is,
+and this is also, in a lot of ways, a dupe-like, is managing the state because you're shuffling
+state for all of these little simulations that you're running all the time.
+Human is a state as well.
+There is an object store, so you keep that state in the object store, so tasks which run
+on different nodes can have access to the state.
+You also try to provide full tolerance if the node fails, so you make sure that the
+computation still is going to make progress and doing that correctly.
+These are some of the issues you need to deal with.
+You were presenting on RAY specifically, so maybe what were some of the main points that
+you wanted to lead with the attendees that you're talking?
+Yes.
+I think the high level point is that right now, over the past 10 years, there has been
+a tremendous progress in AI, right?
+Many great applications.
+Right now, as we look forward, the application becomes more and more sophisticated.
+While most of the applications we develop so far were based on supervised or unsupervised
+learning, the new applications, we believe, they are going to be more and more
+based on reinforcement learning, and again, the reason is that the new applications are
+more about interacting with the environment, around them, learning from this interaction
+and affecting the environment.
+We talk about games, we talk about dialogue systems, but you can look, think about the
+health applications.
+You know, they're constantly monitoring you and then give you health services.
+How about the next level of detail, so you talk about the experience of using RAY or
+architecture?
+Yes.
+So basically, that's what I've started, but it's again, like you said, you know, for instance,
+if you do not have a feedback after each action, after each move, that means that the space
+you need to explore in terms of solution space is larger because I need to make a series
+of moves because I know it's good or bad, right?
+So more possibilities to go wrong, right?
+So that's one of the characteristics.
+The computation requirements are increasing, and that's why one way, if you cannot for simulations,
+that's a very good way to do because you can do the simulation fast.
+So now, like for instance, playing games or things like that, you do a lot of simulations,
+right?
+Even with robots, you try to simulate the physical world, right?
+Because you can learn much faster, right?
+So that's the key.
+So the key is basically, then, the computation pattern is basically saying, I have a policy,
+I'm going to evaluate the policy by running many simulations, right?
+And I'm going to feed in their outputs, these trajectories, right, what happened, and update
+the policy, and run again, right?
+So that's kind of, it's a pretty regular computation because different simulations they can take
+different amounts of time, like for instance, if you play a game of chess, I can lose in
+three moves, or it may take 60 moves to win, right?
+And you want to learn as soon as some of this simulation happen, you want to learn from
+them and update the policies.
+You don't want to, you know, if I run 100,000 simulations, evaluate the policy, I don't
+want to wait for all of them, right?
+So this is kind of a computation is more irregular.
+Also, the other thing is that, you know, many of these policies are implemented by neural
+networks, neural networks, which run on GPUs.
+So you want also to support more heterogeneous hardware, and also the kind of patterns, you
+are talking only about simulations, but then you want to search to be able to search the
+space, the solution space, and things like that.
+So you end up basically with a very fine grain computation graph, you want to execute on heterogeneous
+hardware.
+So that's what raised.
+So how it's really achieving that, it's using this in memory object store to share the
+data.
+So it's very fast on a single machine, you share memory.
+On the back end is a scheduling, where it totally distributes a scheduler.
+Each note can schedule locally, and then when it's overloaded or the inputs of the task
+are not available locally, it's only then it's going to contact a global scheduler.
+We also replicate the global scheduler, so we do a lot of these kind of things to try
+to scale and to have very high throughput.
+And finally, we also provide the bindings in Python.
+Why Python?
+Because most of the AI community develops in Python, and now it seems to be the most popular
+language.
+Right.
+Where Spark is Java and Scala, and also has binding, it was developed in Scala, so obviously
+has API in Scala, but also has in Java and Python.
+And Python actually is very popular API and of course SQL.
+I guess early on I had the impression that some of those early efforts with Python were
+kind of like second-class citizens, has it evolved to be more?
+We're not evolving.
+I think that a very large percentage of users use Python, so they're improving fast.
+So where is Ray on the maturity cycle?
+You know, it's still an early project.
+We had a first release a few months ago, we are going to have soon the second release,
+but it's still early, so we have just a few users.
+But we believe that going forward, this reinforcement learning will play a major role in the future
+of AI, and I think that the usage adoption of Ray will grow as well.
+What size environments have you tested?
+Oh, we tested these over hundreds of nodes, so we are at that level now.
+But it's again, maturity is not only about how scalable it is, there are vastness, and
+there's a kind of features you need, monitoring, and things like that, you need really to have
+to deploy something like Ray in production.
+Does Ray lend itself to being deployed in cloud environments?
+No.
+You can deploy equally like Spark and many others, you can deploy in the cloud or you can
+deploy on-prem.
+Okay.
+Does it work with Spark in any particular way?
+Of course, of course.
+What are the uses there?
+I mentioned about this object store, so actually for the object store, you use Apache
+Arrow.
+So it's easy to Apache Arrow to exchange the data between Spark and Ray.
+So Ray has a much lower level API, it's again, it's targeted for this particular reinforcement
+learning and distribute AI applications.
+Well Spark has a higher level and it's in general, it's very, very mature API, very easy
+to use when it comes to processing big amounts of data.
+And thinking about that API, what's the kind of fundamental unit of work, or the unit
+of work is a task.
+A task, so you can add a decorator on a task and basically that task will be your Android
+module.
+Okay.
+Moving from a task to reinforcement learner is all of that in user code or it is Ray provide
+any abstractions for reinforcement learning in particular.
+For reinforcement learning, right now, we are in the next release, we are going to add
+a new library of reinforcement learning algorithms.
+Okay.
+It will be a small library as the beginning, but we are going to implement, it's going
+to offer the implementation of some of the most common reinforcement learning algorithms
+and we'll take it from there.
+Okay.
+And so you will be able to kind of use that with the same decorator model, you decorate
+your task and then it will be, yeah, it will be some function calls, right?
+So it will be an idea.
+Okay.
+Great.
+Based on your experience with Spark, how do you see Ray evolving?
+So you know, it's very hard to predict, right?
+I mean, when we start this Spark, we never thought that he's going to become so popular
+and it depends a lot of things.
+So for us, for now is that we want to build as with Ray, we want to build a platform which
+allows us to speed up the research and the application in reinforcement learning.
+So that's our first goal.
+And it's again, we are talking about only us at Berkeley, but obviously across the board,
+you know, it's academia and industry.
+So that's kind of, you know, our goal.
+So your focus is on making a tool that helps accelerate research and if, you know, the
+Spark-like success comes and the Spark-like success comes, but, you know, your focus
+on the kind of the user problem is excellent, excellent.
+Are there any companies offering like commercial support for Ray?
+No, not yet.
+So early for that.
+There are some companies that are playing with it, but yeah, it's like I mentioned, in order
+for someone to put in production, it still has a little bit to go.
+Okay.
+You know, we are moving fast.
+It will take a bit of time.
+Yeah.
+Yeah.
+So you mentioned some other projects around security and other things.
+The projects all kind of tie together, like, can you think of like the Ryze Lab is creating
+this platform and the security thing, talks to Ray, talks to the next thing, or are they
+more or less?
+So there are a bunch of projects.
+I was actually surprised, like, you know, considering Ryze's relatively new lab, there
+were a huge number of projects on the website.
+Yes.
+Yes.
+We have quite a few people.
+Quite a few students.
+But it did start on this year, generally, officially at least.
+So we have a few other projects.
+Actually, there are some projects also, like you mentioned, you know, in the Spark-wise
+also about real-time and so forth, streaming.
+We have a few projects in the context of Spark.
+One is about accelerating and reducing the latency of streaming, called Rizl.
+And actually, there is a talk later today from Intel, which we collaborate with this platform
+big deal, which is experimenting with Rizl and they are going to present some results
+today.
+And then there is another project called Tegra, it's about how to process time-evolving
+graphs.
+So you know that Spark also has graphics, which is in graph frames, which are some libraries
+to provide graph processing.
+So Tegra takes that at the next level and basically saying that most of the systems today
+are processing static graphs.
+So you want to process the graphs as they change.
+And also, you want to be able to ask questions about past instances of the same graph.
+So what are your friends, you know, January 15th this year, right?
+And how are these friends changing over the former spirit, right, who are the new friends
+you got, who are the friends, you know, like, so this is the kind of questions you want
+to answer.
+The Tegra project tried to answer.
+On the security side, I would say it's one project called opaque.
+So opaque, it actually, it's again, it's like taking Spark SQL and making it more secure.
+What do I mean by that?
+You know, today there are solutions, you encrypt the data address, maybe in motion, but
+still they do not defend, for instance, if the operating system or other applications
+are compromised, right?
+So opaque uses, you know, new developments of hardware enclaves, which now is used by
+many companies, right?
+Also Apple is their Morrison announcement for this cheap, bionic chip right on the iPhone
+to run their neural network.
+But these enclaves basically defend the application, the code you run within the enclave, even
+if the operating system high-pipervisor are compromised.
+So basically we try, so zero, opaque is about providing Spark SQL, taking Spark SQL and
+providing Spark SQL functionality, but now it's secured against this kind of very strong
+attacks.
+By running in a hardware enclave, running part of it, like the operators running the hardware
+in place.
+Okay.
+Oh well.
+So, and the last one, maybe I want to, well, there are two and one.
+I want to mention one is Clipper, this is about prediction service, so there we develop
+this very modular architecture, so you can serve models which are developed with very different
+systems.
+Like, you know, of course, Spark, it will be actually probably the first prediction serving
+system which will provide native support for Spark models and develop in others, in many
+other frameworks like TensorFlow and others.
+So that's all that Clipper and the last one I want to mention is ground.
+So ground, it's about managing the metadata.
+This is one of very important problems, right?
+You have data which is generated and modified, you know, think about an enterprise, different
+source is different people.
+So it's about really tracking the metadata and answering, being able to answer the questions
+who create this data, where the data is coming from, who modifies the data, who do
+it is the data, and then on top of that, of course, you can have access control and authorization.
+So this is kind of a few projects we are working on.
+Ground makes me think a little bit of, like, it might be an interesting blockchain application.
+There's a blockchain application, there's another project which is based on blockchain
+which is doing about authorization, yes, it's called WAVE.
+WAVE?
+WAVE.
+Okay.
+Interesting.
+Great.
+Well, before we finish up, is there anything else that you'd like to leave listeners
+with?
+Well, I think you're very nice here, as far as this question says, I know you don't
+want to stay with this guy, hey, so I'll save something for the next time.
+Great.
+Well, thanks so much, Ian.
+It was a pleasure having you on the show.
+Thank you.
+Thank you.
+All right, everyone, that's our show for today.
+Thanks so much for listening, and of course, for your ongoing feedback and support.
+For more information on Ian, or any of the other topics covered in this episode, head
+on over to twimlai.com slash talk slash 55.
+For the rest of this series, head over to twimlai.com slash AI SF 2017.
+And please, please, please send us any questions or comments that you may have for us or our guests,
+via Twitter, at twimlai or at Sam Charington, or leave a comment on the show notes page.
+There are a ton of great conferences coming up through the end of the year, to stay up to
+date on which events will be attending, and hopefully to meet us there, check out our
+new events page at twimlai.com slash events, twimlai.com slash events.
+Thanks again for listening, and catch you next time.
