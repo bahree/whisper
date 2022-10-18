@@ -122,7 +122,3 @@ elif choice == 3:
     downloadVideoFromURL(url, MP3_PATH)
 else:
     print(f"{textColors.WARNING}Invalid choice. Exiting.{textColors.RESET}")
-
-#savePlaylistToFile(TWIML_PLAYLIST_URL, TWIML_PLAYLIST_FILENAME)
-#downloadVideoFromPlaylist(TWIML_PLAYLIST_URL, MP3_PATH)
-#downloadVideoFromURL("https://www.youtube.com/watch?v=YgQxlKPeC-g", MP3_PATH)
