@@ -1,4 +1,6 @@
-# If you don't have pytube installed, then install it first using the following command: # pip install pytube
+# If you don't have pytube installed, then install it first using the following command:
+# pip install pytube
+
 import sys
 import csv
 from time import process_time_ns
@@ -58,12 +60,12 @@ def savePlaylistToFile(playlist_url, playlist_filename):
             f.write(str(index) + '|' + yt.title + '|' + url + '\n')
         print("Playlist saved to file" + playlist_filename + " with " + str(index) + " episodes.")
 
-
 # Download all the videos from a youtube playlist, and save it as a mp3 file
 def downloadVideoFromPlaylist(playlist_url, path):
     playlist = Playlist(playlist_url)
     fileSaved = 0
     for index, video in enumerate(playlist.videos, start=1):
+        # following is used to skip over episodes that have already been downloaded
         # if index < 286:
         #     continue
         print("\nDownloading #" + str(index) + " ... " + video.title)
@@ -89,10 +91,11 @@ def downloadVideoFromLocalPlaylist(playlist_name, mp3_path):
         index = 1
         fileSaved = 0
         for row in reader:
-            if index < 526:
-                print("Skiping ... # " + str(index))
-                index += 1
-                continue
+            # following is used to skip over episodes that have already been downloaded
+            # if index < 526:
+            #     print("Skiping ... # " + str(index))
+            #     index += 1
+            #     continue
             # print("Episode: " + row[0], "Title:" + row[1], "URL:" + row[2])
             episode = row[0]
             title = row[1]
@@ -112,35 +115,15 @@ def downloadVideoFromLocalPlaylist(playlist_name, mp3_path):
             print("Download complete. Number of episodes saved: " + str(fileSaved))
             index += 1
         
-#testing ignore
-# from a youtube playlist, get the video url, title, and save it as a mp3 file
-# def new_downloadVideoFromPlaylist(playlist_url, path):
-#     playlist = Playlist(playlist_url)
-#     length = playlist.length
-#     print(f"{textColors.CYAN}" + str(length) + f"{textColors.RESET} episodes found. Starting download...")
-#     for index, video in enumerate(playlist.videos, start=1):
-#         print("\nDownloading #" + str(index) + "/" + str(length) + " ... " + video.title)
-#         try:
-#             tempFileName = validFilename(str(index) + '_' + video.title + ".mp3")
-#             video.register_on_progress_callback(fancy_progress_bar)
-#             video.streams.filter(only_audio=True).first().download(output_path=MP3_PATH_TEST, filename=tempFileName)
-#         except IOError:
-#             print(f"{textColors.FAIL}Error: can\'t save the following file. Most likely it has an invalid character in the name.{textColors.RESET}")
-#             print("File: " + tempFileName)
-#         except VideoUnavailable:
-#             print(f"{textColors.FAIL}Video: " + tempFileName + " is unavailable, skipping.{textColors.RESET}")
-#     print("Download complete. Number of episodes downloaded: " + str(index))
 
-
-# download mp3 from youtube video url
+# download mp3 from youtube
 def downloadVideo(video_url, mp3_location, filenametoSave):
     yt = YouTube(video_url)
     yt.register_on_progress_callback(fancy_progress_bar)
     
     yt.streams.filter(only_audio=True).first().download(output_path=mp3_location,filename=filenametoSave)
-    #print("\nFile downloaded: " + tempFileName)
 
-# download mp3 from youtube video url
+# download mp3 from youtube video url and extract the title from the video
 def downloadVideoFromURL(video_url, path):
     yt = YouTube(video_url)
     yt.register_on_progress_callback(fancy_progress_bar)
@@ -172,7 +155,7 @@ print("0. I changed my mind, I don't want to do anything")
 
 # This is clunky, but the intent is to make it simple.
 try:
-    choice = int(input(f"{textColors.MAGENTA}Enter your choice (1-3):{textColors.RESET} "))
+    choice = int(input(f"{textColors.MAGENTA}Enter your choice (0-4):{textColors.RESET} "))
 except ValueError:
     print(f"{textColors.WARNING}That's not an integer! Exiting...{textColors.RESET}")
     sys.exit(1)
