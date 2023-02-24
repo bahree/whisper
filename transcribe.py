@@ -1,5 +1,6 @@
 # If you don't have pytube installed, then install it first using the following command: # pip install pytube
 import sys
+import csv
 from time import process_time_ns
 from turtle import width
 from pytube import Playlist
@@ -80,6 +81,36 @@ def downloadVideoFromPlaylist(playlist_url, path):
             print("{textColors.FAIL}Unexpected error: " + sys.exc_info()[0] + "{textColors.RESET}")
     print("Download complete. Number of episodes saved: " + str(fileSaved))
 
+
+# Download all the videos from the local playlist text and save it as a mp3 file
+def downloadVideoFromLocalPlaylist(playlist_name, mp3_path):
+    with open(playlist_name, 'r', encoding="utf8") as f:
+        reader = csv.reader(f, delimiter='|')
+        index = 1
+        fileSaved = 0
+        for row in reader:
+            if index < 526:
+                print("Skiping ... # " + str(index))
+                index += 1
+                continue
+            # print("Episode: " + row[0], "Title:" + row[1], "URL:" + row[2])
+            episode = row[0]
+            title = row[1]
+            url = row[2]
+            print("\nDownloading Episode #" + episode + " ... " + title)
+            try:
+               tempFileName = validFilename(str(index) + '_' + title + ".mp3")
+               downloadVideo(url, mp3_path, tempFileName)
+               fileSaved += 1        
+            except IOError:
+                print(f"{textColors.FAIL}Error: can\'t save the following file. Most likely it has an invalid character in the name.{textColors.RESET}")
+                print("File: " + tempFileName)
+            except VideoUnavailable:
+                print("{textColors.FAIL}Video: " + tempFileName + " is unavailable, skipping.{textColors.RESET}")
+            except:
+                print("{textColors.FAIL}Unexpected error: " + sys.exc_info()[0] + "{textColors.RESET}")
+            print("Download complete. Number of episodes saved: " + str(fileSaved))
+            index += 1
         
 #testing ignore
 # from a youtube playlist, get the video url, title, and save it as a mp3 file
@@ -102,6 +133,14 @@ def downloadVideoFromPlaylist(playlist_url, path):
 
 
 # download mp3 from youtube video url
+def downloadVideo(video_url, mp3_location, filenametoSave):
+    yt = YouTube(video_url)
+    yt.register_on_progress_callback(fancy_progress_bar)
+    
+    yt.streams.filter(only_audio=True).first().download(output_path=mp3_location,filename=filenametoSave)
+    #print("\nFile downloaded: " + tempFileName)
+
+# download mp3 from youtube video url
 def downloadVideoFromURL(video_url, path):
     yt = YouTube(video_url)
     yt.register_on_progress_callback(fancy_progress_bar)
@@ -119,6 +158,7 @@ def validFilename(s):
     s = str(s).strip().replace(':', '-')
     s = str(s).strip().replace('*', '')
     s = str(s).strip().replace('?', '')
+    s = str(s).strip().replace('|', '-')
     return s
 
 # This is equivalent to main() where the program starts.
@@ -127,6 +167,7 @@ print("What you want to do?")
 print("1. For a given playlist, save the details of the episodes (metadata) to a file ")
 print("2. Download and save as mp3 files, all the episode for a playlist")
 print("3. Download a single video and save as mp3 (for a given URL)")
+print("4. Use a local playlist, download and save as mp3 files all the episode")
 print("0. I changed my mind, I don't want to do anything")
 
 # This is clunky, but the intent is to make it simple.
@@ -137,7 +178,7 @@ except ValueError:
     sys.exit(1)
 
 if choice == 0:
-    print(f"{textColors.OK}No worries. Exiting.{textColors.RESET}")
+    print(f"{textColors.OK}Meh. Exiting.{textColors.RESET}")
     sys.exit(0)
 elif choice == 1:
     print("\n\nSaving details of the following playlist:" + TWIML_PLAYLIST_URL + "\n to the file:" + TWIML_PLAYLIST_FILENAME)
@@ -160,5 +201,13 @@ elif choice == 3:
     url = input()
     print("Downloading episode from URL: " + url + "\nand saving to this location:" + MP3_PATH)
     downloadVideoFromURL(url, MP3_PATH)
+elif choice == 4:
+    print("\n\nDownloading all episodes from playlist:" + TWIML_PLAYLIST_FILENAME + "\nand saving to this location:" + MP3_PATH)
+    answer = input(f"{textColors.WARNING}This can take a *long* time, and will use up a *lot* of bandwidth. \nContinue? [default: n] (y/n): {textColors.RESET}")
+    if answer == 'y':
+        downloadVideoFromLocalPlaylist(TWIML_PLAYLIST_FILENAME, MP3_PATH)
+    else:
+        print("Skipping. Thanks for playing...")
+        sys.exit(0)
 else:
     print(f"{textColors.WARNING}Invalid choice. Exiting.{textColors.RESET}")
