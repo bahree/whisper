@@ -1,0 +1,1208 @@
+1
+00:00:00,000 --> 00:00:05,000
+All right, everyone. Welcome to our AI Trends 2023 series.
+
+2
+00:00:05,000 --> 00:00:16,000
+Each year, we invite friends of the show to join us to recap key developments of the prior year and anticipate future advancements in several of the most interesting subfields in AI.
+
+3
+00:00:16,000 --> 00:00:21,000
+Today, we're joined by Sergei Levine, Sergei is an associate professor at UC Berkeley,
+
+4
+00:00:21,000 --> 00:00:24,000
+and we'll be talking through all things reinforcement learning.
+
+5
+00:00:24,000 --> 00:00:30,000
+Sergei and I last spoke at NURPS 2019, where we discussed a similar topic,
+
+6
+00:00:30,000 --> 00:00:35,000
+and before that, early on in the show's history back in 2017.
+
+7
+00:00:35,000 --> 00:00:42,000
+Of course, before we dive in, take a moment to hit that subscribe button wherever you're listening to today's show.
+
+8
+00:00:42,000 --> 00:00:44,000
+Sergei, welcome back to the podcast.
+
+9
+00:00:44,000 --> 00:00:45,000
+Thank you.
+
+10
+00:00:45,000 --> 00:00:52,000
+It's great to have you on the show once again, looking forward to talking about an exciting year in reinforcement learning.
+
+11
+00:00:52,000 --> 00:00:56,000
+I'll refer folks back to our prior shows for your full background,
+
+12
+00:00:56,000 --> 00:01:00,000
+but why don't you take a moment to share a little bit about what you're working on?
+
+13
+00:01:00,000 --> 00:01:01,000
+Yeah, sure.
+
+14
+00:01:01,000 --> 00:01:05,000
+So I'm an associate professor at UC Berkeley, and I'll just spend some of my time at Google.
+
+15
+00:01:05,000 --> 00:01:11,000
+And I work on broadly speaking, algorithms for autonomous decision making reinforcement learning algorithms,
+
+16
+00:01:11,000 --> 00:01:15,000
+other sorts of algorithms that learn to make decisions principally for control of robots,
+
+17
+00:01:15,000 --> 00:01:20,000
+although lately we've been branching out in my group a lot to control of other kinds of systems,
+
+18
+00:01:20,000 --> 00:01:24,000
+including dialogue systems and autonomous vehicles and things like that.
+
+19
+00:01:24,000 --> 00:01:25,000
+Awesome, awesome.
+
+20
+00:01:25,000 --> 00:01:28,000
+So we've got a lot to cover, and we'll jump right in.
+
+21
+00:01:28,000 --> 00:01:39,000
+I think you hinted on one of kind of one of the biggest things happening in reinforcement learning this year has been the broad application of RL to language models.
+
+22
+00:01:39,000 --> 00:01:43,000
+And I think that's one of the first topics we want to dig into.
+
+23
+00:01:43,000 --> 00:01:48,000
+Take us through some of your thoughts on what's happening there.
+
+24
+00:01:48,000 --> 00:01:53,000
+It's kind of a funny coincidence, actually, right before I went to NURBS this year,
+
+25
+00:01:53,000 --> 00:02:01,000
+I started writing up a little opinion piece about the role that I thought reinforcement learning would play in the future development of language models.
+
+26
+00:02:01,000 --> 00:02:03,000
+And those are right before Chad G.P. came out.
+
+27
+00:02:03,000 --> 00:02:07,000
+So sort of at that time, you know, I thought this would be like a very fresh original perspective piece,
+
+28
+00:02:07,000 --> 00:02:10,000
+because everyone was thinking about maximum likelihood training.
+
+29
+00:02:10,000 --> 00:02:14,000
+And then I thought I would table it until after the conference and release it afterwards.
+
+30
+00:02:14,000 --> 00:02:18,000
+And then like right right after that Chad G.P. came out.
+
+31
+00:02:18,000 --> 00:02:24,000
+So I was quickly trying to like edit my opinion piece so that it wouldn't look completely out of place.
+
+32
+00:02:24,000 --> 00:02:35,000
+But it was actually very rewarding to see that come out because now suddenly people, you know, I didn't need to convince you but anymore that RL would actually play a central role in the future of language models.
+
+33
+00:02:35,000 --> 00:02:52,000
+So one of the things that I think is maybe interesting to think about here though is that the way that Chad G.P.T. and in general, this kind of RL from human feedback system uses RL.
+
+34
+00:02:52,000 --> 00:03:05,000
+It kind of, you know, our RL base has two dimensions. It has the dimension of reward and the dimension of time. And the current techniques are really primarily hammering on only one of those.
+
+35
+00:03:05,000 --> 00:03:09,000
+They are figuring out how to use reward, how to use in this case human feedback to improve the system.
+
+36
+00:03:09,000 --> 00:03:14,000
+But RL also gives you the other dimension and gives you the ability to reason about sequential processes.
+
+37
+00:03:14,000 --> 00:03:21,000
+And that's something that has been done somewhat in prior work, but isn't sort of the central focus of the current methods.
+
+38
+00:03:21,000 --> 00:03:30,000
+And you would think that dialogue systems could greatly benefit from incorporating the sequential element in as well.
+
+39
+00:03:30,000 --> 00:03:43,000
+Absolutely. Yeah. So, and in fact, if you go in and you start playing around with the Chad G.P.T. you will notice some of the things that are actually shortcomings that come from an inability to reason about sequential processes.
+
+40
+00:03:43,000 --> 00:03:57,000
+So, essentially what these RL from human feedback systems do is they optimize each response of the model producers to maximize its estimate of human preference.
+
+41
+00:03:57,000 --> 00:04:07,000
+But when we talk to each other, especially if we have a more goal directed dialogue, like maybe I'm trying to buy a house from somebody and I have a negotiation, right.
+
+42
+00:04:07,000 --> 00:04:14,000
+My goal is something at the end of the conversation. So, I might say something now that is not necessarily the optimal thing to buy the house right now.
+
+43
+00:04:14,000 --> 00:04:22,000
+But it might be good to elicit some information, which I will then incorporate, change my strategy around a little bit and then achieve my goal better at the very end.
+
+44
+00:04:22,000 --> 00:04:28,000
+And that's something that the current thing that Chad G.P.T. at least will not do because it's not optimizing for that.
+
+45
+00:04:28,000 --> 00:04:30,000
+But in principle, RL could optimize.
+
+46
+00:04:30,000 --> 00:04:48,000
+Can you give a more concrete example of that? Because I think when we think about Chad G.P.T. and one of the things that it does, you know, a lot better than playing around with G.P.T. 3, for example, is this idea that it's kind of adding the conversation history into the prompt.
+
+47
+00:04:48,000 --> 00:05:03,000
+And so it kind of seems to remember and have some sequential awareness to it.
+
+48
+00:05:03,000 --> 00:05:19,000
+One of the most obvious things ways in which this shows up is it will very rarely ever ask you clarifying questions. So, if you and I are talking and you were to ask me like, oh, can you explain like a good RL algorithm for this problem? I might say, well, but does your problem have this property?
+
+49
+00:05:19,000 --> 00:05:33,000
+Does your problem have that property? And like, how many GPUs do you have? Like, I might ask you all these clarifying questions so I can serve you better, essentially. And that's something that it will not do because it's not optimizing for that final result after many iterations.
+
+50
+00:05:33,000 --> 00:05:59,000
+That's really interesting. One of the first things that I tried to do in my experimentation with it was try to get it to play 20 questions with me. And it was darn near impossible. I didn't spend a lot of time on it, but I think the best that I could do was get it to ask three questions. And then it would just spit out the other 14 or whatever 17 in that case.
+
+51
+00:05:59,000 --> 00:06:13,000
+But it was really didn't like to do that. Like, it took a lot of cajoling to not just spit out 20 questions in the first response. Yeah, by funny coincidence, I did exactly the same thing. So, yeah.
+
+52
+00:06:13,000 --> 00:06:29,000
+Interesting. Interesting. Let's maybe take a step back and have you talk a little bit about more broadly about RLHF and what that does. That paper preceded chat GPT by a little bit, right?
+
+53
+00:06:29,000 --> 00:06:45,000
+Yeah, so the basic idea that was described in the instruction GPT paper was that you could take the response from the language model and you could treat it as a reinforcement learning problem.
+
+54
+00:06:45,000 --> 00:06:55,000
+It's a special kind of reinforcement learning problem called a bandit problem. So the difference between a bandit and general RL problem is that in a bandit, you treat the problem as a one time step problem.
+
+55
+00:06:55,000 --> 00:07:04,000
+There's essentially one decision you make, you receive the payoff, and that's the end of your episode. So the action in this case is the entire response of the model.
+
+56
+00:07:04,000 --> 00:07:13,000
+Now, if you had ground truth reward annotations for every single thing that the model said, then you could run standard bandit algorithms.
+
+57
+00:07:13,000 --> 00:07:25,000
+But in reality, getting humans to label every single thing the model says is expensive. So what they do instead is they actually train a separate neural network to act as a reward model. So they get a limited amount of labeled samples.
+
+58
+00:07:25,000 --> 00:07:35,000
+So the network generates some utterances, humans label it, and then they essentially do like label propagation. So train a model on it to label everything else with the rewards.
+
+59
+00:07:35,000 --> 00:07:45,000
+And then they run a standard bandit RL algorithm. In this case, based on PPO, although, you know, that part I think is not that important kind of just about anything would do, would do the job there.
+
+60
+00:07:45,000 --> 00:07:54,000
+Has RLHF as a technique, are you aware of other places that it's been applied beyond instruct GPT and chat GPT?
+
+61
+00:07:54,000 --> 00:08:11,000
+The idea of learning from human preferences in reinforcement learning learning is actually very old. But perhaps the the modern incarnation of that idea first came to the forefront. I think this was roughly five years ago in the context of more standard RL problems like these little local motion simulation tasks.
+
+62
+00:08:11,000 --> 00:08:26,000
+You know, been worked by Paul Christiano, who described this algorithm, like the optometrist algorithm for doing it basically showed the human to trials, asked them which one they prefer. Yeah, exactly. And then use that to back out a reward signal.
+
+63
+00:08:26,000 --> 00:08:45,000
+And you know, that work itself is like somewhat old classical and there's work on preferences going back even further than that. In fact, arguably the foundation of the notion of rewards and utilities in reinforcement learning really comes down to preferences like the way you define a rational agent.
+
+64
+00:08:45,000 --> 00:08:59,000
+An agent is rational if it has preferences that can that satisfy an ordering. So if I prefer like you know bananas over apples and apples over oranges. And I should really prefer bananas over oranges and it's the other way around my preferences are inconsistent.
+
+65
+00:08:59,000 --> 00:09:08,000
+Then I am not a rational agent that's basically the definition of rationality. And there's a classical theorem that says that if you have preferences that will be in ordering, then you can.
+
+66
+00:09:08,000 --> 00:09:23,000
+But then there exists a scalar value utility function basically a reward function that will reflect those preferences. And that's the foot, you know, if you open up the Stuart Russell's AI textbook like the classic textbook is called artificial intelligence, like that is the definition of our rational agent.
+
+67
+00:09:23,000 --> 00:09:51,000
+Do you do you think that the enthusiasm around chat GBT and the fact that RLHF is a big part of, you know, it's creation. You think that that will lead to a broader investigation of places to apply that type of preference gathering and propagation across different types of problems.
+
+68
+00:09:51,000 --> 00:10:04,000
+One of the things that I'm actually hopeful about is that we might actually see more variety and more interesting ways to use RL and combination with language models besides just preferences.
+
+69
+00:10:04,000 --> 00:10:23,000
+So preferences are great because preferences allow allow us to optimize these models so that they do things that that we want. But you know, there's like the joke is something like the customer doesn't know what they want, right? Like it could be that what you actually want to optimize is not people's preferences, but maybe something about outcomes.
+
+70
+00:10:23,000 --> 00:10:35,000
+So if you imagine, for example, so for an assistant, it makes a lot of sense to say like, well, yeah, people will just tell you like what makes for good assistant. Like I like it when it gives me informative answers or something, but imagine that you're doing like tech support, right?
+
+71
+00:10:35,000 --> 00:10:40,000
+You have a chatbot that's supposed to help somebody fix their like display driver or something.
+
+72
+00:10:40,000 --> 00:10:54,000
+Maybe you're less concerned about their preferences and you're more concerned about whether their problem was fixed or not. So there, the reward signal might actually be something that is on the one hand more explicit, but on the other hand, much more indirect because it only happens at the end of a long interaction.
+
+73
+00:10:54,000 --> 00:11:05,000
+And there's a very deep credit assignment challenge in figuring out what is it that you did in the middle of the conversation that caused the person to then do the right thing and like and fix their tech support issue.
+
+74
+00:11:05,000 --> 00:11:20,000
+So I think that once we see sequential RL methods that go beyond just satisfying people's preferences and actually move towards maximizing desired outcomes will have will actually unlock much more of the power behind these models.
+
+75
+00:11:20,000 --> 00:11:49,000
+We spoke a little bit about one shortcoming of this this preference model and the RLH of approach is being, you know, not aware of kind of time and sequence and that kind of thing is the problem that you just described is it kind of another angle on the same problem or those kind of two separate shortcomings of the way RL has been
+
+76
+00:11:49,000 --> 00:11:56,000
+applied to language models thus far. Yeah, it's another angle on the same on the same challenge that essentially.
+
+77
+00:11:56,000 --> 00:12:04,000
+Here's one way that we could think about it a language model we call it a model like that means that it's modeling something.
+
+78
+00:12:04,000 --> 00:12:16,000
+So one question we can ask is well, what is it modeling in some very literal sense a language model models the keystrokes that humans press on keyboards because that's how all the text on the internet is generated.
+
+79
+00:12:16,000 --> 00:12:27,000
+And that's actually like there's something very profound there because if you can very actively predict what buttons people press on keyboards, you understand something very deep about human behavior because so much of our interaction is with computers.
+
+80
+00:12:27,000 --> 00:12:39,000
+So if a language model really understands how people will act, how people will behave, then it should be able to utilize this understanding of those patterns to do a really great job of achieving conversational goals.
+
+81
+00:12:39,000 --> 00:12:52,000
+And I think we've only scratched the surface of the potential for that because right now the preferences stuff the supervised learning stuff it's really trying to get these models to act more like people to sort of mimic people.
+
+82
+00:12:52,000 --> 00:13:00,000
+But they think they can do a lot more than that they can actually use their deep understanding of the patterns and human behavior to be much better at achieving and goals.
+
+83
+00:13:00,000 --> 00:13:12,000
+You know there's a there's a natural like a little bit of an aferis undertone to that sometimes, but you know there's also something very good about it like if you if you can be a tech support agent that optimizes for minimizing human frustration.
+
+84
+00:13:12,000 --> 00:13:29,000
+That's a really good thing if you can be you know an AI enabled teacher that gets students to patiently listen to a lesson that can be a really powerful thing and I think that we haven't unlocked that potential yet, but with some of these technologies that are coming to the forefront, I think we're getting closer and closer to that.
+
+85
+00:13:29,000 --> 00:13:36,000
+Talk about some of the research that has been done and published that you think will help us get there.
+
+86
+00:13:36,000 --> 00:13:47,000
+Yeah, for sure. So there is actually there has been research on sequential decision making with language and various kinds of language models extra for quite a while.
+
+87
+00:13:47,000 --> 00:13:55,000
+It hasn't been at quite the same scale as the recent human preferences work that everyone's more familiar with.
+
+88
+00:13:55,000 --> 00:14:07,000
+Now, for example, we could go back to you know there's some some work that I actually found very inspiring a few years back by Natasha jakes back when she was at MIT.
+
+89
+00:14:07,000 --> 00:14:10,000
+So she did some work that actually applied.
+
+90
+00:14:10,000 --> 00:14:39,000
+That time very early offline RL algorithms to very early language models like in some ways this is the danger of being ahead of your time because back then the language models were pretty mature and the RL algorithms were pretty mature, but she had some work that put them together in a very interesting way she actually build a chatbot that would optimize not human preferences, but actually human sentiment and there's a very subtle difference because preferences means a person says you should say this and not this sentiment means a person responds to you positively.
+
+91
+00:14:39,000 --> 00:14:49,000
+So, so was she actually optimized for a bot that would cause humans to react more positively and it was actually kind of interesting in her work some of the examples.
+
+92
+00:14:49,000 --> 00:15:03,000
+You know in some places it would just be like a very like upbeat very happy bot like it would just say things that are very positive very friendly, but it was kind of interesting to see that emerge naturally from just RL and analyzing the data.
+
+93
+00:15:03,000 --> 00:15:18,000
+But since then there's been work that approach the problem more pragmatically. There was work from folks like I believe a group mantra from Georgia Tech that studied, you know, combining our concepts with language models for negotiation.
+
+94
+00:15:18,000 --> 00:15:33,000
+My own group at UC Berkeley we've done work recently on offline model free RL for negotiation and dialogue tasks so my student Charlie Snell has a paper called implicit language Q learning that applies essentially some of our recent innovations in offline RL combines them with language models.
+
+95
+00:15:33,000 --> 00:15:45,000
+So this is stuff that's been sort of percolating the surface for a while and I think that it's also kind of right on the cusp where it could be scaled up in an analogous way to these banded methods.
+
+96
+00:15:45,000 --> 00:15:50,000
+And that could I think you know maybe as early as the next year enable some of these much richer interactions.
+
+97
+00:15:50,000 --> 00:15:58,000
+Can you talk a little bit about the offline RL paper that you mentioned so we can get kind of a deeper understanding of the possible direction here.
+
+98
+00:15:58,000 --> 00:16:09,000
+So the idea in our work in this was led by Charlie Snell was that instead of viewing RL with language models as this band that problem where you optimize for the highest reward utterance.
+
+99
+00:16:09,000 --> 00:16:26,000
+You can instead take it to the other extreme and view every single token as a decision so for every single token that the model generates it actually optimizes for the future reward it will receive accounting for the fact that it might be talking to a person who might react in unpredictable and stochastic ways.
+
+100
+00:16:26,000 --> 00:16:33,000
+And is this across a series of dialogue exchanges or tokens within a single utterance or to turn.
+
+101
+00:16:33,000 --> 00:16:53,000
+Yeah so it's across the entire dialogue so token by token you know some of the tokens are produced by the model some are produced by the human and just because of how the data structure the model can tell that like it's all lines of dialogue so if the next token is the model's choice then it knows that and if it ends the line then it knows that the next token will come from the human.
+
+102
+00:16:53,000 --> 00:17:17,000
+And the kinds of things that this can do is, for example, you could have an exchange with a person where you're trying to do like a question like a guessing game so that this is actually a benchmark task that was actually proposed by Drew Bachelors lab called visual dialogue where the answer has an image in mind like a picture photograph and the question needs to ask them questions to guess which photograph they have in mind.
+
+103
+00:17:17,000 --> 00:17:46,000
+So you'll ask like oh does it have a person does it have a car etc and one of the things that you could do with RL in this case is you could actually obviously you could you could ask the right questions to guess the picture but you could also optimize for interesting outcomes like maybe ask questions that will lead to more informative answers not yes or no answers but like quantitative answers so then you would actually ask the kinds of questions that lead to the answer producing certain kinds of answers like more informative answers or or shorter answers or longer answers whatever you want.
+
+104
+00:17:46,000 --> 00:18:15,000
+So I'm related to RL potentially because I've not looked deeply at any of these works one of the another interesting thing that's been happening in the natural language community is the application of large language models to kind of diplomacy and that the diplomacy setting and like these strategy interactions seems like an approach like what you're describing.
+
+105
+00:18:15,000 --> 00:18:25,000
+Might produce interesting results there yeah for sure so I think that's also an area where in some ways the community has only scratched the surface.
+
+106
+00:18:25,000 --> 00:18:44,000
+So the there's of course the really interesting paper from no browning colleagues from meta on playing diplomacy but one of one of the things that I would note about that work it I think it's a really inspiring paper but while you're at it if you if you can give a kind of highlight on diplomacy for folks that I've income across.
+
+107
+00:18:44,000 --> 00:19:12,000
+Oh yeah for sure for sure so this is so that the recent work from meta I mean it follows up on a long line of work like I should say that I talked to no brown several times over the past two years about this and it's like you know the first time I talked about to him about it was like oh can we just play diplomacy without any language at all and seemed like you know year after year this thing was just like rapidly gaining capability so this is something that he he and his colleagues have been asked for a while it's actually really inspiring.
+
+108
+00:19:12,000 --> 00:19:41,000
+I was just a long term research agenda can lead to such great results but they're latest result which is I think actually really impressive is that you can actually get about the plays diplomacy which is a board game where you actually negotiate with other players and it will play the game very well and it will actually like talk to people and it will try to convince them that it's like it's not trying to backstab them and it will like make a line so like all this stuff that really looks and feels very human like they even have this this this example that I thought was.
+
+109
+00:19:41,000 --> 00:20:01,000
+But I thought was hilarious where they they're running a server where the you know there's one thread that runs the actual strategic layer and then another thread that runs the language model and the strategic layer crashed so the language model was stuck without any instructions about what to do and it produced this dialogue that it doesn't respond for all and says like oh I was on the phone with my girlfriend.
+
+110
+00:20:01,000 --> 00:20:29,000
+I don't have the strategy layers and giving me any moves so I'll just make an excuse. So this thing does some pretty remarkable stuff but something I will say that the methodology there is rather I don't want to say so much hand engineered as decomposed in the sense that the way they're tackling the strategic layer is much more similar to systems like alpha go that rely on large amounts of simulation and self play.
+
+111
+00:20:29,000 --> 00:20:58,000
+So it's really kind of an alpha go style strategy layer that decides what to do in a symbolic sense and then it essentially just uses the language model as like a wrapper on top of that so it decides like oh I'm going to move here and here and I'm going to bluff and tell the person this and this in a symbolic language like you know just a hand engineer language and then the language model kind of makes make that happen like yeah yeah language model almost like rationalize it it says like oh I was you know I didn't mean to like take over Belgium like let me go to Germany or something like.
+
+112
+00:20:58,000 --> 00:21:08,000
+But it's not the language model is not actually doing the strategy so this is where I think we'll actually see some interesting new developments in the future because in principle.
+
+113
+00:21:08,000 --> 00:21:22,000
+RL could be coupled to the language model like much more tightly and I think that there's actually a lot of potential in that because when you decouple the strategy from the language essentially the strategy layer doesn't benefit from all the deep knowledge contained in the language model.
+
+114
+00:21:22,000 --> 00:21:41,000
+Remember that this language model knows a lot about humans knows how humans will type words on keyboards which is very deep understanding of human behavior in their system they're not taking advantage of that one way the language is part of the output as opposed to part of the input or you know you can think of it as providing features to the strategy model.
+
+115
+00:21:41,000 --> 00:22:07,000
+Exactly yeah exactly so so I think that this tighter coupling where the language model itself is actually the one doing the deciding leveraging its understanding of human behavior I think would be a lot more powerful because then you could figure out there's patterns like if someone's if someone sounds a little frustrated or if they sound a little impatient you can recognize that and you can react appropriately to you know take that into account when you make your your plan.
+
+116
+00:22:07,000 --> 00:22:29,000
+Interesting to the most recent to the recent meta work does the strategy model rely on RL it does so it works in a way that is you know roughly analogous to the methodology that that no brown actually developed in in in in his PhD for playing poker so poker is another kind of partial information game.
+
+117
+00:22:29,000 --> 00:22:37,000
+I think that actually you know in my opinion his system is actually a lot more sophisticated in many ways than alpha go I think on a systems level it's obviously not.
+
+118
+00:22:37,000 --> 00:22:58,000
+Not quite the same but in terms of the game theoretic foundations of it it actually takes into account partial observability partial information very interesting work for anyone interested in game theory I strongly recommend checking it out but that was you know he essentially took what he had developed for poker and applied it to the partial information game of diplomacy so that's how that that's how.
+
+119
+00:22:58,000 --> 00:23:27,000
+Any additional thoughts on the application of RL to language models before we move on I think one more thing I might mention this is perhaps a little bit of a tangent but I think it's something that's quite important that as we bring in more decision theoretic tools like RL into language models I think another thing that we have to be very thoughtful about is how to address the problem problems of reward specification and also problems relating to the behavior of these language models.
+
+120
+00:23:27,000 --> 00:23:56,000
+In regard to things like deception and manipulation and I think that there's a lot there's a lot of work on this topic but I think that especially once RL comes into the picture we might have a lot more tools that are disposal to define like what does it mean for model to be honest what does it mean for it to be manipulative deceptive these might seem like really major challenges but I think the introduction of RL give us a lot more tools because in RL we can actually reason about utilities including the models utility and the utility.
+
+121
+00:23:56,000 --> 00:24:11,000
+And the utility of the human it's talking to and we can do things like define build up mathematical definitions of deception manipulation specify those as things we don't want or do want I guess in some cases and also potentially even figure out ways to detect them.
+
+122
+00:24:11,000 --> 00:24:25,000
+So if you can define what it means for a model to be manipulative you understand it's objective you can figure out like oh this model is saying something to me but based on its objective it actually has an incentive to do something deceptive and maybe that's something that we can formalize a lot more in the coming years.
+
+123
+00:24:25,000 --> 00:24:37,000
+Can you talk a little bit more about how RL as a tool set can help with that and maybe if there's an example or other work that you can refer to.
+
+124
+00:24:37,000 --> 00:25:02,000
+Think of RL as more of this tool for kind of driving you know exploration and reward attainment as opposed to you know something that's kind of defining these I don't even know the best way to say to kind of defining these objectives or characterizing.
+
+125
+00:25:02,000 --> 00:25:31,000
+You know different outcomes what's the connection there so there is a technique called inverse reinforcement learning that has been around for quite a while which if reinforcement learning takes us from reward functions to behaviors inverse reinforcement learning does the opposite it infers intentions from observing the behaviors of an agent kind of trying to say what is the policy that probably generated these behaviors.
+
+126
+00:25:31,000 --> 00:25:47,000
+What is the objective of the policy so it actually goes even deeper and that this kind of stuff has been applied in the past problems like you observe somebody driving on a road and you figure out what is their destination based on how they're navigating or you might figure out are they in a hurry or not based on how they're acting.
+
+127
+00:25:47,000 --> 00:26:07,000
+So these things you know inverse reinforcement learning has always been considered a harder problem than reinforcement learning because inverse reinforcement sort of requires almost like a mental simulation of what different objectives would what kind of behaviors different objectives would lead to and then you look at someone's behavior and say well based on my predictions like this is probably their objective.
+
+128
+00:26:07,000 --> 00:26:32,000
+And so so therefore if you want to do inverse RL you need to at least be able to do forward RL but once we can do forward RL effectively with language models it's not inconceivable that we could also do inverse RL and when you're talking to a bot or maybe you don't know who you're talking to just talking to a person on the internet perhaps you can then infer some guesses to their intentions and that could be really helpful if you want to detect that you're interacting with a potentially deceptive or manipulative bot.
+
+129
+00:26:32,000 --> 00:26:46,000
+Is it clear how we would get from how we would characterize a objective of a policy as being manipulative like what that even means how how closer we to knowing how to do that.
+
+130
+00:26:46,000 --> 00:26:56,000
+I think that there's some basic things that we're lacking at some level just a very mathematical level we're even lacking very formal definitions of what manipulation deception means.
+
+131
+00:26:56,000 --> 00:27:06,000
+But I think this is something that's very difficult to define if you view the world as sort of purely statistical kind of maximum likelihood supervised learning kind of terminology.
+
+132
+00:27:06,000 --> 00:27:11,000
+But once you bring in the decision theoretic concepts in RL I think it's actually a lot more practical to define these things.
+
+133
+00:27:11,000 --> 00:27:33,000
+So if you have a partially observed RL problem there are well-defined notions of beliefs, states, observations and then you can start writing down definitions like if the bot says something it'll change a person's belief I mean you don't know exactly how it will change but you can estimate it and then you can define deception for example as changing somebody's belief to be less accurate.
+
+134
+00:27:33,000 --> 00:27:44,000
+So we can we can this is this is not something that has been done very rigorously in the past it's something that my students are working on at UC Berkeley and I'm sure there's many others that are working on that.
+
+135
+00:27:44,000 --> 00:27:56,000
+But I think that my point here is that now that RL and language models can kind of play together I think we're getting to the point where we can actually formalize these notions and it will actually mean something instead of being a true academic exercise.
+
+136
+00:27:56,000 --> 00:27:59,000
+So I think we'll see a lot more of that in the next few years.
+
+137
+00:27:59,000 --> 00:28:24,000
+Yeah, interesting maybe bridging over to some of your traditional work or the space that you've traditionally focused on the kind of emergence over the past couple of years of foundational models and pre-trained models on the language side.
+
+138
+00:28:24,000 --> 00:28:34,000
+It's kind of driving a desire to apply those that idea more broadly for example in robotics.
+
+139
+00:28:34,000 --> 00:28:37,000
+Can you talk a little bit about what you're seeing there?
+
+140
+00:28:37,000 --> 00:28:38,000
+Yeah, for sure.
+
+141
+00:28:38,000 --> 00:28:49,000
+So I mean in some ways the notion that large data sets in general broadly reusable models get how a transformative effect on robotics is also not entirely new.
+
+142
+00:28:49,000 --> 00:28:54,000
+So I've been of Gupta professor at CMU.
+
+143
+00:28:54,000 --> 00:29:05,000
+Myself many of my colleagues we you know we've been working on these kinds of things for quite a long time including things like collecting large amounts of data with many robots working together and things like this.
+
+144
+00:29:05,000 --> 00:29:21,000
+But I do think that in the last couple of years there's been basically a lot more of the robotics community has bought into that as a concept as a way that we should approach robotics problems in large part of course inspired by the success of that recipe in feels like natural language.
+
+145
+00:29:21,000 --> 00:29:32,000
+But something that's something interesting that I've observed over the past year is that there are a number of different kind of clusters emerging in terms of how people think about that problem.
+
+146
+00:29:32,000 --> 00:29:52,000
+I think that a lot of folks are in agreement that large models train on very broad multimodal or embodied data can have a transformative effect on robots that if you have a model that really understands how to interact with the world how actions affect images and how to interpret human commands that's great.
+
+147
+00:29:52,000 --> 00:29:55,000
+But then the big question is where do you get it?
+
+148
+00:29:55,000 --> 00:30:14,000
+This is where I think there's a few different philosophies I have my own perspective but I could give a maybe a balanced or only slightly biased view of the picture and probably the two main schools of thought here which are not mutually exclusive but they are a bit distinct.
+
+149
+00:30:14,000 --> 00:30:39,000
+On the one hand, there is the school of thought that says data from robots is expensive and hard to get internet data is cheap and plentiful so perhaps the way to get large pre trained reusable models and robotics is to maximally pull in things like YouTube videos or large data sets like EO4D to get understanding of the world from humans and then sprinkle a little bit of robot data on top of that to basically ground it in robot actions.
+
+150
+00:30:39,000 --> 00:30:56,000
+So you tend to imitation learning or are you meaning learning trying to infer behaviors policies objectives that kind of thing or are you thinking like world buildings synthetic data synthetic environment.
+
+151
+00:30:56,000 --> 00:31:01,000
+Yeah, I guess I should actually say there's actually three schools of thought I just didn't mention the third one.
+
+152
+00:31:01,000 --> 00:31:19,000
+So maybe I should start with that so there is simulation and there is definitely a segment of the robotics community that subscribes strongly to the notion that we should simulate a whole lot of stuff and actually use that as a foundation.
+
+153
+00:31:19,000 --> 00:31:40,000
+The simulation approach has been very successful in settings where the environment is relatively narrow in the sense that basically there isn't a content creation bottom like like you don't need to like manually design a million different objects but the problem is physically very complex and a really class example this is local motion local motion is great because it's physically very complex.
+
+154
+00:31:40,000 --> 00:31:51,000
+There are lots of random terrains and most of the complicated modeling is actually in the robots body and because you have one robot you can model it very accurately generally lots of random terrains and get very robust local motion policies.
+
+155
+00:31:51,000 --> 00:32:03,000
+But that recipe hasn't really panned out very well for things like robotic manipulation because they are the world is extremely diverse and creating all that content and simulation is actually very costly and time consuming.
+
+156
+00:32:03,000 --> 00:32:32,000
+So that's why the videos the human videos and date from the internet is so appealing because there you can pull in lots of content has already been created by others without simulation and instead of figuring out how to solve the transfer learning or embodiment gap so basically human is not a robot so if you want to use human data to get robots to be smarter you need to somehow transfer that knowledge figure out some level of abstraction maybe at the level of visual features or something like that and use that.
+
+157
+00:32:32,000 --> 00:32:52,000
+And then the last approach and that's the one that I myself most subscribed to is that perhaps we can actually just scale up robot data itself perhaps we can just get robots in the real world to produce large amounts of interaction and learn from that this is something that many people are skeptical about because it's so costly right now.
+
+158
+00:32:52,000 --> 00:33:05,000
+But the reason that I'm actually a big advocate of that approach is because if we have robotic systems that are actually useful that are doing something in the world that people want done will probably have a lot of them.
+
+159
+00:33:05,000 --> 00:33:15,000
+So right now kind of looks very daunting to have lots of robot data because there's relatively few robots but if you have a useful robot there will be many of them and then the data will come in large quantities.
+
+160
+00:33:15,000 --> 00:33:38,000
+The example here is that you know for example if you if you're Tesla you probably don't worry about transferring from YouTube videos because you have so much data from your own robots so precisely so if we get a robot that does manipulation in the home that is as popular as a car or a room but then we won't worry about data anymore.
+
+161
+00:33:38,000 --> 00:33:50,000
+So as a scientist to me it's much more rewarding to sort of work on the problem of the future once as efficiently entrepreneurial individual takes care of the deployment problem so to speak then to figure out how to patch up the holes right now.
+
+162
+00:33:50,000 --> 00:34:06,000
+But these are kind of the three what I would say brought approach simulation transfer from human data and massively scaling up robot data and it's not I would say in all fairness it's not clear right now in at the end of 2022 which of those will be the most impactful and the most important.
+
+163
+00:34:06,000 --> 00:34:20,000
+Are there are the recent works over the past year or so in these various areas that you think are particularly interesting and kind of pointing out the direction that we're headed.
+
+164
+00:34:20,000 --> 00:34:48,000
+I think that the learning from videos area that's something where there's been a lot of action you know certainly there's been smaller scale experiments larger scale experiments most recently I think the Pittsburgh meta group folks like I've been up good to the cash Kumar and and their colleagues have been doing a lot of excellent work on leveraging the ego for D data set which came out recently.
+
+165
+00:34:48,000 --> 00:35:17,000
+The transfer visual representations and the things like language understanding into robotic systems that that's that's a very natural fit because the go for the data set has first person videos of object manipulation from humans from humans wearing cameras so it makes sense to try to leverage that to get representations for robot so that that was a data collection effort led by a very large number of people my understanding is that the main driver behind it was Christian ground from UT Austin but with with many many colleagues.
+
+166
+00:35:17,000 --> 00:35:38,000
+The intent is a computer vision data set but now the robotics folks are taking it and pulling out representations for robotic manipulation and I think they've been some very you know fairly convincing demonstrations that the representations you get from these egocentric manipulation data sets are more effective for robotics than the traditional representations you would get out of like image net or other purely vision centric data sets.
+
+167
+00:35:38,000 --> 00:35:55,000
+Is the parallel to or characterization of that is imitation learning is that correct or is that you know they kind of adjacent but not really talking about the same things.
+
+168
+00:35:55,000 --> 00:36:11,000
+Actually a surprise that that's actually a question where there's a lot of depth wrapped up in it I think that the truth is we're not sure right now because the way that a lot of these techniques work is they they take this data set which does have gold directed human behaviors.
+
+169
+00:36:11,000 --> 00:36:38,000
+Trying some kind of model on that data set that does some sort of prediction or association and then pull out its visual features and we're not actually sure whether those visual features encode something about the behavior itself or merely something about perception of objects so you know then you take those visual features and you still do some kind of robotic learning on top of it and it works better but we don't know actually I think whether it works better because there's something truly action centric wrapped up in it or if it's merely a better way to like detect objects.
+
+170
+00:36:38,000 --> 00:37:02,000
+And this by the way is exactly why I myself advocate for a more robot centric approach because I think that if we actually use robot data large amounts of robot data then I think it'll be much more actionable in the sense that there we can set it up so that it really does pull out behaviors and leverage the understanding of behaviors rather than merely visual features.
+
+171
+00:37:02,000 --> 00:37:31,000
+So in parallel to some of this work out of Meta and some of these other places that focuses on videos in my group we've been focusing on using robot data sets we collected a large robot data set called the bridge data set called the bridge data set because it's supposed to bridge the generalization gap between single task learning and multi task learning and that has about a hundred different kitchen tasks and we've been trying to see if we can pre train actually with RL so that because it's all robot data can actually pre train with RL and then fine tune with RL and get better performance.
+
+172
+00:37:31,000 --> 00:37:42,000
+And we have seen you know perhaps unsurprisingly that if you're going to use that that robot in those kitchen environments that pre training with RL and multi task settings better than merely learning visual representations.
+
+173
+00:37:42,000 --> 00:38:00,000
+But of course you know I should I should I should sort of predicate this by saying that the experimental setups are different kind of by necessity because we have a variety of robot data sets they have a variety of video data sets and it's hard to have like a head to comparison because it's like they're just different setups.
+
+174
+00:38:00,000 --> 00:38:05,000
+So that that's why it remains an open question as to you know what how those approaches really compare.
+
+175
+00:38:05,000 --> 00:38:24,000
+And the data set that you're working with are they heterogeneous in terms of the type of robot it's you know some granularity some level of granularity or other meaning you know all arms different vendors different form factors like what makes sense there.
+
+176
+00:38:24,000 --> 00:38:34,000
+Yeah, this is actually something that I think is a really important thing that we're going to see a lot more action on in the next year.
+
+177
+00:38:34,000 --> 00:38:43,000
+So right now for our robotic manipulation work it's still in the single robots setting many tasks many environments but one robot we've done work on robotic navigation.
+
+178
+00:38:43,000 --> 00:39:01,000
+This is like ground robots that drive off road to think like sidewalk delivery style robots where we have actually brought in data for many different robots we have a recent work by by my student drew shot called the generalized navigation model that uses data from everything all all the way from a tiny RC car to a full size vehicle.
+
+179
+00:39:01,000 --> 00:39:18,000
+We basically borrowed data from all of our friends at all the different universities that we know of multiple different robots and we were actually able to train an navigation model that can drive new robots we actually got to fly a drone although it was a drone that's pretending to be a car so food a constant altitude without ever having control drones before.
+
+180
+00:39:18,000 --> 00:39:23,000
+So there are no drones in the data set and it can immediately just in zero shot fly the drone down hallways.
+
+181
+00:39:23,000 --> 00:39:38,000
+We're starting but this is why I think this is something that they'll really pick up in 2023 because right now we're right on the cost like we've got for robotic navigation seems to work for manipulation we're collecting the data now but as far as I've seen there hasn't been a really great demonstration yet but I think it's just it's like right on the cost.
+
+182
+00:39:38,000 --> 00:39:48,000
+And the thing that that picks up in 2023 in particular that you're kind of predicting here is an ability to accommodate heterogeneity.
+
+183
+00:39:48,000 --> 00:40:07,000
+I think so I think I think we will we'll see the emergence of models that can accommodate multiple different robot types maybe even different action abstractions and get better generalization by leveraging all of that together and there's already a little bit of a preview of this so there was a work that came out just last week from from Google.
+
+184
+00:40:07,000 --> 00:40:18,000
+This was the this was the team that I that I work with in my part time job as a as a as a Googler called RT one robotics transformer.
+
+185
+00:40:18,000 --> 00:40:32,000
+This was a large effort that took us probably over a year this point although it's roots go back much much further talk a little bit more about that I feel like we're still in the stage where anything that has transformer and it is sexy and interesting.
+
+186
+00:40:32,000 --> 00:41:01,000
+Sure so so the the robotics at Google team is basically the Google brain robotics division we've been doing this work on scaling up robotic learning for a very long time going all the way back to the arm farm effort but most recently what we've done is we've scaled up imitation learning to a massive degree so there's there there are you know if you go into our offices in Mountain View you'll see that there's robots in the kitchen you know you go to get a snack in the kitchen
+
+187
+00:41:01,000 --> 00:41:24,000
+and you'll be waiting in line behind a robot because busy learning how to pick up snacks typical end of tele operation so there's this kind of pipeline kind of an industrial scale pipeline for collecting demonstration data that at this point has yielded over 100,000 trials of all sorts of kitchen theme manipulation behaviors and over the past year we've taken that data and trained
+
+188
+00:41:24,000 --> 00:41:53,000
+and probably the largest robotic control model in existence it's we call it robotics transformer robotics transformer one aspiration hopefully there'll be a two and a three and it takes all this data and it learns language action vision associations to you know mostly to control this one robot it's a robot made by everyday robots it's a Google spin out but in the process of that research we also almost as a little side experiment took data from our previous robot which we use for robotic grasping it's a different robot arm it's a cuckarm
+
+189
+00:41:53,000 --> 00:42:03,000
+and we just rolled that data into the same transformer model more or less without any any substantive modification we just had to get the formats right to make sure like the images with the same scale and the actions with the same scale
+
+190
+00:42:03,000 --> 00:42:18,000
+and it actually worked so the original cuckar robot was doing these bin picking tasks kind of think like Amazon warehouse style tasks the new robot was doing these kitchen snack retrieval kind of things opening drawers getting napkins
+
+191
+00:42:18,000 --> 00:42:26,000
+and for when we combine the data so suddenly the kitchen robot could also do been picking so we could actually trans transplant that knowledge and get better generalization
+
+192
+00:42:26,000 --> 00:42:35,000
+now now this is only two robots and they're you know admittedly there's there was a little bit of finagling to get them to kind of line up so it's not the full multi robots thing and it's certainly not
+
+193
+00:42:35,000 --> 00:42:50,000
+generalizing to new robots but it's an early preview of what might be possible I'm compelled to elaborate on my comment about transformer earlier like it's I think transformers have kind of come to symbolize this
+
+194
+00:42:50,000 --> 00:43:18,000
+there's a brand unification perhaps across different modalities and all of that enables and you mentioned you mentioned that to some degree in there I didn't catch exactly but you said something about text I thought you said text video and something else and actions can you dig into into that and the extent to which
+
+195
+00:43:18,000 --> 00:43:31,000
+is playing out this transformer kind of unification or is it something totally different it's more or less exactly what you would expect so in the same way that you could have so
+
+196
+00:43:31,000 --> 00:43:47,000
+as an example there's been some some work that does multi multimodal transformers for things like visual dialogue right probably the deep minds flamingo model is the best known example of this but there are many others so there's been quite a bit of work that shows how
+
+197
+00:43:47,000 --> 00:44:07,000
+tokenization and transformers can allow you to more or less transparently manipulate multiple different modalities kind of in the same fashion and that's basically the concept behind RT1 robotics transformer is that the modalities that these robots have to deal with which are natural language instructions
+
+198
+00:44:07,000 --> 00:44:23,000
+in the job observations and the action commands that go to the arm can all be treated as tokens that you can flatten into a stream process with a transformer and that provides for a very
+
+199
+00:44:23,000 --> 00:44:35,000
+kind of generic architecture that you can scale up as you see fit to process whatever modalities are about us to deal with and in fact right now we're actually working to include other modalities including goals specified in
+
+200
+00:44:35,000 --> 00:44:40,000
+this other than language and that's fairly straightforward to do once you have this tokenization architecture.
+
+201
+00:44:40,000 --> 00:44:55,000
+What I'm most curious about with regards to RT1 and this idea of a robotics transformer and kind of unifying the modalities is beyond generalization
+
+202
+00:44:55,000 --> 00:45:07,000
+and what do you see that kind of positioning us to accomplish next? Yeah so of course generalization is a really big deal in robotics because you want robot you want general purpose robots that can
+
+203
+00:45:07,000 --> 00:45:26,000
+exist in real world situations in AI in general maybe. But I do think that there is another point here that is you know something that we'll probably see a lot more progress on in the coming year which has to do with how the knowledge contained in language
+
+204
+00:45:26,000 --> 00:45:36,000
+models that traditional kinds of language models and ones that are trained on natural language can inform the behavior of autonomous agents including embodied agents like robots
+
+205
+00:45:36,000 --> 00:45:46,000
+and I would say it's probably fair to say that over the past year there's been a lot of excitement about this but probably the work that we've seen come out is really just the very early steps.
+
+206
+00:45:46,000 --> 00:45:56,000
+And I think that that's something where we'll see a lot more progress and there's some deep there's some deep questions there that have to do with the fact that language models they really
+
+207
+00:45:56,000 --> 00:46:10,000
+do understand something that what goes on in the world but their understanding is you know lacking in many places and there's a there's some deep scientific question and how to marry that knowledge base with embodiment with an understanding of cause and
+
+208
+00:46:10,000 --> 00:46:23,000
+effect in the real world with physical interaction. Essentially the language model can bring to the robot some sort of deep understanding of the semantics of the world but it's up to us as researchers to figure out the right way to get
+
+209
+00:46:23,000 --> 00:46:32,000
+that knowledge that actually utilizes it in the ways where where it's useful but avoids falling prey to all the kind of common sense mistakes that these models will make.
+
+210
+00:46:32,000 --> 00:46:51,000
+Yeah, the picture that's coming to mind for me and it's it's maybe very specific and I'm curious if there's a broader example or the example that you think of but I'm envisioning training some model on all the academic papers that have been written about grasping
+
+211
+00:46:51,000 --> 00:47:00,000
+and somehow using the language you know that model to inform a robot actually trying to grasp.
+
+212
+00:47:00,000 --> 00:47:04,000
+Is that along the lines of the kind of thing you're thinking or.
+
+213
+00:47:04,000 --> 00:47:14,000
+I think we have to be a little careful there so I think that there's a lot of a lot of useful things we can get out of language models like you know if I if I need to
+
+214
+00:47:14,000 --> 00:47:21,000
+ask me to fetch milk well maybe I need to go find a refrigerator I know the refrigerators tend to be in kitchen so I'll go find the kitchen.
+
+215
+00:47:21,000 --> 00:47:30,000
+At the same time there's certain things that a language model won't really tell you and there's a there's a reason for this which is that certain things are very easy for people but very hard for machines
+
+216
+00:47:30,000 --> 00:47:38,000
+and the things that are easy for us we don't tend to put them into words so we don't we don't have to write instruction manuals about how to use your neurons to
+
+217
+00:47:38,000 --> 00:47:45,000
+actuate your muscles to pick up a fork so you can eat dinner because like people don't need instructions for that but robots do need those instructions.
+
+218
+00:47:45,000 --> 00:47:55,000
+So so I think that there's this gap and exactly those things where the gap between humans and robots is largest are those things that we will not be able to get out of language.
+
+219
+00:47:55,000 --> 00:48:05,000
+And that's okay that that that that that means that you know I'm going to remain gain for employed and we as roboticists can figure out embodied learning methods that will
+
+220
+00:48:05,000 --> 00:48:11,000
+take care of those behaviors and then interface them appropriately with the rich semantics contained in language models.
+
+221
+00:48:11,000 --> 00:48:13,000
+But but that's where we get into the challenge.
+
+222
+00:48:13,000 --> 00:48:31,000
+In other words you think that where robotics the greatest yeah to overspecify what you're saying but broadly where robotics most will gain from kind of
+
+223
+00:48:31,000 --> 00:48:47,000
+incorporation of language models is kind of this broader understanding of the world that the robot is operating in as opposed to we've been talking a lot about you know robots robots going to get you know some understanding of robots you
+
+224
+00:48:47,000 --> 00:48:57,000
+know from an actuation and kind of how to move in the world from what it's what we're what this language model learns.
+
+225
+00:48:57,000 --> 00:49:05,000
+Yeah that I think that's basically the idea that that for the robot to learn about physical physical interaction or physical interaction something you go and do you try and you see what happens.
+
+226
+00:49:05,000 --> 00:49:20,000
+But then when it comes to understanding the the logic of semantics the logic of how human spaces are laid out the logic of how humans think about concept you know that that's something that language model can provide which would be tremendously useful.
+
+227
+00:49:20,000 --> 00:49:30,000
+You reference a couple of additional papers that you found interesting this year say can and clipboard can you talk a little bit about those.
+
+228
+00:49:30,000 --> 00:49:46,000
+Yeah so on this topic of interfacing language models to robots there have been a number of works that have sought to explore different ways to perform that interface and these range from you know kind of fairly
+
+229
+00:49:46,000 --> 00:49:59,000
+direct approaches like for example a number of folks here at Berkeley when long was the student who kind of let that work.
+
+230
+00:49:59,000 --> 00:50:12,000
+Look that just directly asking a language model to create a plan so you can just construct a prompt and say like hey I you know I want to make a sandwich tell me the steps to make a sandwich and then attempt to execute those steps.
+
+231
+00:50:12,000 --> 00:50:17,000
+And you know that was one of the first efforts of every leveraging language models in this way.
+
+232
+00:50:17,000 --> 00:50:25,000
+But I think it also revealed many of the shortcomings that like yeah like the cement the grounding the physics and the perception is not quite there.
+
+233
+00:50:25,000 --> 00:50:37,000
+So at Google we had some work this was the say can paper that looked at exploring deeper ways to interface language models and physical interaction.
+
+234
+00:50:37,000 --> 00:50:54,000
+And the particular idea that we want to explore is whether RL can actually provide a way to facilitate that grounding and in particular not RL policies but actually RL value functions so value function looks at the state and it says can I do this task.
+
+235
+00:50:54,000 --> 00:50:58,000
+So if you have a high value for a task that means that in that state you believe the task can be done.
+
+236
+00:50:58,000 --> 00:51:12,000
+And what we try to do is we try to use these essentially as affordances so you have you know 20 tasks you can do you look at the current world and your value functions predict oh five of these tasks are possible so the world has affordances for those five tasks.
+
+237
+00:51:12,000 --> 00:51:19,000
+And then you ask a language model I want to make a sandwich what do I do and the language model gives you a bunch of steps but some of those steps you can't do right now.
+
+238
+00:51:19,000 --> 00:51:34,000
+The current state might not have that affordance so you do is actually combine and you take the affordances that are predicted and the steps the language model is to execute and you intersect them to find the ones that are both possible right now and that are semantically meaningful and that now provides you with the ground.
+
+239
+00:51:34,000 --> 00:52:02,000
+So that worked a lot better for us and I think that you know perhaps in some ways this is actually only one step in that direction because you could imagine multi step versions of this where you might have a learned predictive model like world model that is more about the physics and the perception and you would couple it to the language model to essentially decode sequences of behaviors that are both physically feasible and semantically meaningful and I think we'll see a lot more research along those lines in the in the next little while.
+
+240
+00:52:02,000 --> 00:52:13,000
+Awesome so our language models pre trained models for robotics.
+
+241
+00:52:13,000 --> 00:52:40,000
+I think the last time we spoke we spent a lot of time talking about offline RL and one of the things that was exciting about that field is just this idea that we've been collecting a lot of data we want to use that data to make intelligence decisions and developing policies using these kind of emerging offline RL methods was kind of a promising approach.
+
+242
+00:52:40,000 --> 00:52:44,000
+Have we seen much advancement in that field this year.
+
+243
+00:52:44,000 --> 00:53:09,000
+Yeah so I think last time you and I talked was might have been 2019 so in the in the intervening time offline RL is an area where we have seen a lot of progress so you know the relevance of this of course to our discussion up until now is that whether it's for language dialogue systems or robots these are all areas where you can get lots of prior data right so certainly for dialogue get lots of data humans talking to humans for robots you can load up videos or data from robotics.
+
+244
+00:53:09,000 --> 00:53:14,000
+We've done in the past so these are all areas where offline RL is a really big deal.
+
+245
+00:53:14,000 --> 00:53:31,000
+And one of the things that has happened over the last few years is that we as a community I think have really nailed down a lot in terms of the theoretical foundations of offline RL and I would say that compared to two to three years ago we understand much much better how to build effective offline RL algorithms.
+
+246
+00:53:31,000 --> 00:53:57,000
+All the way from theoretical foundations to practical methodology so in terms of the theory there has been a tremendous kind of amounts of progress from you know many RL researchers developing a deep understanding of how offline RL works and also how it doesn't work in some cases so there's been some negative results in possibility results from folks like Sean Cockade and his collaborators that show that at some circumstances it's very hard.
+
+247
+00:53:57,000 --> 00:54:08,000
+But in practice there have been advances in algorithms that do make it very practical and at this point I think we you know if you want if you have an application we have algorithms that are kind of ready to go.
+
+248
+00:54:08,000 --> 00:54:18,000
+There's still room for improvement but with things like implicit Q learning conservative Q learning other recent developments there's you know there's a pretty good foundation to build on.
+
+249
+00:54:18,000 --> 00:54:37,000
+And certainly in my group and I'm sure many others there's now a lot more exploration of applications of these things because what the methods of mature to the point where we can start trying to use them for dialogue for robots for autonomous driving and you know I do think we'll see a lot more exploration of that area in the near future.
+
+250
+00:54:37,000 --> 00:54:49,000
+Speaking of the kind of growing practicality of offline RL by the time this interview is published we will have already published I think.
+
+251
+00:54:49,000 --> 00:55:12,000
+In an interview that I did with Tony Jabara of Spotify in the context of a talk that he gave at one of the kind of practical RL workshops at nirips exploring some of the ways that they're applying offline RL and some other things to recommendations for for Spotify.
+
+252
+00:55:12,000 --> 00:55:30,000
+Maybe kind of big papers that come to mind in the fields over the past year or so or you may be well you can address that and then kind of where you think things are going we can touch on that next.
+
+253
+00:55:30,000 --> 00:55:45,000
+I don't think there have been really huge papers but there's there are a few things popping up here and there including the thing that you just mentioned that kind of show that lots of people are trying to use these things in various places.
+
+254
+00:55:45,000 --> 00:56:10,000
+Some of the things that was kind of a little surprising to me is I found out just a couple months ago that apparently some folks at LinkedIn had used conservative Q learning with their like I think it was like a notification system and and attain some you know pretty clear quantifiable improvement from that so so it really seems like people are trying this thing and in different algorithms and different applications but already started to see some forward progress.
+
+255
+00:56:10,000 --> 00:56:26,000
+That's actually quite nice because just a few years prior this would probably not have been possible but I think that the really big results are yet to come and I do think that it could that it's possible this will show up in places like dialogue and language models where there are large data sense and where there's room for gold or behavior.
+
+256
+00:56:26,000 --> 00:56:35,000
+I think it might show up in areas like robotics certainly something that we're working on here probably many others to where you could potentially use offline RL is a very effective pre training tool.
+
+257
+00:56:35,000 --> 00:56:58,000
+We we've used that here for robots with a bridge data sub but I think that there's a lot more to do there it could show up in areas like autonomous driving where offline RL can give you a kind of a middle ground between a pure limitation based approach versus purely planning based approach that leverage a simulation and that could be very effective because in driving you need to figure out how to interact with other humans which is something that's very hard to simulate.
+
+258
+00:56:58,000 --> 00:57:08,000
+So I'm not sure where the really big result will first come from but I think that there's a good chance that we'll see that popping up over the next little while.
+
+259
+00:57:08,000 --> 00:57:31,000
+When you when you look forward yeah I kind of want to ask about where you see the greatest opportunities in the field and you know maybe one way to think about that is if you're a new researcher which you should be focused on or I'm not sure that's different from everything that we just talked about.
+
+260
+00:57:31,000 --> 00:57:53,000
+But I'll put that question out to you and kind of see where you take it sure so I think we could if we step back a little bit I can give a kind of a little bit of big picture of logic for this that at some level if you if we want very capable AI systems and we reflect on the lessons of the past few years.
+
+261
+00:57:53,000 --> 00:58:01,000
+I think it's pretty clear that certain ingredients need to be present like it seems pretty clear for example that large data sets are really important for effective AI systems.
+
+262
+00:58:01,000 --> 00:58:17,000
+But at the same time at least to me it also seems clear that effective decision making is also important because you really you don't just want AI systems that mimic human behavior you really want AI systems that accomplish objectives that I actually do something and that means decision making.
+
+263
+00:58:17,000 --> 00:58:28,000
+So so that's some very high level logic but what it points to is that basically you want systems that can optimize for outcomes that can make rational decisions and that can consume lots of data.
+
+264
+00:58:28,000 --> 00:58:45,000
+And if we take those two ingredients and we say well if we want these two things what what are we going to work on it probably suggested there needs to be some kind of RL component in there and you know maybe it'll be like the banded style RL from human feedback I think it'll be more like the multi multi step sequential stuff.
+
+265
+00:58:45,000 --> 00:58:54,000
+But you know that that's more technical detail seems like some kind of optimization for behaviors necessary and it also seems like the ability to use data is necessary.
+
+266
+00:58:54,000 --> 00:59:00,000
+So that's why I myself am really excited about offline RL in particular because that does use data and has a rel in it.
+
+267
+00:59:00,000 --> 00:59:08,000
+But to be fair it doesn't necessarily have to be offline like you know it could be that there's some setting where you can get huge amounts of online interaction certainly recommender systems are one such example.
+
+268
+00:59:08,000 --> 00:59:17,000
+Or it could be a setting where maybe the methods have looked more like a model learning prediction followed by planning and certainly a very valid way to approach it.
+
+269
+00:59:17,000 --> 00:59:28,000
+But as long as there is optimization for rational decisions and the ability to consume large amounts of data those are I think the key ingredients and I think for folks that want to get into studying some of these problems.
+
+270
+00:59:28,000 --> 00:59:42,000
+There are a lot of opportunities from dialogue and language models to you know robotics autonomous vehicles all the way to you know to the more industrial relevant things like recommender systems things like that.
+
+271
+00:59:42,000 --> 00:59:51,000
+So I think if the ingredients are there is data there's a lot of it and there is an ability to inject rational decision making that's a good area of study.
+
+272
+00:59:51,000 --> 01:00:20,000
+So the thing is that historically and maybe it's not in the review mirror fully yet but has kind of played RL is just fragility and challenges with reproducibility and you know just the difficulty in difficulty in getting it working difficulty in kind of writing down reward functions like all of these things.
+
+273
+01:00:20,000 --> 01:00:46,000
+Do you think the do you think that the kind of change in setting and like focusing on offline as opposed to online has shifted that a little bit and kind of made it more readily applicable and address some of those issues or do you think that kind of solving those problems is yet ahead of us and do you do you foresee.
+
+274
+01:00:46,000 --> 01:00:51,000
+You know that are becoming easier to apply you know in the near term future.
+
+275
+01:00:51,000 --> 01:01:03,000
+I think that this is actually an area that used to be extremely difficult to deal with because not the problem I think is not just that RL was hard to use in fragile it's that we didn't really understand exactly why.
+
+276
+01:01:03,000 --> 01:01:12,000
+And I don't think I don't think it's that we've made a ton of progress in solving that issue but I do think we've made a ton of progress in understanding why.
+
+277
+01:01:12,000 --> 01:01:22,000
+And a little bit of progress in solving it so one of the things that maybe you know it's going to be under the radar for many folks but in the in the core RL community it's something that.
+
+278
+01:01:22,000 --> 01:01:35,000
+I think quite a few people are excited about is that I think we are actually approaching and understanding for what the heck is going on and what the heck is going on in general or what the heck is going on when it is not working what the heck is going on when it's not working so.
+
+279
+01:01:35,000 --> 01:01:59,000
+And here's one hypothesis and I do want to preface this by saying that this is not you know this is stuff that's still up in the air there have been a few papers that have come out you know from my group from Shimon Whitesons group with a student Clare Lyle from some folks at deep mind there's you know a few folks that have approached this but there isn't a definitive answer but it seems plausible that the answer looks something like this we can go back to.
+
+280
+01:01:59,000 --> 01:02:09,000
+First to a more basic question about supervised learning which is how is it that we can train models with a huge number of parameters and not overfit catastrophically.
+
+281
+01:02:09,000 --> 01:02:28,000
+Seemingly completely unrelated question but it actually connects deeply to this and it's something that are all that the machine learning deep learning practitioners kind of don't really worry about because like hey the thing is working but theoreticians they this keeps them up at night like they are freaking out about this what the heck is going on we're breaking like the fundamental law of machine learning by trading giant models and they don't overfit.
+
+282
+01:02:28,000 --> 01:02:42,000
+So the dominant hypothesis is that there's some kind of implicit regularization effect that happens when we use stochastic gradient descent and deep nets and it's in some sense that that effect has been sort of saving our bacon for the last decade by.
+
+283
+01:02:42,000 --> 01:02:55,000
+Allowing us to train these giant models without overfitting and lots of folks have constructed various mathematical models for what that effect would be there's some very good hypothesis coming coming out now from from the machine from the deep learning theory world.
+
+284
+01:02:55,000 --> 01:03:13,000
+But then it seems like in reinforcement learning what might be happening is that that magic that makes supervised deep learning not crash and burn might not actually be working the way it should because RL is not grading descent if you're doing value function learning it's a fixed point duration it's not exactly grading descent.
+
+285
+01:03:13,000 --> 01:03:24,000
+And we thought for a while it's like kind of close enough like don't worry about it well maybe that was actually a mistake maybe we should worry about it and there have been a few results from from a number of groups including from ours.
+
+286
+01:03:24,000 --> 01:03:40,000
+That provide different mathematical models that do actually show that you can you can set up your assumptions carefully and get a result that says supervised learning will work RL will not work and perhaps this offers us a hint for what the cause of that fragility is.
+
+287
+01:03:40,000 --> 01:04:09,000
+It's fair to say that the magic isn't necessary isn't gradient descent but all of the hacks and tricks and things that we layered on top of gradient descent I mean gradient descent started not working with exploding gradients and all that stuff and you know we've come up with drop out and you know cyclic learning rates and a whole bunch of crazy like incantations that kind of makes it work consistently now is it just that we haven't figured those things out yet for RL.
+
+288
+01:04:09,000 --> 01:04:29,000
+I think that that is probably at some level the truth yes and I think that certainly some of the incantations from supervised learning do help a ton in RL and you know in our own work on scaling up offline RL methods we have found that if we're a little careful in using the right architectures
+
+289
+01:04:29,000 --> 01:04:42,000
+ones that are bigger than one would think are appropriate for the problem have better grading flow and are a little careful in setting things up things can work way better and sometimes the choice are not exactly the same as supervised learning choices but they're kind of in the same wheelhouse.
+
+290
+01:04:42,000 --> 01:04:54,000
+But at the same time I do think that more deeply understanding the theory the cause behind the instability might give us a little more guidance I mean in the end you know practical machine learning always comes down to tricks and kind of empirical prowess
+
+291
+01:04:54,000 --> 01:05:03,000
+but a little bit of those theoretical foundations might help point us to where we would expect those tricks to come from the degree to which they're the same as supervised learning and the degree to which they're different.
+
+292
+01:05:03,000 --> 01:05:09,000
+So you know that that's something I'm actually pretty excited about and I think that it's flying under the radar a little because these are like very technical things.
+
+293
+01:05:09,000 --> 01:05:18,000
+But I think it you know as someone who's like really deep in the RL world I guess I haven't been this hopeful in a while let me put it this way.
+
+294
+01:05:18,000 --> 01:05:25,000
+Awesome awesome can I press you for your top three predictions for 2023.
+
+295
+01:05:25,000 --> 01:05:33,000
+I think my predictions are necessarily going to be a little aspirational but what I would hope for is that in 2023 I think we.
+
+296
+01:05:33,000 --> 01:05:44,000
+I'm very hopeful that we will see RL with language models go beyond the single step setting and really optimize for long horizon goals in an effective way at scale so that we can actually get.
+
+297
+01:05:44,000 --> 01:05:49,000
+Language models that interact with humans and optimize long horizon objectives.
+
+298
+01:05:49,000 --> 01:06:06,000
+I'm very hopeful that we will get some kind of robotics model that can be used by other people in the sense that right now if we develop a robotics model in my lab it'll be used in my lab if I've been up to develop set in his lab he'll use it in his lab.
+
+299
+01:06:06,000 --> 01:06:18,000
+I'm very hopeful that 2023 will be the year when we really start seeing meaningful sharing at the level of you know models that actually represent behaviors and I think that we're getting very very close to that.
+
+300
+01:06:18,000 --> 01:06:32,000
+And I think the other thing the third one I would name and I don't know who's who's going to sort of have the first big win there but I think we will see some kind of big application of offline RL that that you know at large scale and perhaps it will be one of the recommender systems folks because it seems like.
+
+301
+01:06:32,000 --> 01:06:47,000
+There's a web applications there've been a lot of you know initial progress in lots of places maybe it'll be for language models or maybe it'll be for robotics and you know I think in the long run will be all of these but we'll see who comes out with something truly impressive first awesome awesome.
+
+302
+01:06:47,000 --> 01:07:02,000
+Well Serge thank you so much for spending the time to kind of recap and look forward in RL with us very fascinating conversation and appreciate you taking the time thank you so.
+

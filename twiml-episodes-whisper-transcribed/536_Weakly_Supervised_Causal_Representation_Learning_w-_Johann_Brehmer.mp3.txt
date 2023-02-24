@@ -1,0 +1,574 @@
+All right, everyone. Welcome to another episode of the Swimwell AI podcast. I am your host,
+Sam Sherrington, and today I'm joined by Johan Braemer. Johan is a research scientist at Qualcomm AI
+research in Amsterdam. Before we get going, be sure to take a moment to hit that subscribe button
+wherever you're listening to today's show. Johan, welcome to the podcast.
+Hi, Sam. Thanks a lot for having me. Super excited to have you. We're going to be talking about one of
+the papers that you presented at NURPS on causal representations, as well as some of the things
+that your colleagues presented at the conference. But before we do that, I'd love to have you share
+a little bit about your background and how you came to work in machine learning. I grew up as a
+particle physicist. So I was trying to figure out the best way that we can measure the properties
+of all these elementary particles around us, like the Higgs boson, from all the data collected
+the large header and collider. Now, that's an inherently statistical problem, right? You need tools
+from statistics and from machine learning to solve this problem with all the high-dimensional data
+and the many pyramids you're trying to measure. During that time, I figured out that I actually
+enjoy working with the methods with the statistics and the machine learning much more than talking
+about the theoretical questions I set out to solve in the first place. So from there, it was a
+slippery slope. I started working on statistics for particle physics. I then did some machine learning
+for the sciences, and suddenly I found myself an Amsterdam working on machine learning problems
+that have nothing to do with particle physics with some great colleagues. And initially, or immediately
+into communications types of problems and the kind of things that you work on at Qualcomm, or
+did you start in another area? So in my first year at Qualcomm, I worked on a video compression
+with neural networks. I think my colleague, Alke Viggas, from the team was recently on your
+podcast and explained all that much better than I would do justice now. But there was a nice
+introduction to Qualcomm and all the research that we're doing there. But then one year in,
+we started a new team on causality. Now relative to some of the other folks that I've talked to
+on the Qualcomm AI research team, causal work is much less applied than video compression,
+for example. Yeah, totally true. I think Qualcomm has kind of this full spectrum of research that
+ranges from pretty applied, like model efficiency, neural network quantization, video compression,
+these kind of things, to pretty fundamentally like a geometrically learning, a covariance, and now
+also causality. But they're all united by this idea of making AI more efficient in some way.
+And I think for causality, the idea is that causality may be a framework that helps us solve some
+problems that are currently pretty much unsolvable with the standard paradigms in machine. But it may
+take some years to get there. And what are some of those types of problems that you think causality
+can help us solve in in ways that will be much more efficient? Yeah, so machine learning systems
+right now are great, like just by scaling up the datasets and scaling up the models we can solve
+many problems much better than we thought we could. I mean, look at ChatGPT. But there's still
+some things that are really hard for these problems. And one case is kind of the brittleness under
+changes. If you train a model in one type of conditions and then deploy it under different
+type of conditions, then often the performance goes down quite a bit. Like the machine learning
+systems have a hard time with seem to real with any kind of changing conditions. Now causality
+on a very high level is a framework about reasoning about actions, about reasoning about changes,
+about robustness under changes. So on an intuitive level, I think it makes a lot of sense that
+this can help us address these these open problems. However, I should say that it's not totally
+clear concretely how this will work, right? This is an open research field. Causing machine learning
+has really just started gaining momentum a few years ago. So let's see where this takes us.
+Yeah, before we dive into the paper about your research, Qualcomm, is it entirely focused on
+causality or are you covering several areas as well? It's about causality and interactive learning.
+So it kind of focuses on a lot of topics that bother on reinforcement learning. We have some
+projects on imitation learning. Maybe we'll get into that a little bit later. We have some projects
+on unsupervised reinforcement learning. What can you learn in a setting where you have an
+interactive environment, but no reward function, and no expert demonstrations, and then there's
+kind of the more classical causality. Awesome. And so this particular paper that we wanted to spend
+some time talking about is called weekly supervised causal representation learning. unpack that
+title a little bit and the goals you have for the paper. Yes, excellent. Let me start a little bit
+from the end of it, right? So the paper title ends with representation learning. And one of the
+two goals of this paper is to learn meaningful representations of data. What do I mean with that?
+If you have data presented to you in some kind of low level format, think the pixels of an image
+or maybe of a video feed or anything that we can record with sensors 3D, we want to train
+into a network to take that as an input and output a much smaller number of high level variables
+that capture the meaningful aspects of a system similar to how humans reason about system.
+When I show an image, you're not thinking, oh, these are some really nice collection of pixels
+here, right? You think this image shows, for instance, a car on a road in front of a traffic light.
+And the relevant variables are probably something like the position of the car, maybe the speed of the
+car, and then the state of the traffic light, whether it's red or green. So this is a much smaller
+number of meaningful variables and we want to train a new network to put this out. So that's the
+representation learning part. Now going one word more to the beginning, there's a causal in there.
+The second goal in our work is that we also want to learn a causal model between these high level
+variables. And its causal model is about the interactions between concepts. So again, in this
+example of a car before a traffic light, as humans, it's very intuitive to us that we think that
+the traffic light state, whether it's green or red, influences causes the behavior of the driver,
+whether they accelerate the car or break the car. So there's a causal effect from the traffic
+light state to the velocity of the car, but not the other way around. And this is important
+because it allows us to reason about what if questions. As a human, it's very easy for us to say,
+if the traffic light would turn to red, the car would break. If the car would break, it wouldn't
+necessarily make the traffic light go red. Now, machine learning systems, at least the majority of
+them, do not really reason about this kind of cause and effect relations. Most machine learning
+systems are stuck at the level of describing correlation patterns. So for instance, looking at a
+data set that shows you images of cars on traffic lights, machine learning systems could figure out
+that green lights are correlated with fast velocities and red lights are correlated with braking cars.
+But this doesn't allow the machine learning system to answer a question, what happens if the car
+breaks? Does the traffic light then suddenly change? So this is really a new kind of capability that
+doesn't exist in most kind of machine learning systems. Now, there's the weekly supervised part in
+the title. In this paper, what we do is we learn a neural network that that learns that
+represents data from pixel level into this kind of low number of meaningful high level variables
+and also learns the causal relations between them. But we do this without explicit labels in the
+training data. So there's no label that tells us in this image, the velocity of the car is 30 kilometers
+per hour, that's 20 miles per hour, or what have you, anything like that. So we just train this from
+example on the pixel level. But it's impossible to do this fully unsupervised. There are some papers
+that prove that this problem is really underspecified if you have just IID data just images.
+And the way that we solve this is by by breaking the ID assumption, we consider non-ID data,
+so kind of data with some structure in it. And concretely, we consider the case where we observe
+the system kind of pairs of before and after images. So we take a picture of the street,
+then something changes in the scene, like some effect is applied to it. For instance,
+you switch the traffic light state from red to green and let all the causative effects of that
+play out, and then you take another picture of the scene. And we just need this kind of before and
+the after image, but no further labels, no information on what happened before and after. If we have
+this kind of paired data, then we can show that this is enough to really learn the true causal
+variables in the scene and the true causal effects, the true causal graph, all the mechanisms that
+come on the scene. Now, I'd love to maybe start talking about how far along you are and how far
+the method that you've identified can take us and ask that in the context of this one diagram
+that you have at the very beginning of the paper that kind of articulates what you're hoping to do.
+It's a picture of some standing dominoes that you're before picture and then you have
+some dominoes tipped over and presumably there's an intervention between the two, someone
+tipped a domino. And you know, the grand idea is that you, with enough of these domino pictures,
+you can start to learn that if you've got some kind of domino tipping intervention,
+what the outcome will be after you've applied that intervention.
+Yeah, that's exactly right. And yeah, we're not at the point where I can, you know,
+giving your trained model, take a picture of some dominoes and apply this intervention somehow
+or say that, okay, give me the picture after the dominoes have fallen and get that resulting
+picture, correct? That's unfortunately correct. Yes, I think we make a pretty strong claim.
+In this paper, right, we have this really strong claim that we can identify the causal structure
+and the right variables and everything correctly. But to get such a strong result, we also need
+strong assumptions. And the strongest assumption is I think there's this kind of data regime that we
+need this data in this before and after pairing. And we also need to assume that nothing else
+changes between the before and the after image, just like one thing is intervened upon one action
+happens. But we also need to make a couple of more technical assumptions. And unfortunately,
+many real world examples violates some of these technical assumptions that we need for our theory,
+at least. So in particular, in this domino case, if you have two domino pieces, if you push over one,
+it would knock over the second one. If you push over the second, it could knock over the first
+one. So they're kind of the graph here in some sense is cyclic, right? Like each domino,
+like they affect each other pairwise. And this is something that standard causal frameworks
+can't really deal with so easily because we always assume that the graph of causal interactions
+needs to be a cyclic. Something can be the cause of something else, but that can't also be the
+effect of that variable. There's no back and forth relation in classical causal models. Now,
+there's some ways to resolve that. But in this work, we just assume that the causal structure is
+indeed a cyclic. So there's a clear causal ordering of mechanisms. The traffic light causes the
+velocity, but the velocity doesn't cause the traffic light, just one of these two things is possible.
+And so this is one setting that that that domino example violates. But I think it's really good
+to look at these cases that we can't do with yet because ultimately what we want to do is we want
+to solve real world problems. So we really need to kind of look at what what our theory can't
+describe yet and push there. And I think the way forward maybe to give up a little bit on the
+theoretical rigor to maybe not aim for theorems and proofs, but aim for just algorithms that empirically
+work ultimately. But in this current paper, we are kind of at the closer to the fundamental side
+of things. We have some theory. I think we understood some things better, but we don't have this.
+One size fits all algorithm that you can deploy to real world examples. And certainly not we haven't
+solved autonomous driving yet. Yeah, for sure, for sure. But what you've done is you've demonstrated
+that it is possible to identify these causal variables from, for example, from just pixels,
+which is pretty impressive in and of itself. Does the paper just demonstrate that it is possible
+or does the paper demonstrate how to derive the causal variables themselves?
+It does both. So I think a large fraction of the contribution of this paper is the theory. So
+that it's basically mostly one theorem and the proof that it accompanies it. But we also have a
+practical implementation. And essentially it consists of a variational autoencoder. So there's
+an encoder that takes as input pixels and it outputs some latent variables. And these latent
+variables are the causal variables of the system. And then there's a decoder that knapset back to the
+pixel space. And what's new about this kind of variation autoencoder is that we describe some causal
+structure in the latent space. So the latent variables are not just described by some, you know,
+IID Gaussian prior, like most fear is to it. But we have a prior that really incorporates
+the causal structure, the graph between the variables, this graph is learned during training.
+And also the exact mechanism, how each variable affects each other very well.
+And yeah, this kind of VAE, we trained this on these paired data sets before and after
+the intervention images. And then we show in a series of experiments with some, we start with
+some very similar toy data sets as we worked towards a simple image data sets that this works in
+practice. Is it interesting or kind of obvious and not interesting that the parallels between
+the video compression stuff that we talked about before that might use an encoder decoder type
+of architecture and that you're able to do the same thing here. You're kind of compressing
+the dynamics of the system happening before and after the pixel space into some kind of reduced
+dimensionality, you know, causally semantic space. Yeah, that's a good point. It definitely has
+some parallels like the overall architecture is very similar. But I think there's one important
+difference and that is that the kind of goal that we are trying to achieve, right? And compression
+is really about this aspect of compression, but then kind of how we use these different bits,
+how we use the representation of the latent space, doesn't really matter like the model can do
+whatever at once. And if you visualize the latent representation that compression autoencoder
+learns, you'll see that it's really not interpreted by humans. Like varying one latent variable
+leads to some very weird outputs in image space. And contrast, our model doesn't really care so
+much about the bit rate used in the end. I mean, it does play a role in the loss function a little
+bit, but it's not really the goal. The goal is really that the variables in the end have some
+meaning. The latent variables are exactly the true latent variables up to some permutations
+and rescalings. There's definitely some kind of machine learning knowledge that we gained
+on this compression work that we could use in the causality work, but I think the interpretation
+of the results is very different. Can you maybe talk a little bit broadly about
+the, you mentioned that there's kind of this one theorem that's at the heart of the paper. Can
+you talk a little bit more detail about that theorem? Yeah, I'm happy to. So this basically says,
+if you have two models, and with model, I now mean kind of a causal model between some variables,
+and then a map that takes these causal variables and maps them to some data space, so think pixels.
+So we call this a latent causal model. Now, what the theorem says, if you have two latent causal
+models, such that both of these latent causal models give rise to the same kind of data set,
+if you look at them. So if you kind of look at what kind of images you would get from the first
+latent causal model and what kind of images before and after images you'd get from the second causal
+model, they are the same. There's the same distribution. Then the two latent causal models are the
+same in the sense that they have the same latent variables, they have the same causal structure
+up to some equivalence class. This equivalence class basically tells you that for instance,
+we can't resolve permutations. If one model has variable one and two, and then the second model
+has variable two and one in the opposite order, then there's just something we can't further resolve
+because we never get labels. But up to this kind of small, and one might say irrelevant effects,
+those two models need to be the same. Now, why does this theorem matter? Because if you think of one
+of these two models as the generative process, the ground truth process, the generated observed data
+in some setting, maybe it's like the physical laws of the universe or it's like the rules of
+the traffic scene or maybe there's some human psychology and there would have some ground truth
+process that generates a data set. And the second model is some neural implementation of
+the latent causal model. So we use a VAE, we use neural permutations of the causal structure,
+and we train it to maximize our training objective. And then another some additional assumption
+that we have a good optimizer that we have enough data and so on, like the usual machine learning
+assumptions, then our theorem implies that in the end our learned model will recover the ground
+truth causal variables and the ground truth causal structure. Of course, the hidden assumption
+here is that indeed nature operates as such a causal model. And as we've already discussed
+with this domino example, there's sometimes some subtleties where our assumptions are not satisfied.
+And what are the mechanisms that you use to prove this theorem?
+Oh, that's a fun question and I like to talk more about this, but maybe I try to keep this
+kind of short. My two collaborators, my two main collaborators on this paper, Pim de Han and
+Takako and are both believers and practitioners of a field of mathematics called category theory.
+This is like the most abstract of mathematics. I really try to find like the most general structures
+that exist and try to unify many different fields of mathematics. We are not really using
+category theory, but we're using one tool, one particular graphical language developed in
+category theory, called string diagrams. And we use string diagrams to kind of represent
+different probabilistic equations, kind of relations between different probabilistic distributions
+graphically. And then you can use some nice manipulations on these and then use that to prove
+the theorem. I have to say, when I started out of this project, I was a bit skeptical about this
+and I like to make fun of my colleagues. And category theory in general? No, I think category
+theory is beautiful, but I was skeptical that it would give us practical advantages for this
+concrete project. But then it did simplify the proof here quite a bit. And I say by colleagues
+really showed me the way a little bit there. That's awesome. Did that just happen to be the
+approach that worked or was the project conceived with that as part of the approach that you
+would, was the project conceived as, you know, with that solution in mind? No, I would say we started
+out just from the actual kind of question. Can we, can we identify, cause a variables, can we
+identify, cause a structure just from pixelabid data? And then our first version of the proof
+looked much longer and much less elegant and did not involve any fancy diagrams, but then that
+evolved over time into something prettier. So it was more of a later stage of the project.
+Okay, okay. And you're careful to distinguish the causal variables and the causal structure
+or the causal relationships. Can you kind of more carefully distinguish the two and really talk
+about the relationships and how, how causal relationships are expressed? Oh, yeah, that's
+a great question. So in causality, one of the really important things is that we really don't
+just reason about variables, but reason about variables and the mechanisms that generate them.
+And what I mean with that is that the causal model, or there's different frameworks, but the one
+that's most widely used these days, describes the relation between variables is kind of factorized
+into a number of, if you want cause and effect relations, each of them takes the form of some,
+some, some mechanism. So in the, the root example that we had, one mechanism could, for instance,
+be how the, the traffic light is programmed, right? It probably has some frequency, how often it's
+green, how often it's red, how the changes, that's, that's one mechanism. And then a separate
+mechanism is how the car behavior adapts to, to the traffic light and maybe also the other things
+it sees on the road. So that kind of determines the car velocity as a function of all the other
+inputs, in particular, as the function of the traffic lights date. This is something that depends
+now on, on the particular driver. And what's kind of cool about this is that these mechanisms
+are independent in the sense that if you think about a different version of the scene, let's say we
+move to a different city, then maybe the, the traffic light frequency is totally different. So you
+can kind of change this one mechanism, but the way that humans react to traffic light will stay
+the same, right? That's kind of universal. So we only have to swap one mechanism when we change
+the scenery, why can keep, why we can keep the other one. This as fast mechanism shift hypothesis
+at its call sometimes is the essential reason why people believe that causality can help us with
+things like domain shift. Because we can think that if everything is composed of mechanisms,
+it's quite likely that when you change conditions, if you go from seem to real or from one country
+to another one, just a few of these mechanisms change, while other things are more universal,
+like the laws of physics are the same everywhere. Some human behaviors are the same everywhere.
+Yeah, but other things change, like go to the UK and suddenly you have to drive on the left side
+of the road. Now going back to the exchange we had about the parallel between compression and
+what you're doing here, identifying causal representations. You mentioned that in the case of
+compression, the goal is to find kind of the minimalist representation of this function, if you will.
+In this case, you're trying to identify a representation that is true to the causal nature that
+you're trying to model. I don't know if it's related to the, I guess intuitively, it strikes me
+that the causal representation would also be minimal. In the case of the traffic scenario we're
+talking about, really, the only things that matter are the traffic light and the cars and everything
+else is noise that might be captured by some other model, but the fundamental things that are
+causing the system to behave the way it's behaving are the traffic light and the car behavior.
+If you can model those and just those as a set of causal relationships, that would seem like it
+should be minimal. Where does that break down? Yeah, that's a really interesting point. I am actually
+not sure if anyone has tried exactly this, but it's true that most people find it likely that
+the causal description of the system has the most or relatively simple components as opposed to
+a non-causal description of the system which could have very complicated probability distributions.
+So, yeah, that's a great question. It is true that in some sense causal mechanisms are generally
+assumed to be simple, especially for humans. We assume that if we factor a probability
+distribution along the causal mechanisms, so if we describe everything with a kind of
+causal mechanisms, it's a much simpler thing than if we parameterize it in some other way.
+Now, I think where this breaks down is that ultimately what's simple to humans and what's
+simple to machine learning algorithms, at least right now, isn't quite the same yet. So,
+the way that machine learning capacity works translates into different notions of simplicity
+for a totally neural prior and then a neural decoder, then notions of simplicity for kind of,
+when humans read an expression, what do they think of the complexity of something?
+But I do think it's very interesting to explore this further and think more about things like
+the minimal description length principle and how that could be applied maybe to compression.
+Maybe indeed there is a deeper relation how we can use some of these ideas of simplicity that
+pop up both in causality and in compression. There was some prior work that attempted to do
+something similar, identify causal representations, but found that it was not possible.
+Is that the case? That's exactly right. There's a very well done paper by Francesco Locatello.
+I think it won a best paper award at ICML, I want to say 2020. They basically show that if you just
+have IID data, if you just have individual images, but kind of just one image from each scene,
+that then you can't even identify the variables, even if you assume that the causal relations are
+in some sense trivial and that kind of implies that for more complicated causes structures you can
+also not do it. So, the way that we get around this is by introducing this non-IID setting,
+where we have these pairs of observations. And actually for full fairness here, I would point out
+that this is not a totally novel idea. There was another paper by Francesco Locatello
+at ICML 2021, I think, where they already think about this weekly supervised setting in observing
+a system before and after something has changed. But they focus on the trivial case where
+trivial sounds are negative. What I mean is the case where all the causal variables are
+independent. So, there's no causal relations between anything. You just have statistically
+independent latent variables and they shall show that those can be identified. What we do in our
+papers, we extend that to the setting where there's actually non-trivial causal structure
+and that we can even then learn the variables and even more that we can also identify the causal
+structure. Is there an experimental component to your paper at all? So, in the sense, yes,
+that we evaluate our via algorithm on synthetic data. We start with some simple toy data sets and
+then we scale up to image data sets. But also these data sets are not real photos of some real
+scenes or anything like that. We start with a standard benchmark for causal representation
+learning, the causal 3D-ident data set or a variation of that was introduced in a paper by
+Julius van Kugelgen and others. And then we introduce our own data set. We call the causal
+circuit because we weren't quite satisfied with the available benchmarks. And in this causal
+circuit data set, you see a robotic finger operating a bunch of buttons that are connected to lights
+in a way. And we show that in this data set, you can correctly identify kind of which pixels
+map to the buttons and to the robotic finger and how everything is related. I guess the
+salient point in this data set is that the robot, when the robot interacts with a button and it
+turns on that light, that doesn't impact any of the other lights, for example. Is that true?
+Yeah, kind of. So we actually, just for fun, we added a little causal relation there that like if
+you press one of the lights, it turns on one of the other ones as well. But in principle, you could
+also have the kind of independent thing. But I think one very obvious thing is like the robot
+which is also in the scene that causes the lights, right? It's not the other way around. You could
+in principle also think there's some kind of magnet on the table, if whenever one light activates
+that magnet pulls the robot, I'm closer to it. Just from looking at individual pictures, there's
+no way of telling these two apart. But the, yeah, with these kind of paired data,
+this data setting that we introduced and we show that we can actually resolve this and we can
+learn that the robot causes the lights to go on another way around. I think there's a really
+interesting paper and I'm personally interested in following along with kind of how that work evolves
+and how far we can push this idea of just pulling causal representation from images and
+you know, woodling down the set of constraints that need to be applied to the model that you create
+from them. But I also wanted to talk to you about some of the papers that your colleagues presented
+at NURBS and there were several. A couple of those were on combinatorial optimization broadly.
+Can you talk a little bit about those? Yeah, I'm happy to. So my colleagues wrote two papers on
+combinatorial optimization that we accepted at NURBS, one that was written by Mukul Gagrani and
+Karado Rhinona and some others on neural topological ordering for computation graphs. And a second
+that was on a batch-based optimization over permutations led by Chang-Yung-Oh,
+Cuba students who student at the University of Amsterdam in a Qualcomm sponsored lab there.
+What both of these papers have in common is that they are about the problem of finding some
+optimal ordering of some objects under constraints. So where this shows up, for instance,
+is in computation graphs when you have some, for instance, neural network that has a number of
+operations that need to be performed and you want to execute them on your hardware in the right order,
+where right order means you want to be as fast as possible, you want to use as little memory as
+possible, but you also have to satisfy some precedence constraints that you don't execute an
+operation while all the inputs aren't available yet. And this is a hard problem because the number
+of operations can be large and the number of possible orders of operations grows very quickly
+with the number of operations. In this neural topological ordering paper, my colleagues develop a new
+attention-based graph neural network with a suitable message passing algorithm to solve this problem.
+It's called a topoformer. I think what's really key about this idea is that this graph-based
+transformer combines both the local topology of the computation graphs, so kind of for each
+operation you have the information kind of what are the preceding operations that you require and
+for which other operations is the output required, but also in the computation you're readily available,
+you have readily available global information about the structure of the graph. So each node can
+kind of talk to each part of the graph at the same time in this message passing algorithm.
+Now there was a bit technical, but the bottom line is that this works really well. If you just
+compare to similarly fast algorithms, this is really state of the art, both on synthetic graphs
+and on a few real-world examples. And I think it's still competitive with algorithms that are some
+orders of magnitude slower than this method. In this context, when you compare synthetic graphs
+versus real-world, elaborate on that, real-world problems will be kind of represented as a graph,
+the graph itself isn't real-world necessarily. That's a good point, but what I mean with
+the real-world problem here is more something like you have some neural network that somebody
+really trains, so usually people use some kind of standard neural networks. And then if you look
+at the structure of the neural network, you can extract the computation graph from that. So
+the graph is as much real-world as the neural network is. It's not that you can see it on the
+street, of course, but there's kind of some consensus in the field of what these networks look like.
+So this is a problem that appears for real-world compilers when these networks are executed.
+While synthetic graphs is really you want to generate a graph with, you say, I don't know,
+I want 10,000 nodes and I want like each edge to exist with the probability of 0.1 and I want
+the graph to be a cyclic and those are kind of the constraints you put in. And then you just
+put on your random number generator. So typically these have a little bit less structure than
+real-world graphs. Got it. You're not generating synthetic
+programs and extracting the graphs from those programs or models or something like that.
+How about the other paper? The other paper, batch-based optimization on
+permutations using acquisition weighted kernels is essentially on the same problem. So
+it's still about finding the right order for a number of objects. But now they consider the case
+where computing performance for each order, so the cost function or whatever you want to call it,
+is really expensive. I see you can only run it a few times. So this setting you have to be smart
+about how you perform your training, which different configuration, which permutations you query.
+And Bayesian optimization is one framework that allows you to do this in a principled way. So you
+kind of at each step you try to find that permutation that allows you to gain the most information
+on the optimal configuration. Without getting into too many details here, I think my colleagues
+here introduced the first batch-based optimization method for optimizing over permutations.
+This batch means that you can kind of evaluate the number of configurations in parallel,
+which is really practical if you, for instance, have multiple devices, multiple GPUs during training.
+And again, like this other paper, I think what really stands out is after developing the algorithm
+that this is just state-of-the-art, it beats existing methods on standard benchmarks.
+As we mentioned earlier, a number of your colleagues work on
+a core variant deep learning, and a couple of the papers at this year's NURBS were on that topic.
+Can you talk a little bit about those?
+Yeah, we have two papers on a key variant deep learning at NURBS. The first is led by Gabriela
+Chesa, and three of the four authors on that paper were actually previously on your podcast.
+I believe there was Arash, Taco, and Max were all colleagues, or in Max's case, former colleague
+of mine, and who you talked at some point. Anyway, this paper is about a cryo-electron microscopy.
+Have you heard about that?
+No, tell me more about that.
+Yes, it's a really cool and pretty new imaging method for structural biology,
+and it has really revolutionized this field a little bit, and I think it also has one
+Nobel Prize in 2017. So the idea is, you're biologist, you have some molecules, say a protein
+or something, and you want to reconstruct the 3D structure of that.
+Now that's hard to do because molecules are kind of small. So what you can do is take a bunch
+of these molecules, solve them in some solution, freeze the solution in a very thin layer,
+and then bombard it with electrons, and image kind of the size of this. This gives you a bunch
+of really noisy two-dimensional images. Now the task is, of course, you have kind of have to combine
+these noisy two-dimensional images into the 3D structure of the molecule that you started with,
+and that's really difficult, one, because of the noise, and two, because you don't know the
+orientation of the molecules, right? They are frozen in some liquid, but you have no idea which
+way around. So you need to infer the pose for each of these molecules first.
+And this is the problem that my colleagues tackle here. They develop a new algorithm
+for inferring the pose of three-dimensional molecules from these trial EM images,
+and they tackle this using some strategy from group theory. I think it's called a group synchronization
+framework. It's quite technical, but the bottom line here is that they incorporate the structures,
+the geometric symmetries of the problem, into the algorithm as much as possible, and then they,
+those are smart people, they figure out that you can infer the 3D poses of these molecules
+from these 2D images a little bit better than before. This is the starting point to then plug
+the residing post-estimates into some 3D reconstruction algorithm and then get better
+reconstructions of these molecules. Maybe on a slightly higher level, I think this is another
+example for how when you take into account the geometric structure of your problem, the symmetries
+of a problem can really make your machine learning algorithms or classical algorithms more efficient.
+And that's a lot of what the group focusing on the aquarium and stuff focuses on those symmetries
+applied in all different places. Yeah, that's right, and maybe that's a good transition to this
+other paper by Arash Béberodi, also a Gabriele and others called a PEC Bayesian generalization bound
+for aquarium networks. Now here, they really study how much you can win when you include
+in corporate aquarium variants or kind of the geometric structure into the architectural
+choices in NREL network. And they do this using a framework called PEC Bayes, so the idea is
+basically that you can develop a theoretical upper bound on how much your loss can become worse
+when you go from training data to test data. And what they do is that they show that this bound
+on the loss, so this kind of generalization error becomes better, the more symmetry constraints
+you incorporate in the architecture of your neural network. So in some sense, they theoretically show
+that aquarium neural networks generalize better than non-aquivariant neural networks.
+What I really like about this paper is that the result of this this theoretical bound also depends
+a little bit on the architectural choices you're making your neural network, so you can use this
+to provide some guidance for the design of aquivariant neural networks.
+How are the architectural choices parameterized?
+So I think this is all about what kind of representations of your group you use in the hidden
+layers of your neural network. So representations of a group are kind of a classification of
+the different ways that groups can manifest themselves on mathematical objects
+in particular on vector spaces. So if you have some latent variables, some hidden variables
+in a neural network, you can think about them, for instance, as vectors or as tensors or higher
+order objects, and they all transform differently under group transformations. Now, that was
+quite dense sentence I just said, but basically if you think about, for instance, translation
+symmetries, you kind of the idea that if you shift the input a little bit, the output should also
+shift a little bit in some way. Then one representation of this is kind of just shifting in the same
+way, the standard representation. Another representation is kind of the trivial representation,
+where you just stay constant, no matter what happens. This is exactly invariant. So if the input
+shifts your hidden layer or your output would kind of stay at the same point. And then there is
+higher order representations where when you shift something, the hidden variables or the outputs,
+we have in a more complicated way, but still in a way that reflects the symmetry structure of your
+problem. And what my colleagues find here is that these representations are that you choose for
+for the design of your network are related to the bound on the generalization error. So they give
+you some guidance on how you can build a query networks in a way that have as small as possible
+bound on the generalization error. The question again. There was a paper on quantization as well.
+Yes. Our last paper at NURBs called FP8 quantization, the power of the exponent. This was led by
+my colleagues Andrei Kusmin and Mart van Bealen. And I think one of the authors' time has also been
+on your podcast before is indeed about a neural network quantization. As you know, a neural
+quantization is maybe the most efficient way of making neural networks more efficient. And with
+that, I mean, run faster, useless memory, useless power are these things. That's quite important
+when you run to run things on device. And that's something that Qualcomm cares a great deal about.
+But it's also maybe just important from a sustainability perspective.
+Now, one problem with quantization is that many different formats for the representation of
+weights and activations have been proposed. So there are integer representations and there are
+floating point representations, for instance. And for floating point representations, there's also
+many different ways you could construct the representation. What my colleagues do in this paper
+is that they compare 8-bit representations in theory and practice. In particular, they compare 8-bit
+integer representations and 8-bit floating point representations. And they train neural networks
+both in a quantization-aware way, so they kind of take into account how your quantitative
+already doing training. And for post-training quantization, where you run the quantization as an
+afterburner after your neural network has converged. The result of this paper is a very clear
+it depends. So if you have, if you want to use post-training quantization, and especially if you have
+large neural networks, let's say large transformer, then a floating point quantization can be
+beneficial. But they also find that if you use quantization-aware training, so if you already
+include the knowledge that you're going to quantize your neural networks during training,
+then the difference becomes much smaller. And another point they make is that the performance
+of floating point quantization really depends on the hyper parameter structures. And this is
+much more sensitive to the choice of hypermills than int8 quantization. Finally, I think it's important
+to say that if the performance of the things is kind of equal, integer quantization has the
+advantage that the hardware that is compatible with running that is often much more energy efficient.
+So all of the things being equal, I think the go-to recommendation is maybe still int8 quantization here.
+Awesome, awesome. How about we quickly run through workshops and demos? Were there any of those as
+well this year? Yeah, I'm happy to talk about those as well. We had a couple of workshop papers.
+I'm a little bit biased here, but I'd like to cherry-pick just one of them because I was involved
+with it personally. And this is a paper called Deconfirmed Immutation Learning, led by my colleague
+Risto for Oreo, and presented at the deep reinforcement learning workshop. Now, you know
+imitation learning is about the problem of training a policy to not just maximize the reward
+function, but imitate behaviors in some offline data set, generate by some experts, right?
+And this is advantageous because it doesn't require you to come up with a reward function,
+but also it can be beneficial for safety, for instance, in autonomous driving.
+And where does the confounding problem that's apparent in the title come in?
+Yeah, yeah, exactly. We're getting to that. The confounding problem appears when the expert
+and the imitator don't see exactly the same data. Let's say the expert has access to more data
+in his inputs than the imitator. Maybe let me give you a silly example for this. So,
+let's say we are trying to solve autonomous driving and we are doing this through imitation
+learning where the data set is generated by some human drivers. It's a reasonable setting,
+but these human drivers generally will have lots of additional information that then later the
+autonomous agent will not have. For instance, imagine a human driver listens to the weather
+forecast on the morning of generating the training data. And maybe on the weather forecast,
+they hear that the road conditions are going to be icy. And then even if you don't see anything
+on the road, I bet that their driving will be a little bit slow and a little bit more careful.
+A little more cautious. Yeah. Exactly. And that's a problem because then later the agent in the data
+set observed multiple examples where the inputs look the same or the behavior of the agent is different.
+So what are they going to choose? Are they going to drive slowly? Are they going to drive fast?
+They have no way of inferring this. So they must make some random guess here. And then it gets
+worse because once you make an initial guess, later the agent can use its own past behavior
+as evidence for what the correct behavior is. This is something known as causal delusions and was
+pointed out in a series of papers by Pedro Ortega who used to be at DeepMind. So if you just train
+an imitation learning agent with a standard algorithm and it kind of decides to go fast initially
+and then a few time steps later, it can kind of look back and see, okay, I used to drive fast
+and in all the training examples where early on the driver drives fast, he continues to drive fast.
+So then this is kind of evidence for continuing with a high speed. Of course, that's not
+ideal if the road is potentially icy. So this is a slightly exaggerated example. Of course,
+autonomous vehicles right now do not really have exactly this problem, but maybe you get the idea.
+And what we do with this paper and what particular is to us in this paper is study this problem
+theoretically and characterize the different conditions under which we can solve it in imitation learning.
+And mostly limited kind of simple toy scenarios, but we also develop an algorithm that we can run
+on reinforcement learning or imitation learning settings and we demonstrate it on a few
+continuous control problems. Interesting. How toy? So for instance, we have one environment,
+it's one of these standard open eye gym environments where you have like a robotic arm with a few
+degrees of freedom and it can strike a ball. And there are some parameters that the agent doesn't know
+like the weight of the ball or how much it slows down later kind of the friction.
+And the expert knows these things. You can imagine that the expert maybe picked up the ball and
+placed it on the table before they hit it to play some mini golf or whatever you want to call it.
+So this is something if you just do it once, there's just, if you just train it on imitation learning
+and out there in your test environment, you have no way of knowing how hard to hit the ball.
+But we learn a policy that kind of does it twice and based on kind of observing how the
+ball behaves the first time, then then figures out the value of the friction and the mass in these
+things and corrects the behavior for that in the next time. So it's still pretty toy, but I think it's
+at least not a kind of tabular data set anymore, but it's slowly moving towards bigger problems.
+Awesome. How about demos? Yeah, it was a great fun. It was the first time for me to be at the
+Qualcomm booth at least physically. And a lot of people came by and looked at the four demos
+that we had there. I talk to you about what exactly they were in a second, but I think what they all
+have in common is kind of maybe Qualcomm AI research core competency, which is really
+making AI ubiquitous in the sense that we want to run machine learning systems on any kind of
+device. So we don't just run our systems on GPUs or even bigger systems, but we had two phones
+there. We had one tablet there and we had one AR goggle there and we were running our AI systems on
+all of these devices and of course all of these included Qualcomm ships inside. Now more
+concretely, we had one demo on super resolution. And here the main novelty was that we quantized
+the super resolution network to in four to four bit integers, which is quite a bit small and
+quite a bit more efficient than what has been done before at least in terms of real world demos.
+We have another demo on conditional compute for video understanding on device. So here the idea
+is that we want to solve an action recognition problem. So you see some video data and you want to
+recognize what is being done in that video. And most methods do this by kind of parsing the full
+video all frames and then classifying the action. But my colleagues developed this method called
+frame exit. I think it was presented in CVPR last year that it basically just looks at a few frames
+and then the size of it is seen enough and can make the decision already. And once it is seen enough
+it kind of stops the computation. It doesn't require processing of all frames and thus makes
+a still very efficient decision but exactly with much less computation time also running on
+device yet. And we had one demo on multi-model future learning on teach your AI. So we had a
+cute simulated robot doc on a tablet and you try to teach gestures that we are performing
+to this dog. So you talk to the dog and at the same time you perform some gesture to tell the
+dog I don't know something with your hands and and it would kind of after seeing it on your
+few times it would kind of learn what these gestures meant by matching what you said and what
+what kind of past as audio input with with the video feed. Also running on device.
+And then finally we had a demo on a 3D reconstruction on AR goggles. This is about the problem
+of depth estimation in AR. So when you have your AR goggles on to do anything with your environment
+you really need to kind of reconstruct the 3D scene around here right you need to know how far
+away are these pixels that the cameras recording from you. And in particular you want to be able to
+do this with very strict hardware constraints. Ideally even just from a single camera feed.
+So here my colleagues developed a monocular depth estimation network trained with
+a self-supervised learning and then quantized that and ran it on device in a different way.
+The processor and the AR goggles roughly equivalent to something that might be in a mobile phone.
+I think it's a little bit more restricted. I'm not an expert on this but I believe that this
+thing was a Qual Snapdragon 888 chip in there and I think these are less powerful than the
+you know the Snapdragon 8 Gen 2 that we just announced that was running in our one of our phone
+demos. Okay. Awesome. So I would like to add one thing to this and I think what's really
+unites these four demos and what what makes them work in addition to kind of these these ideas
+on the method sides is this philosophy of full stack optimization. So at Qualcomm and I research
+we do everything from developing the architectures thinking about the training algorithm
+to quantizing the neural network. We use this AMAT AI model efficiency toolkit that's
+open source and then finally also running it on our chips actually that you can hold in your hand
+at the demo booth. I think that's quite neat. It's awesome and I'll link to an interview that I
+did with one of your colleagues Morale on that full stack philosophy as well as some of the other
+interviews that you've mentioned as well. With all that said it sounds like quite a successful
+nerves for you and your colleagues so congratulations. I'd love to have you maybe close us up by
+talking a little bit about kind of where your research goes in the in the future and kind of what
+you're most excited about across the various things that we've talked about. Yeah thanks for
+the question. So this causal representation learning paper that we talked about at length
+earlier is really one example of how action and perception should inform each other. In the
+sense that in this paper we show that if we can observe the effect of actions it gives us a
+principled way of learning perception learning representations. But I think this this relation
+between action and perception goes goes further than the justice one direction and in the future
+my colleagues and I would really like to continue working on this and maybe also going in the
+other direction. Can we learn principled ways of of learning to act learning policies in an
+interactive environment based on ideas about causality based on ideas about structure of a system
+based on maybe ideas of how representations should behave under actions and that's one direction
+I'm very excited about. More broadly we talked about this already before but I really think we
+should try to move away from identifiability theorems and more towards thinking about downstream
+applications. But I you know what I've had really beautiful in machine learning is the following
+like sometimes you have this hammer based research where you have some elegant idea and some
+beautiful theory and then you just try to make this theory somehow work in some way and sometimes
+you have this nail based research where you have a really well problem you really want to solve it
+and the working is the only way that matters and often it ends up being more of an engineering
+effort than then really kind of beautiful. But every now and then these two things come together
+and you can really kind of hit a hammer with an air you can really use something elegant
+from the theory side to solve a really well problem and that's that's where the beauty is
+that's that's where machine learning is really fun. Awesome. Awesome. Well Johan thanks so much for
+taking the time to walk us through your paper and some of your colleagues work at NURPS.
+Yeah thanks a lot thanks for having me this was fun.
