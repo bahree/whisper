@@ -19,7 +19,7 @@ There are a few steps to get this going:
 
 If you just want the transcribed files, at the time of writing this there were 525 published episodes that I have all transcribed. These were done using the base model form Whisper and can be found in the :file_folder:	twiml-episodes-whisper-transcribed.
 
-- You can download all of the files as one zip file too -- :card_file_box: twiml-episodes-transcribed.zip
+- You can download all of the files as one zip file too -- :card_file_box: twiml-episodes-whispered-transcribed.zip
 
 ## Dependencies
 
