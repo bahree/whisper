@@ -1,0 +1,3593 @@
+WEBVTT
+
+00:00.000 --> 00:01.520
+All right, everyone.
+
+00:01.520 --> 00:04.960
+Welcome to another episode of the Twimmel AI podcast.
+
+00:04.960 --> 00:07.680
+I am your host, Sam Charrington,
+
+00:07.680 --> 00:09.040
+and today I'm joined by
+
+00:09.040 --> 00:11.200
+Cedric Coco, Chief Engineer of
+
+00:11.200 --> 00:13.600
+the Wayfinder Group at Acubed.
+
+00:13.600 --> 00:15.680
+Cedric, welcome to the podcast.
+
+00:15.680 --> 00:16.880
+Thank you for having me.
+
+00:16.880 --> 00:19.040
+I'm looking forward to digging into our conversation.
+
+00:19.040 --> 00:20.640
+We'll be talking about a lot of
+
+00:20.640 --> 00:22.960
+cool things that you are doing with
+
+00:22.960 --> 00:25.360
+data-centric AI in particular,
+
+00:25.360 --> 00:27.520
+your journey with data labeling for
+
+00:27.520 --> 00:29.280
+your specific use case,
+
+00:29.280 --> 00:30.320
+to get us started.
+
+00:30.320 --> 00:32.800
+I'd love to have you share a little bit about your background
+
+00:32.800 --> 00:35.440
+and how you came to work in ML&AI.
+
+00:35.440 --> 00:36.960
+Yes, thank you.
+
+00:36.960 --> 00:38.320
+My name is Cedric Coco.
+
+00:38.320 --> 00:41.440
+I'm the Chief Engineer of the Wayfinder Group at Acubed,
+
+00:41.440 --> 00:44.480
+and that is Airbus Innovation Center in Silicon Valley.
+
+00:45.360 --> 00:48.640
+My background, I have a PhD in computer vision navigation,
+
+00:48.640 --> 00:51.120
+and I used to come from the space sector,
+
+00:51.120 --> 00:54.320
+so I spent part of my life trying to land spacecraft
+
+00:54.320 --> 00:57.760
+autonomously using one camera on near-Earth asteroids.
+
+00:57.760 --> 01:02.720
+I lowered my altitude of interest in 2016
+
+01:02.720 --> 01:06.960
+when I joined Airbus and we started to work
+
+01:06.960 --> 01:09.120
+on aviation rather than spacecraft.
+
+01:09.120 --> 01:12.000
+The thing that really attracted me there
+
+01:12.000 --> 01:16.560
+was the UAM concept, the urban air mobility or air taxis.
+
+01:16.560 --> 01:19.040
+At the time, there was this new project
+
+01:19.040 --> 01:20.640
+that started called Bahana.
+
+01:20.640 --> 01:22.880
+It was a technology demonstrator,
+
+01:22.880 --> 01:26.000
+basically a first prototype of one of those air taxis.
+
+01:26.000 --> 01:30.720
+The whole goal is to provide a completely new way
+
+01:30.720 --> 01:34.480
+of commuting people within urban areas and suburban areas,
+
+01:34.480 --> 01:39.520
+and this time at scale in the sense of really having thousands
+
+01:39.520 --> 01:42.880
+of vehicles in a city trying to have passenger
+
+01:42.880 --> 01:46.240
+going from one area to another to solve the congestion problem
+
+01:46.240 --> 01:48.000
+that we have in all big urban centers.
+
+01:48.000 --> 01:52.000
+I was part of the sense and avoid crew back in the days,
+
+01:52.000 --> 01:56.400
+and the central focus was basically developing machine learning
+
+01:56.400 --> 02:00.320
+and vision for the sense avoid system for urban air mobility.
+
+02:00.320 --> 02:05.520
+As we moved forward, we realized that this technology
+
+02:05.520 --> 02:08.160
+was really applicable to a larger range of application
+
+02:08.160 --> 02:10.000
+for aviation and airbus,
+
+02:10.000 --> 02:12.320
+and we started to apply the same technology
+
+02:12.320 --> 02:13.760
+to commercial aircraft.
+
+02:13.760 --> 02:16.240
+This is where we are now,
+
+02:16.240 --> 02:19.600
+the focus of Wayfinder is to build more autonomy
+
+02:19.600 --> 02:22.240
+into commercial aircraft.
+
+02:22.240 --> 02:26.960
+So you mentioned you got started in this air taxi project,
+
+02:26.960 --> 02:31.120
+Bahana, what were the key technology innovations
+
+02:32.080 --> 02:36.400
+that drove that project that ultimately led to what you're working on now?
+
+02:36.400 --> 02:40.240
+Yeah, so air taxis is a completely new breed of aircraft.
+
+02:41.040 --> 02:44.880
+We're looking at an electric propulsion system.
+
+02:44.880 --> 02:50.640
+We're looking at basically a vertical take-off and landing system
+
+02:50.640 --> 02:54.480
+that can be converted into a fixed wing
+
+02:54.480 --> 02:58.320
+during the cruise phase for efficiency purposes.
+
+02:58.320 --> 03:02.640
+But the other aspect that is driving this innovation
+
+03:02.640 --> 03:05.120
+and this revolution in the aviation sector
+
+03:05.120 --> 03:06.240
+is how you build them.
+
+03:06.240 --> 03:09.680
+Currently commercial aircraft are built
+
+03:09.680 --> 03:11.920
+in the hundreds every year.
+
+03:11.920 --> 03:17.840
+You could hit the 1000, but we're not at the 10,000 or even more
+
+03:17.840 --> 03:19.680
+in terms of scale.
+
+03:19.680 --> 03:24.880
+So one of the key concepts that most urban air mobility companies
+
+03:24.880 --> 03:27.520
+in the area and across the world are thinking about it
+
+03:27.520 --> 03:31.120
+as how to combine forces with the automotive industry
+
+03:31.120 --> 03:34.560
+and with their skills and their production capabilities
+
+03:34.560 --> 03:36.480
+to be able to scale up production
+
+03:36.480 --> 03:38.960
+while having the safety standard
+
+03:38.960 --> 03:41.520
+and the reliability standard of aviation.
+
+03:41.520 --> 03:47.440
+So this is a huge challenge and on the technology side
+
+03:47.440 --> 03:49.440
+there's two aspects that are really important.
+
+03:49.440 --> 03:51.760
+One of them is the electric propulsion system
+
+03:51.760 --> 03:56.480
+which is quite new and the other one is autonomy.
+
+03:56.480 --> 04:01.680
+So one of the key and fundamental of air taxis to make it viable
+
+04:01.680 --> 04:04.240
+is to have a fully autonomous solution down the road.
+
+04:05.200 --> 04:08.320
+Many are taking roads where they go through an intermediate step
+
+04:08.320 --> 04:09.360
+where it's going to be piloted.
+
+04:09.360 --> 04:11.920
+But the end goal is clear for everybody
+
+04:11.920 --> 04:14.720
+we need to go for a fully autonomous system.
+
+04:14.720 --> 04:18.720
+And so that has multiple objectives.
+
+04:18.720 --> 04:22.000
+One of them is how do you handle traffic at scale
+
+04:22.000 --> 04:24.080
+over a city with all those aircraft?
+
+04:24.080 --> 04:29.200
+The other one is when that system fails to ensure
+
+04:29.200 --> 04:31.200
+the proper distances between all the vehicle,
+
+04:31.200 --> 04:33.200
+what do you have on board to detect
+
+04:33.200 --> 04:37.040
+that such distances have been so violated
+
+04:37.040 --> 04:40.400
+and how do you respond adequately
+
+04:40.400 --> 04:44.000
+so that you don't create more risks to other vehicles.
+
+04:44.000 --> 04:47.840
+So you have this layered approach between air traffic control,
+
+04:47.840 --> 04:50.080
+between deconfliction, reserving the airspace
+
+04:50.080 --> 04:52.160
+and then ultimately your sense and avoid
+
+04:52.160 --> 04:54.160
+on the aircraft itself,
+
+04:54.160 --> 04:58.080
+and then you have to have the ability to perceive your environment
+
+04:58.080 --> 05:00.480
+on the aircraft to understand what it is
+
+05:00.480 --> 05:03.360
+and to make the proper decisions that minimize risks
+
+05:03.360 --> 05:05.840
+and ensure that the passenger is delivered safely
+
+05:05.840 --> 05:07.520
+to its destination.
+
+05:07.520 --> 05:11.280
+So my role and the role that the team I was in at the time
+
+05:11.280 --> 05:13.280
+was ready to develop that sense and avoid system
+
+05:13.280 --> 05:16.320
+that last piece of this onion model
+
+05:16.320 --> 05:18.080
+for ensuring the safety of passengers.
+
+05:18.960 --> 05:22.880
+And I imagine that translating that
+
+05:22.880 --> 05:26.560
+into the commercial side of things,
+
+05:26.560 --> 05:32.080
+there are some foundational elements that translate,
+
+05:32.080 --> 05:35.120
+but it sounds like a very different problem.
+
+05:35.120 --> 05:36.320
+It is a very different problem
+
+05:36.320 --> 05:38.240
+because commercial aircraft operates
+
+05:38.240 --> 05:40.080
+in a completely different airspace
+
+05:40.080 --> 05:42.320
+and that airspace is highly controlled.
+
+05:43.280 --> 05:45.760
+So from the time that you take off from the airport
+
+05:45.760 --> 05:48.240
+where the tower helps you and guides you,
+
+05:48.240 --> 05:50.880
+you have already corridors that are reserved for you.
+
+05:51.680 --> 05:54.240
+So this is a very interesting problem
+
+05:54.240 --> 05:57.680
+because bringing autonomy to commercial aircraft
+
+05:57.680 --> 06:00.000
+when you really look at it
+
+06:00.000 --> 06:04.240
+is probably not as hard as autonomous or self-driving cars.
+
+06:04.240 --> 06:06.400
+Our environment is a lot more structured.
+
+06:07.120 --> 06:10.800
+We have autopilot that can fly the aircraft
+
+06:10.800 --> 06:12.800
+when you're in the air during the cruise phase
+
+06:12.800 --> 06:14.480
+and we had them for decades now.
+
+06:15.440 --> 06:17.280
+And they are up to the safety level
+
+06:17.280 --> 06:18.720
+and the reliability level that you need
+
+06:18.720 --> 06:22.320
+to be able to transport 350 passengers.
+
+06:23.440 --> 06:25.280
+The other aspect is our pilot
+
+06:25.280 --> 06:28.160
+are actually skilled, trained professionals
+
+06:28.960 --> 06:31.680
+not to criticize anybody driving in the area,
+
+06:31.680 --> 06:34.800
+but depending on our expertise,
+
+06:34.800 --> 06:37.280
+our level of being tired or not,
+
+06:38.720 --> 06:41.120
+let's say drivers are more at risk for this.
+
+06:41.760 --> 06:44.560
+So we have those very skilled pilots.
+
+06:44.560 --> 06:46.800
+We have this aircraft that already has
+
+06:47.280 --> 06:49.040
+a good level of autonomy built in.
+
+06:49.760 --> 06:51.440
+But now what we need to tackle
+
+06:51.440 --> 06:55.040
+is when you increase the scale of this air traffic,
+
+06:55.040 --> 06:56.400
+you decrease the distances
+
+06:56.400 --> 06:58.160
+and especially in terminal areas,
+
+06:58.960 --> 07:01.120
+how many aircraft can you actually land
+
+07:01.120 --> 07:04.400
+at an airport and how many can take off
+
+07:04.400 --> 07:05.680
+within this small volume
+
+07:06.240 --> 07:08.400
+without creating risks for anyone.
+
+07:09.200 --> 07:11.440
+And there is certain volume
+
+07:11.440 --> 07:16.000
+that manual operation can control
+
+07:16.000 --> 07:17.280
+and can tackle.
+
+07:17.280 --> 07:19.280
+But if you want to go beyond that,
+
+07:19.280 --> 07:21.280
+then autonomy is a must go
+
+07:22.080 --> 07:24.000
+to be able to maintain the same level of safety
+
+07:24.640 --> 07:27.280
+while increasing volume, while increasing air traffic.
+
+07:27.920 --> 07:29.840
+And this is where we come into play
+
+07:29.840 --> 07:33.520
+because we are looking at a range of autonomous functions
+
+07:33.520 --> 07:37.120
+to be able to take that leap toward this next generation aircraft
+
+07:37.120 --> 07:40.240
+and this future where basically
+
+07:40.240 --> 07:43.120
+the air traffic would increase significantly.
+
+07:43.120 --> 07:45.680
+And just to give you some numbers,
+
+07:45.680 --> 07:49.280
+based on the trends that we've seen before COVID,
+
+07:50.000 --> 07:52.720
+the air traffic doubled every 15 years.
+
+07:53.440 --> 07:55.120
+And right in 2019,
+
+07:55.120 --> 08:00.080
+commercial aircraft carried 4.9 billion passengers.
+
+08:00.800 --> 08:03.680
+So the application that we're working on
+
+08:03.680 --> 08:08.320
+is technically going to touch about 60% of the planet
+
+08:08.320 --> 08:10.640
+if you look at the numbers in 2019.
+
+08:10.640 --> 08:12.800
+And then if you look at doubling that,
+
+08:12.800 --> 08:18.400
+meaning that roughly you would touch 9 to 10 billion people a year,
+
+08:18.400 --> 08:21.840
+the need in terms of safety,
+
+08:21.840 --> 08:23.840
+the needs in terms of making sure
+
+08:23.840 --> 08:26.720
+that this fully-autonomated system works well
+
+08:26.720 --> 08:28.720
+is orders of magnitude beyond
+
+08:28.720 --> 08:30.720
+most of the other application that we see there.
+
+08:30.720 --> 08:33.760
+And when you talk about increasing the volume
+
+08:34.640 --> 08:37.760
+and the requirements that that places
+
+08:37.760 --> 08:39.680
+especially around the terminal,
+
+08:40.480 --> 08:42.480
+the terminals in the terminal area,
+
+08:42.480 --> 08:46.960
+I'm thinking that one of the major factors we're talking about
+
+08:46.960 --> 08:51.200
+is like the spacing and approaches and landings
+
+08:51.200 --> 08:52.160
+and things like that.
+
+08:52.160 --> 08:56.320
+And there are parameters around where you want that to be
+
+08:56.320 --> 08:58.560
+if it's being done manually.
+
+08:58.560 --> 09:01.600
+And the idea is that if it's fully autonomous
+
+09:01.600 --> 09:05.280
+that you can kind of shrink that spacing, is that the idea?
+
+09:05.280 --> 09:08.800
+So there's two things that we're really trying to achieve.
+
+09:08.800 --> 09:11.520
+One of them is that there is a lot of things
+
+09:11.520 --> 09:14.640
+that the pilot must do when he approaches the terminal,
+
+09:14.640 --> 09:17.520
+the airport, and when he navigates either.
+
+09:17.520 --> 09:19.120
+So either when he's doing,
+
+09:19.120 --> 09:22.720
+he's landing the aircraft, he's in the taxi phase, or he's taking off.
+
+09:23.360 --> 09:27.200
+And what we want to build is enough autonomy in those aircraft
+
+09:27.200 --> 09:29.840
+so that the pilot stops being worried
+
+09:29.840 --> 09:33.360
+about all those small details plus the strategic aspects
+
+09:33.360 --> 09:36.240
+and can really focus only on the strategic part.
+
+09:37.120 --> 09:39.360
+For that, there's a range of functions
+
+09:39.360 --> 09:40.400
+that needs to be built in.
+
+09:40.400 --> 09:42.560
+So for example, autonomous landing
+
+09:42.560 --> 09:46.160
+so that the person can focus on other aspects
+
+09:46.160 --> 09:49.280
+than just controlling the aircraft toward the right light slope
+
+09:49.280 --> 09:52.320
+to be able to touch the runway at the right point.
+
+09:52.320 --> 09:53.920
+All of that can be abstracted out.
+
+09:54.560 --> 09:56.160
+The aircraft can take care of it
+
+09:56.160 --> 09:57.920
+and the pilot can focus his attention
+
+09:57.920 --> 10:01.360
+on more strategic aspects of the flight.
+
+10:02.160 --> 10:03.200
+One of them is, for example,
+
+10:03.200 --> 10:05.280
+what is the route that he will need to take
+
+10:05.280 --> 10:07.520
+to confirm that this is the right runway
+
+10:07.520 --> 10:10.640
+that he needs to land at, for instance.
+
+10:10.640 --> 10:12.720
+And during the taxi phase, especially,
+
+10:12.720 --> 10:16.640
+it's pretty crowded on the runway
+
+10:16.640 --> 10:19.040
+and especially when you're getting close to the gates.
+
+10:19.040 --> 10:22.720
+So being able to have a system that keeps an eye
+
+10:22.720 --> 10:24.480
+on all that traffic around you
+
+10:24.480 --> 10:27.680
+and alerts you when really your attention is needed
+
+10:27.680 --> 10:29.920
+for one particular aspect
+
+10:29.920 --> 10:33.120
+is really going to help lower the workload of the pilots
+
+10:33.120 --> 10:35.760
+and help the overall operation to be more efficient
+
+10:35.760 --> 10:37.120
+and safer as well.
+
+10:37.120 --> 10:39.680
+I'm going to say this is where ML becomes
+
+10:39.680 --> 10:41.200
+a critical component of the system
+
+10:41.200 --> 10:44.160
+because doing all of that autonomous detection
+
+10:44.160 --> 10:48.480
+of the runway, autonomous assessment of where your aircraft is
+
+10:48.480 --> 10:51.200
+during that landing segment
+
+10:51.200 --> 10:52.720
+and during the taxi phase,
+
+10:52.720 --> 10:54.320
+making sure that the aircraft is really
+
+10:54.320 --> 10:56.400
+where it's supposed to be on the runway
+
+10:56.400 --> 10:58.080
+that there's no object around.
+
+10:58.080 --> 11:02.240
+So the collision protection function is key.
+
+11:02.240 --> 11:04.720
+So all of those requires a heavy dose
+
+11:04.720 --> 11:06.320
+of perception decision making.
+
+11:07.040 --> 11:09.760
+And the range of things that you see
+
+11:09.760 --> 11:12.320
+in the complexity of the situation
+
+11:12.320 --> 11:16.720
+makes it hard for classical approaches to work
+
+11:16.720 --> 11:19.360
+and really requires the power of ML
+
+11:19.360 --> 11:21.920
+to be able to ensure the performance
+
+11:21.920 --> 11:24.640
+and the reliability that we expect out of that function.
+
+11:24.640 --> 11:27.520
+Yeah, let's dig into that a little bit more deeply.
+
+11:27.520 --> 11:32.080
+You reference autonomous vehicles earlier
+
+11:32.080 --> 11:38.800
+as kind of a comparison in urban taxi contexts.
+
+11:38.800 --> 11:41.360
+There's obviously a lot of investment happening
+
+11:41.360 --> 11:44.560
+in that type of autonomy right now
+
+11:44.560 --> 11:46.960
+from an ML and AI perspective.
+
+11:48.240 --> 11:50.800
+But again, this sounds like a very different problem.
+
+11:50.800 --> 11:52.880
+Can you kind of elaborate on some of the ways
+
+11:52.880 --> 11:54.960
+that from a technical perspective,
+
+11:54.960 --> 11:57.120
+the problem that you're dealing with
+
+11:57.120 --> 12:03.040
+differs from what someone who's working on AV cars
+
+12:03.040 --> 12:05.120
+is worth thinking about?
+
+12:05.120 --> 12:07.440
+Yeah, that's a very interesting question
+
+12:07.440 --> 12:10.240
+because one of the strategies here
+
+12:10.240 --> 12:11.760
+is to leverage a lot of the work
+
+12:11.760 --> 12:14.880
+that has been done in the self-driving car industry.
+
+12:14.880 --> 12:18.160
+They've been starting this decades ago.
+
+12:18.800 --> 12:21.360
+And so there's a lot of legacy, a lot of system
+
+12:21.360 --> 12:22.560
+that is available.
+
+12:22.560 --> 12:25.120
+And so for us to be able to speed up our development,
+
+12:25.120 --> 12:27.760
+being able to leverage all of that work
+
+12:27.760 --> 12:28.720
+is to our benefit.
+
+12:28.720 --> 12:31.280
+However, there's a certain limit
+
+12:31.280 --> 12:34.240
+at which we can transfer and re-adapt that technology
+
+12:34.240 --> 12:36.400
+without tuning it and actually
+
+12:36.400 --> 12:38.320
+or changing it from the bottom up.
+
+12:38.320 --> 12:43.120
+So for instance, cars needs to see in 2D plus heights,
+
+12:43.120 --> 12:45.360
+but it's a 2.5D problem.
+
+12:46.160 --> 12:49.920
+They need to see, you know, 200, 300 meters in front of them.
+
+12:49.920 --> 12:53.760
+And maybe the autonomous trucks needs to see a little further.
+
+12:53.760 --> 12:57.200
+But in our case, when the aircraft gets close to an airport,
+
+12:57.200 --> 12:59.680
+we need to see kilometers ahead of time.
+
+12:59.680 --> 13:03.200
+And the object that we're trying to see
+
+13:03.200 --> 13:06.160
+are actually very small in the image.
+
+13:06.160 --> 13:08.720
+And we need very high-resolution image
+
+13:08.720 --> 13:12.080
+to be able to have just enough pixel enough information
+
+13:12.080 --> 13:14.720
+to give to the ML or other algorithms
+
+13:14.720 --> 13:16.400
+to be able to make heads and tails
+
+13:16.400 --> 13:17.920
+of everything that they see in there.
+
+13:17.920 --> 13:21.600
+So typically, the cameras that we need to use
+
+13:21.600 --> 13:23.120
+to be able to do those functions
+
+13:24.320 --> 13:26.880
+are in the order of 10 to 15 megapixels
+
+13:27.680 --> 13:30.880
+versus in the car industry in the order of two,
+
+13:30.880 --> 13:33.680
+maybe five megapixels for very high-resolution.
+
+13:34.240 --> 13:37.040
+And then in our case, because we operate in 3D,
+
+13:37.040 --> 13:38.880
+we need more, of course, than one camera.
+
+13:38.880 --> 13:42.640
+We need cameras to cover the full space ahead of us.
+
+13:43.520 --> 13:47.840
+So that is one differentiator between our use case
+
+13:47.840 --> 13:50.400
+and the self-driving car use case
+
+13:51.040 --> 13:53.360
+is just the sheer number of pixels
+
+13:53.360 --> 13:55.840
+that we need to deal with in real time.
+
+13:55.840 --> 14:00.320
+The other aspect is real-time performance.
+
+14:00.320 --> 14:04.320
+We need to guarantee that our algorithm
+
+14:04.320 --> 14:07.840
+perform adequately at the frame rate that we have.
+
+14:07.840 --> 14:11.680
+So basically, we need to guarantee real-time performances.
+
+14:11.680 --> 14:15.680
+And for that, the level of guarantee that we need to provide
+
+14:15.680 --> 14:18.720
+depends on what we call the design assurance level,
+
+14:18.720 --> 14:20.880
+which is basically a gauge on the safety
+
+14:20.880 --> 14:23.040
+and the process that we've put behind
+
+14:23.040 --> 14:25.600
+to guarantee the safety of those systems.
+
+14:25.600 --> 14:29.360
+And the autonomous, the aviation industry
+
+14:29.360 --> 14:31.920
+actually has very stringent standards on that.
+
+14:31.920 --> 14:36.480
+And what happens is before we can even use an aircraft,
+
+14:36.480 --> 14:39.840
+the certification authorities need to stamp our system.
+
+14:39.840 --> 14:42.000
+So they need to look at all the details.
+
+14:42.000 --> 14:43.680
+Because of all the guarantees that we need to give
+
+14:43.680 --> 14:45.440
+to certification authorities,
+
+14:45.440 --> 14:47.840
+and because of the fact that they need to stamp our design
+
+14:47.840 --> 14:52.320
+and they need to stamp the way we are writing the software
+
+14:52.320 --> 14:54.720
+before we can even start using the aircraft,
+
+14:54.720 --> 14:57.760
+there's a lot more that we need to put
+
+14:57.760 --> 15:00.480
+into those developments and a lot more proof
+
+15:00.480 --> 15:02.640
+on the safety and the performance of those algorithms
+
+15:02.640 --> 15:05.120
+that we need to provide than any other application.
+
+15:05.120 --> 15:07.520
+I was just going to jump in there.
+
+15:07.520 --> 15:14.000
+I remember hearing presentations around
+
+15:14.000 --> 15:17.760
+the kind of verification and validation that happens,
+
+15:17.760 --> 15:21.440
+for example, by NASA software engineers
+
+15:21.440 --> 15:25.200
+building those kinds of systems and classical,
+
+15:25.200 --> 15:27.360
+aeronautic systems.
+
+15:27.360 --> 15:30.720
+And that seems, I guess, like a culture clash,
+
+15:30.720 --> 15:33.120
+when you're thinking about machine learning
+
+15:33.120 --> 15:35.520
+and probabilistic types of systems.
+
+15:35.520 --> 15:40.080
+And I'm wondering how you bring those two worlds together
+
+15:40.080 --> 15:42.880
+in areas like this.
+
+15:42.880 --> 15:45.120
+That is a fundamental challenge for us.
+
+15:45.120 --> 15:49.040
+So our team is at the crossroad
+
+15:49.040 --> 15:51.440
+between two very different worlds.
+
+15:51.440 --> 15:55.600
+Our team is drawing people from software companies
+
+15:55.600 --> 16:00.080
+such as Google, Facebook, the sell-driving companies
+
+16:00.080 --> 16:03.120
+in the area, they're used to create software
+
+16:03.120 --> 16:06.400
+in a certain way, a very rapid way,
+
+16:06.400 --> 16:09.440
+and exactly, exactly.
+
+16:09.440 --> 16:12.720
+That doesn't work when you're carrying 300 people.
+
+16:12.720 --> 16:16.480
+This is exactly the problem is destructive flight test
+
+16:16.480 --> 16:19.120
+is not really an option for us.
+
+16:19.120 --> 16:22.320
+And then on the aerospace side, the people that you have there
+
+16:22.320 --> 16:26.080
+are used to do things right the first time.
+
+16:26.080 --> 16:29.280
+And to have everything deterministic,
+
+16:29.280 --> 16:32.320
+everything planned, and everything verified.
+
+16:32.320 --> 16:34.480
+And so what we're doing right now is
+
+16:34.480 --> 16:37.440
+we are proposing those new algorithms based on machine learning
+
+16:37.440 --> 16:40.160
+that are completely probabilistic based.
+
+16:40.160 --> 16:42.880
+And we're saying it's going to work.
+
+16:42.880 --> 16:47.360
+We can predict that it will work to a certain performance
+
+16:47.360 --> 16:50.640
+standard, but we don't have any formal proof for you.
+
+16:50.640 --> 16:52.720
+We can only do that statistically.
+
+16:52.720 --> 16:54.880
+What does that even mean now?
+
+16:54.880 --> 17:01.280
+Are you referring to the application of formal methods
+
+17:01.280 --> 17:07.040
+to provide performance envelopes and guarantees to your system?
+
+17:07.040 --> 17:07.520
+Exactly.
+
+17:07.520 --> 17:09.560
+So right now, there's a lot of work that
+
+17:09.560 --> 17:11.200
+is being done in formal methods.
+
+17:11.200 --> 17:15.560
+And those methods have proven to be very useful for,
+
+17:15.560 --> 17:20.560
+let's say, algorithms of low to medium complexity.
+
+17:20.560 --> 17:23.680
+But when we're tackling autonomous landing,
+
+17:23.680 --> 17:26.440
+autonomous taxi function, for example,
+
+17:26.440 --> 17:29.280
+the sheer number of pixels and the image size
+
+17:29.280 --> 17:31.360
+that we need to deal with and the speed at which we need
+
+17:31.360 --> 17:35.000
+to deal with them makes those applications
+
+17:35.000 --> 17:38.000
+for now barely usable.
+
+17:38.000 --> 17:40.520
+We basically don't have the right tool
+
+17:40.520 --> 17:44.040
+to be able to apply it on very complex neural network
+
+17:44.040 --> 17:48.560
+that would be based on architectures like ResNet or VGG
+
+17:48.560 --> 17:53.280
+or all the newest flavor as well.
+
+17:53.280 --> 17:56.800
+So at that point, since we can't rely on those formal methods,
+
+17:56.800 --> 17:59.360
+what we're left with is those statistical methods.
+
+17:59.360 --> 18:01.720
+And one of the things that makes it really hard
+
+18:01.720 --> 18:04.560
+is that we don't know the distribution of the events
+
+18:04.560 --> 18:05.840
+beforehand.
+
+18:05.840 --> 18:09.040
+So we need to be able to do those data collection
+
+18:09.040 --> 18:11.840
+to be able to understand what is our environment,
+
+18:11.840 --> 18:14.400
+as far as our function, our concerns,
+
+18:14.400 --> 18:18.040
+what is the, let's call it for a Gaussian distribution,
+
+18:18.040 --> 18:21.640
+what is the nominal case that gives you your 60%,
+
+18:21.640 --> 18:24.960
+but also what is the long tail events?
+
+18:24.960 --> 18:28.360
+And one of the interesting examples
+
+18:28.360 --> 18:32.240
+that we have is we've captured on video and elephant
+
+18:32.240 --> 18:35.880
+walking on taxiways in Africa just behind
+
+18:35.880 --> 18:38.480
+some commercial aircraft at an airport.
+
+18:38.480 --> 18:41.240
+And there's no way any of our engineers at least
+
+18:41.240 --> 18:43.640
+in Silicon Valley could have figured this one out.
+
+18:43.640 --> 18:46.640
+But these are cases that our system for object detection,
+
+18:46.640 --> 18:48.800
+for example, will have to tackle.
+
+18:48.800 --> 18:52.320
+So this is the challenge is that we
+
+18:52.320 --> 18:54.600
+can't use those formal approaches
+
+18:54.600 --> 18:56.680
+because we don't know what the world is made of
+
+18:56.680 --> 18:58.800
+until you've done that data collection.
+
+18:58.800 --> 19:04.000
+And that data collection really gives you just the statistical
+
+19:04.000 --> 19:06.360
+the means to do a statistical approach.
+
+19:06.360 --> 19:10.960
+And in terms of that statistical approach,
+
+19:10.960 --> 19:16.160
+what are some of the tools that you're using?
+
+19:16.160 --> 19:19.880
+Early on when we started to do flight tests
+
+19:19.880 --> 19:22.280
+and one of the greatest achievements that we've done
+
+19:22.280 --> 19:24.320
+in our team is actually work on the AI
+
+19:24.320 --> 19:27.720
+that completed the very first autonomous landing
+
+19:27.720 --> 19:31.120
+of an A350 with a camera system.
+
+19:31.120 --> 19:33.720
+And to give you an idea that the A350
+
+19:33.720 --> 19:38.720
+is this aircraft that carries between 300 and 350 passengers.
+
+19:38.720 --> 19:41.840
+So it's a fairly big beast to land.
+
+19:41.840 --> 19:44.040
+Now, when we did that, one of the first things
+
+19:44.040 --> 19:47.840
+that we noticed is flying an A350 is quite costly.
+
+19:47.840 --> 19:50.680
+It's time consuming and to ensure safety,
+
+19:50.680 --> 19:54.400
+it takes quite a bit of time to go through all the hoops
+
+19:54.400 --> 19:56.560
+to have the authorization to fly it.
+
+19:56.560 --> 20:00.400
+So doing data collection using flight test aircraft
+
+20:00.400 --> 20:03.360
+is a lengthy and time consuming process.
+
+20:03.360 --> 20:05.640
+So what we have developed here in Silicon Valley
+
+20:05.640 --> 20:07.840
+is this hybrid approach where we said,
+
+20:07.840 --> 20:10.120
+well, the software engineers here
+
+20:10.120 --> 20:12.760
+are used to those two weeks development cycle
+
+20:12.760 --> 20:14.760
+or those very short development cycle
+
+20:14.760 --> 20:17.600
+where there's a new release every couple weeks.
+
+20:17.600 --> 20:20.880
+And how can we do that for aerospace?
+
+20:20.880 --> 20:23.680
+So what we did is we acquired our own aircraft
+
+20:23.680 --> 20:25.600
+that we own and operate.
+
+20:25.600 --> 20:28.680
+And we've modified that aircraft to be equipped
+
+20:28.680 --> 20:32.000
+with all the sensors that we need to perform those functions.
+
+20:32.000 --> 20:34.680
+And we are now flying this aircraft throughout the area
+
+20:34.680 --> 20:38.680
+to be able to do data collection in those different conditions
+
+20:38.680 --> 20:40.480
+that we're gonna see in the field.
+
+20:40.480 --> 20:44.280
+So it can range from clear conditions during daytime
+
+20:44.280 --> 20:48.360
+to night conditions, but also what we call the graded conditions.
+
+20:48.360 --> 20:52.800
+So fog, low ceiling, rain, and all those.
+
+20:52.800 --> 20:55.000
+And to be able to have real data
+
+20:55.000 --> 20:58.320
+and to be able to acquire the volume necessary
+
+20:58.320 --> 21:01.040
+to start doing those statistical proofs
+
+21:01.040 --> 21:04.520
+of reliability and performance is essential for us
+
+21:04.520 --> 21:06.520
+to push the maturity of those functions.
+
+21:06.520 --> 21:11.320
+Are you saying, or is it the case that you have to fly?
+
+21:11.320 --> 21:13.280
+If you want to do this on A350s,
+
+21:13.280 --> 21:15.480
+you have to fly A350s for data collection
+
+21:15.480 --> 21:20.480
+or are you flying cheaper vehicles for data collection?
+
+21:20.480 --> 21:23.840
+And in our case, when we started in flight test aircraft,
+
+21:23.840 --> 21:27.080
+we started doing data collection on A350s
+
+21:27.080 --> 21:30.720
+and other big commercial aircraft.
+
+21:30.720 --> 21:33.240
+But it's quite costly to do so.
+
+21:33.240 --> 21:35.640
+And after analyzing the problem,
+
+21:35.640 --> 21:39.080
+we saw that we don't actually need to use such an aircraft
+
+21:39.080 --> 21:41.520
+to collect data that is applicable and usable
+
+21:41.520 --> 21:43.280
+to develop those functions.
+
+21:43.280 --> 21:45.320
+And the reason is, in our case,
+
+21:45.320 --> 21:46.840
+we're using a beachcraft barren
+
+21:46.840 --> 21:51.680
+to collect the data for the visual landing system.
+
+21:51.680 --> 21:56.240
+And the barren, although less stable than an A350,
+
+21:56.240 --> 22:00.080
+can replicate the approach that an A350 would do,
+
+22:00.080 --> 22:03.920
+can explore the full service volume that we need to explore
+
+22:03.920 --> 22:06.280
+and can cover pretty much all of the conditions
+
+22:06.280 --> 22:08.560
+that an A350 would encounter.
+
+22:08.560 --> 22:11.280
+And even to a certain extent,
+
+22:11.280 --> 22:15.280
+because the beachcraft barren is less stable than an A350,
+
+22:15.280 --> 22:18.200
+we cover a wider range of conditions
+
+22:18.200 --> 22:20.960
+than what we would be able to do with an A350.
+
+22:20.960 --> 22:24.320
+So on that respect, it's actually a way
+
+22:24.320 --> 22:28.760
+of building a more robust system using a cheaper aircraft
+
+22:28.760 --> 22:30.800
+that is available for us anytime.
+
+22:30.800 --> 22:31.800
+Yeah, yeah.
+
+22:31.800 --> 22:33.480
+Going back to the previous question
+
+22:33.480 --> 22:35.280
+about statistical tools,
+
+22:37.320 --> 22:39.640
+I'm trying to get a little bit more clarity
+
+22:39.640 --> 22:41.520
+on what that looks like.
+
+22:41.520 --> 22:46.520
+Like I'm envisioning you're using something akin
+
+22:47.760 --> 22:50.960
+to like, you know, confidence testing
+
+22:50.960 --> 22:52.120
+or something like that.
+
+22:52.120 --> 22:56.200
+But it's not clear to me how you ever have confidence
+
+22:56.200 --> 23:00.160
+if you don't know what your plane is going to be able to see.
+
+23:00.160 --> 23:03.000
+So I'm looking for kind of names of,
+
+23:03.000 --> 23:05.360
+oh, we use this statistical method or this
+
+23:05.360 --> 23:09.520
+or that to produce these guarantees.
+
+23:09.520 --> 23:12.600
+Is that something that you can elaborate on?
+
+23:12.600 --> 23:14.120
+Yes.
+
+23:14.120 --> 23:16.480
+So first thing is we need to identify
+
+23:16.480 --> 23:19.160
+what are the dimensions of the problem
+
+23:19.160 --> 23:21.280
+that affects the performance of,
+
+23:21.280 --> 23:24.640
+in this case, the ML model or the perception stack.
+
+23:24.640 --> 23:26.040
+So one of the things that we've observed
+
+23:26.040 --> 23:29.680
+is the configuration of the airport is critical.
+
+23:29.680 --> 23:31.520
+If you have only one runway,
+
+23:31.520 --> 23:34.240
+it's easier to identify than when you're in Chicago
+
+23:34.240 --> 23:36.960
+where you have like seven with runways
+
+23:36.960 --> 23:38.640
+that are crossing each other
+
+23:38.640 --> 23:41.280
+and taxiways that are confusing everything.
+
+23:41.280 --> 23:43.800
+So the airport configuration is, for example,
+
+23:43.800 --> 23:45.440
+one of those dimensions.
+
+23:45.440 --> 23:48.800
+The other one is lighting conditions,
+
+23:48.800 --> 23:50.520
+weather conditions.
+
+23:50.520 --> 23:53.240
+So and you have also those,
+
+23:53.240 --> 23:54.680
+I'm going to call it corner cases.
+
+23:54.680 --> 23:56.600
+So when you have the sun in view
+
+23:56.600 --> 23:59.080
+or when you have the moon in view
+
+23:59.080 --> 24:00.800
+and you're trying to perform this function,
+
+24:00.800 --> 24:02.680
+that will affect the performance of the ML
+
+24:02.680 --> 24:06.240
+if it has never seen such occurrences.
+
+24:06.240 --> 24:10.320
+Now, once we have identified those dimensions,
+
+24:10.320 --> 24:13.200
+we need to understand what is the amount of data
+
+24:13.200 --> 24:16.320
+that we need to be able to be representative
+
+24:16.320 --> 24:20.680
+of our environment for each of those dimensions.
+
+24:20.680 --> 24:26.840
+And then what we can do is using a representative statistical set.
+
+24:26.840 --> 24:29.200
+So a number of population of images
+
+24:29.200 --> 24:32.000
+that represent our space.
+
+24:32.000 --> 24:34.960
+We can take the ML,
+
+24:34.960 --> 24:38.200
+do the test over a percentage of that
+
+24:38.200 --> 24:40.880
+with a holdout at the end.
+
+24:40.880 --> 24:43.880
+And then by having multiple folds
+
+24:43.880 --> 24:45.800
+and basically reshuffling this,
+
+24:45.800 --> 24:49.080
+we can understand what is the degree of generalization
+
+24:49.080 --> 24:51.560
+of the ML model.
+
+24:51.560 --> 24:53.560
+And using that statistic,
+
+24:53.560 --> 24:58.160
+we can derive from there how many airports do we need to see
+
+24:58.160 --> 25:00.000
+to guarantee to a certain probability
+
+25:00.000 --> 25:02.880
+that we will meet our performance.
+
+25:02.880 --> 25:04.960
+So to give you an example,
+
+25:04.960 --> 25:09.840
+let's say that we've collected data on 100 different airports.
+
+25:09.840 --> 25:13.120
+We can use that 100 airports and say,
+
+25:13.120 --> 25:15.400
+let's try to train only on 30
+
+25:15.400 --> 25:17.480
+and check how we perform on the rest.
+
+25:17.480 --> 25:22.200
+And then we do that again saying we take 40, 50, et cetera.
+
+25:22.200 --> 25:24.360
+From there you can draw a curve.
+
+25:24.360 --> 25:27.760
+And at some point that curve will hit an asymptote
+
+25:27.760 --> 25:31.840
+that tells you I've reached my target performance
+
+25:31.840 --> 25:34.960
+and any additional airport on top of that
+
+25:34.960 --> 25:37.360
+will increase or improve it.
+
+25:37.360 --> 25:38.840
+But you're already there.
+
+25:38.840 --> 25:41.200
+So from there we can backtrack how many airports
+
+25:41.200 --> 25:44.320
+or how many samples we need in each of those dimensions.
+
+25:44.320 --> 25:49.320
+And so that's one of the approach that we're exploring
+
+25:49.320 --> 25:51.360
+to be able to provide this statistical proof.
+
+25:51.360 --> 25:54.400
+Thus far in the conversation you've kind of connected
+
+25:54.400 --> 25:57.280
+the safety, critical nature of what you're doing
+
+25:57.280 --> 26:00.920
+and the need to provide these performance guarantees
+
+26:00.920 --> 26:03.760
+to kind of this very fundamental task
+
+26:03.760 --> 26:08.440
+that all ML practitioners are worried about data collection.
+
+26:10.120 --> 26:12.720
+And you've talked a little bit about how you collect
+
+26:12.720 --> 26:15.000
+the data.
+
+26:15.000 --> 26:17.680
+There's also the aspect of labeling the data
+
+26:17.680 --> 26:21.080
+which is a big deal as well.
+
+26:21.080 --> 26:24.200
+Can you talk a little bit about some of the challenges
+
+26:24.200 --> 26:26.800
+of labeling for your use case?
+
+26:26.800 --> 26:28.120
+Absolutely.
+
+26:28.120 --> 26:30.640
+And I think anybody that has worked in ML
+
+26:30.640 --> 26:33.600
+fully understand that getting the right data
+
+26:33.600 --> 26:36.480
+and getting the good labels is half of the work.
+
+26:37.400 --> 26:39.320
+And the other half being able to train it
+
+26:39.320 --> 26:40.440
+and test it properly.
+
+26:40.440 --> 26:43.480
+So labeling and acquiring that data
+
+26:43.480 --> 26:46.280
+is one of the major challenges for our industry.
+
+26:47.240 --> 26:50.960
+The car industry has the luxury of being able to collect data
+
+26:50.960 --> 26:54.120
+in a fairly cheap way because they need to equip a car
+
+26:54.120 --> 26:56.200
+that's certainly an expensive piece of equipment
+
+26:56.200 --> 26:59.800
+but after that driving around is not an expensive operation.
+
+26:59.800 --> 27:02.400
+In our case, flying is an expensive operation
+
+27:02.400 --> 27:05.600
+meaning that getting data is time consuming.
+
+27:05.600 --> 27:08.720
+It's we need to put a lot of resources behind it.
+
+27:08.720 --> 27:11.880
+And then after that, we need to label that data
+
+27:11.880 --> 27:14.200
+and we need to label to a level of precision
+
+27:14.200 --> 27:18.560
+that has rarely been seen in other use cases.
+
+27:18.560 --> 27:20.160
+And I'm going to give you an example
+
+27:20.160 --> 27:25.880
+of the typical classifier and bounding box sort of ML model
+
+27:25.880 --> 27:26.800
+that you have out there.
+
+27:26.800 --> 27:29.480
+So for detecting cats and dogs.
+
+27:29.480 --> 27:31.120
+So most of the time to be able to do
+
+27:31.120 --> 27:33.360
+those typical classification problem
+
+27:33.360 --> 27:35.600
+and to put a bounding box on it.
+
+27:35.600 --> 27:39.520
+Using, for example, the typical YOLO architecture,
+
+27:39.520 --> 27:45.440
+your labeling needs is basically you need to fit a box
+
+27:45.440 --> 27:49.240
+on an image that mainly contains the object of interest.
+
+27:49.240 --> 27:52.680
+So for example, your dog may be half of the image
+
+27:52.680 --> 27:55.560
+or may be 40% of all your pixels.
+
+27:55.560 --> 27:58.640
+And so that means at the end, if you put a bounding box on it
+
+27:58.640 --> 28:01.880
+as a manual operator would, even if the bounding box
+
+28:01.880 --> 28:03.800
+is not well fitted over the object
+
+28:03.800 --> 28:06.680
+and you're taking another 70 pixels on the side
+
+28:06.680 --> 28:10.200
+of your image for, for example, an HD image
+
+28:10.200 --> 28:14.600
+that's still more or less within the 2% or 5% margin.
+
+28:14.600 --> 28:17.720
+And your ML model will be able to generalize
+
+28:17.720 --> 28:19.360
+over all of those samples assuming
+
+28:19.360 --> 28:23.560
+that you don't have an inherent bias into your images.
+
+28:23.560 --> 28:29.760
+So the classical approach makes it, if you forgive the term,
+
+28:29.760 --> 28:34.440
+makes sloppy labels still OK to achieve the right performance.
+
+28:34.440 --> 28:38.280
+Now, in our case, if you take a 12 megapixel image,
+
+28:38.280 --> 28:41.720
+which is the typical range of resolution
+
+28:41.720 --> 28:43.960
+that we need for lending an aircraft
+
+28:43.960 --> 28:48.840
+and being able to provide the navigational parameter for it,
+
+28:48.840 --> 28:54.360
+the airport can be as small as 20 pixel by 20 pixel in this image.
+
+28:54.360 --> 28:58.480
+So at the end, if you want to keep your error bounded,
+
+28:58.480 --> 29:00.440
+your bounding box on that object needs
+
+29:00.440 --> 29:04.880
+to be within maybe 5 pixels or 3 pixels.
+
+29:04.880 --> 29:06.920
+So what does it mean in terms of labeling
+
+29:06.920 --> 29:11.080
+is that the manual labeler needs to take that 12 megapixel
+
+29:11.080 --> 29:14.920
+or even 15 megapixel image, needs to zoom in as soon
+
+29:14.920 --> 29:18.160
+as he has identified where the object and the tiny object
+
+29:18.160 --> 29:22.000
+is in the image, and then needs to work
+
+29:22.000 --> 29:25.320
+on putting this bounding box as tight as possible around it
+
+29:25.320 --> 29:29.320
+within a 3 pixel accuracy.
+
+29:29.320 --> 29:32.600
+And so that is quite a challenge as anybody
+
+29:32.600 --> 29:35.040
+has worked with manual labeling knows,
+
+29:35.040 --> 29:36.600
+and it's also time-consuming.
+
+29:36.600 --> 29:41.440
+And I'm going to add that most of our crowd sourcing
+
+29:41.440 --> 29:43.360
+strategies to be able to do that,
+
+29:43.360 --> 29:47.280
+so meaning gathering a large population of manual annotator
+
+29:47.280 --> 29:51.440
+is not a good method to do this because the level of accuracy
+
+29:51.440 --> 29:55.880
+required requires a lot more time than they will spend
+
+29:55.880 --> 29:58.120
+because of the money that they're getting out of it.
+
+29:58.120 --> 30:04.120
+I mean, there are even simpler challenges
+
+30:04.120 --> 30:09.880
+like most of the folks that we're paying to do manual labeling.
+
+30:09.880 --> 30:12.280
+I'm imagining a 12 megapixel image
+
+30:12.280 --> 30:14.480
+is going to take a long time to download
+
+30:14.480 --> 30:16.720
+and is going to choke their machine.
+
+30:16.720 --> 30:18.080
+That is absolutely right.
+
+30:18.080 --> 30:22.000
+The whole pipeline behind it of being able to transfer
+
+30:22.000 --> 30:25.680
+those data to the annotator is a challenge in itself.
+
+30:25.680 --> 30:28.480
+We could, and one of the strategies, for example,
+
+30:28.480 --> 30:32.560
+to break it down into a sub-grid, but it gives you
+
+30:32.560 --> 30:36.320
+more images at the end, more images to annotate,
+
+30:36.320 --> 30:39.040
+still meaning more time to do so.
+
+30:39.040 --> 30:43.840
+And the problem is, at scale, it doesn't work at all.
+
+30:43.840 --> 30:46.560
+If you're at a point where you're collecting
+
+30:46.560 --> 30:50.320
+literally millions of images every week,
+
+30:50.320 --> 30:53.640
+it is totally impossible to break down those images
+
+30:53.640 --> 30:57.280
+into those 500 by 500, for example, pixel images
+
+30:57.280 --> 31:01.760
+and have this army of human annotators looking at each of them.
+
+31:01.760 --> 31:05.760
+The throughput is just going to break the whole chain,
+
+31:05.760 --> 31:08.240
+which forces us at that point to think
+
+31:08.240 --> 31:13.240
+about auto labeling approach or semi-automated approach.
+
+31:13.240 --> 31:16.640
+And I'm going to say this is not a binary problem,
+
+31:16.640 --> 31:20.600
+in the sense you can think about it as a spectrum.
+
+31:20.600 --> 31:25.880
+In the very first stage, when your ML models are immature
+
+31:25.880 --> 31:27.960
+and you're just learning how to do this,
+
+31:27.960 --> 31:29.480
+you're going to need a human annotator
+
+31:29.480 --> 31:31.200
+for pretty much every frame.
+
+31:31.200 --> 31:34.040
+But then, as you're starting to build some autonomy
+
+31:34.040 --> 31:36.680
+on top of it, in the sense, you have algorithms,
+
+31:36.680 --> 31:39.720
+heuristics that can start to make sense of the data
+
+31:39.720 --> 31:44.880
+and give you a first guess of what you need to annotate,
+
+31:44.880 --> 31:48.360
+then you can increase the number of images
+
+31:48.360 --> 31:49.720
+that you're automatically annotating
+
+31:49.720 --> 31:52.920
+and have the human annotator only checking every one image
+
+31:52.920 --> 31:54.000
+out of 10.
+
+31:54.000 --> 31:56.560
+And then, as those algorithms, again, mature,
+
+31:56.560 --> 31:58.360
+you can push the cursor further
+
+31:58.360 --> 32:01.680
+and have the annotator looking at one image over 100,
+
+32:01.680 --> 32:03.880
+over 1,000, et cetera.
+
+32:03.880 --> 32:05.600
+And then the ultimate goal for us
+
+32:05.600 --> 32:10.400
+is when you reach the millions, one image out of 1 million
+
+32:10.400 --> 32:12.840
+is still something that a human annotator can do.
+
+32:12.840 --> 32:15.120
+But how do you ensure the quality and the consistency
+
+32:15.120 --> 32:16.960
+of the million of images behind it?
+
+32:16.960 --> 32:19.440
+And that is the fundamental challenge
+
+32:19.440 --> 32:23.560
+for the labeling parts that we are addressing.
+
+32:23.560 --> 32:28.080
+And before we jump into the automatic labeling,
+
+32:28.080 --> 32:31.720
+automated labeling, and more detail,
+
+32:31.720 --> 32:33.880
+speaking to the previous comment,
+
+32:33.880 --> 32:37.240
+do you, both from a labeling perspective,
+
+32:37.240 --> 32:42.280
+as well as from a model perspective?
+
+32:42.280 --> 32:44.120
+Do you tile the images?
+
+32:44.120 --> 32:49.920
+Or do you keep the images whole?
+
+32:49.920 --> 32:54.200
+So for the labeling, this, I'm going to use an expression
+
+32:54.200 --> 32:55.840
+that everybody hates.
+
+32:55.840 --> 32:56.520
+It depends.
+
+32:59.320 --> 33:02.920
+So for the images, the concept that we've seen
+
+33:02.920 --> 33:06.200
+is because our use case for commercial aviation
+
+33:06.200 --> 33:08.280
+is within a very structured environment
+
+33:08.280 --> 33:11.600
+compared to others, we have a pre-array knowledge
+
+33:11.600 --> 33:14.680
+on the environment that we can leverage
+
+33:14.680 --> 33:16.680
+to actually break it down.
+
+33:16.680 --> 33:20.160
+So in the sense, to be more practical here,
+
+33:20.160 --> 33:22.160
+we know exactly where the airport is
+
+33:22.160 --> 33:24.960
+because we have the lat long coordinates,
+
+33:24.960 --> 33:27.040
+and this is in a database.
+
+33:27.040 --> 33:30.280
+Now, where should it be in the image is the question.
+
+33:30.280 --> 33:33.480
+So as soon as we know the GPS coordinate of the aircraft,
+
+33:33.480 --> 33:36.680
+we know its attitude, heading, and all that stuff, yeah.
+
+33:36.680 --> 33:37.520
+Exactly.
+
+33:37.520 --> 33:39.520
+And then if we have the camera calibrated,
+
+33:39.520 --> 33:40.640
+and we know exactly where it is,
+
+33:40.640 --> 33:42.800
+and where it's pointing at on the aircraft,
+
+33:42.800 --> 33:44.920
+then we roughly know where the airport
+
+33:44.920 --> 33:47.400
+is supposed to be within the image.
+
+33:47.400 --> 33:50.280
+Now, there's still sufficient amount of errors in there
+
+33:50.280 --> 33:52.440
+so that we can't just rely on that system
+
+33:52.440 --> 33:55.280
+to guide the aircraft all the way to the runway.
+
+33:55.280 --> 33:57.920
+Many, you can't do a full geometric solution
+
+33:57.920 --> 34:00.640
+because there's a lot of noise and uncertainty in the system.
+
+34:00.640 --> 34:01.880
+Exactly.
+
+34:01.880 --> 34:04.520
+This is where the ML component becomes necessary
+
+34:04.520 --> 34:08.480
+because we need to go from a rough region of interest
+
+34:08.480 --> 34:11.640
+to the exact position of the runway within the image.
+
+34:11.640 --> 34:13.560
+But that gives us a first guess,
+
+34:13.560 --> 34:15.880
+and this is a region of interest that we can cut out
+
+34:15.880 --> 34:18.760
+from that 12-megapixel image,
+
+34:18.760 --> 34:21.280
+and then have the annotators annotate
+
+34:21.280 --> 34:23.240
+instead of looking at the whole image.
+
+34:23.240 --> 34:27.400
+So that is one technique to reduce the amount of pixels
+
+34:27.400 --> 34:30.520
+that we need to process when we're labeling things.
+
+34:30.520 --> 34:34.320
+So in other words, what you primarily care about
+
+34:34.320 --> 34:37.520
+for the task that we're discussing,
+
+34:37.520 --> 34:42.360
+eG landing is the airport and the runways,
+
+34:42.360 --> 34:44.440
+and a lot of your images are gonna have,
+
+34:44.440 --> 34:47.000
+by definition, a lot of sky, for example,
+
+34:47.000 --> 34:49.360
+and you don't really care about having that annotated
+
+34:49.360 --> 34:51.480
+so you can kind of crop that out.
+
+34:51.480 --> 34:52.800
+Exactly.
+
+34:52.800 --> 34:55.880
+One additional thing is, as you're pointing out,
+
+34:55.880 --> 34:58.320
+during crews where you can only see sky,
+
+34:58.320 --> 35:00.280
+this is something that we're not even recording
+
+35:00.280 --> 35:04.600
+because there is no task to be done when you're in crews.
+
+35:04.600 --> 35:06.440
+It's all the airspace is controlled,
+
+35:06.440 --> 35:09.680
+so you know that your separation is guaranteed.
+
+35:09.680 --> 35:12.680
+So on that case, it's a very safe environment.
+
+35:12.680 --> 35:15.720
+So you need to start recording as soon as you are
+
+35:15.720 --> 35:19.040
+in the terminal area and you're in the last stretch
+
+35:19.040 --> 35:22.400
+to be able to land that aircraft on the airport.
+
+35:22.400 --> 35:24.320
+And even in there, as you said,
+
+35:24.320 --> 35:27.440
+there's a large portion that might be the sky of the beginning.
+
+35:27.440 --> 35:30.640
+As you get closer, the scale of the runway will change
+
+35:30.640 --> 35:35.200
+and the runway will take the full field of view of your image.
+
+35:35.200 --> 35:36.680
+And this is also one of the challenges
+
+35:36.680 --> 35:40.080
+for the ML on the ML side, as a side note is,
+
+35:40.080 --> 35:42.400
+you start looking at the tiny little box
+
+35:42.400 --> 35:44.240
+in the middle of your image,
+
+35:44.240 --> 35:46.480
+and the ML has to recognize that as a runway
+
+35:46.480 --> 35:48.120
+and then do the math behind it
+
+35:48.120 --> 35:50.200
+to be able to give you exactly your position
+
+35:50.200 --> 35:51.800
+with respect to it.
+
+35:51.800 --> 35:53.520
+And then you have to go all the way
+
+35:53.520 --> 35:56.240
+to the point that you don't even see the full runway,
+
+35:56.240 --> 35:58.480
+you only see a portion of it.
+
+35:58.480 --> 36:00.920
+And yet, all the way to the landing,
+
+36:00.920 --> 36:04.320
+your ML model still needs to take that partial image
+
+36:04.320 --> 36:05.720
+and compute the exact same thing
+
+36:05.720 --> 36:07.360
+of where you are with respect to it
+
+36:07.360 --> 36:09.160
+to be able to land your aircraft.
+
+36:09.160 --> 36:13.480
+So the scaling factor is a major challenge,
+
+36:13.480 --> 36:16.560
+both for the ML part but also for the annotation.
+
+36:16.560 --> 36:20.600
+Because we need to ensure that our error on the labels
+
+36:20.600 --> 36:24.400
+are tightly controlled over this entire range of scales.
+
+36:24.400 --> 36:26.400
+And then the other side of my question
+
+36:26.400 --> 36:31.160
+was with regard to building and training the model,
+
+36:31.160 --> 36:36.360
+your typical computer vision networks
+
+36:36.360 --> 36:40.680
+or hundreds of pixel-wide images
+
+36:40.680 --> 36:44.640
+is kind of what they're tuned for.
+
+36:44.640 --> 36:47.880
+Are you tiling or are you using techniques
+
+36:47.880 --> 36:50.840
+that work at full-scale images?
+
+36:50.840 --> 36:53.040
+So this is a very good question
+
+36:53.040 --> 36:55.520
+because it taps into the real-time performance
+
+36:55.520 --> 36:58.200
+with respect to the onboard compute power
+
+36:58.200 --> 37:00.360
+that we have available.
+
+37:00.360 --> 37:01.200
+And I'm going to...
+
+37:01.200 --> 37:03.040
+The flip side of that is inference, right?
+
+37:03.040 --> 37:04.720
+Exactly, exactly.
+
+37:04.720 --> 37:07.080
+And I'm going to make a little digression here
+
+37:07.080 --> 37:09.240
+just to understand the fundamental problem.
+
+37:09.240 --> 37:13.160
+So on an aircraft, everything needs to be certified
+
+37:13.160 --> 37:15.400
+and everything needs to be deterministic,
+
+37:15.400 --> 37:17.160
+which means that the type of computer
+
+37:17.160 --> 37:20.280
+that we can use to run the ML algorithms
+
+37:20.280 --> 37:24.720
+are not the typical GPU that you use on your gaming laptop.
+
+37:24.720 --> 37:28.280
+They're much less powerful and there's redundancy
+
+37:28.280 --> 37:29.600
+built into it.
+
+37:29.600 --> 37:32.320
+And so essentially, it's a big constraint
+
+37:32.320 --> 37:34.800
+to be able to achieve the real-time performance
+
+37:34.800 --> 37:36.240
+that we need to have.
+
+37:36.240 --> 37:40.000
+So having said that processing 12 megapixel
+
+37:40.000 --> 37:42.880
+or 15 megapixel images in real time
+
+37:42.880 --> 37:44.400
+when you have three cameras, for example,
+
+37:44.400 --> 37:46.040
+processing it at the same time,
+
+37:46.040 --> 37:48.600
+is a major challenge for us.
+
+37:48.600 --> 37:51.000
+So there's different approaches of doing this.
+
+37:51.000 --> 37:54.080
+Tiling is definitely one of the first methods
+
+37:54.080 --> 37:56.240
+that we are using.
+
+37:56.240 --> 38:00.880
+But also, the other aspect is to exploit the scale.
+
+38:00.880 --> 38:05.880
+So if we can shrink the image and we can use the image
+
+38:05.880 --> 38:10.880
+at different scales, it also provides you a filter
+
+38:10.880 --> 38:14.520
+that lets information at different frequencies pop out.
+
+38:14.520 --> 38:18.080
+So for example, when you're pretty far from the runway,
+
+38:18.080 --> 38:20.400
+if you shrink the image, it actually
+
+38:20.400 --> 38:23.360
+blurs out the high frequency item that are actually noise
+
+38:23.360 --> 38:25.320
+and that you don't really care about.
+
+38:25.320 --> 38:29.000
+And you can see more clearly the runway down the road.
+
+38:29.000 --> 38:30.880
+Now, that's one approach.
+
+38:30.880 --> 38:33.760
+The other approach is really to take the full image,
+
+38:33.760 --> 38:37.720
+just cut it in grids that overlap each other
+
+38:37.720 --> 38:41.320
+and to basically brute force it over the entire thing.
+
+38:41.320 --> 38:43.400
+But again, like here, this approach
+
+38:43.400 --> 38:46.520
+where the bottleneck is the compute power that is available.
+
+38:46.520 --> 38:49.880
+And we don't have the luxury of having
+
+38:49.880 --> 38:52.880
+a full server of GPUs in the trunk.
+
+38:52.880 --> 38:55.520
+Like, we would another application.
+
+38:55.520 --> 39:00.280
+And so kind of getting back to the labeling task,
+
+39:00.280 --> 39:02.680
+to the label, I guess the labels would translate
+
+39:02.680 --> 39:07.400
+from you're essentially down sampling your images.
+
+39:07.400 --> 39:09.960
+You know the label is, it's kind of a one-way,
+
+39:09.960 --> 39:10.800
+one-to-one mapping.
+
+39:10.800 --> 39:14.680
+So that's not, you don't have to manually label
+
+39:14.680 --> 39:17.880
+down-sampled images separate from the full resolution
+
+39:17.880 --> 39:18.480
+images.
+
+39:18.480 --> 39:19.200
+No, that's right.
+
+39:19.200 --> 39:21.600
+You would sample the images only once
+
+39:21.600 --> 39:23.400
+at the highest resolution.
+
+39:23.400 --> 39:26.760
+And then you could reuse that as you down sample it.
+
+39:26.760 --> 39:31.440
+However, I have to say you can down-sample it
+
+39:31.440 --> 39:33.960
+so that basically you have this filtering effect
+
+39:33.960 --> 39:36.320
+that happens, and that enables you
+
+39:36.320 --> 39:39.040
+to go faster in processing the image.
+
+39:39.040 --> 39:41.560
+But it's not sufficient, and you can't just
+
+39:41.560 --> 39:44.680
+use the output of that, because the resolution
+
+39:44.680 --> 39:49.000
+and the precision of the output parameter that we need
+
+39:49.000 --> 39:52.760
+is such that we also need the full resolution imagery
+
+39:52.760 --> 39:55.840
+and to have a pixel-level accuracy
+
+39:55.840 --> 39:57.680
+in the detection at the end.
+
+39:57.680 --> 40:00.760
+So I guess what I'm saying is, you
+
+40:00.760 --> 40:03.760
+can use those different techniques of, for example,
+
+40:03.760 --> 40:06.720
+cutting out a region of interest out of your image,
+
+40:06.720 --> 40:08.600
+of down-sampling it as well.
+
+40:08.600 --> 40:10.320
+But it's not sufficient.
+
+40:10.320 --> 40:12.400
+You need at the end, once you've defined
+
+40:12.400 --> 40:14.680
+really the region of interest, to get back
+
+40:14.680 --> 40:18.240
+to the original image with the highest resolution possible,
+
+40:18.240 --> 40:20.440
+to get that last piece of precision
+
+40:20.440 --> 40:23.320
+that you need for your autopilot, for instance.
+
+40:23.320 --> 40:25.600
+I think what I'm hearing you say is that you
+
+40:25.600 --> 40:28.960
+use these tricks like the down-sampling
+
+40:28.960 --> 40:32.680
+more to identify regions of interest,
+
+40:32.680 --> 40:37.000
+and then you pass full resolution images
+
+40:37.000 --> 40:43.120
+to your models, as opposed to some funky model
+
+40:43.120 --> 40:46.120
+that knows how to deal with both full resolution
+
+40:46.120 --> 40:48.320
+and down-sample images or something like that.
+
+40:48.320 --> 40:51.000
+So we're exploring different ways of doing that.
+
+40:51.000 --> 40:53.520
+But essentially, what I'm saying is,
+
+40:53.520 --> 40:56.240
+those are a range of techniques that you can use.
+
+40:56.240 --> 40:59.400
+And then there's different architectures behind it,
+
+40:59.400 --> 41:04.000
+where you can paralyze some of those from that processing.
+
+41:04.000 --> 41:07.600
+And that is the way for us to achieve both the precision
+
+41:07.600 --> 41:11.320
+that we need at the frame rates that we need
+
+41:11.320 --> 41:13.200
+to process all of that information.
+
+41:13.200 --> 41:17.480
+So that means that, and this is the second big challenge
+
+41:17.480 --> 41:21.480
+for us, we can't just reuse ML models out of the shelf
+
+41:21.480 --> 41:25.520
+from the fresh from the press, from Google or Facebook,
+
+41:25.520 --> 41:28.440
+because they're essentially on fit for our application.
+
+41:28.440 --> 41:32.040
+So there's definitely some big segments that we can reuse
+
+41:32.040 --> 41:35.200
+that is very useful for us, but at the end,
+
+41:35.200 --> 41:37.000
+because of the performance constraints
+
+41:37.000 --> 41:38.440
+that we have, the compute constraints,
+
+41:38.440 --> 41:42.560
+the huge images, we need to significantly rethink
+
+41:42.560 --> 41:46.480
+the architecture and create sort of novel architectures
+
+41:46.480 --> 41:48.960
+that really matches our needs.
+
+41:48.960 --> 41:52.440
+We started talking a bit about automated labeling,
+
+41:52.440 --> 41:57.440
+and you mentioned the kind of using the geometry
+
+41:57.440 --> 42:00.920
+to identify where an airport is.
+
+42:00.920 --> 42:03.920
+Is there more to the automated labeling?
+
+42:03.920 --> 42:08.760
+Is that automated labeling, or is that just focusing
+
+42:08.760 --> 42:12.760
+on what needs to be labeled, and then you're doing more
+
+42:12.760 --> 42:14.920
+from an automated labeling perspective?
+
+42:14.920 --> 42:16.920
+The way I'm going to answer the question is,
+
+42:16.920 --> 42:21.080
+it's an evolution of our pipeline.
+
+42:21.080 --> 42:22.880
+At the very beginning, as I said,
+
+42:22.880 --> 42:25.400
+everything was labeled manually,
+
+42:25.400 --> 42:29.120
+actually, everyone's going to say, in-house,
+
+42:30.080 --> 42:34.240
+until we ran out in interns, no, this is a joke,
+
+42:34.240 --> 42:37.960
+until basically people said that it's completely
+
+42:37.960 --> 42:39.640
+unfeasible to scale it up.
+
+42:39.640 --> 42:42.560
+So after that, this is, well, actually soon after that,
+
+42:42.560 --> 42:45.480
+we started looking into those heuristics
+
+42:45.480 --> 42:48.200
+and those semi-automated processes
+
+42:48.200 --> 42:51.520
+to be able to label the images
+
+42:51.520 --> 42:55.680
+with as few human or manual label as possible.
+
+42:55.680 --> 42:58.560
+And we are building the stack
+
+42:58.560 --> 43:00.840
+so that we use more of those algorithms,
+
+43:00.840 --> 43:04.560
+more of those heuristics to be able to increase
+
+43:04.560 --> 43:06.280
+the precision of our label,
+
+43:06.280 --> 43:08.880
+to be able to increase the consistency of them,
+
+43:08.880 --> 43:11.440
+and to be able to do that at greater scale
+
+43:11.440 --> 43:13.640
+with fewer human supervision.
+
+43:13.640 --> 43:16.040
+So the middle portion of that journey
+
+43:16.040 --> 43:19.080
+is what we call weak supervision, for example,
+
+43:19.080 --> 43:20.760
+or pragmatic means.
+
+43:20.760 --> 43:22.920
+So we're starting to have
+
+43:22.920 --> 43:25.520
+some of those heuristics applied,
+
+43:25.520 --> 43:28.160
+and it gives us enough consistency
+
+43:28.160 --> 43:30.200
+and enough accuracy so that we can meet
+
+43:30.200 --> 43:33.400
+the performance requirements that we have.
+
+43:33.400 --> 43:36.640
+But again, there's a scaling challenge here
+
+43:36.640 --> 43:41.640
+because, for example, along one lending,
+
+43:41.760 --> 43:46.760
+we might have to pick 20 or 50 images
+
+43:46.920 --> 43:48.920
+that are manually labeled
+
+43:48.920 --> 43:52.400
+so that we can recalibrate all of the entire sequence.
+
+43:52.400 --> 43:56.680
+So that would be a mix of programmatic aspect
+
+43:56.680 --> 43:59.760
+or weak supervision with the manual labelers
+
+43:59.760 --> 44:01.920
+sort of going back at it
+
+44:01.920 --> 44:06.000
+and sort of giving you some pointers to the algorithm
+
+44:06.000 --> 44:08.680
+so that everything is re-adjusted
+
+44:08.680 --> 44:11.440
+and all the errors are minimized in your sequence.
+
+44:11.440 --> 44:13.880
+Can you elaborate on that recalibration?
+
+44:13.880 --> 44:16.120
+One of the things is there's a lot of vibration,
+
+44:16.120 --> 44:17.840
+for instance, on an aircraft,
+
+44:17.840 --> 44:21.680
+and what you need to know to be able to label things properly
+
+44:21.680 --> 44:24.760
+is what is your camera position on the aircraft
+
+44:24.760 --> 44:26.840
+and what is this orientation with respect
+
+44:26.840 --> 44:28.920
+to your frame of reference?
+
+44:28.920 --> 44:31.160
+And that thing moves over time.
+
+44:31.160 --> 44:34.080
+So when we're doing data collection,
+
+44:34.080 --> 44:36.840
+our aircraft will do maybe 50 landings
+
+44:36.840 --> 44:38.800
+during that data collection.
+
+44:38.800 --> 44:42.600
+And the exact position and the exact calibration matrix
+
+44:42.600 --> 44:44.840
+that we need to apply for that camera
+
+44:44.840 --> 44:46.960
+will not be the same between the first flight test
+
+44:46.960 --> 44:48.640
+and the last flight test.
+
+44:48.640 --> 44:50.560
+The only way to compensate for that
+
+44:50.560 --> 44:55.000
+is to, in retrospect, analyze the full sequence
+
+44:55.000 --> 44:57.280
+and do what we call the bundle adjustment over it.
+
+44:57.280 --> 45:00.840
+So recalculate what would be the calibration
+
+45:00.840 --> 45:04.960
+for that sequence and then using that optimized calibration
+
+45:04.960 --> 45:07.840
+matrix, recompute where all the labels should be.
+
+45:07.840 --> 45:10.200
+And that is one way of minimizing the error
+
+45:10.200 --> 45:11.280
+over those labels.
+
+45:11.280 --> 45:14.960
+And this is for the programmatic labels.
+
+45:14.960 --> 45:15.960
+That's correct.
+
+45:15.960 --> 45:19.320
+So that is our way of using heuristics
+
+45:19.320 --> 45:23.800
+to be able to automatically label those images.
+
+45:23.800 --> 45:27.720
+But unlike a programmatic labeling task on NLP
+
+45:27.720 --> 45:29.800
+where you've got your heuristics,
+
+45:29.800 --> 45:34.840
+you apply them to your data and you get some labels,
+
+45:34.840 --> 45:40.360
+you've got this loop where just that one shot data point
+
+45:40.360 --> 45:44.880
+isn't sufficient because you think you know where your camera
+
+45:44.880 --> 45:49.000
+is but you don't really until you analyze a sequence
+
+45:49.000 --> 45:52.480
+of images and then you have to go back and correct.
+
+45:52.480 --> 45:53.080
+Exactly.
+
+45:53.080 --> 45:55.200
+And this is why we often have the question
+
+45:55.200 --> 45:58.280
+saying, if you can auto label your images,
+
+45:58.280 --> 46:01.000
+why don't you use your auto labeling algorithm
+
+46:01.000 --> 46:04.040
+in inference to actually do the function?
+
+46:04.040 --> 46:09.280
+And the simple answer is, well, that algorithm only works
+
+46:09.280 --> 46:12.000
+once you have the full sequence and you've already landed
+
+46:12.000 --> 46:15.280
+and you can sort of recalculate all of it
+
+46:15.280 --> 46:18.400
+and then subtract the error out of your sequence.
+
+46:18.400 --> 46:21.560
+So essentially, it's completely inapplicable
+
+46:21.560 --> 46:24.920
+to the inference case.
+
+46:24.920 --> 46:28.400
+But one additional thing is the heuristics
+
+46:28.400 --> 46:31.160
+have some limitations, especially when
+
+46:31.160 --> 46:34.560
+you're starting to look at long tail events.
+
+46:34.560 --> 46:36.680
+This is where typically they fail.
+
+46:36.680 --> 46:41.120
+And also at larger scales to be able to ensure
+
+46:41.120 --> 46:43.280
+the consistency and the quality of your labels
+
+46:43.280 --> 46:46.480
+using those heuristics might prove of a challenge.
+
+46:46.480 --> 46:49.080
+And this is where the journey that I was talking about
+
+46:49.080 --> 46:51.160
+keeps on going because at some point,
+
+46:51.160 --> 46:55.800
+if you have enough data and your ML is mature enough,
+
+46:55.800 --> 46:59.160
+you can start to use your ML to go back into your data set
+
+46:59.160 --> 47:01.360
+and start doing auto labeling.
+
+47:01.360 --> 47:05.600
+And using the output of your ML with the uncertainty
+
+47:05.600 --> 47:08.160
+or the confidence depending on the metrics
+
+47:08.160 --> 47:11.320
+and how you factor in those output for your ML,
+
+47:11.320 --> 47:14.600
+you can identify pieces or groups of data
+
+47:14.600 --> 47:17.880
+that needs further attention for labeling.
+
+47:17.880 --> 47:19.840
+And so this is the entire journey
+
+47:19.840 --> 47:23.640
+from your very first image that you hand label
+
+47:23.640 --> 47:27.200
+to the batch of images that you're programmatically labeling
+
+47:27.200 --> 47:30.680
+with some human supervision all the way to the grail
+
+47:30.680 --> 47:33.480
+where you have your ML automatically annotating
+
+47:33.480 --> 47:37.920
+your data sets with very specialized ML trained for that
+
+47:37.920 --> 47:40.360
+that wouldn't run on your aircraft.
+
+47:40.360 --> 47:44.120
+And the journey here is that we're trying to get
+
+47:44.120 --> 47:47.760
+to that point where ML is usable in that way,
+
+47:47.760 --> 47:50.760
+while guaranteeing again the precision and accuracy
+
+47:50.760 --> 47:53.440
+that we need for our use case, which is extremely high.
+
+47:53.440 --> 47:55.680
+Is it fair to characterize that last stage
+
+47:55.680 --> 47:59.320
+as kind of a hybrid of programmatic labeling
+
+47:59.320 --> 48:00.520
+and active learning?
+
+48:00.520 --> 48:01.360
+Exactly.
+
+48:01.360 --> 48:05.280
+And the active learning is a very interesting approach
+
+48:05.280 --> 48:08.240
+which has been implemented in various flavors
+
+48:08.240 --> 48:11.880
+across the industry, especially in industries
+
+48:11.880 --> 48:14.520
+where you have a vast amount of data
+
+48:14.520 --> 48:16.480
+or when the data is cheap to acquire
+
+48:16.480 --> 48:18.720
+and you have more data on your hand than you actually need
+
+48:18.720 --> 48:20.480
+and you want to sort out which one is useful
+
+48:20.480 --> 48:22.040
+and which one is not.
+
+48:22.040 --> 48:25.680
+In our case, we're not in this data rich environment,
+
+48:25.680 --> 48:29.520
+data is hard to get, data is costly to get.
+
+48:29.520 --> 48:31.120
+So active learning in our case
+
+48:31.120 --> 48:33.440
+means something slightly different.
+
+48:33.440 --> 48:36.160
+It's like active labeling in a sense.
+
+48:36.160 --> 48:39.720
+That would be a new label that would really fit our purpose.
+
+48:39.720 --> 48:42.280
+Active labeling, it's true that during one sequence,
+
+48:42.280 --> 48:44.640
+during one lending, if you're capturing images
+
+48:44.640 --> 48:47.600
+at, for example, 20 frame per second,
+
+48:47.600 --> 48:51.920
+your frame one will not be very different from frame two.
+
+48:51.920 --> 48:55.080
+So in that respect, active learning,
+
+48:55.080 --> 48:58.120
+if you follow the concept, would say, well,
+
+48:58.120 --> 49:01.920
+sub-sample your images because what you want is diversity.
+
+49:01.920 --> 49:04.360
+But you also need to guarantee volume in a certain way
+
+49:04.360 --> 49:07.040
+and this one is also kind of a challenge for us to get.
+
+49:07.040 --> 49:09.720
+So we have to have this balance between labeling
+
+49:09.720 --> 49:11.800
+enough to get the critical volume,
+
+49:11.800 --> 49:14.840
+but then ensuring diversity by looking at which data
+
+49:14.840 --> 49:17.880
+provides the most learning value over it.
+
+49:17.880 --> 49:19.960
+So our implementation is going to be slightly different
+
+49:19.960 --> 49:22.440
+from other industries, but it's still very relevant
+
+49:22.440 --> 49:23.720
+to be able to pick the right data
+
+49:23.720 --> 49:25.880
+that you want to have in your data set at the end.
+
+49:25.880 --> 49:28.600
+Part of what I heard when you describe
+
+49:28.600 --> 49:32.560
+the way you apply programmatic labeling is that
+
+49:32.560 --> 49:36.080
+you're applying these heuristics to these images,
+
+49:36.080 --> 49:39.080
+you're kind of going back through a second time
+
+49:39.080 --> 49:44.080
+or end time in a loop to calibrate or recalibrate.
+
+49:46.200 --> 49:49.360
+But it almost sounded like then you have these labels
+
+49:49.360 --> 49:54.360
+which you have a very high degree of confidence about.
+
+49:54.720 --> 49:57.160
+I guess that's prompting the thought,
+
+49:57.160 --> 49:59.720
+are you then when you're training,
+
+49:59.720 --> 50:03.200
+do you consider that weak supervision in the sense
+
+50:03.200 --> 50:06.400
+that the labels are noisy or are you still worried
+
+50:06.400 --> 50:08.800
+about noise and if so, how do you deal with that?
+
+50:08.800 --> 50:11.480
+So noise is still going to be in there.
+
+50:11.480 --> 50:14.960
+And but to a degree that we have control over.
+
+50:14.960 --> 50:17.640
+So essentially the whole point is to be able
+
+50:17.640 --> 50:20.600
+to quantify the error and understand that
+
+50:20.600 --> 50:23.720
+at the end of labels are going to have some amount of error
+
+50:23.720 --> 50:27.080
+but not beyond a certain threshold that we've specified.
+
+50:27.080 --> 50:29.560
+Now this is extremely hard to do
+
+50:29.560 --> 50:32.560
+because when you're meeting new conditions
+
+50:32.560 --> 50:35.120
+that you haven't encountered in the past,
+
+50:35.120 --> 50:37.160
+you're not sure that your labeling pipeline
+
+50:37.160 --> 50:38.960
+and your heuristics are going to provide
+
+50:38.960 --> 50:40.920
+the same level of quality and consistency
+
+50:40.920 --> 50:44.280
+as known environments, known conditions
+
+50:44.280 --> 50:46.920
+and images coming from this operational domain.
+
+50:46.920 --> 50:49.560
+So to give you a concrete example,
+
+50:49.560 --> 50:53.600
+labeling daytime images for landing
+
+50:53.600 --> 50:56.120
+is something that we understand how to do
+
+50:56.120 --> 50:57.720
+and we understand how to provide
+
+50:57.720 --> 51:00.920
+the sufficient precision and consistency on it.
+
+51:00.920 --> 51:03.760
+But nighttime is an entirely new ball game here.
+
+51:03.760 --> 51:06.600
+So this is an exercise that we've done as well.
+
+51:06.600 --> 51:09.520
+And what we've seen is that our labeling pipeline
+
+51:09.520 --> 51:12.160
+for daytime doesn't work during nighttime.
+
+51:12.160 --> 51:13.960
+You don't see the same features.
+
+51:15.040 --> 51:17.760
+And for example, one of the things is trying to put
+
+51:17.760 --> 51:21.760
+a, trying to identify the corner points of the runway
+
+51:21.760 --> 51:23.160
+is not feasible during nighttime
+
+51:23.160 --> 51:24.600
+because you don't actually see it.
+
+51:24.600 --> 51:27.200
+All you see is the lights around.
+
+51:27.200 --> 51:30.560
+So as soon as it's going to be an iterative process,
+
+51:30.560 --> 51:32.800
+each time we're pushing further,
+
+51:32.800 --> 51:36.720
+the operational domain that our function needs to operate in,
+
+51:36.720 --> 51:39.600
+we're going to encounter those new conditions,
+
+51:39.600 --> 51:43.200
+those new images and we will have to assess
+
+51:43.200 --> 51:45.400
+whether the current labeling pipeline
+
+51:45.400 --> 51:48.120
+can still provide the same quality
+
+51:48.120 --> 51:51.360
+and basically the same bound on the error.
+
+51:51.360 --> 51:54.640
+And most likely, we're going to have to iterate on this.
+
+51:54.640 --> 51:57.320
+And so in that way, I guess the point
+
+51:57.320 --> 52:00.320
+that I'm trying to make here is that it's a full loop.
+
+52:00.320 --> 52:03.640
+You are using your labeling pipeline to provide labels
+
+52:03.640 --> 52:06.480
+with a certain error, a certain consistency.
+
+52:06.480 --> 52:09.120
+But then at the same time, you need to test your labeling
+
+52:09.120 --> 52:12.000
+pipeline to see what kind of error it induces
+
+52:12.000 --> 52:14.840
+in your labels based on those conditions.
+
+52:14.840 --> 52:16.560
+And for that, you need reliable data.
+
+52:16.560 --> 52:18.800
+So it's kind of a chicken and a neck problem.
+
+52:18.800 --> 52:21.960
+You need well-labeled data to test your labeling pipeline
+
+52:21.960 --> 52:23.520
+and you need a good labeling pipeline
+
+52:23.520 --> 52:26.320
+to provide you right labels and right images.
+
+52:26.320 --> 52:29.640
+So that is the challenge that we're facing.
+
+52:29.640 --> 52:35.280
+I'm also wondering about the use of or thoughts
+
+52:35.280 --> 52:40.480
+on the role of synthetic data for your use case.
+
+52:40.480 --> 52:43.800
+In a sense, I guess the thought is coming from,
+
+52:43.800 --> 52:47.680
+I would think there are fairly small number of airports
+
+52:47.680 --> 52:51.120
+that can accommodate an Airbus 350.
+
+52:51.120 --> 52:53.440
+Why don't you send someone around?
+
+52:53.440 --> 52:55.240
+And in fact, there may be survey data
+
+52:55.240 --> 52:57.160
+that knows where the corner points are
+
+52:57.160 --> 52:59.600
+once you can localize the airport.
+
+52:59.600 --> 53:02.160
+Can you then just generate synthetically
+
+53:02.160 --> 53:03.760
+all the training data that you need?
+
+53:03.760 --> 53:05.520
+That is a very good point.
+
+53:05.520 --> 53:09.120
+And I'm going to say you're ties into two things.
+
+53:09.120 --> 53:13.120
+One is we can absolutely replicate all the airport
+
+53:13.120 --> 53:16.840
+across the world because there's database of them.
+
+53:16.840 --> 53:19.680
+So this is a capability that we have.
+
+53:19.680 --> 53:23.040
+And the other point is we, it's going
+
+53:23.040 --> 53:25.720
+to be very challenging to be able to collect real data
+
+53:25.720 --> 53:28.600
+at all the airports in the world that we operate at
+
+53:28.600 --> 53:30.800
+or that we want to operate at.
+
+53:30.800 --> 53:32.960
+So this is where it really is helpful
+
+53:32.960 --> 53:36.720
+because you can collect data on a sub portion
+
+53:36.720 --> 53:38.320
+of those airport.
+
+53:38.320 --> 53:41.440
+You can generate the synthetic data for all of them
+
+53:41.440 --> 53:43.600
+and using those two data sets and verifying
+
+53:43.600 --> 53:46.480
+that your synthetic data is actually representative
+
+53:46.480 --> 53:50.040
+of your real data, you can create a very extensive data
+
+53:50.040 --> 53:54.360
+set to train the neural network, but also to test it.
+
+53:54.360 --> 53:56.000
+And this is the point that I want to make
+
+53:56.000 --> 53:59.240
+is the difficulty in the challenges
+
+53:59.240 --> 54:04.160
+in improving the safety and the reliability of the algorithm
+
+54:04.160 --> 54:08.280
+requires a large data set that needs to be shown
+
+54:08.280 --> 54:10.400
+as representative of your environment
+
+54:10.400 --> 54:13.760
+and dense enough to be able to give you
+
+54:13.760 --> 54:15.560
+the statistical proof at the end.
+
+54:15.560 --> 54:18.800
+And this is extremely hard to do with real data
+
+54:18.800 --> 54:20.760
+because of the challenge of collecting it.
+
+54:20.760 --> 54:23.800
+And this is where synthetic data can be very useful
+
+54:23.800 --> 54:28.800
+because from a sparse population of samples,
+
+54:30.160 --> 54:32.880
+you can recreate that population with synthetic data,
+
+54:32.880 --> 54:34.920
+make it a very dense population
+
+54:34.920 --> 54:37.800
+and make your case based on that population
+
+54:37.800 --> 54:40.680
+with a mix of real and synthetic data.
+
+54:40.680 --> 54:44.080
+So this is one of the avenue that self-driving cars
+
+54:44.080 --> 54:47.080
+have taken is, for example, for one mile
+
+54:47.080 --> 54:49.880
+that a typical autonomous car is driving,
+
+54:49.880 --> 54:53.920
+they're probably generating a 1,000 mile of simulated driving
+
+54:53.920 --> 54:56.640
+and they're testing their algorithm on all of that.
+
+54:56.640 --> 54:59.560
+So that gives you a 1,000 to 1,000 leverage
+
+55:00.560 --> 55:03.680
+and that enables you to have the statistical
+
+55:04.840 --> 55:09.200
+meaningfulness that you need to start to trust your system.
+
+55:09.200 --> 55:12.120
+And so in our case, we are looking at the same approach
+
+55:12.120 --> 55:15.880
+of leveraging synthetic data not only for the training
+
+55:15.880 --> 55:17.600
+but also for the testing.
+
+55:17.600 --> 55:21.480
+Are there other techniques or approaches or ways
+
+55:21.480 --> 55:24.360
+that you see your pipeline evolving
+
+55:24.360 --> 55:25.680
+that we haven't touched on?
+
+55:25.680 --> 55:29.400
+So one of the other alternative to purity synthetic data
+
+55:29.400 --> 55:32.080
+and real data is data augmentation.
+
+55:32.920 --> 55:36.160
+And that is a very nice, and I'm gonna say,
+
+55:36.160 --> 55:38.640
+cheap way of reusing your real data
+
+55:38.640 --> 55:41.600
+and creating new data that has learning values.
+
+55:41.600 --> 55:43.760
+So you've got daytime images,
+
+55:43.760 --> 55:45.480
+make them look like nighttime images
+
+55:45.480 --> 55:46.840
+and put them through the pipeline.
+
+55:46.840 --> 55:47.680
+Exactly.
+
+55:47.680 --> 55:50.920
+And one of the challenges as well that might not necessarily
+
+55:50.920 --> 55:53.920
+come to mind is you're using one type of camera
+
+55:53.920 --> 55:55.320
+when you're recording the imagery.
+
+55:55.320 --> 55:57.640
+It might not be the same that you're using at inference
+
+55:57.640 --> 56:01.080
+and actually as the generation of aircraft goes on
+
+56:01.080 --> 56:03.720
+and your new cameras comes in,
+
+56:03.720 --> 56:05.120
+it might be a completely different camera
+
+56:05.120 --> 56:07.520
+that are gonna be using 10 years or 15 years from now
+
+56:07.520 --> 56:09.840
+but you still wanna be able to use the data
+
+56:09.840 --> 56:12.800
+that you've collected because of all the energy
+
+56:12.800 --> 56:14.840
+and the resources that you've put into it.
+
+56:14.840 --> 56:17.280
+And so being able to reuse that real data
+
+56:17.280 --> 56:19.680
+post-processing it so that the noise, for example,
+
+56:19.680 --> 56:22.600
+looks different and matches your new camera.
+
+56:22.600 --> 56:24.760
+You can induce chromatic aberration,
+
+56:24.760 --> 56:27.400
+so change and shifts in RGB.
+
+56:27.400 --> 56:29.240
+And you can also warp those images
+
+56:29.240 --> 56:32.680
+so that they look different in terms of perspective.
+
+56:32.680 --> 56:36.760
+There is some studies to put rain on top of good
+
+56:36.760 --> 56:39.080
+and clear condition imagery.
+
+56:39.080 --> 56:41.000
+And then you can put some fog, et cetera.
+
+56:41.000 --> 56:43.080
+Now the challenge at some point is
+
+56:43.080 --> 56:45.640
+you can do all those fancy things on top
+
+56:45.640 --> 56:47.520
+but you always need to validate
+
+56:47.520 --> 56:50.200
+that they are representative of the real data.
+
+56:50.200 --> 56:53.960
+And this is where it, you cannot just start
+
+56:53.960 --> 56:55.840
+with synthetic and stick in synthetic
+
+56:55.840 --> 56:58.200
+and then deploy it in the real world.
+
+56:58.200 --> 57:01.800
+This validation is the thing that is somewhat taxing
+
+57:01.800 --> 57:03.320
+because you need all that real data
+
+57:03.320 --> 57:06.000
+to prove that you're still in the real world.
+
+57:06.000 --> 57:09.080
+Well, Cedric, lots of exciting stuff there, sounds like
+
+57:09.080 --> 57:12.200
+you've got enough to keep you busy for quite a while.
+
+57:12.200 --> 57:13.600
+We are indeed.
+
+57:13.600 --> 57:18.040
+And I must add, this is a very exciting time for us
+
+57:18.040 --> 57:22.960
+because in contrast with the car industry,
+
+57:22.960 --> 57:24.720
+we're really at the beginning of this.
+
+57:24.720 --> 57:29.400
+And this is a brand new revolution of autonomy in aviation.
+
+57:29.400 --> 57:32.960
+And so we are building the foundation block
+
+57:32.960 --> 57:35.480
+of how to use ML and how to use
+
+57:35.480 --> 57:38.440
+artificial intelligence into not only commercial aircraft
+
+57:38.440 --> 57:42.040
+but a wide range of aviation products.
+
+57:42.040 --> 57:45.840
+And so the other mission that for me is really exciting
+
+57:45.840 --> 57:50.760
+at A Cube in particular is we're drawing all those engineers
+
+57:50.760 --> 57:54.840
+from other fields such as Google, Facebook,
+
+57:54.840 --> 57:58.680
+the self-driving car industry that have a big knowledge
+
+57:58.680 --> 58:01.520
+and a significant amount of experience in those industries
+
+58:01.520 --> 58:03.600
+and we're pulling them into the aviation industry
+
+58:03.600 --> 58:05.400
+and we're saying, OK, so you have
+
+58:05.400 --> 58:09.000
+those 10-year cycle to produce a new aircraft
+
+58:09.000 --> 58:12.560
+but we want to use all those new techniques that Silicon Valley
+
+58:12.560 --> 58:16.640
+has created to be able to do, let's say, one new release
+
+58:16.640 --> 58:18.320
+every three weeks.
+
+58:18.320 --> 58:20.440
+And we're going to be able to push that to an aircraft
+
+58:20.440 --> 58:22.280
+and test those things.
+
+58:22.280 --> 58:25.440
+And so just the pipeline and the processes
+
+58:25.440 --> 58:28.880
+are going to be revolutioning the aviation industry.
+
+58:28.880 --> 58:30.840
+It's basically a brand new world for us
+
+58:30.840 --> 58:33.280
+so it's quite exciting to be in this year.
+
+58:33.280 --> 58:37.320
+And I'm going to say as well, just as a last note,
+
+58:37.320 --> 58:40.520
+A Cube and Wayfinder is actively recruiting.
+
+58:40.520 --> 58:43.800
+So if you're interested in facing all those challenges
+
+58:43.800 --> 58:45.520
+and working with us, it will be a pleasure
+
+58:45.520 --> 58:47.120
+to have your application.
+
+58:47.120 --> 58:47.880
+Where should they go?
+
+58:47.880 --> 58:49.920
+Well, make sure to include it in the show notes page.
+
+58:49.920 --> 58:52.680
+Yes, so A Cube as its own websites
+
+58:52.680 --> 58:56.240
+and if you actually type Wayfinder.error,
+
+58:56.240 --> 59:00.440
+it will redirect you directly to our page with our blogs
+
+59:00.440 --> 59:03.960
+and the join the team section.
+
+59:03.960 --> 59:05.240
+Awesome, awesome.
+
+59:05.240 --> 59:07.400
+Well, Cedric, thanks so much for joining
+
+59:07.400 --> 59:10.920
+and sharing a bit about what you're up to, very cool stuff.
+
+59:10.920 --> 59:39.440
+Thank you very much for inviting me.
+
