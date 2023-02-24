@@ -1,0 +1,262 @@
+All right everyone, I am here in Vancouver at NURPS 2019 and I've got the pleasure of being
+seated with Josh Tobin. Josh here is a former research scientist at OpenAI and a co-organizer
+of full-stack deep learning. Josh, welcome to the Trauma AI podcast. Thanks, happy to be here.
+Awesome, so let's maybe jump into a little bit of your background. Do you spend some time at OpenAI
+and you did your PhD at Berkeley advised by Peter Abil, who's been on the podcast before?
+Great, yeah. So I got into the field about four years ago. Okay. Really I started at Berkeley
+in the applied math program and then you know kind of on a whim took a class with Professor Abil
+who ended up becoming my advisor and I was just kind of blown away by the potential of AI to
+make robotics work better and so you know through that I ended up working with Peter and spending
+a bunch of time at OpenAI and so what are you currently up to? Yeah so I left OpenAI a few months
+ago and I'm in the process of exploring kind of what to dive into next. Figuring out what's next.
+Yeah exactly. Nice, nice. And so your talk here actually later this afternoon is on geometry
+aware neural rendering. What's that? Is that something you worked on at OpenAI or kind of personal
+interest? Yeah that's something I worked on at OpenAI also through like during my PhD at Berkeley
+kind of while I was spending time in both places. Okay and so the kind of the core problem that I'm
+working on there is you know how do we like in robotics you know in order to to act robots need
+to first understand what's happening in the world and so typically the way that you'll do that in
+robotics is you'll kind of take your sensor observations about the world and you'll map them to
+some way of representing the state of the world right so where are all the objects what poses are
+they in you know what configuration is the robot in etc but the challenge is that as you move to
+more and more complex scenes then it becomes hard to write down a concrete representation of
+the state of the world and so the kind of the focus of this work is on implicit scene understanding
+so can we can we take some sensor observations about a scene and then use that to create a
+representation of the world that kind of implicitly has an understanding of what's happening in the scene
+and so what's can you be more concrete than that or is there an example that that you use to
+describe that? Yeah absolutely so that concretely the way that you formulate the problem is you take
+one or more observations of the scene so think about like cameras imaging the same scene from
+different viewpoints and then you train a model and the goal of that model is to
+give in some arbitrary other viewpoint that could be you know any other viewpoint of the scene
+the model's goal is to render what it thinks the scene looks like from that viewpoint
+and so the and thus if it can do that then it has an accurate kind of implied or implicit
+representation of what's happening in the scene yeah that's the intuition right it's if the model
+can do that task well it has to have some sort of representation internally that understands what's
+going on in the scene practically when you do this a how many cameras are we talking about yeah
+it's a handful I mean it's the formulation can really extent any number in practice I usually
+use three cameras to image the scene and then and so then the fourth viewpoint is the one that the
+the model is trying to predict that is the the neural rendering part of the the talk geometry
+aware implies that it's kind of a model-based approach in some sense yeah I mean so the geometry
+of where part is so the kind of the the inspiration for the work that I did and what I built on was
+this paper from DeepMind called GQN generative query networks okay and so the the extension that
+I added to that is the geometry of where part and so what it refers to is you know if you
+if you know the geometry of the scene so where the cameras are relative to one another then that
+allows you to constrain the process of of searching what pixels are most relevant to rendering a
+particular pixel so you know if you're rendering a particular viewpoint and you want to know you
+know okay what should I image in this pixel somewhere somewhere in the image that I'm rendering
+then what you want to do is you want to go back and look at all the images that you've been given
+as context and sort of search over those images for relevant information and it turns out if you
+use the geometry of the scene this thing from classical computer vision called the epipolar geometry
+then you can constrain that search to align in each of the context viewpoints and so maybe as context
+kind of walk us through GQN and what that paper is talking about yeah so in GQN they're taking this
+problem of neural rendering right so looking at a looking at a scene for multiple viewpoints and
+rendering from an arbitrary other viewpoint and then they set up a model structure and the way
+that model structure works is it's basically an encoder decoder architecture so the encoder
+takes each of the viewpoints and maps them through a convolutional neural network independently
+and so then you get a representation for each of those viewpoints those representations are summed
+and then you get sort of one representation for the entire scene so that's kind of the encoder part
+so like element-wise or concatenated more yeah some element-wise okay yeah so then you take that
+that representation for the scene and you pass that to the decoder and then the decoder's job is to
+take that representation and sort of go through this multi-step process of turning it into the
+what it thinks the image from that viewpoint should look like okay and is there any particular
+intuition for the element-wise sum versus keeping everything around you know I think the main
+intuition is that you want it to be you don't want it to depend on the order that you present the
+camera's in so if you can coordinate then order matters some then it doesn't okay and so they
+their results were kind of purely based on this just the camera angles and the kind of encoder
+decoder architecture and so that what you added was a constraint to the search base that is based
+on what we know about the geometry epipolar geometry epipolar geometry yeah so so basically the
+the contribution of our paper is you know there's this this sort of bottleneck in the GQN formulation
+where you know you've taken the encoder and that's given you representation of the scene and then
+you pass that to a decoder but what we do instead is instead of having this representation of the
+scene instead we have an attention mechanism so that attention mechanism allows you to when
+you're generating a new image to attend over all the information in the in the representations
+of the context images that you've been given and the way that attention mechanism works is by
+taking advantage of this you know this sort of fact of 3D geometry called the the the epipolar
+geometry is calling it an attention mechanism is it is it like attention like or is it
+implemented the way attention is often implemented in these kinds of networks yeah so it's
+implemented exactly like like kind of like a scaled dot product attention mechanism but the way
+that you have to do that is you know you have for every pixel you know you're searching over a line
+so you need to create you need to sort of construct the right representation so that you can do
+attention in the normal way okay so you're you're kind of constructing a vector that represents
+this line that you're doing the dot product and your dot producting that with everything yeah okay
+so for each pixel we're constructing this vector that represents a line and so when you aggregate
+all of those right so you have two spatial dimensions for the image and then you have this line
+and so you get this sort of 3D tensor and then your dot producting the image that you're trying to
+render the current representation of that with this 3D tensor and then that's kind of the attention
+mechanism cool cool and so tell us a little bit about the results of the paper is it kind of
+trying to get at you know better accuracy in rendering the scene or computational efficiency all
+of the above yeah so it's nice to me that both of the above would be would follow from what you're
+doing sure yeah I mean there's definitely data efficiency gains but really the main goal was
+sort of coming back to the motivation for working on this I you know I primarily work in robotics
+and so the you know the reason I started working on this was to construct better representations
+for robotic scenes and so the thing I really wanted to do was to extend GQN to you know more complex
+more realistic scenes so higher dimensional images more like higher dimensional sort of robot
+morphologies and more complex objects and so the the kind of main result of the paper is we
+introduced a few new data sets that capture some of those properties and then we showed that our
+attention mechanism produces like kind of qualitatively and quantitatively much better results on
+those sort of newer more complex data sets there also the results are also better on the
+old data sets as well but you know I think really the interesting thing is how much better they work
+on on these newer data sets so tell us a little about the newer data sets and how they were
+constructed yeah so there's three new data sets one is a data set that's based on the
+in-hand block manipulation work from open AI and so it's you know related to the Rubik's Cube
+yeah so the precursor to the Rubik's Cube works so before the Rubik's Cube work there was the
+block manipulation work that was you know I guess a little more than a year ago at this point
+and so yeah we hadn't we hadn't released the Rubik's Cube work yet at the time I was working on
+this so I worked on the older data set okay and yeah so you know you have a bunch of cameras looking
+at a robot hand that's holding a block and the sort of colors of the cube in the background
+and the hand are randomized and the hand and the cube can be in any pose so that's one of the
+data sets okay and so that's kind of meant to capture sort of a like what a quite realistic sort of
+robotic task could look like right the second data set is what I call disco humanoid and so this
+is like you know the he the classic mojoco humanoid model but the poses of all the joints are
+completely randomized and the colors of everything are randomized as well the lighting so what it
+looks like is this sort of humanoid model that's like doing this like crazy jumping in the air dance
+moves okay and so that's kind of the second data set and that's meant to capture you know whether
+you can model robots that have complex internal states right so this high-dimensional robot
+needing to model it in any pose now is this the starting position randomized or is it kind of
+randomized in time at every time step or yeah so just one time step okay it's just a single frame
+yeah a single frame a single scene and then multiple viewpoints of that scene right got it okay
+but then each each each scene has different parameters for randomizing everything about the scene
+so the the humanoid is in a different pose the colors and lighting are all different okay and so
+the third data set the third data set the third data set is I think the most challenging one so
+it's basically a room and then in that room are placed a few objects but those objects are sampled
+from the shape net object data set okay so there's something like 60,000 possible object models
+and so each in each of the kind of million scenes that we generated there's a different set of
+objects that are placed in that scene and so it's really challenging because you know the
+the model needs to understand how to render sort of you know essentially any type of object
+interesting at least in the the first couple of those examples maybe in the third
+what kind of jumped out at me is not so much the like the complexity of the scene you know of
+course that that that's there but also the attempts to you know randomize colors and things like
+that I often refer back to one of Peter's videos of like the robot doing rope tying and like it
+can figure it out on a green table but then if you change the table to red it like totally fails
+yeah so now you know it's a part of what you're doing explicitly trying to make the model more
+generalizable or yeah I mean so we didn't explore how generalizable the model could be in this work
+okay but I think you know a lot of my earlier work was on like this idea of domain randomization
+right so if you want to train a model in simulation that generalizes the real world kind of the
+one of the most effective ways of doing that is to sort of massively randomize every aspect of
+the simulator so there's some background that you brought into this task exactly okay so I'm
+interested in realistic robotics tasks and so to me if you're working on realistic robotics tasks
+in simulation you need to randomize everything okay and you know I think exciting future work
+could be to see how well these models transfer from simulation to the real world uh-huh and so
+when you're evaluating the performance of these models are you is it kind of like pixel wise
+differences or distortions and an error rate that you're kind of looking at or what's what are
+the metrics that you're looking at yeah so the way that these I sort of gloss over how the models
+are trained but it's essentially like the the easiest thing to compare to is to a VAE
+okay so you have a lower bound on the log likelihood and that's a variational autoencoder that's
+right yeah and so that's kind of the main way that you can compare the differences is by is by
+comparing the number of that lower bound and then you can also look at things we also look at
+things like you know L1 and L2 pixel wise differences between the images and so that's where our
+quantitative results come from it sounds like you have not applied this to a real world you didn't
+uh apply it to the Rubik's cube uh robot or any uh robots uh not not yet not yet yeah okay okay
+so what are some of the other things that you're working on or have worked on or are interested in
+yeah um so I think as I mentioned a lot like the sort of big chunk of my the early part of my
+PhD was working on demand randomization so you know really the sort of core question I got
+interested in early on when I started working robotics is if we believe that reinforcement learning
+is going to have a big impact in robotics then um sort of the the main challenge is that most
+reinforcement learning methods are super data and efficient right and so there's you know
+different ways that you could think about dealing with that you know one is just to make reinforcement
+learning methods themselves more data efficient um so that's like a lot of work from uh surgae
+Levine's group at Berkeley um pushes in that direction um but I kind of became interested in this
+question of you know can we just assume that our algorithms are always going to be data inefficient
+and then figure out how to generate data much more efficiently so that that kind of led me to work
+on simulation the thing that I've realized recently is that I think domain randomization and um
+you know other simple real techniques work actually surprisingly well other what techniques um
+other uh simple real techniques okay some transferring simulation in the real world domain
+adaptation and things like that um but so I I think are still like very um under explored
+techniques in robotics but the challenge if you want to apply those techniques has become that
+it's actually quite difficult to build physics simulators and so in practice that often becomes
+the bottleneck is you have some new robotics task you want to solve maybe you want to use Sim to
+real to solve it but um then you have to go and do this manual process of um you know constructing
+and uh randomizing the simulator that you use to generate the training data um and so that's
+kind of what started to get me interested in 3d scene understanding is thinking about the question
+of is it possible to automate part of that process um or at least to augment augment people
+in um the process of creating synthetic training datasets does that goal tie to the work we just
+talked about what's the connection there yeah or are you not trying to say that I think uh
+I think it loosely ties to that goal okay right so I think um you know that like in my mind
+sort of the end state for Sim to real is um you know is you have like real to Sim to real right so
+you have you collect some data in the real world you use that data to generate a simulation
+mm-hmm and that simulation is sort of richer than the real world it's highly randomized
+um you train a model in that simulation and you transfer that model back to the real world um
+use that model to collect more data in the real world and then feed it back into the simulation
+mm-hmm right so I think and then I think you iterate over that process and I think that um
+if you have the right algorithms for that then I think that process or that um those types of
+algorithms will be really powerful um and so you know that the the main sort of missing piece
+there is um going from you know a small amount of data about the real world right so a small number
+of observations about you know the scene that the robot is going to be interacting with
+and then turning that into a simulation mm-hmm right and so um the this work on neural rendering is
+um kind of I think like a conceptual cause of that because um we're not directly trying to create
+a simulation but we're trying to create a um like sort of an implicit version of a simulation
+mm-hmm um and so right now it only captures 3d structure it doesn't capture um
+semantics or dynamics or anything like that but I think it's kind of like an early step along that path
+mm-hmm what's the the state of research in the real to sim
+part of that flow like how far along are we yeah I think it's I think it's pretty early there's
+been a number of papers that have come out on it you know 2018 2019 what what are the main things
+the way that researchers are approaching the the problem right now yeah I think um so I think
+like the general problem is very challenging and this is the general problem is inverse graphics
+which um it's super super hard to do mm-hmm and so I think the main way that people are
+approaching the problem right now is to sort of create a frame in first graphics being like I've
+got some set of images create the representation yeah create the um create a world that would generate
+those images right and so I think like the main way that I've seen people approach this right
+now is um instead of trying to solve the entire inverse graphics problem mm-hmm um instead sort of
+manually create a parameterized simulator so a simulator that kind of in principle should capture
+the things about the real world that you care about mm-hmm and then using the real data to optimize
+the parameters of that simulator yeah yeah um and so then you you know the hope would be at least
+you can use the real data to choose the distribution of parameters that allows you to best transfer
+your model from simulation to the real world um and so there's a bunch of work in that direction
+so for example in the case of trying to use Grand Theft Auto as a simulator take a picture of a
+road and try to generate something that looks like that road within the constraints of GT Auto
+exactly yeah yeah yeah and so it sounds like folks are starting the kind of poke at that
+direction how far you know what do you do you have a sense or do you know off the top of your
+head kind of some of the results that folks have seen there yeah I think uh I don't want to point
+to any specific results because I don't want to get them wrong but um yeah let's see we're
+even going to find this qualitatively like are we at doing this with Grand Theft Auto or are we
+more doing this with like simple rooms with shape library pictures like how sophisticated are the
+simulation environments that we're even able to do this kind of thing with yeah I mean so there
+are some results doing this kind of thing um I think like the primary results come out of
+Nvidia um doing this kind of thing with self driving car data okay um and uh the results there
+seem to be promising um I think um it's not clear to me how much effort still goes into the manual
+sort of creation of the parameterized simulation yeah um versus that being more automated um that's
+kind of the big question mark I think also although I'm not going to remember the the specific papers
+off the top of my head um I wrote kind of a a guide to some seem to real um transfer for robotics
+and I cited a bunch of the kind of relevant work in this direction there um so I'm happy to
+share a link to that yeah please do and we'll include it in the show notes you mentioned a few times
+domain randomization as a way to drive kind of generalizability and the the you know more
+effective seem to real are you or are there folks looking at more of it maybe kind of stretching
+the term too far but like active learning type of approaches like should the domains actually be
+randomized or should they be you know more carefully constructed so as to drive generalization
+yeah it's a great question um I think there's not really a simple answer to it I think in a lot of
+cases what I've found is that the simplest thing that you can do which is just randomizing your
+simulation as much as possible um tends to give you like closed optimal results um so you might
+as well just do a simple thing but for a lot of problems that's not that's not true I think like
+one of the main cases where that's not true is where um randomizing your simulator too much
+actually hurts performance in simulation right so and if your performance in simulation gets worse
+than your performance in real gets worse as well um and so I think in those types of cases
+so that's like a lot of the dynamics randomization type stuff as an example of where where that happens
+okay and so in a lot of those cases you know choosing not just randomizing everything but
+choosing the right randomizations become super important and so there's also some work in that
+direction there's a there's a paper from an Nvidia for example where they kind of do an iterative
+process um where they you know at each step in the iteration they um take real data and then they
+use that real data to optimize the parameters of the simulator so that the the distribution of
+simulations is as similar as possible to the real data um they go back and collect more real data
+and then continue to iterate between those two things um so there's some work in that direction
+yeah you describe so you describe the the scenario where the simulator you over-randomize and you
+drop performance in your sim um that seems like the easier of the you know problems relative to
+over-randomize your simulator does great but you drop performance in real does that happen also
+I've not really seen that happen okay usually more randomization tends to help generalization
+okay yeah yeah unless it hurts performance on the original task it's in principle possible
+that that could happen but it's not something I've seen much in practice so I described earlier
+the geometric aware approach that you presented is kind of a model based on model aware approach
+do you have ideas or other types of models that you might want to combine with a neural
+rendering that you know would help it yeah it's a good question um an interesting
+direction for this type of work is um we right now model static scenes so we you know um
+we're taking like we're freezing a single time frame of a robotic task and we're saying
+you know can we understand what this what the scene would look like from another angle um but
+also super relevant is to um is to look at entire tasks and try to you know compress those
+and understand those um and so um what that would require you you to do is also understand
+things like how um objects interact with one another how robots interact with objects how physics
+works um and I think there you can I think there are certainly other kind of concepts from physics
+that you could encode into a neural network architecture that would allow you to um to do those
+tasks more data efficiently cool well it sounds like really interesting uh really interesting work
+and best of luck in the presentation thanks a lot yeah you know do you want to kind of
+give a pitch for your next job or something like that well uh no I don't think so um I think
+people just have to wait and see yeah yeah so it sounds like you've got something something brewing
+uh yeah we could call it that yeah yeah nice nice awesome well Josh thanks so much for
+taking some time uh chat with us about what you're up to yeah thanks so much for having me thanks

@@ -1,0 +1,2384 @@
+1
+00:00:00,000 --> 00:00:16,320
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+
+2
+00:00:16,320 --> 00:00:21,480
+people, doing interesting things in machine learning and artificial intelligence.
+
+3
+00:00:21,480 --> 00:00:31,480
+I'm your host Sam Charrington.
+
+4
+00:00:31,480 --> 00:00:36,000
+Today we're joined by Hema Rogovon and Scott Meyer of LinkedIn.
+
+5
+00:00:36,000 --> 00:00:41,440
+Hema is an engineering director responsible for AI for growth and notifications and Scott
+
+6
+00:00:41,440 --> 00:00:45,080
+serves as a principal software engineer.
+
+7
+00:00:45,080 --> 00:00:49,320
+In this conversation, Hema Scott and I dig into the graph database and machine learning
+
+8
+00:00:49,320 --> 00:00:55,480
+systems that power LinkedIn features such as people you may know and second degree connections.
+
+9
+00:00:55,480 --> 00:00:59,720
+Hema shares her insight into the motivations for LinkedIn's use of graph-based models
+
+10
+00:00:59,720 --> 00:01:04,040
+and some of the challenges surrounding using graphical models at LinkedIn scale, while
+
+11
+00:01:04,040 --> 00:01:08,520
+Scott details his work on the software used by the company to support its biggest graph
+
+12
+00:01:08,520 --> 00:01:11,360
+databases.
+
+13
+00:01:11,360 --> 00:01:15,840
+Before we get going, I'd like to send a huge thanks to LinkedIn for sponsoring today's
+
+14
+00:01:15,840 --> 00:01:16,840
+show.
+
+15
+00:01:16,840 --> 00:01:22,080
+LinkedIn Engineering solves complex problems at scale to create economic opportunity for
+
+16
+00:01:22,080 --> 00:01:24,320
+every member of the global workforce.
+
+17
+00:01:24,320 --> 00:01:29,120
+AI and machine learning are integral aspects of almost every product the company builds
+
+18
+00:01:29,120 --> 00:01:32,080
+for its members and customers.
+
+19
+00:01:32,080 --> 00:01:36,520
+LinkedIn's highly structured dataset gives their data scientists and researchers the ability
+
+20
+00:01:36,520 --> 00:01:41,280
+to conduct applied research to improve member experiences.
+
+21
+00:01:41,280 --> 00:01:48,720
+To learn more about the work of LinkedIn Engineering, visit engineering.linkton.com slash blog.
+
+22
+00:01:48,720 --> 00:01:53,360
+And now on to the show.
+
+23
+00:01:53,360 --> 00:01:58,280
+Alright everyone, I am here with Hema Rogovon and Scott Meyer of LinkedIn.
+
+24
+00:01:58,280 --> 00:02:04,640
+Hema is an engineering director and responsible for AI for growth and notifications and Scott
+
+25
+00:02:04,640 --> 00:02:06,480
+is a principal software engineer.
+
+26
+00:02:06,480 --> 00:02:09,440
+Hema and Scott, welcome to this week in machine learning and AI.
+
+27
+00:02:09,440 --> 00:02:10,440
+Thank you.
+
+28
+00:02:10,440 --> 00:02:11,440
+Glad to be here.
+
+29
+00:02:11,440 --> 00:02:17,520
+I'm very glad to be here at LinkedIn and looking forward to our conversation and digging
+
+30
+00:02:17,520 --> 00:02:22,200
+in to some of the things you're doing with graphs for machine learning and powering
+
+31
+00:02:22,200 --> 00:02:24,200
+various LinkedIn features.
+
+32
+00:02:24,200 --> 00:02:29,400
+But before we dive into that, I'd love to introduce our audience to you.
+
+33
+00:02:29,400 --> 00:02:33,080
+So would you take a minute to share a little bit about your background and how you got
+
+34
+00:02:33,080 --> 00:02:36,880
+started working on graphs and machine learning, Hema?
+
+35
+00:02:36,880 --> 00:02:42,640
+Okay, so I've been in the field of machine learning for several years now.
+
+36
+00:02:42,640 --> 00:02:48,880
+I got my PhD back in 2006, largely focused on search and information retrieval, I've worked
+
+37
+00:02:48,880 --> 00:02:57,680
+on advertising, I've worked on question answering systems at IBM, IBM research in particular.
+
+38
+00:02:57,680 --> 00:03:03,960
+And then when I came to LinkedIn, I came in to actually work on content, on content
+
+39
+00:03:03,960 --> 00:03:05,440
+recommendations.
+
+40
+00:03:05,440 --> 00:03:11,920
+I spent a year doing that and I realized that one of the fundamental assets that LinkedIn
+
+41
+00:03:11,920 --> 00:03:19,560
+has is the underlying social network and that's where content propagates.
+
+42
+00:03:19,560 --> 00:03:28,320
+And I got really interested in the problem of building the graph in particular, thinking
+
+43
+00:03:28,320 --> 00:03:33,560
+about algorithms for people you may know like problems or follow recommendations and so
+
+44
+00:03:33,560 --> 00:03:40,040
+on. And that's what brought me from the general area of search and information retrieval
+
+45
+00:03:40,040 --> 00:03:41,040
+to graphs.
+
+46
+00:03:41,040 --> 00:03:44,240
+And it's been four years and I'm still having fun.
+
+47
+00:03:44,240 --> 00:03:45,240
+Fantastic.
+
+48
+00:03:45,240 --> 00:03:46,240
+Fantastic.
+
+49
+00:03:46,240 --> 00:03:47,240
+How about you Scott?
+
+50
+00:03:47,240 --> 00:03:48,240
+Well, let's see here.
+
+51
+00:03:48,240 --> 00:03:49,240
+I guess the story starts.
+
+52
+00:03:49,240 --> 00:03:54,720
+I did relatively well in the.com boom and actually quit for three years to go sailing.
+
+53
+00:03:54,720 --> 00:03:59,720
+And at the end of that, I was semi-relectorately looking for a job and I bumped into this company
+
+54
+00:03:59,720 --> 00:04:01,040
+called MetaWeb.
+
+55
+00:04:01,040 --> 00:04:05,960
+And they were like, hey, we want to build a world-rideable graph of all common knowledge.
+
+56
+00:04:05,960 --> 00:04:08,040
+And by the way, we're going to call this thing freebase.
+
+57
+00:04:08,040 --> 00:04:12,280
+And I was like, wow, I would really regret not taking that job.
+
+58
+00:04:12,280 --> 00:04:15,680
+So I wound up leading the storage team at MetaWeb.
+
+59
+00:04:15,680 --> 00:04:18,280
+MetaWeb was acquired by Google.
+
+60
+00:04:18,280 --> 00:04:22,320
+Freebase became Google's knowledge graph.
+
+61
+00:04:22,320 --> 00:04:24,960
+Spent four years at Google working on knowledge graph infrastructure.
+
+62
+00:04:24,960 --> 00:04:30,160
+I think the best summary of that is Google and I disagreed about graph databases.
+
+63
+00:04:30,160 --> 00:04:36,280
+LinkedIn found me actually through LinkedIn, which was a huge endorsement, and recruited
+
+64
+00:04:36,280 --> 00:04:40,440
+me to come here and lead a next-generation graph database project.
+
+65
+00:04:40,440 --> 00:04:43,520
+So that's what I've been doing for the last four and a half years.
+
+66
+00:04:43,520 --> 00:04:46,440
+So it's like 15 years in graph databases now.
+
+67
+00:04:46,440 --> 00:04:48,400
+Can't shake the habit.
+
+68
+00:04:48,400 --> 00:04:53,360
+So we're going to go deep into graphs in the way LinkedIn uses them.
+
+69
+00:04:53,360 --> 00:04:59,720
+We spoke a little bit about this with a previous interview with Romer, who's one of your colleagues.
+
+70
+00:04:59,720 --> 00:05:06,720
+Heima, but we'll dive even deeper here, but to kind of contextualize that for us, talk
+
+71
+00:05:06,720 --> 00:05:13,480
+a little bit about the motivation for the emphasis on graphs at LinkedIn.
+
+72
+00:05:13,480 --> 00:05:14,480
+Yeah.
+
+73
+00:05:14,480 --> 00:05:20,240
+So the social network for LinkedIn, we are an online professional social network.
+
+74
+00:05:20,240 --> 00:05:28,360
+The fundamental asset that a user has on LinkedIn, perhaps even comparison to our competitors
+
+75
+00:05:28,360 --> 00:05:34,640
+but indeed, or any of the other job sites, is the social network.
+
+76
+00:05:34,640 --> 00:05:44,160
+So in that context, a graph is the prime driver of all of the other parts of our business
+
+77
+00:05:44,160 --> 00:05:45,760
+at LinkedIn.
+
+78
+00:05:45,760 --> 00:05:50,360
+In particular, if you can just think about it intuitively, it makes sense that when you're
+
+79
+00:05:50,360 --> 00:05:56,480
+looking for a job, the most common thing for you to do is actually reach out to your
+
+80
+00:05:56,480 --> 00:05:59,120
+first degree connections.
+
+81
+00:05:59,120 --> 00:06:07,280
+If you are in a job that you like, you might want to stay informed through what your first
+
+82
+00:06:07,280 --> 00:06:11,440
+degree connections are talking about, and that's pretty much what your feed does.
+
+83
+00:06:11,440 --> 00:06:18,240
+And if you are likely missing out on a conversation, then your notifications are what are sent
+
+84
+00:06:18,240 --> 00:06:19,320
+to you.
+
+85
+00:06:19,320 --> 00:06:25,400
+And notifications from your first degree connections are more valuable than otherwise.
+
+86
+00:06:25,400 --> 00:06:30,720
+So at all stages of your professional network, your connections are your core asset.
+
+87
+00:06:30,720 --> 00:06:35,720
+And that's the core of what LinkedIn offers.
+
+88
+00:06:35,720 --> 00:06:45,520
+So in terms of the set of AI problems that surround graphs is first building the graph itself.
+
+89
+00:06:45,520 --> 00:06:50,200
+So when a member comes in, the most primitive way that a member would build their network
+
+90
+00:06:50,200 --> 00:06:56,920
+is Google buy memory and think about all of their colleagues that actually exist on LinkedIn
+
+91
+00:06:56,920 --> 00:06:58,720
+and go into a search.
+
+92
+00:06:58,720 --> 00:07:02,240
+Now you would not get a lot of coverage that way.
+
+93
+00:07:02,240 --> 00:07:07,160
+I would probably not remember colleagues from 10 years ago when I'm building my network.
+
+94
+00:07:07,160 --> 00:07:11,560
+So that's when a recommendation engine like people you may know comes in.
+
+95
+00:07:11,560 --> 00:07:19,600
+Likewise for the feed, then how do you know which of your first degree connections are
+
+96
+00:07:19,600 --> 00:07:24,240
+actually relevant to your current context?
+
+97
+00:07:24,240 --> 00:07:31,120
+So I may have colleagues from school, from three other jobs before, but maybe the conversation
+
+98
+00:07:31,120 --> 00:07:37,560
+that I really care about in today's context is deep learning and AI.
+
+99
+00:07:37,560 --> 00:07:41,560
+So which of those colleagues are contextually relevant to my feed?
+
+100
+00:07:41,560 --> 00:07:43,160
+So that's also a graph problem.
+
+101
+00:07:43,160 --> 00:07:48,680
+We can think about it as affinity modeling amongst your first degree connections.
+
+102
+00:07:48,680 --> 00:07:54,280
+Likewise, if you're on the jobs page, then which of your connections are relevant to you
+
+103
+00:07:54,280 --> 00:07:57,840
+and who might potentially give you a referral, right?
+
+104
+00:07:57,840 --> 00:08:00,160
+So all of these are graph problems.
+
+105
+00:08:00,160 --> 00:08:03,120
+They can be modeled as prediction.
+
+106
+00:08:03,120 --> 00:08:07,280
+They can come down to prediction problems given a certain context.
+
+107
+00:08:07,280 --> 00:08:12,440
+The people you may know problem is what edge should I build and that is most relevant
+
+108
+00:08:12,440 --> 00:08:13,760
+for the member.
+
+109
+00:08:13,760 --> 00:08:20,360
+And then the other problems like feed notifications or jobs say the member has a set of edges,
+
+110
+00:08:20,360 --> 00:08:24,000
+which of these edges are most relevant in that context.
+
+111
+00:08:24,000 --> 00:08:28,200
+So that's graphs everywhere at LinkedIn.
+
+112
+00:08:28,200 --> 00:08:32,680
+So LinkedIn is clearly already doing this.
+
+113
+00:08:32,680 --> 00:08:38,360
+When you think about the big challenges or opportunities in this space and among the
+
+114
+00:08:38,360 --> 00:08:42,880
+various features that you've talked about, people you may know in the feed, what are
+
+115
+00:08:42,880 --> 00:08:46,160
+those big challenges from a machine learning perspective?
+
+116
+00:08:46,160 --> 00:08:47,160
+Correct.
+
+117
+00:08:47,160 --> 00:08:52,600
+When I think about graph problems, I actually think the challenge, just compared to other
+
+118
+00:08:52,600 --> 00:08:59,600
+recommender systems, is often scale because in the limit, a lot of these problems are
+
+119
+00:08:59,600 --> 00:09:00,600
+n squared.
+
+120
+00:09:00,600 --> 00:09:06,440
+So if you have a graph that's 500 million members, then you're looking at n squared of
+
+121
+00:09:06,440 --> 00:09:07,440
+that.
+
+122
+00:09:07,440 --> 00:09:11,960
+So there's no way that you can talk about some of these problems without having a distributed
+
+123
+00:09:11,960 --> 00:09:17,320
+systems expert co-seated at the table with you, which is part of why we're at in this
+
+124
+00:09:17,320 --> 00:09:20,560
+conversation today together with Scott, right?
+
+125
+00:09:20,560 --> 00:09:25,640
+So in fact, that's the one piece we realize that even when we're training the models,
+
+126
+00:09:25,640 --> 00:09:31,440
+like just thinking about network propagation algorithms or about inference on these large
+
+127
+00:09:31,440 --> 00:09:39,160
+graphs, there is a community, a research community out there, but it's not as prolific
+
+128
+00:09:39,160 --> 00:09:47,280
+as perhaps, you know, other fields of AI, for example, Tex and LP have broader communities.
+
+129
+00:09:47,280 --> 00:09:52,920
+And it's perhaps also because the problem space is rather niche.
+
+130
+00:09:52,920 --> 00:10:01,600
+So those are the biggest challenges, the lack of large data sets for academia to publish
+
+131
+00:10:01,600 --> 00:10:06,320
+research that necessarily we can directly leverage from.
+
+132
+00:10:06,320 --> 00:10:11,640
+So oftentimes we are pushing the boundaries internally ourselves.
+
+133
+00:10:11,640 --> 00:10:17,600
+And there are a few problem spaces which sort of intersect so closely with distributed
+
+134
+00:10:17,600 --> 00:10:19,760
+systems and AI.
+
+135
+00:10:19,760 --> 00:10:23,600
+Scott, how about from your perspective, what are the big challenges in addressing this
+
+136
+00:10:23,600 --> 00:10:24,600
+scale?
+
+137
+00:10:24,600 --> 00:10:25,600
+Yeah.
+
+138
+00:10:25,600 --> 00:10:30,120
+Well, interestingly, I had a conversation with a recruiter when I came in and he said,
+
+139
+00:10:30,120 --> 00:10:34,080
+look, the magic in LinkedIn is in the second degree.
+
+140
+00:10:34,080 --> 00:10:38,120
+That is in, it's in connections that you could have, but probably don't.
+
+141
+00:10:38,120 --> 00:10:43,200
+So for example, any problem that you're experiencing, probably there's somebody in your second
+
+142
+00:10:43,200 --> 00:10:47,480
+degree who has solved it or who knows more about it than you.
+
+143
+00:10:47,480 --> 00:10:49,920
+And you may not know this person.
+
+144
+00:10:49,920 --> 00:10:55,120
+Conversely, with the first degree, like mostly you already know it, it's, you know, top
+
+145
+00:10:55,120 --> 00:10:57,480
+of mind.
+
+146
+00:10:57,480 --> 00:11:01,240
+From the standpoint of data, a second degree is very difficult to work with, right?
+
+147
+00:11:01,240 --> 00:11:06,800
+Because it's big, the way it got big is because it changes rapidly.
+
+148
+00:11:06,800 --> 00:11:11,520
+So if I talk about storing first degrees, this is very easy to do with a key value store.
+
+149
+00:11:11,520 --> 00:11:17,560
+However, if I were to try and materialize second degrees, the data footprint would be huge
+
+150
+00:11:17,560 --> 00:11:20,720
+and the right way it would be enormous.
+
+151
+00:11:20,720 --> 00:11:24,720
+And so there isn't a simple brute force solution to working with a second degree.
+
+152
+00:11:24,720 --> 00:11:31,200
+So one of the key things that a graph database does, probably the defining thing is joining.
+
+153
+00:11:31,200 --> 00:11:35,840
+And in particular, we join two first degrees to put together a second degree.
+
+154
+00:11:35,840 --> 00:11:39,680
+And we have to do this interactively in real time.
+
+155
+00:11:39,680 --> 00:11:46,400
+And talking about graph databases, where does the graph database sit in the process of
+
+156
+00:11:46,400 --> 00:11:49,320
+kind of serving up these graph based features?
+
+157
+00:11:49,320 --> 00:11:56,960
+Is it kind of at the end of the chain, you know, close to where a page is being rendered
+
+158
+00:11:56,960 --> 00:12:02,040
+or is it kind of early in the chain, serving up the models?
+
+159
+00:12:02,040 --> 00:12:06,880
+Certainly, our online, we are an online service.
+
+160
+00:12:06,880 --> 00:12:08,720
+So it's fundamental to LinkedIn.
+
+161
+00:12:08,720 --> 00:12:13,680
+If the graph is down, LinkedIn does not display web pages.
+
+162
+00:12:13,680 --> 00:12:17,160
+And you'll see it all over the site, for example, graph distances, how far apart you are
+
+163
+00:12:17,160 --> 00:12:19,280
+from someone you're looking at.
+
+164
+00:12:19,280 --> 00:12:22,200
+That's computed out of the graph.
+
+165
+00:12:22,200 --> 00:12:28,600
+So the graph itself is definitely online.
+
+166
+00:12:28,600 --> 00:12:33,720
+The graph, the contents of the graph, some of it is raw data that is curated directly
+
+167
+00:12:33,720 --> 00:12:35,000
+by users.
+
+168
+00:12:35,000 --> 00:12:41,240
+And some of it is the result of a relevance or AI process where we take data that may be
+
+169
+00:12:41,240 --> 00:12:46,000
+unreliable and figure out what's good, for example, filter out spam.
+
+170
+00:12:46,000 --> 00:12:47,000
+Okay.
+
+171
+00:12:47,000 --> 00:12:54,320
+So is it, is the graph a single monolithic system, an instance of a graph database, or
+
+172
+00:12:54,320 --> 00:12:59,280
+are there multiple systems that contribute to making the graph real for?
+
+173
+00:12:59,280 --> 00:13:02,040
+The graph is an instance of a graph database.
+
+174
+00:13:02,040 --> 00:13:09,360
+We actually have seven instances in four different collos to actually provide a continuous
+
+175
+00:13:09,360 --> 00:13:10,600
+service.
+
+176
+00:13:10,600 --> 00:13:16,760
+And the instance of the graph database itself is a cluster of machines, roughly 20 terabytes
+
+177
+00:13:16,760 --> 00:13:19,040
+of RAM per cluster.
+
+178
+00:13:19,040 --> 00:13:24,960
+And is this a LinkedIn kind of internally developed graph database, or is it an open-source
+
+179
+00:13:24,960 --> 00:13:25,960
+project?
+
+180
+00:13:25,960 --> 00:13:32,000
+This is a complete internal project, it's built, it's an in-memory database, it's built
+
+181
+00:13:32,000 --> 00:13:34,520
+on top of basically bare Linux.
+
+182
+00:13:34,520 --> 00:13:35,520
+Okay.
+
+183
+00:13:35,520 --> 00:13:37,520
+Oh wow, wow.
+
+184
+00:13:37,520 --> 00:13:45,760
+And so you talked about, Hema, you talked about across these different capabilities,
+
+185
+00:13:45,760 --> 00:13:52,960
+the common thing that you're trying to drive for, across the graph is relevant, some
+
+186
+00:13:52,960 --> 00:13:54,960
+aspect of relevance.
+
+187
+00:13:54,960 --> 00:14:02,280
+You mentioned affinity modeling as one of the types of technical approaches that you're
+
+188
+00:14:02,280 --> 00:14:03,280
+applying.
+
+189
+00:14:03,280 --> 00:14:04,280
+Can you talk a little bit more about that?
+
+190
+00:14:04,280 --> 00:14:05,280
+Sure.
+
+191
+00:14:05,280 --> 00:14:11,440
+So let's take affinity modeling for the people you may know problem, and then we'll talk
+
+192
+00:14:11,440 --> 00:14:15,520
+about it in the context of some other problems.
+
+193
+00:14:15,520 --> 00:14:22,800
+So the people you may know problem says, is A likely to know B, and, but we also want
+
+194
+00:14:22,800 --> 00:14:25,000
+to consider long-term value.
+
+195
+00:14:25,000 --> 00:14:32,480
+So if A may know B, but if they're not going to derive value from on LinkedIn in any
+
+196
+00:14:32,480 --> 00:14:35,640
+potential future, right?
+
+197
+00:14:35,640 --> 00:14:40,800
+Is it worth connecting to your neighbor down the road, like should we be showing?
+
+198
+00:14:40,800 --> 00:14:48,240
+It's someone you know, but using a top slot in a recommendation system for that versus
+
+199
+00:14:48,240 --> 00:14:55,840
+perhaps somebody who might be a good referral for a job for you down in the future.
+
+200
+00:14:55,840 --> 00:15:02,200
+Or someone who may share really good content, like someone that you know, but they just
+
+201
+00:15:02,200 --> 00:15:09,720
+write really well and you would benefit from their writing.
+
+202
+00:15:09,720 --> 00:15:14,960
+So you can think about predicting future edges or predicting.
+
+203
+00:15:14,960 --> 00:15:20,080
+So what we're doing is actually predicting future edges, right?
+
+204
+00:15:20,080 --> 00:15:23,680
+Is Hema likely to connect to Sam?
+
+205
+00:15:23,680 --> 00:15:28,760
+And so is Hema likely to send an invitation to Sam, and is Sam likely to accept that invitation?
+
+206
+00:15:28,760 --> 00:15:33,360
+So you have to know that, you know, Hema knows Sam, and Sam also knows Hema.
+
+207
+00:15:33,360 --> 00:15:36,160
+So it's a two-way problem.
+
+208
+00:15:36,160 --> 00:15:42,480
+But you want more than just that edge in building that edge in itself.
+
+209
+00:15:42,480 --> 00:15:50,400
+You want to be able to predict that once Hema and Sam connect, what's the likelihood
+
+210
+00:15:50,400 --> 00:15:52,280
+that they're going to interact?
+
+211
+00:15:52,280 --> 00:15:57,000
+An interact could be in the context of a job, interaction could be in the context of the
+
+212
+00:15:57,000 --> 00:16:00,840
+feed or a notification or some other context.
+
+213
+00:16:00,840 --> 00:16:03,760
+So affinity turns into a predictive problem.
+
+214
+00:16:03,760 --> 00:16:10,520
+You can generalize it to are you likely to interact in some context in the future?
+
+215
+00:16:10,520 --> 00:16:18,680
+And how likely is a person likely to accept an invitation from a person and derive value
+
+216
+00:16:18,680 --> 00:16:19,680
+from that?
+
+217
+00:16:19,680 --> 00:16:25,160
+So those are all the broader problems that we're trying to solve when we're building edges.
+
+218
+00:16:25,160 --> 00:16:30,360
+So one thing that comes to mind for me and think about that is you've got this graph
+
+219
+00:16:30,360 --> 00:16:38,120
+database that is presumably you're capturing the nodes which are the people in some aspect
+
+220
+00:16:38,120 --> 00:16:41,800
+of the relationships, the edges.
+
+221
+00:16:41,800 --> 00:16:48,440
+But you're also, when you're making these predictions, are you then taking the high
+
+222
+00:16:48,440 --> 00:16:52,040
+likelihood predictions and then putting them into the graph database?
+
+223
+00:16:52,040 --> 00:16:59,080
+I guess I'm trying to reconcile the graph as this kind of existent thing that's captured
+
+224
+00:16:59,080 --> 00:17:05,520
+concretely in a database and this predicted thing that doesn't exist.
+
+225
+00:17:05,520 --> 00:17:09,800
+And when does it get kind of materialized into the database?
+
+226
+00:17:09,800 --> 00:17:10,800
+God.
+
+227
+00:17:10,800 --> 00:17:16,400
+So the existing graph is the existing set of members and their connections.
+
+228
+00:17:16,400 --> 00:17:18,440
+And it can actually be richer than that.
+
+229
+00:17:18,440 --> 00:17:21,920
+You can have nodes in the economic graph of LinkedIn.
+
+230
+00:17:21,920 --> 00:17:25,560
+You can have nodes that are schools, companies.
+
+231
+00:17:25,560 --> 00:17:27,680
+You can have edges that people follow.
+
+232
+00:17:27,680 --> 00:17:30,840
+So that rich database in its current state.
+
+233
+00:17:30,840 --> 00:17:37,680
+So if you take a snapshot in time, that's what Scott Steen built serves for all of LinkedIn.
+
+234
+00:17:37,680 --> 00:17:43,160
+And then what we do is, given that snapshot, how do we query it to get the potential second
+
+235
+00:17:43,160 --> 00:17:44,160
+degree?
+
+236
+00:17:44,160 --> 00:17:47,400
+These are people who are not connected to each other.
+
+237
+00:17:47,400 --> 00:17:53,440
+And then potentially even third degrees for a low degree members because if your second
+
+238
+00:17:53,440 --> 00:17:57,960
+degree is too sparse, we might want to walk the graph out a little more.
+
+239
+00:17:57,960 --> 00:18:03,560
+So we look at the second degree, the third degree, and that itself is huge.
+
+240
+00:18:03,560 --> 00:18:08,760
+Even if a few of your second degree nodes have 30 odd connections each that can blow up
+
+241
+00:18:08,760 --> 00:18:10,200
+in computation.
+
+242
+00:18:10,200 --> 00:18:12,840
+So we take that large list.
+
+243
+00:18:12,840 --> 00:18:16,960
+And then we say all of these people are not connected to each other, which ones are
+
+244
+00:18:16,960 --> 00:18:18,840
+likely to connect to each other.
+
+245
+00:18:18,840 --> 00:18:21,400
+And that's the predictive problem.
+
+246
+00:18:21,400 --> 00:18:27,240
+And that's what you see on the people you may know or even follow recommendation pages
+
+247
+00:18:27,240 --> 00:18:29,800
+at LinkedIn.
+
+248
+00:18:29,800 --> 00:18:37,120
+And once people start sending invitations, so the bidirectional edge is a connection edge.
+
+249
+00:18:37,120 --> 00:18:42,720
+So when they send in an invitation and it gets accepted, it materializes back into the
+
+250
+00:18:42,720 --> 00:18:43,720
+database.
+
+251
+00:18:43,720 --> 00:18:48,280
+A follow recommendation will materialize right away.
+
+252
+00:18:48,280 --> 00:18:59,280
+And so Scott maintains the state of truth or of what connections have been accepted as
+
+253
+00:18:59,280 --> 00:19:01,960
+well as what follow links exist.
+
+254
+00:19:01,960 --> 00:19:02,960
+Okay.
+
+255
+00:19:02,960 --> 00:19:06,800
+I see the people you may know quite page all the time.
+
+256
+00:19:06,800 --> 00:19:11,120
+And you certainly wouldn't want to recompute that every time I'm going to see it.
+
+257
+00:19:11,120 --> 00:19:19,240
+So it needs to be cashed in some kind of way, is it cashed outside of the graph database?
+
+258
+00:19:19,240 --> 00:19:20,400
+That's also a graph.
+
+259
+00:19:20,400 --> 00:19:27,040
+Why not put the potential kind of secondary connections into the graph as well?
+
+260
+00:19:27,040 --> 00:19:30,080
+Like it is kind of a turtles all the way down kind of problem.
+
+261
+00:19:30,080 --> 00:19:37,800
+That's a very good question because the assumption around, you know, could we take a state
+
+262
+00:19:37,800 --> 00:19:45,040
+of the graph a time and point maybe once a week or once in every end days and then take
+
+263
+00:19:45,040 --> 00:19:50,160
+the second degree network and then actually build recommendations and cash it in some kind
+
+264
+00:19:50,160 --> 00:19:57,760
+of key value store, go as the premise with which LinkedIn built the people you may know
+
+265
+00:19:57,760 --> 00:20:00,480
+system for several years.
+
+266
+00:20:00,480 --> 00:20:08,120
+But something we discovered in more recent years was that network building is contextual.
+
+267
+00:20:08,120 --> 00:20:15,600
+So when people say people don't necessarily engage with people you may know application
+
+268
+00:20:15,600 --> 00:20:21,560
+or as a daily use case, but when they do it's long and deep sessions and say if you would
+
+269
+00:20:21,560 --> 00:20:27,400
+join the company and you connected with your manager, if we could in real time then explore
+
+270
+00:20:27,400 --> 00:20:33,360
+the second degree network from that new connection itself, right?
+
+271
+00:20:33,360 --> 00:20:39,720
+Then you start exploring nodes around that company, around perhaps, you know, the team.
+
+272
+00:20:39,720 --> 00:20:44,680
+You will start discovering some of these patterns and people go down PYM, can they go click,
+
+273
+00:20:44,680 --> 00:20:50,760
+click, click and then if we can actually refresh those results in each subsequent scroll based
+
+274
+00:20:50,760 --> 00:20:57,040
+on how we're walking that graph, we'd actually discovered that we can show significant
+
+275
+00:20:57,040 --> 00:20:59,640
+improvements in memory experience.
+
+276
+00:20:59,640 --> 00:21:06,560
+So actually walking the graph in your real time has been one of our internal discoveries.
+
+277
+00:21:06,560 --> 00:21:12,800
+So to speak the fact that we can actually do it and the fact that it gives huge improvements
+
+278
+00:21:12,800 --> 00:21:19,760
+in experience and performance has been one of the key insights in recent times.
+
+279
+00:21:19,760 --> 00:21:25,600
+And it strikes me that there are significant kind of systems level challenges there.
+
+280
+00:21:25,600 --> 00:21:28,040
+Is that in your realm or is that?
+
+281
+00:21:28,040 --> 00:21:29,920
+Yeah, I can speak to that.
+
+282
+00:21:29,920 --> 00:21:37,240
+So I think traditional graph processing, something like Pregel or GraphX, the notion is
+
+283
+00:21:37,240 --> 00:21:40,640
+I'm going to process the entire graph.
+
+284
+00:21:40,640 --> 00:21:46,120
+And if you're going to process the entire graph, the way that you serialize the graph is
+
+285
+00:21:46,120 --> 00:21:50,560
+really important because serial IO, you know, when you can read disc blocks in order is
+
+286
+00:21:50,560 --> 00:21:53,400
+much, much faster than random access.
+
+287
+00:21:53,400 --> 00:21:58,880
+And so a lot of graph processing focuses on clever ways to serialize the data and the
+
+288
+00:21:58,880 --> 00:22:02,960
+processing so that you do the most efficient processing.
+
+289
+00:22:02,960 --> 00:22:07,120
+The tack we've taken is what if we used random access, right?
+
+290
+00:22:07,120 --> 00:22:11,560
+So for random access, you've got to be in RAM.
+
+291
+00:22:11,560 --> 00:22:17,160
+Your basic problem is how fast can I get something from memory into the CPU?
+
+292
+00:22:17,160 --> 00:22:19,840
+So you're counting L3 cache misses.
+
+293
+00:22:19,840 --> 00:22:24,840
+Every link that you follow is an L3 cache miss, at least, that would be if you followed
+
+294
+00:22:24,840 --> 00:22:27,080
+it with a pointer.
+
+295
+00:22:27,080 --> 00:22:32,680
+In practice, we would like to follow links in constant time.
+
+296
+00:22:32,680 --> 00:22:34,440
+It's a little bit more expensive.
+
+297
+00:22:34,440 --> 00:22:38,920
+We typically average out between two and three L3 cache misses.
+
+298
+00:22:38,920 --> 00:22:44,480
+So by building a system which can do this, you can now use edges pretty much the way
+
+299
+00:22:44,480 --> 00:22:47,040
+you use pointers pretty casually.
+
+300
+00:22:47,040 --> 00:22:53,320
+And you can do, say, online materialization of a second degree in real time.
+
+301
+00:22:53,320 --> 00:22:58,280
+I'm not sure that this is a direction that I really want to go down, but you know, you're
+
+302
+00:22:58,280 --> 00:23:03,440
+talking about kind of optimizing around cache hits and avoiding cache misses.
+
+303
+00:23:03,440 --> 00:23:09,080
+You know, there's a whole emerging field of like baking machine learning into the low
+
+304
+00:23:09,080 --> 00:23:14,320
+level infrastructure here to make some of these predictions for you.
+
+305
+00:23:14,320 --> 00:23:22,280
+Is that, is that something that you're, are you thinking about it, what I do is a lot
+
+306
+00:23:22,280 --> 00:23:23,280
+more boring.
+
+307
+00:23:23,280 --> 00:23:28,640
+It's really nuts and bolts, retrieve data, figure out if it's the data that you want, you
+
+308
+00:23:28,640 --> 00:23:30,760
+know, pretty, pretty boring database stuff.
+
+309
+00:23:30,760 --> 00:23:31,760
+Okay.
+
+310
+00:23:31,760 --> 00:23:32,760
+Okay.
+
+311
+00:23:32,760 --> 00:23:39,000
+A lot of the challenges for building machine learning systems at scale have to do with kind
+
+312
+00:23:39,000 --> 00:23:44,480
+of the data pipeline and getting that in place before you even get to modeling.
+
+313
+00:23:44,480 --> 00:23:48,920
+Does having access to this graph database alleviate all of that for you?
+
+314
+00:23:48,920 --> 00:23:54,320
+Are you still wrangling with data pipeline types of issues?
+
+315
+00:23:54,320 --> 00:24:01,480
+So data pipeline issues exist definitely for modeling because oftentimes models are still
+
+316
+00:24:01,480 --> 00:24:04,760
+built offline prototyping is done offline.
+
+317
+00:24:04,760 --> 00:24:09,960
+I mean, a graph database comes in when you're actually serving.
+
+318
+00:24:09,960 --> 00:24:18,240
+So one of the pieces around making data pipelining easier has been what LinkedIn calls productive
+
+319
+00:24:18,240 --> 00:24:29,240
+ML or ProML and we have actually facilitated tooling to become much more easier for data
+
+320
+00:24:29,240 --> 00:24:32,360
+scientists to actually build prototypes.
+
+321
+00:24:32,360 --> 00:24:40,920
+Now that said, we have also started thinking about how do we make computing graph features
+
+322
+00:24:40,920 --> 00:24:50,920
+because if you have a data scientist who wants to try a slightly different variant of
+
+323
+00:24:50,920 --> 00:24:55,600
+a second degree algorithm because we talked about a very simple version which is get
+
+324
+00:24:55,600 --> 00:24:58,000
+or get me all the second degree notes.
+
+325
+00:24:58,000 --> 00:25:05,440
+And if you want to think about it as a probabilistic random walk and you want to weigh the edges
+
+326
+00:25:05,440 --> 00:25:12,160
+in terms of by a model, right, like how close people are based on some of these affinity
+
+327
+00:25:12,160 --> 00:25:15,400
+models that we talked about.
+
+328
+00:25:15,400 --> 00:25:20,360
+How would it be easy for a data scientist to not have to worry about scale?
+
+329
+00:25:20,360 --> 00:25:25,920
+So can we just provide an interface, a simple, maybe Jupyter notebook like interface
+
+330
+00:25:25,920 --> 00:25:28,280
+to actually query these kind of databases?
+
+331
+00:25:28,280 --> 00:25:33,160
+So we've actually, we've, we're working on these and that makes the life for our data
+
+332
+00:25:33,160 --> 00:25:35,120
+scientists easier.
+
+333
+00:25:35,120 --> 00:25:41,560
+So and that definitely takes away the data pipeline issues or the scale issues.
+
+334
+00:25:41,560 --> 00:25:47,280
+And when you get to modeling, can you talk a little bit about the modeling, the types
+
+335
+00:25:47,280 --> 00:25:52,640
+of models that folks are building to solve these types of problems are there.
+
+336
+00:25:52,640 --> 00:25:58,840
+You know, if you kind of go to models that you apply broadly or do you customize the
+
+337
+00:25:58,840 --> 00:26:03,400
+models very deeply for the specific types of problems you're attacking here?
+
+338
+00:26:03,400 --> 00:26:04,400
+Yeah.
+
+339
+00:26:04,400 --> 00:26:12,440
+So at the very basic, oftentimes for any kind of affinity modeling, we would start with
+
+340
+00:26:12,440 --> 00:26:20,520
+the simplest class of models, decision trees, logistic regression and so on and so forth.
+
+341
+00:26:20,520 --> 00:26:26,400
+That said, we do find benefits in deep learning like models.
+
+342
+00:26:26,400 --> 00:26:32,600
+So there are some, there are, there's published literature.
+
+343
+00:26:32,600 --> 00:26:39,360
+In particular, there is a graph sage algorithm that came out of work from graph sage.
+
+344
+00:26:39,360 --> 00:26:40,360
+Graph sage?
+
+345
+00:26:40,360 --> 00:26:41,360
+Yes.
+
+346
+00:26:41,360 --> 00:26:45,000
+And that has come out of Stanford and Pinterest.
+
+347
+00:26:45,000 --> 00:26:52,680
+So we've done variants of those, we see certain advantages to algorithms of that nature.
+
+348
+00:26:52,680 --> 00:26:58,120
+So deep learning definitely is one direction we're pursuing.
+
+349
+00:26:58,120 --> 00:27:01,560
+Another direction is just personalization.
+
+350
+00:27:01,560 --> 00:27:07,480
+So how do we think about different users who are in different stages of career building?
+
+351
+00:27:07,480 --> 00:27:14,120
+You may be a new user and you may be building your graph and what LinkedIn calls a novice
+
+352
+00:27:14,120 --> 00:27:15,120
+member.
+
+353
+00:27:15,120 --> 00:27:21,680
+So you're more tentative to send out invitations, you're showing you somebody that you're likely
+
+354
+00:27:21,680 --> 00:27:25,720
+to connect in that context makes a lot more sense.
+
+355
+00:27:25,720 --> 00:27:31,760
+So knowing the stage of the user, the degree of the of connectivity of the user and the
+
+356
+00:27:31,760 --> 00:27:37,200
+lifecycle of the users, particularly important and likewise for someone who's very well connected
+
+357
+00:27:37,200 --> 00:27:41,000
+already, the additional value of a connection may be much lower.
+
+358
+00:27:41,000 --> 00:27:44,760
+So how do we find that one connection that that person's missing?
+
+359
+00:27:44,760 --> 00:27:52,640
+So personalization is something that the simple models like logistic regression would
+
+360
+00:27:52,640 --> 00:27:53,640
+not achieve.
+
+361
+00:27:53,640 --> 00:27:59,640
+So we get to more advanced models like mixed effect models.
+
+362
+00:27:59,640 --> 00:28:00,640
+Okay.
+
+363
+00:28:00,640 --> 00:28:03,480
+I'd like to explore some of these.
+
+364
+00:28:03,480 --> 00:28:06,280
+So graph sage, what's that trying to do?
+
+365
+00:28:06,280 --> 00:28:16,520
+So graph sage looks at, so most deep learning models have, if you think about the body
+
+366
+00:28:16,520 --> 00:28:25,000
+of literature in text processing or NLP, typically looks at sequences of words.
+
+367
+00:28:25,000 --> 00:28:31,760
+There are a few models that actually look at general graphs for deep learning.
+
+368
+00:28:31,760 --> 00:28:37,920
+But essentially what graph sage is trying to do is similar to what to work or might be
+
+369
+00:28:37,920 --> 00:28:43,000
+trying to achieve, which is trying to learn a representation or an embedding, but it
+
+370
+00:28:43,000 --> 00:28:48,320
+takes into account properties of the node and it takes into account the graph structure.
+
+371
+00:28:48,320 --> 00:28:56,000
+So for example, you may be a sparse, leconnected node, but connected to one dense, leconnected
+
+372
+00:28:56,000 --> 00:28:59,480
+node with very rich profile features.
+
+373
+00:28:59,480 --> 00:29:05,040
+And I actually, in for some properties about the sparse, leconnected node, which with
+
+374
+00:29:05,040 --> 00:29:09,640
+an incomplete profile from the densely connected node.
+
+375
+00:29:09,640 --> 00:29:13,960
+So actually looking at network propagation, looking at the structure of the underlying graph
+
+376
+00:29:13,960 --> 00:29:17,840
+is the class of algorithms that we're going after.
+
+377
+00:29:17,840 --> 00:29:18,840
+Okay.
+
+378
+00:29:18,840 --> 00:29:27,120
+So thinking about it as a graph embedding kind of approach your, your building a model
+
+379
+00:29:27,120 --> 00:29:35,120
+that is finding relationships, ultimately between the nodes, that such that in this embedding
+
+380
+00:29:35,120 --> 00:29:38,360
+space, nodes that are close together have similar properties.
+
+381
+00:29:38,360 --> 00:29:39,880
+Yes, exactly.
+
+382
+00:29:39,880 --> 00:29:44,320
+And then you also mentioned mixed effect models, what are those?
+
+383
+00:29:44,320 --> 00:29:45,320
+Yeah.
+
+384
+00:29:45,320 --> 00:29:55,640
+So the way I want to sort of generalize that class of models is how do I learn models
+
+385
+00:29:55,640 --> 00:30:04,880
+that are specific to certain groups and groups that are learned automatically, right?
+
+386
+00:30:04,880 --> 00:30:14,720
+So we can think about it as a logistic regression is a simple, like simple formula, which does
+
+387
+00:30:14,720 --> 00:30:21,960
+not necessarily consider effects of the viewer.
+
+388
+00:30:21,960 --> 00:30:28,960
+So the member that's being, for whom the recommendations are being rendered, the, or the
+
+389
+00:30:28,960 --> 00:30:36,640
+in the, or doesn't take into account personalized features of the items being recommended, right?
+
+390
+00:30:36,640 --> 00:30:42,480
+Or you would actually have to hand code these deeply into a logistic regression model.
+
+391
+00:30:42,480 --> 00:30:50,440
+But classes of models that can actually learn subgroupings of people and learn those interactions
+
+392
+00:30:50,440 --> 00:30:56,400
+between the viewer, that is, for whom it is being recommended and the items that are being
+
+393
+00:30:56,400 --> 00:31:00,400
+recommended and learn interactions between them.
+
+394
+00:31:00,400 --> 00:31:07,600
+So is it fair to think of it as almost conditional clustering, like your clustering condition
+
+395
+00:31:07,600 --> 00:31:10,800
+on to a specific node or something?
+
+396
+00:31:10,800 --> 00:31:16,400
+The other way people can think about it, these are also hierarchical models, like in more
+
+397
+00:31:16,400 --> 00:31:21,840
+classical statistical statistics literature, you can think of taking all of your feature
+
+398
+00:31:21,840 --> 00:31:24,600
+data and actually building clusters.
+
+399
+00:31:24,600 --> 00:31:27,920
+So you know, you think about, you're called it conditional clustering, but just building
+
+400
+00:31:27,920 --> 00:31:34,360
+these groups and then almost learning a separate model for each group, but not having to
+
+401
+00:31:34,360 --> 00:31:39,480
+hand code these groups by themselves, letting the model info what these groups may be.
+
+402
+00:31:39,480 --> 00:31:45,840
+And then we jumped into some of the more advanced models that I wasn't familiar with, but in
+
+403
+00:31:45,840 --> 00:31:53,080
+thinking about the application of kind of your linear regression and other basic models
+
+404
+00:31:53,080 --> 00:32:01,720
+to graph types of data, is that are there unique kind of challenges or approaches to doing
+
+405
+00:32:01,720 --> 00:32:09,960
+that or is it kind of pretty standard to the way you do a linear regression on more simple
+
+406
+00:32:09,960 --> 00:32:10,960
+types of data?
+
+407
+00:32:10,960 --> 00:32:20,200
+Yes, so the challenges for a simpler model would often be just the volume of data we have
+
+408
+00:32:20,200 --> 00:32:21,200
+for training.
+
+409
+00:32:21,200 --> 00:32:26,840
+So just processing all of that data can often be a challenge.
+
+410
+00:32:26,840 --> 00:32:32,600
+The other part is feature computation, so if you actually work computing something like
+
+411
+00:32:32,600 --> 00:32:37,760
+just a number of common connections between two nodes, that can be a pretty heavy computation
+
+412
+00:32:37,760 --> 00:32:45,760
+and you have in an offline system like Spark or MapReduce.
+
+413
+00:32:45,760 --> 00:32:51,720
+And the other piece is the online serving, so actually inference is can be a challenge.
+
+414
+00:32:51,720 --> 00:32:57,360
+So if you're actually thinking about how the PYMK is rendered, we talked about neural
+
+415
+00:32:57,360 --> 00:32:59,720
+real time candidate generation.
+
+416
+00:32:59,720 --> 00:33:05,560
+So what happens is if Sam comes to his PYMK page, we have, we need to look at features
+
+417
+00:33:05,560 --> 00:33:11,520
+for Sam, but then we may have a few thousand candidates to rank for Sam.
+
+418
+00:33:11,520 --> 00:33:16,840
+So then we have to look up the, all of the features for those few thousand candidates.
+
+419
+00:33:16,840 --> 00:33:23,160
+So then we're pounding a key value store at our PQPS for that many candidates.
+
+420
+00:33:23,160 --> 00:33:28,720
+Then you start hitting against systems challenges to actually retrieve all of those features
+
+421
+00:33:28,720 --> 00:33:31,040
+at that rate.
+
+422
+00:33:31,040 --> 00:33:38,400
+So both at the data munging side for just offline analysis or feature engineering, some of
+
+423
+00:33:38,400 --> 00:33:46,560
+these graph features can be computationally complex and we, you're doing a lot of large
+
+424
+00:33:46,560 --> 00:33:47,640
+joints.
+
+425
+00:33:47,640 --> 00:33:54,960
+So we actually become smarter at the way we do joints, just simple, sequil it like pick
+
+426
+00:33:54,960 --> 00:34:00,520
+joints don't necessarily work that well for us at the scale that we're at.
+
+427
+00:34:00,520 --> 00:34:04,640
+And then again, online inference is the other piece in terms of those joints got what
+
+428
+00:34:04,640 --> 00:34:05,640
+does work.
+
+429
+00:34:05,640 --> 00:34:07,360
+Oh, what does work?
+
+430
+00:34:07,360 --> 00:34:14,360
+I think the two problems with, with joins are, are query planning.
+
+431
+00:34:14,360 --> 00:34:18,440
+So typically if you talk about a graph, it's represented as a table of edges.
+
+432
+00:34:18,440 --> 00:34:22,480
+This is a very, very easy to do in any SQL database.
+
+433
+00:34:22,480 --> 00:34:27,680
+However, when you start to query it, you're doing self joints.
+
+434
+00:34:27,680 --> 00:34:32,520
+And the problem with self joints is that the optimizer is based on statistics.
+
+435
+00:34:32,520 --> 00:34:39,520
+And after your first round of projections, you no longer have any statistics.
+
+436
+00:34:39,520 --> 00:34:44,560
+This gets exacerbated by the fact that graphs tend to have a lot of skew in them.
+
+437
+00:34:44,560 --> 00:34:49,680
+That is some nodes are very, very dense and others are very sparse.
+
+438
+00:34:49,680 --> 00:34:55,360
+And so basic techniques like, oh, I'll just take an average, don't work very well.
+
+439
+00:34:55,360 --> 00:35:03,480
+You can be looking at things, oh, this guy has 200, 150, 113, 25 million.
+
+440
+00:35:03,480 --> 00:35:09,320
+So if you have to look at 25 million things, you have to pay that price.
+
+441
+00:35:09,320 --> 00:35:12,440
+But if you're in a complex query, maybe you don't have to.
+
+442
+00:35:12,440 --> 00:35:17,960
+Maybe that highly skewed node will be knocked out by some other condition.
+
+443
+00:35:17,960 --> 00:35:26,000
+So you need an optimization framework that can respond to that problem of skew.
+
+444
+00:35:26,000 --> 00:35:30,680
+And then, so this typically shows up in offline jobs where you have a hot, you have a hot
+
+445
+00:35:30,680 --> 00:35:31,840
+shard.
+
+446
+00:35:31,840 --> 00:35:37,400
+All the other shards are done and one shard is just spinning at 100% CPU or it runs out
+
+447
+00:35:37,400 --> 00:35:39,080
+of RAM.
+
+448
+00:35:39,080 --> 00:35:42,520
+That's a very, very typical problem.
+
+449
+00:35:42,520 --> 00:35:50,320
+And the query planning we solve with a dynamic planner rather than a static planner.
+
+450
+00:35:50,320 --> 00:35:53,440
+So typical SQL database, you give it the query.
+
+451
+00:35:53,440 --> 00:35:56,640
+It looks at the statistics of the tables that are referred to.
+
+452
+00:35:56,640 --> 00:36:02,480
+It comes up with a plan and then it just executes the plan without change.
+
+453
+00:36:02,480 --> 00:36:09,440
+What we do is we look at the query, look at the sizes of sets, which we can determine
+
+454
+00:36:09,440 --> 00:36:13,760
+in constant time and we do the cheapest thing.
+
+455
+00:36:13,760 --> 00:36:18,960
+And then we see what that's done to the sizes of sets and we do the next cheapest thing.
+
+456
+00:36:18,960 --> 00:36:23,680
+So if we're pursuing a key brand and it turns out to be expensive, we'll go look at other
+
+457
+00:36:23,680 --> 00:36:25,080
+keeper things.
+
+458
+00:36:25,080 --> 00:36:30,800
+So we'll change the query plan in midstream as it were.
+
+459
+00:36:30,800 --> 00:36:36,280
+The hot shard problem that you were mentioning is that something that you deal with kind
+
+460
+00:36:36,280 --> 00:36:45,760
+of operationally or is that something that does this kind of dynamic element of the underlying
+
+461
+00:36:45,760 --> 00:36:47,920
+platform know how to deal with that?
+
+462
+00:36:47,920 --> 00:36:53,480
+It's something that would, I mean, so in liquid the graph database, it's something that
+
+463
+00:36:53,480 --> 00:36:55,760
+our planner handles.
+
+464
+00:36:55,760 --> 00:37:00,240
+So it's a problem that we don't have in the online world.
+
+465
+00:37:00,240 --> 00:37:05,080
+In the offline world, it's just a thing that can happen, right?
+
+466
+00:37:05,080 --> 00:37:09,880
+So very often people are grumbling about their offline job not finishing and oh, well,
+
+467
+00:37:09,880 --> 00:37:16,720
+we need to give everybody more memory or we need to fiddle with the query plan for this
+
+468
+00:37:16,720 --> 00:37:20,840
+particular thing that we're computing.
+
+469
+00:37:20,840 --> 00:37:23,440
+It's just a bad thing that can happen.
+
+470
+00:37:23,440 --> 00:37:28,320
+And when you say fiddle with the query plan, how much of that query planning is kind of
+
+471
+00:37:28,320 --> 00:37:35,360
+hand-tuned like that versus the system is creating the query plan?
+
+472
+00:37:35,360 --> 00:37:37,960
+It varies a lot.
+
+473
+00:37:37,960 --> 00:37:44,640
+The tendency is for things to be more SQL-like, where somebody else figures out the plan.
+
+474
+00:37:44,640 --> 00:37:52,240
+But a lot of people are still writing handwritten map-produced jobs, where you are actually,
+
+475
+00:37:52,240 --> 00:37:58,200
+the human programmer is figuring out a plan that the computer program will exit.
+
+476
+00:37:58,200 --> 00:38:03,000
+And the programmer has to realize, hey, if I want to talk about people who are following
+
+477
+00:38:03,000 --> 00:38:09,040
+Richard Branson, I probably don't ask about the shard that has Richard Branson.
+
+478
+00:38:09,040 --> 00:38:13,720
+I probably ask all the other shards like, hey, if you're connected, if anybody that you
+
+479
+00:38:13,720 --> 00:38:18,280
+have is connected to Richard Branson, I want to do some stuff with that, right?
+
+480
+00:38:18,280 --> 00:38:23,680
+So that's a typical way to work around that problem.
+
+481
+00:38:23,680 --> 00:38:27,880
+Is that type of thinking natural for the kinds of engineers that are working on these
+
+482
+00:38:27,880 --> 00:38:28,880
+problems?
+
+483
+00:38:28,880 --> 00:38:30,880
+Or is there a lot of education?
+
+484
+00:38:30,880 --> 00:38:35,760
+Yeah, I don't think it's natural for anyone.
+
+485
+00:38:35,760 --> 00:38:40,520
+Graph databases, it takes a while to, there's no top or bottom.
+
+486
+00:38:40,520 --> 00:38:46,480
+So I've always seen, it takes at least six months for people to come up to speed on the
+
+487
+00:38:46,480 --> 00:38:48,800
+domain and really start being productive.
+
+488
+00:38:48,800 --> 00:38:51,200
+That's like the new concurrency, right?
+
+489
+00:38:51,200 --> 00:38:53,760
+It's like something you just have to wrap your head around.
+
+490
+00:38:53,760 --> 00:38:56,920
+There's this fog and eventually you come out on the other side of the fog and it kind
+
+491
+00:38:56,920 --> 00:38:57,920
+of makes sense.
+
+492
+00:38:57,920 --> 00:38:58,920
+Yeah, yeah.
+
+493
+00:38:58,920 --> 00:38:59,920
+I think so.
+
+494
+00:38:59,920 --> 00:39:08,440
+I'm curious about if you're seeing anything happening on the hardware side of supporting
+
+495
+00:39:08,440 --> 00:39:09,440
+graph databases.
+
+496
+00:39:09,440 --> 00:39:15,760
+It strikes me that there's maybe an analogy in, there are a number of companies going
+
+497
+00:39:15,760 --> 00:39:20,960
+at doing machine learning in Silicon and one of the big innovations there is the way
+
+498
+00:39:20,960 --> 00:39:26,400
+where we do a lot of machine learning via TensorFlow and PyTorch and the like is
+
+499
+00:39:26,400 --> 00:39:32,280
+by constructing computational graphs, so let's build Silicon that is better suited towards
+
+500
+00:39:32,280 --> 00:39:35,720
+computational graphs as opposed to linear instruction sets.
+
+501
+00:39:35,720 --> 00:39:38,400
+Now we're talking about graph databases.
+
+502
+00:39:38,400 --> 00:39:43,600
+I don't think I've heard of like a graph server or graph hardware that's kind of tuned
+
+503
+00:39:43,600 --> 00:39:45,440
+for supporting graph databases.
+
+504
+00:39:45,440 --> 00:39:49,880
+Do you, have you heard of that or, and do you think that maybe I think at some point?
+
+505
+00:39:49,880 --> 00:39:56,520
+I mean, honestly, for my standpoint, hardware has steadily gotten worse, instruction pipelines
+
+506
+00:39:56,520 --> 00:39:58,280
+are longer.
+
+507
+00:39:58,280 --> 00:40:06,640
+People tend to focus on, well, if you can do serial IO, then it's much, much faster.
+
+508
+00:40:06,640 --> 00:40:09,320
+They want things to fit in the L1 cache.
+
+509
+00:40:09,320 --> 00:40:15,520
+So the sweet spot for modern hardware is I have figured out how to chop things up into
+
+510
+00:40:15,520 --> 00:40:21,720
+small enough pieces that one piece fits in the L1 cache and then I can use vectorized
+
+511
+00:40:21,720 --> 00:40:24,840
+operations really fast.
+
+512
+00:40:24,840 --> 00:40:26,240
+That's absolutely wonderful.
+
+513
+00:40:26,240 --> 00:40:29,160
+Unfortunately, that's not what a graph is.
+
+514
+00:40:29,160 --> 00:40:32,160
+A graph is really random access, right?
+
+515
+00:40:32,160 --> 00:40:34,880
+There's no easy way to sort a graph.
+
+516
+00:40:34,880 --> 00:40:41,600
+So for example, if I'm storing edges, well, the edge has, say, three fields, a subject
+
+517
+00:40:41,600 --> 00:40:45,440
+predicate an object, I have to sort in one way.
+
+518
+00:40:45,440 --> 00:40:50,920
+So if I sort it by subject, I can find all of your edges very easily.
+
+519
+00:40:50,920 --> 00:40:56,000
+But when I start looking at objects at the other end, it's unsorted, right?
+
+520
+00:40:56,000 --> 00:41:03,960
+So you really cannot escape the need for random access and unfortunately modern processors
+
+521
+00:41:03,960 --> 00:41:08,120
+are very heavily pipelined and don't handle random access very well.
+
+522
+00:41:08,120 --> 00:41:13,920
+So do you envision a hardware that's better, have you come across that?
+
+523
+00:41:13,920 --> 00:41:16,680
+I think people are doing the best they can.
+
+524
+00:41:16,680 --> 00:41:19,320
+It's very hard and expensive.
+
+525
+00:41:19,320 --> 00:41:21,240
+So we have L1 memory.
+
+526
+00:41:21,240 --> 00:41:25,440
+Why don't we just make L1 be like all of the RAM?
+
+527
+00:41:25,440 --> 00:41:27,240
+It's very expensive to do that.
+
+528
+00:41:27,240 --> 00:41:32,040
+Hey, man, when you think about the, you know, a lot of the challenges that we've been
+
+529
+00:41:32,040 --> 00:41:37,880
+talking about are challenges that arise from kind of the scale at which LinkedIn is manipulating
+
+530
+00:41:37,880 --> 00:41:41,320
+graphs and applying machine learning to graphs.
+
+531
+00:41:41,320 --> 00:41:44,320
+Not a lot of people are operating at that scale.
+
+532
+00:41:44,320 --> 00:41:50,080
+Do you think about kind of scaling down this kind of problem and like, you know, getting
+
+533
+00:41:50,080 --> 00:41:55,680
+started thinking about applying machine learning to graph types of problems, what are some
+
+534
+00:41:55,680 --> 00:42:01,040
+of the things that people can do to explore this area?
+
+535
+00:42:01,040 --> 00:42:08,560
+There are definitely lots of graph datasets out in the public domain.
+
+536
+00:42:08,560 --> 00:42:11,840
+The clue web corpus is a web graph in itself.
+
+537
+00:42:11,840 --> 00:42:12,840
+Clue web.
+
+538
+00:42:12,840 --> 00:42:13,840
+Okay.
+
+539
+00:42:13,840 --> 00:42:20,040
+There are academic publications that reference protein interaction networks.
+
+540
+00:42:20,040 --> 00:42:22,520
+You can think of those as graphs as well.
+
+541
+00:42:22,520 --> 00:42:26,920
+So there's lots of embodiments of graphs in different subdomains.
+
+542
+00:42:26,920 --> 00:42:36,560
+The set of problems that come to mind often is, it often boils down to link prediction,
+
+543
+00:42:36,560 --> 00:42:40,760
+like, does a link between A and B exist.
+
+544
+00:42:40,760 --> 00:42:47,080
+Another problem that actually many companies in particular financial institutions are generally
+
+545
+00:42:47,080 --> 00:42:53,680
+interested in is interaction graphs, but thinking in terms of the problem of abuse.
+
+546
+00:42:53,680 --> 00:43:00,600
+So the general problem of link prediction has many applications both in, you know, the
+
+547
+00:43:00,600 --> 00:43:07,080
+public domain as well as, you know, which the niche, you know, corporate domains.
+
+548
+00:43:07,080 --> 00:43:13,040
+So I think thinking about a newer classes of link prediction problems that go beyond
+
+549
+00:43:13,040 --> 00:43:21,360
+random walks, bringing embedding like algorithms, basically deep learning algorithms, but that
+
+550
+00:43:21,360 --> 00:43:24,120
+can operate at scale.
+
+551
+00:43:24,120 --> 00:43:27,200
+So basically, how can we distribute the processing?
+
+552
+00:43:27,200 --> 00:43:32,520
+Thinking about distributed graphs is itself a hard problem.
+
+553
+00:43:32,520 --> 00:43:40,120
+The other piece that we didn't cover too much about, but I think for folks who are academically
+
+554
+00:43:40,120 --> 00:43:47,560
+oriented, I would actually think about how do you do a B testing on a graph?
+
+555
+00:43:47,560 --> 00:43:57,320
+Because in some sense, nodes are not IID when you expose a node to a particular treatment,
+
+556
+00:43:57,320 --> 00:43:59,560
+its neighborhood is impacted too.
+
+557
+00:43:59,560 --> 00:44:05,000
+So a very nice theoretical problem may be just, you know, taking a look at how we might
+
+558
+00:44:05,000 --> 00:44:08,280
+actually do experiments on these graph structures.
+
+559
+00:44:08,280 --> 00:44:11,960
+So IID independent, identically distributed.
+
+560
+00:44:11,960 --> 00:44:17,120
+So where's the, what's the missing part of the academic literature in this area?
+
+561
+00:44:17,120 --> 00:44:26,720
+So think about this today when most companies do a B testing or they definitely, they partition
+
+562
+00:44:26,720 --> 00:44:32,040
+their user base into random buckets, right?
+
+563
+00:44:32,040 --> 00:44:37,640
+But when your users are connected by links, right?
+
+564
+00:44:37,640 --> 00:44:42,360
+So for example, let's take the example that you and I are connected and you share an
+
+565
+00:44:42,360 --> 00:44:46,320
+article and I view the article.
+
+566
+00:44:46,320 --> 00:44:53,640
+If we're in two different buckets for an AB test, I'm not really independent of you.
+
+567
+00:44:53,640 --> 00:44:56,320
+So that assumption completely breaks apart.
+
+568
+00:44:56,320 --> 00:45:00,440
+So how do we actually tackle this problem?
+
+569
+00:45:00,440 --> 00:45:09,000
+I think that's something you can study even in a smaller graph in a simulation like framework.
+
+570
+00:45:09,000 --> 00:45:13,200
+So I would, you know, sort of love to toss that problem out at the academics.
+
+571
+00:45:13,200 --> 00:45:19,120
+It's got any requests from your part for the academic community.
+
+572
+00:45:19,120 --> 00:45:22,720
+I think, I don't really have requests.
+
+573
+00:45:22,720 --> 00:45:25,560
+You were talking about, you know, how do you process this at small scale?
+
+574
+00:45:25,560 --> 00:45:26,560
+Yeah.
+
+575
+00:45:26,560 --> 00:45:32,160
+I think one of the, one of the insights here is it's actually pretty economic to have a
+
+576
+00:45:32,160 --> 00:45:35,000
+lot of RAM, right?
+
+577
+00:45:35,000 --> 00:45:40,960
+And so if I was, if I was wanting to do a graph work at a smaller scale, where a small
+
+578
+00:45:40,960 --> 00:45:47,960
+probably means, you know, up to three terabytes, I would just focus on a single machine and
+
+579
+00:45:47,960 --> 00:45:50,360
+use, use RAM.
+
+580
+00:45:50,360 --> 00:45:57,160
+It's, I think you can buy a one and a half terabyte machine from Dell at the rack price for
+
+581
+00:45:57,160 --> 00:45:59,960
+20,000 bucks, 25,000 bucks.
+
+582
+00:45:59,960 --> 00:46:01,760
+It's really quite economical.
+
+583
+00:46:01,760 --> 00:46:06,720
+And if you didn't have access to liquid, what graph database would you be exploring?
+
+584
+00:46:06,720 --> 00:46:07,720
+That's a harder one.
+
+585
+00:46:07,720 --> 00:46:12,400
+I know the guys at Franz, who, who build a leg rat graph.
+
+586
+00:46:12,400 --> 00:46:18,240
+And I think that's, to me, probably the most interesting of the extent graph databases.
+
+587
+00:46:18,240 --> 00:46:22,560
+Well, Hema Scott, thank you so much for chatting with me.
+
+588
+00:46:22,560 --> 00:46:24,040
+Thank you so much for having us here.
+
+589
+00:46:24,040 --> 00:46:26,560
+Yeah, thank you very much.
+
+590
+00:46:26,560 --> 00:46:32,480
+All right, everyone, that's our show for today.
+
+591
+00:46:32,480 --> 00:46:37,800
+For more information on Hema, Scott, or any of the topics covered in today's show, visit
+
+592
+00:46:37,800 --> 00:46:42,480
+twimmalei.com slash talk slash 236.
+
+593
+00:46:42,480 --> 00:46:45,200
+Thanks once again to LinkedIn for their support.
+
+594
+00:46:45,200 --> 00:46:50,320
+Be sure to check out what their engineering team is up to at engineering.linkedin.com slash
+
+595
+00:46:50,320 --> 00:46:51,840
+blog.
+
+596
+00:46:51,840 --> 00:47:02,800
+As always, thanks so much for listening and catch you next time.
+

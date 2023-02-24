@@ -1,0 +1,507 @@
+All right, everyone. I am here with Tim Rockteschel. Tim is a research scientist at Facebook AI
+research and associate professor in the Department of Computer Science at University College London.
+Tim, welcome to the Twomol AI podcast. Thanks so much for having me. It's great to be.
+I am really looking forward to digging into our conversation. We'll be talking about one of my
+favorite topics, which is reinforcement learning. But before we do, I would love to have you share a
+little bit about your background and how you came to work in the field. Sure. Yeah, so I started a
+PhD actually in natural language processing at University College London in 2013. I got interested
+in generally knowledge representations and knowledge graphs and how we can reason, you know,
+about knowledge and for new facts from these knowledge graphs. I also did some work on
+textual entailment and other NLP problems. But I got more and more excited about reinforcement
+learning. I felt in NLP, lots of the data sets back then, they were static and it was mostly,
+you know, chasing scores on leaderboards. And I was very intrigued, I guess, by work that came
+out of, you know, top AI labs like DeepMind and OpenAI at the time. So I, you know, went over to
+Oxford to the postdoc with a human white son's reinforcement learning group there. And then after
+the postdoc, I joined UCL as a lecturer back then and also Facebook research in London.
+Awesome. Awesome. And when you think about your kind of research,
+agenda at the university and the work that you focus on at Facebook, how do you characterize it?
+What are the bounds of your interests? So the thing that we care most about at this point are
+being able to train agents that can somewhat generalize to novel situations. So we strongly
+believe that over the last decade, quite a bit of the research in the field has unfortunately
+focused on very limited environments. So, you know, games like Atari Games come to mind. This
+has been obviously really fantastic for advancing the field, but it can only go so far in that,
+you know, Atari Games are deterministic. There's only so much kind of novel situations that you
+encounter in these kind of games. And we are really far away from being able to apply these
+reinforcement learning techniques to lots of the real world problems that we would care about.
+So really, my work focuses on how we can move closer towards these kind of real world problems.
+How can we drop some of these kind of simplified assumptions that are baked into some of the,
+you know, environment simulators that we've been used for driving reinforcement learning research?
+And from there, basically, it's a slippery slope into procedally generated games and, you know,
+training agents that are intrinsically motivated and curious, even training agents that can design
+their own kind of problems in these simulated worlds to then hopefully get agents that can generalize
+better to new tasks and new situations. And when you talk about kind of these constrained
+environments versus unconstrained environments is a unconstrained environment, something like,
+you know, what we might be familiar with with OpenAI Jim or Mojoku or something like that,
+where you have these figures or humanoids or do you think about that differently?
+So it's a bit different. So OpenAI Jim is a really fantastic interface that allowed us researchers
+right to basically speak the same language in terms of how to interact with environments.
+But it's really just an interface, right? And then there are lots of different
+and actual environments that connect to that interface. For example, Atari games are, you know,
+connected to this OpenAI Jim interface. So if you, as a researcher, want to create a model
+on new, you know, our agent that should, you know, do something sensible in these environments,
+you can just follow that interface and other researchers kind of can, you know, write other models,
+and they're all kind of compatible in terms of interacting with that environment. Same goes with Mojoku.
+So the problem with things like Mojoku or, you know, other environments that we've been using for
+a long time is that they are somewhat limited, right? Each of these environments make or have
+baked in certain simplifying assumptions that unfortunately mean that when, you know, cohort
+of researchers over a long time, the research on it eventually they find ways to basically
+exploit these simplifying assumptions. Now, I'm not saying that, you know, we can directly jump
+into completely unconstrained environments. The only such environment that comes to my mind is
+the real world, right? We would have to, that would be make a jump towards training, you know,
+real robots in the real world. And that's for many reasons, I think, very challenging, right? It's
+it's slow because you can't, you know, speed up time. You have all kinds of engineering
+challenges with robots falling apart and whatnot. So I'm saying we still find to use
+simulated environments that are somewhat constrained, but we need to be very explicit about the
+simplifying assumptions that are built into these environments. And we need to gradually remove
+them to be able to then develop methods that are somewhat of a general nature so that we have the
+hope at some point to learn something generally about training agents that can do things for real world
+tasks. We've talked a lot about in the context of, for example, computer vision, how
+deep learning models are so good at picking up patterns. They, you know, will pick up a pattern
+that is correlated with the result that you want, the label that you want, but not really the
+one that you want them to pick up. An example that comes to mind from a recent conversation was
+the, you know, a pen mark that happened to be used on a radiology image to, you know,
+that's correlated with whether there's cancer in the actual specimen. You said something that
+kind of suggested that, you know, in the RL setting, the models will, you know, pick up on these kind
+of tangential constraints of the environment and that impacts the way that they, the way that
+they're trained, et cetera, is that is the, you know, there's similar effects in that way or
+it's actually worse. It's, you know, that problem we also have, right? So the moment you use deep
+function approximators like deep neural networks that get any input as data, they might, as you
+said, they might just latch on to certain spurious correlations in the data. That is true for
+natural language processing, computer vision. It's also true for reinforcement learning environments,
+right? If you happen to have, for example, a certain, you know, visually rich reinforcement
+environment where the agent is supposed to do a certain task, maybe there's a certain queue
+in the training episodes that allows the agent to, you know, do well there, but then once you
+change something slightly, you change the background, you change some of the textures in that,
+in that environment, the agent will most likely break down and not do anything sensible. So that's,
+that's, that problem is there too. What I'm talking about is I think of somewhat a worse problem
+in that and we as researchers, right? We oftentimes design in RL, we design our own kind of
+environments to do the research, right? We create, you know, our own kind of games or we use
+games like the Atari games. And that works for some time, but if you are then not careful,
+right? You as a researcher over years and years as a, as a research cohort, right? You start to
+actually exploit that simulator. You say, okay, now we have an agent that can, you know,
+solve some of the hardest exploration problems in Atari, but then really what does that tell us
+for the real world? Right? What does it tell us for real world problems when let's say all your
+agent is doing is kind of memorizing over time, what are the right steps to do? If you change
+anything in that game, you know, this agent would be screwed, right? So how do you, how do you learn
+something general about AI agents that you want to deploy at some point to solve, you know, actual
+real world problems? That's the, that's the challenge. Got it. So going back to the comparison with
+computer versions, kind of the overfitting on image net problem. Yep. Yeah, exactly. And so how do
+you propose to address this problem? What are, what are some of the things that you've done in this
+area? So, I mean, to be honest, I think one can step back a bit and say, actually, there were
+multiple researchers that recognized that problem some, some time ago. So a few years ago, people
+started to use what's called procedurally generated environments for training and testing our
+agents. And what that means is that you actually have a generative process that given the start of
+an episode can generate a new, all your world basically, right? A whole new kind of problem,
+right? A new maze or a new new game with new dynamics. Or yeah, if you think about, for example,
+Minecraft, right, really a new kind of landscape where whatever you, I mean, whatever you learned
+before in terms of the topology of the world, you find yourself in, it's going to be different now,
+right? Certain things stay the same. The environment and dynamics stay the same, right? So the way
+how certain items work and what certain, you know, enemies do to you, right? That stays the same,
+but at least in terms of the, the kind of visual inputs and the topology of the map, right? Things
+change dramatically. And there were multiple researchers who've been taking that approach, right?
+Starting to create procedurally generated environments to test the generalization capabilities of
+our agents. Some prominent examples are actually indeed Minecraft. So that has been used for
+reinforcement learning research, although it's a somewhat a slow simulator. There was the obstacle
+tower challenge where you have a basically 3D jump and run problem environment. Again,
+wherever you episode, the blocks that you have to jump over and doors and keys that you have to,
+you know, interact with the position of these change. So that was quite exciting. And then
+more recently, opening, I released this project and benchmark. So these are 16 games that look
+a bit like Atari games, but that are actually procedurally generated. That means in every
+episode, for example, again, the mace structure changes or the textures even off the game assets
+change. So your agents really have to systematically generalize with respect to certain factors of
+variation. And, and that is interesting, right? Because now we are talking about a regime that's
+closer to actually what people do in computer vision and natural language processing where they
+have a training set. And then I have a held out test set and they actually test for generalization,
+right? They can see how much actually overfitting is happening. So now we can do that. And yeah,
+that's what what other people did in the space back then. And we looked at that and honestly,
+we were really, you know, really excited about this. It's to me, research is really not a zero
+sum game. It's great to see what other people are doing. But one of the gaps that we identified
+back then, and as is roughly two, three years ago, is that these environments, these procedurally
+generated environments, they're either quite rich, like Minecraft, right? They're where there's
+really lots of things to do, lots of, you know, entities to interact with. But they're really slow
+to simulate. So that's not great news for like contemporary reinforcement learning approaches. So
+you can't really do like good research with it unless you have really tremendous computational
+resources, and even then it's it's problematic. Or these are procedurally generated environments,
+but they're actually relatively limited in terms of the richness, right? In terms of interacting
+with different entities and agents having to acquire certain skills, they actually more like,
+okay, I have to move around, maybe get a key open the door, but then that's mostly it. Whereas
+what we would want, ideally, is something that is really rich and complex, but at the same time,
+very fast to simulate, so that we can still make progress with like, currency of the art
+reinforcement learning methods. So that's the kind of gap that we identified two, three years ago,
+and then basically that lead led to looking into a very interesting class of games,
+called Rooklikes. So these are dungeon crawl games, and they have a very long tradition.
+So Rook, I think itself was implemented in the in the early eighties, and then there's
+another much richer game called NetHack, which we then settled on in terms of turning it into
+reinforcement learning environment. NetHack is I think was developed in 1987. It's played
+entirely in the terminal. So every thing that you observe is actually ASCII characters in a terminal,
+and that makes it really, really fast to simulate, but it's extremely rich and complex at the same time,
+as well. It has hundreds of items, hundreds of monsters that all behave differently, so you have to
+learn over time how to avoid them or fight them. It's, as I mentioned, procedurally generated,
+so every time you played, it's different. The moment you die, the game is over, you have to start
+from the very beginning of the game, and again, it's procedurally generated, so you can't really
+memorize anything about certain landmarks or positions in the previous game. It's very long
+as well. It takes an average player, something like 50,000 steps to complete the game. It's very
+different to some of the grand challenges that have been used in the past for AI. If you think
+about StarCraft 2, for example, that game takes something like 15 minutes, and depending on how many
+actions you allow the agent to do per second, it means something like 2,000 steps for an episode,
+whereas here we're talking about, as I mentioned, 50,000. NETAC is open source, so then we decided to
+say, look, we're going to turn it into an RL benchmark, and we're going to see how, well,
+vanilla, deep brain, phospholining approaches do. That's what we did.
+What does completing the game mean for NETAC? Is it kind of finding your way through a world?
+In overcoming the various challenges that you mentioned, fighting with monsters, and finding
+treasures, and that kind of thing? Yeah, so it's fantasy dungeon crawl game, so basically,
+you get thrown into a dungeon with rooms and corridors connecting these rooms. You have to
+explore in there because the environment itself is partial observable. You only see kind of what's
+in the current room. The moment you go out, there can be things happening in there that you don't
+see. That itself is challenging for RL already. It's stochastic, so in the moment you attack a monster,
+there's a die roll in the back, like in dungeons and dragons, right? And your outcomes of the
+actions are uncertain. That's, again, a really major challenge for, like, a current state of the art
+or other approaches. But yeah, yeah, as a player, you would basically try to fight your way down.
+There's their cases down. You get to the next level, next level. They're over 50
+procedurally generated levels that become more and more difficult. At the bottom of that dungeon,
+that is, without hopefully spoiling too many people, is an amulet that you need to retrieve,
+and then you need to make your entire way up again. And then there's five more really challenging
+elemental planes. And then at the end of it, you need to offer the amulet to a in-game deity,
+and then you ascend to demigothood on your one-game. It's extremely challenging. Was it a game
+that you played before you started doing the research in this area? I did, yeah. So I did play
+a much simpler kind of clone of it that you can play easily on the smartphone, which is called
+Pixel Dungeon, which I enjoyed a lot. But then it was at a time, actually, when I was commuting
+between Oxford and London, so that's kind of a two-hour commute door-to-door where you take a train,
+and on that train, at least in evenings after a full day of work, yeah, I did then start to play
+Nethack. Specifically, when we started to get serious about this project, it took me two years
+to win in this game for the first time. So it is really, really challenging, but also very funny.
+Nice, nice. When you talk about it being procedurally generated, how many parameters
+are, you know, do you have a control over when you're generating a game? Is it, you know,
+you give it a seed and that kind of creates everything? Or do you have more fine-grained control over,
+you know, number of levels or difficulty or other things?
+So, yeah, basically, if you just take Nethack as it is, you define a seed and then the dungeon
+is created, it's very subtle, actually. It's very tricky, in the sense that actually there's a
+random number generated in the background, obviously, that is only advanced when you do an action that
+would lead to a stochastic outcome. So depending on the kind of, even if you set the same seed
+in the beginning, depending on the kind of interactions you have on the first level,
+the moment you go down to the next level and depending on how far that random number generator
+has been already advanced, the next level is going to look differently. So one thing you
+alter, even by fixing the seed, you won't get the entire dungeon the same way, just get the first
+level the same way. And that is been true for like contents in kind of containers like, you know,
+boxes. So it's, it's a bit like basically at disk qualifies many of the, you know, approaches that
+have been proposed that would, you know, make use of the fact that the simulator is deterministic,
+even if we try to make an hacked deterministic, it's a bit challenging.
+And so in publishing the, the, the environment and the challenge to you, have you also attempted
+to solve it? And what have you learned? What do you run into when you set RL agents loose in this
+kind of environment? When we released the, the network learning environment last year and presented
+it at NURBS, we have in that paper results of a distributed deep reinforcement learning approach,
+a pretty much kind of vanilla model. And we originally thought that this won't work at all,
+basically. It's way too hard, even for such a kind of state of the art approach to learn any
+meaningful behavior. We were actually surprised that our agents do learn some sensible behavior.
+I mean, they're not really getting very far in that game. They're not anywhere close to winning that
+game, but they learn like certain things like, you know, exploring the dungeons, even looking for
+secret doors, which can be quite tricky, kicking in locked doors, which I found a very interesting
+behavior because it's a pretty difficult thing to explore. Like when you're actually kicking and
+you're kicking against walls, you take damage and you might die. So it's interesting to see that
+over time, if you give it enough kind of interactions with the environment, it learns actually
+these kind of basic behaviors and skills. It learns to go deeper and deeper into the dungeon.
+It learns to avoid certain very powerful monsters. It learns to eat, which is very important in
+the game to actually not starve to death. But, you know, they get to like, you know, average dungeon
+level five or six, some lucky agents get to dungeon level 10 or 15, even. We saw that too, but
+that's all like very basic, basic behavior. It's not on the level of like a human when they start
+learning to play Natagon, they've never played it before. If they play for a week and they get to
+the same kind of level of skills, I think they're quite good. But then, you know, afterwards humans
+just are much, much better at kind of nailing this over time. And is there a score associated with
+the game or what is the like the fundamental driving signal that you're giving your agents to give
+it success, some kind of success notion? Yeah, that's a fantastic question. There is an in-game score.
+That score captures things like, you know, how deep did you go down in the dungeon? How many
+monsters did you kill? And it's a really terrible metric to try to optimize for in terms of actually
+winning the game. But that's basically what we did, right? We started simple and say, okay,
+let's use any kind of metric that we can think of. We tried the score and what happens is basically
+what you expect. Like, if you get reward for going down a dungeon level and killing stuff,
+you get an agent that just, you know, goes completely berserk, tries to kill everything in their
+path, more or less, and just tries to run down the dungeon level as quickly as possible without
+caring about actually, you know, finding items, equipping them in order to get stronger the long run.
+So it's a very tricky challenge, right? How do we, what's even the right reward function?
+So that we can guide an agent towards winning the game. And to be very honest, I think humans
+don't care about score when they learn to play this game. They don't even care about winning
+because it takes them hundreds or maybe even thousands of games before they win for the first time.
+For humans, something different happens, right? They get just excited about exploring
+and they are intrinsically motivated to learn about how this game works and what kind of
+funny things you can do with it, isn't it? So that's an interesting, interesting angle to it.
+We have to, I guess, you know, find ways to intrinsically motivate these kind of agents to explore.
+Yeah, and so that that sounds a lot like curiosity and leads to ideas about kind of the
+explore exploit knob. Is that something that, you know, what do you see when you kind of play
+with a knob like that with an agent in this environment? Yeah, so we, we provided another
+baseline in that, in that Europe's paper, which is indeed, like, such an intrinsic reward mechanism.
+It's called random network distillation. It's a very robust method. And it does give you small gains
+and significant, but small gains. I think we have to, more long term, I think we have to think
+about more fundamentally different ways of encouraging agents to explore things that are not
+directly based, for example, on counting. That really doesn't work here, right? Because every game
+looks different, so you can't really count the observations because most of them you only see once.
+You could try to come up with intrinsic motivations derived from how much you can predict the future,
+but even that is really difficult in a stochastic environment that's
+procedally generated where you go around a corner and you can't really know what's going to
+be around the corner or in the next angel level because it hasn't been generated yet.
+I think ultimately where we had to get to, and now this is, I kind of, I guess, full circle to
+what I've been doing my PhD on, like, a few years ago, is actually encouraging agents to
+expand their knowledge about the environment dynamics. You as a human, you basically become
+a scientist within this environment. You want to understand, okay, if I take this potion and put
+it together with that potion, what happens, right? Or if I'm, if I'm, you know, if I find this
+wand of digging, can I, you know, maybe dig downwards and fall just through the dungeon levels and
+things like that, like getting almost like a causal understanding of what's going on in this
+environment. So ideally, I think we at some point have agents that just reward themselves by
+discovering something new about the environment dynamics, not so much about actually what happens
+in a specific episode. And going back to what you worked on in your PhD is the implication that
+you think that some kind of knowledge graph is the way you might represent what the agent is learning.
+Yeah, I think, I mean, we're not, like, working on that explicitly right now, but one of the things
+that are, I think, exciting is the environment itself is symbolic. So you don't actually observe
+the pixel, you don't have observed pixels. I mean, you can do that, but you don't have to,
+right? You can actually just take the characters that are on the screen, the ASCII characters,
+and try to represent each symbol, right, using a vector. And then you could, you could basically
+build relatively structured models, neuro symbolic models for that. We haven't done that, but
+but that is an option. Another thing that's interesting about that direction is the fact that there's
+also what's called the Nehag Wiki. This is a basically 3000 document domain-specific Wikipedia
+for the game of Nehag, where humans over decades have been basically collecting all kinds of advice.
+And it's very interesting because it's not like a step-by-step walkthrough that you would normally
+see in some of the kind of video games that people play, right? It's not like a step-by-step that
+tells you, okay, here you have to go left, here you have to collect that item to then be able to do
+this or that. It can't be, right? Because the game is presumably generated, it can only be very
+high-level strategic advice. So how to utilize that for kind of, you know, imbuing agents with a
+lot of prior knowledge in terms of how to explore, or what to do in certain situations, I think,
+is a very interesting direction. Partly also because that Nehag Wiki itself has lots of structure,
+so lots of, you know, names and entities that are linked to each other that you could use in some
+way. And have there been attempts to do that? Not that I know of. So we have this approach that we
+really like sharing these kind of environments and the baselines and our research publicly and openly,
+so we've open sourced on of that people are invited to compete on that environment. We've even
+for this year, organized a Nehag Challenge where we got sponsorship from Facebook, I research in
+and deep mind as well, where we invited both deep reinforcement researches as well as actually
+bot makers. So people try to hand craft solutions for this environment. And we really want to see
+what people come up with. Obviously, we have our own kind of research directions as well, but
+often we use Nehag more for kind of inspiring, you know, problems that we want to work on rather
+than trying to say, okay, we're going to do anything we can do just to beat that game, right? We're
+going to use, you know, hundreds or hundreds of thousands of GPUs to just like try to work for
+our way. We really see it as a generator for kind of problems that are interesting for reinforcement
+research. And we started this conversation talking about trying to provide an alternative platform
+for our research that was less compute intensive than some of the previous things, but it sounds
+like it still can be computationally intense to, you know, set an agent up it to navigate this
+environment. Can you characterize the, you know, is it, you know, hundreds or thousands of GPUs
+required or GPU hours or like what's typically required to train an agent for this environment?
+Yeah. So the environment itself is not the bottleneck. So we can, if you have an extremely
+fast model, you could run this environment for tens of thousands of steps per second with a
+relatively basic, the deep neural network agent, we get to something like 14,000 steps a second
+with the monster we released for nerves. We now have versions of that that run roughly 20,000
+steps a second, 30,000 steps a second. So basically it means with a relatively basic,
+you know, deep RL agent, you can train in this environment for something like one to three
+billion steps a day. That's a lot of interactions. That's basically more interactions than humans
+had with this game, human kind had with this game per day almost. So the environment is really not
+the bottleneck, but once you start creating, you know, bigger and bigger, you know, deep learning
+models, then at some point those become basically the bottleneck. So you basically, you then just have
+to live with the fact that your model itself might require let's say a GPUs, right? And then if you
+want to, if you want to do a hyper parameter sweep or you have multiple, you know, ablations that
+you want to run, then you find yourself, well, n times that, right? But for researcher, I mean,
+you can, I think you can do really exciting research with that environment with just one GPU. That
+was the plan from the, from the get go. You mentioned that the goal of the project isn't so much
+for your team to solve it, but to inspire other research directions or advances. What are some
+examples of those? So, well, one example, we already mentioned right that this is, you know,
+how do we imbue agents with intrinsic motivation to learn to explore and such an environment in a
+somewhat open-ended way, right? I mean, there's so many things to explore. There's so many,
+as I mentioned, hundreds of items and entities to learn to attack with. Another direction is
+learning from demonstrations. So humans have been playing this game for a long time for like three
+decades. And as of, I think two decades ago, they're kind of online web pages where you can play
+the game by SSHing into a server, and you can actually record your game because it's so incredibly
+hard to play that game. Basically, people were interested in getting proof that they actually
+won this game with fair means, right? So, that's part of, of that story. And actually means there are
+five million online recorded games that everyone can have access to. They're hosted on Art.org.
+And an open question is, how can we learn from these kind of human demonstrations? It's very
+tricky because these human demonstrations don't record the actions. So usually in learning from
+demonstrations, we see the states and actions, and then we can do things like behavioral cloning.
+So directly trying to, you know, just mimic basically human policies using supervised learning
+techniques. Here, you can't do that because you only see the observations, not the actions,
+but that's again very interesting, right? It kind of exemplifies a real world problem,
+namely, you observing a third person doing something. And we humans, we can still kind of infer
+from that how we should maybe act, right? With FOA agents that can be relatively tricky. So that's
+another direction. Yet another direction is how can we potentially try to step back out of a
+specific episode and put the agent into a situation where it can experiment with the environment,
+right? Where I give it, you know, think of like something like a holodeck where no, the agent can
+experiment. We, you know, can put certain objects or certain things into that kind of contained,
+you know, simple space. But the agent over time learns to pose itself more and more challenging
+situations. And then ultimately might be able to transfer its knowledge about the environment
+dynamics over to the full game, the actual task, curriculum learning type of direction.
+Yeah, exactly. And so NetHack, this project ultimately led to another project called MiniHack.
+What's that about? Yeah. So MiniHack is going into the direction that I just mentioned.
+The problem with NetHack is you can basically put out a really challenging environment and people
+can start to experiment with it. But the problem becomes that in research, what we often like to do
+is what we like to actually have a specific research question that we want to tackle, which might
+isolate a specific problem of an RL agent, right? In NetHack, you have multiple problems all
+appearing at the same time. I've been touched upon them quite a bit already. What if you now say,
+okay, really, I want to, well, I want to do research on this, but I want to start simple, right?
+I want to have maybe only kind of a few things like I don't want to have even monsters, I don't
+want to have any items. I just want to navigate me as a example, right? Yeah.
+And so that's a common, common, I guess, pattern in AI research. We start really simple,
+get to a proof of concept result, then we start to crank up complexity, right? So how do we smoothly
+move on this kind of spectrum of NetHack super complex and difficult or like, let's say,
+really simple kind of grid world where we have full control over what's going on, right?
+And that led to MiniHack. MiniHack is basically leveraging NetHack to create a sandbox in which
+you can very easily create problems of varying difficulty by tapping into the richness
+of NetHack. The way this works is that NetHack itself has so-called description files.
+So to procedurally generate the game, there are basically, there's a specific language that people
+can use to, you know, create, you know, random rooms and random corridors connecting these rooms.
+They can even, with certain probabilities, specify that certain items or monsters appear somewhere,
+they can sample even, you know, entities from a distribution of monsters or our items.
+They can even draw in ASCII like a level. You can actually sit down and basically type a maze,
+and then you can kind of compile it into NetHack and you get an actual kind of maze to traverse.
+So this kind of domain-specific language is what enabled MiniHack. So it's basically a way
+to create, um, create lots and lots of interesting wheat fostering environments that are more
+contained, but also very easy to extend using that domain-specific language. It's a whole environment
+zoo basically. So when I asked earlier, how many degrees of freedom do you have when you're
+spawning one of these procedurally generated environments? In NetHack, you have your seed,
+but here you basically have an unlimited number of possibilities for creating the environments.
+Can you talk a little bit about, you know, maybe stepping back more broadly, the,
+you know, we talked about curriculum learning earlier. You know, the suggestion with NetHack is,
+you know, maybe you want to train agents to, I guess similar to curriculum learning to focus
+on particular areas and maybe see if those skills generalize other ways. What's the, you know,
+kind of current state or thinking or frontier of curriculum learning and transfer learning
+in the realm of RL? I guess we have, I mean, there's some work that we are focusing on,
+but I think more generally, I guess there's just a question around even what kind of
+generalization we want to see, right? Do we assume we have, you know, a fixed number of tasks
+and we have to, you know, we can sample problems for each of these tasks and we learn over time
+basically to identify when we are on an episode which kind of tasks we're in and then do well.
+The same agent, you know, do we, is the goal for the same agent to play breakout in
+Montezuma's revenge in NetHack? You know, the tasks we're talking about, for example.
+Yeah, that could be, that could be the task, right? You might have all the over 50 games in
+in Atari and you might say clearly there's something to be transferred from learning how to play
+one game over to learning to play a different game and maybe you want to figure out in which kind
+of order you should be presenting these kind of games to a learning agent. But yeah, I think, I mean,
+this, this, it's really tricky, right? Like how do we, how do we test for the kind of generalization
+that we want to test? What are the kind of assumptions that we bake into the kind of curriculum
+method that we that we're developing? In our case, we started off with the assumption that there's
+actually a seat that generates the same kind of world every time we, you know, use that seat.
+I already mentioned in NetHack itself, that's already not possible, but in somewhat more simplified
+environments, for example, open-eye proxjans, benchmark with these 16 different proceed-generated
+games. For each of these games, you can specify a seat and then you're going to have the same kind of,
+let's say, maze or the same kind of, you know, jump and run kind of level. And what we then were
+interested in is can we learn? Because if you sample from these seats, right? You will sometimes
+get really easy levels, things where, you know, the agent has to just step left and has already
+won, right? We'll finish the level. And then there are really, really challenging levels that you
+could, you know, happen to sample. And then there's everything in between, right? So the normal
+approach in our L is to just uniformly sample from these kind of levels, right? Or you could also
+call them tasks, actually, it doesn't really matter at this point. So that's the normal approach.
+What we were interested in is can we learn how to, how to sample these kind of levels in the way
+that we start with the easier ones so that the agent can start to learn certain skills and then
+gradually move over to more and more challenging levels. And this is, this is interesting because
+you basically always want to be at the frontier of what the agent can currently do, right? You don't
+want to present levels that are too easy and not levels that are too hard. You always want to be
+somewhere where the agent doesn't really show whether it's going to do well or not. And we actually
+exploit exactly that property. So in many current early agents, we are using what's called a value
+function to stabilize training. So basically, the agent at every step tries to predict how well it's
+going to do in the remainder of the episode and actually turns out we can use that value function
+to estimate a value error. So basically, that's a discrepancy between what the agent thought,
+how well it's going to do and then how well it actually did. And now if you think about it, right?
+That for kind of setups, there's you think you're doing really poorly and you'll do really
+poorly. So that's not interesting because you basically just realize you're in a really tough
+situation. You think you're going to do really well and you're actually doing really well. Again,
+that's not very interesting because that's way too easily. But the other two are interesting. So
+you think you're going to do really well and you did really poorly or you think you're going to do
+really poorly and you actually did really well. So these are the kind of levels or configurations
+that help you if you were to replay the level in the future again and try to learn from it,
+that actually helps you to actually learn something. And this is this approach is called
+practice. Every play we it has level in the name, but actually it's more general in that any kind
+of environment where you have a configuration that you can reset to, you can apply that approach.
+So if you think about, for example, a robot simulator where you have certain blocks that need
+to be stacked and they blocks are arranged in front of the robot, right? That kind of arrangement
+is a configuration you could specify that by a seed and you could apply that approach.
+It's analogous to an active learning kind of scenario where you're trying to provide some signal
+into the training process for where you have the opportunity to gain most new information.
+Yeah, exactly. Okay. And going further now, this is a paper that we just got accepted at NUREPS,
+we can actually turn that into a approach for what's called uncivilized environment design.
+So an uncivilized environment design, you basically separate your agent into kind of two agents,
+one that's the student that learns basically to do an episode and the basically agent you
+at the end of the day care about because that's the agent you're going to use to then test whether
+it's any good. And another agent, a teacher agent, and that teacher agent is basically trying to
+generate problems. It's generating actual, you know, levels or environments. And it turns out,
+if you actually not really treat that as an agent, but you just randomly sample from your
+procedurally generated kind of environment design space, you just randomly sample seats.
+And you rank them or you basically filter them by the learning potential for the current
+student's policy, then over time, the levels that you keep, the levels that you actually use for
+training student, they will gradually become more difficult and more difficult and more difficult.
+And basically through that kind of complexity increase, you see very interesting problems,
+you know, emerging through that process, as well as you see a student that's actually very strong
+at at the end of the day, generalizing to held out handcrafted problems. So what we call it,
+we call that usually zero shot generalization. So taking taking that agent into a complete new
+situation, see how it does. And can you or how can you predict the learning potential for a given seed
+before the agent has attempted the seed? We talked about it previously. It was the difference
+between their results. They're expected outcome and their actual outcome. Yeah. So you can't.
+So you have to play at once. And then when you've done it once, you basically have a score for
+that kind of level in terms of the learning potential for presenting it again in the future.
+And you keep that in the buffer now. Basically, at every time step, the student agent,
+and either sample, it's basically completely new level, right, from just your seed, or samples,
+one of the levels from the buffer and uses that to train. Okay. And then
+ultimately, you're trying to drive with this adversarial approach by greater training
+efficiency and converging on successful agents more quickly. Yeah. And what kind of results have
+you seen in applying the technique? So the, the things that we did was we started again,
+very simple, right? I mean, again, I mentioned this comes back from our focus. You can say,
+here's a super complex environment. And here are like more kind of toyish grid worlds.
+We started with the grid worlds and we trained agents to basically generate
+mazes and then student ages to navigate these mazes. That itself is not a super interesting problem
+because you could just code up a symbolic agent that is really good at traversing mazes.
+But it presents an interesting challenge for reinforcement learning because you only get
+the what when you finish the maze, right? And depending on how big your maze becomes,
+this is very, very tricky. And so now we have this kind of process, you know, that's generating,
+the teacher generating or crew rating. Basically, that's how we call it crew rating levels for
+student to learn. And then you actually see over time, the kind of levels that are kept to train
+the student agent, they become quite complex. They have quite interesting structure that resembles
+to some extent actual mazes. So now the student learns in that and then we take it out of that kind
+of space and actually presented with handcrafted quite tricky mazes and we see how well the student
+doesn't these. And actually, we do see quite quite strong zero shot generalization to these kind
+of held out problems. So just to be very clear, this is really kind of out of domain generalization
+in that these kind of handcrafted levels were not within the distribution of the levels that
+you would normally see during training, right? So that's that's a kind of interesting bit. And then
+we thought, okay, if that works for mazes, maybe we can also do this in a continuous control
+environment. So we actually moved over to to the car racing and we let the teacher to basically
+over time generate formula one tracks. I mean, non actual formula one tracks, but basically
+racetracks. And we have this student kind of trying to get through this as quickly as possible.
+And then we again have held out handcrafted racetracks, namely actual formula one tracks
+and see how well the student can generalize to these kind of unseen tracks. So in both cases,
+we see a strong generalization performance. Got it, got it. And when you say the the handcrafted
+maps are out of distribution, how far out of distribution or are they out of distribution in any
+particular ways? Are they more complex? Are they do they have different features?
+Oh, yeah. So they have more blocks. They have more structure in the kind of, you know, levels you
+get by just randomly sampling basically blocks on a on a on a map, right? You you're not necessarily
+getting a lot of really complicated structure. But we have like mazes where you have a labyrinth
+for example, or you have mazes where you have lots of different kind of corridors and you have to
+basically check each of them and you have to backtrack what you have to memorize where you already
+been. And and these were the kind of held out mazes. I don't have a quantification of how much
+out of distribution they are, but basically on you look at the paper and you you eyeball basically
+up here are the randomly generated ones. Here the handcrafted ones should see a very notable
+difference. Got it, got it. And then what's next? What what what research directions? You know,
+we've talked about several potential directions. What are you most excited about in terms of building
+on this foundation? So one of the things I'm very excited about is this this space of unsupervised
+environment design. I think we as a field only started to scratch the service of that. And then
+you know, ideal world in the next kind of few years we have, I think, very interesting AI
+systems that really can create very complex rich, you know, interesting, you know, whole worlds,
+right? I mean, not just like 2D mazes, but you know, imagine kind of, you know, 3D Minecraft
+environments, right? And we had then have also students student agents that learn to do very
+interesting complex stuff in these environments. I think that would be something that would be very
+exciting, but I think it requires a lot of additional work in that you need to basically,
+I think, overtime compound complexity, right? If you were to design a level for me, I don't think
+you would just randomly or like just with one kind of stroke sketch one, right? You would actually
+start somewhere and then develop it slowly over time. You would test it out, right? See what
+actually a student now does in the level. And then depending on whether it does really well or
+poorly, you would start to, I guess, refine it a bit. So I think there's lots of stuff to be
+to be done in that space. And there's some, one of the things I'm very excited about.
+The other thing I'm excited about is I guess more ways to intrinsically motivate agents as we
+discussed earlier, right? How do we make sure agents just get excited about expanding and knowledge
+about certain dynamics in the environment? Really some kind of open-ended process that just
+allows the agent to explore all kinds of things in the environment, becoming basically a scientist
+within such a simulated environment. That's something that's also very exciting to me.
+And then I think also just looking more for applications in other domains and environments.
+I think one of the things that we really want to, I guess, be able to do is develop
+methods that are of somewhat general nature, right? That's where we care about, can we start in
+a grid world with discrete actions, but does it also work in a continuous control environment,
+right? So this is, I think, very, very important. Likewise, I think it's very important for us as a
+field to be very explicit about the kind of simplifying assumptions that are baked into some of the
+environments that we use for research. And I think mapping that out in a bit more structured way
+would be very useful as well. Awesome. Also, sorry, just on the environmental line aspect, I mean,
+we talked about how it's useful to train like student agents that then generalize.
+I think that's also something interesting, maybe going forward, where we also make sure that these
+kind of levels might be interesting to a human, right? I'm not really sure how do we quantify that,
+but that could be a nice side effect, right? How do we create more and more engaging content
+for human players in some of these kind of environments? Right. Right. Awesome. Awesome.
+Well, Tim, thanks so much for joining us and sharing a bit about what you're working on.
+Yeah, thanks so much. I really was really excited in the discussion. Thanks. Thank you.

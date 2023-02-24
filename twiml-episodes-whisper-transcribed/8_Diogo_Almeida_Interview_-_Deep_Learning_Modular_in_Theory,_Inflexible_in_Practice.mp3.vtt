@@ -1,0 +1,2015 @@
+WEBVTT
+
+00:00.000 --> 00:16.060
+Hello and welcome to another episode of Twimmel Talk, the podcast where I interview
+
+00:16.060 --> 00:21.640
+interesting people doing interesting things in machine learning and artificial intelligence.
+
+00:21.640 --> 00:25.480
+I'm your host Sam Charrington.
+
+00:25.480 --> 00:29.480
+The recording you're about to hear is part of a series of interviews I recorded live
+
+00:29.480 --> 00:34.520
+from the O'Reilly AI and Stratoconferences in New York City last month.
+
+00:34.520 --> 00:38.520
+I'll be sharing these interviews on the podcast over the next several weeks and I'm sure
+
+00:38.520 --> 00:40.880
+you'll enjoy them.
+
+00:40.880 --> 00:46.160
+This time I interview Diogo Almeida, senior data scientist at healthcare startup and
+
+00:46.160 --> 00:47.680
+LITIC.
+
+00:47.680 --> 00:52.400
+Diogo and I met at the AI conference where we delivered a great presentation on in the
+
+00:52.400 --> 01:01.000
+trenches deep learning titled deep learning modular in theory inflexible in practice.
+
+01:01.000 --> 01:07.040
+Diogo and I discussed the ideas he presented which are centered on the data, software,
+
+01:07.040 --> 01:12.400
+optimization and understanding issues surrounding deep learning.
+
+01:12.400 --> 01:18.200
+Diogo is also a past first place Kaggle competition winner and we spend some time discussing
+
+01:18.200 --> 01:22.880
+the competition he competed in and the approach he took to win it.
+
+01:22.880 --> 01:25.760
+Before we jump in, a bit of a listener warning.
+
+01:25.760 --> 01:29.400
+Our conversation gets pretty technical pretty quickly.
+
+01:29.400 --> 01:34.120
+I do try to make sure to summarize key points from time to time and I really think that
+
+01:34.120 --> 01:37.280
+if you hang in there, I'm sure you'll learn a ton.
+
+01:37.280 --> 01:41.480
+Of course, let me know how you like this level of detail.
+
+01:41.480 --> 01:45.480
+I'll be including links to Diogo and a bunch of the data sets and other things that we
+
+01:45.480 --> 01:53.640
+discuss in the show notes, which you can find at twimmolai.com slash talk slash eight.
+
+01:53.640 --> 01:58.380
+Also as is the case with my other field recordings, there's unfortunately a bit of unavoidable
+
+01:58.380 --> 02:01.360
+background noise, sorry for that.
+
+02:01.360 --> 02:04.120
+And now on to the show.
+
+02:04.120 --> 02:11.040
+Alright, hey everyone, I'm here at the O'Reilly AI conference and I'm sitting with Diogo
+
+02:11.040 --> 02:16.080
+Almeida, who just did a really interesting talk on deep learning and he was kind enough
+
+02:16.080 --> 02:21.120
+to sit down with us and talk a little bit about what he talked about.
+
+02:21.120 --> 02:23.320
+Diogo, why don't you introduce yourself?
+
+02:23.320 --> 02:24.320
+Cool.
+
+02:24.320 --> 02:25.320
+I'm Diogo Almeida.
+
+02:25.320 --> 02:30.760
+I work at this super cool medical deep learning startup where we work on giving like really
+
+02:30.760 --> 02:35.600
+accurate, really fast, really safe medical diagnoses and this is something we hope will completely
+
+02:35.600 --> 02:38.080
+change the world.
+
+02:38.080 --> 02:41.360
+Before that, in past life, I was a math lead.
+
+02:41.360 --> 02:45.600
+So I broke a 13 year losing streak for the Philippines in the international math Olympiad
+
+02:45.600 --> 02:52.680
+was in the top team in the world at the interdisciplinary competition in modeling and there's a website
+
+02:52.680 --> 02:57.080
+for machine learning competitions called Kaggle that I won first place on in one competition
+
+02:57.080 --> 02:58.080
+as well.
+
+02:58.080 --> 02:59.080
+What was that?
+
+02:59.080 --> 03:03.760
+This was in 2013 because the cause effect bears challenge.
+
+03:03.760 --> 03:04.760
+Tell us about that.
+
+03:04.760 --> 03:10.240
+Oh, it's just a very weird challenge where in most machine learning, you have like tabular
+
+03:10.240 --> 03:11.240
+data.
+
+03:11.240 --> 03:15.520
+So you know, like you have columns of features, rows of observations.
+
+03:15.520 --> 03:20.200
+And in this problem, your data was pairs of sequences.
+
+03:20.200 --> 03:24.760
+So you have something like altitude and like one observation is like altitude and height
+
+03:24.760 --> 03:30.320
+and you have like a pair of, sorry, a sequence of pairs of like which altitudes correspond to
+
+03:30.320 --> 03:32.680
+which heist in some unordered manner.
+
+03:32.680 --> 03:38.000
+The idea was given this, you're supposed to predict whether altitude is causes height
+
+03:38.000 --> 03:40.240
+or height, sorry, the altitude and height were the same thing.
+
+03:40.240 --> 03:41.600
+I meant altitude and temperature.
+
+03:41.600 --> 03:42.600
+Right.
+
+03:42.600 --> 03:45.800
+So you're supposed to predict if altitude causes temperature, it causes altitude and obviously
+
+03:45.800 --> 03:48.760
+that altitude causes temperature right for us.
+
+03:48.760 --> 03:54.360
+But there's a lot of like very complicated tasks that we don't know the answer to and
+
+03:54.360 --> 03:58.720
+it's kind of like the basic task is to, if you know the saying correlation doesn't apply
+
+03:58.720 --> 04:01.880
+causation, it's supposed to do the opposite of that.
+
+04:01.880 --> 04:06.680
+You're supposed to figure out how the correlation implies causation, which is, it's extremely
+
+04:06.680 --> 04:08.800
+useful because you have like lots and lots of observational data.
+
+04:08.800 --> 04:09.800
+Right.
+
+04:09.800 --> 04:11.320
+It's very hard to have like a controlled study.
+
+04:11.320 --> 04:15.560
+So the more accurate we can get a view of the world from purely observational data,
+
+04:15.560 --> 04:21.920
+the more we can either have informed priors before running the control study or figure out
+
+04:21.920 --> 04:24.200
+how to order the controlled study in an appropriate way.
+
+04:24.200 --> 04:25.200
+Okay.
+
+04:25.200 --> 04:30.600
+And this is also the kind of analysis you would use for like a root cause analysis or something
+
+04:30.600 --> 04:33.800
+in like an IOT use case where you've got all these observations and you're trying to
+
+04:33.800 --> 04:36.800
+figure out what the underlying condition is or.
+
+04:36.800 --> 04:40.360
+I'm not as familiar with that.
+
+04:40.360 --> 04:46.400
+There are, there was traditional statistical work and there actually was a background for
+
+04:46.400 --> 04:50.360
+this topic, but I kind of didn't pay much attention to that because I kind of went my
+
+04:50.360 --> 04:54.400
+own way and it was much more for fun than for winning.
+
+04:54.400 --> 04:58.520
+And winning was a very nice side effect.
+
+04:58.520 --> 05:04.840
+And I went through a much more like software oriented way of just like build a really
+
+05:04.840 --> 05:10.000
+complicated powerful model and have it solve this based on like rather than like hand
+
+05:10.000 --> 05:11.320
+engineering stuff.
+
+05:11.320 --> 05:16.040
+Why not just like automatically engineer a lot of informative variables and then solve
+
+05:16.040 --> 05:17.040
+it with that.
+
+05:17.040 --> 05:18.040
+Okay.
+
+05:18.040 --> 05:24.200
+So can you walk us through the process like how do you, how did you formulate a methodology
+
+05:24.200 --> 05:25.200
+for attacking them?
+
+05:25.200 --> 05:28.280
+Was this your first Kaggle competition or had you been doing that for a while?
+
+05:28.280 --> 05:29.280
+My first serious one.
+
+05:29.280 --> 05:33.440
+I've done like one or two before that I didn't really like really spend much time on.
+
+05:33.440 --> 05:36.440
+But like you know you quit like after two days because it turns out your teammates were
+
+05:36.440 --> 05:39.040
+in useful or something like that.
+
+05:39.040 --> 05:44.160
+So I have like played with it before but I've never really gone all out until this one.
+
+05:44.160 --> 05:49.120
+So my methodology was, well some background is that there are like statistical tests that
+
+05:49.120 --> 05:55.880
+people use that did very well in this task and or sorry that people used to use in this
+
+05:55.880 --> 06:00.680
+task and put it roughly in perspective these got like 0.6ish AUC.
+
+06:00.680 --> 06:04.840
+So if you see a paper in nature science about a new test for causality it probably gets
+
+06:04.840 --> 06:05.840
+around 0.6ish AUC.
+
+06:05.840 --> 06:06.840
+Okay.
+
+06:06.840 --> 06:10.720
+AUC for those that don't know is the area under the curve and that's a performance metric.
+
+06:10.720 --> 06:11.720
+Yeah.
+
+06:11.720 --> 06:16.280
+So we were solving a ranking problem or we were trying to rank the outputs given that we
+
+06:16.280 --> 06:20.600
+know which ones were, which ones caused each other to a little bit of complicated metric
+
+06:20.600 --> 06:22.720
+because we actually had three output classes.
+
+06:22.720 --> 06:26.840
+So we did like a bidirectional AUC but that doesn't really matter much.
+
+06:26.840 --> 06:30.840
+And so these tests we did like 0.6ish they're roughly a single feature because it's just
+
+06:30.840 --> 06:34.320
+the prediction you extracted directly from the data.
+
+06:34.320 --> 06:40.480
+The most of the other competitors in like the top 10 had you know tens of features or
+
+06:40.480 --> 06:46.560
+something like that and the second place where I think had like a whooping like 100 something
+
+06:46.560 --> 06:47.560
+features.
+
+06:47.560 --> 06:48.560
+Okay.
+
+06:48.560 --> 06:58.040
+I had 50,000 so what I did was I found like a very simple way of determining causality
+
+06:58.040 --> 07:05.960
+which would be the rationale would be if x causes y then y is a function of x you know
+
+07:05.960 --> 07:07.880
+there's noise in there somewhere.
+
+07:07.880 --> 07:13.160
+So roughly you can tell how good one is a function of the other based on how well they
+
+07:13.160 --> 07:15.720
+can be approximated by functions.
+
+07:15.720 --> 07:21.000
+And this is kind of like a very vague like recipe for how to create these features but the
+
+07:21.000 --> 07:25.320
+idea is rather than you know hard coding statistical tests like you know like add a Gaussian
+
+07:25.320 --> 07:29.840
+integrate this thing out whatever I just figure that we have an entire field of curve fitting
+
+07:29.840 --> 07:34.720
+which is called machine learning right and these are often like built after natural like
+
+07:34.720 --> 07:36.360
+very natural priors.
+
+07:36.360 --> 07:40.320
+So the idea would be try like a ton of machine learning algorithms all of the ones that were
+
+07:40.320 --> 07:41.840
+computationally feasible.
+
+07:41.840 --> 07:47.440
+Try a different metrics for what fit means because fit is it's it's kind of like a not like
+
+07:47.440 --> 07:52.720
+a very exact term and like throw like these are all the features now throw them all into
+
+07:52.720 --> 08:01.240
+like big boost decision tree train this thing for a week on like a 50 core machine and
+
+08:01.240 --> 08:07.320
+then you know take a nap the entire time so that was roughly my solution.
+
+08:07.320 --> 08:14.520
+Wow and so the solution was was primarily based around the boosted decision tree as opposed
+
+08:14.520 --> 08:21.200
+to some super complex ensemble or something like that actually it's a weird story that
+
+08:21.200 --> 08:26.520
+for this competition I was so far ahead for almost all the competition I didn't even
+
+08:26.520 --> 08:27.520
+try.
+
+08:27.520 --> 08:35.960
+So the what was it like for basically everything beyond the last week like yep like maybe
+
+08:35.960 --> 08:39.240
+a month or a month and a half before I even started the competition late I was like
+
+08:39.240 --> 08:43.240
+so far ahead that the gap between like me and second place was like the equivalent of
+
+08:43.240 --> 08:46.280
+like you know second and like 50 and there's something like that.
+
+08:46.280 --> 08:49.960
+So I was like feeling really confident and I actually stopped paying attention to this
+
+08:49.960 --> 08:54.480
+because I felt that like oh this is going to be easy right.
+
+08:54.480 --> 08:57.720
+But then during the last week you know someone you know people started sharing their solutions
+
+08:57.720 --> 09:03.360
+like I only got 10 or something here the features I used in all of a sudden like everyone
+
+09:03.360 --> 09:08.080
+started rising and this is definitely basically by creating ensembles of everyone's
+
+09:08.080 --> 09:12.240
+everyone's a solution like people like Lee kind of hinted at what I think it was only
+
+09:12.240 --> 09:14.960
+one person but like they had like a lot of good stuff in there that other people started
+
+09:14.960 --> 09:15.960
+using.
+
+09:15.960 --> 09:19.440
+And once people were getting performance they like make more of it or something like that.
+
+09:19.440 --> 09:24.600
+So people are starting to rise right and like I didn't have even ensemble this far and
+
+09:24.600 --> 09:29.160
+I unfortunately had a model that took out like a week to train like I said so and I only
+
+09:29.160 --> 09:31.240
+had a one week left for the competition.
+
+09:31.240 --> 09:38.280
+So I decided that I tried like a few last minutes attempts at ensembling but nothing beat
+
+09:38.280 --> 09:41.520
+my like my super big one week long model.
+
+09:41.520 --> 09:44.960
+And so I just stuck with that thing and that ended up actually winning and it actually
+
+09:44.960 --> 09:50.920
+was very scary because people ended up passing me on the training on the validation leader
+
+09:50.920 --> 09:51.920
+board.
+
+09:51.920 --> 09:52.920
+Yeah.
+
+09:52.920 --> 09:56.040
+But in test leader board it was like it was completely flipped because by they overfit
+
+09:56.040 --> 10:00.000
+yeah they like they had like hundreds of submissions while like my best submission was
+
+10:00.000 --> 10:05.760
+like my sub 10th because like it was a very like hands off competition for me.
+
+10:05.760 --> 10:13.320
+I cared about it a lot and I like I wrote like lots of software that was I thought nice
+
+10:13.320 --> 10:17.320
+but like I was really I really really thought that would have been like an absolute slam
+
+10:17.320 --> 10:18.320
+down.
+
+10:18.320 --> 10:19.320
+Okay.
+
+10:19.320 --> 10:20.320
+So it's exciting though.
+
+10:20.320 --> 10:21.320
+Okay.
+
+10:21.320 --> 10:25.680
+So where did the 50,000 features come from?
+
+10:25.680 --> 10:29.640
+So you can imagine like exponential growth when you're just trying like every combination
+
+10:29.640 --> 10:31.160
+of this with every combination of this.
+
+10:31.160 --> 10:32.160
+Yep.
+
+10:32.160 --> 10:35.760
+There was like every combination of metric that I can think of every combination of machine
+
+10:35.760 --> 10:38.960
+learning algorithm that was like computationally tractable.
+
+10:38.960 --> 10:43.280
+There was like symmetric features so you could like augment your thing with like difference
+
+10:43.280 --> 10:48.120
+features because like it doesn't matter which extra bias right.
+
+10:48.120 --> 10:53.880
+There was a a nuanced thing that I don't normally explain when I talk about the competition
+
+10:53.880 --> 10:59.280
+which is not all of the input was numerical some of it was categorical.
+
+10:59.280 --> 11:02.720
+And like it you just can't like throw categorical data into a numerical algorithm right.
+
+11:02.720 --> 11:03.720
+Right.
+
+11:03.720 --> 11:04.720
+So it becomes actually a complicated problem.
+
+11:04.720 --> 11:07.640
+How do you compare numerical different ways of calibrating your bands or something like
+
+11:07.640 --> 11:08.640
+that?
+
+11:08.640 --> 11:12.280
+Well, I mean you can it's very easy to convert numerical to categorical but you lose a lot
+
+11:12.280 --> 11:13.800
+of information from that drive.
+
+11:13.800 --> 11:19.960
+So what I did was I did different ways of converting from like like this is like a categorical
+
+11:19.960 --> 11:21.880
+numerical pair metric.
+
+11:21.880 --> 11:27.400
+So this stuff like compare you know compute sorry convert numerical to categorical via
+
+11:27.400 --> 11:29.840
+like clustering or binning or something right.
+
+11:29.840 --> 11:33.280
+And then you know when you want to convert categorical to numerical you do something like
+
+11:33.280 --> 11:39.880
+the PCA you know like get the first principle components or something like that or projection
+
+11:39.880 --> 11:41.760
+to the first principle components.
+
+11:41.760 --> 11:44.360
+And I basically are just looping through all of these things.
+
+11:44.360 --> 11:48.280
+So you can imagine like a lot of less before loops and the end I had a bunch of them.
+
+11:48.280 --> 11:51.080
+So like that ended up with like 50,000 ish.
+
+11:51.080 --> 11:55.920
+And I also skipped a detail there which is I also used a feature selection algorithm in
+
+11:55.920 --> 11:59.960
+Earth like make it a little bit smaller, which help performance a bit but it ended up not
+
+11:59.960 --> 12:00.960
+being important.
+
+12:00.960 --> 12:04.760
+So I usually am it but for the sake of clarity that was also done.
+
+12:04.760 --> 12:05.760
+Okay.
+
+12:05.760 --> 12:06.760
+Okay.
+
+12:06.760 --> 12:07.760
+Wow.
+
+12:07.760 --> 12:08.760
+That sounds pretty cool.
+
+12:08.760 --> 12:10.760
+And now that was a little bit of a digression.
+
+12:10.760 --> 12:11.760
+Yeah.
+
+12:11.760 --> 12:12.760
+Complete digression.
+
+12:12.760 --> 12:13.760
+Yeah.
+
+12:13.760 --> 12:15.160
+Interesting story though.
+
+12:15.160 --> 12:16.160
+Yeah.
+
+12:16.160 --> 12:17.160
+Absolutely.
+
+12:17.160 --> 12:18.160
+Absolutely.
+
+12:18.160 --> 12:19.680
+It's actually generalized to new problems as well.
+
+12:19.680 --> 12:23.760
+I believe the competition organizer was applying it to some sort of biology problems and
+
+12:23.760 --> 12:26.160
+they were showing that they'd actually predict causality in that as well.
+
+12:26.160 --> 12:27.160
+Oh really?
+
+12:27.160 --> 12:31.720
+So yeah, hopefully that kind of thing could be really useful.
+
+12:31.720 --> 12:32.720
+Oh nice.
+
+12:32.720 --> 12:33.720
+Nice.
+
+12:33.720 --> 12:36.120
+But what you were talking about here was deep learning.
+
+12:36.120 --> 12:37.120
+Yeah.
+
+12:37.120 --> 12:38.880
+And it was not deep at all.
+
+12:38.880 --> 12:42.560
+And I didn't catch all of your talk.
+
+12:42.560 --> 12:44.440
+I caught the last bit of it.
+
+12:44.440 --> 12:50.160
+But it seemed like what you were going through was kind of a bunch of war stories lessons
+
+12:50.160 --> 12:56.000
+learned like, you know, you hear a lot about deep learning, you know, but there are a lot
+
+12:56.000 --> 13:00.400
+of things that people broadly believe about deep learning that actually are false.
+
+13:00.400 --> 13:06.160
+And why don't you explain kind of what your intent was for the talk and kind of walk
+
+13:06.160 --> 13:09.160
+us through, you know, an overview of what you're presenting.
+
+13:09.160 --> 13:10.160
+Cool.
+
+13:10.160 --> 13:13.800
+So the way I see it is like there's these two competing these views on deep learning,
+
+13:13.800 --> 13:18.200
+like extreme views, which is deep learning will solve all our problems and deep learning
+
+13:18.200 --> 13:19.200
+is complete garbage.
+
+13:19.200 --> 13:23.240
+Sorry, it's all hype, kind of exaggeration, but maybe for exaggerating views, you can
+
+13:23.240 --> 13:24.240
+say that.
+
+13:24.240 --> 13:27.640
+And there's evidence for each of these views, you know, like there's some amazing results
+
+13:27.640 --> 13:28.640
+of deep learning.
+
+13:28.640 --> 13:31.280
+There's some made like extremely poor results on deep learning.
+
+13:31.280 --> 13:32.280
+Right.
+
+13:32.280 --> 13:35.320
+And the idea is that like these are not as informative of the stuff in the middle.
+
+13:35.320 --> 13:38.280
+So the idea is like you draw all of this evidence in like this one dimensional plane.
+
+13:38.280 --> 13:39.280
+Yeah.
+
+13:39.280 --> 13:42.480
+And you like try to like draw like a max margin hyper plane.
+
+13:42.480 --> 13:45.320
+You might get like you this interesting decision boundary because like this is where the
+
+13:45.320 --> 13:46.320
+interesting stuff lies.
+
+13:46.320 --> 13:49.560
+Like this is stuff that's going to be moving slowly over time if deep learning is doing
+
+13:49.560 --> 13:50.560
+well, right?
+
+13:50.560 --> 13:55.200
+Or the other way if people are starting to like find all sorts of failure cases.
+
+13:55.200 --> 14:00.480
+And the idea would be if we talk about like these examples and like the edges of our understanding
+
+14:00.480 --> 14:04.520
+or the edges of our everything or like edges of you know, like all the things that are limiting
+
+14:04.520 --> 14:09.560
+deep learning nowadays and like keeping us from solving all of our dreams, that can hopefully
+
+14:09.560 --> 14:14.280
+give people an impression of like what everything else is like because it's like just very extreme
+
+14:14.280 --> 14:15.600
+on the other end to this spectrum.
+
+14:15.600 --> 14:20.360
+And I feel like that's just not very much talked about because like you said, like a lot
+
+14:20.360 --> 14:25.120
+of people are on the deep learning hype drain or kind of being sad at home and like being
+
+14:25.120 --> 14:31.840
+grumpy because now all of the all of the questioners are silent stride.
+
+14:31.840 --> 14:37.280
+So if we kind of map out what the corner cases are and the failure mose and things like
+
+14:37.280 --> 14:40.840
+that to help us push forward our understanding of this thing is the basic premise.
+
+14:40.840 --> 14:41.840
+Yeah.
+
+14:41.840 --> 14:44.960
+And kind of like acknowledging it also helps.
+
+14:44.960 --> 14:48.720
+I don't think what I did was the greatest acknowledgement of it, but I think it was a
+
+14:48.720 --> 14:55.200
+more thorough one than I've seen before and realistic especially in that I think that
+
+14:55.200 --> 15:01.040
+sometimes just understanding your problem really well really helps you to solve that problem.
+
+15:01.040 --> 15:08.000
+So I know now that I mean like I do research as well and the stuff's very important to
+
+15:08.000 --> 15:09.520
+me.
+
+15:09.520 --> 15:14.720
+And by looking at it from like a kind of a higher level, I can kind of see better like
+
+15:14.720 --> 15:19.240
+this seems like something that looks really promising to me or this doesn't seem promising
+
+15:19.240 --> 15:20.240
+at all.
+
+15:20.240 --> 15:21.240
+Right.
+
+15:21.240 --> 15:25.840
+Like for example, one of the problems with deep learning nowadays is everything's very
+
+15:25.840 --> 15:26.840
+local.
+
+15:26.840 --> 15:27.840
+Right.
+
+15:27.840 --> 15:31.480
+Like you get local and what's that use the gradient, right?
+
+15:31.480 --> 15:38.960
+Or maybe higher order driven things, but they for practical purposes use the gradient
+
+15:38.960 --> 15:45.520
+and this can be insufficient for some applications, right?
+
+15:45.520 --> 15:49.920
+Going to a higher level, maybe it can start with a lower level, right?
+
+15:49.920 --> 15:53.880
+Like S3D doesn't work for my spatial transformer network.
+
+15:53.880 --> 15:54.880
+This is unfortunate.
+
+15:54.880 --> 15:58.840
+Like, let me try Adam, let me try RMS prop, but if you go to a higher level, you realize
+
+15:58.840 --> 16:02.520
+that the problem is the local learning, the spatial transformer network, not necessarily
+
+16:02.520 --> 16:03.520
+the gradient descent.
+
+16:03.520 --> 16:08.800
+So to tell us about spatial transformer networks, yeah, so this is just one example I
+
+16:08.800 --> 16:14.840
+use of a kind of network that it's very easy to see the issues of local learning with.
+
+16:14.840 --> 16:17.120
+It's very nice because it's a, it's a differentiable network.
+
+16:17.120 --> 16:21.120
+It's very easy to see exploration problems in reinforcement learning domains, but this
+
+16:21.120 --> 16:27.720
+is one that you have a derivative of and it should be easier to optimize and it is, but
+
+16:27.720 --> 16:33.160
+you sometimes don't get what exactly you, it doesn't like fulfill its full potential.
+
+16:33.160 --> 16:38.360
+So are you kind of seeing that there are a lot of people coming into the space that,
+
+16:38.360 --> 16:42.280
+you know, that, you know, try to throw deep learning at a given problem.
+
+16:42.280 --> 16:47.160
+The common way of solving it is using stochastic gradient descent and they don't really think
+
+16:47.160 --> 16:52.160
+about, you know, how that's working and that it's, you know, finding a local optimization
+
+16:52.160 --> 16:55.920
+and there are some problems that, you know, for which they get kind of stuck in that local
+
+16:55.920 --> 16:56.920
+and...
+
+16:56.920 --> 16:58.160
+That is unfortunately the case.
+
+16:58.160 --> 17:02.720
+Like, I have seen many people introduce to deep learning who think that let's stitch
+
+17:02.720 --> 17:06.760
+together an architecture that's differentiable, you know, bingo, bingo, call it a day.
+
+17:06.760 --> 17:08.920
+They've like solved problem X, right?
+
+17:08.920 --> 17:17.600
+Like, they realize the limitations of requiring large data sets, but they think that that's
+
+17:17.600 --> 17:18.600
+what it amounts to.
+
+17:18.600 --> 17:21.600
+And I think often, very often times, it doesn't.
+
+17:21.600 --> 17:26.440
+So back to spatial transformer networks, what they are is basically, instead of like a single
+
+17:26.440 --> 17:29.960
+network that learns how to classify an image, you have two networks.
+
+17:29.960 --> 17:33.680
+One of them learns which part of the image to look at and the other part takes what
+
+17:33.680 --> 17:37.600
+that network looked at and does the classification on it.
+
+17:37.600 --> 17:41.920
+And this is a huge advantage because a lot of the times your input image might be really
+
+17:41.920 --> 17:45.120
+large and you don't want to run the network overall, all of it.
+
+17:45.120 --> 17:48.600
+It might have like unnecessary information.
+
+17:48.600 --> 17:52.280
+It might be really useful to like, co-localize, so like, have the where as well as the
+
+17:52.280 --> 17:53.280
+what.
+
+17:53.280 --> 17:57.600
+So there's really good reasons to use this and in fact, for medical problems, if it worked
+
+17:57.600 --> 17:59.040
+well, I would use it for everything.
+
+17:59.040 --> 18:01.880
+Number one, the number two is if it worked well, I would use it for every computer vision
+
+18:01.880 --> 18:02.880
+problem.
+
+18:02.880 --> 18:06.600
+Because what these spatial transformer networks can do is not only find the region, but it
+
+18:06.600 --> 18:11.480
+can also transform the region into a canonical location.
+
+18:11.480 --> 18:15.880
+So rather than having to learn filters of like cats at every orientation, you might have
+
+18:15.880 --> 18:20.000
+to learn filters of cats at only one orientation, which like would reduce and result in like
+
+18:20.000 --> 18:24.000
+much better data and parameter efficiency.
+
+18:24.000 --> 18:29.320
+But back to the issue here is that you have these two networks that are, they're not competing,
+
+18:29.320 --> 18:34.040
+but they're working together, but they're only using the current network, the current
+
+18:34.040 --> 18:37.680
+other network as its source of signal basically.
+
+18:37.680 --> 18:42.040
+So if your classification network gets really good early on in training, your localization
+
+18:42.040 --> 18:43.720
+network gets stuck in this optimal, right?
+
+18:43.720 --> 18:47.160
+Because like if it changes anything at least a little bit, your classification network
+
+18:47.160 --> 18:48.160
+will do worse.
+
+18:48.160 --> 18:51.880
+So like the gradient tells it like, hey, hey, just stay where you are, you're pretty good
+
+18:51.880 --> 18:54.080
+or move you all around the small region, right?
+
+18:54.080 --> 18:56.400
+Which might be very far from the intended purpose, right?
+
+18:56.400 --> 18:59.960
+Like correctly like zooming all the way into the thing you care about and like rotating
+
+18:59.960 --> 19:01.240
+it a lot.
+
+19:01.240 --> 19:06.640
+And on the other hand, if the spatial transformer network converges early, so imagine the classification
+
+19:06.640 --> 19:12.120
+network is garbage, it might zoom into like regions of the image that are just independent
+
+19:12.120 --> 19:15.160
+of the class, but makes the classification network tends to perform a little bit better
+
+19:15.160 --> 19:16.440
+on.
+
+19:16.440 --> 19:21.080
+So it might like, for example, if you're trying to classify kinds of dogs or like image
+
+19:21.080 --> 19:26.640
+net, and it turns out like your classifier starts out like just being good at telling
+
+19:26.640 --> 19:30.920
+grass means dog, and the localizer notices and like just zooms into the grass, right?
+
+19:30.920 --> 19:32.840
+Like those zooms in, zoom grass.
+
+19:32.840 --> 19:35.000
+And basically you've cut the dog out of the image.
+
+19:35.000 --> 19:38.360
+And the moment you've cut the dog out of the image, you get no gradient signal.
+
+19:38.360 --> 19:41.560
+And when you have no gradient signal, you're stuck there forever.
+
+19:41.560 --> 19:47.040
+And this is a problem that people just don't really like to acknowledge in networks, right?
+
+19:47.040 --> 19:52.440
+That's actually a very complicated relationship, because now you need to like maintain a balance
+
+19:52.440 --> 19:53.760
+and all of that.
+
+19:53.760 --> 19:55.640
+And I don't think people even know how to do that.
+
+19:55.640 --> 19:58.040
+Like people don't know how to do it with a generative adversarial network either, which
+
+19:58.040 --> 19:59.760
+is another example I gave of this.
+
+19:59.760 --> 20:00.760
+Yeah.
+
+20:00.760 --> 20:01.760
+Yeah.
+
+20:01.760 --> 20:02.760
+Huh.
+
+20:02.760 --> 20:08.040
+So what was the overall structure of your talk?
+
+20:08.040 --> 20:12.680
+So the title of the talk was deep learning, modular, and theory, and flexible in practice.
+
+20:12.680 --> 20:19.160
+So I first wanted to talk about the successes of deep learning, rather to show that deep learning
+
+20:19.160 --> 20:22.280
+is very modular and it can do a lot of things.
+
+20:22.280 --> 20:25.760
+And you know, get them into the mode like, wow, we can solve everything.
+
+20:25.760 --> 20:31.400
+And I actually think that I had a somewhat bold claim to end that first part, which is
+
+20:31.400 --> 20:39.120
+that deep learning, today's deep learning components can solve any problem, any like
+
+20:39.120 --> 20:45.240
+a computable problem, if you ignore the practical aspects, which would be, I mean, I think
+
+20:45.240 --> 20:46.840
+it's interesting to point out, right?
+
+20:46.840 --> 20:49.840
+Because then now that you isolate that, you know that the practical aspects are the issue,
+
+20:49.840 --> 20:50.840
+right?
+
+20:50.840 --> 20:51.840
+Right.
+
+20:51.840 --> 20:57.320
+And those practical aspects are data software optimization, in probably order of difficulty
+
+20:57.320 --> 21:00.640
+of how to understand them.
+
+21:00.640 --> 21:05.680
+And the latter part of the talk I talked about, these issues with deep learning like specifically
+
+21:05.680 --> 21:11.040
+data software optimization and a final section of understanding, just because I wanted to
+
+21:11.040 --> 21:16.440
+point out that while understanding is not necessary for like getting things to work,
+
+21:16.440 --> 21:21.320
+which maybe is what we care about, understanding is very necessary to make progress, right?
+
+21:21.320 --> 21:24.720
+And we just, it's amazing how little we understand about anything.
+
+21:24.720 --> 21:27.720
+Well, let's come back to that and maybe walk through the different sections.
+
+21:27.720 --> 21:33.600
+So data, walk us through the points that you were driving home around that.
+
+21:33.600 --> 21:39.840
+Okay, so from a super high level, it's that neural networks are extremely data-efficient
+
+21:39.840 --> 21:42.040
+and they don't have to be that way.
+
+21:42.040 --> 21:45.440
+And data efficiencies, the root cause of all problems, because if we were data-efficient,
+
+21:45.440 --> 21:48.240
+the size of data sets wouldn't matter, right?
+
+21:48.240 --> 21:54.200
+The data sets we use are kind of flawed in that, like they have known issues that, you
+
+21:54.200 --> 22:00.680
+know researchers know about, that they're noisy or like what kinds of known issues.
+
+22:00.680 --> 22:05.680
+Like, Pantry Bank is a very small data set, therefore making bigger networks is not
+
+22:05.680 --> 22:11.360
+very helpful, because it overfits, therefore you should generally only publish regularization
+
+22:11.360 --> 22:13.920
+research on it or something like that.
+
+22:13.920 --> 22:19.480
+So you're referring primarily to kind of the known data sets, that kind of thing.
+
+22:19.480 --> 22:22.720
+That's the kind of things that, you know, like the mainstream deep learning researchers
+
+22:22.720 --> 22:27.280
+publish on to keep into them, hey, I have something cool, use my thing.
+
+22:27.280 --> 22:31.600
+And that is, I mean, it's important, right?
+
+22:31.600 --> 22:35.120
+Like the alternative is publishing and they said no one knows about, which is also very
+
+22:35.120 --> 22:37.160
+hard to get any information from.
+
+22:37.160 --> 22:43.480
+But one has kind of, it's almost like a reproducibility kind of issue where there are elements that
+
+22:43.480 --> 22:49.680
+are inherent to the data set that, you know, drive towards or require a certain class
+
+22:49.680 --> 22:50.680
+of solution.
+
+22:50.680 --> 22:58.000
+Yeah, it's a horrible state of affairs where, like you need to, like, if you, you know,
+
+22:58.000 --> 23:00.280
+you read a paper, the paper usually has the high level, it doesn't have all the low
+
+23:00.280 --> 23:03.640
+little details, that's what the code is for, and you implement the paper exactly as it
+
+23:03.640 --> 23:04.960
+says.
+
+23:04.960 --> 23:09.120
+And it gets not anywhere near close to what they had, right?
+
+23:09.120 --> 23:14.440
+And you're like, yo, what the F. And then, you know, you, maybe you email the authors,
+
+23:14.440 --> 23:16.800
+maybe they eventually reach the source code, and you run the source code, because you
+
+23:16.800 --> 23:17.800
+don't believe them.
+
+23:17.800 --> 23:22.040
+Wow, this reproducibility is exactly what the author said, and it turns out, like, it just
+
+23:22.040 --> 23:23.720
+has like a bunch of magic hyper parameters.
+
+23:23.720 --> 23:27.200
+Like you said, you know, L2 regularization to this, you need this learning rate schedule
+
+23:27.200 --> 23:28.200
+for sure.
+
+23:28.200 --> 23:33.320
+Use this optimizer, and also preprocess your data set in this way and sample it in this
+
+23:33.320 --> 23:34.480
+way.
+
+23:34.480 --> 23:37.920
+And like, these are all things that you really want to be robust to, right?
+
+23:37.920 --> 23:40.320
+And you just, you just aren't, right?
+
+23:40.320 --> 23:45.520
+Like that is, it's a very unfortunate, like, aspect of the world, right?
+
+23:45.520 --> 23:51.160
+Like, you're put into this position where, um, if you don't do, you know, if you don't
+
+23:51.160 --> 23:55.160
+play the game, you never get to the art results, and people don't listen to you.
+
+23:55.160 --> 23:59.880
+If you do play the game, um, I mean, some people listen to you, but some don't, because
+
+23:59.880 --> 24:05.000
+they know the game, but then, like, it's the only way to get people to see your thing.
+
+24:05.000 --> 24:09.800
+And then by the game, you mean in terms of the researchers, like they're driven to publish,
+
+24:09.800 --> 24:14.000
+you know, you know, win in the competitions for whichever data set that they're looking
+
+24:14.000 --> 24:15.000
+at.
+
+24:15.000 --> 24:17.440
+And then you're in the competition, but it's usually like, you want to get people interested
+
+24:17.440 --> 24:18.440
+in your papers.
+
+24:18.440 --> 24:19.440
+Yeah.
+
+24:19.440 --> 24:22.440
+And it's very different if you just didn't care and you wanted to publish interesting things,
+
+24:22.440 --> 24:23.440
+right?
+
+24:23.440 --> 24:27.440
+But if you want to get eyeballs, sometimes, like, unless you're already a respected person,
+
+24:27.440 --> 24:29.680
+it's kind of what you have to do, right?
+
+24:29.680 --> 24:35.040
+So, um, like, I did, like, uh, it's sometimes that kind of thing is important.
+
+24:35.040 --> 24:40.080
+I think that it's kind of very qualitative thing, um, which is unfortunate in the data world
+
+24:40.080 --> 24:43.640
+that they get to get a feel of a data set, like when this data set's starting to get, like,
+
+24:43.640 --> 24:47.080
+really overfit, um, that, um, perhaps it's not useful anymore.
+
+24:47.080 --> 24:51.800
+And I feel like some researchers like qualitatively feel that about, like, CIFAR 10 and CIFAR
+
+24:51.800 --> 24:52.800
+100.
+
+24:52.800 --> 24:53.800
+Especially CIFAR 10.
+
+24:53.800 --> 24:57.240
+I'm not 100% sure about CIFAR 100 as much as that data set.
+
+24:57.240 --> 25:02.880
+Um, this is a data set of 32 by 32 RGB images.
+
+25:02.880 --> 25:03.880
+Okay.
+
+25:03.880 --> 25:08.920
+It's a popular use baseline because, um, it's a very small baseline and images of anything
+
+25:08.920 --> 25:09.920
+in particular.
+
+25:09.920 --> 25:11.120
+CIFAR 10 has 10 classes.
+
+25:11.120 --> 25:12.120
+Okay.
+
+25:12.120 --> 25:18.320
+And common classes, um, and they are, um, it's a popular data set because it's a really
+
+25:18.320 --> 25:21.520
+small data set, 32 by 32 images, you barely see anything.
+
+25:21.520 --> 25:25.600
+And it's not MNIST because people have, like, basically decided, like, MNIST research is
+
+25:25.600 --> 25:26.600
+not enough.
+
+25:26.600 --> 25:29.400
+So, like, they just don't listen to MNIST research at all, right?
+
+25:29.400 --> 25:33.040
+And it's starting to be that way for CIFAR 10, just because we're getting to be so good
+
+25:33.040 --> 25:34.040
+on it now.
+
+25:34.040 --> 25:35.040
+Okay.
+
+25:35.040 --> 25:41.840
+Um, and, yeah, there's just known limitations that makes it, it makes it hard if you
+
+25:41.840 --> 25:46.400
+have a genuinely good result to tell people that you have a genuinely good result, especially
+
+25:46.400 --> 25:49.520
+because, like, as you scale up, like, it's also very computationally demanding, right?
+
+25:49.520 --> 25:58.040
+So, um, you describe the data sets as being overfitted, which, um, explain, elaborate
+
+25:58.040 --> 26:04.320
+on that because I tend to think of data as being inherently, well, the community is
+
+26:04.320 --> 26:05.320
+overfitted.
+
+26:05.320 --> 26:06.600
+They said, not even the algorithm itself.
+
+26:06.600 --> 26:10.640
+There's actually this cool test that someone did, I can't remember who, where they showed
+
+26:10.640 --> 26:16.280
+us, like, four pictures of images, and they asked, like, these are, these are the four
+
+26:16.280 --> 26:20.040
+data sets, or, sorry, maybe not, they said, like, do you know what, they set these pictures
+
+26:20.040 --> 26:22.560
+from, these pictures from, these pictures from, these pictures from, right?
+
+26:22.560 --> 26:28.000
+Like many people did, like CIFAR is a very canonical data set, um, uh, there's a place
+
+26:28.000 --> 26:31.640
+of data set, there's a large team understanding one, right?
+
+26:31.640 --> 26:34.200
+And there's ImageNet, which is, like, more general.
+
+26:34.200 --> 26:38.240
+So, but, and so you're basically saying that if someone can recognize these data sets so
+
+26:38.240 --> 26:43.320
+well, we're designing solutions to them, they are not generalizable or not adequately
+
+26:43.320 --> 26:44.320
+generalized.
+
+26:44.320 --> 26:47.400
+And, like, people have actually reported, like, native results are generally not reported
+
+26:47.400 --> 26:49.000
+as much, because it's just so much of it, right?
+
+26:49.000 --> 26:50.480
+It's a very empirical field.
+
+26:50.480 --> 26:54.720
+So maybe this is uninteresting now, but, um, this just happens so much, like, people have
+
+26:54.720 --> 26:59.800
+noted that, um, the inception architecture seems to work much better in ImageNet than
+
+26:59.800 --> 27:04.560
+it does in other tasks, um, and it is a pretty complicated thing, right?
+
+27:04.560 --> 27:11.560
+So maybe, maybe that makes sense, or, um, I've had friends that I talk to, I'd hate that
+
+27:11.560 --> 27:16.600
+I, a lot of my references are friends, but there's, like, the field moves so fast, right?
+
+27:16.600 --> 27:20.000
+That, like, sometimes even archive can't keep up, which is, I think, super awesome for
+
+27:20.000 --> 27:26.480
+being in it, where, and, anyway, they chat about sometimes how resnets, um, oftentimes
+
+27:26.480 --> 27:29.400
+don't work for their computer vision architectures, right?
+
+27:29.400 --> 27:35.480
+Or one of the best, um, practitioners of using Contnets, um, a friend of mine, Sander,
+
+27:35.480 --> 27:40.840
+Dielamann, he works at DeepMind, he has not been able to find BatchNorm to work for him,
+
+27:40.840 --> 27:44.160
+and I find that to be really interesting, like, is it because all of his other parameters
+
+27:44.160 --> 27:45.160
+are tuned to BatchNorm?
+
+27:45.160 --> 27:49.840
+Is there something that he solves, that BatchNorm solves also, that is not necessary?
+
+27:49.840 --> 27:52.440
+Is, is, is he just wrong?
+
+27:52.440 --> 27:57.440
+Um, honestly, I don't know, but I think that there's a bunch of cool stuff there that,
+
+27:57.440 --> 28:00.440
+um, maybe we can figure out, right?
+
+28:00.440 --> 28:07.440
+And is this inherent issue inherent to deep learning, or is it just the approach we've
+
+28:07.440 --> 28:08.440
+taken?
+
+28:08.440 --> 28:17.440
+Ooh, um, I mean, I would argue that it's not even an issue in deep learning, it's actually,
+
+28:17.440 --> 28:20.400
+like, maybe we can look at the bright side of this, I was like, it's a miracle it even
+
+28:20.400 --> 28:21.400
+works.
+
+28:21.400 --> 28:26.480
+Um, so, um, going to the understanding topic, right?
+
+28:26.480 --> 28:31.720
+There's, as far as I know, no practical theory in deep learning, like, there's nothing
+
+28:31.720 --> 28:36.280
+that can actually, like, guide us to understandings, like, there's, what I call stories, like,
+
+28:36.280 --> 28:40.240
+every paper has, like, a high level story of, this is why I think it works, and if you,
+
+28:40.240 --> 28:44.120
+like, really try to vet the story really well, you can, like, very easily, like, disprove
+
+28:44.120 --> 28:49.520
+it, and I know of no story that's, like, 100% bulletproof, um, so I'm willing to make
+
+28:49.520 --> 28:55.120
+that claim, and so we have these stories, and, like, they, they guide people, but they,
+
+28:55.120 --> 29:00.920
+they rarely work out as useful tools, unfortunately, so what we have instead is empirical results.
+
+29:00.920 --> 29:06.600
+What we do is, we want generalization, generalization is kind of like a lofty concept, and we,
+
+29:06.600 --> 29:10.880
+we don't really know, like, it's not, like, you can, in, like, traditional statistics,
+
+29:10.880 --> 29:15.000
+you can kind of do that, um, but, like, deep learning is as much harder because you have
+
+29:15.000 --> 29:19.160
+so many parameters, like, you can't really measure, well, you can measure the VC dimension,
+
+29:19.160 --> 29:23.680
+but it's really, it's so big that it doesn't matter, um, there's a lot of things that,
+
+29:23.680 --> 29:28.320
+what's the VC dimension? It's, I probably would screw this up, but I'll give you, like,
+
+29:28.320 --> 29:35.320
+my best, like, first of all, your approximation of what it is. It's roughly how, um, powerful
+
+29:35.320 --> 29:41.040
+your model is, so it shows, it kind of corresponds to, like, how much data you need in order to
+
+29:41.040 --> 29:46.040
+get generalization. So, like, very curvy, powerful models have, like, a very high VC dimension,
+
+29:46.040 --> 29:49.200
+which means that you need a lot of data. VC doesn't send for very curvy, does it?
+
+29:49.200 --> 29:56.160
+No, it stands for, I know the VC stands for Vapnik, um, and the C stands for another person's
+
+29:56.160 --> 30:04.640
+name. Okay. Um, sorry. Um, so generalization, like, in a, you know, like, in the very old school
+
+30:04.640 --> 30:09.840
+machine learning sense, the sense that I don't think we'll come back to personally. Um, like,
+
+30:09.840 --> 30:14.080
+you could have bounds on, like, how much data you need in order to get, like, this epsilon
+
+30:14.080 --> 30:18.160
+difference between training tests and stuff like that. And that's just not something that's
+
+30:18.160 --> 30:20.960
+going to happen in deep learning, as long as we keep using deep learning, we're probably
+
+30:20.960 --> 30:24.240
+not going to get that. Right. So what we have is empirical results. And with these empirical
+
+30:24.240 --> 30:28.160
+results, we just have a bunch of experiments and a bunch of data sets. And we show, like,
+
+30:28.160 --> 30:33.120
+it seems to work on the data sets we've tried, um, hopefully it works in everything. And
+
+30:33.840 --> 30:38.160
+so, like, this is where you might see it as a pro, but I, sorry, as a con, but I see this as a
+
+30:38.160 --> 30:41.520
+huge positive of deep learning, right? Like, it's actually super cool that it generalizes,
+
+30:41.520 --> 30:45.520
+right? Like, you can get a new computer vision to ask. Um, I use computer vision,
+
+30:45.520 --> 30:50.400
+because like, that's one of the easier, um, domains and you kind of a ton of data. And you can just
+
+30:50.400 --> 30:54.640
+generalize, you know, you can use it to generalize. You can use image net features to generalize
+
+30:54.640 --> 30:59.520
+in that that that's just not something that makes sense, right? Um, I mean, like, if you look at it
+
+30:59.520 --> 31:04.720
+from like a really strict perspective of like, there's no guarantee that this should work, but it tends
+
+31:04.720 --> 31:11.840
+to work. And that's really interesting. All right. And I think that there's something, uh,
+
+31:11.840 --> 31:16.000
+about deep learning that allows it to generalize so well, you know, you can even generalize to
+
+31:16.000 --> 31:19.600
+domains that you've not even trained on. I think that there's been some work on
+
+31:20.160 --> 31:25.040
+generalizing image net models to cartoons. And like, even like cartoon drawings of the things
+
+31:25.040 --> 31:30.480
+that they were classifying, sometimes activate or there's something related to that. Yeah. So, yeah,
+
+31:30.480 --> 31:36.240
+it's a wonder of deep learning. I actually, there are some experimental results that try to
+
+31:36.240 --> 31:43.120
+explain after the fact why things work, but without being falsifiable, it's questionable how useful
+
+31:43.120 --> 31:49.680
+it is. Um, so perhaps maybe deep learning is exploiting some of these kinds of explanations. There
+
+31:49.680 --> 31:57.920
+was a recent one on physics. Okay. That, um, that deep learning is the, like, deep learning, the
+
+31:57.920 --> 32:02.480
+kind, the class of things that deep learning is very good at fitting are a very like a very natural
+
+32:02.480 --> 32:07.680
+class of functions. Therefore, since deep, deep learning models only can fit like a,
+
+32:07.680 --> 32:11.040
+efficiently fit a small subset of the function space, but that happens to be like very common,
+
+32:11.680 --> 32:16.720
+um, like based on physics, um, kinds of functions that would occur. Okay.
+
+32:19.040 --> 32:24.560
+So you started out talking about data and that overfitting problem and then, uh, tools,
+
+32:24.560 --> 32:28.480
+was that the network software software software? I, there's two more things in data, though,
+
+32:28.480 --> 32:32.960
+which is that data we have, which is problematic. There's a data that we, so data we have when we use,
+
+32:32.960 --> 32:36.960
+like data sets, this data we have that we don't use, and there's like tons and tons of data that
+
+32:36.960 --> 32:41.360
+we have that we don't use, that I think that we just don't know how to use well, um,
+
+32:41.360 --> 32:45.120
+unsupervised learning, multitask learning, transfer learning, we kind of use, but we don't
+
+32:45.840 --> 32:51.360
+do very smart things, I think, um, and even like, there's implicit stuff like the trajectories
+
+32:51.360 --> 32:54.320
+of the networks that you've passed through. Maybe there's some interesting information there.
+
+32:54.320 --> 33:00.880
+And the last kind was the data that we don't have that we need. Like for example, measuring
+
+33:01.360 --> 33:06.240
+these things that we really care about, that we are just missing right now. Like we have,
+
+33:06.960 --> 33:10.560
+we have no way of measuring long-term dependency, like how well networks capture longer
+
+33:10.560 --> 33:16.080
+dependencies. We don't have like a general RNN benchmark. We don't have a good benchmark for
+
+33:16.080 --> 33:20.320
+visual attention. Um, we don't have a good benchmark for hierarchical learning. Like how do we
+
+33:20.320 --> 33:24.560
+even know we're learning hierarchical stuff, right? Do we want to learn hierarchical stuff? Um,
+
+33:24.560 --> 33:29.680
+I don't know, but like if I would think that if we want to learn something, having a benchmark
+
+33:29.680 --> 33:36.880
+for it would be really good, right? So that was roughly it for data. Um, from a software perspective,
+
+33:37.760 --> 33:43.120
+it was more about like how the tools we use nowadays really limit what we can do in like every
+
+33:43.120 --> 33:48.560
+tools flawed in some ways, because it hits home for me personally because I'm a software engineer.
+
+33:48.560 --> 33:53.760
+Okay. Um, and I want to use really good tools. You mean TensorFlow doesn't solve every problem in
+
+33:53.760 --> 34:01.840
+the universe? Uh, no, not yet. I think they introduced some really good ideas. Um, they definitely
+
+34:01.840 --> 34:11.680
+brought something to the table. Um, but it, it alone isn't enough. Um, it might like the,
+
+34:11.680 --> 34:16.320
+the like I think better things could be built on top of it. I don't think that it's the low-level
+
+34:16.320 --> 34:19.760
+components that are a problem. And I actually don't think like hardware is that big of an issue.
+
+34:19.760 --> 34:28.480
+Like it's big of an issue that people, um, make it out to be. Um, in, in theory, in practice,
+
+34:28.480 --> 34:32.320
+if you really want to do the art results and things sometimes that's needed, but there's like
+
+34:32.320 --> 34:36.800
+higher level problems that you can solve without hardware. So the idea with behind software is that
+
+34:37.440 --> 34:44.400
+you can like very like easily see situations where, um, like the software we have actually
+
+34:44.400 --> 34:51.520
+prevents us from doing what we want to do. So I, I think I have like two examples that really
+
+34:51.520 --> 35:01.520
+resonated with me where that, um, an example of bad software is when, um, it's easier to explain
+
+35:01.520 --> 35:07.040
+in words the technique than it is with code because ideally you want to like express idea,
+
+35:07.040 --> 35:11.920
+you want like the flow from ideas to code to be really easy and the flow from ideas to words
+
+35:11.920 --> 35:15.760
+is generally pretty good. And that just means to give a bottleneck and like words to code. And
+
+35:15.760 --> 35:20.400
+maybe it's a reality of life that it'll never be that simple. Did you provide a specific example?
+
+35:20.960 --> 35:27.360
+Um, yes. I had like a list of like many examples of like different kinds of, um,
+
+35:28.560 --> 35:33.280
+tricks that are hard to do in various frameworks. So depending on the framework you do some things
+
+35:33.280 --> 35:41.280
+can be kind of difficult. So like for, what is it? For, um, so when you say tricks and frameworks,
+
+35:41.280 --> 35:49.920
+the basic idea being, you know, kind of the, um, at, you know, the research, I did see that you
+
+35:49.920 --> 35:54.000
+put a lot of paper, you were just showing a lot of papers, which is great documenting kind of
+
+35:54.000 --> 36:00.160
+where the ideas came from. Uh, so in the research, you know, we're introducing all these various
+
+36:00.160 --> 36:06.480
+tricks to improve solvability of the, of the deep learning networks. And it's not what I'm hearing is
+
+36:06.480 --> 36:12.320
+the tools are, you know, on the one hand, you know, great. They're, they're raising the level
+
+36:12.320 --> 36:18.320
+of abstraction and making this stuff, you know, more easily adoptable. But, you know, that also
+
+36:18.320 --> 36:22.960
+prevents us from implementing some of these tricks, which have to be plugged in at lower levels.
+
+36:22.960 --> 36:28.880
+Yeah, exactly. So, um, when I mentioned trick, I used that as a general term of like this,
+
+36:28.880 --> 36:34.960
+like one unit of thing that you do to a neural network. Like, um, you can think of layers as
+
+36:34.960 --> 36:39.600
+these tricks, but tricks being more than just layers. Like, for example, an additional regularizer
+
+36:39.600 --> 36:44.400
+might be a trick, um, or doing, like, they could be pretty complicated, I think, like doing
+
+36:44.400 --> 36:49.440
+unsupervised pre-training might be a trick. And the argument that I would have is that no framework
+
+36:49.440 --> 36:56.480
+makes everything really easy. And easy in this sense is that I would, I would ideally like it such
+
+36:56.480 --> 37:02.480
+that, um, everything just gets solved for me. Like, I would be able to like, like, this is probably
+
+37:02.480 --> 37:07.360
+not going to happen, but we can get closer, right? Like, I would like to express, like, very
+
+37:07.360 --> 37:11.440
+declaratively, like, what I want this neural network to be. Like, literally, like, take this
+
+37:11.440 --> 37:17.600
+neural network in this database, apply this transformation, um, run this transformation, um,
+
+37:17.600 --> 37:23.840
+do it on a, like, train on this training set. Like, I want it to be that simple. And I,
+
+37:24.800 --> 37:29.680
+like, I don't think it can be, but like, striving towards that, I think, is good. Sure. And, like,
+
+37:29.680 --> 37:35.280
+a lot of the frameworks, like, TensorFlow, um, doesn't support a bunch of the thing, like, it makes
+
+37:35.280 --> 37:41.440
+it a large number of lines of code in order to do something rather than few. So what should be an
+
+37:41.440 --> 37:46.880
+example, like, batch normalization is like a pretty simple thing, right? So, or sorry, it's a,
+
+37:48.000 --> 37:52.560
+it's actually not a very simple thing in terms of implementation. But like, many frameworks can do
+
+37:52.560 --> 37:57.200
+batch normalization very, very well. Like, torch can do batch normalization amazingly because like,
+
+37:57.200 --> 38:02.160
+they can just implicitly keep it state. And in torch, like, each of the nodes applies its
+
+38:02.160 --> 38:06.000
+updates on its own, like, when flowing through the grad and like, applying the updates.
+
+38:06.800 --> 38:16.080
+Um, so that's very good. Um, but, um, TensorFlow, for example, like, in order to apply a batch normalization
+
+38:16.080 --> 38:19.680
+after, it has to do quite a few things, right? Like, you need to create, like, some state for,
+
+38:19.680 --> 38:22.720
+if you're doing the rolling mean approximation, you need to create some state for the mean,
+
+38:22.720 --> 38:27.280
+some state for the variance. You need to make sure to, like, apply the updates to this thing. You
+
+38:27.280 --> 38:32.480
+need to only apply the updates at training time. And then it becomes, like, much more complicated
+
+38:32.480 --> 38:38.240
+than just, like, calling a layer on something, right? Um, depending on how you wrap it, of course.
+
+38:38.240 --> 38:42.800
+But it, like, this, this kind of thing is just a layer in torch, right? And like, every framework has
+
+38:42.800 --> 38:47.920
+its trade-offs, but I just don't think that we are at, like, the efficient frontier yet of, like,
+
+38:47.920 --> 38:54.000
+this is like, like, I think we can get benefits for free, basically. And I actually have written
+
+38:54.000 --> 39:00.640
+a few libraries that, um, that try to get these benefits for free. And I think they've been
+
+39:00.640 --> 39:06.240
+pretty successful. Um, I'm still experimenting with them because I think there's so much to do there.
+
+39:06.800 --> 39:13.520
+But it's, uh, it's an open problem. And are these libraries, uh, these stand-alone frameworks,
+
+39:13.520 --> 39:19.680
+or libraries that plug into other existing frameworks? Um, mostly they go on top of
+
+39:19.680 --> 39:25.040
+fiannoir tensorflow. Okay. Because I think that they're actually, or both. Um, I think that they
+
+39:25.040 --> 39:29.600
+are both, like, very good baseline. So I'm a big fan of the computational graph. Um, I think the
+
+39:29.600 --> 39:33.760
+design of theanos actually, like, quite excellent. I'm a huge fan of theano and its developer is,
+
+39:34.640 --> 39:40.160
+it has the downside of distributed computing. Um, but I think that its abstraction level is actually
+
+39:40.160 --> 39:45.200
+quite good. Like, it can capture that abstraction level very well. Its optimizations are like things
+
+39:45.200 --> 39:51.840
+that I probably wouldn't do by hand anyway. So you get them for free. Um, it's, it's a, it's a,
+
+39:51.840 --> 39:56.400
+it's a very, I am more focusing on theano tensorflow similar, but kind of as a mix of abstraction
+
+39:56.400 --> 40:01.360
+levels. So, um, I'm focusing on the low level aspect. I think those low level aspects are actually,
+
+40:01.360 --> 40:07.360
+like, quite good. Like, they might actually be on an efficient frontier of trade-offs, you know,
+
+40:07.360 --> 40:13.840
+like trading off like usability versus, um, usability versus like, um,
+
+40:15.120 --> 40:19.360
+flexibility, yeah, yeah, flexibility or performance. And I think that that's like, there's,
+
+40:19.360 --> 40:23.600
+that's just one view, right? Like, use a, you know, have computational graph, have like,
+
+40:23.600 --> 40:27.520
+all of the basic operations and they are, um, optionally use an optimizer in order to do that.
+
+40:27.520 --> 40:32.800
+Like, another view would be like the torch it or cafe-ish view where you bundle up the pieces
+
+40:32.800 --> 40:37.200
+of functionality that have a lot of, like, the, the highly optimized pieces, right? And like,
+
+40:37.200 --> 40:42.080
+that's the view you go for next performance. I think it's also very different philosophically,
+
+40:42.080 --> 40:45.280
+but there's nothing wrong with either of these views. So I'm, I'm fine building on top of that.
+
+40:45.280 --> 40:49.600
+This is not what you're using. It's more of, yeah, it's more of the level and how you construct
+
+40:49.600 --> 40:54.480
+the computational graph, which I think should be independent of theano or tensorflow. Like,
+
+40:54.480 --> 40:59.280
+these are just different levels, right? Like, you could have like a really nice low level thing,
+
+40:59.280 --> 41:04.160
+but change the high level thing on top of it and it should be fine, which is why I'm not the biggest
+
+41:04.160 --> 41:09.920
+fan of tensorflow's like many different abstraction levels. And I think most of, well, all of the best
+
+41:09.920 --> 41:15.280
+people I've talked to who use TensorFlow, um, they kind of only use a little bit of it. And they think
+
+41:15.280 --> 41:20.800
+that a bunch of it is like, um, it's not the greatest, but I, I don't care, I'm not using it.
+
+41:20.800 --> 41:26.560
+Okay. And like, it's, it's at those high levels that I think is very interesting. And like, that's
+
+41:26.560 --> 41:29.760
+also where the user interacts with it, right? Like, if you're having code interact with code, it
+
+41:29.760 --> 41:33.680
+doesn't matter. You can have like the ugliest interface in the world, like your compiler can just,
+
+41:33.680 --> 41:39.200
+you know, switch things around and all of that stuff. Okay. So data, software, what was the third
+
+41:39.200 --> 41:45.040
+piece optimization? So I touched a little bit into it with local learning. Yeah. And Andre Carpathi
+
+41:45.040 --> 41:49.760
+had a great quote, which I can't remember off the top of my head, but it roughly goes along the lines
+
+41:49.760 --> 41:59.280
+of that neural networks only do memorization. They don't do thinking. And this is problematic,
+
+41:59.280 --> 42:03.280
+because this is already not as good, but this is problematic because we'd ideally like them to
+
+42:03.280 --> 42:07.920
+think. We want them to do like cool, complicated things that like blow our minds in their coolness,
+
+42:07.920 --> 42:13.200
+right? And they do blow our minds already. But perhaps those things were simpler than we thought.
+
+42:13.200 --> 42:17.120
+Yeah. And what's going to happen when you want to do something pretty darn complicated, right?
+
+42:17.120 --> 42:22.400
+Like we'll see, right? Like there's some tasks that we think that would require some pretty
+
+42:22.400 --> 42:26.560
+complicated levels of thinking in order to do. Perhaps playing Starcraft, you need to like think
+
+42:26.560 --> 42:31.520
+many moves ahead and imagine what the opponent's going to do in order to like take actions. And
+
+42:31.520 --> 42:37.440
+neural networks are not very good at imagining what to do yet. Maybe that will change, but we'll see.
+
+42:38.800 --> 42:46.000
+And Andrewing likes to say that as a heuristic of what neural networks can do is anything a
+
+42:46.000 --> 42:52.640
+human can do in less than one second. But I mean, if that's a hard limitation, then there's a lot
+
+42:52.640 --> 42:57.040
+of tasks that take more than one second for people to do. And will this solve generally I for us,
+
+42:57.040 --> 43:04.160
+maybe not like when you phrase it that way, right? So it should be possible, right? Like it's
+
+43:04.160 --> 43:09.520
+modular in theory. Like you can't just have architectures that give in a magic set of parameters
+
+43:09.520 --> 43:15.200
+would solve that task. So this question is how do we do that, right? And there's just many tricks
+
+43:15.200 --> 43:22.800
+on that. And I talk a little bit about the downsides of local learning, how we don't pay attention
+
+43:22.800 --> 43:27.440
+to exploration in supervised learning. And like mostly it's paid attention,
+
+43:27.440 --> 43:33.200
+enforcement learning, but we treat it as like obviously the plane, like there is some implicit
+
+43:34.000 --> 43:38.000
+exploration because you're, you know, you're using stochastic gradient descent. So your
+
+43:38.720 --> 43:43.280
+gradients noisy. But roughly if it wasn't noisy, you'd, you know, be blocked on a point and you
+
+43:43.280 --> 43:49.760
+just till climb down some direction and be stuck there. And like you don't even know how good of
+
+43:49.760 --> 43:58.640
+a solution that is, right? So that's that can be, I don't know, like that can be a very unsatisfying
+
+43:58.640 --> 44:03.040
+because if the answer is, I mean, this goes back to what I was talking about like in terms of
+
+44:03.040 --> 44:09.040
+limitations, like maybe local learning just can't solve this, right? And that would be super
+
+44:09.040 --> 44:13.440
+duper unsatisfying because local learning is like our most scalable learning algorithm we have,
+
+44:13.440 --> 44:17.040
+like using gradients is really, really good for turning lots of parameters. Like we're going to have
+
+44:17.040 --> 44:20.560
+to have to make like a lot of plant, like a lot of different plans we want generally with
+
+44:20.560 --> 44:25.600
+our gradient descent. So yeah, we're going to have to figure it out. So we're going to have to
+
+44:25.600 --> 44:30.800
+figure out tricks and how to do this better. Maybe tricks for more principled exploration. And maybe
+
+44:30.800 --> 44:35.440
+this will make it such that these won't be problems anymore. At least our will find much harder
+
+44:35.440 --> 44:40.240
+problems, right? Though hopefully always be problems. And that would, that's what keeps the field
+
+44:40.240 --> 44:45.040
+going, right? Yeah. Yeah. But hopefully they're not intrinsic to the way we do optimization.
+
+44:45.040 --> 44:50.320
+And people are making better optimizers. Yeah. You know, it's quite slow, the progress.
+
+44:51.120 --> 44:57.600
+Right. So data software optimization and understanding, and we talked a little bit about that earlier.
+
+44:58.320 --> 45:00.800
+Are there, are you going to post your slides up somewhere?
+
+45:00.800 --> 45:07.840
+Um, probably. I think that, well, the, I think I've, I think that rarely people put the slides
+
+45:07.840 --> 45:11.280
+up somewhere. Okay. But they haven't asked me for the slides yet. I think they're supposed to do
+
+45:11.280 --> 45:16.240
+that after the presentation. Okay. Which is probably good since there was like last minute editing going
+
+45:16.240 --> 45:23.840
+on. Um, but it'll almost certainly be up somewhere. Okay. And how can folks, if folks want to learn
+
+45:23.840 --> 45:30.320
+more about what you're up to or find you do you have a GitHub or Twitter or. I had do have a GitHub.
+
+45:30.320 --> 45:33.680
+It's, even though that's probably not a great way to contact someone. What's it? What's it?
+
+45:34.560 --> 45:44.080
+I'm not. I'm not. Right. GitHub.com slash Diego. Diogio. 149. Okay. And, uh, probably email would be
+
+45:44.080 --> 45:49.760
+the best way. This is something that I love chatting about. It would be Diogio at. Oh, God, my
+
+45:49.760 --> 45:58.640
+company name's hard to spell. Um, analytic, which is E N L I T I C dot com. Okay. Great.
+
+45:58.640 --> 46:00.720
+Cool. Thank you. Awesome. Hey, thanks so much.
+
+46:04.800 --> 46:10.080
+All right, everyone. That's it for today's interview. Please leave a comment on the show notes page
+
+46:10.080 --> 46:19.360
+at twimlai.com slash talk slash eight or tweet to me at at Sam Charrington or at twimlai to discuss
+
+46:19.360 --> 46:32.800
+this show or let me know how you liked it. Thanks so much for listening and catch you next time.
+

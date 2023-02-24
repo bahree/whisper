@@ -1,0 +1,441 @@
+Hello and welcome to another episode of Twimble Talk, the podcast where I interview interesting
+people doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington.
+This week on the podcast, we're featuring a series of conversations from the AWS re-invent
+conference in Las Vegas. I had a great time at this event, getting caught up on the new machine
+learning and AI products and services announced by AWS and its partners. If you missed the news
+coming out of re-invent and want to know more about what one of the biggest AI platform providers
+is up to, make sure you check out Monday's show, Twimble Talk number 83. Around table discussion,
+I held with Dave McCrory and Lawrence Chung. We cover all of AWS's most important news,
+including the new SageMaker, DeepLens, Recognition Video, Transcription, Alexa for Business,
+Greengrass ML inference, and more. This week, we're also running a special listener appreciation
+contest to celebrate hitting 1 million listens here on the podcast and to thank you all for being
+so awesome. Tweet to us using the hashtag TwimbleOneMill to enter. Every entry gets a fly
+TwimbleOneMill sticker, plus a chance to win a limited run t-shirt commemorating the occasion.
+We'll be digging into the Magic Twimble swag bag and giving away some other mystery prizes as well,
+so you definitely don't want to miss this. If you're not on Twitter or you want more ways to enter,
+visit twimbleai.com slash TwimbleOneMill for the full rundown.
+Before we dive in, I'd like to thank our good friends over at Intel Nirvana for their
+sponsorship of this podcast and our reinvent series. One of the big announcements at reinvent
+this year was the release of Amazon DeepLens, a fully programmable deep learning enabled wireless
+video camera designed to help developers learn and experiment with AI both in the cloud and at the
+edge. DeepLens is powered by an Intel Atom X5 processor, which delivers up to 100 gigaflops
+of processing power to onboard applications. To learn more about DeepLens and the other
+interesting things Intel's been up to in the AI space, check out intelnervana.com.
+Okay, this time around we're joined by Kristen Grouman, professor in the Department of Computer
+Science at UT Austin. Kristen specializes in computer vision and joined me leading up to her
+talk on learning where to look in video at reinvent deep learning summit. Kristen and I dig into
+the details of her research and talk, including how an embodied video system can internalize the
+link between how I move and what I see so as to learn how and where to move in its environment.
+We discuss various policies for learning to look around actively and how an agent can learn
+to focus attention on the interesting elements of a scene. This was a really interesting conversation
+and I'm sure you'll learn a ton from it. And now on to the show.
+All right, everyone. I'm at AWS reinvent and I've got the pleasure of being seated here with
+Kristen Grouman. Kristen is a professor in the Department of Computer Science at UT Austin.
+Kristen, welcome to this weekend machine learning in AI. Thank you. Thanks for having me.
+Absolutely. So you are speaking here today at the deep learning summit that's part of reinvent
+and I'm really interested in learning a little bit more about your talk and what you'll be sharing.
+But before we do that, why don't we start by having you tell us a little bit about your
+background and how you got interested in machine learning? Sure. Well, I'll work backwards
+right now. As you said, I'm at UT Austin. I'm a faculty member. I've been there for 11 years now
+and my specialty is in computer vision and machine learning. So that's the part of artificial
+intelligence where you want to make algorithms that can understand images and video. So before
+coming to UT Austin about 11 years ago, I did my PhD at MIT and prior to that, I was at Boston
+College and from undergrad. So I got into AI happily as an undergrad. I actually had the chance
+to take courses that were relevant, including a course in computer vision. And from that,
+got the chance to work with a professor doing some small research project that really
+got me excited and got me the chance to get into the research world and then at degree at school
+where I explored some more. Did you do computer vision at MIT? Yes, yeah. And as part of CSAIL
+or another lab there? Yeah, I was in CSAIL. In fact, I'm old enough that it was the AI lab before
+it became CSAIL. But during my time there, yeah, we transitioned from a separate AI lab to CSAIL.
+Okay. And what did you, what was your research focus there? So my PhD work was focused on
+object recognition. Okay. And in particular, we were developing ways to work with what are called
+local feature representations. So being able to match objects based on local parts that are
+repeatable. And the key to my thesis in a nutshell was to show how to perform discriminative learning
+with these sets of local features. So we developed something called the pyramid match kernel that
+was very effective for fast matching of sets of features to do recognition. Can you give an
+example of local feature recognition and where that comes into play? Sure. Yeah. So
+prior to kind of the major advances with CNNs, commercial neural networks, one representation
+of choice was to use interest operators to find local points and images that are going to be
+repeatedly detectable across scale changes, lighting changes, viewpoint changes, and then describe
+the content around each of these local points with some invariant or tolerant representation
+that's tolerant to changes. Is this different from like an edge detector or something like that?
+Well, so an edge detector also can be a pointwise operator. So what's really, what's really powerful
+about these local representations was the repeatability under different viewing conditions. So
+once we could find points that would be the same points, even if you scaled the image by two,
+or even if you rotated the camera by 20 degrees, or if you changed the lighting in the room.
+So with those kind of features being repeatedly detected, you have nice invariance so that you're
+really robust to change as you experience in the real world when you see the thing again.
+And that kind of representation got going and these features got going originally from
+multi-view geometry work, where you need to be able to match and do triangulation and reconstruct a
+3D scene. But around that time, we're talking back when I was doing my PhD. This was then found
+to be quite important in a similar way for recognition because you want to find the object again,
+even when it's had these changes. So the learning challenge came up when if you want to jump up to
+categorization, not just finding that same object again, but finding, you know, not bus this bus,
+but any bus or not this car, any car, then you need to do some kind of learning on top of that
+sort of representation. As a way to generalize what you've learned from the points to the class
+of object that you're trying to be able to recognize. It's interesting. So you describe an element of
+that that is it's kind of invariant to, you know, positional changes and things like that. And
+I guess I'm thinking of this experience I had yesterday with so AWS announced this developer
+toolkit called DeepLens. It's basically a camera on a basically a small computer that is self-contained
+and you can do you can kind of train models in a cloud and push them out to this little computer
+and do inference at the edge. And they did a workshop where you're detecting a hot dog,
+basically hot dog, not hot dog, Silicon Valley reference. And one of the things that was you know,
+one of the things that was real clear is that it was very intolerant to, you know, positional
+changes in the hot dog, you know, basically the hot dog had to fill the whole frame in order for
+it to be able to recognize it. You know, are there elements of the the approach that you were
+describing that you worked on in grad school that would, you know, you know, and granted that was
+a, that was a squeeze net model. So it was like a limited, you know, it's a very limited model
+that was designed to fit on this embedded device. But, you know, there are elements of that kind of
+work that you, you know, that are being tied to what folks were doing today with CNNs to try
+to make them more kind of invariant to those kinds of, you know, positional shifts.
+Yeah. So I mean, a couple of things. One, my PhD work was back in 2006. So we're talking about
+things that are not what I'm working on now. But those local features, in fact, have that kind of
+invariance more strongly than your vanilla CNN representation will for the whole image.
+So if you want to just treat object recognition as an image classification problem,
+that's really a simplification, right? Because when you want to recognize an object, it's not
+necessarily, as you said, just frame right in the view, such that it occupies most of the pixels.
+If it is image classification, super powerful, including with, you know, even a squeezed CNN.
+But if you want to recognize an object that's, first of all, sitting in a room full of clutter,
+then you also have to tackle what's called the detection problem, which means, you know,
+localizing and finding where boundaries of objects are, or, you know, the very least scanning
+around to make classification decisions. Furthermore, the kind of work we do now, you know, we're
+actually interested in this very question, you know, if I have an agent that's visually intelligent,
+you know, it's not enough for it to be handed flashcards and ask to name them. It's a stepping stone,
+and it's a huge one that, you know, has grown so much in the last four or five years.
+But they also need to be able to figure out which pictures should this agent be taking.
+Where does it have to look? What is an object? Even if that's an object, I haven't seen
+the eye being the agent, you know, haven't seen before during training. So, yeah, I think you can,
+the kind of demo you described is super powerful, but, you know, not all problems are, you know,
+we have to go even further than image classification on a web photo or a photo that's kind of closely
+zoomed in. And that's actually a great transition to the topic of your discussion later on today,
+right? You're talking about, well, why don't you tell us a little bit about what you're talking
+about today? Sure. Yeah. So, my plan today is to give an overview of one segment of my group's work,
+and what I'm going to focus on is the theme of learning where to look in video. So, again,
+when we think about training up today's state-of-the-art object recognition systems, such as those that take
+decompletional neural networks, train them on a dataset like ImageNet, for which you have a million
+images, say, with thousands of different categories, you can name. Well, benchmarks like that,
+and training sources like that, treat the problem only in part, and this is because
+they bake in intelligence about how those photos even came to exist, right? So, these are
+human-daken photos. And their photos, furthermore, that they have the good composition of human
+photographer would make, furthermore, they were chosen to be uploaded on the web to even be good
+enough as an exemplar that someone wants to see. And so, if you can draft that with what you get if
+you strap a camera to a person's head, or if you strap a camera to a robot's head, or a vehicle,
+all such kind of egocentric or first-person perspective views, coupled with video, meaning
+ongoing observation, not just a well-chosen moment in time, but, you know, just continuous video,
+then you'll see that the image content and quality is quite different. And if you're not going
+to rely on that baked in intelligence about human-taken photos, then party your job in the system is to
+decide where to look in the first place. And so, my talk today, that's kind of the motivating
+disparity, right? From going from labeling photos that humans took to having a dynamic camera in
+the world that captures video on an ongoing way and has intelligence about which parts of it matter
+or which parts are recognition-worthy. So, that's my theme, and then I'm going to talk about that
+on a few fronts. One is to look at how to have systems that learn in an embodied manner. So,
+if you think about snapshots on the web as disembodied, right? Because they're just these moments in
+time, you know, that humans took. Well, then if you have embodied learning observations,
+you might be able to do something more. And so, take this as a loose inspiration, you know, we
+certainly know biological systems build up their visual representations, not from flashcard learning,
+like the web photos you could take to be, but instead from interacting, moving in the world and
+having the context of that motion and interaction as part of the learning process. So, you know,
+think of a baby doing this, for example, and there's, you know, there's enough evidence on the
+cognitive science side, and that's actually crucial, you know, like I'll point to a study with
+kittens, a famous one back from the 60s, where if you deprive a kitten of the ability to control
+its own motion, it has severe determinants to visual perception development, even if it sees
+the same things that a kitten who can control its own motion sees. Interesting. So, so that's kind
+of the first thing you look at at that is motivation. We've been studying how to perform visual
+learning in a body context, and one of our steps in that direction is to take first person
+egocentric video. So, video in our case, this one's captured on a vehicle, where we don't just see
+the pixels in the video. We also can pay attention to what we call motor signals. So, physical
+measurements about how the agent is moving in sync with the video that we observe.
+So, now we're talking about kind of direction orientation of a vehicle in addition to the video
+that is capturing. That's right. Yeah. So, we look at the GPS coordinates and the heading of the
+vehicle and sensed from, you know, outside of the visual sensors, and now we look at them synchronized
+with the video stream. And then the idea is that this video stream let it be unlabeled, which means,
+you know, no human is set down and done some annotation on it. It's just video that's been captured,
+but the goal was to let the system discover the structure linking the two, so that it's building
+its own visual representation that's informed by this embodiment. So, more specifically,
+we posed it in terms of eagomotion-conditioned new-view predictions. So... Eagomotion-conditioned
+new-view prediction. Yeah, so there's a lot of words that wants what it... What we're saying is that,
+okay, suppose you are seeing something, you, the agent, of course, at a current moment in time.
+Now, can we have a representation where it's predictable for that agent? How things will look
+if it moves in a certain way? Mm-hmm. Okay. So, you can teach that from unlabeled video, right? If it
+knows senses its motion, sees what it sees, it's going to learn that connection between how I move
+and what I see as a function of my motion, so... And so, if I can just take a step to kind of
+paraphrase here, you know, we've seen there's a... You know, there's work that's been done on,
+you know, just taking still video from a single perspective and trying to predict future frames
+based on what the learning system has seen so far. And what you're doing is you're taking that
+a step further by coupling, you know, first of all, the learning system isn't static. It's, you know,
+it's in motion and it's field-of-view shifts. And so, you're trying to incorporate that signal
+into its ability to predict what it's seeing next as well. Yeah, you can definitely think of it
+that way. And furthermore, so both the dynamic camera and the embodiment or kind of physical motor
+signal being part of the learning process are distinct. And thirdly, the desire to have
+this be part of representation learning for better recognition. So, once this learning happens,
+the idea is this will give us, you know, we'll learn this embedding that is capable to do view
+prediction as a function of ego motion. And now you give us maybe a video, but also even a static
+photo. And that can be embedded in this space where those benefits of visual perception that
+you arrive at by paying attention to ego motion are there so that even the static frame,
+static image representation is stronger. And so, we'll tackle classic recognition tasks and
+bump them up because of this kind of so-called pre-training from unlabeled video.
+You're talking about embeddings here and representations. And I usually hear that in the context of,
+you know, word embeddings and things like that. And less so in the context of video,
+is that common or is that fairly common in the video world as well? Right. And so, the word
+embedding here, I just mean as a learned feature space. So, you come in with your x, which is your
+image or your video frame or your video sequence. And then there's some f of x you want to apply.
+And the f will be the thing you learn, which will embed x into a space that is more appropriate
+for what you're trying to do. Got it. Okay. Okay. So, that's kind of the challenge that you're
+going after. Like, where are you in terms of that research? Yeah. So, in this part of the work,
+we had some nice results come out. So, we trained this idea with video captured from a vehicle.
+There's a dataset called kitty that's widely used for autonomous driving kind of work.
+So, we take that video, no labels, learn representation from it. And then tackle a number of
+recognition challenges. I'll take one. So, we take a scene categorization task where your job
+is to name the category among 400 categories that a new image belongs to. Is it a cathedral? Is it
+a plaza? Is it a courtyard? Is it a hotel room? Etc. And what we found, just kind of a nutshell,
+is that with this unsupervised pre-training from unlabeled video, the system will have a 30%
+increase in accuracy compared to what it'll get if it's just training in the traditional way,
+which means those disembodied photos that are labeled. So, there's a particularly evident
+when you are low on training data. So, if you don't have a million exemplars for cathedral,
+say, but you have a handful, or some other, or any other class that sits in the long tail of
+objects, then this is especially important to have this kind of free learning from just moving
+around the world and looking at things. So, where does the labeling come in? Where did that come in?
+Yeah. Okay, right. So, we can learn this representation purely in an unsupervised way,
+and now I'll do any classification we like, you know, train a CNN train, a nearest neighbor
+cost fire train us for a vector machine, any, you know, depending on the capacity of the model required
+in the amount of labeled data you have, you know, go from this pre-trained representation to
+tackle it there, or, and we've explored two ways, or you could treat our video learning as a
+regularizer for the classification task and do it jointly. And so, your question, where is
+labeled data come in? If we have, when we have task-specific data that is labeled, then either
+we'll use it, you know, in this modular way, pre-trained and now trained for the supervised task,
+or jointly, where the video is kind of a supplement to the labeled instances you're using to train
+for the target task. Okay, so let's look at each of those in, in series in the first case,
+your pre-training on the video data coming up with your embedding and features and things
+like that. How does that feed into the training of the next model? Yeah. So, in that, that first case,
+it's very modular in that, now, just imagine, instead of starting x equals pixel vector,
+you start with x equals our embedding. Feature vector? Yeah. Okay. So, you're in a vector space,
+and so that's just like off the shelf. Okay. And so, that would have the advantages of being
+modular, you know, the recognition task you wish to tackle with this feature space can be,
+it can arise in the future, right? And the data doesn't have to be seen together. Okay.
+Whereas if you treat it the second way, this assumes you've got the task data for your task of
+interest in hand at that very same moment as you learned from the video, and so you jointly train them.
+Okay. And so, you've got some results that show performance improvements relative to,
+relative to what specifically, what model did you base line against? So, always apples to apples.
+So, whatever recognition model classifier would be used for that scene recognition task,
+and whichever label data it would receive, we take the exact same far method. So, for example,
+if it's a CNN, which we've tested, then the same, you know, we're talking about the same
+CNN architecture plus or minus this learning from a label video. Okay. Same amount of labels for both.
+So, that's the important baseline to say, if I just did everything the same way, but now I also
+have this benefit of watching video and knowing how I moved, then how much better does that make
+anything? Okay. Interesting. So, what else are you covering in your talk today? Yeah. So,
+this is the first thing I'll look at. And then from there, we transitioned because what I just
+described was learning from how an agent moves before a recognition task. And then we think, okay,
+not only do we have to, well, not only would we like to benefit from this ego-motion embodiment
+being in the world when learning, but also when acting or testing. So, we've been looking at
+active recognition. Active recognition is a problem where you are not passively given the data to
+recognize you. And I keep saying you and I am always talking about the system, right? The system
+is given an environment and it has to make choices about what observations to even collect
+to succeed in the task. So, active recognition systems would want to be able to know where to
+look around in the scene and sequence to decide what the scene is or to let to recognize an object
+or equivalently a robot with active recognition would be able to hold an object and turn it
+in the sequence of ways such that it rapidly deduces what the subject is. So, either manipulating
+your the embodiment or manipulating the objects itself to essentially get better information about
+what it's seeing. Exactly. And how do you go about doing all that? Yeah, right. And so, it actually
+flows well from the ego-motion-based learning. Now, you can imagine that if an agent's going to be
+smart about choosing its motions, one way to get smart about that is for it to be able to predict
+how things might look if it moved a certain way. Because if you can look forward in time or
+motion that way, then you can predict which motions you could make that would most reduce ambiguity.
+You know, I have a current set of posteriars over all the objects I know or all the scenes I know
+and then I can envision how things are going to perhaps change if I move in ways once
+you're n and it doesn't have to be discrete, of course. But then which of those n would most
+reduce the entropy of those posteriars, right? To say, okay, things are starting to converge more,
+I think the subject is getting more clear. So, that ability to look ahead is related to what I was
+describing for the ego-motion condition, view prediction. But you're not done with that. So,
+what we explored for first to tackle this is so-called end-to-end approach where we would
+jointly train modules to do all the important steps of active recognition. So, what are they?
+There's three. One is perception. So, a way to take the raw sense or input and map it into some
+internal representation that's useful for the task, you know, key to representation learning.
+Two is action selection. So, some component that makes that intelligent choice about which
+motion to make or which manipulation to issue. And then three, evidence fusion, which says,
+okay, this is happening in a loop. And so, as these observations come in, how do I aggregate everything
+I've seen to inform the next round of action selection? Or, you know, if I'm stopping to give my
+final estimate? Okay. So, it sounds to me like, is it fair to say that in a way we're trying to
+build curiosity in the model? Like, the way I'm thinking about it and correct me if I'm off here
+and I'm simplifying. But, you know, the robot is looking at a scene. It's just determining a set of
+probabilities of, you know, what future scenes might look like if it oriented itself in different
+ways. And one strategy would be for it to, you know, to orient itself in a way that has the
+the lowest, probably like it, where it's the most unclear about what's going to happen. So,
+as to learn the environment, which strikes me as like a curiosity type of motivation.
+Yeah. This is a great point you're making. In fact, at least to two things. So, one is,
+if that's exactly the right intuition. And in the case of recognition, it's curious for a goal,
+right? So, this is the case where there is some task that the agent knows it's learning to do well.
+And in fact, we're going to be learning this in a reinforcement learning manner.
+I was just going to ask about that. And so, the next, you can, the system could learn in two ways.
+It could learn it in a greedy, myopic way, which says I always want the next, what's called the
+next best view, you know, which would be roughly, you know, let's pick the one that most, you know,
+increases information gain. But you can also train these reinforcement learning systems for some
+budget of time that says, well, I'm, you know, I don't need to always make just one next best.
+I'd like to think about a sequence of motions that will get me to my resolution. So, you know,
+because in every step, maybe the agent can't teleport out of this building to another one,
+but it can make a sequence of motions that, in aggregate, it expects to have good influence.
+So, that's kind of analogous to tuning your Explorer exploit or how short-term the agent is.
+Right. So, right, how short-term it is is definitely really, and so it's saying, if you have a time
+horizon for decision-making, then you can train this big network consisting of all these modules,
+I mentioned, a perception and evidence, fusion, action selection, could be trained to target that
+budget. This is all controlled by how you specify that reward function, right? And you could also
+target it to be more instantaneous, just always greedily making the next best move. If you don't,
+if you don't have it, doesn't make sense to have a budget to target. So, we kind of explore both
+of those. And, but when you mention curiosity, it really rings a bell for me, too, because
+where we've gone since then, looking at this is to suppose, well, what if we have an agent that
+has to be smart of how to look around, not just for this task that I've pre-ordained, right?
+Not just for image and classification or whatever it is, but just for a system I'm going to deploy,
+it needs to be intelligent about looking around before that task gets defined. It's kind of in an
+absolute sense. And this is what starts to sound like curiosity, right? Because it needs to be
+able to jump into a new environment, look around, and have those look around motions be smart,
+but not purely motivated by a closed world of decisions that it's going to make.
+Right. You know, I think about that, you know, the far end of simplicity, like just looking around
+this room, objects on a table are going to be more interesting than a wall, for example. And so,
+you know, I think that some of the same things that we traditionally use for object detection,
+like features and edges and color variation and things like that might percolate out as signals for
+this kind of model. Is that right? Yeah, so you're right. So, what will a system learn if it's
+asked to be able to look around intelligently without a recognition goal? Right. And so,
+our expectation is it will learn to look at the places that are least predictable from
+everything else around. So, your example of an object on the table in the wall, well, once the
+system has seen a part of the wall, a lot of walls are smooth. And so, there's little need to
+evaluate many other glimpses on that wall, because with high probability, they're going to be similar.
+And you can learn that. And whereas, once an agent glimpses a part of a scene that's interesting,
+which can be more textured, which also means harder to
+infer missing pixels of, then it'll start concentrating some observations there until it becomes
+clear what, you know, by drawing on regularities learned before, for other scenes, you know,
+that would help you reconstruct those. Yeah, strikes me that one of the
+the differences between kind of the human visual system and the, you know, cameras is that,
+you know, we've got a focal area and then peripheral. And so, it seems like it's more important for us
+to, you know, move our heads around and kind of focus on different things where, as, you know,
+robot can just like do a 360 degree scan and capture the pixels of everything. Like, why do we even
+need this learning-based curiosity given the differences between cameras and vision? Yeah,
+it's a really good point. So, that's right. Sensing can almost, in some dimensions, is more complete
+for a robot, you know, like you said, it's 360 capture. And in fact, that's the kind of data we
+work with right now. But don't forget that the robot also needs to move in the world, right? So,
+even if I have omnidirectional observations at a place in space, what I need to know can be
+around the corner. And so, you think about, you know, if it's not just narrow field of view glimpses,
+even if you don't aren't restricted that way, you still have a need to move in the scene.
+Or something, I think about that case of an agent robot holding an object in which it's
+own manipulator is including part of it or, you know, part of the object is behind. So, even with
+omnidirectional view, there's content that's invisible. It's behind the object. Okay. Yeah. Okay,
+interesting. And was there another example or scenario that you walk through that you're planning
+to walk through in your talk? Oh, yeah. So, we've talked about kind of ego-motion and forming how
+the agent learns representation. Then we kind of bring that up into active recognition by learning
+policies for how to intelligently move around to make recognition decisions or just explore in a
+curious way. So, the last thing that I look at is instead of kind of how to look around as a
+agent-centered question, I think about it actually as a human-centered question. So,
+we were working with 360 video, which cried exciting media, Domain, a immersive video,
+and connecting to VR. And the way you right now watch a 360 video as a human viewer is a little bit
+of trial and error, right? Because you can't see what's behind you. And so, whether you wear a
+headset, whether you sit at a computer and mouse around on an interface like on YouTube to view
+the 360 content, you are in charge of deciding where to look, right? And so, it's a little bit of
+trial error in the sense that you may have to watch a video a couple times to really know where the
+interesting things are. And so, while 360 video is so appealing, even as a consumer for, you know,
+just capturing everything. So, I don't have to make those decisions at capture time.
+Well, you're still left with this decision-making at viewer time, right? So, we looked at this with
+the where to look question in mind. And what we've been developing is a way for learning how to direct,
+well, think of it as automatic video cinematography. So, can we learn how to direct a narrow field of
+you virtual camera within that 360 sphere? So, both in terms of its viewpoint, angle as well as the
+zoom. Okay. So, that you could map a 360 video into a normal field of video that's 2D and flat
+and planar. And interesting. Yeah, and got the stuff, right? So, and this is, you know, right away,
+that sounds... And there's a temporal aspect of this as well, because you're not, or I'm assuming
+you're trying to smoothly pan around this 360 view as opposed to flash, you know, some sequence of
+interesting things in it. Yeah. So, it has to be carving out a video path that has some kind of
+motion model as well. Okay. Not just... So, your question almost always to the two parts of the
+approach. And one is to figure out where are the pieces on this sphere that look capture-worthy.
+And then how do I optimize, yeah, a path to get them as well as possible. And now, I'm immediately
+kind of brought to two thoughts on how you would go about this. One is kind of the extension of all
+the stuff that we spoke about earlier where you're learning, you know, features of interest based on,
+based on the kind of the observations themselves and trying to identify, you know, the stuff we
+talked about previously, another would be, you know, like imitation learning, put the human in the
+heads that have a bunch of people look around and kind of trying to learn a model based on what
+they find interesting. Are you looking at both of those or... Yeah, we're actually pursuing something
+distinct, but the kind of the imitation learning would make a lot of sense. And it's something
+to consider, right? And you can just treat it as a supervised problem where, if I've seen where
+humans tend to look, or even better if I get to see video editors edit, then I've got, you know,
+good data to train with. Problem is that's, as you can imagine, that's going to be hard to build up
+enough data for potentially, right? So it's expensive on the annotation side. So our insight was
+that this actually can be learned from unlabeled video. And that's because people take a lot of video,
+that's not 360, that is normal field of view. Right. And of course, we know it's online. And
+for the more people kind of have selected video that's worth uploading. So what we do is have the
+agent, the learning algorithm look at hundreds of hours of unlabeled video on YouTube, a varying
+content. Right. So we'd like this to be content independent to build up a model of what human
+taking video looks like. Okay. And now you get your 360 content. Imagine chopping it up into all
+these glimpses throughout the viewing sphere. And over time, so there's space time chunks, then
+just trying to score these by saying, how, how much like this manifold of human taking video
+are each of these glimpses like? No, it just interrupt. Is there a lot of 360 video on YouTube? Yeah.
+Really? I know. Well, I didn't, you know, and I wasn't aware either until we started this project,
+maybe two, one and a half, two years ago. There is. And, you know, we've looked, started
+to look at some of the stats. I mean, we're on the research side, of course. But we found stats,
+like, you know, the 360 camera sales are expected to go by 100% every year for the next six years.
+I hope I got that right. You know, so there's huge growth, both in the, the sale on the use of the
+cameras plus the content is online. And yeah, you can download these 360 videos and 4K from Google,
+right? Right. That's what we do to get our data set. So that's how you acquire the data sets,
+put one by me again, what the insight is to. Yeah. So the insight is the points of interest there?
+Yeah, rather than have kind of an intensive annotated version of training our system where humans
+teach it where to look explicitly, will let it be implicit in free label because if I have
+massive collection of unlabeled video, these are all videos that humans took from normal field
+of view cameras. Then the notion is, when you give me a glimpse, and here a glimpse means some
+narrow field of view carve out from a 360 video, say, let it be five seconds long, say. Now, if you
+take out that glimpse and now do some computation to say, how close is it to this manifold of human
+taking content? Like based on some, in our case, 3D convolutional features of that glimpse,
+is it close to that space or is it really far? If it's close, that means it shares some visual
+properties. Indeed, in our case, what closeness will mean will be things like framing effects.
+So if I understand what you're saying, you've got 3D video, but you've also got regular 2D
+video, and you're mapping scenes from the 3D or you're trying to map qualities of the scenes from
+the 3D video to the 2D video to identify what looks like a human taken video, is that right? Exactly,
+yes. That's interesting. Okay. So that's where the kind of capture worthy measure comes from,
+and it comes from unannotated data, and it really does pick up on things like framing, composition.
+So if you have a 360 camera just bouncing around the world, I suppose not unintelligently driven,
+then a lot of the views are not well framed, but there's some portion of it that is, and so that's
+that's one thing that'll be learned, kind of the composition, the framing effects. You can potentially
+also learn content, right? So the kind of things that are worse filming versus the blank wall,
+no, the scene with the people, probably. Wow, really interesting. You mentioned that these
+three things that you talked about are just kind of one of a bunch of things that you work on in
+your lab. Can you give us an overview of some of your areas of interest? Yeah, so the other areas
+that we work on today, one, is looking at fashion. So we've been looking at, for a long time, we've
+been looking at semantic representations built on what are called attributes. So these properties,
+like fuzzy, flat, red, metallic, etc. And so this is kind of a way to connect visual properties
+with language. So we've been working on attributes for many years, including developing
+interactive image search techniques that exploit them. Like I want to find the image that's like this,
+or the image of a shoe, say that's like this, but pointier, that kind of thing. And more recently,
+we've been looking at fashion in the attribute space, but now at full body images of people and
+understanding things like style and trend forecasting and compatibility between items. So this is one
+project looking at fashion and vision. Okay. We touched on kind of two parts of my work. Really,
+one is embodied visual perception, which is kind of on this border of vision and robotics to do
+recognition in the world. Right. And we touched on 360 video analysis, which we're working in.
+The other elements of my group right now, we have some work looking at image and video segmentation.
+Okay. It's kind of very core vision type stuff of finding objects and video and images.
+And finally, how to do things quickly. So specifically recognition. So we're looking at how to
+have a system that can make only observations it needs in the sense of timely recognition.
+So if I have a very deep network, for example, but I can't afford to run the whole thing,
+can I dynamically choose which portions of it to run for a given new image? Or if I have a video
+where, you know, we talked about how to do this in embodied way, but even if I'm disembodied and
+I'm just a machine sitting there processing video, you know, what parts of the video need
+attention and what features should I extract on each part? And so what specifically are we
+are in the, let's say the simplest case of an image, what specifically are you doing there?
+Yeah. So what we've been doing most recently, and this is a collaboration with my colleagues
+at IBM. We've been looking at if you have, you know, ResNet. So this is one architecture that's
+quite successful. Has these skip connections between layers and blocks. So we have an approach
+that will use reinforcement learning to come up with a policy that is input condition to decide
+how to route through that network dynamically so that, you know, ideally maybe you'd like to run
+every single one. But with time pressure, you will then decide which to keep and which to drop.
+And so that means, let's see, I mean, for a fraction of the block computation will nearly meet
+the even actually match the accuracy of the full network running every area.
+Oh, that's really cool. Well, I really appreciate you taking the time out to chat with me this
+morning. Any final words or ways for, you know, places to point folks, ways for folks to get in touch
+with you? Oh, sure. Well, thanks. Of course, for having me, it's great to have this discussion.
+People who are interested in this work can check out our website from my homepage and we share
+the papers, but also the code and data surrounding all the things we're doing. So I'm happy to see
+anyone being able to use them or build on them. Oh, great. We'll definitely link to that in the show
+notes. So folks will be able to find it easily from there. All right. Well, Kristen, thanks so
+much. I really appreciate it having you on the show. Okay. Thank you. Nice talking with you.
+All right, everyone. That's our show for today. Thanks so much for listening and for your continued
+feedback and support. For more information on Kristen or any of the topics covered in this episode,
+head on over to twimlai.com slash talk slash 85. To follow along with the AWS reinvent series,
+visit twimlai.com slash reinvent. To enter our twimla 1 mil contest, visit twimlai.com slash twimla 1
+mil. Of course, we'd be delighted to hear from you either via a comment on the show notes page
+or via Twitter to at twimlai or at sam charrington. Thanks again to intel nirvana for their sponsorship
+of this series. To learn more about their role in deep lens and the other things they've been
+up to, visit intel nirvana.com. And of course, thanks once again to you for listening and catch you
+next time.

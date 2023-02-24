@@ -1,0 +1,327 @@
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+people, doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington.
+I want to start out with a huge thanks to everyone who joined in on our My AI discussion
+over the last few weeks.
+We received some outstanding entries to the contest, and now it's your turn to check
+them out and vote for a winner.
+Do this by visiting our contest page at twimbleai.com slash My AI.
+Swimming remains open through Sunday March 14th at 11.59pm Eastern time.
+A quick bit about the next Twimble online meetup.
+The meetup will be on Tuesday March 13th, and Sean Devlin will be doing an in-depth review
+of reinforcement learning and presenting the Google Deep Mind paper, playing Atari with
+deep reinforcement learning.
+Get on over to twimbleai.com slash Meetup to learn more or register.
+For today's show, the final episode in our Black and AI series, I'm speaking with Zena
+Tavarez, a PhD student in both the Department of Brain and Cognitive Sciences and the Computer
+Science and Artificial Intelligence Lab at MIT.
+I spent some time with Zena after his talk at the Strange Loop Conference, titled Running
+Programs in Reverse for Deeper AI.
+Zena shared some great insight into his work on program inversion, an area which lies
+at the intersection of Bayesian modeling, deep learning, and computational logic.
+We set the stage with the discussion of inverse graphics and the similarity between graphic
+inversion and vision inversion.
+We then discussed the application of these techniques to intelligent systems, including
+the idea of parametric inversion.
+Last, but not least, Zena details how these techniques might be implemented and discusses
+his work on reverse flow, a library to execute tensorflow programs backwards, and sigma.jl,
+a probabilistic programming environment implemented in the Dynamic Programming Language, Julia.
+This talk packs a punch, and I'm glad to share it with you.
+Let's get to it.
+Hey everyone, I am here at the Strange Loop Conference, and I have the pleasure of being
+joined by Zena Tavarez, and Zena is a PhD student at MIT, and he is, actually, he spoke
+this morning here at the conference on Running Programs in Reverse for Deeper AI, and I'm
+really interested in hearing more about what that's all about.
+So welcome.
+Thank you, Zena.
+Great to have you on.
+So why don't we start by having you tell us a little bit about your background, how
+you got interested in AI, what are you up to at MIT, all that stuff?
+Yeah, so I'm from London.
+I studied electronic engineering for my undergrad, and I think I first got into research.
+I became interested in research when I studied abroad in Japan, and so I went to Japan,
+and I worked in this lab, the PI for that lab, the advisor for that lab.
+His famous Japanese guy, you might have seen him, he builds these really lifelike robots,
+so he builds them of people in the lab, so look, there's one of him, and there's one
+of some of the lab students, oh wow, and so that was my first kind of touch of research,
+and I thought, this is a cool environment, and also I thought studying the brain is a
+cool thing, and so I finished my undergrad, I did a master's degree, which is in basically
+neuroscience, and so then after that I thought, okay, let me come to the States, and I came
+to MIT, and I joined MIT in the BCS, which is the brain and cognitive sciences department,
+so it's a mixture of neuroscience and cognitive science, which is basically psychology,
+okay, and from there I kind of transitioned more into the computer science side, and so
+now I sit in C cell, the computer science AI lab, and where I work on basically using
+ideas from computer science and programming languages to study things about how the mind
+works.
+But wow, wow, sounds like a, you've been a bunch of interesting places, for sure.
+So I read the abstract for your talk, running programs in reverse, and it sounds like
+that's a thing, like programming version, I hadn't heard about that before, you tell
+us a little bit about programming version and like, how, where's the intersection between
+that and AI?
+Sure, so maybe the best way to describe it is how I came to the problem, and so there's
+a professor at MIT called Just Ten and Bound, and when I joined MIT he was talking about
+this idea.
+Just Ten and Bound, the networking guy, or operating systems, I don't think so, he's
+more of a psychologist, a co, okay, I think there's another Just Ten and Bound that wrote
+a book, and I forget which book that we use in, in my engineering program, either networking
+or operating systems or something.
+Yeah, well I think it's the same thing, it could be the same thing, anyway, so Just Ten
+and Bound, MIT and MIT, okay, and he told me about this idea of inverse graphics, and
+the way he describes it is basically like this, so you can think of rendering this process,
+which using animation films like Toy Story to go from a 3D representation of the world
+to 2D images or a video that you're going to see when you go to the movies, and you
+can think of vision as in seeing as the inverse of that process, in the sense that I get
+into my eyes two dimensional images, and somehow from now I infer the three dimensional
+structure of the world, I infer the geometry I can figure out where the light saw, I can
+figure out where I am in relation to the world, and so there's this like inverse relationship
+between rendering or graphics and vision, okay, and so it's not, I don't think it's his
+idea, it's an old idea in computer vision, but nobody's really taking it literally,
+right, and so some other people in Josh's lab, like Tedges and Elka, they've worked on similar
+projects, and the idea I had was okay, what if we like literally literally took this
+idea, like what if we took a rendering algorithm similar to the kind they use in computer graphics
+and tried to run that algorithm backwards, from the output, from the image literally backwards
+to the 3D structure, oh wow, okay, so that was the kind of the motivation, like how I came
+to this project, and then after we started, I mean there's many issues that arise, but
+we realized that it's actually kind of a general framework that we can use to think about
+many different kinds of problems, okay, and it sounds like at least in the graphics case,
+it works generally, I mean it works in the research sense, right, so I mean it produces
+something, yeah, we have a working prototype for a particular kind of graphics, so we can
+take in 2D images from a fairly primitive voxel renderer, so the images in the output
+are 3D voxel shapes, so we can't do like super complicated geometric structure, but we
+can do kind of cool interesting shapes, and we're doing it in a way which I don't think
+anybody has done before, so we hope that we can scale up to these, to real realistic
+scenes, but that's going to require a lot more work, okay, okay, and so what you were talking
+about here was applying that to AI, so yeah, so I started with this example of inverse
+rendering, inverse graphics, right, but the way I opened my talk was talking about this
+idea of mental simulation, so mental simulation is an idea, it's an old idea in psychology,
+and the basic idea is that the way that you can reason about the world, like the way that
+I can pick up objects or know that something is stable or unstable, is that I have a kind
+of simulator in my head, right, and so I look at the world, I can show up to model of
+the world inside my head, and then I can run that simulation and figure out what's going
+to happen, so I can figure out, oh, this is, this is, this object's not stable because
+in my simulation it falls over, right, and so one of the ways that we're trying to basically
+extend this idea of inverse graphics to more general problems is say, or can we like
+do inverse physical simulation, right, so for example, you could say things like, oh,
+what I want to do is fold some clothes, right, or I want to, you know, pick up some object
+in some, you know, in some dynamic environment, and so one way to frame that problem is to
+say, well, I have some end state that I'm trying to get to, let me run a kind of a physical
+simulation backwards and say, okay, what are the inputs that have to go into that system
+for me to reach the desired end state, okay, and so that's the way that we're trying to solve
+the problem, I mean, many people approach the problem in various different ways, I would
+say that the kind of the main distinguishing point about our approach is that we really
+try to take this idea literally, we take real physical simulations and we're trying
+to run them backwards, the tools that we've developed, they're quite general, so they
+can apply to many different problems, so if you can reformulate your problem in terms
+of a kind of programming version, then hopefully we can have a like a stab at trying to solve
+it.
+And so do I need to reformulate my problem in terms of, in the terms of programming
+version, or is that something that your tools will do or help me do?
+That's something you need to do, but I mean, it's not like, you're speaking of me reformulating
+my problem at the level of a problem statement, or like, I've got the, okay, not my program.
+Yeah, yeah, so the problem statement, that's what I'm talking about, so if you can formulate
+your problem in your head or like, as a former programming version, and what I would argue
+is that actually many problems can be formulated in terms of programming version, right, because
+programs are very general things, right, can you give us some examples of ones that will
+help us wrap our heads around the concept?
+Sure, so, okay, so for example, and I'm not saying that we can solve this kind of problem
+yet, right, but for example, you know, if you had a big kind of quantum simulator, right,
+which takes this input, some molecules, and as output, you know, it says, okay, how efficient
+would this molecule be as, you know, in a solar panel, for example, okay, so this is like
+a forward simulator, it does all kind of quantum simulations, and it says, okay, the efficiency
+of this molecule, you know, is 90%, whatever, right, so you can think of the inverse of that
+process as going from the efficiency that you want back to the molecule, so now you have
+a kind of discovery of chemicals, right, got it, or optimization, right, so, you know,
+optimization, optimization comes up in all kinds of fields, and so you have some loss function
+which takes in something and says, okay, how good is that thing, right, if you can invert
+an optimization, so if you can invert a loss function, you can do optimization, you can say,
+okay, here is the cost that I'm trying to achieve, right, what is the input that, you know,
+realizes that cost, right, it strikes me from hearing the examples that you gave that,
+you know, the challenges that the, in the forward direction, the output space is like much more
+constrained, it's a number, right, whereas in the reverse direction, the output space is massive,
+if not infinite, yeah, yeah, yeah, exactly, so, yeah, so when I first came to this, you know,
+this idea, you know, I remember I was sitting in one of Josh's, just telling Bob, so that
+means, I think, okay, why don't we just try and run this program backwards, right, and obviously,
+the first thing you get into is that often these functions or these programs are not invertible,
+right, which means that there are many outputs which map to the same, so many inputs which map
+to the same output, and so in the inverse direction, you have a choice, like, which way should you go,
+which way should you go backwards, right, if I've got any x's which map to y, and I'm going
+backwards from y to x, like, what should I choose, how do I do that, right, and so the theory that
+I came up with, we now call parametric inversion, okay, and basically says, if you're trying to invert
+a non-invertical function, so there's multiple x, there's multiple inputs which map to the same
+output, we can parameterize that choice, okay, we construct this new thing, we call it a parametric
+inverse, so we'll take in some value y, but also a parameter theta, and give you back one of the
+x's which map to y, so just to give me a very simple example, absolute value function is not invertible,
+right, so because if I take the absolute value of five, I get five, yeah, if I take absolute value
+of minus five, I get also get five, right, but I can construct this thing called a parametric
+inverse, and it will take in some value, let's call it y, five in this case, and the parameter,
+let's say it's either one or minus one, and it will just return this parameter theta times y,
+right, so the point is that the output, depending on your choice of theta, will be either
+five or minus five, right, obviously that's a kind of a trivial example, but the intuition or the
+idea that we had was, oh, you can define these simple inverses for all of our simple functions,
+like absolute value, addition, multiplication, sign, and so on, and it turns out with a little bit of
+work, actually you can define inverses for much more complicated functions, or much more complicated
+programs. And is the idea then for, with the example that you gave around finding a molecule that
+achieves x, you know, a level of efficiency in a solar panel that you would be able to
+constrain by some set of molecules, or for example, that would be your parameter.
+So in this case, so, yeah, so suppose you give me some program, it's forward simulation,
+right, and I think I can construct this parametric inverse, so you'll have many parameters,
+and as you vary over the parameters, you'll get out different molecules with the desired
+efficiency. And so if you have some further constraints, I don't know, maybe you want a small
+molecule, or maybe you want a molecule that you can synthesize, then you can add these constraints
+to the, you can impose those constraints on the parameter space, right, and so a parametric
+inverse basically gives you the choice, you choose a parameter value, and it'll be back one of
+like a different input which maps to the same output. And so you mentioned that you have
+your current researches, or you mentioned in your abstract, I should say your current researches
+applying this specifically to TensorFlow programs, and inverting the computational graphs for
+deep neural nets. So yeah, so we built a lot of machinery around TensorFlow programs.
+Okay. It's not so much that we're focused on inverting neural networks, although that's
+something that we've been considering, just that TensorFlow programs have a nice kind of
+representation which is amenable to our algorithms, right, and so TensorFlow, you know,
+the graph structure, the graph structure, yeah, so people often use it for, you know,
+neural networks, but really it's a general kind of programming language, like in a better
+programming language. And so we have a tool, some GitHub, in some kind of slightly broken
+state, but one thing I would say is that more recently we've been moving over to using the
+Julia program in language. Okay. And so we've kind of been building our own version of TensorFlow
+in Julia. It's still thing. Yeah, so we still can compile down to TensorFlow if you want to use
+TensorFlow. Okay. TensorFlow has all these great things for optimization and so on that we want to,
+you know, I don't want to re-implement. Right. So we can still compile down to TensorFlow and Python,
+but we basically we move to Julia because, um, basically because of the type system it allows us
+to do a lot more things more efficiently with a lot less code. So that's the, that's the
+direction we're going. And I would also recommend other people check out Julia if they get the
+chance. Huh. So can you give me some examples of the application of this AI systems or deep learning
+systems? Yeah. So, so the ones, I mean, the ones I've spoken about in vision. So, you know,
+basically if we're trying to build robots that act in the real world, they're going to have to
+manipulate objects in the real world. Right. So, you know, for example, you can pick up a cup,
+right. This cup on the table and you know, it's, you know, it's a little bit elastic. It has a
+particular shape. It has some, you know, resistance. All these things you know about the physical world
+allow you to freely interact with the physical world. Right. And so you have some physical
+intuition. And I would argue that in order to build robots that aren't so rigid in how they
+interact with the world, we're going, we're going to have to kind of embed that physical knowledge
+into their brains as well. Okay. And one way to do that is to allow them to have a simulator in
+a mind. But many of the things that they'll use this simulation for are kind of inverse simulation.
+So they'll, you know, for example, they may see the cup on the floor and they can figure out,
+oh, it fell over at some point in time. Or to go to the lower, like the lower perceptual things,
+like how does a robot learn to see? How does a robot see in the world? Well, it's got to take in
+images, you know, in its camera eyes and somehow figure out the geometric structure of the world.
+So it knows that the door, you know, is so, you know, so far away, it can just
+ambiguous between the colors of the lights versus the color of the material. So I think many of
+like the core, I don't have a like a concrete thing that we're trying to build, but I think many of
+the core problems in AI, you know, this kind of technology is relevant to me. It's still a research
+project. I mean, yeah. So it's kind of thing that we do. And so you were careful to kind of
+distinguish between TensorFlow as a general programming framework and it's common use in deep
+learning. But does the work that you've done and the results that you've seen with reverse flow
+apply to deep neural nets that are constructed in TensorFlow? And like, what are there any like
+practical examples that you can cite of taking like a real TensorFlow program and doing this program
+in version to it and having it produce something? Yeah. So there was a lot of, I mean, there's a
+lot of work with like adversarial examples recently. And like, but before, you know, those work
+basically say, okay, if I've trained some neural network, I want to find out, you know, what
+inputs would cause a kind of weird misclassification. People have worked on this for a little while.
+And so in some sense, we can invert neural networks in a kind of, in a sense that, you know,
+even a complicated neural network eventually just boils down to some sequence of primitive operations.
+Sure. Basically multiplications, sounds, and some right, nonlinearity. Even that nonlinearity
+also boils down to even simpler things. So because our inversion algorithm is defined in terms
+of these primitive operations, in principle, we can invert, you know, a neural network with
+the current framework. But in practice, it's not the best way to do it. And so one of the things
+that we've been working on is how can we kind of take a better approach to inverting neural networks?
+And so to the second part of your question, like, why might you want to do that?
+But for me, I think the most interesting application is, again, inverting models of the world. So
+I've worked on inverse graphics. And to do that, I write down a normal render in algorithm.
+I happen to write it in TensorFlow, but, you know, I could have written it in Python or see
+or so on. But I think humans, we learn algorithms. We learn algorithms, you know, from experience.
+And so it'll be nice if we could take a learned algorithm. So something like a neural network
+and also invert that. So I do, I can do inverse graphics. But the algorithm that I'm
+inverting is a more realistic version of reality. Is there an implication there that you're
+inverting not a, I guess the picture that I had in my head of this was that you're
+not you're inverting a, I guess an architecture absence of like having been trained.
+Yeah. But it sounds like what you're saying is you're, you know, the learning is coming in through
+the training. And so we're inverting this trained. No, it's not something that we're doing right now.
+Right. Right now we think conceptual. This is conceptual. I mean, maybe like a better example would be
+in like physics and dynamics. So we can build pretty impressive physical simulators that work
+well for, you know, rigid bodies and, you know, some elastic bodies. But they're not so good at
+things like hair, for example, and they're not so good at simulating things like cloth. And yet
+humans can still, you know, manipulate cloth. We still have a good intuition about how that works.
+And so I think a learning approach could supplement that so we can maybe have some part of that
+model which is, you know, handwritten and some part of that model is learn from experience. And there
+are people who are working on this right now. It's interesting. So one of the examples that
+comes to mind for me is there are some folks at Berkeley in their intelligent robotics lab that
+are applying reinforcement learning to teaching a robot how to tie a knot. Right. Right. And a rope.
+And so, you know, they're, you know, the rope, the rope is basically trying to mess around with
+the rope and learn the rope dynamics. And it sounds like, you know, the approach that you're describing
+would be, I don't know, how, how would the approach you're describing fit into that? It's like,
+once you learn this model for kind of basic rope dynamics, you can invert it to what is the
+conceptual thing that you're inverting it to? So like the way you have to formulate this,
+formulate it in this way, you'd say, okay, I have a model of, you know, rope dynamics.
+Right. And you can think about this as a, probably a temporal model, right. So the time is
+available. And I have some desired state, like I want, you know, after some amount of time to
+whatever, right. I want the rope to be in a knotted state. Right. And so the inputs that
+at system are my actions. And obviously the system also acts in the absence of me doing anything.
+Right. Right. And so it's the inversion in the sense that I have to figure out what are the
+actions that I need to input into the system for me to tie them not. Right. Right. And so this is,
+I'm supposed to, these actions produce this model. Right. And so like, I mean, in some ways,
+you know, people have an intuition. It's like, if I want to do something, like, what do I have to
+do for that to be true? Yeah. And so that's how you would formulate the problem in this way.
+Um, but the rope dynamics, as I'm saying, as I've been saying, this is something I think you
+could learn. Right. We don't, I mean, maybe people do have, you know, good models for rope dynamics,
+I'm not sure. I think it's so work in progress. Right. Okay. So yeah.
+Interesting. Interesting. So what else did you cover in the talk?
+So the third, I mean, the first, I talked a bit about Julia. I would say that the first,
+you know, 10 minutes was, actually, I talked a little about psychology experiments.
+Okay. Um, from what perspective? So there's an experiment from the 1970s. I mean, so
+these are all about this idea of mental simulation. Okay. And it's kind of, you know,
+it's kind of hard to describe without diagrams, but the basic idea, it's called mental rotation,
+the basic idea is that you can see different shapes. And they're either the same shape,
+but rotate it from different angles or their different shapes. Like different shapes entirely.
+Okay. And so people did these studies where they said, okay, look at many of these shapes and
+say whether you think they're the same or whether you think they're different. And what they found
+is a very tight linear correlation with the angle of rotation and the amount of time it took people
+to respond. Okay. Like, lending some support to the idea that the way people answer this question
+is that they look at these, they look at the shapes and they do a kind of mental rotation. And they
+say, oh, I can rotate shape A into shape B. And like, if they're more, you know, if they're more
+rotated, they're longer than simulation takes. Yeah. And so like a whole subfield of psychological
+research came out of that idea. And so some part of my talk was saying, okay, this is, you know,
+obviously there's a lot of who work there. And I always see they've done a lot of studies,
+can we take that idea and make it computational? Can we build computational models of it?
+And can we build an AI that can do something similar? And if we were to do that, what kind of
+technologies would we need? What kind of algorithm would we need? So like, personally, I'm
+motivated by like core interest in small studies like this, which pinpoint something interesting
+about how the mind works. And then you realize that despite all the kind of core stuff that's
+happening in AI at the moment, deep learning, there are all these really simple things that we really
+haven't even got the right way to think about. Right. And so those are the things that interest
+the most. Right. Right. Cool. And then you mentioned Julia. You mentioned the type, the type safe
+aspect of it. Is Julia something that comes up a lot in the context of AI? Does it lend
+itself to that type of work? Specifically, I haven't heard it come up in that context much.
+Yeah. So I'm in the main frameworks for AI definitely in Python. Sure. Right. And I guess
+that's taught, which is a lure. Right. But I would say Julia is building momentum. So Julia,
+I mean, it came out of MIT and the people who did it, you know, well, kind of data scientists,
+maybe not machine learning people as such, but people who use MATLAB or see, I think that
+I was watching a guy watching a talk. And one of the main developers who said he had this
+huge stack of C, R, MATLAB, and Python. Right. And it's like, why is it so complicated? And so
+that was kind of the birth of of this language. To the main point, so that one, it's very fast.
+Okay. It's dynamic. It's also compiled. And it has a kind of interest in type system,
+like a multi-method dispatch type system. I mean, it's what does that mean?
+So like in an object-oriented language, like Python, for example, or C++, you have some
+object, like, I don't know, you have like cat, and you do cat dot, you know, make a sound, right?
+Cat dot meow. Cat dot meow. Um, in Julia, the methods, so this is what people call a single
+dispatch, right? But in Julia, the methods are not part of the object. They live, they live in
+like a separate space. Okay. And so you would do meow, which takes in an object of type cat,
+and it would meow that cat. And so obviously you can do more things. You can have meow
+taking an object of type cat and some other object, dog and, you know, the cat meow as a dog.
+So it sounds like a, you know, a simple thing, but it turns out that if you build your language
+on that principle, lots of nice, elegant features fall out. Um, is this related to the content
+of mixes? It's, you know, it's definitely not used in machine learning so much, but I would say there's
+a few packages like flux.jl. There's also a TensorFlow binding, TensorFlow.jl. Okay.
+Um, and so I think it's getting momentum. And I think because it's built on like a, like a nice
+set of core principles, I think actually it has the opportunity to strive as a machine learning,
+language. Okay. That's what I want. Nice. Nice. And does it, it presumably, it has some kind of,
+you know, native or provided by a package, uh, strong notion of matrices and arrays and all
+that stuff. Yeah. Yeah. So yeah, all of that stuff is. Oh, that's there. And it's really well designed
+as well. They put a lot of thought into how to take what's good about MATLAB, discard, what's bad.
+And so you have multi-dimensional arrays and you have all the kind of things that you would expect
+from like a numerical program language. Right. And it's fascinating. Also, there's like a GPU
+library now so you can call native CUDA. Okay. So there's a lot of stuff. Okay. Cool.
+Uh, did we hit on everything? Did you cover it in your talk? I think so pretty much. Yeah. Awesome.
+Awesome. Well, thanks so much for taking a few minutes to chat with us. All right. Thanks a lot. Appreciate it. Thanks.
+All right, everyone. That's our show for today. For more information on Xenna or any of the topics
+covered in this episode, head on over to twimlai.com slash talk slash 114.
+And definitely remember to vote for your favorite My AI video at twimlai.com slash My AI.
+And of course, thanks so much for listening and catch you next time.

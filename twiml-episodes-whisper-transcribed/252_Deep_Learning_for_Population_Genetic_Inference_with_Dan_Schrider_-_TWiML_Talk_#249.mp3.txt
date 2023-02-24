@@ -1,0 +1,569 @@
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+people, doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington.
+Today we're joined by Dan Schreider, Assistant Professor in the Department of Genetics at
+the University of North Carolina at Chapel Hill.
+My discussion with Dan starts with an overview of population genomics and from there, digs
+into his application of machine learning in the field, allowing us to, for example, better
+understand population size changes and gene flow from DNA sequences.
+We then dig into Dan's recent paper, the unreasonable effectiveness of convolutional neural networks
+in population genetic inference, which was published in the molecular biology and evolution
+journal.
+The paper examines the idea that CNNs are capable of outperforming expert derived statistical
+methods for some key problems in the field.
+Before we dive in, a quick thanks to our friends at Pegasystems, sponsors of today's show.
+Pegaworld, the company's annual digital transformation conference, which will be held
+at the MGM Grand in Las Vegas from June 2nd to 5th, is just a couple of months away now.
+I'll be attending the event as I did last year and will once again be presenting.
+In addition to hearing from me, the event is a great opportunity to learn how AI has
+applied to the customer experience at real-pecker customers.
+As a Twimble listener, you can use the promo code Twimble19 for $200 off of your registration.
+Again, that code is Twimble19.
+Hope to see you there.
+And now on to the show.
+Alright, everyone.
+I am on the line with Dan Schreider.
+Dan is an assistant professor in the Department of Genetics at the University of North Carolina
+at Chapel Hill.
+Dan, welcome to this week in Machine Learning and AI.
+Hi, Sam.
+Thanks for having me.
+Awesome.
+It's great to have you on the show.
+So you have an undergraduate degree in computer science, but you are now an evolutionary
+biologist.
+Can you tell us about that transition and how it led you to work in machine learning?
+Sure.
+Yeah.
+So it's actually sort of a series of transitions.
+And it started when I was in undergrad, I was studying computer science.
+I got into that field because I liked to write code in high school.
+I didn't really know what I was going to do with it.
+And during, I believe, my sophomore year, I started going to seminars about sort of
+various topics in computational research.
+And I heard about this thing called bioinformatics.
+And it turned out that you could write code to do research in biology.
+And I thought that sounded amazing.
+I always sort of liked the idea of being a scientist, though I didn't know much about
+biology at the time.
+And the night after that seminar, I immediately started looking into taking biology courses
+and sort of shifting focus.
+And from that moment forward, I was training to become a biological researcher as well as
+a, you know, someone with computer programming skills.
+I was not sort of keen on the idea of being a software engineer.
+And yeah, when I heard that, oh, someone like me can, you know, be a biologist.
+I thought that was really cool.
+So I started doing that.
+And when I wrapped up my degree, I decided to stay at Indiana University and started working
+there with Matthew Hahn, who is my PhD advisor there.
+And our area of research was population genetics, which is a subfield of evolutionary biology
+where you're sort of looking at the evolutionary dynamics of gene sequences, especially in
+the recent evolutionary history.
+And you do this by looking at sort of the patterns of genetic variation that are present
+within a population.
+So you go out to nature, sample a bunch of individuals, sequence their genomes, and see
+what sense you can make of all the variation there.
+Started that at the beginning of grad school, fell in love with it, and haven't really looked
+away since now you might be gathering that this involves a lot of data analysis, a lot
+of sequence analysis.
+And we're interested in population genetics with trying to tease apart the different
+evolutionary forces that are shaping patterns of genetic variation, things like natural
+selection or demographic events such as population size changes, like population crashes
+or expansions, and all of these things sort of leave their footprints in patterns of genetic
+variation within species.
+So we're sort of interested in going backwards, taking these patterns of variation and making
+inferences about the evolutionary forces at play.
+And it turns out that machine learning is a great way to go about doing this because
+you have a lot of high dimensional data and we're trying to sort of, you know, churn out
+as much information from it as we can.
+Very cool.
+One question that just jumps out at me is you mentioned that your study or maybe evolutionary
+biology in general is focused on recent changes in genomes.
+What does that mean in this concept?
+Yeah, certainly clarify.
+Population genetics, my sort of subfueled within evolutionary allergies, is often more
+concerned with recent changes because the recent evolutionary events, because those are
+the things that shape present-day patterns of genetic variation.
+And so how recent is that in this context?
+Yeah, so it depends on the organism and, you know, there's sort of theoretical expectations
+for sort of how far back in time you can see based on present-day patterns of variation
+and without going into the theory, the idea is essentially that if you take one, we'll
+start with one human individual, so humans have two copies of each chromosome, one from
+mom, one from dad, and if you compare those two copies, you'll see a bunch of differences,
+and that is because these two chromosomes, at some point in the past, were derived from
+the same ancestor, but enough time has passed since then that mutations have occurred and
+everything, and therefore you see differences between the two.
+So we expect that those two chromosomes will have been separated, you know, on separate
+sort of evolutionary trajectories for the last two end generations, wherein is the population
+size, so that's sort of the expectations.
+For humans that turns into something like a scale of hundreds of thousands of years,
+and using populations, genetic approaches, you have more resolution to say something about
+kind of the more medium, the intermediate and recent subset of that range, so up until
+the last 50,000 years or so, we have a lot more power to see what's going on, and once
+you get back sort of half a million years ago, you're sort of running out of information
+there with that, that's sort of the time range that we're talking about.
+And to put that in some context, half a million years in humans, you know, they can compare
+that to the time since our split with chimpanzees, which was about five to six million years
+ago.
+Maybe walk us through some of the biological concepts that might be handy in kind of
+exploring what you do and how you apply machine learning.
+Sure, so I think sort of the key concept is that we're dealing with a sample of genomes,
+so it's not cost effective to sequence every genome in the population, so we draw some
+random subset and sample them, and then what we get is a string of letters, A, C, G, and
+T is for for each of the individuals that we've sequenced, and then we're sort of putting
+that together into this matrix where each row in the matrix is one genome sequence, and
+each column in the matrix is one site along that genome as we're moving along.
+So that the human genome, for example, is about three billion of these sites.
+Now not every one of those sites will exhibit variations.
+There's not always useful information there that we're going to look at, but you know,
+there's a lot of columns in this matrix.
+So that's sort of the data that we're dealing with, then there are a number of questions
+that we're interested in answering with that data, one area of research that has been
+a major focus of mind for the last several years is looking for the signatures of natural
+selection.
+So if a new mutation shows up in a population and is harmful, then it will be rapidly
+removed by natural selection because individuals bearing that mutation will be less likely
+to reproduce.
+And therefore in that region of the genome, you might expect to see a deficit of diversity.
+If on the other hand, a new mutation appears and it's beneficial, then it will rapidly increase
+in frequency because individuals harboring it are more likely to survive reproduce and
+leave offspring. So after some number of generations, this mutation has increased in frequency
+to the point where it has replaced the ancestral version of that site in the genome.
+And this will also create a sort of distinct characteristic signature of selection that
+we can try to uncover by using some of these computational techniques.
+So yeah, there are a whole number of other interesting areas in population genetics that
+are doing similar types of research.
+We're taking this sort of input matrix and trying to infer what is going on there.
+But the natural selection question has been one that's especially near and dear to my
+heart over the last few years.
+Does that depend on or assume that you are doing a complete sequence of the genome for the
+samples that you're working with or are you able to make inferences based on partial
+sequences as well?
+You can use partial sequences.
+In fact, population genetics as an empirical discipline has existed for quite some time
+long before we were able to sequence entire genomes, especially if organisms like humans
+where we have this large complex genome.
+Yeah, there's sort of, we refer to this as kind of a shift from population genetics to
+population genomics because for much of the field's history, we were interested in what's
+going on at say one gene rather than looking at patterns of variation across an entire genome.
+But now with increases and the speed and cost effectiveness of DNA sequencing technologies
+were now able to look at variation at genome-wide scale.
+So yeah, you're not limited to cases where you have whole genome data, but it's getting
+to the point now where anybody can sequence a gene, anybody who has a lab and modest research
+funding can sequence a fairly large sample of genomes.
+And when you're doing the type of experiments that you describe or you're trying to understand
+natural selection, is the implication of what you describe that you're kind of fundamentally
+looking at stable sections of the genome as opposed to those sections of the genome that
+tend to exhibit a lot of variation, or are you looking at those as well for different
+things?
+Yeah, so in my work, a lot of what I do is I'm sort of trying to walk along the genome
+and look at how sort of the landscape of variation changes.
+So you'll have some areas where there's a lot of variation, somewhere there is not.
+And we try to make sense of that by sort of segmenting the genome into these different
+classes or evolutionary models.
+So this chunk of the genome looks like it's being shaped by positive selection, which
+is that scenario where beneficial mutation has recently increased in frequency, or this
+region of the genome seems to be experiencing negative or purifying selection where harmful
+mutations are being removed.
+And this region of the genome seems to be evolving relatively free from selection.
+So mutations don't really affect fitness.
+They're just kind of drifting around randomly over time.
+So their frequencies are fluctuating, but it does nothing to do with any sort of selective
+benefit or harm caused by the mutation.
+So yeah, basically I'm trying to figure out how much of the genome is evolving under
+one particular model of evolution versus another, and so on and mentioned in the landscape
+as you move across chromosomes.
+And so you recently published a paper called the unreasonable effectiveness of convolutional
+neuron networks in population genetic inference, actually they came out earlier this month.
+We're speaking at middle of February.
+And that was published in molecular biology and evolution.
+Can you talk a little bit about that particular paper and what it is trying to convey?
+Yeah, so this paper is purely methodological and focused and that we're sort of interested
+in the different statistical and computational methods that population geneticists have been
+using over the years.
+And a major focus of my work over the last five years has been to try to incorporate
+machine learning techniques into population genetic inference.
+And I should probably start there before I get into this paper because this is kind of
+the culmination of a lot of that.
+I was wondering just that if it was a culmination of a trajectory of things that you tried
+in machine learning applied to population genetics or if you, you know, I also talk to scientists
+that kind of, you know, just luck into hearing about her finding out about CNNs and deep
+learning and apply it to their problem and damage as works and they kind of start there.
+So how did that evolve for you?
+Though, the way this evolved for me was around the time that I was finishing up in grad
+school and getting started with my postdoctoral research.
+I was becoming increasingly interested in this question of, you know, how much can we
+learn about natural selection from looking at genomic data and the methods for doing this
+in population genetics I found were, to me, they seemed a little bit antiquated in
+that they were often focused on taking your alignments, you know, this matrix that I'm
+talking about, this matrix of genome sequences and sort of boiling it down to a single number.
+So describing your sequence data by a single statistic, which is descriptive, it tells
+you something about how much variation is there in this alignment or what are the frequencies
+of mutations in this alignment are some of them very common within the population or
+they're very rare, to what extent are two mutations correlated?
+That is, if an individual has a mutation at site one, how does that tell you something
+about whether he also has a mutation at site two, there are a large number of statistics
+that all sort of captured different somewhat redundant but somewhat complementary patterns
+of a variation and there's kind of this cottage industry and population genetics of coming
+up with a new statistic that you think is the best one for answering the question that
+you're looking at and sort of describing the theoretical expectations for the statistic
+under various evolutionary models and, you know, applying this to some data and seeing
+what you can learn.
+Well, that's all great, but, you know, you can imagine that if you take this large matrix
+of genome sequence data and boil it down to a single number, you're probably throwing
+out a lot of useful information, right?
+So the work that I was doing during my postdoc and there's some other labs that are doing
+this too, I'm not the only one doing this, but it was sort of a small group of population
+geneticists doing this and we were just trying to incorporate as much of this information
+as we could into a method and one way to do that is to, instead of using one of these
+statistics, use a large vector of them, throw them all in to a vector and try something
+like support vector machine or random forest so you can use a support vector machine and
+train it to distinguish between natural selection or no natural selection.
+Yeah, if I can jump in just to make sure I understand what you're doing, you've got kind
+of this underlying set of data, which is essentially these alignments, you've got genomes or
+genome samples that are aligned with one another and the first thing you did was you took the
+traditional metrics that have been applied to these alignments and you kind of calculated
+all of them, put those into a vector and then use machine learning to, for example, identify
+clusters within the vector space that you created of these summary statistics.
+Is that correct?
+Yeah, that's right.
+So the idea is rather than arguing over which one of these summary statistics is best,
+we should see how well we can do if we use all of them at once and machine learning
+is one way for you to do that because you can use it for higher dimensional data.
+So when you say how well you do, what was the specific problem or what are the types of
+problems that you're trying to solve?
+Is it just clustering them together or are there other problems that you apply this
+technique to?
+Yeah, so a lot of population genetic inference is about discriminating between different
+evolutionary models.
+So let's go back to this question of can we find whether there has been a recent beneficial
+mutation that has increased in frequency and become what we call fixed or ubiquitous
+within the population?
+So a little bit of terminology, we call this a selective sweep because this mutation is
+selected and it sweeps through the population.
+So this problem of finding selective sweeps is a very difficult one, but it's one that's
+sort of central to pop general research because we're interested in how much recent
+adaptation, you know, particular species might be having whether it's humans or anything
+else, you know, how are we responding to the selective environment that we're in?
+So you can use this information to tell you something about how much adaptation is there,
+which parts of the genome are responsible for this adaptation, but it all boils down
+to this model selection thing.
+Can I discriminate between regions of the genome that are experiencing a sweep and those
+that are not?
+So the way that I have gone about this model selection is by treating a classifier to
+do it.
+Is the data just the sequences, at least at this point in your application of machine
+learning, is it just the sequences or is it the sequences, for example, and I guess
+I'm curious about if there's some element of time that's captured like the, you know,
+birth or death or eight, you know, the timestamp of the sequence or something like that.
+And you're looking at these sequences over a long period of time.
+Is it like a time series thing or are you able to infer these sweeps just by looking
+at t equals zero set of samples and the way that they're distributed?
+Sure.
+Yeah, that's a great question.
+So generally we do, you know, think about the scenario where you only have sampling from
+one time point.
+So, you know, you've randomly sampled from some population, you know, last year and
+you have this data set and you're trying to use it to make these inferences about, you
+know, recent evolutionary history.
+And a large reason for that, I mean there are two reasons for that.
+One is the practical cost of accumulating sequence data and that cost has gone down.
+I'll come back to that in a second.
+And the other is that if you want to do this sort of time series thing, you need to say
+you want to sample every generation.
+Well, if you're doing that in humans, then, you know, each generation, you know, might
+be 25, 30 years or so.
+So to sort of capture any interesting patterns or you have to be accumulating data over a long
+period of time.
+Now, some organisms have much more rapid generation times.
+They also work on fruit flies and mosquitoes and, you know, these things rather than having
+one generation every few dozen years they'll have a, you know, a dozen or so generations
+in one year.
+So over the course of a few years, you're going to accumulate a large number of generations
+and create time series data.
+And this is something that's becoming feasible now with improvements in sequencing technology.
+So I would say that that's kind of a small subset of the kind of landscape of pop chin research
+right now, but you're going to be seeing that changing very rapidly.
+I think so.
+So you'll see a lot of this time series analysis, but right now it's mostly just looking at
+this one snapshot.
+So at this stage where you're creating a classifier, you've got this data as we discussed, it tends
+to be from a single period of time or a period of time I'm assuming that where you can
+kind of, they're close enough that you can kind of ignore time as a big factor.
+And you've collected this data, can you talk a little bit about the data collection process?
+So in, this is where it gets a little bit tricky because in sort of more traditional applications
+of machine learning, you want to collect training data.
+And here we can't do that, you know, we collect data that we can apply something to, right,
+we can sequence a bunch of human genomes that we want to run our classifier on.
+But how do we get a data set where we know what the ground truth is?
+And you know, that can be tricky and evolutionary biology because, you know, while we are doing
+our best to make evolutionary inferences, it's difficult to nail down with absolute certainty,
+right?
+What is the evolutionary history of, you know, this species, this population or this gene?
+So what we do is we simulate.
+So there are these nice idealized models of evolution that allow you to simulate an
+evolving population and sequences within this population.
+So you can produce synthetic data that one can then use to train a classifier.
+And then the tricky part is, you know, how do we simulate this thing?
+How do we parameterize these simulations and, you know, you have to be careful to sort
+of try to make these simulations match your data as best as you can.
+But if you knew exactly how your data, you know, how your organism of interest was evolving,
+then you wouldn't be needing to do the research anyway, right, because you already know everything.
+So it's kind of analogous to doing some sort of Bayesian inference where you've got, you
+know, these priors.
+And, you know, here we're simulating onto those priors to generate training data.
+And you have to examine what is the robustness of this classifier to model a specification.
+What if I'm wrong about the, you know, the parameters of the simulation?
+What if I, you know, I thought the population size of this organism was 1 million, but
+actually it's half a million, how does that affect the accuracy of my downstream analysis?
+So you have to take all these things into account.
+Is there some like prototypical human genome that you use as the starting place for your
+simulation or some kind of standard human, how does that work?
+Yeah.
+So, yeah, there is.
+That's a great question.
+So we typically refer to these as reference genomes.
+So for the way that sequencing started out like this approach was that you would go and
+create one very high quality genome sequence for your species.
+So we did this in humans and it took over a decade and a billion dollars to sequence
+the first human genome, which we call the reference genome, but it's this very high quality
+sequence and you can use that by using these cheap and fast DNA sequencing technologies,
+which produce a bunch of very tiny chunks of DNA sequence that you then search against
+that reference genome.
+So that's this, that's how you create these alignments that I was referring to by doing
+sequence searches and figuring out, okay, this tiny little chunk here that goes to this
+part on chromosome one, I can figure that out by searching it against the reference genome.
+So there are sort of these two different tiers of genome sequences, are these very high
+quality reference genomes and then there are these genomes produced from these rapid sequencing
+technologies that are mapped against the reference genome in order to reveal variation
+because you take this tiny chunk from this individual sequence, you map it to the reference
+and you see, okay, this little chunk or read, we call it, it's identical to this portion
+of the reference genome except for this one difference.
+And if you accumulate enough evidence for those differences, then you know, okay, that
+is a mutation that's present in my population.
+And then you referenced needing to make sure you get the population size right.
+In the case of humans, for example, where does the complexity come in there and is it
+correct relative to this reference genome and the specifics of the population you're sampling
+or what kind of resolution do you need there?
+Yeah, I mean, that's a good question and it's still a very open area of research.
+So you can go get the census population size of humans today or pretty good approximation
+of it, but that has not been the size of our population over much of our history.
+There's been dramatic changes, of course, growth most recently, but in many populations
+there were contractions, especially with those populations that migrated out of Africa.
+That migration was associated with a large population bottleneck.
+So the population size history in humans is, it's messy, it's non-monotonic and it concludes
+with this very rapid, super-exponential explosion that's been going on for the last
+few hundred years now.
+So to what extent can we accurately model these population size changes, that's another
+area of research that actually touch upon a little bit in the CNN paper that we'll be
+talking about.
+Yeah.
+I don't know if I answered your question.
+No, I think you did.
+I think my takeaway was it's complicated.
+Yeah, okay, then I think I did a good job.
+Yeah.
+So you're doing this simulation, you're applying kind of Bayesian types of methods, you're
+trying to apply probability distributions at different points in the simulation process.
+I guess the question is, are you doing that per read or SNP or something like that?
+Are you doing that on a sequence level like do you, are we at the point where we're modeling,
+variability and distributions on a kind of subsequent level or is it kind of a more
+coarse-grained model today?
+Yeah.
+So for the most part, Rich, and sort of zooming in and looking at relatively small regions
+of the GNOME, so that's kind of what we're simulating, yeah, to sort of come up with
+expectations for patterns of variation within, you know, say a size of the genome that's
+spanning, you know, a few dozen genes, something like that or less, sometimes something on
+the order of a single gene.
+So yeah, typically we're looking at smaller regions, but for some questions, especially
+this question of trying to infer demographic changes like population size changes, we
+want to be looking at patterns of variation across the whole genome because if there's
+a population crash, that affects the amount of genetic variation across the entire genome.
+So we want to use as much of that data as possible.
+So yeah, another development in our field in recent years has become feasible to simulate
+larger and larger genomes.
+So we can sort of capture the expected dynamics genome-wide, not just, you know, at a gene
+or a few genes.
+So we do the whole gamut, I guess.
+Okay.
+Okay.
+And so this approach to training a classifier based on the sequences and simulated results
+to provide your ground truth was one of your first steps in the direction of applying machine
+learning to pop-gen, you know, the CNN, the next step, or did you have a few more steps
+to get there?
+Yeah.
+So I played around with this approach on, I guess, a few different problems.
+You know, I was mostly interested in this natural selection question, but I branched out
+to a few different areas.
+You know, I kind of got a little bit caught up in trying to push along a cultural change
+in our field in population genetics.
+I was trying to make the point to people that these machine learning methods are not scary.
+We should consider trying to use them for, you know, every question where it is appropriate
+and then see how well they compare to our more traditional methods.
+So another question that I was looking into was this question of finding gene flow.
+So this is the scenario where you have two different populations.
+They diverge to some time ago, you know, say African and non-African humans, you know,
+they split some time ago when non-Africans migrated out of the African continent and,
+you know, colonized your Asia.
+And we want to know, after that split, did these populations come back into contact at
+a certain time point and exchanged genetic material?
+And if so, can we find like the genomic regions where there has been this gene flow?
+So yeah, probably the African non-African question is the best example of this because
+that the genetic exchange is across the entire genome in cases where there has been the
+secondary contact like African-Americans, for example, have European ancestry across
+the entire genome, as well as African ancestry.
+A better example is probably Neanderthals, so you may have heard it's been reported in
+the news that we now know that Neanderthals have donated genetic material to Eurasian
+Asians and Europeans, humans. So a typical European individual has maybe two to four percent
+of their DNA tracing its ancestry back to Neanderthals.
+So after the split between, you know, the ancestral population that gave rise to modern humans
+and also Neanderthals, these two species eventually found themselves in the same location,
+and there was interbreeding there, and we can sort of see the genetic remnants of that
+in certain parts of the human genome.
+So I got into this question of detecting regions where there has been regions of the
+genome, where there has been the flow of genetic material from one population into another.
+And of course, here there have been a large number of statistical approaches devised
+over the years to detect these patterns, and I took the same approach of creating a machine
+learning classifier that uses a vector of these statistics to discriminate between these
+different models of, so here are three models where there is no gene flow between these two
+populations, or within this genomic window there is gene flow from population one to population
+two and vice versa. And of course, it works much better than any method that is using
+just one statistic because you're throwing out all that information, so if you incorporate
+as much information as you can, the feature vector you produce more accurate inferences.
+So I was going around talking about that work, going to conferences, trying to sell this
+stuff to people, say this machine learning stuff works, which here is the evidence.
+And somebody in the audience of that talk was interested and went and looked at my code,
+and thought, well, what happens if I get rid of this part that calculates all the statistics
+and just replace it with a convolutional neural network? So let a neural net come up with
+its own statistics and see how well it can answer this question. And this person was
+Lex Flagel who was the first author on that paper published in MBE, and Lex sent me an
+email one day, and yet the day I opened up this email was the most exciting day of my professional
+life. He opened this up and said, hey, I got this result. I was playing around with the
+convolutional neural net, and thought I'd see how it did. And here are the results. Is
+this good? So I pull up my data and I'm comparing and I'm like, huh, this is better than mine.
+So, yeah, so there had been a few conversations I'd had in the years leading up to this
+about this idea of maybe using deep learning or some approach to say, well, act directly
+on the alignment rather than pre-digesting it into a bunch of features or summary statistics.
+But I never had a chance to get around to it. And then suddenly there on my screen was
+the evidence that not only can you do this, but it works really well better than what
+I was trying at the time. So we knew right away, or I knew right away that we had to try
+this out on a bunch of different problems in population genetics to see if this approach
+would work in general. And that was the work that led to the MBE paper.
+In the paper you're doing just that, you're trying CNNs out on a bunch of these different
+problems. Do each of these problems represent one of the statistics that you were kind
+of aggregating together in your previous work? Or are the problems kind of at a higher level
+and the statistics, you know, informed approaches to the problems?
+Yeah, so these problems have been major areas of research and pension for quite some
+time. So the different problems we touch on in the paper are this problem of finding
+selective sweeps, this problem of finding gene flow. We try to infer population size changes
+and the other is inferring the rate of our combination. So our combination is when
+during myosis you're two different chromosome copies, exchange, genetic material, one
+another. So it sort of breaks up the association between mutations along a chromosome. So you
+would think that if you're looking at say chromosome one in the human genome, like if you take
+one of your copies of chromosome one as you're going back in time, that whole chromosome
+should have the same evolutionary history, you know, as you trace it back through ancestor
+to ancestor, but recombination breaks that up. Different chunks of the chromosome have different
+ancestors. And it's a longstanding problem in population genetics trying to infer how
+much of this recombination happens in different parts of the genome. So can you infer the
+recombination rate landscape across the genome? And you can try to do this using population
+genetic data. So a bunch of methods exist for doing that. All of these problems have gotten
+a lot of attention from researchers over the years. So there's not just one statistic for
+each of them. There are dozens for many of them. So we were comparing our approach of just
+throwing it all into a CNN and then seeing what answer comes out to many of these statistics
+that have been used or vectors of those statistics, you know, like the approach I had been using
+up to that point of throwing them all into a classifier and using something like a random
+forest. Can you talk a little bit about the approach to making your data fit well within
+the paradigm of CNNs? Did you need to do anything special there?
+Yeah, you certainly do. And because we wanted this to sort of be a proof of principle,
+we were focusing on simulated data in this paper just to show that this can work in principle,
+and it can work better than some of the best methods that we have at our disposal right
+now. We didn't want to get too deep into the rabbit hole of all the things that you have
+to do when you're working with real data that can be messy. So yeah, one problem with,
+so we kind of skipped a lot of this stuff or just pointed out that these are issues that
+won't have to deal with. But I think that the deep learning approach is probably better suited
+for dealing with a lot of these problems than some of the more traditional approaches.
+Because what are some of those problems? Yeah, so a common problem is that there can be
+piece parts of the genome where you just don't have a lot of information where, you know,
+you've mapped these reads, but you're not exactly sure where they go or the reads are of
+localities, so you're not exactly sure what nucleotide is there with the bases. So there's
+low confidence data or missing data, and you have to sort of mask these out. So dealing with this,
+I think, is actually pretty straightforward. In this machine learning framework, you take a look
+at your actual data and see like sort of what's the distribution of missing data along my genome,
+and then just adjust your simulations accordingly, synthetically mask some portion of your training
+data and your simulated test data, and then train. It's a lot more easy to do this when your input
+is just the sequence matrix rather than some statistic that has been calculated across the matrix,
+and it might not be designed to deal with missing data. You know, we don't really have to deal
+with that. We just have to supply training data that we think kind of matches what the input
+data look like. You know, we think of CNS, we most frequently think of image data that has kind of
+you know, often square or two dimensional or two three dimensional channels kind of structure.
+How did your sequence data map to that? Yeah, so we were using two dimensional data where each
+row in your matrix is a genome sequence in each column is one site. Yeah, the shape of this matrix
+is different from what you might find in like a typical image or something like, you know,
+the image database because you might have something like 50 rows, you know, 50 is a fairly
+small number of pixels, but you may have thousands of columns, you know, maybe 10,000. So,
+you know, you get these very oblong matrices that you're that you're shoving in there. So,
+yeah, we're actually using primarily one D convolutions within the paper kind of treating these
+more as time series data than as image data. And myself have also played around with applying
+different flavors of RNNs. And I know some other researchers that are doing that as well now.
+So they don't look exactly, you know, in terms of their shape, like a typical image that you'd
+be throwing a CNN app. This is kind of a, a net, I guess, but did you, I'm curious if you
+did like a one-hot encoding on your proteins or your gene, individual genes?
+The way that we encode the sequence data is basically zeros and ones. In a lot of population
+genetics, we are only concern ourselves of what we call biolilic sites. Those sites where there
+are two different variants. So, you know, maybe I have an A and, you know, you have a G at this site.
+You know, we'll just think of those two different alleles as zero and one. So, just a matrix
+of zeros and ones. And, you know, if we are trying to use that information to find selective sweeps,
+then we'll have different classes. You know, there are a few different types of selective sweeps.
+So, you know, like say zero for one particular type of sweep, one for another and, you know, two for
+a neutrally evolving region of the genome. Those are our class labels and it'll make a one-hot
+and coded vector of those classes. But yeah, the input matrix is just a 2D matrix of zeros and ones.
+Okay. For now. But I mean, there's a lot of, you know, other different ways of encoding that one
+could try out here. And I think it's important to stress here. And I'm sure a lot of listeners
+of your podcast will gather that we are very far behind the machine learning field, the deep learning
+field. When it comes to population genetics, we're, you know, just sort of trying things out right
+now and we're trying out neural nets that, you know, are at least five years or more behind the
+state of the art. So, there's a lot of catching up to do and a lot of experimentation with
+different network architectures, different input encodings and things like that that we have to try out.
+So, can you give us a summary of the results you saw for these four different types of problems?
+Yeah. Yeah. So, that's basically deep learning. If trained carefully, it can, it can at least match
+the current state of the art methods. If not, handle the outperform them for most of the problems
+that we've looked at. So, the one case where I think there's a lot more work to be done that we just
+sort of gave a simple first attempt at was this question of trying to infer population size histories.
+You know, it's the method we came up with worked fairly well there, but we want to be able to scale
+up to genome scale data and you know, a simple CNN approach where you have an image that encompasses
+an entire genome of billions of base fares is at least beyond our capabilities at the moment
+computationally and it's probably not the appropriate method for that anyway. Something like a
+recurrent neural net of some kind might be more appropriate, but for, you know, these questions of
+finding gene flow, finding selective sweeps, inferring or combination rates, the results were
+pretty stunningly amazing. And, you know, that's why we gave it the title, you know,
+in reference to the, you know, the popular unreasonable effectiveness meme in statistics.
+Yeah, I mean, we were certainly blown away about how well this stuff works and,
+yeah, we wanted to share that enthusiasm with the field and get people to consider these types
+of methods in the future for their own work. Awesome. Awesome. And so where do you go from here?
+Yeah, so I have started my lab here at UNC almost a year ago and we're continuing some work along
+these lines. So I have a postdoc right now who's very interested in trying to dive deeper into
+this question of population size changes and try out a variety of methods, including deep learning
+methods to to answer these and other demographic questions. So yeah, the deep learning is definitely
+still a part of it. I have another postdoc who is working on phylogenomic questions. So here,
+phylogenomics is different field of ocean biology where you're looking at sequences from
+different species rather than sequences within one population within one species and try to make
+inferences like just inferring the species tree that, you know, connects them. So figuring out the
+relationship among species, you know, trying to fill out the tree of life. And he's also trying out
+deep learning methods there. Yeah, it's not my plan to have a lab that's entirely based on
+machine learning and deep learning, but when you've had some success using these methods and,
+you know, they've got the cool buzzwords. So it attracts talent and, you know, I have people,
+the people who want to join are interested in doing deep learning. So I guess that's what I'm
+going to do, right? You're limited by who you can recruit. So, but no, we're enjoying it a lot,
+sort of trying to push the envelope to see how much we can learn by applying these methods to
+genomic data. Yeah, there's other stuff that I am interested in doing that it's not at all
+related to machine learning, but yeah, that's probably a topic for a different conversation.
+Well, Dan, thanks so much for taking the time to chat with us about your work. It's really
+exciting to see how deep learning and machine learning in general is applied to these types of
+problems in population genetics. Yeah, my pleasure. Thanks for having me, Sam. And I'm looking
+forward to seeing how this stuff evolves over the next few years because, you know, I want to be clear,
+there are some other labs working on this as well. And I want to see where they where they take it.
+Thank you. Thanks.
+All right, everyone. That's our show for today for more information on Dan or any of the topics
+covered in today's episode. Visit twimmelai.com slash talks slash 249. Be sure to register for
+Peggo World using the code twimmel19 for $200 off of registration. As always, thanks so much
+for listening and catch you next time.

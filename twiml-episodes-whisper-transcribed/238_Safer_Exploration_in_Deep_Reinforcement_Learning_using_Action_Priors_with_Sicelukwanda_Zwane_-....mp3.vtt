@@ -1,0 +1,2033 @@
+WEBVTT
+
+00:00.000 --> 00:16.320
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+
+00:16.320 --> 00:21.480
+people, doing interesting things in machine learning and artificial intelligence.
+
+00:21.480 --> 00:31.720
+I'm your host Sam Charrington.
+
+00:31.720 --> 00:36.680
+While at last year's NERP's conference, in December, I attended the second annual black
+
+00:36.680 --> 00:42.720
+NAI workshop, which gathered participants from all over the world to showcase their research,
+
+00:42.720 --> 00:45.720
+share experiences and support one another.
+
+00:45.720 --> 00:51.280
+Today, we conclude our black NAI series with this interview with Sikle Lukwandazwane,
+
+00:51.280 --> 00:56.400
+a master student at the University of Vithwatersrand, and graduate research assistant at South
+
+00:56.400 --> 01:01.880
+Africa's Council for Scientific and Industrial Research, or CSIR.
+
+01:01.880 --> 01:06.760
+At the workshop, Sikle Lukwandaz presented on safer exploration and deep reinforcement
+
+01:06.760 --> 01:11.800
+learning using action priors, which explores transferring action priors between robotic
+
+01:11.800 --> 01:18.280
+tasks to reduce the exploration space, which in turn reduces sample complexity.
+
+01:18.280 --> 01:23.000
+In our conversation, we discuss what exactly safer exploration means in this sense, the
+
+01:23.000 --> 01:27.720
+difference between this work and other techniques like imitation learning, and how this fits
+
+01:27.720 --> 01:30.760
+in with the broader goal of lifelong learning.
+
+01:30.760 --> 01:32.760
+Enjoy.
+
+01:32.760 --> 01:39.680
+Alright, everyone, I am on the line with Sikle Lukwandazwane.
+
+01:39.680 --> 01:44.920
+He's a master student at the University of Vithwatersrand, and a graduate research assistant
+
+01:44.920 --> 01:50.840
+at the Council for Scientific and Industrial Research, or CSIR in South Africa.
+
+01:50.840 --> 01:55.680
+Sikle Lukwandazwane, welcome to this week in machine learning and AI.
+
+01:55.680 --> 01:57.480
+Thanks a lot, Sam.
+
+01:57.480 --> 01:59.240
+Thank you for having me.
+
+01:59.240 --> 02:06.240
+So I will just let everyone know that you were very, very gracious in practicing the pronunciation
+
+02:06.240 --> 02:10.760
+of your name with me, and I am still butchering it, but thank you so much.
+
+02:10.760 --> 02:15.880
+We had a long practice session before, and I am going to work on these, Koza, was it
+
+02:15.880 --> 02:16.880
+Koza?
+
+02:16.880 --> 02:17.880
+It's a Zulu.
+
+02:17.880 --> 02:18.880
+Sorry, sorry.
+
+02:18.880 --> 02:22.880
+Yeah, it tends to be very similar to a Kosa.
+
+02:22.880 --> 02:27.960
+Okay, so I am going to work on this, and the next time we have you on the show, we're
+
+02:27.960 --> 02:28.960
+going to get it.
+
+02:28.960 --> 02:29.960
+We're going to get it.
+
+02:29.960 --> 02:32.320
+But thanks so much for your patience with that.
+
+02:32.320 --> 02:36.600
+Why don't we get started by having you share a little bit about your background and how
+
+02:36.600 --> 02:41.480
+you got started working in machine learning and artificial intelligence?
+
+02:41.480 --> 02:48.000
+So I got into machine learning because of the problems that I found when back when I was
+
+02:48.000 --> 02:53.660
+in this interest group in 2nd year, where we were at this robotics interest group at
+
+02:53.660 --> 02:58.760
+VITS, and we were giving these quadcopters to fly around, and my friend and I decided
+
+02:58.760 --> 03:05.600
+we want to fly hours in like a rectangular shape, and we found that we couldn't do that.
+
+03:05.600 --> 03:08.400
+Like we had issues with things like wind and momentum.
+
+03:08.400 --> 03:11.680
+You could never actually get the drone to be in one particular position.
+
+03:11.680 --> 03:16.680
+But nonetheless, even though we did fly in some type of kite shape, like I found myself
+
+03:16.680 --> 03:22.720
+fascinated by the fact that I basically wrote some code, and I had to sit back and relax
+
+03:22.720 --> 03:26.640
+and watch my code basically fly this machine around, right?
+
+03:26.640 --> 03:34.520
+So actually I became interested in the field of robotics and continued my studies and tried
+
+03:34.520 --> 03:41.240
+to pick subjects even in honors that would basically give me a good start in my career
+
+03:41.240 --> 03:44.760
+as a roboticist in South Africa.
+
+03:44.760 --> 03:51.120
+Then I think during my honors year, one of the subjects that I picked was reinforcement
+
+03:51.120 --> 03:59.840
+learning, and there I learned that the big challenge in trying to get machines that can
+
+03:59.840 --> 04:06.200
+think and act like human beings is not so much the actual machinery and trying to create
+
+04:06.200 --> 04:10.600
+something that is anatomically similar to a human being.
+
+04:10.600 --> 04:14.920
+But the bigger challenge was trying to get these machines to perform like these complex
+
+04:14.920 --> 04:21.920
+behaviors, things like that we take so much for granted, something as simple as picking
+
+04:21.920 --> 04:27.160
+a pen or picking a cup up and putting it down is something that is still a difficult
+
+04:27.160 --> 04:32.880
+task when you want to achieve it with a robot, or rather the bigger challenge was this
+
+04:32.880 --> 04:40.000
+thing, generalization, we want to have, we want to want these machines to be able to
+
+04:40.000 --> 04:46.720
+perform general behaviors, if I say pick something up, you shouldn't care what the object
+
+04:46.720 --> 04:52.920
+looks like, your code shouldn't rely on the actual position of the hand when it does
+
+04:52.920 --> 04:58.120
+it, it needs to generalize to all these weird scenarios, for example, if someone has a
+
+04:58.120 --> 05:05.760
+bigger cup, if someone has a mug, if someone has a pen, it turns out that machine learning,
+
+05:05.760 --> 05:13.280
+or I found out that machine learning was one of the tools that could actually help achieve
+
+05:13.280 --> 05:19.560
+this goal through machine learning, we can actually learn more general behaviors to
+
+05:19.560 --> 05:27.160
+get more interesting robotic applications, or more useful, actually useful is the word
+
+05:27.160 --> 05:34.600
+I was looking for there, that is literally how I got into the field, just by wanting
+
+05:34.600 --> 05:40.960
+to see a robot perform some simple task, and then realizing that having the robot perform
+
+05:40.960 --> 05:48.640
+that task is not something that is simple to say, it wasn't trivial, one alternative
+
+05:48.640 --> 05:55.160
+or as a third year computer science student, I think my skill set would have probably pointed
+
+05:55.160 --> 06:01.320
+me towards trying to hard code, okay maybe tilt the robot hand by 45 degrees and then move
+
+06:01.320 --> 06:05.880
+it forward a few centimeters and then go down and then open the gripper, close the gripper
+
+06:05.880 --> 06:11.520
+and then pick it up and then, but you realize that you just, you created like this behavior
+
+06:11.520 --> 06:15.880
+is only specific to this particular scenario, like you leave your robot overnight at the
+
+06:15.880 --> 06:21.560
+lab and someone comes and they move the cup by a few centimeters and now your whole system
+
+06:21.560 --> 06:26.720
+doesn't work, so the reason why I'm interested in machine learning, or the reason why I'm
+
+06:26.720 --> 06:32.880
+in machine learning is to be able to learn more general behaviors, you know, more useful
+
+06:32.880 --> 06:40.880
+behaviors for robots and other applications, because machine learning is not only useful
+
+06:40.880 --> 06:45.840
+for robotics, just that, that is my, yeah, interest.
+
+06:45.840 --> 06:52.440
+One of the things that I can really relate to is that initial inspiration, you know, I find
+
+06:52.440 --> 07:01.120
+I really enjoy, I don't code a lot, but I do enjoy it, but when you're writing code
+
+07:01.120 --> 07:08.960
+and then that is affecting the physical world through motors and other actuators, you
+
+07:08.960 --> 07:13.600
+know, basically robotics, whether in like small form, you know, making light splink, all
+
+07:13.600 --> 07:21.240
+that kind of stuff, I find it super rewarding and so I can see how that would like it you
+
+07:21.240 --> 07:27.400
+kind of pulled into wanting to explore more and have more, kind of be able to build these
+
+07:27.400 --> 07:28.920
+more robust interactions.
+
+07:28.920 --> 07:36.480
+Yeah, now, yeah, that's precisely the point, right, there's so much, it is actually very
+
+07:36.480 --> 07:41.240
+rewarding to say something that you created actually become something physical that you
+
+07:41.240 --> 07:42.240
+can see.
+
+07:42.240 --> 07:47.600
+At the Black and AI workshop, you presented on some of your research, titled safer exploration
+
+07:47.600 --> 07:51.840
+and deep reinforcement learning using action priors.
+
+07:51.840 --> 07:55.240
+Tell us a little bit about the motivation for this project.
+
+07:55.240 --> 07:58.760
+Okay, the motivation is not really a straightforward thing for me.
+
+07:58.760 --> 08:07.840
+But motivated me to go with this particular topic is my, mainly my experience with using
+
+08:07.840 --> 08:14.480
+deep reinforcement learning and trying to apply it to the robotics domain, right?
+
+08:14.480 --> 08:23.120
+So I have access to this mobile manipulator, it's basically just a powerbot, AGV platform
+
+08:23.120 --> 08:29.880
+with that baritwem, seven dog robot arm on top, and we would like to basically, the dream
+
+08:29.880 --> 08:35.720
+is to have this platform performing complicated tasks such as making someone coffee or making
+
+08:35.720 --> 08:41.720
+a sandwich and things like that, but it's really hard to specify rewards and it's very
+
+08:41.720 --> 08:44.920
+hard to produce those kind of behaviors.
+
+08:44.920 --> 08:51.680
+If you are trying to manually specify what is supposed to happen, ideally, would like
+
+08:51.680 --> 08:58.720
+the system to actually learn to perform these behaviors on its own.
+
+08:58.720 --> 09:05.320
+So what I'm kind of hearing here is like you kind of started out as an undergrad, like
+
+09:05.320 --> 09:14.240
+trying to get robots to do things and at that stage in your experience, the natural way
+
+09:14.240 --> 09:18.440
+to do things was to build these big rule sets.
+
+09:18.440 --> 09:25.440
+And then else kind of programming and you went on to explore doing this with deep reinforcement
+
+09:25.440 --> 09:32.040
+learning, but then you ran it to this challenge of how do we create the reward functions to
+
+09:32.040 --> 09:34.280
+get a robot to grip something?
+
+09:34.280 --> 09:39.720
+That's historically one of the hard, you know, the hard parts about using deep reinforcement
+
+09:39.720 --> 09:40.720
+learning.
+
+09:40.720 --> 09:42.080
+Yes, that is correct.
+
+09:42.080 --> 09:49.640
+So I found it very hard to specify a reward function for picking something up, you know.
+
+09:49.640 --> 09:56.240
+My first task as a master student was, okay, I want to use deep reinforcement learning
+
+09:56.240 --> 10:02.320
+to perform multitask learning on this particular robot platform that we have at the CSR, right?
+
+10:02.320 --> 10:07.160
+Then when I'm thinking about doing that, I realize, okay, this is basically one of the
+
+10:07.160 --> 10:13.440
+few robots that we have and reinforcement learning is known to be random in nature, right?
+
+10:13.440 --> 10:21.560
+You rely on maybe executing random actions to kind of discover rewarding states and stuff
+
+10:21.560 --> 10:26.320
+like that and you can't really afford to be performing these random actions and these
+
+10:26.320 --> 10:33.640
+jerky movements when you're actually working with actual machinery or the physical platform.
+
+10:33.640 --> 10:40.360
+So my first task was, let me just build a simulated environment and as I was doing that, I spent
+
+10:40.360 --> 10:45.440
+some time trying to basically find the right meshes that would kind of correspond in shape
+
+10:45.440 --> 10:50.720
+and size to the actual physical platform and I was using this thing called gazebo where
+
+10:50.720 --> 10:55.960
+you can basically have like a physical environment, you know, with all the physics and collisions
+
+10:55.960 --> 11:02.080
+and things and then gazebo is a gazebo is like a physics simulator that's used quite a
+
+11:02.080 --> 11:04.000
+bit in robotics, is that right?
+
+11:04.000 --> 11:05.240
+Yes, yes, yes.
+
+11:05.240 --> 11:11.600
+So yeah, when I say both is that I built basically some packages for this particular platform that
+
+11:11.600 --> 11:19.720
+would allow me to use reinforcement learning with the actual joint configurations of the robot,
+
+11:19.720 --> 11:24.480
+you know, so things like I need to be able to publish actions to the robot and have it perform
+
+11:24.480 --> 11:28.760
+those actions and then observe some change and then have something that's going to decide
+
+11:28.760 --> 11:32.880
+if this was good or bad, which is basically my reward function, right?
+
+11:32.880 --> 11:38.480
+So yeah, but the whole thing was just I want to have this particular robot platform being
+
+11:38.480 --> 11:45.280
+able to perform multiple tasks and on my way there towards performing multiple tasks,
+
+11:45.280 --> 11:50.040
+I realized that okay, there's actually a lot of challenges with getting a standard
+
+11:50.040 --> 11:55.200
+dipping reinforcement learning algorithm to to work properly on, you know, like any environment
+
+11:55.200 --> 11:56.800
+that you have, right?
+
+11:56.800 --> 12:03.960
+So when I think about a deep enforcement learning, I'm going to be thinking about okay, firstly
+
+12:03.960 --> 12:10.280
+you have this, this exploration phase where you start with random policies, right?
+
+12:10.280 --> 12:16.520
+And you're going to be trying to find, I guess, would be executing random actions.
+
+12:16.520 --> 12:21.120
+I found out that it was really hard to specify reward functions for these complicated
+
+12:21.120 --> 12:25.560
+behaviors, like for example, in wanting to pick something up, right?
+
+12:25.560 --> 12:31.240
+You need to somehow reward the agent for what's this thing re-reaching towards the object
+
+12:31.240 --> 12:37.320
+and then actually picking it up, you know, which is there's actually two stages you need
+
+12:37.320 --> 12:41.880
+something that's going to encode moving towards the object and something that's going to encode
+
+12:41.880 --> 12:46.360
+basically you closing your gripper around the object and then still having the object
+
+12:46.360 --> 12:51.800
+and moving that your hand up and having the object remain in the hand, you know, so things
+
+12:51.800 --> 12:53.120
+like that.
+
+12:53.120 --> 12:58.640
+You presented a project called safer exploration and deep reinforcement learning using action
+
+12:58.640 --> 13:00.360
+priors.
+
+13:00.360 --> 13:04.440
+First off, when you say safer exploration, you know, what does that mean and why is that
+
+13:04.440 --> 13:05.440
+important?
+
+13:05.440 --> 13:11.000
+Yeah, so when I'm talking about safer exploration, right?
+
+13:11.000 --> 13:19.480
+I'm trying to improve the safety of the exploration policy in a standard deep reinforcement learning
+
+13:19.480 --> 13:20.640
+algorithm, right?
+
+13:20.640 --> 13:26.600
+So being in the robotics domain, I can't very much about the physical well-being of my
+
+13:26.600 --> 13:27.920
+platform, right?
+
+13:27.920 --> 13:33.560
+So it's very important to me that I won't be, if for example, I need to learn to perform
+
+13:33.560 --> 13:39.320
+some task using a deep reinforcement learning algorithm, I need some form of insurance that
+
+13:39.320 --> 13:43.960
+my platform won't be basically performing the worst possible thing.
+
+13:43.960 --> 13:45.960
+It won't hurt itself in any way.
+
+13:45.960 --> 13:54.360
+For example, if I have like a Rumba and basically having it sweep my roof for some reason, right?
+
+13:54.360 --> 13:57.920
+I need to know that this thing won't drive off the roof, you know, like things like that,
+
+13:57.920 --> 14:02.600
+like it should be able to learn, right?
+
+14:02.600 --> 14:08.400
+In this scenario or in an environment where there are still states that are deemed very
+
+14:08.400 --> 14:11.360
+unsafe or like very undesirable, right?
+
+14:11.360 --> 14:15.800
+So when I talk about safer exploration, I'm just trying to
+
+14:15.800 --> 14:22.000
+I guess improve the safety of your standard deep reinforcement learning algorithm, I mean.
+
+14:22.000 --> 14:27.400
+That paradigm is based on, so you understand the standard paradigm in reinforcement learning
+
+14:27.400 --> 14:33.320
+in general is that you, or one of the more popular exploration techniques is this
+
+14:33.320 --> 14:39.240
+epsilon greedy thing where you're going to decide, okay, I'm going to execute some random
+
+14:39.240 --> 14:42.120
+actions or actions from random policy, right?
+
+14:42.120 --> 14:48.320
+Some epsilon probability of the time and then with probability one minus epsilon, you're
+
+14:48.320 --> 14:53.000
+going to be basically exploiting or you're going to be executing actions that come from
+
+14:53.000 --> 14:55.360
+your from the policy that you're training, right?
+
+14:55.360 --> 15:00.560
+Which is also quite random initially, but you do this so that like you can actually discover,
+
+15:00.560 --> 15:06.000
+you know, like potentially useful actions to perform in any state in the state that you're
+
+15:06.000 --> 15:07.240
+currently occupying.
+
+15:07.240 --> 15:14.280
+So my work is to trying to kind of relax this very random nature, right?
+
+15:14.280 --> 15:19.560
+When you're exploring and what I'm saying is that instead of trying to explore randomly,
+
+15:19.560 --> 15:25.760
+right, or executing random actions, why don't we execute actions that were performed
+
+15:25.760 --> 15:33.360
+by experts in these like states that were in, you know, so you'd have maybe something
+
+15:33.360 --> 15:41.920
+like you tried to first build some notion of account, right, to maintain, you'd maintain
+
+15:41.920 --> 15:45.960
+some notion of accounts to see how many times a particular action has been performed
+
+15:45.960 --> 15:47.600
+in a state, right?
+
+15:47.600 --> 15:51.080
+And then you're going to explore according to these counts, you convert these counts to
+
+15:51.080 --> 15:55.680
+a probability distribution and then you sample from the from from this distribution and
+
+15:55.680 --> 15:58.520
+that is the action that you're going to apply, right?
+
+15:58.520 --> 16:04.000
+Like a more intuitive example is something like if I gave you the task of opening a door,
+
+16:04.000 --> 16:05.000
+right?
+
+16:05.000 --> 16:09.520
+The first thing, if if you're an enforcement agent and you've never opened a door in
+
+16:09.520 --> 16:13.360
+your life, the first thing you do when you're in front of a door is that you're going to
+
+16:13.360 --> 16:15.160
+try every possible action, right?
+
+16:15.160 --> 16:17.040
+And you're going to try a very random things.
+
+16:17.040 --> 16:21.960
+So now in your action space, you have the action of licking the door handle, which is,
+
+16:21.960 --> 16:26.360
+you know, could not lead to you opening the door, you can you can try kicking the door,
+
+16:26.360 --> 16:28.640
+you can try, there's so many things you can try.
+
+16:28.640 --> 16:33.240
+But if you have the opportunity, maybe to sit on a chair next to the door and watch how
+
+16:33.240 --> 16:37.400
+other people do it and then try what they're trying to do, like these people may be trying
+
+16:37.400 --> 16:39.320
+to do other things with the door.
+
+16:39.320 --> 16:46.640
+But the hope is that by trying what other expert agents have tried in this particular state,
+
+16:46.640 --> 16:53.720
+you know, you may be doing, you may avoid this, this, this, this, this, this random nature
+
+16:53.720 --> 16:58.880
+like that, that may lead you to undesirable states, like it kind of grounds your, your search
+
+16:58.880 --> 17:00.560
+for good actions.
+
+17:00.560 --> 17:06.440
+And also, you know, like because these agents that you're watching expert agents, you can
+
+17:06.440 --> 17:11.360
+assume that they're behaving optimally or in a way that they're not trying to harm themselves
+
+17:11.360 --> 17:12.360
+in any way.
+
+17:12.360 --> 17:18.840
+So when I hear you describe it like that, the thing that comes to mind for me is imitation
+
+17:18.840 --> 17:19.840
+learning.
+
+17:19.840 --> 17:23.600
+How was that related to what you've done here?
+
+17:23.600 --> 17:29.800
+So how I understand imitation learning is that you're going to be observing.
+
+17:29.800 --> 17:33.960
+I think you're going to have access to some expert trajectories.
+
+17:33.960 --> 17:38.120
+And I think the task today is to try and follow those, right?
+
+17:38.120 --> 17:42.000
+You're basically trying to make those trajectories more general in any way.
+
+17:42.000 --> 17:46.160
+You want to kind of imitate the expert, right?
+
+17:46.160 --> 17:51.600
+Whereas here, what we're trying to do is that we're not really performing the same task
+
+17:51.600 --> 17:53.960
+as the expert that we're watching, right?
+
+17:53.960 --> 17:59.720
+So the action process framework has the flexibility that the different experts can be performing
+
+17:59.720 --> 18:01.200
+different tasks, right?
+
+18:01.200 --> 18:05.440
+And by different tasks, I mean, tasks that have different reward functions, right?
+
+18:05.440 --> 18:09.800
+Meaning that it doesn't matter what the action that the experts are doing, as long as the
+
+18:09.800 --> 18:16.560
+action spaces are the same between the agent that is learning and these experts here, right?
+
+18:16.560 --> 18:24.480
+You may find some benefit in basically trying what the experts tried, like if that makes
+
+18:24.480 --> 18:25.480
+sense.
+
+18:25.480 --> 18:32.280
+You're trying to act according to this body of advice, like I think advice kind of makes
+
+18:32.280 --> 18:34.160
+more sense, right?
+
+18:34.160 --> 18:40.560
+So if I can recap what you're saying to make sure I understand when an imitation learning,
+
+18:40.560 --> 18:48.920
+if you've got our scenario with the robot sitting in a chair, observing an expert interacting
+
+18:48.920 --> 18:56.440
+with the door and imitation learning as it's classically defined, what you're really trying
+
+18:56.440 --> 19:05.080
+to do is have the robot, you know, look at someone performing a very specific task like
+
+19:05.080 --> 19:11.080
+rotating the door handle thousands of times or however many times and you're trying to
+
+19:11.080 --> 19:14.360
+teach it that very specific action.
+
+19:14.360 --> 19:18.520
+And any other actions would be noise and that kind of model, whereas in what you're doing,
+
+19:18.520 --> 19:25.600
+you're presenting, it's kind of not random observations, but observations of a bunch
+
+19:25.600 --> 19:31.480
+of different things, reaching for the door, turning the knob, opening the door.
+
+19:31.480 --> 19:39.360
+It's more unconstrained and you're trying to use all of these observations to kind of
+
+19:39.360 --> 19:43.560
+condition the exploration process.
+
+19:43.560 --> 19:44.560
+Yes.
+
+19:44.560 --> 19:45.560
+Yes.
+
+19:45.560 --> 19:48.640
+That's exactly what I'm trying to do.
+
+19:48.640 --> 19:49.640
+Okay.
+
+19:49.640 --> 19:56.120
+So, yeah, it's just as you put it in unconstrained, I guess, version where you're trying to,
+
+19:56.120 --> 20:01.080
+you have all these multiple demonstrations, you're not exactly trying to follow any particular
+
+20:01.080 --> 20:06.360
+trajectory, but what you're interested in is what these experts are kind of doing in any
+
+20:06.360 --> 20:07.360
+particular state.
+
+20:07.360 --> 20:13.760
+So, if you visit a state, you can always ask the question, what did experts do, right?
+
+20:13.760 --> 20:20.000
+And maybe there'll be some arbiter or some Oracle that will tell you, hey, 63% of experts
+
+20:20.000 --> 20:26.520
+took this action, maybe 23% of experts took this action and then, you know, other experts
+
+20:26.520 --> 20:30.560
+took this particular action and no expert took this particular action, right?
+
+20:30.560 --> 20:36.520
+So then I want to, in that case, basically try the actions that were more popular as opposed
+
+20:36.520 --> 20:41.320
+to the one that the experts didn't try because you can imagine that in a model like that,
+
+20:41.320 --> 20:46.960
+you're kind of implicitly representing in this case, I guess, the state space in the environment
+
+20:46.960 --> 20:52.200
+and maybe the experts in this particular state are not moving for, are not taking the action
+
+20:52.200 --> 20:54.640
+for going forward because this is a cliff, right?
+
+20:54.640 --> 20:58.880
+So as they were training, they found that, okay, when they went forward, this led to a
+
+20:58.880 --> 21:00.960
+very bad reward.
+
+21:00.960 --> 21:03.920
+So they decided, okay, I'm not going to take that action.
+
+21:03.920 --> 21:05.720
+I'm just going to do this and that.
+
+21:05.720 --> 21:09.560
+You know, so it's basically you treat it as this party of advice that you can, like,
+
+21:09.560 --> 21:13.920
+you know, kind of query at every step in your exploration process.
+
+21:13.920 --> 21:20.960
+One question I'm curious about is how you define the state space and if you're doing
+
+21:20.960 --> 21:27.600
+anything to generalize it and I realize there's a lot of loaded language there.
+
+21:27.600 --> 21:33.800
+What I mean is kind of going back to this example of the robot observing the expert.
+
+21:33.800 --> 21:42.880
+If the expert is reaching for the door handle, you could learn a lot about that action.
+
+21:42.880 --> 21:50.360
+But if you're only able to access what that expert has done, if the robot is in the exact,
+
+21:50.360 --> 21:56.960
+you know, if all of the dimensions of the robot, you know, it's all of its positions
+
+21:56.960 --> 22:05.920
+are in the exact same point, then you kind of miss out on a lot of advice from, you
+
+22:05.920 --> 22:09.960
+know, experts who were, you know, their hand was doing the same thing, but it was shifted
+
+22:09.960 --> 22:11.960
+over a centimeter or something like that.
+
+22:11.960 --> 22:12.960
+Yeah, yeah.
+
+22:12.960 --> 22:15.600
+That's a question of portability, right?
+
+22:15.600 --> 22:22.920
+So, so this in the original paper, right, the way the authors basically tackle this
+
+22:22.920 --> 22:29.600
+problem is by introducing a second version of the action prior framework, which was conditioned
+
+22:29.600 --> 22:31.880
+on observations instead of the state, right?
+
+22:31.880 --> 22:37.400
+So obviously, if you're trying to learn this distribution over actions given a state,
+
+22:37.400 --> 22:42.520
+right, basically asking, okay, what action should I take at this particular state?
+
+22:42.520 --> 22:47.760
+You are only going to, that model is only going to be useful, should like in an environment
+
+22:47.760 --> 22:52.240
+where the state space doesn't change, you know, so essentially if there's an obstacle
+
+22:52.240 --> 22:55.720
+here, that obstacle should not move at all, right?
+
+22:55.720 --> 22:58.680
+And they'll also stay the same place and stuff like that.
+
+22:58.680 --> 23:05.800
+But as soon as you move like an obstacle or something that was not like, for example,
+
+23:05.800 --> 23:11.400
+if you were training in an environment way, let's say the obstacle is in one particular
+
+23:11.400 --> 23:12.880
+position, right?
+
+23:12.880 --> 23:19.240
+And then now you take demonstrations from that setting and you try to move it into a setting
+
+23:19.240 --> 23:24.360
+where the agent is training, where these obstacles have been moved around now.
+
+23:24.360 --> 23:27.880
+What's going to happen is that that information is not going to be portable, right?
+
+23:27.880 --> 23:35.280
+So to try and fix that problem or to fix the problem, what the authors did, this is Benjamin
+
+23:35.280 --> 23:41.240
+Rosman and Subramarine Ramamothi, I think, remember correctly.
+
+23:41.240 --> 23:49.040
+What they did is that they conditioned the action prior distribution over observations,
+
+23:49.040 --> 23:55.840
+meaning that I guess if you can imagine if all the obstacles were blue and your agent
+
+23:55.840 --> 24:00.840
+can be like, oh, your body of advice could be something that says, okay, if I see a
+
+24:00.840 --> 24:05.400
+blue thing, I want to do this or this, you know, so basically whenever I see an obstacle,
+
+24:05.400 --> 24:09.440
+I want to do one of the following deterministic things, you know, so you can increase the
+
+24:09.440 --> 24:16.440
+possibility of this action prior framework by just conditioning on observations instead
+
+24:16.440 --> 24:17.440
+of this state.
+
+24:17.440 --> 24:22.680
+I guess I'm trying to visualize how you represent the state for a given problem.
+
+24:22.680 --> 24:28.440
+How do you figure out, is it, is the representation, like, I'm, you know, I'm imagining it's a
+
+24:28.440 --> 24:33.200
+vector of some sort, but is it a vector of, like, if it's a robot, like all of the stepper
+
+24:33.200 --> 24:36.840
+motor angles and that kind of thing, or is it something else?
+
+24:36.840 --> 24:37.840
+Is it more abstract?
+
+24:37.840 --> 24:41.960
+No, no, it's exactly that.
+
+24:41.960 --> 24:48.160
+So if you have a robot, like a robot arm, then it will be your joint angles and stuff
+
+24:48.160 --> 24:49.160
+like that.
+
+24:49.160 --> 24:54.200
+It's literally, so how I think of reinforcement learning in general is that you're going
+
+24:54.200 --> 24:58.560
+to have some target environment and then you can have a state, right?
+
+24:58.560 --> 25:02.640
+I defined in the framework of often a Markov decision process, you can have a state and
+
+25:02.640 --> 25:07.600
+then you have access to actions and the transition function and then you have a reward function
+
+25:07.600 --> 25:14.800
+I guess in some gamma discount factor thing, but yeah, like a state can mean anything that
+
+25:14.800 --> 25:19.960
+you wanted to mean as far as, as long as you have formulated the problem you're trying
+
+25:19.960 --> 25:25.040
+to solve as a reinforcement learning problem, like that's how I think about it.
+
+25:25.040 --> 25:29.880
+So in my case, so then the question that I was trying to get at in this case is let's
+
+25:29.880 --> 25:38.800
+say that your state vector is all of your angles and you've got this.
+
+25:38.800 --> 25:45.920
+You're basically able to consult the Oracle, so to speak, to see if it knows anything
+
+25:45.920 --> 25:48.000
+about what to do in a given state.
+
+25:48.000 --> 25:53.200
+I guess the question that I'm asking is like, when you consult the Oracle and you say like
+
+25:53.200 --> 26:00.080
+these are my, you know, angles out to the second decimal point, the second decimal place,
+
+26:00.080 --> 26:05.600
+will it return what it knows even if it's not exactly that, but kind of close or do
+
+26:05.600 --> 26:14.000
+you have to kind of generalize it around it before you consult the Oracle or will you
+
+26:14.000 --> 26:18.400
+only know about things that happen at the very exact places?
+
+26:18.400 --> 26:19.400
+Does that make sense?
+
+26:19.400 --> 26:20.400
+Yeah, it does.
+
+26:20.400 --> 26:26.960
+So that's a very good question, right, so that is precisely the challenge with trying
+
+26:26.960 --> 26:27.960
+to move.
+
+26:27.960 --> 26:33.400
+Okay, let me just first say this action prior framework was defined, the thing for it to
+
+26:33.400 --> 26:39.120
+work very well in the discrete setting, which is true for most deep reinforcement learning
+
+26:39.120 --> 26:41.480
+and reinforcement learning algorithms, right.
+
+26:41.480 --> 26:46.200
+And moving into a continuous setting where you don't really have any guarantee that you'll
+
+26:46.200 --> 26:52.240
+ever see the same state again, there's, there's a need for models that can generalize,
+
+26:52.240 --> 26:59.040
+you know, like in some region and say, okay, for this particular region of state space,
+
+26:59.040 --> 27:03.560
+this is what the action distribution looks like, you know, and stuff like that.
+
+27:03.560 --> 27:11.040
+And I think that is what motivated my choice in what model to use to represent the action
+
+27:11.040 --> 27:12.040
+prior.
+
+27:12.040 --> 27:17.440
+That was a Gaussian process, which has a very nice, a smoothing effect, you know, like
+
+27:17.440 --> 27:19.800
+as far as data is concerned.
+
+27:19.800 --> 27:20.800
+Okay, okay.
+
+27:20.800 --> 27:24.960
+Yeah, now that you've said it, all of the language that I should have been using to ask
+
+27:24.960 --> 27:31.280
+the question is obvious, like discrete versus continuous and so just maybe to take a step
+
+27:31.280 --> 27:41.200
+back to make sure I understand the question I'm curious about now is how your specific research
+
+27:41.200 --> 27:49.160
+fits into the broader landscape of research in this area?
+
+27:49.160 --> 27:56.840
+Okay, so how I thought about it, right, was basically if you want to have a robot that
+
+27:56.840 --> 28:04.200
+can perform multiple tasks and things like that, right, you, okay, if you want a robot
+
+28:04.200 --> 28:10.400
+that is going to be useful in any particular scenario, then you need to think about, I think
+
+28:10.400 --> 28:16.320
+the field is called lifelong learning, right, and lifelong learning is basically trying
+
+28:16.320 --> 28:24.040
+to get these systems that can basically learn tasks as they are presented either, you know,
+
+28:24.040 --> 28:29.400
+in parallel or sequentially and then retain their ability to perform those tasks and then
+
+28:29.400 --> 28:34.160
+somehow use the knowledge that they've gained in learning the previous tasks to what's
+
+28:34.160 --> 28:36.840
+a thing to improve the learning of concurrent tasks.
+
+28:36.840 --> 28:40.560
+And I think that's almost how humans do this learning thing, right?
+
+28:40.560 --> 28:47.680
+So if I then think about the challenges that you get there, the first one is just trying
+
+28:47.680 --> 28:54.240
+to perform successful, you know, transfer learning in my case in continuous settings,
+
+28:54.240 --> 29:02.400
+you know, so I would, I can imagine that the action-price framework kind of fits somewhere
+
+29:02.400 --> 29:11.120
+in between, in between having like a very full or rather, it's one component that you
+
+29:11.120 --> 29:16.640
+would need to have a lifelong learning system or a lifelong learning robot, you know.
+
+29:16.640 --> 29:23.320
+So for example, my whole pipeline would be something like you train some expert agents
+
+29:23.320 --> 29:30.000
+in some target environment, right, and then these expert agents or these tasks, right,
+
+29:30.000 --> 29:34.920
+you're actually trying to learn can be, you know, all basically learned by the same robot,
+
+29:34.920 --> 29:35.920
+so to speak.
+
+29:35.920 --> 29:42.040
+And then this particular robot would use or sample trajectories or like keep a data set
+
+29:42.040 --> 29:47.280
+of trajectories from these learned tasks, right?
+
+29:47.280 --> 29:53.040
+And it would fit this model, this action prior distribution over those trajectories.
+
+29:53.040 --> 29:58.440
+And then for every task that it wants to learn, it can basically explore according to this
+
+29:58.440 --> 30:03.680
+action prior distribution, and after it has learned this new policy, it can then sample
+
+30:03.680 --> 30:09.240
+trajectories from there augmenting its data set, and then, you know, fitting the distribution
+
+30:09.240 --> 30:16.000
+again, you know, and then when learning a new task, it then going to use the exploration
+
+30:16.000 --> 30:22.640
+policy again, and then that just keeps going on until you have this machine or the system
+
+30:22.640 --> 30:28.400
+that can perform, you know, multiple tasks and things like that, you know, so I like
+
+30:28.400 --> 30:34.200
+to think of it as, I guess, a step towards lifelong learning, and one of the problems we
+
+30:34.200 --> 30:42.400
+have there in lifelong learning is we need to, I guess, solve the problem of transfer,
+
+30:42.400 --> 30:45.960
+as well as, you know, if you're talking about deep reinforcement learning, you need to
+
+30:45.960 --> 30:53.320
+kind of worry, or at least dedicate some time towards how to do exploration more efficiently
+
+30:53.320 --> 30:55.240
+and more safely.
+
+30:55.240 --> 31:03.160
+Before this explanation, when we were talking about experts, I was thinking in terms of
+
+31:03.160 --> 31:08.800
+observations, so your system would have some set of observations and those represent
+
+31:08.800 --> 31:16.840
+the experts, but you just introduced this concept of training expert models.
+
+31:16.840 --> 31:23.120
+How is that done, and kind of how is that different from the ultimate model that you're
+
+31:23.120 --> 31:27.160
+trying to train with reinforcement learning?
+
+31:27.160 --> 31:28.600
+So you please read the question.
+
+31:28.600 --> 31:35.520
+So it's you asking if how different is having this whole notion of an expert model compared
+
+31:35.520 --> 31:38.560
+to having what?
+
+31:38.560 --> 31:47.160
+Reinforcement learning, like the expert model is presumably the expert model is simpler and
+
+31:47.160 --> 31:54.760
+more readily trainable than a DRL model, is that true, or are the experts also trained
+
+31:54.760 --> 31:56.760
+using reinforcement learning?
+
+31:56.760 --> 32:06.360
+So in this case, I think my notion of expert, or how I think of expert, of what an expert
+
+32:06.360 --> 32:13.360
+is, it could be a deeply enforcement learning agent that was learning a task in the same
+
+32:13.360 --> 32:19.280
+environment, and now I just sample trajectories from the policy that I get from there, and
+
+32:19.280 --> 32:24.520
+then I use those samples to train the agent that I'm going to train next on a different
+
+32:24.520 --> 32:25.520
+task.
+
+32:25.520 --> 32:31.480
+It could also, expert can also mean, you know, just some, I guess in the context of video
+
+32:31.480 --> 32:38.560
+games, you can find that maybe a human player can kind of demonstrate what the correct actions
+
+32:38.560 --> 32:44.440
+or the correct policy is by playing the game and giving the reinforcement learning agent
+
+32:44.440 --> 32:48.960
+this trajectory that goes to the game in some sort of optimal way.
+
+32:48.960 --> 32:56.560
+And yeah, so it's basically either your expert is either agents that you were training in
+
+32:56.560 --> 33:03.080
+the same environment, or it could be just some human demonstrations and things like that,
+
+33:03.080 --> 33:04.080
+you know.
+
+33:04.080 --> 33:12.480
+In the context of getting learning from demonstration, when you're talking about robot manipulators,
+
+33:12.480 --> 33:17.320
+you can have someone who's trying to teach a robot how to wave by actually performing
+
+33:17.320 --> 33:20.400
+the action themselves and then recording that trajectory, you know.
+
+33:20.400 --> 33:25.560
+So my, I think the notion of expert in this case is just a bit more general.
+
+33:25.560 --> 33:33.400
+You know, say we're back at the door, and is the idea that we would have separate expert
+
+33:33.400 --> 33:37.640
+models for reaching and turning and pulling and that kind of thing?
+
+33:37.640 --> 33:43.240
+Or is there one expert that knows how to open a door?
+
+33:43.240 --> 33:49.800
+So I want to say maybe in training and expert how to open a door, right, you'd use information
+
+33:49.800 --> 33:53.800
+from these other experts, right.
+
+33:53.800 --> 33:59.480
+So reaching a door and turning the handle could all be actually useful actions.
+
+33:59.480 --> 34:00.480
+Okay.
+
+34:00.480 --> 34:06.360
+Yeah, in that case, this task is, it feels like it's arranged in a sort of like a hierarchical
+
+34:06.360 --> 34:13.200
+way way, turning the door could be considered as some kind of, I guess, opening the door
+
+34:13.200 --> 34:18.960
+could be considered as some kind of macro action that is composed of these smaller policies,
+
+34:18.960 --> 34:23.320
+such as reaching for the door handle, turning the handle and then pulling, you know.
+
+34:23.320 --> 34:24.320
+So yeah.
+
+34:24.320 --> 34:32.000
+And the action priors framework I'd like to think is more primitive in the sense that it's
+
+34:32.000 --> 34:33.760
+not hierarchical in any sense.
+
+34:33.760 --> 34:39.000
+It doesn't really, although you can kind of make it hierarchical by using options and
+
+34:39.000 --> 34:47.200
+other stuff like that, but my particular use case is using action priors or rather the
+
+34:47.200 --> 34:51.840
+action priors rely on actions that are kind of primitive, you know.
+
+34:51.840 --> 34:57.720
+So as long as my experts have the same action space and state space, then I can be able
+
+34:57.720 --> 35:03.200
+to use trajectories from other expert models or trained models and use them to train one
+
+35:03.200 --> 35:07.120
+particular target task faster and safer.
+
+35:07.120 --> 35:14.000
+So in other words, if you're trying to train an agent to open the door, you don't really
+
+35:14.000 --> 35:15.000
+care.
+
+35:15.000 --> 35:21.120
+You may have access to these experts that were trained on these sub tasks, but you don't
+
+35:21.120 --> 35:23.280
+really care about that implicit hierarchy.
+
+35:23.280 --> 35:30.200
+You're just looking, you're asking the question, hey, the arm is here.
+
+35:30.200 --> 35:31.200
+What do people use?
+
+35:31.200 --> 35:33.680
+What do experts usually do when the arm is here?
+
+35:33.680 --> 35:40.960
+And then kind of sample from a distribution of that answers that question and use that
+
+35:40.960 --> 35:42.520
+to inform your next step.
+
+35:42.520 --> 35:49.320
+I'm trying to move or rather trying to think independent of or rather I'd like my model
+
+35:49.320 --> 35:56.200
+to kind of not consider the reward functions or what task was being performed by any particular
+
+35:56.200 --> 35:57.200
+expert.
+
+35:57.200 --> 35:58.200
+Right.
+
+35:58.200 --> 35:59.200
+Right.
+
+35:59.200 --> 36:00.200
+Okay.
+
+36:00.200 --> 36:04.600
+Because it makes sense for me to use data from an expert that was performing a very similar
+
+36:04.600 --> 36:05.600
+task.
+
+36:05.600 --> 36:10.200
+And now when I say similar task, I have to in my pipeline somewhere consider, how am I
+
+36:10.200 --> 36:12.360
+going to compare task similarity?
+
+36:12.360 --> 36:17.640
+Like how do I know that this robot is performing a task that is similar to this one before deciding
+
+36:17.640 --> 36:20.720
+to sample trajectories from the policy that I got from this one?
+
+36:20.720 --> 36:21.720
+Right.
+
+36:21.720 --> 36:26.520
+So it's something like if I have this library of policies that do multiple things, the
+
+36:26.520 --> 36:33.280
+first task is to first maybe traverse through all these trained policies, checking to see
+
+36:33.280 --> 36:39.760
+how similar these tasks that they're performing to my tasks to the task that I'm interested
+
+36:39.760 --> 36:40.760
+in.
+
+36:40.760 --> 36:45.400
+And then after finding the one that is most similar, then I can now perform transfer.
+
+36:45.400 --> 36:51.440
+But I guess what I'm trying to do here is trying to perform multi task transfer, which
+
+36:51.440 --> 36:59.360
+is basically you just have this library of tasks, tasks and you're trying to extract some
+
+36:59.360 --> 37:04.760
+common knowledge from them and then use whatever body of common knowledge to kind of speed
+
+37:04.760 --> 37:09.640
+up or improve the learning of some tasks that you're interested in.
+
+37:09.640 --> 37:12.240
+You're not looking at test similarity at all.
+
+37:12.240 --> 37:17.400
+You're just looking at, you know, what do we know about what these experts do when we're
+
+37:17.400 --> 37:18.400
+in this state?
+
+37:18.400 --> 37:19.400
+Yes, yes.
+
+37:19.400 --> 37:24.080
+So I'd like to think of transfer as like falling into two categories, right?
+
+37:24.080 --> 37:27.080
+And the first one would be aggregate transfer, right?
+
+37:27.080 --> 37:31.360
+We're trying to transfer from like I guess all the tasks that I have.
+
+37:31.360 --> 37:35.960
+And then the other version of transfer would be kind of more selective to say, okay, in
+
+37:35.960 --> 37:40.720
+this library of tasks that I've learned, these maybe three tasks are very similar to the
+
+37:40.720 --> 37:42.320
+task that I'm trying to learn.
+
+37:42.320 --> 37:45.960
+And I'm going to take these three and transfer only from those, right?
+
+37:45.960 --> 37:46.960
+So yeah.
+
+37:46.960 --> 37:51.240
+And then when transferring, we also need to be careful of things like negative transfer
+
+37:51.240 --> 37:55.840
+because you can imagine that not all that knowledge is going to be used for some is actually
+
+37:55.840 --> 38:01.880
+going to be very bad for like it's going to hurt the learning of this target task if
+
+38:01.880 --> 38:06.840
+you're not careful, you know, and you can imagine that's one challenge that I kind of have
+
+38:06.840 --> 38:09.840
+to worry about here.
+
+38:09.840 --> 38:17.680
+So again, taking a step back to understanding the specific focus and contribution of your
+
+38:17.680 --> 38:24.160
+research relative to the broader landscape, it sounds like action priors is already
+
+38:24.160 --> 38:32.520
+out there, epsilon greedy exploration policy, we know is already out there is what you're
+
+38:32.520 --> 38:40.720
+adding here, the idea of this multitask transfer from multiple action priors, or is it something
+
+38:40.720 --> 38:41.720
+else?
+
+38:41.720 --> 38:48.920
+It's essentially the extension of the framework to continuous settings, you know, okay.
+
+38:48.920 --> 38:57.080
+So yeah, so just trying to understand how you can still maintain a notion of account
+
+38:57.080 --> 39:04.160
+in a continuous setting, because if you think about having a discrete space like, for
+
+39:04.160 --> 39:10.840
+example, and maze with with tiles as as as states, it's easy to basically keep some table
+
+39:10.840 --> 39:16.720
+where you're like, okay, this particular action has been performed this many times and this
+
+39:16.720 --> 39:18.720
+action has been performed this many times.
+
+39:18.720 --> 39:23.760
+And then you build a decision over that, you sample over like from that categorical distribution
+
+39:23.760 --> 39:29.960
+you get an action outright, but now how do you do that for for for for the case where
+
+39:29.960 --> 39:37.720
+you you don't really have the ability to to to even kind of maintain account, because
+
+39:37.720 --> 39:42.720
+you essentially have as soon as things become continuous, you kind of have infinitely many
+
+39:42.720 --> 39:44.360
+states, right?
+
+39:44.360 --> 39:49.160
+And and the other thing is that you get this effect off of multi modality where at the
+
+39:49.160 --> 39:54.080
+same state, you need a model that can kind of represent these different action preferences
+
+39:54.080 --> 40:00.920
+like these action preferences from from this this data that that you have these trajectories
+
+40:00.920 --> 40:06.560
+from the experts that you have like for for example, if if we're talking about maybe
+
+40:06.560 --> 40:07.560
+let me see.
+
+40:07.560 --> 40:12.240
+So you have an action space where actions can range from minus one to one, right?
+
+40:12.240 --> 40:19.840
+And you can imagine that maybe in this particular setting, experts, most experts prefer an action
+
+40:19.840 --> 40:28.560
+of 0.2 or around they prefer an action that has a mean of 0.2 and other other experts can
+
+40:28.560 --> 40:35.320
+have a preference around maybe off of minus 0.7 and things like that, but then there should
+
+40:35.320 --> 40:39.320
+be this places where if if you were to put a mean around there like that would result
+
+40:39.320 --> 40:44.040
+in a very, very bad kind of policy, you know, so it's kind of like you have a one to many
+
+40:44.040 --> 40:46.240
+mapping, right?
+
+40:46.240 --> 40:49.920
+At every point in the state space, right?
+
+40:49.920 --> 40:53.680
+And that is not really in my experience.
+
+40:53.680 --> 40:57.880
+It hasn't been very trivial to kind of learn, you know, cause I think neural networks are
+
+40:57.880 --> 41:03.880
+kind of the more for kind of one to one type of mapping, you know, where you have like
+
+41:03.880 --> 41:09.840
+input and, oh, no, they call this the more for many to one type of scenarios where you
+
+41:09.840 --> 41:14.840
+can have multiple inputs and then you have like one kind of output in the end.
+
+41:14.840 --> 41:19.880
+But what happens when you have like a single input, which is like your state and then you
+
+41:19.880 --> 41:25.920
+have all these like possible wild values that you have to get out, you know, so my experience
+
+41:25.920 --> 41:30.520
+with using just like a standard neural network is that you get this averaging effect and
+
+41:30.520 --> 41:37.160
+you have noticed that the the average of of of expert actions in a particular state is
+
+41:37.160 --> 41:40.280
+not an expert action or is not an optimal action.
+
+41:40.280 --> 41:41.280
+Yeah.
+
+41:41.280 --> 41:46.480
+So in the scenario of I guess a self driving car, you can imagine that you're driving into
+
+41:46.480 --> 41:49.160
+like a kind of fork, right?
+
+41:49.160 --> 41:52.720
+And then in the middle of the fork, there's something like a tree or something like that.
+
+41:52.720 --> 41:57.320
+And then your experts would be going either, you know, a steering have a steering angle of
+
+41:57.320 --> 42:02.280
+like minus 0.5 at the decision point.
+
+42:02.280 --> 42:06.480
+And then other other experts have have like, I guess, 0.5.
+
+42:06.480 --> 42:12.520
+And then what happens in that case is that if you try to learn your guess action prior
+
+42:12.520 --> 42:18.120
+distribution or action preference distribution at the decision point, you might just average
+
+42:18.120 --> 42:22.400
+over the two and you get like a steering angle of zero and that says, you know, drive straight
+
+42:22.400 --> 42:23.400
+into the tree.
+
+42:23.400 --> 42:27.280
+And then that's not useful at all, especially if you care about your cause.
+
+42:27.280 --> 42:28.280
+Yeah.
+
+42:28.280 --> 42:31.200
+And so how does this model compensate for that?
+
+42:31.200 --> 42:33.000
+The framework does compensate for that.
+
+42:33.000 --> 42:39.000
+But I have been looking at models that try to to look at how to represent a multimodal
+
+42:39.000 --> 42:40.000
+policy.
+
+42:40.000 --> 42:45.480
+Like for example, especially since I'm talking about probability distributions or it's kind
+
+42:45.480 --> 42:48.880
+of like I'm working with mixed Gaussian mixture models, right?
+
+42:48.880 --> 42:54.560
+So I need something that will basically take in a state and then give me a mixture, a
+
+42:54.560 --> 42:58.600
+Gaussian mixture model of sorts over the action space.
+
+42:58.600 --> 43:04.200
+And recently I've been playing with things like, um, I'm playing with things like mixture
+
+43:04.200 --> 43:05.200
+and city networks.
+
+43:05.200 --> 43:08.200
+And those have been giving me promising results.
+
+43:08.200 --> 43:14.360
+And then there's still like some ammo of models that I have, I guess I heard about, um,
+
+43:14.360 --> 43:18.680
+I think it's overlapping mixtures of Gaussian processes.
+
+43:18.680 --> 43:25.840
+And basically it's just, um, models that have, uh, support for, uh, models that can give
+
+43:25.840 --> 43:30.320
+you, um, multiple outputs given a single input, you know?
+
+43:30.320 --> 43:33.080
+So yeah, that's kind of, uh, the challenge here.
+
+43:33.080 --> 43:40.360
+So is the idea that kind of referring back to your self-driving car example that you,
+
+43:40.360 --> 43:44.240
+you know, given your state, you know, one of these mixture models would be able to tell
+
+43:44.240 --> 43:52.680
+you that there are two distributions that, uh, are likely one is centered at minus 0.5
+
+43:52.680 --> 43:57.560
+and the other centered at 0.5 and then based on, you know, based on that information, you
+
+43:57.560 --> 44:02.280
+would know to choose one of those as opposed to choosing the zero or averaging out to zero.
+
+44:02.280 --> 44:03.280
+Yes.
+
+44:03.280 --> 44:04.280
+Yes.
+
+44:04.280 --> 44:05.280
+So that's exactly what I'm trying to do.
+
+44:05.280 --> 44:07.840
+And, and actually you highlighted another problem there, right?
+
+44:07.840 --> 44:12.120
+Which is how do you choose how many modes they are, you know, like, um, no one is going
+
+44:12.120 --> 44:17.640
+to tell you that, um, the good kind of behaviors here, uh, like, there's only two of them,
+
+44:17.640 --> 44:22.080
+meaning that you have like, uh, two kernels or two, two modes, like in, in your mixture
+
+44:22.080 --> 44:23.080
+model, right?
+
+44:23.080 --> 44:26.680
+Meaning, um, you got your goal left and then go, right?
+
+44:26.680 --> 44:33.280
+Um, that kind of thing can, can change, um, um, at, at different points in, in, in, in
+
+44:33.280 --> 44:34.280
+the state space.
+
+44:34.280 --> 44:38.040
+Maybe some states have got like an action preference distribution way, like experts
+
+44:38.040 --> 44:42.480
+are doing kind of three optimal, uh, uh, things and then like in other cases, it may kind
+
+44:42.480 --> 44:43.480
+of change.
+
+44:43.480 --> 44:48.160
+So like learning this kind of model has been, uh, a bit challenging, um, when it comes
+
+44:48.160 --> 44:50.160
+to, like, continuous environments.
+
+44:50.160 --> 44:55.800
+And I feel like this is typically, typically the case when you're moving some, I guess,
+
+44:55.800 --> 44:59.840
+reinforcement learning algorithm from a discrete setting, uh, towards continuous settings.
+
+44:59.840 --> 45:04.680
+Because I'd like to think that the real world is, is made of continuous contact, continuous
+
+45:04.680 --> 45:07.000
+quantities and, and, and stuff like that.
+
+45:07.000 --> 45:13.160
+And there should be some, um, care taken as to how, or what kind of model you're going
+
+45:13.160 --> 45:18.760
+to choose to, to represent that, like for, for example, going from, um, standard reinforcement
+
+45:18.760 --> 45:22.800
+to deep reinforcement learning, we need to care about how we represent our policy.
+
+45:22.800 --> 45:29.120
+So, you know, um, um, going to use maybe some, uh, deep neural network and, and this
+
+45:29.120 --> 45:31.280
+is going to, I guess parameterize my policy.
+
+45:31.280 --> 45:34.480
+I also need to represent my action prior, uh, distribution.
+
+45:34.480 --> 45:38.400
+It's just, there's so many, you know, things that you, you need to kind of like, uh, tweak
+
+45:38.400 --> 45:42.160
+and, and work with for you to have a fully working, working system.
+
+45:42.160 --> 45:47.280
+Maybe as a way to start to wrap up, can you give me a list of kind of the top three things
+
+45:47.280 --> 45:52.360
+that you've learned about doing about a, I guess, about deep reinforcement learning in
+
+45:52.360 --> 45:58.480
+general as applied to robotics, but with a particular emphasis on taking, uh, existing
+
+45:58.480 --> 46:03.120
+research results from the discrete domain into continuous environments.
+
+46:03.120 --> 46:10.920
+Uh, firstly, just moving from discrete environments to, to, um, for, from, from discrete environments
+
+46:10.920 --> 46:12.480
+to continuous environments.
+
+46:12.480 --> 46:18.560
+I think one challenge, uh, with doing that is, uh, just representing, uh, I think your
+
+46:18.560 --> 46:19.560
+policy, right?
+
+46:19.560 --> 46:24.080
+So, for example, uh, I think, I think the first paper that I came across, um, that kind
+
+46:24.080 --> 46:29.920
+of did like a good job with that was, was DDPG, it made me very interested in, in trying
+
+46:29.920 --> 46:37.360
+to apply, uh, reinforcement learning, um, towards, um, it, it basically, like, allowed me
+
+46:37.360 --> 46:40.880
+to believe that, okay, reinforcement learning will work in, in, in the robotics domain,
+
+46:40.880 --> 46:41.880
+right?
+
+46:41.880 --> 46:46.960
+Um, but then the paper again, uh, I think it's, it's, it's deep deterministic, uh, policy,
+
+46:46.960 --> 46:47.960
+policy gradients.
+
+46:47.960 --> 46:48.960
+Okay.
+
+46:48.960 --> 46:49.960
+Right.
+
+46:49.960 --> 46:53.760
+There's a, a newer version, I think D4 PG, um, not sure, but yeah, but, uh, essentially,
+
+46:53.760 --> 46:59.440
+um, it's like an, uh, it's a critic method and that it has all these, um, okay, let me
+
+46:59.440 --> 47:04.160
+just say, like, it is one of the, the first papers that, that kind of worked in, in, in,
+
+47:04.160 --> 47:06.400
+uh, deep, in, in robotics, right?
+
+47:06.400 --> 47:11.040
+So to apply DDPG reinforcement learning in, like, with continuous environments, right?
+
+47:11.040 --> 47:15.960
+Um, I think, I think besides trying to learn, like, a, a good policy, you need to kind
+
+47:15.960 --> 47:22.240
+of think of, uh, exploration, like, how you're going to handle, um, exploring this very,
+
+47:22.240 --> 47:25.880
+like, uh, the, your, your, your, your, your, your state space, given the fact that it's
+
+47:25.880 --> 47:31.000
+continuous and there's like infinitely many, uh, states that you can, uh, occupy there.
+
+47:31.000 --> 47:38.640
+And, um, the, the other thing is data in robotics is very, like, it's, it's, it's very,
+
+47:38.640 --> 47:45.200
+it's very hard to come by, like, you, um, you kind of need to, or rather, the ideal case
+
+47:45.200 --> 47:51.040
+is to not have a lot of, um, it's, it's, it's, it's, it's, it's to not have to train
+
+47:51.040 --> 47:52.880
+your, your model for a long time, right?
+
+47:52.880 --> 47:57.120
+You'd like to maybe train, um, your model, like, for, for a very short period of time,
+
+47:57.120 --> 48:02.760
+but, like, in reality, if you're using, like, these model free methods, um, you find
+
+48:02.760 --> 48:05.360
+yourself training for a very, very long time.
+
+48:05.360 --> 48:12.920
+And that makes it difficult to kind of apply, um, um, existing work in the sense that
+
+48:12.920 --> 48:16.720
+maybe you have, like, uh, you're working on your laptop and you can't run these models
+
+48:16.720 --> 48:19.360
+because it's going to take a long time to converge.
+
+48:19.360 --> 48:24.960
+And the other thing in reinforcement learning is that, uh, I realized it very late, um, um,
+
+48:24.960 --> 48:31.040
+in my master's project where, like, I realized the fact that, uh, your random seed is, is
+
+48:31.040 --> 48:35.400
+quite a very, it's a very important thing, you know, like, so you can, you can blame the
+
+48:35.400 --> 48:39.600
+model all you want to, like, you get, maybe you get, like, a very good, uh, kind of learning
+
+48:39.600 --> 48:42.440
+curve and you feel like, okay, this thing is working and you run it again.
+
+48:42.440 --> 48:46.320
+Um, and what happens now, it basically gives you, like, a very flat thing and shows you
+
+48:46.320 --> 48:47.320
+that it doesn't work.
+
+48:47.320 --> 48:50.640
+So it fluctuates a lot, there's like all these variants.
+
+48:50.640 --> 48:55.840
+So I learned that, okay, for you to actually, for people to be able to trust your results,
+
+48:55.840 --> 49:00.280
+you need to be able to kind of average them over multiple runs and multiple runs means
+
+49:00.280 --> 49:03.440
+that you're going to be running your, you, I guess, you'll algorithm for like a long time
+
+49:03.440 --> 49:06.400
+and, um, that is just more compute time.
+
+49:06.400 --> 49:12.160
+So like, you can't, you need like, uh, I guess compute, compute is a very important thing,
+
+49:12.160 --> 49:18.600
+you know, so I'm fortunate enough to have, um, access to a cluster, like, um, we have,
+
+49:18.600 --> 49:24.080
+I think something with, with 60 blades, like, at the university, um, and I can basically
+
+49:24.080 --> 49:29.200
+run multiple experiments in parallel and, um, I can get my results within, uh, two
+
+49:29.200 --> 49:35.360
+hours or so, you know, but the one challenge is just, you know, um, you, firstly looking
+
+49:35.360 --> 49:40.520
+for environments, you're looking for, um, things that won't take too long, you know, um,
+
+49:40.520 --> 49:46.000
+and then also, yeah, exploration has been like a very, uh, a big thing, you know, so, yeah,
+
+49:46.000 --> 49:51.320
+I don't know if that answers your question, but, um, yeah, those were like, in my experience,
+
+49:51.320 --> 49:55.680
+things that I found very difficult about trying to apply, uh, deep enforcement learning
+
+49:55.680 --> 50:00.800
+in, in, in the robotics domain, just data and having very accurate simulations.
+
+50:00.800 --> 50:05.160
+Like, for example, you start out very, very ambitious, um, for example, we have a physical
+
+50:05.160 --> 50:10.320
+robot, uh, in house here, um, like this mobile manipulator and I'm like, I want to apply
+
+50:10.320 --> 50:14.240
+deep enforcement learning, maybe learn to pick up a cup, and maybe the cup will have water
+
+50:14.240 --> 50:15.240
+and stuff like that.
+
+50:15.240 --> 50:20.160
+And as you kind of traverse through the literature, you start checking things off from this
+
+50:20.160 --> 50:23.760
+checklist or like from these ambitions, you know, it's like, okay, maybe there shouldn't
+
+50:23.760 --> 50:27.840
+be water, you know, like in the cup, and then maybe the cup should be like a ball, you
+
+50:27.840 --> 50:30.280
+know, something that's, I don't know, easier to, to, to, to hold.
+
+50:30.280 --> 50:33.560
+And then you're like, okay, maybe instead of having a ball, I'll just have, I'll be moving
+
+50:33.560 --> 50:37.440
+the manipulator just along like this, you know, and then you keep going and then you
+
+50:37.440 --> 50:41.120
+find yourself, okay, maybe you have instead of having a physical robot, I'm going to
+
+50:41.120 --> 50:42.840
+build a simulated version.
+
+50:42.840 --> 50:46.640
+And then when you're there, you're like, okay, instead of building a physical simulated
+
+50:46.640 --> 50:50.400
+version of the robot, I'm just going to build a simple 2D thing just to see if like these
+
+50:50.400 --> 50:51.400
+models work.
+
+50:51.400 --> 50:56.680
+And then you go all the way down to like a simple navigation domain, like a 2D thing where
+
+50:56.680 --> 51:01.840
+you can kind of easily prototype ideas and, you know, so it's, it's a very humbling
+
+51:01.840 --> 51:02.840
+experience.
+
+51:02.840 --> 51:08.520
+You start out very, you know, big and then like you kind of, you kind of get to narrow
+
+51:08.520 --> 51:12.080
+down into these like particular problems and you need something that's going to allow
+
+51:12.080 --> 51:16.880
+you to evaluate your ideas like quickly and, and, and, and very, you know, very efficiently
+
+51:16.880 --> 51:18.120
+and things like that.
+
+51:18.120 --> 51:23.640
+So yeah, like that has been my experience, I think with, with deep, deep RL in robotics
+
+51:23.640 --> 51:27.040
+and I think other applications that have been trying to use it in.
+
+51:27.040 --> 51:33.920
+Yeah, and I think your experience is very much in line with, with the experiences of
+
+51:33.920 --> 51:41.160
+others and it has, you know, that kind of experience I think has led a lot of people
+
+51:41.160 --> 51:50.200
+to kind of, you know, leave deep RL in frustration and move on to simpler things.
+
+51:50.200 --> 51:59.760
+But it's, you know, certainly a, a space that I find fascinating and thank you for kind
+
+51:59.760 --> 52:03.000
+of walking us through the way you're approaching it.
+
+52:03.000 --> 52:04.480
+Yeah, thank you.
+
+52:04.480 --> 52:05.480
+Thank you.
+
+52:05.480 --> 52:10.760
+Like I really, really relate to like that, that last part, you know, I understand people's
+
+52:10.760 --> 52:14.840
+frustration and understand the reasons if they end up leaving deep RL, you know, like
+
+52:14.840 --> 52:19.800
+I think what has helped me stay here is the, the communities that have been exposed to
+
+52:19.800 --> 52:26.200
+like, for example, I've met other people deep learning in Daba who are using deep RL
+
+52:26.200 --> 52:30.440
+for the, for the unique applications and we get to kind of, you know, talk and if you're
+
+52:30.440 --> 52:32.960
+having a problem, you can ask this particular person.
+
+52:32.960 --> 52:37.880
+Same thing is happening at Black and AI and like in some cases, you know, I guess through
+
+52:37.880 --> 52:42.720
+Black and AI, you get to meet the leading researchers in the field of the people who wrote
+
+52:42.720 --> 52:47.080
+the paper that's giving you sleepless nights and headaches and you get to ask them directly
+
+52:47.080 --> 52:51.880
+like, yo, what is this ex like, how did you make this work and what was, what motivated
+
+52:51.880 --> 52:57.040
+you, your decisions like for, I guess, choosing this particular thing.
+
+52:57.040 --> 53:02.880
+So yeah, I really, really understand, I guess the frustration and why people would be frustrated
+
+53:02.880 --> 53:07.920
+with the field, but hopefully going forward with this whole movement of trying to get people
+
+53:07.920 --> 53:12.760
+to release their code more like this whole thing of reproducibility, problems like that
+
+53:12.760 --> 53:14.280
+will tend to die out.
+
+53:14.280 --> 53:15.280
+Awesome.
+
+53:15.280 --> 53:16.280
+Awesome.
+
+53:16.280 --> 53:23.280
+Thank you so much for taking the time to chat with me.
+
+53:23.280 --> 53:24.280
+Thank you, Sam.
+
+53:24.280 --> 53:28.640
+And I think you're having me.
+
+53:28.640 --> 53:29.640
+All right, everyone.
+
+53:29.640 --> 53:35.480
+That's our show for today for more information on secret, or any of the topics covered in
+
+53:35.480 --> 53:41.040
+this episode, visit twimmelai.com slash talk slash 235.
+
+53:41.040 --> 53:48.200
+For more information on the black and AI series, visit twimmelai.com slash black and AI 19.
+
+53:48.200 --> 54:14.960
+As always, thanks so much for listening and catch you next time.
+

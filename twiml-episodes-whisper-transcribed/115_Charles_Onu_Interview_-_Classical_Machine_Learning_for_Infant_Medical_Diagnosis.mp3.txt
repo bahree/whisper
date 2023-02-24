@@ -1,0 +1,583 @@
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+people, doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington.
+If you're listening to this podcast, you probably have an opinion about AI and where it's
+headed.
+I personally think AI will make a huge difference in how we approach both our work and personal
+lives, but as of today, the biggest impacts for me are in the little things.
+But enough of what I think, I want to invite you to join the conversation.
+Jump on over to Twimbleai.com slash MyAI to let us know what you think about where personal
+and home AI is headed.
+Sharing your thoughts takes just two minutes and qualifies you to win some great prizes.
+In this episode, I'm joined by Charles Onu, PhD student at McGill University in Montreal
+and founder of Benoit, a startup tackling the problem of infant mortality due to asphyxia.
+Using SVMs and other techniques from the field of automatic speech recognition, Charles
+and his team have built a model that detects asphyxia based on the audible noises a child
+makes upon birth.
+We go into the process he uses to collect his training data, including the specific methods
+they use to record samples and how their samples will be used to maximize accuracy in
+the field.
+We also take a deep dive into some of the challenges of building and deploying who Ben was platform
+and mobile application.
+This is a really interesting use case, which I'm sure you'll enjoy.
+Let's go.
+Alright everyone, I am on the line with Charles Onu.
+Charles is a PhD student at McGill University.
+Charles, welcome to this weekend machine learning in AI.
+Thank you very much, Sam.
+I'm happy to be here.
+It's great to have you on the show. I had a chance to see your presentation on, I think
+the project was called the Benoit at the NIPS Black and AI workshop and it was very well
+done.
+Thank you.
+And I'm sure you'll tell us a lot more about that project, but before we do that, why
+don't you tell us how you got involved and interested in machine learning?
+Well, that story is very intertwined with the project, the Benoit that you just spoke
+about.
+All the better.
+Yeah, because indeed it was, it was, it might be to pursue that project that I got into
+machine learning and took a, I say, side roads from my original path.
+Okay.
+Yeah.
+So, so I had my undergrad education in electrical and computer engineering and when I finished
+my undergrad, I worked as a software engineer.
+I was doing that time that I was volunteering with an NGO called in Actus and then eventually
+co-founded one called Fisher Foundation with some colleagues in Nigeria.
+So I studied in Nigeria and that was when we, during our work in the local communities,
+we had projects across agriculture, health care and a number of other domains.
+And we came across the huge challenge of birth as fixed year, which is essentially when
+the baby does not breathe well right after birth and it was such a huge cause of infant
+mortality in our communities and but also in many parts of the world and particularly
+in developing regions or resource poor settings.
+So it was, you know, it was in a bid to see what causes this problem, how could we address
+it?
+I came across a research that, you know, first of all, detailed that one of the big reasons
+why as fixed year is causing such huge casualties in developing countries.
+So about one million babies die every year from as fixed year and another one million
+suffer severe lifelong disabilities like brain damage, intellectual disability, cerebral
+policy and so on.
+And one of the reasons why the causality was so high was because in most resource poor
+settings, the means for clinical diagnosis was too expensive, too resource intensive and
+was just not happening.
+Yeah.
+And so there was a need for something, a low cost way of being able to screen babies early
+enough for whether or not they are breathing well because when it's severe, it's easy
+to know, you know, the baby usually would not cry when it's not breathing at birth.
+But in many other cases, it's not as severe to cause baby not to cry, but it's there and
+it's causing damage to the brain of the oxygen starvation.
+And so the work we began to develop was based on clinical research done by doctors in the
+70s and 80s way back.
+And you know, they had looked at cries of infants suffering several pathologies and in particular
+as fixed year, they used their spectograms back in the days and we were able to notice
+that several perhaps characteristics of the cries, the fundamental frequencies and melodies
+and very important frequency components of the cries were different or in general in
+the population of babies that had some of these pathologies from those that, you know,
+were okay, but normal.
+And in particular, in the case of asphyxia, it's even more pronounced because breathing
+and speech are coordinated by the same region of the brain and within our vocal tract as
+well, the same set of organs are oscillating when a person is breathing and speaking.
+And so the connection is so intertwined that the baby is not breathing well, there is a
+manifestation in the frequency patterns in the scribe.
+And so it was upon, you know, I'm giving the long-winded story of how I came into a machine
+learning.
+And it was upon the story of this that I, I first of all, to head about pattern recognition
+as a discipline.
+Okay.
+And I began to study and take courses myself to learn more about it.
+And slowly began to, to, you know, to start what has become original as a project now.
+Yeah.
+Oh, wow.
+And you recently published a paper on this that won a Best Paper Award in the Machine
+Learning and Healthcare Workshop at Neps, is that right?
+Yes.
+That's right.
+Yes.
+Our paper won the Best Paper Award at Nips in 2015 Nips, actually.
+And at the last Nips, we published a new one, which was a follow-up to that paper in
+which we had moved from algorithm into an actual deployable device in the form of a smartphone
+application.
+Oh, okay.
+Okay.
+So maybe we can dive into that project, and you can tell us a little bit about, kind of
+a little, in a little bit more detail, how you approach it.
+You mentioned that the, the research came out of the 70s and 80s, is this the, the research
+that identified these fundamental relationships, or were you somehow able to borrow data from
+that research as well?
+Yeah.
+Well, the, this research, first of all, you know, told us that it was, there was something
+to be explored there.
+Because at the beginning, the last thing I would have thought of was to consider the infant
+cry as a useful signal for diagnostic too.
+And, and so it was really serendipitous, I'd say, to have stumbled upon one of these papers
+and to see that it was indeed a string of studies between the 70s and 80s, exploring the,
+the use of, you know, spectrograms to analyze the infant cries.
+And there was this winter afterwards in which nobody seemed to carry it about, you know,
+what infant cry could be used for.
+And my assumption was that, you know, at the time, there was no, there are no concrete
+methods for transferring this knowledge or this hypothesis into useful applications as
+we now have today with machine learning being so well developed as a field now.
+And several low cost technologies, like mobile phones, that was not conceivably at the time
+of the 70s.
+So my thoughts was, that was why some of the studies did not scale forward.
+You know, when you first came across this paper and got the idea that, you know, this might
+be applicable to this problem, you know, you mentioned that you started taking a bunch
+of courses, but what was some of the first, like, concrete things that you did to try
+to apply this knowledge that you came across?
+Yeah.
+Well, one of the, one of the first things I did was, you know, I had a doctor friend and
+we had long conversations about it.
+You know, I tried to understand physiology of the infant, of the infant breeding system
+from him.
+And, first of all, validated this was something worth pursuing.
+And we were together, you know, worked on the early part of the work that we eventually
+did.
+Well, the next challenge, too, was how do we find data to validate this hypothesis that
+infant cry holds information about the presence or not of asphyxia?
+Right.
+As you know, machine learning is based on the ability to use data and learn from it and
+be able to generalize from that going forward.
+But as you probably know as well, in medical space acquiring data is can be an extremely
+resource intensive process, what intensive time to get approval to interact with actual
+patients or time it takes to the amount of cost of funds it would require to conduct
+the whole study to acquire this data.
+And so one of the first things we thought was to find if someone had, by some chance, been
+collecting data of infants in the world, at the time, we only interested in say, we
+really thought we would find, you know, cries of babies that were normal.
+And if we were able to find that at least, we thought that would be a good point to begin
+to start modeling the inherent characteristics of cry.
+And to begin to phrase this as maybe an anomaly detection problem, where we have a good model
+of what a good cry should be, and we can say that any new example, any new sample,
+that doesn't fit this model, is likely an anomaly that has to be checked, you know, has
+to go for further verification and, you know, I'm referring to babies here.
+And that could be useful screening too that, you know, first responders could use to
+transfer babies for tertiary care.
+Right.
+So we saw we searched and eventually we came across the database that we used for our
+work.
+It's called the baby shilan to database.
+And it's collected across a set of specialist hospitals in Mexico.
+And this is a team of doctors who had been tracking several pathologies in babies.
+And they had collected the cries of babies in several states, from normal states like,
+from normal babies and in different states like hungry states, just a resting state, when
+receiving some measure of pain, through maybe blood sampling, and also they collected pathological
+states as well as fixier deafness and a number of other conditions.
+Okay.
+And so we reached out to them, you know, taught them about the work we were trying to
+do.
+And they gave us access to the subset of their data that had the normal baby's cries
+and the XPC database cries.
+Yeah.
+It was fairly small to set about 69 babies in total, but over a thousand or so recordings.
+And that was all we used to develop the, our first, our first work that I really showed
+that there was promising, was promising signal in the cry that we could use to develop it
+possibly it, it too for the agonies.
+Yeah.
+How did you use that data to develop a model, what kind of model did you end up pursuing
+and what was your general approach there?
+Yeah.
+Yeah.
+That's an interesting one.
+The primary subdomain of machine learning that we looked to was that of automatic speech
+recognition.
+As you can imagine, this is a very similar problem as well, whereas ASR is trying to take
+a speech and take a person's speech and understand what the person is saying.
+In this case, we're not trying to understand what the baby is saying, what the baby's body
+is communicating to us.
+And so you can think that the methods developed there will be useful.
+And so that was all we did.
+We adopted feature extraction methods like the use of male frequency, septal coefficients,
+MFCCs.
+So MFCCs are an extraction of key frequency components in the speech signal.
+And they've been used a lot in ASR because it's been, it's been easy, the methods of discrete
+Fourier transforms to extract these key components that really put society things that are not
+as relevant, you know, the artifacts of speech that are not as relevant and brings into
+the, for the most important component of it.
+Okay.
+And so MFCCs have used a lot in ASR and we used that for speech recognition and feature
+extraction path.
+And we use support vector machines at the classification phase and combine these with,
+you know, with non-linear kernels like the Gaussian kernels and so on.
+So that's made the core of our system in general.
+So you had the, you had these thousand recordings, you passed them through some pre-processing
+steps that basically broke them down into frequency components and those became your features
+for your SVM.
+Yes, exactly.
+And how, you know, beyond that initial kind of model, like, did you run into any challenges
+in, in doing that?
+So any challenges in building the classifier, you mean, from building the classifier,
+yes.
+Yeah.
+Well, the good thing was, you know, we've, we've had this data that had been collected.
+It had been, you know, someone had someone else had gone through all the work of getting
+a clinical approval for it to conduct this study, collected the data, you know, filtered
+the data, they had, you know, annotated it by labels, you know, which ones are the pathological
+samples and healthy samples and so on.
+So, so as you probably know, machine learning is a lot of work that goes into that early part
+which we were, fortunately, saved from the engagement.
+At least at that time.
+So, so we spend most of the time, you know, developing the classifiers and tuning and, you
+know, and searching the space of what's the best solution within this range of parameters
+between the MFCs extraction and the SVMs and hyperparameters.
+But, you know, ultimately, we are, we are now somewhat back to that first stage because
+we're able to use that data to show the promise of this approach, to show the, the feasibility
+of, of this method.
+So now we need to, one, validate it, you know, with data we collect ourselves, we need to,
+we need to get a larger data set to improve the performance.
+So, the performance of the system we have now is about 90% on specificity and sensitivity
+measures.
+That's in accuracy in detecting the babies, the expiated babies and that sensitivity
+and accuracy in detecting normal babies is our specificity.
+And so, you know, the goal is to try to, one, robustly validate this, this, this results
+we have using samples acquired from a different geographical location, different population.
+And hopefully acquired this more data to use it to improve the performance of the algorithm.
+And I'm beginning to develop into, into our software, very practical issues that would
+have to face in the real world, like making sure it's robust to noise, and because the samples
+were coded in very controlled environment without background noise, and just several optimizations
+by, you know, for instance, in the presence of overlapping signals, you know, several of
+these crying at one, can we separate them, the five one, can we optimize for the length
+of the audio signal that we require to make a useful, a valid diagnosis, and so on,
+and more of such things, we're looking at now.
+Okay.
+And now, one of the tools that will help you do all this is you were able to take the
+work that you did initially and then build a mobile app around this.
+Mel, tell us a little bit about that process and kind of what stage you are, you're in
+with deploying this mobile app.
+Yeah.
+So, you know, in terms of the development of mobile app, one of the challenges is that
+a lot of, a lot of machine learning has, you know, happens on Python and MATLAB, and
+what those are not the languages that are used in mobile development, right, in general.
+And so, you know, but they really help with experimentation and, and, you know, the fast
+tone of our design to take process, but thinking of deployment, you know, we had to start
+thinking about, first of all, we had to decide upon what was the best mobile platform
+for a place like Nigeria, where I lived when this, when we started this project.
+And Nigeria, Android phones are 90% or 95% of what people use.
+So that was our go-to platform to start with.
+Android at the time, at least, was 2014 and there about the main platform for development
+or the main language for Android development was Java.
+And now there's been C-shop portals to be done, I think Python, possibly now, yeah, but
+also the one of the big challenges too was transferring our code to Java and maintaining
+efficiency, maintaining performance as well, accuracy, and, you know, just all of that
+thing.
+So, it took quite a while.
+That was quite a bit of a few weeks or maybe months, we spent on, on just that part
+of the work, but we're able to do it ultimately and my colleague, Innocent, who is also a software
+engineer.
+We're able to completely move our code and maintain performance both in terms of time
+to diagnosis, we're able to maintain the original classification performance on the data
+set as well when we put it in the mobile application.
+So that was one challenge we had to face and it was good.
+And we also mentioned that we face this challenge too because we wanted to put the classification
+model on the device.
+We did not want it to require internet to do classification because if we are trying
+to deploy in some of the poorest parts of the world, in Nigeria that's also not so poor,
+the internet access is still very, very, very, very scanty in many places.
+And so if the device required internet to make it a diagnosis, then the purpose is halfway
+defeated already.
+And we could go there in the long run, but in the media term it was the most practical
+thing for our target groups.
+And so we went through that and we got it onto the mobile app.
+So where we are now is the questioner, so in terms of validating our mobile application
+and that's really love what's taking us, it's what takes out most of our time presently.
+So in Montreal, at the Maggi University Health Center, at the Children's Hospital here,
+we are doing the validation exercise in one year exercise with the doctors here.
+And the goal is to acquire more samples from babies who have experienced in different
+levels of species from mild to moderate to severe, acquire control samples of normal babies,
+and then to use a binwad to validate against, to classify the samples essentially.
+So these samples are going to be, the cry samples of these babies are going to be evaluated
+very clinical methods of diagnosis.
+So they have blood samples be taken to be analyzed with a blood gas analyzer and a doctor,
+especially doctor, would clinically determine what to label these babies as, and then
+validate these against the binwad and hopefully further develop the algorithm in that process.
+And the next stage after that would be to then take this to Nigeria and do field trials there.
+Our regional plan was to do this stage in Nigeria and it's still not a shutdown plan completely
+but we faced many challenges with that. Just because, whereas the whole clinical process
+I just explained of blood gas analysis and so to confirm the presence of our species,
+whereas it's a routine procedure in Montreal, in Canada, in Nigeria it doesn't happen,
+which is the root of this problem differently.
+Right.
+Equipments do not exist in any of the public hospitals there.
+There's no power, there's no electricity for the most part, so if we use it if it was
+there, there's a whole workflow and process requirements that should be in place or that
+would have to put in place if we were to try to do it there.
+And a lot of this would cause put time, money, effort and it would be a huge deviation
+from the ultimate or the precise focus of the project.
+And so after much thought from back, we decided that we'll do the first stage here and then
+move to do it, filter out in Nigeria with the doctors who work with there as well.
+And now it sounds like the samples you're collecting at McGill are, there's a high level
+of care clinically and evaluating the samples.
+Are you also collecting them with more professional equipment or are you trying to collect the
+samples via the mobile app so that you can kind of match the conditions that you'll be
+collecting them with in the field?
+Yeah, that was indeed a decision point for us, whether to use the mobile apps, the mobile
+phones themselves to apply it there or to use specialized or the recorders.
+And ultimately we went for special or the recorders just because of that.
+Oh really?
+Yeah, we did.
+We really want to maintain the one, the recording quality across the subjects, across the samples.
+We want to track things like sampling rates and just, you know, exclude some of the immediate
+let's say Mr. Lenners' functionalities are coming with a mobile phone.
+Also, you know, we've had some slight issues with the ethics before, I don't know if this
+probably lands on phone things I should not talk about as well, but yeah, there's also
+some ethics issues with using the phone right away for the acquisition and yeah, so we're
+going to be using digital audio recorders to pick these signals at this point.
+Okay.
+Yeah, I'll take your word on it if it's something you can't talk about, but you certainly
+pick my curiosity.
+I mean, I can imagine in the U.S. we have laws like HIPAA that require a certain level
+of standard of care with patient information, I imagine there's that kind of thing going
+on.
+Yeah, things on that line.
+Okay.
+Yeah, I mean, it's, it's, it can get complicated.
+You've got these samples that you're capturing with specialized audio equipment.
+How then do you address the issues that you mentioned previously, you know, kind of
+there, the transfer, transferability of those samples to the samples that are collected,
+you know, via your mobile device, so your background noises, you're overlapping, like
+are you, you recreating these situations after the fact or is that just reserved for a later
+stage of developing your model?
+Yeah, yeah, at the current stage, we are going to be working on those optimizations more
+in the research settings, so we're going to simulate what noise it looked like, okay.
+We could go out, you know, the sample, one way which we could do the case of the noises
+to record noise in record actual noise signals in the environment, we think the Apple
+be used and think that and use that noise to, I wanted to say noisy our samples further
+with a bit too much use of noise, but we use that to corrupt our samples essentially.
+And then, you know, work more from the research, so our research team is going to be working
+more on the research side of how can we improve the algorithm, making more robust noise.
+And I guess the more practical test of whatever we develop would happen when we are able
+to go through this phase of validation and begin to test on the fields in Nigerian, so
+we can put it down on the field and say, and test it in reality.
+How many samples are you expecting to collect in the current phase?
+Oh, you shouldn't have asked that, now I'm going to, now I'm going to disappoint you
+if you've heard about machine learning data, but we are collecting a total of 100 samples.
+Oh, wow, okay.
+You know, it's interesting because I was, I think perhaps the precursor to that question
+was, you know, thinking about, you know, whether this is something you would also evaluate
+like a deep learning type of approach, and I figured maybe one of the, you know, the
+limitations would be the number of available samples and needing a much more efficient
+model.
+Yes, yes, that's correct.
+I mean, first of all, getting medical data is really hard.
+I work on another study at McGill, in which we are also collecting cardio respiratory
+signals of newborns, and over a period of since 2014, it's taking us from then to 2017
+December to collect a total of 230 newborn data.
+So we're tracking, you know, respiratory difficulties in the intensive care unit.
+And so the bottom line is, yeah, it's really hard, it takes time to get, you know, quality
+medical data.
+And, but that's also part of what turns us more towards classical machine learning and
+less away from automatic representation methods like deep learning, so that we can really
+have control of what features we extract and really make direct connections between,
+the features and the cause they have on the system and, you know, and their projectability
+as well.
+On that note, are there, you know, you started with this understanding from the prior
+research that the frequency components would have a big play a big role in identifying
+the asphyxia samples in that kind of feature engineering process, feature identification
+process.
+Did you identify any new features beyond what you found in the existing research, and
+in particular, was there anything that you found that surprised you?
+I'll say, because there's such a wide range of audio characteristics that I was explored
+back then, but one of the features that I really stood out the most was the fundamental
+frequency of the cry, because the fundamental frequency is one of the most studied elements
+because it's like the very first thing that describes an audio signal even in music
+to the fundamental frequency determines the key of a song, and so it more or less determines
+what the, at what pace or at what pitch is this child crying at.
+And that would say it's been the most significant features consistently across our work.
+And across the previous work that was done as well.
+Okay, so it's not some, you know, there's not some kind of mysterious thing that's happening,
+like some, you know, it's like just the basic, you know, most fundamental thing that you
+would get out of this audio signal.
+Yeah, but the interesting question comes in in the, in how it varies in the time across
+time.
+So the time very in nature of this signal.
+And that's why it's not a simple problem that you could set it threshold or chord
+and say, okay, every value above this, right, right.
+So that's really why machine learning was necessitated because it's the complex time
+very nature of the signals and of these characteristics that is just impossible to put down a rule
+that says, you know, maybe the has this, this and this is going to be normal and otherwise
+for, for us fixated.
+Now, how do you capture that time very nature with the SVM?
+Yeah, so SVMs inherently are not time, time series classifiers.
+And so we've used the combination of several methods.
+So one of the things we did was use Gaussian kernels for the SVMs, which, which primarily
+do with scalar features, or we then segmented the samples into, into several time chunks
+and, and use the instances in time, as if they were independent for training.
+But at test, I, we test the, we test the instances, again, independently, but combine their
+results to determine whether or not we've, the performance has worked, the performance
+of the system is doing well at this, at the level of this subject now, at the level
+of the independent time instances.
+And so that way, by guiding the search, basically through our, our parameters, by guiding the search
+with the ultimate performance on the subject, we can go to a better, hyper parameter space
+that really optimizes performance at the level of the subject based on the nature of each
+of these instances in time.
+Hmm.
+Yeah, can you give me an example, maybe of how that, how that works?
+Like, what, how does the, the relationship between these samples, give you, you know, allow
+the algorithm to, to key in on this time-sensitive variation?
+Yeah, so, so you could look at it as, imagine we recorded, hypothetically, the, the length
+of the samples we have was ten samples.
+So that's it was one second at ten hertz.
+Okay.
+Ten seconds, ten, ten samples per second.
+Hmm.
+So this is for one subject, for one infant.
+So what we do is, you know, we take each of this, the, the feature, the feature vector
+at each of these time instances, so to be clear again, at each of these ten time instance,
+we have a feature vector of some length, the feature vector is determined by the number
+of characteristics we decide to extract from the, from the audio signals, you know, including
+the fundamental frequencies and many other characteristics from the MSC features.
+And so we take that feature vector of, say, some, some value, let's say it was three.
+And we take that feature, those feature vectors, we decore it as, first of all, for training.
+And the goal released to find in the, in the high dimensional space, is there a space
+on which we can separate the instances from success samples, from the time instances
+of failure samples. But when we do that training to try and separate them and find a good
+hyperplane, the high dimensional space, then on the evaluation point, we take, of course,
+a separate set of samples. So we don't use the same subjects we use in training as the
+evaluation phase. In the evaluation phase, we take each of the instances, the ten instances
+of a particular subject to evaluate it. We classify them based on the, the model that
+we are choosing to evaluate at this point. And, and ultimately, we, we then use another
+metric. So in our case, we, we, we explored both the use of just a simple majority count
+of the instances, but also we explored using another classifier, another support vector
+machine to be able to classify the predictions. So it's like a meta classifier to be able
+to classify the predictions of each of the ten instances. So each of the predictions
+become their own features to the next classifier. And then we use that to predict, to make
+one final prediction for that subject. And is that, yeah, is the meta classifier method
+more performant than a majority or some kind of quorum based system?
+Yeah, in our case, it performs slightly better than just doing a majority count. And that's
+partly because it's able to take into account temporal dynamics now of this, of the, the
+original instances in time. It's able to, it's able to find the relationship between,
+between these instances over time, pretty much, and connect the ultimate outcome.
+And the example that you use was ten data points a second is, is one second, is that the,
+was that just a, for illustration or is, it does one second, worth of sample, give you
+enough to identify this time varying indicator in the fundamental frequency of aspects.
+Yeah, so one of the, one of the things that we've done is, we use longer segments, but
+we, first of all, break them down into one second segments. It's also a way of, of dealing
+with the fact that we don't have so many subjects. And we want to make sure that whatever we build
+is, it leaves room for, for uncertainty. And so what we do is we break down the samples
+into one second segments, perform classification on each one second segment, and then average
+the results to give a prediction for that subject. So there's several levels of breaking
+down, including this. So we, we, we, we, we, we are the very lowest level deal with the
+one second segments. And then we, we, we, we, we, we, we, we, we, we average data on
+sample data at the higher level to make a prediction for each patient. So in practice
+to, in the test, we did with the mobile application. What we do is, we're called lens
+of 10 to 20 seconds. And we break it down that way for the classification. So we split
+it. That also helps us to do parallel computations if the device supports it. And then we eventually
+combine the predictions. And in terms of, you know, where you are currently, what kind
+of results are you saying with the, with the method? So, so the, the paper we have published,
+we obtained about precisely 86% of sensitivity. So that was the detection rate of infants who
+had a sphixia. And it's 9% of a specificity. That was detection rate of infants who did
+not have a sphixia who were healthy. And this is the one we published in, in 2015, that's
+one the basic part of what that nips. Nips machine learning for health care. Right, right. And
+practically speaking, your, your baseline is against, you know, in the field, it's against
+an unated doctor trying to identify asphyxia just based on being presented with an infant
+that isn't responding normally. Yeah. Yeah. I mean, that's what would, would like to,
+to change. And that's, you know, that's not good enough to have the doctor just eyeball
+it. Right, right. But it should be clear that there's a very clinical, there's a gold standard,
+you know, there's a gold standard, which is used in, in Canada and in many other parts
+of the world. That's the blood. And that's a general. Exactly. The blood class analysis.
+Okay. Right. So detect this example of the baby's blood through, usually through the
+cut on bleak record, the arterial blood sample. And they analyze it for several parameters,
+bilirubin, acidosis and electrolytes and so on. And usually they combine this with the
+abgas core of the infant. The abgas core is a, is a score assigned to literally, literally
+every baby who has been born for the last 40 years. And it's a physical assessment of how
+old baby is doing on five measures. So that's combined with this blood gas analysis to make
+a confirmatory diagnosis of a fiction. And that is, is the blood gas analysis also something
+that is routinely performed or is it performed when there's, you know, a certain level of the,
+of the score or some indication of a problem? Well, in Montreal and the rest of Canada,
+it's a routine process for every baby that's born. And really that's one of the things that makes
+it very convenient for us to do the study here. It's because we would not have to as part of our
+study design decide how we collect the gold standard. The gold standard is already a part of
+day-to-day clinical operations. We just have to read the charts to get that data. So yeah,
+it's routine here. Interesting. And you mentioned that you're working on another project
+there as well in addition to Benoit. What's that one? It's called the APEX project. APEX has in
+A4APEX, the stands for automated prediction of extubation readiness. It has, I guess, one technical
+term, the extubation. And basically that refers to the process of winning a child who is on the
+respiratory support. Yeah, so usually infants who are born pre-term, pre-matchell, which is
+usually around seven weeks or they're about, is I usually, the lungs are actually not well developed
+well-formed to support spontaneous breathing for them. And so they usually require respiratory
+support. And this happens in general through the insertion of a tube down the attractor.
+Yeah. And the other end of the tube is connected to a ventilator. And this ventilator provides oxygen
+to the infant at a certain interval, you know, tunable by the diffusitions. But these positions
+have to make a very critical choice under this setting. So they must decide when to remove the
+infant from this setup, from mechanical ventilation, as it's called, because the longer you leave the
+infant on that, that system, the increased chances of lung disease, because, you know, you've placed
+a plastic tube in the trachea. And that causes less interactions with the walls of the trachea
+and so on. And so to that degree, it causes something called BP, the bronchopulmonary dysplasia,
+which effectively is lung disease. And that's bad because it's going to be a live lung disability
+in most cases. So, but also you don't want to remove it too early. So that's the case when you
+leave it too much too long. If you remove it too early, the infant may not be ready to breathe on
+its own. And what could happen is that the infant would require re-intubation. So intubation is a
+process of putting the tube in and extubation is a process of removing the tube. The infant could
+require re-intubation. And re-intubation is a technically difficult challenge for infants that have
+been integrated already because they're swelling the trachea and so on. And in some cases they never
+succeed and the baby ends up having to die. And so there's this trade-off between how one is the
+optimal time to extubate an infant on the intubation in the ICU. Can I ask the stupid question,
+which is can't they remove the oxygen source without removing the tube and see if it works?
+Well, that turns out to not be a stupid question.
+Because for our study, that's indeed what we are tracking. Because one of the things the doctors
+do as partly a way of evaluating how ready the baby is is to disconnect the ventilator and let the
+child breathe through the tube first to just observe how well the infant does. The challenge with
+this is that while it's a good process better than nothing, it still has resulted to
+to currently North America the failure rate for re-intubation is about 25%. So the doctors get
+it wrong about 25% of the time. And really that's the core of the project we're trying to fix. I
+was trying to save those 25% of babies who end up either being re-intubated or who end up with
+long-term disability. So in a lot of ways similar to the asphyxia problem you have doctors that
+don't have an effective way of clinically assessing whether the baby is able to breathe on its own.
+And so they do in fact disconnect the ventilator without taking the tube out. But they're just eyeballing
+whether the baby looks to be ready. And in 25% of the cases they get it wrong, take the tube out
+and only then find out it has to go back in.
+Exactly. I say eyeballing, but the doctors have many medical devices connected to the baby,
+respiratory monitors and so on. And you know the look at these data, look at the patterns and
+make it an informed decision. And you know that explains why they do this too.
+Tell you well, 75% is not too bad. It could be better and that's really the goal of the project.
+To say how can we take machine learning methods, apply to an automated analysis of the heart rate
+signals, respiratory signals that we get from this infant during that spontaneous
+bidding trial period. So during that time when the ventilator is turned off, because that's
+usually the true measure of how well the infant might do when they don't have that ventilator on.
+So we take these signals at that point in time and we are building a primarily
+time series methods to analyze them and say how can we make a prediction from this.
+Okay. Yeah. And what stage are you in with this project?
+We are at the stage where, as I mentioned earlier, you know, in December 2015, we reached
+we reached our target of 200 and a set of the... Oh right.
+Right. Yeah. Yeah. But that was the target of the project anyways, to get to about,
+to get to 200 babies for our training and development and to get another 50 for validation.
+So those 50 will be left to the very end of the project, say, five year long project.
+We left to the very end before we to evaluate what about methods that we've developed on the other
+parts. So we've done quite a bunch of analysis on the data over the last year,
+but really much of it has been, much of the detailed work about, say, I've been starting this year
+since we now have the many multitasets that we require. Yeah. We've written about a few,
+a few works we've done on the data in terms of using Markov chain models to model the respiratory
+patterns and how they change over time. Yeah. So we have a paper that we have published about
+this work last year at the Engineering and Medicine and Biology Conference.
+Okay. And what was the conclusion of that paper?
+Yeah. The paper was pretty interesting. At least we find it a bit for people. It was pretty
+interesting. So in that case, what we did was we did not look at the raw signals of how the
+heart rate is changing, you know, the respiratory rate in particular. We looked more at states. So
+so breeding in general goes through a number of states. There's five of them roughly.
+There's synchronous breeding, which is when the breeding in the rib cage and abdomen,
+in synchrony, it's very creative. So they're happening at the compression and expansion is
+happening at the same rate pretty much in both sides. There is a synchronous breeding when they're
+out of phase. That's the second pattern. The third pattern is the pause states when the infant
+experiences a cessation of breeding at some point. And there's the movement artifact phase,
+which is somewhat a phase induced by external factors, either the infant is moving or it's been
+found by nurses and so on. And then there's the last phase is called an unknown state.
+And that is just the ones that don't fit into any of the four defined patterns. And so the
+goal of this project was to see how we could use switching models like the Markov chain,
+which models the transitions from one state to another. How we could take that and apply to this
+to learn more about what kind of transitions do infants who are ready for excavation go through
+and walk on of transitions to infants who are not ready for excavation go through and could this
+inform the classifiers will build in the future. And so it was a more of a modeling task using chain
+models. And do you think that the Markov chain model will play a big role in the approach you
+eventually take to create a diagnostic tool? Yeah. On one hand, it emphasized some of the things
+I was known somewhat within the clinical community that for instance pause states are bad.
+Session of breeding is not good because that means there's no power to drive the longer activity.
+So it's very important for some things like that. But also we observed some interesting trends
+in terms of the transitions from some of these phases to the others. That would eventually serve
+us features into whatever classifiers we build in the near future. Awesome. Awesome. Well,
+you've been very gracious with your time and we're running out of it. So I'd love to dig more
+into this. But I think in lieu of that we'll just make sure that we have a link to
+to this second paper here. But Charles, thank you so much for taking the time. You're doing
+some really interesting work. And I appreciate it having the opportunity to learn about it.
+Yeah, thank you very much. Some of us had a nice chat to meet you as well. Awesome. Thanks.
+All right, everyone. That's our show for today. For more information on Charles or any of the topics
+covered in this episode, head on over to twimlai.com slash talk slash 112. And remember to submit your
+thoughts on AI in your life at twimlai.com slash my AI. Thanks so much for listening and catch you
+next time.

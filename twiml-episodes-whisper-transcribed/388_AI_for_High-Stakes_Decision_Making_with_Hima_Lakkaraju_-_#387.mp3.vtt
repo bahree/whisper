@@ -1,0 +1,1850 @@
+WEBVTT
+
+00:00.000 --> 00:13.120
+Welcome to the Twimal AI Podcast.
+
+00:13.120 --> 00:17.120
+I'm your host Sam Charrington.
+
+00:17.120 --> 00:26.920
+Hey, what is up, good Twimal people?
+
+00:26.920 --> 00:32.160
+Before we jump into today's show from our CVPR series, I'd like to share a few quick
+
+00:32.160 --> 00:39.120
+details about the next great event in our continuing live discussion series.
+
+00:39.120 --> 00:45.920
+Join us on Wednesday, July 1st for the great machine learning language on debate as we
+
+00:45.920 --> 00:52.400
+explore the strengths, weaknesses and approaches of both popular and emerging programming languages
+
+00:52.400 --> 00:54.360
+for machine learning.
+
+00:54.360 --> 01:01.320
+People have great speakers representing Python, R, Swift, Closure, Scala, Julia and more.
+
+01:01.320 --> 01:06.760
+The session kicks off at 11 a.m. Pacific time on the first and you won't want to miss
+
+01:06.760 --> 01:13.560
+it, so head over to twimalai.com slash languages to get registered.
+
+01:13.560 --> 01:18.280
+At this point, I'd like to send a huge thank you to our friends at Qualcomm for their
+
+01:18.280 --> 01:24.120
+support of this podcast and their sponsorship of our CVPR series.
+
+01:24.120 --> 01:30.680
+Qualcomm AI research is dedicated to advancing AI to make its core capabilities, perception,
+
+01:30.680 --> 01:34.840
+reasoning and action ubiquitous across devices.
+
+01:34.840 --> 01:39.120
+Their work makes it possible for billions of users around the world to have AI enhanced
+
+01:39.120 --> 01:43.520
+experiences on Qualcomm technology's powered devices.
+
+01:43.520 --> 01:49.440
+To learn more about Qualcomm and what they're up to on the AI research front, visit twimalai.com
+
+01:49.440 --> 01:52.120
+slash Qualcomm.
+
+01:52.120 --> 01:55.400
+Now on to the show.
+
+01:55.400 --> 01:56.400
+All right, everyone.
+
+01:56.400 --> 01:58.440
+I am here with HEMA Lockaraju.
+
+01:58.440 --> 02:04.000
+HEMA is an assistant professor at Harvard University with joint appointments in both the
+
+02:04.000 --> 02:07.360
+business school and the Department of Computer Science.
+
+02:07.360 --> 02:09.840
+HEMA, welcome to the Twimal AI podcast.
+
+02:09.840 --> 02:10.840
+Thank you so much, Sam.
+
+02:10.840 --> 02:12.800
+I'm super excited to be here.
+
+02:12.800 --> 02:13.800
+Same here.
+
+02:13.800 --> 02:16.760
+I'm really looking forward to our conversation.
+
+02:16.760 --> 02:23.160
+We will start where we typically do on the show and have you share a little bit about
+
+02:23.160 --> 02:29.600
+your background and how you came to work in machine learning in particular, your focus
+
+02:29.600 --> 02:39.320
+on fair and interpretable ML and the implications and kind of mission critical high stakes domains
+
+02:39.320 --> 02:42.800
+like criminal justice, healthcare and public policy.
+
+02:42.800 --> 02:44.800
+How did you get started in all this?
+
+02:44.800 --> 02:48.560
+So, that's actually an interesting story.
+
+02:48.560 --> 02:55.400
+Let me try and kind of summarize it in a hopefully few sentences so that we are not hogging
+
+02:55.400 --> 02:56.960
+all the time here.
+
+02:56.960 --> 03:01.760
+So yeah, I was actually working in machine learning, right?
+
+03:01.760 --> 03:08.320
+So basically I come from India, I moved to the United States for my PhD in 2012.
+
+03:08.320 --> 03:13.280
+I have been working in machine learning since I was a student in India.
+
+03:13.280 --> 03:19.360
+I was publishing actively in machine learning, but my interest in sort of the applications
+
+03:19.360 --> 03:25.000
+of machine learning to some of these domains, like criminal justice or healthcare, that
+
+03:25.000 --> 03:30.920
+sort of started or it became a prominent threat in my research when I started my PhD.
+
+03:30.920 --> 03:38.840
+And this was, I guess, mostly due to a collaboration now between my advisor and another professor,
+
+03:38.840 --> 03:43.560
+and I have a couple of professors and economics who were dealing with behavioral economics,
+
+03:43.560 --> 03:48.120
+and they sort of introduced us to all these fascinating problems.
+
+03:48.120 --> 03:52.360
+As I was sort of, I think, by then I had already explored machine learning to a reasonable
+
+03:52.360 --> 03:59.080
+extent, and I was looking for applications which were more than just like ad recommendations
+
+03:59.080 --> 04:04.480
+or, you know, friendship recommendations and so on so that I could keep myself going
+
+04:04.480 --> 04:10.200
+in the field and also anchor on to something which is more applied in the sense of, like,
+
+04:10.200 --> 04:11.760
+real world settings and so on.
+
+04:11.760 --> 04:18.720
+So I guess my PhD was like one of the, you know, main times in my life where I got into
+
+04:18.720 --> 04:24.600
+both machine learning as well as its applications to some of these domains which are super fascinating
+
+04:24.600 --> 04:29.440
+and the broad field of fairness and interpretability enabled, yeah.
+
+04:29.440 --> 04:37.880
+You know, I suspect when we dig into your upcoming, well, actually your recent talk at CVPR
+
+04:37.880 --> 04:43.440
+where you were an invited speaker in the fair data efficient and trusted computer vision
+
+04:43.440 --> 04:53.400
+workshop, we will learn about a bit of your research, but kind of broadly, how do you frame
+
+04:53.400 --> 04:58.360
+out the kinds of questions that you're looking to answer with your work?
+
+04:58.360 --> 04:59.360
+All right.
+
+04:59.360 --> 05:05.960
+I guess in a broad sense the way I think about my research is it's about enabling machine
+
+05:05.960 --> 05:11.240
+learning to help with decision making in high stakes settings, right, and that involves
+
+05:11.240 --> 05:17.320
+some sub questions like how can we make sure that machine learning models which are of course
+
+05:17.320 --> 05:23.440
+getting more and more complex day by day are, you know, more palatable form to these decision
+
+05:23.440 --> 05:27.040
+makers who are not necessarily experts in machine learning.
+
+05:27.040 --> 05:32.400
+So how do we sort of explain these models, what are the algorithms that we can use which
+
+05:32.400 --> 05:36.160
+can in turn explain these models to people who are not machine learning experts.
+
+05:36.160 --> 05:41.000
+So that's of course one of the key questions and also other core question behind interpretable
+
+05:41.000 --> 05:47.800
+ML, right, and beyond that when we develop some of these tools which will assist these
+
+05:47.800 --> 05:53.360
+decision makers in important decisions, how do we ensure that the tools or the algorithms
+
+05:53.360 --> 05:58.840
+that we are developing are by default fair otherwise they can induce their own discriminatory
+
+05:58.840 --> 06:04.160
+biases and undesirable biases into the entire real world decision making.
+
+06:04.160 --> 06:09.560
+So that's of course another question and more broadly also just trying to develop models
+
+06:09.560 --> 06:16.800
+and methods to understand what kinds of biases exist as of now in human decision making
+
+06:16.800 --> 06:21.600
+like even if there was no algorithm involved in the picture as well as how to diagnose
+
+06:21.600 --> 06:26.440
+biases if someone gives me an algorithm, what is the best way to do that.
+
+06:26.440 --> 06:29.120
+So these are roughly the broad questions I think about.
+
+06:29.120 --> 06:35.120
+And so your talk is titled Understanding the Limits of Explainability in ML Assisted
+
+06:35.120 --> 06:40.200
+Decision Making and there's some interesting tidbits that I'm looking forward to digging
+
+06:40.200 --> 06:46.800
+into around like some of the explainability algorithms like Lyme and Shap, but before we
+
+06:46.800 --> 06:52.840
+even do that, thinking about the topic of your talk and the workshop makes me think of
+
+06:52.840 --> 07:01.840
+a podcast that I did with Cynthia Rudin last year and her perspective seems to come from
+
+07:01.840 --> 07:06.600
+a different direction which is we shouldn't even be using black box models for the kinds
+
+07:06.600 --> 07:08.960
+of problems that you're studying.
+
+07:08.960 --> 07:17.560
+We should be using models that are kind of more fundamentally understandable and in many
+
+07:17.560 --> 07:21.320
+conversations I've had in this topic, there's this tension between explainability and
+
+07:21.320 --> 07:22.320
+interpretability.
+
+07:22.320 --> 07:28.400
+So I'm curious kind of out of the gate, what's your take on all that?
+
+07:28.400 --> 07:34.440
+Oh, I think we're already starting with a very interesting and controversial topic.
+
+07:34.440 --> 07:39.880
+Yeah, I mean, Cynthia has been a mentor and a collaborator for several years but we somehow
+
+07:39.880 --> 07:43.760
+managed to coexist with this dichotomy.
+
+07:43.760 --> 07:50.040
+So yeah, I mean, so I agree with this point or rather might take on this would be that
+
+07:50.040 --> 07:56.000
+if at all it is possible for you to develop a model that is interpretable by default
+
+07:56.000 --> 08:01.440
+and is also accurate and you have the data to build such a model by all means you should
+
+08:01.440 --> 08:03.120
+go for it, right?
+
+08:03.120 --> 08:08.240
+So because there are no barriers here, but unfortunately the real world is always not
+
+08:08.240 --> 08:09.240
+like that.
+
+08:09.240 --> 08:13.480
+So in some cases you may not have enough training data for example to build a disease
+
+08:13.480 --> 08:15.400
+diagnosis model, right?
+
+08:15.400 --> 08:21.680
+So you might be then using another proprietary model that some other company has built and
+
+08:21.680 --> 08:27.680
+in that case you would still want to do some diagnostic checks to ensure that the model
+
+08:27.680 --> 08:32.160
+is you're doing what it's supposed to do and it's put the way it's making predictions
+
+08:32.160 --> 08:34.320
+is reasonable and so on.
+
+08:34.320 --> 08:41.640
+So those are the kinds of cases where explaining a given model or a black box model as we are
+
+08:41.640 --> 08:45.440
+calling it, you know, is probably the only option, right?
+
+08:45.440 --> 08:50.320
+So because you don't have the ability to sort of build such a model because of lack of
+
+08:50.320 --> 08:56.880
+data or resources and empty number of other reasons, but you have the capability to buy
+
+08:56.880 --> 09:02.480
+or get this model from a third party, but you still want to wet it or understand what's
+
+09:02.480 --> 09:08.080
+roughly going on with the tiny bit of data that you have or like just doing some diagnostic
+
+09:08.080 --> 09:12.240
+checks with whatever little amount of data that you have which may not be enough to develop
+
+09:12.240 --> 09:17.560
+and accurate model, but at the same time might be, you know, decent enough to sort of wet
+
+09:17.560 --> 09:18.960
+a given model.
+
+09:18.960 --> 09:24.120
+So if that is the context you're dealing with, then essentially explaining or understanding
+
+09:24.120 --> 09:27.760
+what the black box might be doing is probably the only option.
+
+09:27.760 --> 09:32.600
+So these are of course, like, you know, again, as I mentioned earlier, these are constraints
+
+09:32.600 --> 09:37.960
+that arise in the real world and that's what we are sort of thinking about, but yes,
+
+09:37.960 --> 09:43.920
+if you have the means to develop an interpretable model from scratch, you have all the data,
+
+09:43.920 --> 09:48.840
+you have the necessary means, I think that is definitely and it's also accurate of course.
+
+09:48.840 --> 09:53.120
+So that is definitely the way to go, but just that there are many other real world contexts
+
+09:53.120 --> 09:57.240
+where that might not be the case which you could actually pursue.
+
+09:57.240 --> 10:04.040
+In the scenarios where you can't do something that is more fundamentally transparent, you're
+
+10:04.040 --> 10:12.920
+doing something that's a black box and you want to explain it, there are some kind of
+
+10:12.920 --> 10:18.280
+known and popular methods for achieving some level of explainability and I mentioned
+
+10:18.280 --> 10:24.880
+a couple of those all right, lime and sap, but a part of your presentation references
+
+10:24.880 --> 10:30.360
+and previous research that you've done that has shown that, you know, that work can
+
+10:30.360 --> 10:37.120
+be vulnerable to attack, you know, with your presentation, what's kind of the broad landscape
+
+10:37.120 --> 10:43.600
+that you're looking to carve out and we'll get to the particular areas of lime and
+
+10:43.600 --> 10:48.920
+sap when we get to them, but you know, how do you, how do you kind of frame the, you
+
+10:48.920 --> 10:53.800
+know, the problem of kind of understanding the limits of the explainability tools?
+
+10:53.800 --> 11:02.120
+Yeah, so I think this talk and more broadly my recent research has been kind of exploring
+
+11:02.120 --> 11:07.960
+as we are thinking about the limits of explainability and what I mean by that is so far at least
+
+11:07.960 --> 11:12.640
+in the past few years, there has been a lot of interest in coming up with new algorithms
+
+11:12.640 --> 11:14.520
+which can explain black boxes, right?
+
+11:14.520 --> 11:19.400
+So there is like a huge research that has built up I think since 2016, pretty much like
+
+11:19.400 --> 11:24.480
+paper on top of papers, every paper comes up with another new method for explaining
+
+11:24.480 --> 11:27.760
+a given black box classifier or a prediction model.
+
+11:27.760 --> 11:32.920
+So one of the things that as we were seeing more and more work on this topic that, you
+
+11:32.920 --> 11:38.480
+know, me and some of my collaborators of this work, we got excited about is how to now
+
+11:38.480 --> 11:45.040
+start thinking about what are all the ways in which these explanation techniques can be
+
+11:45.040 --> 11:51.960
+gained or potentially even unintentionally misused to sort of generate explanations which
+
+11:51.960 --> 11:58.480
+could fool people or mislead and users into trusting something that they should not trust,
+
+11:58.480 --> 11:59.480
+right?
+
+11:59.480 --> 12:04.440
+So for example, maybe if your explanation, basically if your model, let's say if you have a black
+
+12:04.440 --> 12:11.040
+box model which is actually using, you know, lace or gender, some of these sensitive features
+
+12:11.040 --> 12:16.040
+which are prohibited to be the key aspects for making, you know, critical decisions like
+
+12:16.040 --> 12:20.240
+for example, who gets a bail or who gets a loan and so on.
+
+12:20.240 --> 12:26.800
+So if a black box model is using some of these features and if your explanation is somehow
+
+12:26.800 --> 12:32.200
+misled to sort of think that that's not the feature that it is using but instead it's
+
+12:32.200 --> 12:38.120
+using another correlate, for example, a zip code when making prediction and end user might
+
+12:38.120 --> 12:43.760
+look at this explanation and just be misled that, oh, this seems like a model that's not
+
+12:43.760 --> 12:48.000
+using grace, it's not rationally biased, it's using other correlates.
+
+12:48.000 --> 12:50.240
+So maybe it's fine to deploy it, right?
+
+12:50.240 --> 12:55.760
+So an explanation that can be misleading in terms of explaining what the black box is
+
+12:55.760 --> 13:00.600
+doing can have serious consequences in the real world as we can just see with this kind
+
+13:00.600 --> 13:02.520
+of example, right?
+
+13:02.520 --> 13:09.120
+So the line of work that I'm pursuing currently is how to identify some of the issues or
+
+13:09.120 --> 13:14.240
+vulnerabilities of existing methods which can potentially lead to these kinds of misleading
+
+13:14.240 --> 13:19.760
+explanations and also understanding what is a real world impact if there is a misleading
+
+13:19.760 --> 13:21.080
+explanation.
+
+13:21.080 --> 13:25.400
+So what would be the consequences of that in real world and for that I'm also doing
+
+13:25.400 --> 13:30.880
+a bunch of user studies with students from law schools and healthcare professionals and
+
+13:30.880 --> 13:35.080
+so on to see how a misleading explanation can affect their work.
+
+13:35.080 --> 13:37.480
+This is pretty much what the talk is all about, yeah.
+
+13:37.480 --> 13:45.880
+I've got to imagine that the effects of these misleading explanations vary pretty dramatically
+
+13:45.880 --> 13:48.960
+depending on the setting in which they're used.
+
+13:48.960 --> 13:49.960
+That is definitely true.
+
+13:49.960 --> 13:50.960
+Yeah.
+
+13:50.960 --> 13:55.760
+So I think like for example, I think you know since anyways we are discussing this, let
+
+13:55.760 --> 14:00.800
+me segue a bit into the second part of this talk which essentially talks about the effects
+
+14:00.800 --> 14:07.080
+of these explanations in a particular context and the context we are looking at is let's
+
+14:07.080 --> 14:14.880
+say if there is a model that is you know designed to predict who should get a bail, right?
+
+14:14.880 --> 14:19.040
+Or at least it's designed to assist a judge in determining who should get a bail, but
+
+14:19.040 --> 14:24.440
+in the process the model is also making predictions as to who should get a bail, right?
+
+14:24.440 --> 14:31.080
+So before such a model is even deployed in the real world, ideally the judges or the teams
+
+14:31.080 --> 14:35.720
+of the people it'll definitely go through a lot of vetting and people would like to look
+
+14:35.720 --> 14:40.800
+at what the model is exactly doing before they sort of decide to trust and deploy it in
+
+14:40.800 --> 14:43.040
+some sense, right?
+
+14:43.040 --> 14:47.960
+So in that context we designed a small experiment with law school students.
+
+14:47.960 --> 14:53.640
+Of course, it's all proxy because you know the time from judges and these senior domain
+
+14:53.640 --> 14:58.320
+experts is their time is much more valuable and it's not easily available.
+
+14:58.320 --> 15:03.280
+So we were trying to sort of mimic that with the law school students here at Harvard
+
+15:03.280 --> 15:04.760
+and Yukon.
+
+15:04.760 --> 15:11.040
+And basically what we did was we essentially built like a simple, in fact, Cynthia Rudin's
+
+15:11.040 --> 15:16.400
+style rule based model which is the actual black box which explicitly has some rules which
+
+15:16.400 --> 15:19.960
+are used to determine who gets a bail or not.
+
+15:19.960 --> 15:25.160
+And in that we specifically used all these bad features or undesirable features like race
+
+15:25.160 --> 15:30.280
+or gender to determine who gets a bail and then we constructed an explanation for this
+
+15:30.280 --> 15:33.440
+rule based model which is another set of rules.
+
+15:33.440 --> 15:39.280
+And then in that we explicitly avoided the usage of the features race and gender, but
+
+15:39.280 --> 15:44.000
+the explanation is free to replace it with its correlates like replace these features
+
+15:44.000 --> 15:45.000
+with its correlates.
+
+15:45.000 --> 15:49.800
+So race could be substituted by zip code or anything else, but the explanation is just
+
+15:49.800 --> 15:55.160
+kind of not allowed to show race or gender explicitly, right, but it's still, it should
+
+15:55.160 --> 16:00.000
+still make the same predictions as what would be made by the original black box model that
+
+16:00.000 --> 16:01.000
+we constructed.
+
+16:01.000 --> 16:07.920
+And there was an actual system that generated these explanations or was this, you know,
+
+16:07.920 --> 16:13.000
+did you create these explanations to simulate what a system might do under the set of conditions
+
+16:13.000 --> 16:14.440
+that you outlined?
+
+16:14.440 --> 16:19.640
+So one of the existing techniques is what we used to generate the explanations for this
+
+16:19.640 --> 16:20.640
+black box.
+
+16:20.640 --> 16:25.360
+So it's just that we put an additional constraint on that technique that just make sure
+
+16:25.360 --> 16:28.240
+that race or gender do not show up in the explanations.
+
+16:28.240 --> 16:29.240
+Got it.
+
+16:29.240 --> 16:35.440
+Now the experiment was something that revealed very insightful things to us, which is
+
+16:35.440 --> 16:39.600
+we showed we basically split people into a couple of groups or we took a bunch of
+
+16:39.600 --> 16:42.440
+law school students, we split them into two groups.
+
+16:42.440 --> 16:47.960
+For one set of people, we showed the actual model, which has race and gender, and then
+
+16:47.960 --> 16:55.160
+we asked them if this is the model or if this is an explanation of a model, which is showing
+
+16:55.160 --> 16:59.640
+you that race and gender are being used in making, you know, these predictions of who
+
+16:59.640 --> 17:00.640
+should be jail.
+
+17:00.640 --> 17:05.800
+Would you trust this model enough to deploy it in your code if you were a judge assuming
+
+17:05.800 --> 17:07.480
+you were a judge, right?
+
+17:07.480 --> 17:11.800
+And most of the people of course, as I expected, said, no, the model is using race and gender,
+
+17:11.800 --> 17:15.760
+I don't want to deploy it anywhere close to me, sorry.
+
+17:15.760 --> 17:20.240
+But then when we gave them the explanation, which was tailored to sort of hide or cover
+
+17:20.240 --> 17:25.840
+up some of these problematic features and then showed it to the other half of the people.
+
+17:25.840 --> 17:31.000
+And we said, this is an explanation generated by state of the art machine learning to explain
+
+17:31.000 --> 17:36.960
+a black box using this now do you trust the underlying model enough to deploy it?
+
+17:36.960 --> 17:41.360
+And most people said, yeah, sure, because it seems to be doing something which reasonably
+
+17:41.360 --> 17:46.720
+matches my intuition of how, you know, we should determine someone should be given a bail
+
+17:46.720 --> 17:47.720
+or not.
+
+17:47.720 --> 17:52.200
+I don't see you say, which of any prohibited features or problematic features, yeah, sure,
+
+17:52.200 --> 17:53.200
+let's go ahead.
+
+17:53.200 --> 17:59.800
+So the actual true model less than 10% of the people trusted it and the explanation that
+
+17:59.800 --> 18:03.760
+we are generated, which is essentially doing the same thing, but replacing race and gender
+
+18:03.760 --> 18:07.960
+with its correlates almost about 80% plus people trusted it.
+
+18:07.960 --> 18:15.000
+Oh, so it reminds me a little bit of some experiments that I on a Howard shared with me and her
+
+18:15.000 --> 18:22.320
+about her research into just the authority that we tend to confer on computing systems in
+
+18:22.320 --> 18:25.800
+her case robots, yeah.
+
+18:25.800 --> 18:30.840
+And the examples that she gave were, you know, a robot that is presumably supposed to lead
+
+18:30.840 --> 18:35.960
+you out of a fire or a dangerous condition in a building, you will like stand behind
+
+18:35.960 --> 18:40.440
+it banging itself against the wall and waiting it for it to, you know, all of a sudden do
+
+18:40.440 --> 18:46.840
+the right thing because we just want to believe that these things are, you know, more infallible
+
+18:46.840 --> 18:48.160
+than they are.
+
+18:48.160 --> 18:49.160
+Right.
+
+18:49.160 --> 18:50.160
+Yeah.
+
+18:50.160 --> 18:51.160
+No, definitely.
+
+18:51.160 --> 18:56.400
+I think this research, I guess, also fits in line with some of that work in the sense
+
+18:56.400 --> 19:02.880
+that people are probably already approaching models and model explanations from the perspective
+
+19:02.880 --> 19:04.800
+of some prior trust, right?
+
+19:04.800 --> 19:10.000
+So they are already willing to sort of trust them, which is why some of these, you know,
+
+19:10.000 --> 19:14.400
+issues are like the things that we are seeing are actually being seen.
+
+19:14.400 --> 19:15.400
+So, yeah.
+
+19:15.400 --> 19:20.080
+And realizing we've kind of jumped ahead to the end of the talk.
+
+19:20.080 --> 19:28.080
+But did you further explore around, you know, different ways to present that result that,
+
+19:28.080 --> 19:32.760
+you know, helped, you know, besides from, you know, the one example where you kind of
+
+19:32.760 --> 19:38.560
+show the race and the other where you hide it and are, are there things that you've played
+
+19:38.560 --> 19:44.880
+with like showing the different correlating features or other things that can help the
+
+19:44.880 --> 19:46.960
+human understand what's really happening?
+
+19:46.960 --> 19:47.960
+Yeah.
+
+19:47.960 --> 19:52.880
+So that's actually the ongoing research that we're actually doing, which is what is the best
+
+19:52.880 --> 19:58.440
+way in which we can educate people that, hey, the explanation that you saw, it is purely
+
+19:58.440 --> 20:03.880
+correlational and it's like when it says that zip code is being used, it could essentially
+
+20:03.880 --> 20:09.680
+mean that any zip code or its correlate could be actually used to make predictions, right?
+
+20:09.680 --> 20:17.040
+And in fact, one thing is we design like a very short 5 to 10 minute, like a primer or tutorial
+
+20:17.040 --> 20:23.080
+just highlighting some of the examples that just because you don't see race, you know,
+
+20:23.080 --> 20:27.840
+it could still be present because the correlation between race and zip code is like greater than
+
+20:27.840 --> 20:29.720
+0.8 or something, right?
+
+20:29.720 --> 20:35.560
+And then designing some examples like these and it's a very short 10 minute tutorial and
+
+20:35.560 --> 20:41.440
+using that we can already see some, you know, like mega improvements in terms of how people
+
+20:41.440 --> 20:47.040
+already like latched on to some of those ideas and the next time we ask them a similar
+
+20:47.040 --> 20:50.440
+question, they are like less likely to make this kind of a mistake.
+
+20:50.440 --> 20:56.160
+So we are also just thinking about what training is, might help people in like realizing some
+
+20:56.160 --> 21:01.240
+of these things because again, what we are designing or even the way that we are sort
+
+21:01.240 --> 21:06.680
+of producing these explanations are intention is that they would be used by someone who is
+
+21:06.680 --> 21:08.560
+not an expert in machine learning.
+
+21:08.560 --> 21:13.360
+So we should also be prepared to teach them how to think about these explanations and
+
+21:13.360 --> 21:17.600
+what they can or they cannot provide in terms of information.
+
+21:17.600 --> 21:21.600
+So I guess that's the next step or the next research that we are conducting.
+
+21:21.600 --> 21:25.240
+And again, going back to your earlier question, we are also looking at this, of course,
+
+21:25.240 --> 21:29.600
+one scenario as we talked about where misleading explanations had this impact.
+
+21:29.600 --> 21:34.880
+We are also looking at other scenarios, again, in healthcare and a bit in like the business
+
+21:34.880 --> 21:40.120
+domains where we are looking at different kinds of decisions, like some of which are more
+
+21:40.120 --> 21:43.560
+high stakes, the others which are a bit more low stakes.
+
+21:43.560 --> 21:48.440
+So in those cases, what would be the implications of misleading explanations?
+
+21:48.440 --> 21:54.680
+So let's maybe take a few steps back and talk a little bit about the explainability
+
+21:54.680 --> 22:02.720
+techniques that you are seeing in use and where you are seeing them in use.
+
+22:02.720 --> 22:09.160
+Have you done a survey of the various techniques and how they are being used in practice?
+
+22:09.160 --> 22:13.200
+I know you talk specifically about Lyme and Shapp, and I hear those come up probably
+
+22:13.200 --> 22:17.160
+more than any others, but I'm wondering if you look broadly at that.
+
+22:17.160 --> 22:18.160
+Yeah.
+
+22:18.160 --> 22:24.720
+So while it's not an active area of my research, so there are I think some other folks who
+
+22:24.720 --> 22:30.280
+are sort of thinking about these things, but in general, you're right that these two
+
+22:30.280 --> 22:35.000
+techniques, one of the reasons we also picked those was because they were being very widely
+
+22:35.000 --> 22:40.560
+used in practice and industry and in other real world settings, so that was also one reason
+
+22:40.560 --> 22:45.120
+to sort of see if there are any vulnerabilities in those first because they're so widely
+
+22:45.120 --> 22:46.120
+used.
+
+22:46.120 --> 22:52.560
+Beyond that also, there are several techniques which are probably much less popular, but they
+
+22:52.560 --> 22:57.240
+try to address some of the issues that are present in the first two techniques, Lyme and
+
+22:57.240 --> 22:58.240
+Shapp.
+
+22:58.240 --> 23:03.520
+Just to name a few, for example, Maple is another approach that has been proposed which
+
+23:03.520 --> 23:09.960
+tries to sort of get rid of some of the, you know, like some sort of an ad hoc perturbations
+
+23:09.960 --> 23:15.440
+or like some of the ad hoc pieces within Lyme and sort of make them more systematic.
+
+23:15.440 --> 23:18.800
+So that's another approach just to give an example.
+
+23:18.800 --> 23:23.480
+And of course, there are like several more which are like, you know, muse and a bunch
+
+23:23.480 --> 23:25.880
+of other things, anchors and so on.
+
+23:25.880 --> 23:30.360
+So there has been a lot of work just built up on, you know, this entire explaining black
+
+23:30.360 --> 23:32.720
+boxes, as I said, like since 2016.
+
+23:32.720 --> 23:37.280
+So by now, there are countless approaches, but I think the well-known ones among, the
+
+23:37.280 --> 23:40.480
+most well-known among these are Lyme and Shapp.
+
+23:40.480 --> 23:44.200
+Now coming to the second part of your question where you're thinking about how are people
+
+23:44.200 --> 23:46.280
+using these techniques?
+
+23:46.280 --> 23:54.560
+Honestly, the domains that I look at, so we are still kind of trying to make decision
+
+23:54.560 --> 24:00.240
+makers like doctors or judges kind of aware of these techniques and how they should even
+
+24:00.240 --> 24:01.240
+use them.
+
+24:01.240 --> 24:05.240
+So, but that's the domains that, you know, I deal with a lot, but I can easily imagine
+
+24:05.240 --> 24:10.160
+that if you're looking at, you know, maybe a startup or a tech company and so on, their
+
+24:10.160 --> 24:14.920
+people are like more widely, you know, more well-familiar with these kinds of techniques
+
+24:14.920 --> 24:20.840
+and they may already be using, be using some of them in their day-to-day, you know, job,
+
+24:20.840 --> 24:24.720
+whether as a developer or an engineer or a scientist, you are trying to understand
+
+24:24.720 --> 24:29.080
+what a particular model is doing, maybe to debug the model and so on.
+
+24:29.080 --> 24:35.080
+So I can imagine all those kinds of use cases already underway and, you know, where explainability
+
+24:35.080 --> 24:40.680
+is becoming a, you know, playing a bigger role in practice in day-to-day applications.
+
+24:40.680 --> 24:45.520
+But, yeah, the domains that I deal with, like especially where you are sort of a bit
+
+24:45.520 --> 24:50.520
+more detached from, you know, the core machine learning, you're dealing with people who make
+
+24:50.520 --> 24:55.240
+different kinds of decisions, they're not tech people, they're not experts, so it is
+
+24:55.240 --> 25:00.560
+like these kinds of approaches are sort of like reaching them at this point, barely,
+
+25:00.560 --> 25:01.560
+I would say.
+
+25:01.560 --> 25:08.080
+In your talk, did you kind of go over how the different techniques work and, you know,
+
+25:08.080 --> 25:14.000
+what some of the, you know, weaknesses or blind spots that are inherent to them are and
+
+25:14.000 --> 25:15.760
+where they come from?
+
+25:15.760 --> 25:22.040
+Yeah, so I think the first part of this talk is mainly about what are the weaknesses
+
+25:22.040 --> 25:29.520
+of Lime and Shap and just to kind of think about more broadly, the explanation techniques,
+
+25:29.520 --> 25:33.200
+you can roughly characterize them into like two categories.
+
+25:33.200 --> 25:38.320
+So one is local explanation methods and the other is global explanation methods.
+
+25:38.320 --> 25:44.560
+I guess as the name suggests, local means, you know, you just think of explaining a
+
+25:44.560 --> 25:52.560
+complaint behavior only within a particular tiny locality or neighborhood in the data,
+
+25:52.560 --> 25:53.560
+right?
+
+25:53.560 --> 25:57.720
+So a small piece of the feature space, you are trying to explain what the model is doing
+
+25:57.720 --> 25:59.480
+there as best as you can.
+
+25:59.480 --> 26:01.760
+So that's the local explanation methods.
+
+26:01.760 --> 26:07.600
+And then the global explanation methods is you somehow want to give an in the pick the
+
+26:07.600 --> 26:12.720
+entire picture of what the black box model might be doing like the whole big picture,
+
+26:12.720 --> 26:17.040
+you know, so that like someone like for example, the use cases of these two could be different
+
+26:17.040 --> 26:22.800
+where in the case of global explanation, the idea would be that someone who is deciding
+
+26:22.800 --> 26:27.680
+if a model is good enough or whether it should be deployed, like maybe a team of judges.
+
+26:27.680 --> 26:32.720
+Or, you know, a stakeholder who has a lot of authority on deciding if some model should
+
+26:32.720 --> 26:39.000
+be deployed or not, he or she might use those to wet and decide is this model even reasonable
+
+26:39.000 --> 26:40.560
+enough to deploy, right?
+
+26:40.560 --> 26:45.600
+So that's where the global explanations come into picture because you are giving like zoomed
+
+26:45.600 --> 26:49.120
+out view of what the model's behavior looks like, right?
+
+26:49.120 --> 26:53.920
+On the other hand, when you think of local explanations, it could be to just like as a
+
+26:53.920 --> 26:59.080
+model is deployed or after a model is deployed, let's say in a hospital to diagnose a disease
+
+26:59.080 --> 27:04.480
+or something, for every patient, the model will give you a particular, you know, diagnosis
+
+27:04.480 --> 27:11.320
+saying that this is basically what the diagnosis should be, say someone has diabetes or not
+
+27:11.320 --> 27:12.720
+for example, right?
+
+27:12.720 --> 27:18.480
+So in such cases, you also want to get an explanation for why that prediction is made
+
+27:18.480 --> 27:19.960
+the way it is.
+
+27:19.960 --> 27:26.080
+So then we focus more on the local or instance level or like singular predictions, whereas
+
+27:26.080 --> 27:29.760
+and that's the case where after a model is deployed, a doctor is just double checking
+
+27:29.760 --> 27:32.760
+that a single prediction makes sense, right?
+
+27:32.760 --> 27:37.880
+So that's the use case and then for the global, it is to decide if a model at a high level
+
+27:37.880 --> 27:40.200
+is even good enough to sort of beat it.
+
+27:40.200 --> 27:49.760
+And so do the local and global methods share the same weaknesses or issues or are they different?
+
+27:49.760 --> 27:50.760
+Yeah.
+
+27:50.760 --> 27:56.000
+So in fact, the weaknesses are specific to the exact techniques employed to generate
+
+27:56.000 --> 28:02.200
+a global or local explanations, like example, the first part of my talk is broadly focusing
+
+28:02.200 --> 28:05.480
+on what is called as perturbation based methods, right?
+
+28:05.480 --> 28:09.160
+And I'll get into the details of what I mean by that a bit.
+
+28:09.160 --> 28:15.080
+Then there are other methods which focus on, you know, kind of using gradients to sort
+
+28:15.080 --> 28:18.960
+of determine what features are being used when making a prediction.
+
+28:18.960 --> 28:24.280
+So the attacks, these two classes of techniques have are vulnerable to different kinds of
+
+28:24.280 --> 28:25.280
+attacks.
+
+28:25.280 --> 28:29.720
+So the same attack would not work both for the perturbation based methods as well as
+
+28:29.720 --> 28:31.040
+a gradient based method.
+
+28:31.040 --> 28:36.760
+So yeah, the attacks are specific to the exact techniques that these methods are using.
+
+28:36.760 --> 28:41.520
+So they're much more finely, fine grained than even just local and global.
+
+28:41.520 --> 28:42.520
+Okay.
+
+28:42.520 --> 28:50.400
+So in the case of a perturbation type of method, like lime, what does the attack look like?
+
+28:50.400 --> 28:52.320
+How are those attacks constructed?
+
+28:52.320 --> 28:53.320
+Right.
+
+28:53.320 --> 28:58.000
+So let me, I think, start by just giving an intuition about what line does so that it becomes
+
+28:58.000 --> 29:00.360
+clear what the attack would look like, right?
+
+29:00.360 --> 29:06.600
+So what line does is it is trying to at a very basic or code level, lime is trying to
+
+29:06.600 --> 29:09.960
+explain individual predictions of classifier.
+
+29:09.960 --> 29:14.960
+So for each prediction, it's trying to give you which features were important and what
+
+29:14.960 --> 29:18.800
+was their weightage in making this prediction, right?
+
+29:18.800 --> 29:23.120
+So now what lime does is it goes to sort of every data point.
+
+29:23.120 --> 29:28.160
+So basically if we want to explain a prediction of a particular data point, lime takes the
+
+29:28.160 --> 29:32.000
+data point and then it's sort of perturbs that data point.
+
+29:32.000 --> 29:36.400
+And when I say that, think of it as like you add some noise to different features of
+
+29:36.400 --> 29:38.360
+this data point, okay?
+
+29:38.360 --> 29:40.640
+And then that's what we call as perturbation.
+
+29:40.640 --> 29:46.240
+So you just kind of slightly massage the values of these data points, generate another artificial
+
+29:46.240 --> 29:53.240
+data point and keep doing this until you have a bunch of data points which were resulted
+
+29:53.240 --> 29:58.800
+from perturbing that initial instance or the data point you wanted to explain, right?
+
+29:58.800 --> 30:04.440
+So now that we have, let's say we got hundreds such perturbations or massage data points
+
+30:04.440 --> 30:08.280
+and then you have this actual data point that you wanted to explain.
+
+30:08.280 --> 30:14.600
+Now think of it as you just build a linear regression model on top of this so that that
+
+30:14.600 --> 30:20.120
+model is predicting what the black box models predictions are for these hundred data points,
+
+30:20.120 --> 30:21.120
+okay?
+
+30:21.120 --> 30:25.800
+So it's basically taking a data point, massage it to create some artificial data set around
+
+30:25.800 --> 30:30.240
+the data point, now just put a regression model and then it will give you what are the
+
+30:30.240 --> 30:33.560
+feature importance weights for each of the features, right?
+
+30:33.560 --> 30:35.840
+So that's what lime is doing.
+
+30:35.840 --> 30:42.480
+So now why this is called a perturbation based method is in order to even fit a linear
+
+30:42.480 --> 30:48.840
+regression model there or any local linear model there, you are generating some perturbations
+
+30:48.840 --> 30:52.280
+of this initial data point where you started from, right?
+
+30:52.280 --> 30:57.800
+So typically these are the, this is what we call as perturbation based methods, okay?
+
+30:57.800 --> 31:03.160
+So now the attack once you sort of know a key intuition becomes very clear and obvious
+
+31:03.160 --> 31:08.880
+which is, so what we found as part of like, you know, analyzing what lime is doing and
+
+31:08.880 --> 31:09.880
+so on.
+
+31:09.880 --> 31:15.120
+In fact, one of the PhD students that works with us found this was the perturbations that
+
+31:15.120 --> 31:22.600
+are being generated by lime are actually not the points that are in the data distribution.
+
+31:22.600 --> 31:29.000
+So these points look very different than the points that are actually in the data distribution
+
+31:29.000 --> 31:30.960
+that we care about, okay?
+
+31:30.960 --> 31:36.640
+So these could potentially be even off manifold data points or you know points that are like
+
+31:36.640 --> 31:41.000
+very far off because you are just massaging a point and assuming that you'll end up with
+
+31:41.000 --> 31:43.000
+a point that is sort of close enough, right?
+
+31:43.000 --> 31:45.160
+But that does not always happen.
+
+31:45.160 --> 31:51.240
+So given that the perturbations that you are generating using lime are not really the
+
+31:51.240 --> 31:55.200
+points belonging to the insample data distributions.
+
+31:55.200 --> 31:59.120
+That's a key, you know, point to sort of remember.
+
+31:59.120 --> 32:05.520
+Now that has happened or now that we realize that that was the case, what we did was design
+
+32:05.520 --> 32:11.640
+a simple attack or like build this kind of a what we call as an adversarial classifier
+
+32:11.640 --> 32:18.880
+which does something, you know, very sneaky which is this classifier, it looks at a point
+
+32:18.880 --> 32:25.040
+and then it basically decides if the point is in the data sample or if it's a perturbation.
+
+32:25.040 --> 32:30.520
+So it kind of makes this prediction as to is this point like generated by perturbation,
+
+32:30.520 --> 32:34.040
+is this a synthetic data point or was this point in the data?
+
+32:34.040 --> 32:40.960
+Now when a point is in the data, then this classifier says, yeah, let's use race or gender
+
+32:40.960 --> 32:46.440
+or any other undesired attribute that you could think of and make a prediction.
+
+32:46.440 --> 32:52.000
+But if a point is a synthetic data point, which means it's a perturbation, then look
+
+32:52.000 --> 32:57.680
+like you're super fair, like don't touch any bad features, remain like super pristine,
+
+32:57.680 --> 33:02.440
+be very careful, like do something very clean and innocuous looking, right?
+
+33:02.440 --> 33:08.120
+So when you do that, what happens is and when I give that classifier to line to explain
+
+33:08.120 --> 33:13.960
+since line relies so much on perturbations, it thinks, oh, this model is doing fine on
+
+33:13.960 --> 33:18.520
+perturbations, I don't see race as, you know, an important feature when it's making predictions
+
+33:18.520 --> 33:24.240
+on those, so it'll just assume that the model is not using race as a feature when making
+
+33:24.240 --> 33:25.240
+predictions.
+
+33:25.240 --> 33:30.440
+Whereas underneath what is happening is this like a wrapper, it's like an adversarial
+
+33:30.440 --> 33:32.400
+wrapper, you can think of that.
+
+33:32.400 --> 33:39.320
+It's kind of nicely shielding its kind of shady behavior for lack of a better word by
+
+33:39.320 --> 33:44.600
+doing all the shady things on in sample data points and then looking very innocent on
+
+33:44.600 --> 33:45.600
+any perturbations.
+
+33:45.600 --> 33:50.960
+So that is the attack, which is throwing off line and though the model uses race as the
+
+33:50.960 --> 33:56.720
+only and main feature in making predictions, because it looks like because it has an innocent
+
+33:56.720 --> 34:01.880
+behavior on the, you know, perturbation data points, line is just assuming that it is
+
+34:01.880 --> 34:07.360
+using some very innocuous features when making predictions and it can never catch this underlying
+
+34:07.360 --> 34:11.280
+racial behavior or that is our behavior which uses race, yeah.
+
+34:11.280 --> 34:18.000
+So the setting kind of goes back to your setup at the very beginning of our conversation,
+
+34:18.000 --> 34:26.240
+you, you know, maybe you can't use a, you know, a transparent model that you've developed
+
+34:26.240 --> 34:33.240
+yourself, so you're getting a model from someone else kind of shelf and the attacker in this
+
+34:33.240 --> 34:40.240
+case is whoever's creating the model and the scenario is kind of reminds me of Volkswagen
+
+34:40.240 --> 34:45.720
+gaming the EPA when the car is detected that they were, you know, being tested for emissions
+
+34:45.720 --> 34:46.720
+test.
+
+34:46.720 --> 34:47.720
+Right.
+
+34:47.720 --> 34:51.280
+They changed the way that they were, you know, throttled or whatever to make their emissions
+
+34:51.280 --> 34:56.520
+fall within spec, but, you know, out on the road, they were, you know, you know, seeding
+
+34:56.520 --> 34:57.520
+the levels.
+
+34:57.520 --> 34:58.520
+Exactly.
+
+34:58.520 --> 34:59.520
+Yeah.
+
+34:59.520 --> 35:00.520
+This is I think a very good analogy.
+
+35:00.520 --> 35:01.520
+Yeah.
+
+35:01.520 --> 35:06.840
+That's pretty much what this adversary who is designing this classifier is also doing.
+
+35:06.840 --> 35:09.280
+This off the shelf classifier is also doing.
+
+35:09.280 --> 35:15.080
+So the main idea is if people are just using like, for example, lime or shaft to determine,
+
+35:15.080 --> 35:19.400
+you know, are there any underlying racial or gender biases in this classifier, then
+
+35:19.400 --> 35:24.000
+the adversary can successfully fool them because they're able to fool these explanation
+
+35:24.000 --> 35:27.000
+methods.
+
+35:27.000 --> 35:35.720
+And were you in this, this work in this presentation, do you propose any protections
+
+35:35.720 --> 35:43.040
+for this or are you identifying the attack, the attack vector?
+
+35:43.040 --> 35:44.040
+Right.
+
+35:44.040 --> 35:49.520
+So that particular piece of work was just identifying the attack because that itself
+
+35:49.520 --> 35:55.080
+was, I think, one of the initial works, which even talks about attacks on explanation
+
+35:55.080 --> 36:01.360
+methods, but our ongoing work is definitely looking at how to sort of design these explanation
+
+36:01.360 --> 36:06.280
+methods, which are robust to those attacks, or which cannot be gained to sort of, you
+
+36:06.280 --> 36:08.280
+know, make these kinds of attacks accessible.
+
+36:08.280 --> 36:09.680
+So how to think about them?
+
+36:09.680 --> 36:11.600
+So that's an ongoing stream of research.
+
+36:11.600 --> 36:12.600
+Mm-hmm.
+
+36:12.600 --> 36:20.280
+And so it is a method like lime work if your perturbations are only producing or in
+
+36:20.280 --> 36:26.280
+the direction of kind of in distribution results, like is that a direction that you're
+
+36:26.280 --> 36:27.280
+looking at or?
+
+36:27.280 --> 36:28.280
+Right.
+
+36:28.280 --> 36:29.280
+Yeah.
+
+36:29.280 --> 36:30.840
+So that's one of the directions we are looking at.
+
+36:30.840 --> 36:36.560
+But then you can also think of this as there are some two problems, which are like two
+
+36:36.560 --> 36:37.920
+sides of a coin, right?
+
+36:37.920 --> 36:44.880
+So one is, then you can basically make these perturbations more and more similar to your
+
+36:44.880 --> 36:46.120
+data instances, right?
+
+36:46.120 --> 36:48.680
+So that will potentially subvert this kind of attack.
+
+36:48.680 --> 36:53.000
+So we can make a lime plus plus where your perturbations look more and more similar to
+
+36:53.000 --> 36:54.000
+your data instance.
+
+36:54.000 --> 36:55.000
+Yeah.
+
+36:55.000 --> 36:56.000
+Right.
+
+36:56.000 --> 36:57.000
+So that's one thing.
+
+36:57.000 --> 37:01.040
+There comes another problem that's a fix for the set attack, right?
+
+37:01.040 --> 37:07.520
+But then there comes another problem, which is your explanations will start becoming more
+
+37:07.520 --> 37:10.040
+and more data dependent, right?
+
+37:10.040 --> 37:15.400
+So because if you have a data set, then the explanation that you build will only hold
+
+37:15.400 --> 37:17.520
+for that data set.
+
+37:17.520 --> 37:23.000
+So which means if you change the data set or something, then the explanation is no longer
+
+37:23.000 --> 37:24.000
+going to hold.
+
+37:24.000 --> 37:28.040
+So that's another problem of this because you're making this explanation very tight to the
+
+37:28.040 --> 37:29.040
+data.
+
+37:29.040 --> 37:32.240
+So now how do we fix that is another problem.
+
+37:32.240 --> 37:36.120
+But I think this is again like a bit of a trade off where you can think of this like
+
+37:36.120 --> 37:40.120
+a scale where the more you move to one side, you're probably creating some issues on the
+
+37:40.120 --> 37:41.120
+other side.
+
+37:41.120 --> 37:45.280
+So we are also looking at sort of formalizing those trade-offs and like, you know, saying
+
+37:45.280 --> 37:49.800
+that yeah, as you try to achieve more of, you know, perturbations that look more and
+
+37:49.800 --> 37:55.160
+more similar to your data, yes, you subvert one attack, but then you're creating explanations
+
+37:55.160 --> 37:57.320
+that are only holding for your data.
+
+37:57.320 --> 37:58.960
+So is that good or is that bad?
+
+37:58.960 --> 38:01.440
+So like what are the trade-offs between these two?
+
+38:01.440 --> 38:02.440
+Okay.
+
+38:02.440 --> 38:07.960
+In your research, have you identified any other similar types of attacks?
+
+38:07.960 --> 38:12.280
+Are there others that have been proposed?
+
+38:12.280 --> 38:17.800
+So again, as I said, like this one of the initial ones, I think as a follow-up paper or as
+
+38:17.800 --> 38:19.760
+a follow-up work, there is another problem.
+
+38:19.760 --> 38:26.480
+Another team in Utah that has recent ICML paper on specific attacks to SHAP.
+
+38:26.480 --> 38:32.000
+So that is a follow-up work which again sort of plays on or builds on some of our earlier
+
+38:32.000 --> 38:33.000
+work.
+
+38:33.000 --> 38:38.160
+But I think so far, there have mostly been attempts at looking at like perturbation-based
+
+38:38.160 --> 38:39.160
+methods.
+
+38:39.160 --> 38:43.640
+So there is a lot of scope for open work on other kinds of methods including radiant-based
+
+38:43.640 --> 38:48.480
+methods and even, you know, global versus local what needs to be attacked and what is
+
+38:48.480 --> 38:50.520
+most vulnerable in each of these and so on.
+
+38:50.520 --> 38:54.680
+So there's like a whole set of open problems that haven't really been addressed so far.
+
+38:54.680 --> 38:55.680
+So yeah.
+
+38:55.680 --> 39:03.080
+And are there any interesting connections between the work that you're doing here and the
+
+39:03.080 --> 39:09.040
+broader research field of kind of adversarial machine learning attacks?
+
+39:09.040 --> 39:12.840
+You know, a lot of this is based on kind of perturbations and noise.
+
+39:12.840 --> 39:16.520
+And so there's at least a permanent creature overlap.
+
+39:16.520 --> 39:20.240
+Does one have something to offer the other and vice versa?
+
+39:20.240 --> 39:21.240
+Yeah.
+
+39:21.240 --> 39:22.240
+So yes, a lot.
+
+39:22.240 --> 39:29.000
+I mean, I think this work is actually inspired by, you know, some sort of the adversarial
+
+39:29.000 --> 39:30.840
+machine learning literature.
+
+39:30.840 --> 39:39.320
+So there the focus was more on finding examples or data points which can throw off a classifier,
+
+39:39.320 --> 39:40.320
+right?
+
+39:40.320 --> 39:46.200
+Whereas here the focus is now let's find something which throws off an explanation method.
+
+39:46.200 --> 39:49.640
+So like I guess that way there is like a very clear parallel.
+
+39:49.640 --> 39:54.680
+What adversarial machine learning was doing for classifiers and prediction models.
+
+39:54.680 --> 39:56.720
+We are trying to do that with explanations.
+
+39:56.720 --> 39:59.800
+So I guess that way there is like a pretty tight connection.
+
+39:59.800 --> 40:05.280
+And in fact, you know, as I was saying about some ongoing work which tries to address
+
+40:05.280 --> 40:11.560
+some of these vulnerabilities like in perturbation methods or otherwise, the way we also try
+
+40:11.560 --> 40:18.560
+to fix the vulnerabilities and come up with a new explanation method is also inspired by
+
+40:18.560 --> 40:25.120
+how people think of adversarial robust classifiers in the adversarial machine learning literature.
+
+40:25.120 --> 40:30.040
+So just like people had this, you know, let's first see what are the vulnerabilities where
+
+40:30.040 --> 40:35.960
+things are breaking down in terms of classifiers, then how can we develop a robust classifier.
+
+40:35.960 --> 40:40.360
+So the same thing is playing out in parallel in the explainability literature.
+
+40:40.360 --> 40:42.160
+So yeah, there is a pretty clear connection.
+
+40:42.160 --> 40:47.240
+A lot of that ended up saying, you know, more regularization is there approach.
+
+40:47.240 --> 40:48.920
+Is that going to be the answer here too?
+
+40:48.920 --> 40:52.920
+That's what I was is equally.
+
+40:52.920 --> 40:58.840
+Yeah, but I think so the I guess the there are a couple of things though, right?
+
+40:58.840 --> 41:05.440
+So for example, one thing is even beyond regularization, it's also about thinking about like
+
+41:05.440 --> 41:11.000
+formulations like maybe minimax, which is, you know, sort of like thinking about the maximum
+
+41:11.000 --> 41:16.280
+possible error that you could have on like a variety of distributions that you want your
+
+41:16.280 --> 41:22.440
+model to work on or like a variety of datasets you want your explanation to hold on and minimizing
+
+41:22.440 --> 41:23.760
+that maximum error.
+
+41:23.760 --> 41:29.680
+So I guess those kinds of formulations are also very helpful apart from, you know, regularization
+
+41:29.680 --> 41:30.680
+and so on.
+
+41:30.680 --> 41:36.160
+So I think those ideas are useful to sort of flow from that community to the explainability
+
+41:36.160 --> 41:37.160
+community.
+
+41:37.160 --> 41:44.480
+Beyond that, I also am hopeful that there could be other interesting challenges with explainability.
+
+41:44.480 --> 41:50.920
+The reason why I say that is because there is as algorithms are being like increasingly
+
+41:50.920 --> 41:54.400
+used for various decisions like whether someone gets a loan, right?
+
+41:54.400 --> 41:59.840
+Or whether, you know, someone gets a particular treatment or whether they are given a bail
+
+41:59.840 --> 42:00.840
+or not.
+
+42:00.840 --> 42:06.640
+So there is an increasing sort of like call from both legal scholars and social sciences
+
+42:06.640 --> 42:12.560
+scholars to sort of make these machines also provide resources to people.
+
+42:12.560 --> 42:17.520
+And when I say that, what do I mean is if I as a bank am using an algorithm and if I
+
+42:17.520 --> 42:23.360
+tell someone a loan is denied for you, I also need to tell them what needs to be changed
+
+42:23.360 --> 42:27.440
+in their profile so that they can come back and get a loan, right?
+
+42:27.440 --> 42:34.080
+So they are making these algorithms more accountable, which means the gaming of these kinds of
+
+42:34.080 --> 42:37.400
+methods is going to be like very real.
+
+42:37.400 --> 42:42.800
+Like when you think of, you know, classifiers and some adversaries sort of giving you an
+
+42:42.800 --> 42:46.400
+adversarial sample or example and so on.
+
+42:46.400 --> 42:51.320
+So I guess the danger of that somehow seems a little bit more limited to me than like
+
+42:51.320 --> 42:56.480
+when it comes to explainability where people are relying heavily on this and like things
+
+42:56.480 --> 43:00.560
+are moving increasingly in the directions that people are looking at these and making
+
+43:00.560 --> 43:06.360
+decisions of what models to use, making decisions like whether a prediction is reliable or not.
+
+43:06.360 --> 43:12.280
+So as you are hitting more and more of these real world scenarios, I think, well, we also
+
+43:12.280 --> 43:17.760
+need to be worried because the risk of these things being manipulated and game is very
+
+43:17.760 --> 43:19.480
+real and very high.
+
+43:19.480 --> 43:26.000
+But at the same time, I can see lot more real world applications or like usages of these
+
+43:26.000 --> 43:31.120
+scenarios probably way more than, you know, someone trying to change pixels and any
+
+43:31.120 --> 43:32.320
+image and so on, right?
+
+43:32.320 --> 43:37.440
+So that's while that's an interesting concept to think about, you know, to solve a problem
+
+43:37.440 --> 43:42.360
+or like from an engineering perspective, technical perspective, here the social implications
+
+43:42.360 --> 43:43.720
+are very real.
+
+43:43.720 --> 43:48.680
+So I'm hoping that this would also bring with that more interesting technical challenges
+
+43:48.680 --> 43:50.000
+as well.
+
+43:50.000 --> 43:55.680
+Is there a GAN application here where you've got some model that's trained to try to
+
+43:55.680 --> 44:02.040
+fool your, some model that's, you know, you've got kind of these two adversarial models
+
+44:02.040 --> 44:07.960
+that are trying to try to pick out, you know, the out of distribution samples or something
+
+44:07.960 --> 44:11.760
+like that and, you know, when the one model is trying to cheat the other or anything.
+
+44:11.760 --> 44:12.760
+Yeah.
+
+44:12.760 --> 44:13.760
+No, I think they're headed there.
+
+44:13.760 --> 44:16.800
+I think some of you in our ongoing work is sort of headed there.
+
+44:16.800 --> 44:17.800
+Okay.
+
+44:17.800 --> 44:23.480
+And I guess the way in which sort of at least like, you know, me and my group or some of
+
+44:23.480 --> 44:30.160
+the other researchers are approaching this problem is kind of trying to keep like a real
+
+44:30.160 --> 44:37.120
+year to the ground because a case where someone can build a classifier which can do something
+
+44:37.120 --> 44:42.320
+messy within sample data points and look very pristine and clean with these perturbations
+
+44:42.320 --> 44:46.240
+that the approach relies on is like a very realistic thing and it's not even like a
+
+44:46.240 --> 44:49.440
+super sophisticated attack if you think about it, right?
+
+44:49.440 --> 44:54.080
+So we are trying to sort of at this point, keep our year to the ground and look at those
+
+44:54.080 --> 44:59.480
+most plausible scenarios and how to fix them and then of course, you know, some of these
+
+44:59.480 --> 45:03.480
+will automatically happen which are definitely interesting from technical perspective and so
+
+45:03.480 --> 45:04.480
+on.
+
+45:04.480 --> 45:05.480
+Right.
+
+45:05.480 --> 45:09.960
+Well, Hima, thanks so much for sharing a bit about your presentation and your research.
+
+45:09.960 --> 45:10.960
+Yeah.
+
+45:10.960 --> 45:11.960
+Thank you so much.
+
+45:11.960 --> 45:12.960
+This was, yeah, this was amazing.
+
+45:12.960 --> 45:15.440
+I had a great time talking to you.
+
+45:15.440 --> 45:16.440
+I'm here.
+
+45:16.440 --> 45:17.440
+Same here.
+
+45:17.440 --> 45:18.440
+Thank you.
+
+45:18.440 --> 45:23.440
+All right, everyone, that's our show for today.
+
+45:23.440 --> 45:29.240
+For more information on today's show, visit twomolai.com slash shows.
+
+45:29.240 --> 45:41.720
+As always, thanks so much for listening and catch you next time.
+
+45:41.720 --> 45:48.720
+Bye.
+

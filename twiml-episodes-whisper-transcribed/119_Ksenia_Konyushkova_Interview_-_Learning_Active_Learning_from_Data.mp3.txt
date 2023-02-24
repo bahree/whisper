@@ -1,0 +1,378 @@
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+people, doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington.
+In this episode, I speak with Cassinia Konyashkova, a PhD student in a CV lab at Acole Polytechnic
+Ferrahal de Lozan in Switzerland.
+Cassinia and I connected at Nips back in December to discuss her very interesting research into
+some ways we might apply machine learning to ease the challenge of creating label data sets
+for machine learning.
+The first paper we discuss is learning active learning from data, which suggests a data-driven
+approach to active learning that trains a secondary model to identify unlabeled data points
+which, when labeled, would likely have the greatest impact on our primary model's performance.
+We also discuss our paper, Learning Intelligent Dialogues for Bounding Box Annotation, in
+which she trains an agent to guide the actions of a human annotator to more quickly produce
+bounding boxes.
+Last week, I attended an investor conference in San Francisco.
+Having spent a couple of packed days being peppered with questions about the state of the
+AI market and its various players, I wrote about some of the key themes that emerged
+for the latest issue of my newsletter.
+If you're interested in the commercial side of the AI industry, you'll definitely want
+to check it out.
+If you don't already subscribed to my newsletter, visit twimmolai.com slash newsletter or just
+email info at twimmolai.com asking to be added.
+You'll automatically get the latest issue when you sign up.
+Quickly, a bit about the next Twimmol online meetup.
+On Tuesday, March 13th, Sean Devlin will be doing an in-depth review of reinforcement
+learning and presenting the Google Deep Mind paper, playing Atari with deep reinforcement
+learning.
+Head over to twimmolai.com slash meetup to learn more or register.
+All right, let's roll.
+All right, everyone, we are here at NIPS and I am with Cassinia Konošková.
+Cassinia is a PhD student in the computer vision lab at EPFL in Lozan, Switzerland.
+Cassinia, welcome to the podcast.
+Thank you.
+Nice to meet you today.
+Absolutely.
+Great to meet you as well.
+So why don't we get started by having you tell us a little bit about your background and
+how you got involved in computer vision and machine learning, artificial intelligence?
+Okay, so it probably all started with my master degree when I just heard this cool name,
+machine learning.
+Okay.
+I had a very little idea of what it is all about, but it sounded exciting, and then I learned
+that you can actually recognize Cassinia in the pictures if you use machine learning and
+then I thought, great, that's the thing for me.
+No, I'm kidding.
+No, it wasn't the real motivation, but yeah, it just sounds fun.
+But yeah, it sounded like a fun field to be, and it was probably a little bit before,
+it became so popular and so famous, but I was likely to be there at the beginning.
+So I joined the program in machine learning and algorithms in the University of Helsinki.
+And after that, I went from my PhD program in Switzerland at a quality technique for the
+Grand de la Sant, and I joined the computer vision lab with Pascal Four, who is famous in
+the computer vision community, but as you know, today computer vision very much depends
+on machine learning, so it was a great match to combine this two fields that interest
+me.
+Okay, awesome.
+Awesome.
+And you're here at NIPS, sharing some of the work you're doing, some of your research.
+Can you tell me a little bit about that?
+Mm-hmm.
+Yes, sure.
+So I'm working in the field that is called active learning.
+Okay.
+So the basic idea is that normally in the traditional machine learning, we have a lot of training
+data, which we collect from human experts, and then they provide us with the labels for
+this data when we're doing the supervised machine learning, and having this huge annotated
+corpus of data, we can train a model, which will help us to predict for the new coming
+data what labels were assigned, either it's a classification or a regression task.
+The problem that we're dealing with is that we don't have this training data available,
+and we're trying to select the data in the optimal way, so that if we annotate it, we can
+learn the machine learning model as quickly as possible.
+So the idea is to reduce human annotation efforts, and at the same time achieve similar
+quality of performance of the machine learning algorithms.
+And what I'm doing, I'm presenting the work that is called learning active learning from
+data.
+Okay.
+So we're going even one step further, and instead of trying to construct some specific
+algorithm that would select data for us, we're trying to learn an algorithm from the
+previous examples of active learning algorithms runs.
+Okay.
+So for example, the very popular active learning algorithm is called uncertainty sampling.
+In this case, we have, for example, suppose we have 10 data points that are labeled for
+us, it's very little and we probably cannot predict much based on them, but we can still
+have a very rough idea of how the model should be, and then we can construct, for example,
+the decision hyperplane, and then we will select points that lie closest to the decision
+boundary, and we would think that as the model is the most uncertain right now about this
+points, if we annotate these kind of points, they would help to train a better model in
+the future.
+So instead of labeling the data just uniformly a trend from the very big corpus, we select
+the data that would help the model the most.
+And this kind of algorithms, like I mentioned, uncertainty sampling, and there are many
+other ones that were introduced in the literature.
+The problem is that on different applications, they're all competing, some of them are doing
+better in this scenario, some are doing better in that scenario.
+And for example, in my previous work, I worked on specific algorithm to work with images,
+so to take the advantage of the structure and some smoothness assumptions of the images
+to annotate data.
+But then there is nothing principle there, and we don't know which of the algorithm would
+actually perform the best at priority, so we have to test them, and this is all human
+annotation costs.
+So my idea is that we have some annotated data sets already, and then if we simulate
+the runs of this data collection process, we can actually see what kind of points led
+to a good behavior of active learning algorithm, and which points didn't improve the quality
+much.
+And then we can try to predict in the future what kind of points should be selected.
+So in particular, I'm dealing with station where I just generate a lot of data myself,
+just like some synthetic data sets of very simple shapes, but they still have a lot
+of variability of them, some in some cases, if I deal with binary classification, sometimes
+the classes overlap a lot, sometimes they're easily separable, two-dimensional shapes
+or...
+Yes, right now it's just very simple, we can do it with a very kind of cheap procedure
+with just two-dimensional data, and then we run active learning on them, just kind of
+this data collection, and then we look at the state of the classifier, how the classifier
+was trained, and the data points, and we look how much adding each kind of data point
+reduced the classification error for us.
+So for example, we label two data points, we train a model, we look at what kind of
+error this model resulted in, as we know all the ground rules, as this is the simulated
+data.
+Then we try to select one more data point, and we get three points.
+Now in these three points, we can learn a new model, and it results in a new error.
+And now we can look at the difference between the error of the model with two points and
+the error of the model with three points, and the difference would show us how much adding
+this third data point helped the model.
+And so now as we go on in training, we memorize the states of the classifier, for example
+I'm dealing with something very simple, like random forest classification, I can look
+at what was the depth of the tree, what was the variance of the forest, what was the cross
+for the data accuracy, and then we look at the data points, for example what was the probability
+to belong to a certain class for a certain point, and we have how much in this situation,
+this particular data point reduced the error.
+So based on this data, after we collected for all synthetic data sets, we can train a regressor
+that will predict in the future, based on the state of the classifier, and given data
+points from the pool of unlabeled data, which of them would result in the highest reduction
+in error, and this is the sample that we select to be annotated.
+And we all started with this very simple two-dimensional data, and of course the easiest is to train
+it on the similar kind of data, and this is our simplest scenario, then we try to complicate
+it more and more, for example we deal with the soil-like problems when we have a classification
+where the data is in the form of checkerboard, and imagine so we have like positive class,
+negative class, positive class, negative class, or they're kind of repeating in the checkerboard
+style.
+And this kind of data sets are more tricky for machine learning, usually and active learning
+is not an exception.
+And if we apply the very famous and very popular uncertainty something algorithm, that
+is often difficult to outperform in normal situations, in this case it would perform even
+worse than random, because it is confused by this checkerboard structure.
+And is the difficulty with this structure because the regions are non-contiguous or is
+it something else?
+The thing is that for example if we imagine the checkerboard is 2x2, so we have, suppose
+we have rent class on the top left, then blue class on the top right, and then blue
+class again on the bottom left, 10 red class on the bottom right, suppose that we selected
+one sample from the upper red class, and one sample from the upper blue class as our
+initial examples, then we construct some kind of decision boundary, and what and so does
+something we do, we would try to refine this boundary and it would take a very long time
+to discover that there are two other regions of these classes that are in completely different
+order.
+So what uncertainty something is good at is it's refining boundary when we already have
+some reasonable approximation of this boundary.
+And this can be a problem in many real data sets when one class can be represented by
+some several modalities of examples.
+And so in this case we show that then this very popular algorithm performs worse than
+just random something, by random something I mean that we would just select data, random,
+and then we label everything.
+So it's definitely not a very efficient strategy, but in this case it does better than uncertainty
+something.
+However, if we learn this strategy from the previous examples of this active learning
+runs, it figures out that it shouldn't follow the strategy of refining the boundary.
+And for example, in this case what it seems that it learns is that when the classifier
+is uncertain, it's better not to trust it at all, not to follow any of the predictions
+of the classifier, but instead just do some random exploration in the beginning until
+we collect enough data on which we can train a better classifier.
+And then we would be able to refine the boundary that would be more efficient.
+And so this method doesn't involve trying to identify data points that are close to your
+decision boundary.
+No, not anymore.
+Okay.
+So as a feature, as we have the regressor, it has some features as an input.
+And some of them are features of the classifier that just characterize how certain our classifier
+is, how good is cross-validated accuracy, for example.
+And then some features they characterize the data points.
+And one of the features could be the distance to the boundary, but it can also include some
+other features.
+For example, we can look at the distance to the other labeled points or distance to the
+unlabeled points.
+For example, it can characterize for us if the point is an outlier or if it lies in the
+dense region of the feature space.
+So it includes many more features and including the distance to the boundary.
+But then if I study how much each of these features influences the decision of the regressor,
+the decision of which point to select by the active learning strategy, the distance to
+the boundary is not the first and most important criteria.
+It comes maybe like the fourth and the first one was actually the certainty, the confidence
+of the classifier.
+So the strategy is adaptive as the active learning progresses and we collect more and
+more data.
+The classifier becomes more and more confident and the strategy adapts accordingly.
+And next we try to test this kind of algorithm that was learned from the data on the real
+data sets that are very different from these synthetic examples.
+In the synthetic examples we just had this two-dimensional features for the data points, but you
+cannot go very far with it and it doesn't sound like a very exciting problem in the
+learning.
+It definitely won't help us to classify cats.
+So next we move to the real data sets and I'm a part of human brain project that is
+a very big European project with a huge funding trying to address the problem of understanding
+how human brain functions and there are many many researchers who work on it from very
+different perspectives, biologists, neuroscientists, physicists and all kind of people.
+And so I'm also part of this project is trying to understand brain imaging.
+For example we're dealing with the electron microscopy scans of red tissue, of red brain
+tissue and we're trying to segment some cellular structures in it.
+For example we're on the cellular resolution and we can see the mitochondria, the synopsis
+between neurons, we can identify membranes or other kinds of things.
+So the other application which I'm interested is having MRI scans of the brain and try
+to segment brain tumor of different types.
+And then I apply the same kind of strategy that I learned on the synthetic data to this
+real data sets of much higher dimensionality, much higher complexity.
+And also I have a very different data set for example for detecting credit card fraud transactions.
+So I have transactions from the bank for which we know that 99% of them are normal transactions
+and then we have around 1% or even less of fraud transactions.
+And it's also very laborious task to annotate this kind of data because you need to annotate
+like thousands of data points before you start having only a dozen of examples of fraud.
+And this is only humans they can do it.
+And the same goes of course for this biomedical imaging like as a person who's not into biology
+or neuroscience it is a very hard task to understand what is going on.
+And the time of these people is quite expensive and we would better want them spend it on something
+more intelligent rather than annotating data for algorithms.
+So these are the applications where active learning is the most interesting in cases when
+only very specialized and educated humans can annotate data for us.
+And in this case we also apply the same kind of strategy that we learned from synthetic
+data.
+And surprisingly it works even in this cases it can generalize to very different data sets
+and how we understand it is that it learns a very general knowledge about active learning.
+For example the rule such as when the classifier is uncertain do random exploration and when
+classifier is rather certain refine the boundary.
+This should hold no matter how the data set looks like and it would hold in the case of
+this simple to dimensional data and the case of very complex electron microscopy imaging
+data.
+And so is the idea you know when you take a step back and think about this in the context
+of a system like the imaging data is the idea that you yeah how does this unfold in practice
+like you have some minimal set of training data and then you're envisioning that you
+would generate some other set of data and kind of send it out for annotation or okay I see
+so okay now example for example let's talk about this electron microscopy segmenting
+cellular structures how we imagine it is that the user has a stack of tissues so it's actually
+not a real image it's a three-dimensional image so it's kind of a cube and in whatever direction
+we look at it we can count it in all directions and we'll get to the images of how the tissue
+looked like that.
+And so what we ask at the beginning as the user to kind of take a brush and some program
+and indicate here is like some part of mitochondria and here is a part of background and then based
+on this our model would train some initial classify a very very very rough one that would
+just like say okay mitochondria is for example they're darker than background on average so
+let's just use this as discriminative feature it would train such a model and then there will
+be some kind of grayish part in the tissue and it would think that classify I would think
+I'm not sure what it belongs to does it belong to mitochondria or does it belong to the
+background and then the active learning would select this as the some special part in the tissue
+which we want to be annotated and then it brings the user to this part of the tissue and kind of
+highlights this error in which we would like to get more labels and ask the user please get
+take a brush again and indicate whether this particular error is background or if this particular
+error is mitochondria and then the user annotates it's again and then the procedure iterates
+until we're satisfied with results or until some budget of time is reached or something of the type
+and do you have that whole system running at this point end to end or you more modeling it from
+the data itself so right now I was mostly working just with from the data okay so we already have
+the labeled data and we simulate this active learning procedure because in this case we can of
+course test many strategies we can study how different parameters influence our algorithms we
+can compare to many strategies but we actually have students and master's student who is working
+on putting it into a plugin that the neuroscientist would use and I actually know some people who work
+in neuroscience and I know one girl whose PhD topic is mostly at identifying mitochondria
+and trying to understand how they influence the neural diseases and the human brain and what she
+does is a big part of her PhD work she's just she has to annotate this data manually and I believe
+that she's very knowledgeable and she can do something more useful at that time if we can provide
+her with this plugin that only with you know 100 samples can provide the same quality of
+classification as with 10,000 samples for example so in some cases we can reduce the annotation
+effort like very significantly so is that you know going from 10,000 required samples to 100 is
+that representative of the kind of results you've seen for different scenarios you mean across
+different applications right okay it depends on the application how much active learning can
+actually improve our results okay yeah so in some cases we can get a very dramatic decrease
+in the annotation time in some cases it's not that much but in any case we're reaching the same
+quality faster and we can stop the procedure at any time when we reach the budget of time and
+the classifier that we constructed at that point of time would be better than what we would construct
+if we just sample points at random then the thing that we can look at is how human friendly this
+kind of annotation environment is for example in my previous work I worked particularly for images
+and I tried to design a particular strategy for the 3D imaging stacks and in this case what we
+were saying is that it is very cumbersome if we have to annotate the stack just kind of pixel by
+pixel suppose that you are brought like in some part of the stack and ask to annotate what is
+here then you brought to some other place you ask to annotate something then some islands and other
+and it can actually take quite a lot of time just because of this context switches and you have to
+understand what is going on and like it's also trivial to understand how this neurons connect
+with each other for example so one thing that we're looking at we're trying to find some
+optimal cuts in this 3D plane so we're just cutting them in various directions and we're projecting
+data on this direction on these planes on these cuts and we're trying to annotate some batches
+of samples instead of asking to annotate one by one whatever samples are you can try to think of
+it kind of like maximum uncertainty cuts or something yeah so we had some some uncertainty measure
+that wasn't like maybe not a standard one but something special for the images but then here we're
+trying to find a cut with a maximum uncertainty and then there are other ways to work on this
+direction so in as I see it in active learning there are two components one of them is we want to
+design an algorithm that would select the best possible sample but on the other hand we should
+still remember that there will be humans annotate data for us so we should make it as convenient and
+as easy for humans to label the data and yeah another thing that I've been working on also in
+this direction is getting label data for object detection so the problem is very different we just
+like want to localize objects in images like I don't know the bottle the TV screen a human
+and these kind of things and there are various and for this we need bounding box annotations so we
+need someone to draw a bounding box around every object and from this with chain and there are
+various ways how we can collect it we can ask the humans to draw it manually this kind of this is
+the normal way of doing it but on that the hand we already have some kind of detectors that maybe
+not as strong as we would like them to be but we can already try to use the output of these
+detectors and show them show it to the users and as the users to correct for the mistakes and
+this is what we're talking about mistakes in terms of identifying the bounding boxes or labeling
+what's in the bounding boxes or both okay so now I'm talking about identifying the location of
+the bounding box because in this scenario we simplify the problem and we say that we already have
+image level annotations so we already know that there is a bottle in this image there is a door
+in this image and now we want to know where this door is okay so we split the problem in two
+separate ones and we deal with the second one where we want to get the coordinates of this
+bounding boxes okay and in this case on the one hand if we ask humans to draw an object it is
+very fast it is not very fast it takes in the very in kind of in the standard protocols it might
+take up to 35 seconds to get a one bounding box per image and we need thousands of them for
+every class which results like in years and years of human work and on the other hand if we ask
+the users to verify the prediction of the classify it can be very fast it takes around two seconds
+for example just to say yes or no if it is a correct identification of the object but it is not
+guaranteed to provide a bounding box that we would like to get so if the user answers no we have
+to repeat the procedure again and we have to ask the user again where the box was so what we are
+trying to do in this work we are trying to balance between these two modalities of data
+annotation and trying to decide in what situations it's better to ask to draw a bounding box that is
+expensive but guaranteed to produce a label and with which situations it's easier to verify
+the detection detected proposals and to result in a positively verified box quicker
+and is the methodology the same for this project as the one you previously described?
+no it's not exactly the same but what unifies them is that we're still dealing with the problem
+of reducing human efforts just approaching it from the other direction so one direction is
+select what to annotate and the other direction select how to annotate so what I believe is that
+both of them would be important and if we just deal with one of them we can get some good results
+on paper and some simulations but in practice both of these directions would be important
+interesting I'm curious about how the system would go about directing the annotator to a
+specific area meaning you have these you have these data points that are annotated what is it
+asking for is it asking for like some coordinate does it know like coordinates of uncertainty or
+does it know something else okay so I didn't go into details of the protocol but actually how
+we start the task is to segment something to segment mitochondria's and we started from
+over-sigmenting images so we use something that is called sleek super pixels or sleek super voxels
+so the idea is that it is unsupervised method that can provide segmentation of the image of the
+very fine fine grain that is not reflecting actually the boundaries of the object but the uniform
+more or less so we get like very small segments in the images that are all more or less uniform
+in their appearance and every object would compile would consist for example of 100 of such objects
+of this super voxels or super pixels and then what the algorithm the active learning algorithm
+identifies it selects which super voxel is the most uncertain and are the super voxels they're
+all uniform in shape and size yes this is the property of this sleek super voxels is that a
+more or less uniform and of a shape that is close to spherical or circular depending if it's 3D
+or 2D stacks and so you can have multiple adjacent super voxels that are the same value essentially
+the same color or yes yes so it's still even if there is a very uniform part of the image it would
+still try to divide it in some way so that they're still kept of more or less the same size
+okay the same shape it depends on the parameters how you specify it's it's unsupervised algorithm
+but you need to identify how compact you want them to be how smooth you want them to be this kind
+of things but what we're trying to do is like to have them roughly circular small objects
+okay and the overlapping no they're not overlapping so it's just kind of assignment of every pixel
+of the object to a super pixel okay so we call they're called super pixels because they consist
+of multiple pixels or super voxels the same for voxels okay and then what active learning does
+it select super voxel or super pixel that needs to be annotated in this case or in case of
+this identifying the planes it just identifies the error with several super voxels that are uncertain
+so in this case it would be just as if we have an image and then we highlight some kind of round
+errors and that we're interested in annotations there okay yeah and there were also suggesting that
+if the objects are big enough like mitochondria are rather big and the selected error that we want
+to use it to annotate is small we can approximate it that just with two clicks of the mouse just
+identifying the boundary of mitochondria if it is in the image so it makes it even faster like this
+okay so this is another example of working on this other direction of how convenient it is for
+user to annotate the data combines together with the algorithm that selects what to annotate
+okay and so if the presumably if you're if the user task is to then identify whether the
+boundary is in the image or in the the voxel super voxel then you can kind of go from there to
+multiple super voxels with boundaries and determine which is where the mitochondria is is that
+what you're saying so how it looks like is that suppose we have a circle that overlaps the mitochondria
+bit but because mitochondria is rather big compared to the size of the circle right the boundary
+of mitochondria is more or less just a line yeah and we can ask the user to draw this line with two
+clicks and to identify on which side the the mitochondria is right and then it would we are able
+from this line we're able to go towards the assignment of super voxels to particular classes
+so when we have just that one assignment in this one super voxel can tell you
+a whole about the whole area exactly yeah okay interesting interesting um well this is
+really fascinating work I appreciate you taking the time to to share it with us work and folks
+learn more about your research do you have a website up on uh yes I have a website that is
+xenia.conishcaller.com and I try to keep it more or less updated about the recent research that
+I'm doing for example what I mentioned today the work about bounding boxes I just finished
+an internship last Friday at Google Research in Zurich okay and this is a project that we're
+working on okay and it's soon to be there and okay before it is going to appear anywhere else
+awesome awesome well thank you once again yeah thank you
+oh all right everyone that's our show for today for more information on cousinia or any of the
+topics covered in this episode head on over to twimlai.com slash talk slash 116 if you haven't
+already done so make sure you head on over to iTunes as well to leave us your most gracious
+rating and review it helps new listeners finds us which helps us grow and of course
+thanks so much for listening and catch you next time

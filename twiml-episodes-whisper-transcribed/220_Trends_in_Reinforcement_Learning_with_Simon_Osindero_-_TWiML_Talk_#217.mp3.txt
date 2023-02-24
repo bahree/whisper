@@ -1,0 +1,663 @@
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+people, doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington to close out 2018 and open the new year we're excited
+to present to you our first ever AI rewind series.
+In this series I interview friends of the show for their perspectives on the key developments
+of 2018 as well as a look ahead at the year to come.
+We'll cover a few key categories this year, namely computer vision, natural language
+processing, deep learning, machine learning and reinforcement learning.
+Of course we realize that there are many more possible categories than these, that there's
+a ton of overlap between these topics and that no single interview could hope to cover
+everything important in any of these areas.
+Nonetheless we're pleased to present these talks and invite you to share your own perspectives
+by commenting on the series page at twimbleai.com slash rewind 18.
+In this episode of our AI rewind series we introduce a new friend of the show Simon Ocindero,
+staff research scientist at DeepMind to discuss trends in deep reinforcement learning in 2018
+and beyond.
+We've packed a bunch into the show as Simon walks us through many of the important papers
+and developments seen this year in areas like imitation learning unsupervised RL, meta-learning
+and more.
+Enjoy.
+Alright everyone, I'm on the line with Simon Ocindero.
+Simon is staff research scientist at Google Monde.
+Simon, welcome to this week in machine learning and AI.
+Hi, sir.
+Good to see you.
+Awesome.
+It is great to have you on the show.
+You are joining us for our end of 2018 beginning of 2019 kind of reflections and predictions
+series and you're unique in this series and that the other guests that we've featured
+in this series are all kind of guests that are returning back to the podcast, but you
+are our new guests in this series.
+We wanted to catch up with you because we've been trying to get you on the show for a while.
+We just saw one another at Nourips and this seemed like a great opportunity.
+For our project here, we're going to talk through some of the interesting developments
+in your particular area of focus which is deep reinforcement learning.
+But you've identified a bunch of papers that caught your eye as being significant this
+year.
+Yeah, that's right, I guess when you asked me this, I was kind of trying to think of what
+was interesting and just the rate of publications at the moment is so high that given that and
+the number of subfields that I see developing in deeper all these days, it was kind of
+hard to come up with a short list.
+So I figured maybe what we do is touch on a couple of high level topic areas and I'll
+try and pull out from each of them a couple of the papers that I thought were interesting
+or that caught my eye.
+Actually, even doing that, there's probably going to be some focus areas that we could touch
+on that I don't know if we'll have time to but maybe we'll do that in another show.
+Awesome.
+So what's the first area you have for us?
+So the first step is what I'm going to call grouping together, sort of imitation learning,
+learning from demonstration, warm starts and curricula, so kind of this idea that we don't
+always need to learn from scratch without any information and in fact, doing that when
+rewards are very sparse is kind of difficult and so we can leverage other types of knowledge.
+So in particular, maybe demonstrations, a small number of demonstrations from other agents,
+some of those might be humans, another way of thinking about this problem is to think
+about curricula, so either over problems or model complexity and essentially starting
+off doing something simple and then bootstrapping from the solution to a similar problem to a
+more complicated one.
+With regards to imitation learning, I typically see this in the context of reinforcement
+learning, are they linked inseparably or can you do one without the other?
+Yeah, I mean, for sure you can do reinforcement learning without imitation and actually I guess
+depending on what you mean by imitation, you don't necessarily have to do it in a reinforcement
+context.
+Are there examples that come to mind of imitation learning outside of the reinforcement learning
+context?
+I mean, I guess depending on how you think about it, you can actually imagine even some of
+the way in which we train some language models is essentially being imitation learning,
+the kind of teacher forcing aspect of sequence model learning, you can kind of do that as
+a kind of imitation.
+All right, so the first paper on your list of important papers in this space comes out
+of deep mind is the playing exploration games by watching YouTube paper and actually by
+the time this interview is published, my interview with Nando to Freitas, one of the authors
+of that paper from Nureps, will have been published.
+So folks can take a listen to that one.
+Great.
+Yeah, what were the highlights of that paper for you?
+I guess a couple of things, and Nando's already said about this, I'll be relatively brief,
+but it's kind of nice that we have observational demonstration data rather than necessarily
+providing.
+So I guess there's a couple of ways that you could give an agent demonstrations, one is
+just letting it watch another agent and observing the world, the other is literally telling
+it action sequences that another agent have done that have been successful.
+So this is a kind of nice example in that it's purely observational, and so the hope is
+that by generalizing this technique, we really could take it from, in this case, it was
+looking at a video game that you can imagine wanting to scale this up and just having an
+agent watch, people doing stuff in YouTube and learn to do stuff in the real world.
+So it's kind of got a lot of potential in that direction.
+Okay.
+Cool.
+How about the next paper on your list?
+So the other one was another deep mind paper and similar kind of idea, so this is the
+observant look further, achieving consistent performance on Atari.
+And again, it's using demonstration, in this case, they do get to see the actions, but
+they basically learn to get good performance on some of these hard-expression gains with
+just a single demonstration trajectory.
+And the kind of idea there is that you basically, in your replay buffer, you have the experience
+of the agents generated, but you also get to populate that with experience that a demonstrators
+provided, and it turns out that if you do that and a couple of other tricks in terms of
+how you do the training, you can also get extremely good results from a very limited amount
+of demonstration data.
+So when you say a single demonstration trajectory?
+Yeah, so imagine a video game just kind of playing through it once, and that's all you
+get to see.
+So the reason that's kind of interesting is that, you know, a single, I mean, I guess it
+depends on the game, but a single playthrough wouldn't necessarily capture all the variability
+that you get when you're playing the game, you know, if you start to do the things a little
+differently at the beginning, then things can kind of diverge, but in this game, and I
+guess it's true of a lot of environments, you know, if you're starting from scratch and
+you don't know anything, then there's lots and lots of things that you could end up doing.
+And so even just seeing one demonstration of roughly the right thing to do can be extremely
+helpful.
+How is the imitation part of this paper approached?
+Yeah, so like I said, they're using the building known as Technica DQFD, and so DQ learning
+from demonstration.
+And so the idea there is you have this replay buffer, which is basically transitions that
+you've seen in the world.
+So you have your current state, the action you did, where you ended up next, and associated
+with rewards, and in regular Q learning, or you would essentially populate that buffer
+just with your own experience.
+And so when you're starting out, you maybe don't really know how the world works.
+And so it's put part of the reason that this is interesting and kind of why highlighting
+this as an area is, there's a lot of problems where just getting the agent off the ground
+and starting to do something simple, can actually end up being the hardest part, but once
+you're starting to see rewards and figuring out how the world works, then learning tends
+to progress reasonably.
+So in terms of learning curves, a lot of the time on some of these tough environments,
+you'll basically see flat lining for a very long time, because the agent is essentially
+just randomly exploring until it figures out something interesting, and then it starts
+to get a signal that it can learn from.
+And so I think that's another reason why just a very small amount of demonstration data
+or instruction or just something to kind of kick learning off the ground and end up accelerating
+learning and help us learn on problems that otherwise would be very hard to do from scratch.
+Were there other papers in the scatigory?
+Yeah, I guess there was another one that we had in Europe, so I was actually, so this
+was kickstarting deep reinforcement learning.
+And that's a slightly different approach, so it's not using demonstrations per se anymore.
+The idea is we have a free-training teacher agent, so you could imagine getting that in
+a couple of different ways, so maybe that would be a simple, easy-to-train agent that
+doesn't necessarily get the best performance, but it's easy to train in a reasonable time
+or maybe you have lots of different tasks in an environment you want to do, and you might
+be able to have a teacher that specializes on a single task, which is typically easier
+than learning a whole bunch of things, but you have a student who wants to be able to learn
+to do many different things, and the kind of, the approach we have there is we are able
+to have the student experience in the world, and we can also query the teacher in a sense
+he asks, what would you do if you were in the situation?
+So here we have access to the actions, and the idea is we'd like the student to match
+the teacher's behaviour, but we don't just want to end up completely copying the teacher
+because there can be no point in that, so we also have a mechanism that essentially
+over time allows the student to figure out how much attention it should pay to its teacher
+and how much attention it should pay to its own experience, so over time the student
+trusts its own experience more and more, listens to the teacher less and less, so you
+can end up with a student rather exceeding the performance of the teacher, and we kind
+of see this as being useful in a couple of different ways, so particularly right now
+in terms of the kind of nuts and bolts of experimental cycles, you often want to try out
+a lot of different ideas and architectures, and if for each one of those you are having
+to start from scratch each time that can be costly in terms of computation, but also can
+just be slow, so we kind of see this as a nice way to shorten experimental cycles if
+you're wanting to iterate through different aging architectures pretty quickly, another
+benefit that we see is, sometimes if you have a really big agent it's just a lot of
+parameters to train, so getting that off the ground initially can be kind of hard, and
+so we've actually seen really nice progress taking very simple agents that are quick
+to train, but they flatline it, not great performance, but by having that as a teacher
+we can then get one of these much, much bigger agents off the ground that then ultimately
+gives us much better performance, so it's, yes, as a technique it's something that we're
+using quite a lot internally.
+One of the contexts that you explained this in is in terms of like multi-task, or at least
+an agent trying to learn multi-task, I don't know if it's formerly multi-task learning,
+but what's the role of the teacher in that multi-multiple task scenario?
+Yes, so in that scenario it would be, often what we'd like is a single agent that can
+do lots and lots of things, and that training that transcript can be kind of challenging,
+what's often more manageable is you kind of subdivide the problem space into smaller
+and smaller chunks, so you are learning to do just one of those tasks, maybe even breaking
+a single task into smaller chunks, so learning to do a small part of the overall problem,
+you can get a teacher agent that specializes on that little bit of the overall problem
+space, and if you then have many different teachers that specialize in different parts between
+them that able to do most of the things you care about, but like I say what you'd really
+like is a single agent that has competency to do everything in the domain, and so in a
+situation like that you could build these simple agents that kind of specialize in parts
+of the problem space, and then use those different teachers to then transfer their knowledge
+to a student that is learning from all of them, and as I say over time it can figure out
+how much attention to pay to the different teachers and get good performance, so in the
+paper we have a set of different tasks that we want to do in the 3D DM lab environment,
+and so you know they can like navigation kind of tasks, avoidance kind of tasks, gathering
+tasks, all sorts of things like that, and we have teacher agents that are specialized
+for each one of those, and then we can build, but what we're really interested in, and
+this is kind of moving towards general intelligence, we really want one agent that can do lots and
+lots of things and can also learn to do new things, and so one way of getting that off
+the ground is to have these simpler, less general agents that specialize in particular parts
+of the problem space, and then distill their knowledge into the student to get the student
+off the ground.
+To be clear, so maybe an example, if you say you have, you're trying to train an agent,
+and you've got four kind of things that you want it to learn, and you create three of
+these teacher agents, are the teacher agents increasing performance in the three categories
+for which you have teacher agents, or is the lack of teacher agent allowing the agent
+to learn more about the one where you don't have a teacher agent?
+In this setting, I guess it's a little orthogonal to that, so in terms of, the teacher should
+never be too limiting in the sense that we have this mechanism, in the people are using
+population-based training, but you could imagine doing other things that essentially tries
+to meta-learn how much attention the page of the teacher.
+If the teacher is useful, if it's giving you learning progress on the thing that you
+care about, great, as that becomes less and less useful, you pay less and less attention
+to the teacher.
+So far, in these conversations, what's been interesting is that I could spend the entire
+time talking about one thing that kind of pulls me in that direction, but we'll try not
+to do that here, and so where there are other papers in this category, do you want to move
+on to the next one?
+So we had another paper mix and match agent curricula for reinforcement learning, and
+there, rather than having a teacher that's kind of pre-trained, it's kind of as if you
+have a companion agent that is trained jointly with the one you really care about, so in practice
+how we implement that, we have a mixed-your-policy, which is two different policies that we kind
+of blend together, and the idea there is maybe a much simpler policy would be easier to train
+to imagine something that has far fewer possible actions that it could take, and so often
+that's similar to learn, but what we'd really like is an agent that has access to many,
+many actions.
+One thing you could do is initially train an agent with few actions and then use the behavior
+of that agent to train the one that has many, many actions, and in this particular setup,
+we do that in a continuous way where the learning is shared between both different types
+of policy, and we have a term that essentially encourages the information to flow in a sense
+the simpler and faster learning agent to the complex, more solely learning agent, and again,
+we have that processes orchestrated, is done automatically with this method population-based
+training, which essentially tries a whole bunch of different values for how strongly we're
+coupling behavior and preferentially follows the ones that are giving the best empirical
+performance.
+So the next category that you identified was what?
+So this one is, I guess what I call unsupervised RRR, or you could think of it as self-supervision
+or different kinds of interesting auxiliary tasks, so I think this is sort of a general
+direction that lots of people are interested in, which is the information in a reward signal
+probably isn't enough to train the scale of agents that we're interested in in a reasonable
+amount of experience.
+It's not very information rich, but there actually is a ton of other stuff in the environment
+that we can learn from.
+And so leveraging that along with a reward signal is something that I think we're going
+to see a lot more.
+So you've probably heard Jan Lecun talk about the cherry analogy with a cake, so it's kind
+of getting at that, but the point is that there's all sorts of things that we can learn
+from in the reinforcement learning context.
+And so examples of this, not from this year, but previously, would be the unreal paper
+where you're essentially doing a whole bunch of auxiliary prediction tasks in addition to
+trying to learn the policy and value.
+One of the papers from this year that I thought was particularly interesting in that sense
+is this one unsupervised control through non-parametric discrimination rewards.
+And the basic idea is wanting to kind of learn to discover and achieve goals without
+any supervision.
+So it appears to be similar to what happens if you have a young kid, you're essentially
+just learning what you can control in the world, learning what you can do.
+But no one's, you do have some supervision, but a lot of learning is just figuring out,
+what can I affect, what can I control in the world, can I set myself arbitrary goals
+and then achieve them?
+And so it's kind of taking a shot at that problem.
+Does that kind of exist?
+Yeah, how did they kind of encode that knowledge that they're making not relative to the
+loss function?
+Yeah, that's a great question, actually.
+So they let's learn a loss function, so there's a couple of clever tricks that they do.
+So you start out behaving, let's say, randomly, and you know that states that you visited
+in that random paper are achievable, or you know, something closer that should be achievable
+because you've achieved that before.
+So this is drawing on some of the ideas from, there's a paper last year on hindsight experience
+replay, which essentially is, you know, maybe I was trying to do one thing.
+I didn't necessarily do that, but I did a whole bunch of things.
+And so you can learn about the count of factuals.
+When you're acting, you do something.
+And so learning about what you did is an alternative to learning about what you wanted to do.
+So that's kind of one element.
+The other element is how you figure out how well you achieve those goals, and they use
+an approach that's a little similar to the discriminator in again, so that the basic
+idea is, well, yeah, okay, the three components, you have a goal condition policy.
+So you have a policy that gets to see its current state, and it also gets given a goal state
+that it's trying to achieve.
+And under ideal conditions, you kind of plug both those in, and it will get you to the
+goal.
+But then there's the question that I think, well, you're saying initially, how do you figure
+out if you achieve your goal or not?
+And that's where this sort of bootstrap teacher comes in.
+So the idea is, imagine the goal that I'm trying to achieve, and imagine a whole bunch of
+other possible states that I could be in.
+So there's the kind of, there's the target and a whole bunch of distractors.
+What I'm going to do is try and learn a classifier that distinguishes between those distractors
+and the goal that I was trying to achieve.
+And the way that that's trained, it's a little subtle.
+So there's two things that we can plug in there, because if you've told what I was saying,
+you might worry there's a bit of a secularity.
+So one of them is to plug in some of those hindsight goals, so given some initial state
+and just a random trajectory, there'll be states that I go through.
+And so I could, after the fact, say, hey, that state that I ended up passing through,
+that wasn't my goal.
+And so the nice thing about that is you know that you achieved it because you were literally
+in that state, you can use that to kind of get this classifier a little off the ground.
+Now other data, the situation between that goal that you reached and these distractors,
+but then it's also bootstrapped a little bit, and there you essentially end up saying,
+wherever you've got to, when you were following this particular goal, I'm going to treat
+that from the point of view of the classifier as if that was the ground truth.
+Which sounds like it might be a little unstable, because initially you're not going to be
+achieving those goals, but what that ends up doing is it sort of gives you a scoring
+function that is kind of smooth in the sort of meaningful space of task achievement over
+time.
+So, you know, I don't necessarily want to need to be pixel perfect to say that I've achieved
+that goal and there might be different ways of achieving the same thing.
+And so by plugging the agent's behavior in it in that way, they're able to learn an
+intrinsic reward function that is effective at kind of critiquing how well they achieve
+these arbitrary self-derived goals.
+Yeah, yeah.
+So, I think that this kind of area of self-supervision or unsupervised RL is going to be something
+we're going to see a lot more of figuring out good ways of how we can set prediction
+or control tasks for ourselves in order to expand the knowledge and capabilities of an
+agent in a particular environment.
+And so, is this general category is it trying to help us overcome the difficulty of creating
+loss functions for RL?
+Yeah, you could do it.
+It's doing that in one way.
+So in terms of a lot of problems that we might be interested in, so imagine you know,
+a kind of robotic and control problem, we're sort of trying to move away from hand-engineering
+reward function.
+So, in that setting, you might, what you really care about is the task done or not.
+But just training on that is very sparse, so you basically get to know if you've done
+the task or not pretty much at the end.
+And there might be lots of different ways of achieving that and to the extent that you
+try and hand design or reward function, you're also in some sense hand designing a solution
+which were kind of trying to get away from it.
+If it was easy for us to design solution, then maybe we wouldn't need to learn it in
+the first place.
+Right.
+Right.
+So, yeah, this is kind of heading in this direction of how can I build a system that can
+learn to control the environment in lots of different interesting ways?
+Because if I can do that, then when you give me your problem, if I know how to do all
+sorts of things, then essentially when you give me your problem, I just need to figure
+out all the many things that I'm capable of, which one is the one that fits your particular
+problem?
+And so that then becomes a lot easier.
+So what's the next category?
+So, the next category, learning to learn or meta-learning.
+So, this idea of how do we use learning to improve the process of learning itself?
+And I'd sort of, this kind of blends in a little bit, especially in the RL setting with
+how do we learn to acquire experience that is useful for learning, or to us to be care
+about, which is, you know, more or less exploration.
+So, I had three papers from this topic that I thought would be good to highlight.
+So, the first one is called Meta-Reenforcement Learning Exploration Strategies.
+And there's a couple of elements to it.
+So, it builds on some meta-learning ideas from previous papers.
+So, there's a paper model-agnostic meta-learning, mammal that folks went ahead of where the
+idea there is, you're trying to find model parameters such that, given arbitrary new problems,
+you can rapidly adapt to solve them.
+This one is building on top of that, and you have a policy that has latent variables.
+And in this case, those latent variables are going to add, so, episode scale, noise
+or stochasticity to your behavior.
+But there's other ways you could do that conditioning, the kind of the point is, there's a latent
+variable that different settings of that cause your model to, cause your agent to behave differently.
+And so, by setting those parameters, you effectively can get different types of exploratory
+behavior.
+So, they essentially try to learn an initial distribution of these latent variables, such
+that for new problems from the domain of interest, if you sampled on that, you quickly produce
+behaviors that allow you to gain experience, that allow you to solve those new problems
+rapidly.
+So, rather than having to have stochasticity at each time step, you get to explore in
+a structured way across the scale of an episode.
+Okay.
+So, that was one of the ones.
+Another one, this paper, Evolved Policy Gradients, and there, it's a very similar metal learning
+flavor, there the idea is, can we evolve a reward functions or an intrinsic reward functions
+such that if I optimize, according to that reward function, I get good performance on the
+task that I care about.
+So, again, imagine one of these settings where you basically, all I care about is, did
+you do the thing that I wanted you to do or not?
+Did you complete the task successfully?
+And, you know, as I was saying before, hand designing, excuse me, a dancer reward function
+that tells you, you know, for each state action transition, how good was that?
+It's kind of hard, but maybe that's a function rather than specifying it, maybe we can learn
+that function.
+And that's what this paper is trying to do, and it's using evolutionary methods to do
+that.
+So, basically, you have an in-loop where you're using regular policy gradient learning,
+an absolute where you're using evolutionary search to figure out what a good function would
+be.
+So, I plug in a function, you get to train with that function, I see how well you did
+training with that reward function, and I'm slowly shifting my search space of functions
+towards ones that when I optimize them, give me good performance on the thing that I
+really care about.
+The evolved policy gradients paper is out of OpenAI and the Meta-reinforcement learning paper
+that I remember correctly is out of Berkeley.
+That's it, yeah.
+Okay.
+Yeah, I should think both of them, they might be both the OpenAI Berkeley collaborations,
+but.
+Oh, really?
+Okay.
+Yeah.
+Okay, interesting.
+Yeah.
+This, the meta-learning space is a really interesting one that I'm starting to hear a lot
+about.
+Yeah, yeah, I think there's a ton of interesting potential there.
+The other paper I was going to mention in that topic real quick was this one is another
+deep-mine paper, Meta-gradient reinforcement learning, and yes, similar themes again in
+terms of having two scales of optimization.
+Here we're asking ourselves that there are parameters that essentially influence the
+return that we're learning on that can affect the learning dynamics, so the discount, how
+much I discount rewards into the far future is a property of the algorithm that affects
+the learning dynamics.
+So even if there is a horizon that I truly care about, it might be the case that I get
+better empirical performance by using something that's different from that.
+And so this paper is combining regular policy gradient with essentially a second set of
+rollouts that try to, again, ask the question, if these meta-parameters of my learning were
+different, would I be making better learning progress?
+And so it's a way, for instance, of automatically and dynamically tuning things like the lambda
+or your discount, moving on, and I'll try and condense this section a little bit since
+we're probably going to get tied on time if we kind of go into a lot of detail.
+But we've been trying to hold back my many questions.
+So yeah, another kind of interesting area is exploration, learning to explore, and dealing
+with different types of uncertainty, so I guess this, you can think of two types of uncertainty.
+And so, folks like you've been talking a lot about, sort of, epistemic versus alliotoric
+uncertainty.
+So epistemic uncertainty is basically represents your lack of knowledge or data about
+the world.
+So it's like uncertainty in your model parameters.
+So whereas alliotoric, you can kind of think of that as like fundamental randomness in
+the world, so stuff that you just can't predict no matter how much data you see.
+And maybe that's because it's too many random, or I guess other people might argue that there's
+the things that are just kind of outside the capability of a model class, but it kind
+of boils down to the same thing.
+So yeah, there's a couple of papers that are closely related, actually, that touch
+on this.
+So there's a really nice paper at New York's in Osborne, John Aslanneeds and Albon Kissiro,
+customized prior functions for the DBRL.
+And there's a couple of really nice tricks in what they're doing.
+This is also kind of building a prior work that I've seen reused in a couple of different
+places.
+So this notion that we can use a sort of bootstrap ensemble of functions to try and represent
+uncertainty.
+So that's basically just rather than having a single function, if I train lots of copies
+of a function with different visualizations, and with, in this case, different prize,
+which I'll touch on briefly in a second, I can then look at to what degree the different
+models in the ensemble agree or disagree.
+So if there's a lot of variance in the models predictions, then in some sense that's a reflection
+of uncertainty.
+And it turns out you can kind of make that connection tight on the certain conditions
+and in general, it seems like a good heuristic.
+So the idea here is we're going to do that with our Q functions and then build on top
+of that for learning the notion of the randomised prior, essentially boils down to, I'm going
+to have a prior distribution over the parameters of our function class.
+And for each member of the ensemble, I'm going to sample from that prior and instead
+of effectively doing weight decay towards zero as a kind of regularization, I'm going
+to do weight decay towards those initially sampled parameters.
+You can kind of think about as starting off with some random function from your prior
+beliefs, and then learning a correction function top of that to model what you actually
+see in the world.
+And so it turns out, if you do that and you don't look the right way, you can basically
+sample when you're acting, you can sample a function from your ensemble, act according
+to that gather experience, participants in a buffer, bootstrap, update all the different
+members of the ensemble.
+And it deals with that uncertainty about the world in the right way that leads to good
+exploratory behaviour.
+So yeah, I thought that was a really cool paper.
+There was another paper, I think OpenAI and you'd most of Edinburgh folks, so Yoruba,
+Harrison Edward, David Storky, and all the claim of exploration by random network distillation
+that take a similar sort or the, you can actually draw a fairly tight connection between what
+they do and the paper I just described, although it's maybe not so obvious immediately.
+What they're doing is they're coming up with a function that, so you have a random
+function, and what you're going to try and do is predict the outputs of that random
+function, using a function that you're learning, and you're going to use your prediction error
+as a sign of unfamiliarity, and then you get to plug that in as an intrinsic award.
+So the idea being, you know, if you're in discrete states, then you can use some kind
+of account-based measure of how unfamiliar you are in a certain part of the world, and
+kind of give bonuses for exploring new places, that gets harder in much bigger statespaces
+where you can't enumerate everything.
+And so this is another way of approaching that.
+How do I measure how uncertain I am about this part of state space?
+And so yeah, essentially what you do, you have this random function, you're trying to
+learn something that predicts the outputs of that random function when applied to the
+state, and your prediction error, you're going to use as an intrinsic award.
+So places that you've visited lots and lots, you kind of know what the random function
+is going to behave there, and so you should have relatively low prediction error, places
+that you haven't visited that much, and you're going to have a higher prediction error,
+and so you'll be incentivized to go find those and explore those more.
+And so they use that approach on Montezuma, which is this hard expression game, and they
+get some really nice results using that.
+Is Montezuma still considered to be, you know, unplayable, you know, with high performance
+by RL agents, or have we kind of cracked that with this and other recent agents?
+Yeah, I mean, it's still pretty challenging.
+Yeah, with a person like this and other recent agents, I think in this paper, they get super
+human performance.
+Okay.
+Yeah.
+Okay, interesting.
+So these are always to kind of structure the structure, the exploration space, and
+kind of create different types of ensembles and train across those ensembles.
+That's right.
+Okay, very cool.
+And then the other one that I guess I'll just mention briefly that is sort of in the category,
+but as long as this is dealing with the other type of uncertainty, was a paper implicit
+quantile networks for distribution RL that was, will that be Geogos Grobski, David Silver
+and Ren Yunus, and it's sort of building on some of these previous ideas in distribution
+RL were the kind of the ideas, rather than just predicting the expected return, I'm going
+to try and predict the distribution of possible returns.
+And so that could happen.
+So if there is sort of intrinsic uncertainty in the environment, then even if I'm following
+the same policy, how the world turns out could end up having variability in it, and rather
+than just kind of model the mean of that, you can also try and capture properties of the
+distribution.
+That's potentially interesting for two different reasons, one, it's a richer prediction problem,
+so you can sort of think of predicting that distribution as helping in the same way
+that auxiliary tasks do.
+And then the other is having those sorts of estimates are themselves useful in some
+cases.
+So, you know, if you want to be risk sensitive for instance, then you might prefer something
+that even though the mean might be higher, you might prefer a policy that has a lower
+mean, but also a lower variance, so you kind of avoid worse but rare outcomes.
+So, that was the one for that one.
+The other area that I thought I'd mention briefly, and again, I think this is an area
+that we'll see more and more interesting developments over the coming years, is in model-based
+reinforcement learning, so this was another one from New York's this month, sample-efficient
+reinforcement learning with stochastic ensemble value expansion, and they have an algorithmic
+approach that they get the acronym Steve out of.
+And that was, I think, mostly Google brain folk, so Jake and Bookmoon don't know, I have
+to Joyce Chalker, Eugene Bervdo, and Holly Lakeley, and it's another one actually where
+they're using this trick of using a bootstrapped ensemble to help us capture model uncertainty.
+And here, they're actually using it in a model of the environment.
+So, in addition to learning our policy and value, we're also going to be trying to learn
+about how the world works, so given a particular state in an action, what is going to be my,
+what state will I transition into, and what will be the associated award?
+And if you have a really good model of the environment, then you can learn much more quickly
+because you can not only use the experience that you gather in the world, but you can also
+essentially simulate in your model what would happen if you did different things.
+But the problem, or one of the problems with that, is that if your model is inaccurate,
+then you can run into all sorts of trouble, and so what they do in this paper, they,
+because they're learning this model with an uncertainty estimate, they essentially
+are able to use the measure of model certainty to figure out how far to trust a model, their
+environment model.
+So, you essentially roll out your internal environment model to the point where you're essentially
+waiting how much you trust your model at different prediction depths into the future by how
+much uncertainty there is associated with that, and then at some point you end up bootstrapping.
+So, it's kind of a neat way of combining model based and model free RL.
+So, the other thing that, or one other area, and this is probably the last one that we'll
+touch on for today, I'll maybe just kind of be shout out to some of the other ones that
+we probably wouldn't have as much time to talk about.
+And that's this kind of trend of seeing sort of, ways in which DPRRL are being scaled
+up, so moving to kind of like these very large models, lots and lots of data distributed
+training systems.
+So, there's a couple of papers from this year that are doing that, so there was three,
+or there was a comment to mind as a three from demide and one from OpenAI, so we had this
+paper importance weighted at learner architectures in Paula, and so the set up there is, you
+have lots and lots of actors gathering experience, they send that experience to a smaller collection
+of learners, but even the learners can be distributed, and one of the kind of subtleties
+of that is, in that kind of set up, the experience that comes from the actors might be a little
+allowed of data, so there's a little bit of op-policy correction, but it essentially
+allows you to use extremely large batches and very big models, and still kind of get
+through a reasonable number of model updates in a short space of time, so that's kind
+of one direction for scaling.
+The others, I'll just mention these, I guess briefly, so there was a paper distributed
+prioritized experience replay, and that's essentially a kind of value learning analog of the
+impulsify I just mentioned, so again lots of active generating experience coming into
+a shared experience, a replay, and then learners pulling off on top of that.
+Another similar paper had an approach, D4PG, so there was all demide, and then the OpenAI
+data, I think there's not a paper on it, I'm not sure, but they kind of detail it in
+their blog post.
+They have a similar scheme, I think, to Impala where they have essentially lots of distributed
+workers generating experience, and then a small number of beefy large batch learners pulling
+from experience from the actors and generating parameter updates, and there's a couple of
+things there, as I said one, it sort of like allows you to kind of crunch through a lot
+more experience, and in some ways it's kind of just by scaling up in that way, it's able
+to address some of the inefficiencies of RL, so earlier we were talking a little bit
+about wanting to kind of pull as many different learning signals as we can out of the environment,
+particularly if reward is sparse or explosion is difficult, and there's sort of lots of
+different ways of tackling that, some are kind of more algorithmic, but also just by
+scaling things up and pushing a lot more data through, that's another way we're addressing
+that, and it also helps some of the kind of stability issues from the variants of the
+learning signals that you get a lot of these environments, so again I think that's another
+trend that we'll see just kind of being built on more and more, and you know, so it's
+somehow in computer vision kind of things have been scaling up and up over the past like
+five or six years.
+So yeah, maybe if I'll just mention some kind of other interesting areas that we work
+up time to dive into, but there's been some kind of interesting developments in hierarchy
+car, RL, multi-agent, there's been some neat work on sort of leveraging different types
+of memories in agents, and also just the kind of folding in of the sort of broader advances
+from machine learning in general in terms of better ways of doing representation learning,
+kind of some modeling, all those other kind of techniques, kind of feeding into DPRL.
+So just a quick review of the topics that we did cover here, imitation learning, unsupervised
+RL, meta-learning, exploration, model-based RL, and scaling up, and those are just a
+few of the ones that you were able to think of.
+So what would you say about the kind of the rate of growth of RL as a field?
+Yeah, super exciting.
+I mean, there's a lot of difficult problems that we don't yet have good ways to solve,
+but there's a ton of creative solutions coming out.
+Beyond papers, did you, did any other kind of broader developments in open source or on
+the commercial side, anything jump out at you?
+Yeah, couple.
+So I guess the commercial side, I've tracked a little less of late in terms of open source.
+There's a kind of background in terms of like the kind of continued development, both sort
+of like the TensorFlow and PyTorch frameworks in the sporting ecosystems.
+There've been a couple of things that there that I thought were pretty nice.
+So these like TF Hub, kind of having a kind of repository for models, and now they're
+kind of similar efforts.
+So there's a couple of frameworks that I saw at Neuros that I like.
+So there's dopamine, which is out of, I think, Google Brain Montreal, lucid, such a dopamine
+is a kind of a nice way of making some of these, yeah, with, with definitely lucid, and
+then there's also something from Uber Model 2, the kind of combination of those, it's kind
+of nice and that I think it'll maybe open up some opportunities to kind of play with
+deep RL with a lower entry bar.
+So with the model zoo they essentially have, I think, three or four different flavors
+of agent, pre-trained on all the games in the Atari Suite that you can just essentially
+download, and lucid is this kind of visualization framework.
+And so with the two of those, you can start to play with some of these pre-trained agents
+without necessarily having to have the resources to train them yourselves, which I think
+is probably something that will be helpful for new people wanting to get into the field,
+to kind of get a bit of a warm start, and then also, I think in general releasing pre-trained
+agents that people can build off of and poke is a nice trend, similar to some of the stuff
+we saw, again, sort of looking back at computer vision with making some of the pre-trained models
+on the ImageNet available that helped a lot of folks kind of get a foothold there, and
+then also then accelerated the progress in that field.
+With these tools and with RL models in general are the same kinds of things possible, like
+kind of taking off the last few layers of a network and fine-tuning, that same kind
+of transfer learning.
+I guess it would depend on the agent, not so much in what's available right now, the
+transfer between different Atari games, for instance, isn't huge, but just in terms of
+having something that can get you started.
+For instance, the kickstarting stuff that we were talking about earlier in the conversation,
+if you have pre-trained agents that have some decent behavior that can dramatically shorten
+your experience cycle time if you want to play with your own modifications of those architectures,
+eventually you might end up wanting to not use that pre-training to kind of get a clear
+look at innovations that you're looking at, but if you don't necessarily have access
+to a ton of compute resources, then leveraging things that are pre-trained is a really nice
+way of making it more accessible.
+Okay.
+So, no direct transfer in the way we might see with CNNs, but you can use these agents
+to kind of get things kicked off.
+Yeah, I think so, I guess, transfer in RL is an interesting conversation that we could
+have on the side, but yeah, it would depend on what task you want to transfer to, and
+there's a lot of subtleties there, so even things like training and simulation and deploying
+in the real world, you see some transfer there, so I guess that's one place where you could
+kind of think of that as being pre-training and fine-tuning, but yeah, I kind of think
+of that as a little differently than like I said, or at least in its current state, the
+model zero is just focused on Atari, so it's more kind of entry level, but I think that's
+probably still something that folks entering the field will find useful.
+Okay.
+Cool.
+And so, given all that we've seen happen in 2018, what are your kind of thoughts and
+predictions on what we'll see in 2019 and the near future beyond that?
+Yeah, prediction that was tough.
+I think a lot of the areas that I highlighted to me feel like they're particularly active
+frontiers, so yeah, I think we'll see more folks trying to come up with different ways
+of doing agent-based RL with more self-supervision, I think the kind of trend, sort of meta-learning,
+learning to learn, transfer learning, continual learning, so one agent learnings to do many,
+many different things through a lifetime.
+I trends will see, yeah, likewise, model-based RL, I feel like models have probably been a
+little less prominent in recent years, sorry, like in very models, definitely have been
+some papers that look to that, but I feel like that's an interesting area for growth,
+so yeah, those are a couple that come to mind.
+Any final thoughts before we wrap up?
+Yeah, I think a super exciting time in the field is kind of tons of groups, both from
+academia and industry that are doing really great work, and so yeah, it's a super exciting
+time to be doing research in the field, and then also, I guess, through the broader machine
+learning community, there's a lot of great efforts in terms of just working to expand
+that the pool of folks who can participate in AI research and who can kind of contribute
+to some of these problems that we're looking at, so yeah, I'm super optimistic for the
+future.
+Well Simon, thanks so much for taking the time to chat with us about RL, there's a ton
+of stuff here, and we'll try to get links to the various papers that you mentioned in
+the show notes, but thank you.
+All right, everyone, that's our show for today.
+For more information on Simon or any of the topics covered in this show, visit twimlai.com
+slash talk slash 217.
+You can also follow along with our AI rewind 2018 series at twimlai.com slash rewind 18.
+As always, thanks so much for listening and catch you next time.
+Happy Holidays.

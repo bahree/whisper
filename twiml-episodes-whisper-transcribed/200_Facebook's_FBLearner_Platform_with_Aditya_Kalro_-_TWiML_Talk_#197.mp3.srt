@@ -1,0 +1,1512 @@
+1
+00:00:00,000 --> 00:00:16,320
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+
+2
+00:00:16,320 --> 00:00:21,480
+people, doing interesting things in machine learning and artificial intelligence.
+
+3
+00:00:21,480 --> 00:00:34,680
+I'm your host, Sam Charrington Hey, what's up everyone? As many of you know, my work
+
+4
+00:00:34,680 --> 00:00:38,840
+involves understanding the way large companies are adopting machine learning, deep learning
+
+5
+00:00:38,840 --> 00:00:44,040
+and AI. While it's still fairly early in the game, we're at a really interesting time
+
+6
+00:00:44,040 --> 00:00:48,360
+for many companies. With the first wave of ML projects that early adopter enterprises
+
+7
+00:00:48,360 --> 00:00:52,440
+starting to mature, many of them are asking themselves how they can scale up their
+
+8
+00:00:52,440 --> 00:00:58,600
+ML efforts to support more projects and teams. Part of the answer to successfully scaling
+
+9
+00:00:58,600 --> 00:01:03,640
+machine learning is supporting data scientists and ML engineers with modern processes, tooling
+
+10
+00:01:03,640 --> 00:01:09,080
+and platforms. And now if you've been following me or the podcast for a while, you know that this
+
+11
+00:01:09,080 --> 00:01:14,440
+is one of the topics I really like to geek out on. While I am super excited to announce that we'll
+
+12
+00:01:14,440 --> 00:01:19,800
+be exploring this topic in depth here on the podcast over the next few weeks. You'll hear
+
+13
+00:01:19,800 --> 00:01:23,800
+from folks building and supporting machine learning platforms at companies like Facebook,
+
+14
+00:01:23,800 --> 00:01:29,960
+Airbnb, OpenAI, Comcast, Shell and more. And we'll be digging deep into the technologies
+
+15
+00:01:29,960 --> 00:01:33,800
+they're deploying to accelerate data science and ML development in their companies,
+
+16
+00:01:33,800 --> 00:01:37,800
+the challenges they're facing, what they're excited about and much, much more.
+
+17
+00:01:37,800 --> 00:01:44,360
+In addition, as part of this effort, I'm publishing a series of e-books on this topic.
+
+18
+00:01:44,360 --> 00:01:50,680
+The first of them takes a bottoms up look at AI platforms and is focused on the open source
+
+19
+00:01:50,680 --> 00:01:57,080
+Kubernetes project, which is used to deliver scalable machine learning infrastructure at OpenAI,
+
+20
+00:01:57,080 --> 00:02:03,960
+booking.com, matroid and many more companies. It'll be available soon on the Twoma website
+
+21
+00:02:03,960 --> 00:02:08,440
+and will be followed shortly thereafter by the second book in the series, which looks at
+
+22
+00:02:08,440 --> 00:02:13,880
+scaling data science and ML engineering from the top down, exploring the internal platforms
+
+23
+00:02:13,880 --> 00:02:19,720
+companies like Facebook, Uber and Google have built, the process disciplines that they embody
+
+24
+00:02:19,720 --> 00:02:24,440
+and what enterprises can learn from them. If this is a topic you're interested in,
+
+25
+00:02:24,440 --> 00:02:30,520
+I'd encourage you to visit TwomaLAI.com slash AI platforms and sign up to be notified as soon
+
+26
+00:02:30,520 --> 00:02:36,600
+as these books are published. All right, on to the main event. In this, the kickoff episode
+
+27
+00:02:36,600 --> 00:02:42,840
+for our AI platform series were joined by Aditya Calro, engineering manager at Facebook
+
+28
+00:02:42,840 --> 00:02:50,120
+to discuss their internal machine learning platform FB Learner Flow. Introduced in May of 2016,
+
+29
+00:02:50,120 --> 00:02:55,080
+FB Learner Flow is the workflow management platform at the heart of the Facebook ML engineering
+
+30
+00:02:55,080 --> 00:03:01,160
+ecosystem. In our conversation, Aditya and I discussed the history and development of the platform
+
+31
+00:03:01,160 --> 00:03:06,200
+as well as its functionality and its evolution from an initial focus on model training
+
+32
+00:03:06,200 --> 00:03:12,360
+to supporting the entire ML life cycle at Facebook. Aditya also walks us through the data science
+
+33
+00:03:12,360 --> 00:03:17,240
+tech stack at Facebook and shares his advice for supporting ML development at scale.
+
+34
+00:03:17,240 --> 00:03:27,960
+And now on to the show. All right, everyone. I am on the line with Aditya Calro. Aditya is an
+
+35
+00:03:27,960 --> 00:03:32,840
+engineering manager at Facebook. Aditya, welcome to this weekend machine learning and AI.
+
+36
+00:03:33,640 --> 00:03:38,840
+Thank you so much. It's great to be here. Awesome. Awesome. Why don't we get started by having
+
+37
+00:03:38,840 --> 00:03:44,920
+you tell our audience a little bit about your background? Sure. So I'm an engineering manager
+
+38
+00:03:44,920 --> 00:03:51,160
+on the AI infrastructure team at Facebook and I support a platform called FB Learner. I've been here
+
+39
+00:03:51,160 --> 00:03:58,200
+about three years and this is the project that I started with when I joined Facebook. So it's
+
+40
+00:03:58,200 --> 00:04:04,520
+something that's pretty near and dear to my heart. Fantastic. Fantastic. And as our audiences
+
+41
+00:04:04,520 --> 00:04:11,240
+probably guessed, FB Learner is really going to be the topic of our conversation today.
+
+42
+00:04:11,240 --> 00:04:17,560
+Why don't we start by having you tell us a little bit about the history of the project?
+
+43
+00:04:18,440 --> 00:04:25,720
+Sure. Like everything at Facebook, it grew organically. Facebook started using machine learning
+
+44
+00:04:26,200 --> 00:04:32,680
+as a way to provide a better experience to all of our users. And we realized that there was
+
+45
+00:04:32,680 --> 00:04:39,240
+certain really common patterns that we were seeing among the developers. It started with
+
+46
+00:04:39,240 --> 00:04:44,040
+binaries, which were hand-coded by developers and they were running on their dev boxes,
+
+47
+00:04:44,040 --> 00:04:47,560
+which meant that these developers couldn't do anything else while the training was running.
+
+48
+00:04:48,680 --> 00:04:54,360
+That's where the basic idea of FB Learner flow came from. It was to create a cloud of machines
+
+49
+00:04:54,360 --> 00:04:59,400
+that ML engineers could use and schedule their jobs on. And they didn't have to take care of
+
+50
+00:04:59,400 --> 00:05:07,160
+the machines. So they actually focus on actually making ML better. Now, what we ended up with was
+
+51
+00:05:07,160 --> 00:05:13,480
+something that evolved further and further into the platform that it is today. But that was the
+
+52
+00:05:13,480 --> 00:05:17,480
+basic idea. We wanted to make it easier for machine learning engineers to do what they did best.
+
+53
+00:05:18,440 --> 00:05:24,920
+And is FB Learner flow a particular feature or subset of a broader FB Learner or do you use
+
+54
+00:05:24,920 --> 00:05:32,040
+those interchangeably? It's the initial and the heart of the FB Learner ecosystem. It is a
+
+55
+00:05:32,040 --> 00:05:37,720
+little bit broader than just that. But it's what runs pretty much everything.
+
+56
+00:05:37,720 --> 00:05:44,760
+Okay. And it sounds like the initial focus was to provide an environment to get training off
+
+57
+00:05:44,760 --> 00:05:53,240
+of the developer workstations to centralize cloud or cluster. Does training remain the primary
+
+58
+00:05:54,280 --> 00:06:01,560
+focus of FB Learner today? It's the majority of the work that we do. That is correct. But there
+
+59
+00:06:01,560 --> 00:06:07,080
+is a lot more that it's actually doing today. So training just happens to be one of the things
+
+60
+00:06:07,080 --> 00:06:12,200
+that we're working on. It's expanded further into a generic workflow engine that does
+
+61
+00:06:12,840 --> 00:06:20,520
+stuff like workflow management across even build and push. So weirdly enough, we actually use
+
+62
+00:06:20,520 --> 00:06:26,680
+flow to push flow. And I know that sounds really meta. But the entire point of it is that we wanted
+
+63
+00:06:26,680 --> 00:06:33,080
+to make a genetic system and we succeeded in doing that. Are there specific types of workloads
+
+64
+00:06:34,200 --> 00:06:42,440
+more specific than generically machine learning that FB Learner is designed to accommodate or
+
+65
+00:06:42,440 --> 00:06:50,120
+does it span all of the ML workloads at Facebook? So it spans more than just the ML workloads.
+
+66
+00:06:50,120 --> 00:06:57,080
+One of the things that we do, I can't say that we have a specific target, right? It's meant to be
+
+67
+00:06:57,080 --> 00:07:02,600
+genetic. One of the things that we actually have, which in my opinion is really cool is that we
+
+68
+00:07:02,600 --> 00:07:08,680
+actually build Android, the Android app, the Facebook Android app on FB Learner Flow for regression
+
+69
+00:07:08,680 --> 00:07:15,560
+testing. We do actually target towards machine learning, but it's much bigger than that.
+
+70
+00:07:15,560 --> 00:07:23,480
+What drove, for example, this Android app to use it, was it kind of an organic, I've used this
+
+71
+00:07:23,480 --> 00:07:28,360
+for machine learning. It's here, it does interesting things, and maybe let's try to do it for
+
+72
+00:07:28,360 --> 00:07:34,200
+this Android app, or was there some specific set of features that have provided that weren't
+
+73
+00:07:34,200 --> 00:07:41,160
+available elsewhere in the kind of Facebook engineering ecosystem. I imagine Facebook has
+
+74
+00:07:41,160 --> 00:07:48,040
+very well defined builds, infrastructure build processes, that kind of things. What drove
+
+75
+00:07:48,040 --> 00:07:54,200
+this non-machine learning app to use this platform? Actually, it's a really good question. So ML
+
+76
+00:07:54,200 --> 00:07:58,840
+algorithms are typically workflows, right? There's some data prep followed by some training,
+
+77
+00:07:58,840 --> 00:08:04,280
+followed by some evaluation, followed by metric generation. The idea behind flow was to make
+
+78
+00:08:04,280 --> 00:08:10,120
+these workflows really flexible. So machine learning engineers could do whatever they wanted.
+
+79
+00:08:10,120 --> 00:08:15,000
+The other thing was that we wanted to be able to run any binary. We wanted to be able to expand
+
+80
+00:08:15,000 --> 00:08:23,320
+it to use any framework. It turned out that workflows are actually the most common way for pretty
+
+81
+00:08:23,320 --> 00:08:29,400
+much anything at Facebook or any batch workload at Facebook to be expressed, including build and push.
+
+82
+00:08:30,040 --> 00:08:34,680
+So it turned out that because we were able to run binaries, because we had a really good API
+
+83
+00:08:34,680 --> 00:08:42,200
+for workflow management, because we were able to run large workflows, workflows, they found it
+
+84
+00:08:42,200 --> 00:08:48,520
+really easy to expand their use case to use our Python APIs and just get off to a running start.
+
+85
+00:08:49,640 --> 00:08:55,320
+That's really interesting, really interesting. So you rattled off four distinct stages of the
+
+86
+00:08:56,280 --> 00:09:01,800
+data science workflow and those were data prep training and I missed what you said the third one
+
+87
+00:09:01,800 --> 00:09:08,680
+was? Well, evaluation and metric generation. I'm imagining then as a generic workflow engine,
+
+88
+00:09:09,640 --> 00:09:13,560
+that FP learner is used to support all four of these different steps.
+
+89
+00:09:14,440 --> 00:09:21,000
+And more, so the idea essentially is that if you are a developer, you can extend it to create your
+
+90
+00:09:21,000 --> 00:09:27,400
+own workflow step and that's exactly what the Android build system did. So the regression testing
+
+91
+00:09:27,400 --> 00:09:33,240
+system, they actually extended it to be able to write their own operator that could be executed
+
+92
+00:09:33,240 --> 00:09:43,240
+inside of the workflow. But I imagine given the system's roots as a tool for machine learning
+
+93
+00:09:43,240 --> 00:09:49,160
+developers and engineers, there are some specific features and capabilities that
+
+94
+00:09:50,200 --> 00:09:55,480
+lend themselves to those types of workloads. Is that correct? And that is correct. There are two
+
+95
+00:09:55,480 --> 00:10:02,920
+specific things. One is experiment management. So this is a significant part of where our UI
+
+96
+00:10:02,920 --> 00:10:08,600
+is helpful. Typically, what ends up happening for machine learning is that you start with a baseline
+
+97
+00:10:08,600 --> 00:10:12,200
+and then you keep doing experiments in order to improve it. You need to compare back to the
+
+98
+00:10:12,200 --> 00:10:19,320
+baseline and you need to be able to keep track of all of your experiments. Now, one of the other
+
+99
+00:10:19,320 --> 00:10:23,640
+initial things that we noticed was that developers were using Excel sheets to keep track of all of their
+
+100
+00:10:23,640 --> 00:10:28,520
+experiments. And we want to like a little bit better and to give them a mechanism to just point
+
+101
+00:10:28,520 --> 00:10:34,280
+and click at the experiments and do comparisons. And that's where the experiment management comes in.
+
+102
+00:10:34,280 --> 00:10:40,520
+The second part of it is because of the way that FP learner is involved, it think of it as
+
+103
+00:10:40,520 --> 00:10:47,240
+open source within Facebook. So pretty much whatever machine learning developers or the Android
+
+104
+00:10:47,240 --> 00:10:52,920
+developers or anybody in infrastructure writes, it's available for other people to use. So we've
+
+105
+00:10:52,920 --> 00:11:01,000
+actually got a pretty rich library of operators that people can reuse and build on top of.
+
+106
+00:11:01,560 --> 00:11:06,360
+And many of those are built by data engineers and by machine learning engineers.
+
+107
+00:11:08,280 --> 00:11:15,320
+On this experiment management point, what specific functionality does it provide? Can you walk us
+
+108
+00:11:15,320 --> 00:11:25,240
+through that in a little bit more detail? For example, there's capturing the results of different
+
+109
+00:11:25,240 --> 00:11:32,680
+tests and evaluation runs. There's possibly integrating in with code repositories and
+
+110
+00:11:32,680 --> 00:11:39,960
+versioning different models and the whole model management thing. There's an element to this
+
+111
+00:11:39,960 --> 00:11:46,840
+is possibly snapshotting data sets that are trained against. So you can kind of compare
+
+112
+00:11:47,720 --> 00:11:54,200
+the results relative to the training data sets. What's the scope of the experiment management
+
+113
+00:11:54,200 --> 00:12:00,360
+capabilities of FP learner? Sure. I think the easiest way to describe this is actually by one of
+
+114
+00:12:00,360 --> 00:12:06,840
+our guiding principles, which was flexibility. We basically wanted to make the system as flexible
+
+115
+00:12:06,840 --> 00:12:13,160
+as we could. So we created a mechanism for people to put in plugins. And you can actually do
+
+116
+00:12:13,160 --> 00:12:20,040
+comparisons across your workflow outputs. Now, one of your workflow outputs potentially could be,
+
+117
+00:12:20,040 --> 00:12:25,560
+let's say an AUC curve, right? Or for the Android engineers, it's the amount of time that it takes
+
+118
+00:12:25,560 --> 00:12:35,240
+to build the app. Or for somebody else, it could be potentially the size of the model. Now,
+
+119
+00:12:35,240 --> 00:12:41,400
+what we want to be able to do is say, okay, these are all outputs. And you get to choose this particular
+
+120
+00:12:41,400 --> 00:12:47,080
+experiment, which and compare it to another experiment that you've already done. That's one.
+
+121
+00:12:47,080 --> 00:12:52,120
+The other part of it. And this is exactly where the baseline and experimentation I was telling you
+
+122
+00:12:52,120 --> 00:12:58,040
+about earlier comes in. We want people to be able to clone things, clone an experiment from their
+
+123
+00:12:58,040 --> 00:13:01,640
+baseline. So you already have something that you started with. You've got a bunch of input
+
+124
+00:13:01,640 --> 00:13:07,400
+parameters that you've got built in there. And you want to be able to clone from the previous
+
+125
+00:13:07,400 --> 00:13:11,880
+things that you don't have to redo everything. That's one of the things that we provided.
+
+126
+00:13:13,000 --> 00:13:17,800
+This helps save a significant amount of time for engineers who are using the system.
+
+127
+00:13:18,680 --> 00:13:24,760
+The other thing that we also did was a bunch of input validation. So like I said, you have a lot
+
+128
+00:13:24,760 --> 00:13:28,520
+of input parameters, typically for machine learning. So for example, the number of trees,
+
+129
+00:13:28,520 --> 00:13:33,080
+how deep a tree should be of a neural networks, how what kind of model architecture you want. And
+
+130
+00:13:33,080 --> 00:13:38,760
+then it parameters all over the place to that. So one of the things that we built was a type system
+
+131
+00:13:38,760 --> 00:13:45,880
+that allows you to or allows us to be able to define this is an integer or a categorical feature
+
+132
+00:13:45,880 --> 00:13:53,400
+or something else. And we don't, if somebody puts in some, let's say a character or a name where
+
+133
+00:13:53,400 --> 00:13:59,160
+they're supposed to be an integer, the UI will actually want them right up front rather than letting the
+
+134
+00:13:59,160 --> 00:14:05,800
+the training or the experiment start and then want them later on. In order for FB learner to
+
+135
+00:14:06,520 --> 00:14:15,160
+manage the experiments and perform type checks against the different features, it is clearly
+
+136
+00:14:15,160 --> 00:14:22,200
+managing this process, the training process in this case for the developers. And I'm curious
+
+137
+00:14:22,200 --> 00:14:32,760
+how are the developers submitting their job parameters to FB learner? Is it via some UI? Is it via
+
+138
+00:14:32,760 --> 00:14:38,840
+you know, JSON files or configuration files? Some place, how does that interface work?
+
+139
+00:14:38,840 --> 00:14:44,360
+So I think that the process goes in two phases. There's one which is a Python API that we provide.
+
+140
+00:14:44,360 --> 00:14:50,760
+Now everything in flow is a workflow and workflows are composed of operators. Each operator is
+
+141
+00:14:50,760 --> 00:14:57,400
+has resource requirements, but it also defines in a large part what it's supposed to be doing.
+
+142
+00:14:57,400 --> 00:15:04,120
+So for example, it could be fetching or shuffling the amount, shuffling the data. It could be
+
+143
+00:15:04,120 --> 00:15:08,360
+actually training. It could be generating metrics and these are all different operators.
+
+144
+00:15:08,360 --> 00:15:13,320
+This, let's say I'm a developer, I'm actually going to write an operator for data fetching and
+
+145
+00:15:13,320 --> 00:15:18,520
+I'm going to pass it on to an operator for training and then I'm going to pass that operator on
+
+146
+00:15:18,520 --> 00:15:25,560
+to metric generation. This whole thing together is a workflow. We developers will check this in.
+
+147
+00:15:25,560 --> 00:15:31,000
+This shows up inside of the flow UI as something that you can invoke as you
+
+148
+00:15:32,440 --> 00:15:35,240
+when you start. You can invoke this directly from the UI.
+
+149
+00:15:36,520 --> 00:15:41,560
+Now the reason that we took this two step approach was because we wanted people to be able to
+
+150
+00:15:41,560 --> 00:15:47,480
+write their workflows and people on their teams or on other teams to be able to use it. So as you
+
+151
+00:15:47,480 --> 00:15:52,120
+can imagine, we're all about sharing and we actually do want teams to be able to share the work
+
+152
+00:15:52,120 --> 00:16:00,600
+that they've done with other teams. So as a user or flow, you can invoke my workflow from the UI
+
+153
+00:16:01,320 --> 00:16:08,040
+and you can point it to your data and you can point it. You can maybe even extend my workflow to
+
+154
+00:16:08,040 --> 00:16:13,480
+be able to generate the metrics that you want to be able to generate. Man, I imagine that that sharing
+
+155
+00:16:13,480 --> 00:16:21,480
+piece is a large part of the reason why you need this robust type checking. If you've got another
+
+156
+00:16:21,480 --> 00:16:27,480
+team that's using a workflow developed by a different team, they might not be as intimately
+
+157
+00:16:27,480 --> 00:16:34,040
+familiar with what the workflow expects in terms of input. That's actually one of the major reasons
+
+158
+00:16:34,040 --> 00:16:40,360
+that we need a type checking. But it's also we understand that systems and even algorithms are going
+
+159
+00:16:40,360 --> 00:16:45,480
+to live for a really long time. Teams change, people are added and that's one of the reasons that
+
+160
+00:16:45,480 --> 00:16:49,720
+we actually wanted to be able to provide a robust ecosystem for people to be able to use.
+
+161
+00:16:50,440 --> 00:16:57,080
+One of the possible, one of the things I alluded to earlier was the idea of tracking different
+
+162
+00:16:57,080 --> 00:17:07,240
+versions of these models or of training data sets in the context of managing experiments.
+
+163
+00:17:07,240 --> 00:17:13,960
+To what extent does FB learner get involved in that or is it delegating that out to
+
+164
+00:17:14,680 --> 00:17:19,240
+traditional repositories like get repositories or whatnot?
+
+165
+00:17:20,680 --> 00:17:26,840
+It's a little bit of both. What we do is create packages. For example, you promote
+
+166
+00:17:28,200 --> 00:17:35,320
+your package saying this is now ready to be production. That's when it shows up inside of
+
+167
+00:17:35,320 --> 00:17:41,560
+FB learner flow is a production package. There it does get versioned. We save some number of
+
+168
+00:17:41,560 --> 00:17:46,600
+versions for this. This depends on individual teams is to how far back they down the path they
+
+169
+00:17:46,600 --> 00:17:54,920
+want to go. That's one. If I remember correctly, you said versioning models. We actually version
+
+170
+00:17:54,920 --> 00:17:59,960
+on the basis of experiments. Each experiment has an ID that's associated with it and that's how
+
+171
+00:17:59,960 --> 00:18:06,440
+we versioned models. Do you do anything in terms of versioning the training data set associated
+
+172
+00:18:06,440 --> 00:18:14,280
+with a given experiment? We don't not specifically. This is typically done by the teams that are
+
+173
+00:18:14,280 --> 00:18:20,760
+using this themselves. The reason that we do that is because we have, like I said, we have a variety
+
+174
+00:18:20,760 --> 00:18:26,360
+of use cases. We're not just limited to one and each team has a different mechanism of doing.
+
+175
+00:18:26,360 --> 00:18:34,040
+Going back to the four steps in the machine learning process that you outlined, starting with
+
+176
+00:18:34,040 --> 00:18:43,240
+the data preparation step, there are a bunch of repetitive steps that fall under data preparation.
+
+177
+00:18:43,240 --> 00:18:51,320
+Are there standardized operators or I guess you could call them operators in this context for
+
+178
+00:18:51,320 --> 00:18:57,720
+different types of data preparation or, for example, data augmentation. Is there a standard
+
+179
+00:18:58,360 --> 00:19:05,160
+you said of data augmentations that a developer can pull in off the shelf or is each team
+
+180
+00:19:05,160 --> 00:19:10,040
+defining these by hand? This is exactly where that operator library that I was telling you about
+
+181
+00:19:10,040 --> 00:19:18,040
+comes in. People have written operators that can just be reused. A lot of teams want additional
+
+182
+00:19:18,040 --> 00:19:23,080
+augmented functionality that they write on top of these operators. There are some that we support
+
+183
+00:19:23,080 --> 00:19:31,080
+as the AI infrastructure team as well. This is something that is going to work with, let's say,
+
+184
+00:19:31,080 --> 00:19:36,040
+the data infrastructure team, infrastructure that they've developed, and we're going to be the
+
+185
+00:19:36,040 --> 00:19:41,960
+guarantee terms of that. There are, again, different places. Like I said, FPL and Open Source within
+
+186
+00:19:41,960 --> 00:19:48,760
+Facebook, the operator library grows significantly with, I can't see each passing day, but I can
+
+187
+00:19:48,760 --> 00:19:59,320
+have definitely 50,000 week a month. The operators are the primary function that you can plug in
+
+188
+00:19:59,320 --> 00:20:06,520
+to support this data prep. We can imagine things like off the shelf, data augmentation, or fetching
+
+189
+00:20:06,520 --> 00:20:14,120
+from different supported data repositories, things like that. How about on the training side? Can
+
+190
+00:20:14,120 --> 00:20:21,240
+you walk us through a little bit more detail on the training part of this process? It sounds like
+
+191
+00:20:21,240 --> 00:20:29,720
+a lot of this is wrapped up in the idea of experiment management, but what as a data scientist
+
+192
+00:20:29,720 --> 00:20:37,960
+or machine learning engineer, what specific requirements do I have for training that the platform
+
+193
+00:20:37,960 --> 00:20:43,400
+can take care of for me? Typically, this is more around resource management than anything else.
+
+194
+00:20:43,400 --> 00:20:50,680
+For example, let's say that one of the things that we've spoken about before is, let's say you
+
+195
+00:20:50,680 --> 00:20:56,680
+have a boosted decision tree that's piping into a logistic regression layer. Now, each of these
+
+196
+00:20:56,680 --> 00:21:03,960
+have different resource requirements. For boosting, you may require, let's say, a significantly
+
+197
+00:21:03,960 --> 00:21:09,080
+beefier machine. And for logistic regression, it's something that's a little bit lighter. So you
+
+198
+00:21:09,080 --> 00:21:14,920
+can specify the resource requirements for your boosting operator for your trees and say that,
+
+199
+00:21:14,920 --> 00:21:19,560
+okay, I need like a beefy machine that I need the entire machine versus for logistic regression,
+
+200
+00:21:19,560 --> 00:21:25,560
+I need a tiny machine that is capable, but I need it for a longer period of time. That's something
+
+201
+00:21:25,560 --> 00:21:31,720
+that we take care of right off the bat, but also it's moving data from one place to another.
+
+202
+00:21:32,280 --> 00:21:36,680
+You don't actually have to worry about which machines this is running on. This is our responsibility.
+
+203
+00:21:36,680 --> 00:21:45,800
+It's on our cluster. We will figure out the right place so that you get the machine and the computing
+
+204
+00:21:45,800 --> 00:21:51,880
+power that you need, but also so that we can stack additional jobs on the system as well.
+
+205
+00:21:51,880 --> 00:22:00,920
+Is the resource management built on top of an existing framework or platform like a Kubernetes
+
+206
+00:22:00,920 --> 00:22:06,200
+or is it built from scratch at Facebook? It's built from scratch at Facebook. We have our own
+
+207
+00:22:06,200 --> 00:22:12,280
+internal scheduling and resource procuring mechanism, and it's something that we've grown and
+
+208
+00:22:12,280 --> 00:22:18,840
+extended as necessary for Facebook's game. So we've talked about the data preparation phase,
+
+209
+00:22:18,840 --> 00:22:24,360
+we've talked a little bit about training and resource management for the different
+
+210
+00:22:25,400 --> 00:22:31,320
+training jobs. How about on the evaluation side, what are the key requirements there that the
+
+211
+00:22:31,320 --> 00:22:37,400
+platforms providing? It's actually very similar to training. It's primarily resources, but the other
+
+212
+00:22:37,400 --> 00:22:44,360
+thing that we do is we plug into a variety of backends so that we can actually distribute the load.
+
+213
+00:22:44,360 --> 00:22:51,720
+So you can use something like MapReduce or distributed evaluation in order to be able to run
+
+214
+00:22:51,720 --> 00:22:58,680
+things quicker. The other thing is that because of the scale that we have, you could potentially
+
+215
+00:22:59,480 --> 00:23:05,800
+end up running it very, very quickly, completely burn through a significant amount of compute,
+
+216
+00:23:05,800 --> 00:23:09,960
+but use it for a very short time so you can get your evaluation results quickly.
+
+217
+00:23:09,960 --> 00:23:15,080
+Is this kind of a cost optimization thing, whether they want their job to go as quickly as
+
+218
+00:23:15,080 --> 00:23:23,480
+possible, but burn a lot of compute resource or take longer on a best effort kind of basis?
+
+219
+00:23:23,480 --> 00:23:27,160
+Is that what we're talking about here? Yeah, that's exactly it. So you can end up bucketizing
+
+220
+00:23:27,160 --> 00:23:34,840
+your evaluation into significantly larger number of buckets. Okay, just based on time and business
+
+221
+00:23:34,840 --> 00:23:40,760
+factors. Exactly. Okay. And when we're talking about evaluation, are we talking about
+
+222
+00:23:41,400 --> 00:23:49,480
+evaluation as the tail end of a training cycle where you're evaluating the model that
+
+223
+00:23:50,120 --> 00:24:00,360
+the training has spit out against a broader set of data? Or are we talking about a model that
+
+224
+00:24:00,360 --> 00:24:06,520
+has been promoted into production and kind of managing the ongoing performance and
+
+225
+00:24:07,160 --> 00:24:14,120
+evaluation of the in production models or both? We're talking about both. So I'm going to try and
+
+226
+00:24:14,120 --> 00:24:19,560
+keep it, try and give you better nomenclature, at least nomenclature that we use. One is
+
+227
+00:24:19,560 --> 00:24:24,840
+evaluation for the test set. The other one is what we call back inference. When you say evaluation,
+
+228
+00:24:24,840 --> 00:24:32,120
+are you including both test set evaluation and inference evaluation? No, generally, I say
+
+229
+00:24:32,120 --> 00:24:38,520
+test set evaluation when I refer to the training process. We do have batch inference and real time
+
+230
+00:24:38,520 --> 00:24:43,800
+inference that are batch inference built on top of the system, real time inference based on
+
+231
+00:24:43,800 --> 00:24:49,400
+a different system. And we do support both of those as well. Well, we'll come back to that.
+
+232
+00:24:49,400 --> 00:24:57,960
+So I've got this model. I've trained it. I've evaluated it against the test set for both training
+
+233
+00:24:57,960 --> 00:25:05,240
+and evaluation. You're managing the compute resources dedicated to those tasks. And then we get
+
+234
+00:25:05,240 --> 00:25:11,640
+to metrics generation. What is metrics generation in this context? There is some standard metrics
+
+235
+00:25:11,640 --> 00:25:17,880
+that you always get. Learning curves, AUC, so on and so forth. The thing that is actually the
+
+236
+00:25:17,880 --> 00:25:23,800
+most powerful about flow, in my opinion, is the fact that this is entirely extendable.
+
+237
+00:25:23,800 --> 00:25:30,520
+So for example, let's say that you wanted to create a completely new type of metric and you
+
+238
+00:25:30,520 --> 00:25:36,200
+want to be able to plot that. We give you the resources necessary. So either you can use something
+
+239
+00:25:36,200 --> 00:25:45,080
+like sci-fi or one of the other Python based plotting mechanisms or you can write your own
+
+240
+00:25:45,080 --> 00:25:51,000
+JavaScript based plotting mechanism and just use our UI to surface it. So for example, when you're
+
+241
+00:25:51,000 --> 00:25:56,760
+looking at your experiment, this is all there for you. The other thing that we want, and this is,
+
+242
+00:25:56,760 --> 00:26:03,000
+if you wanted to write something completely esoteric, that is specific to you. If you wanted to
+
+243
+00:26:03,000 --> 00:26:09,480
+just use a standard graph, you can provide us all of your data and we'll plot it for you,
+
+244
+00:26:09,480 --> 00:26:16,440
+giving you the ability to actually do comparisons between your current experiment and compare it to
+
+245
+00:26:16,440 --> 00:26:22,520
+preview of previous baseline. I think that the power here is more in terms of its, again,
+
+246
+00:26:22,520 --> 00:26:28,440
+its flexibility in terms of its extendability and metrics change from team to team. So we can't
+
+247
+00:26:28,440 --> 00:26:34,360
+actually say we have a less set of metrics that are probably the common base set, but there are
+
+248
+00:26:34,360 --> 00:26:40,600
+tons of people who build on top of this. So you've talked quite a bit about the example of this
+
+249
+00:26:40,600 --> 00:26:45,560
+Android application. Are there some machine learning specific examples that you can walk us through
+
+250
+00:26:45,560 --> 00:26:52,040
+and how they take advantage of the various features of the platform? Sure, I think that the,
+
+251
+00:26:52,040 --> 00:26:57,080
+so for example, I don't know if you remember, but sometime ago we had this thing Facebook for
+
+252
+00:26:57,080 --> 00:27:02,360
+the blind, which was a computer vision based application. And we wanted to be able to recognize
+
+253
+00:27:02,360 --> 00:27:12,280
+trees, snow, skis, things like that. And there were a lot of metrics that were specific to this
+
+254
+00:27:12,280 --> 00:27:18,440
+that we built into the system. There were also a few things around training. So this was a deep
+
+255
+00:27:18,440 --> 00:27:23,000
+learning application. There were specifics around training that they did when they were using
+
+256
+00:27:23,000 --> 00:27:31,960
+flu. Maybe from an architectural perspective, how is the platform architected? How is it set up?
+
+257
+00:27:31,960 --> 00:27:38,200
+Is it and maybe a little bit more on the technology stack? It sounds like the API and a lot of the
+
+258
+00:27:38,200 --> 00:27:48,440
+components are in Python. Is it highly distributed or are there kind of centralized components? How
+
+259
+00:27:48,440 --> 00:27:55,720
+does that tend to work? Sure. I think that the best way to think about this is as a standard cloud.
+
+260
+00:27:55,720 --> 00:28:01,080
+Right. So at the top level, you have, okay, let's actually start from the bottom. At the bottom,
+
+261
+00:28:01,080 --> 00:28:06,600
+you have the core execution mechanism. And this is built on top of the scheduler on top of our
+
+262
+00:28:07,720 --> 00:28:14,600
+distributed package management and distribution framework. This is also built on top of several
+
+263
+00:28:14,600 --> 00:28:19,000
+storage layers that we have so that we can actually move data from one place to another place.
+
+264
+00:28:19,880 --> 00:28:24,520
+Above the core execution mechanism is where you have the API. This is what workflow authors
+
+265
+00:28:25,400 --> 00:28:31,560
+use significantly. How they describe workflows and operators. And then the translation layer in
+
+266
+00:28:31,560 --> 00:28:37,560
+between these, which is taking workflows and creating the DAG out of it so that the scheduler can
+
+267
+00:28:37,560 --> 00:28:44,120
+actually run it. We also have agents that run on our machines to keep track of which operator is
+
+268
+00:28:44,120 --> 00:28:48,280
+running and what state it's in and to make sure that the operator is running fine.
+
+269
+00:28:48,920 --> 00:28:55,960
+Above the workflow author level is the UI and experiment management layer. This is the place
+
+270
+00:28:55,960 --> 00:29:00,520
+where it'll significantly amount to the business logic clips. And this is based on our own metadata
+
+271
+00:29:00,520 --> 00:29:06,360
+store, which is in my sequel to keep track of all of the experiments. I think you alluded to Python.
+
+272
+00:29:06,360 --> 00:29:12,680
+And yes, a significant portion of this is written in Python. This we chose this language for
+
+273
+00:29:12,680 --> 00:29:18,680
+specific reason, both for the workflow authors API and for the system itself. This is something
+
+274
+00:29:18,680 --> 00:29:23,640
+that most machine learning engineers are very comfortable with. It's a language that I think
+
+275
+00:29:23,640 --> 00:29:30,280
+with PyTorch, with Cafe and with the circuit we've seen machine learning engineers get more and
+
+276
+00:29:30,280 --> 00:29:35,800
+more comfortable with it. That's the reason that we chose this language. Are there specific areas
+
+277
+00:29:35,800 --> 00:29:45,560
+that the platform decidedly doesn't address? I'm not entirely sure. Is there a specific area
+
+278
+00:29:45,560 --> 00:29:50,760
+that you're referring to? Because we're trying to be as generic as possible so it can be extended
+
+279
+00:29:50,760 --> 00:29:56,520
+to address most of not all areas. Okay. I guess I was thinking about the context of
+
+280
+00:29:57,640 --> 00:30:05,400
+opinionated versus not. Clearly you're targeting being very flexible and it sounds like
+
+281
+00:30:05,400 --> 00:30:11,800
+less opinionated, but I'm wondering if things have come up where the team has made a call to say,
+
+282
+00:30:11,800 --> 00:30:18,040
+no, while this comes up, it's not really in scope for this particular platform.
+
+283
+00:30:19,160 --> 00:30:24,280
+I think one of the things that we've historically done is made sure that we can make the platform
+
+284
+00:30:24,280 --> 00:30:29,240
+as robust and reliable as possible. So yes, there have been certain situations in which we said,
+
+285
+00:30:29,240 --> 00:30:35,960
+okay, we're going to punt on this particular thing for a little while. There are things that we definitely
+
+286
+00:30:35,960 --> 00:30:39,640
+know that we're going to support. Like for example, certain storage mechanisms that we know that
+
+287
+00:30:39,640 --> 00:30:44,840
+we're going to support certain others that don't meet our SLA requirements that we say that we
+
+288
+00:30:44,840 --> 00:30:52,360
+won't. Those are the decisions that we typically make. For the operators in this operator library,
+
+289
+00:30:52,360 --> 00:31:00,520
+I'm envisioning kind of like an app store for machine learning, data engineering, other
+
+290
+00:31:00,520 --> 00:31:07,560
+elements of these processes. What's the user experience for that and how do you,
+
+291
+00:31:08,760 --> 00:31:15,560
+I imagine discoverability and findability is a bit of a challenge if this library has gotten
+
+292
+00:31:15,560 --> 00:31:22,360
+quite large. How do you address that? Actually, your analogy is quite very, very apt. It is an
+
+293
+00:31:22,360 --> 00:31:29,240
+app store for operators. We've actually created an index. We index every operator that comes in
+
+294
+00:31:29,240 --> 00:31:34,440
+and we created a mechanism where we auto generate documentation from the code when somebody writes
+
+295
+00:31:34,440 --> 00:31:40,520
+an operator. We index all of that and fortunately, you're unfortunately that the operator library
+
+296
+00:31:40,520 --> 00:31:45,880
+has gotten very, very large. People do end up having to search through a significant portion of it.
+
+297
+00:31:46,600 --> 00:31:50,520
+We're hoping that a search and indexing mechanisms actually helps them quite a bit.
+
+298
+00:31:51,400 --> 00:31:57,400
+The other thing is that we do have internal forums where people discuss this and discuss how they
+
+299
+00:31:57,400 --> 00:32:08,040
+can use each other's work. Do you find situations where a team develops, I guess you may be alluded
+
+300
+00:32:08,040 --> 00:32:16,760
+to this earlier. You alluded to the notion of operators that are developed by individual teams
+
+301
+00:32:16,760 --> 00:32:22,600
+and operators that are officially supported. I imagine there have been situations where a team
+
+302
+00:32:22,600 --> 00:32:31,000
+developed an operator. They used it for their purpose but other teams had a adjacent needs and
+
+303
+00:32:31,000 --> 00:32:37,240
+maybe your team took it over, generalized it a bit and supports it. There are some
+
+304
+00:32:37,240 --> 00:32:44,520
+situations like that. I think they're relatively few. We specifically don't want to do that because
+
+305
+00:32:44,520 --> 00:32:50,200
+like I said, we aren't experts in machine learning. We are experts in building systems and that's
+
+306
+00:32:50,200 --> 00:32:57,160
+the reason that we try and make sure that whatever it is that's there on the system is supported by
+
+307
+00:32:57,160 --> 00:33:02,760
+the team that originally built it. We built a bunch of functionality to keep track of this. We
+
+308
+00:33:02,760 --> 00:33:07,560
+built a bunch of functionality so that if somebody does want to use it, they know who built it and
+
+309
+00:33:07,560 --> 00:33:14,600
+can get in touch with them instantly. From a systems perspective, if you are an enterprise or
+
+310
+00:33:14,600 --> 00:33:23,400
+other organization that is starting to think about how to industrialize machine learning operations,
+
+311
+00:33:24,840 --> 00:33:31,080
+doesn't already have a platform like this. What are the principles separate from maybe the details
+
+312
+00:33:31,080 --> 00:33:34,600
+of what you've done and how you've built it? What are the principles that they should be thinking
+
+313
+00:33:34,600 --> 00:33:41,160
+about when looking to support machine learning at scale? I can tell you what our principles were
+
+314
+00:33:41,160 --> 00:33:47,240
+and then hopefully that will generate really, really well. The first is actually make sure that
+
+315
+00:33:47,240 --> 00:33:55,000
+it's completely reusable. I've seen this happen several times where we built something the first
+
+316
+00:33:55,000 --> 00:33:59,960
+specific use case and then we realized that when the use case changed, we couldn't use it anymore
+
+317
+00:33:59,960 --> 00:34:05,880
+and that's one of the reasons that we made the system as generic as possible so that today maybe
+
+318
+00:34:05,880 --> 00:34:11,320
+the flavor of the week is to build your own binary. Tomorrow, the flavor of the week may be to use
+
+319
+00:34:11,320 --> 00:34:17,800
+PyTorch to expose neural networks. That's the current flavor of the week. The day after that,
+
+320
+00:34:17,800 --> 00:34:23,160
+it may be something completely different. We wanted to make the system as reusable as possible.
+
+321
+00:34:23,800 --> 00:34:29,640
+That's one. The second is to make it as comprehensive as possible. That's the reason that we actually
+
+322
+00:34:29,640 --> 00:34:37,240
+built the UI and the workflow operator library so that everything that we do inside of this system
+
+323
+00:34:37,240 --> 00:34:44,360
+is catalogued and it's tracked so that we can build on Docker better. That's the second one.
+
+324
+00:34:44,360 --> 00:34:50,920
+The third one, actually, you already said it, which is scale. We wanted to make sure that we were
+
+325
+00:34:50,920 --> 00:34:58,600
+at Facebook scale. We did several things including making sure that we were able to distribute
+
+326
+00:34:58,600 --> 00:35:07,640
+packages and distribute workflows and the data at a very, very large scale or at Facebook scale.
+
+327
+00:35:07,640 --> 00:35:13,240
+The other thing that we did was caching. We want what typically happens is especially when
+
+328
+00:35:13,240 --> 00:35:18,360
+you're doing experimentation, there is a possibility that you might reuse the results from a previous
+
+329
+00:35:18,920 --> 00:35:23,640
+experiment. We just cached the results of a previous experiment so that you don't have to run
+
+330
+00:35:23,640 --> 00:35:31,080
+it over and over again. Often the needs for pre-production, model development and training
+
+331
+00:35:31,880 --> 00:35:38,120
+are very different from the needs of production. It sounds like you're supporting both
+
+332
+00:35:39,320 --> 00:35:45,800
+development and prod with this platform. Can you talk about how you've managed the varying
+
+333
+00:35:45,800 --> 00:35:53,240
+requirements for those two modes? In principle, you're right. They're very different, but at the basic
+
+334
+00:35:53,240 --> 00:35:59,080
+level, they're about the same. We actually have a mechanism for dealing with canaries differently
+
+335
+00:35:59,080 --> 00:36:06,920
+from dealing with production packages. We don't go through all of the same steps as we do with
+
+336
+00:36:06,920 --> 00:36:13,720
+production packages. For example, with production packages, we're the ones that cached and distributed
+
+337
+00:36:13,720 --> 00:36:19,640
+across the entire cluster. With canaries, it is actually copied from the dev machine of the
+
+338
+00:36:19,640 --> 00:36:25,560
+developer that's building it onto the flow machine directly. It doesn't go through the entire
+
+339
+00:36:25,560 --> 00:36:31,800
+large full-blown step of going everywhere. This is a simple example of changes that we've done.
+
+340
+00:36:32,360 --> 00:36:40,760
+Are there examples of challenges that you've added the level above that kind of categories of
+
+341
+00:36:40,760 --> 00:36:46,600
+challenges that you've run into along the way in putting this platform together that someone who's
+
+342
+00:36:46,600 --> 00:36:52,760
+getting started down the path of building an environment to support data science and machine
+
+343
+00:36:52,760 --> 00:36:57,080
+learning engineering should be aware of? I think there are lots of challenges that we fix
+
+344
+00:37:00,200 --> 00:37:05,960
+one of the biggest challenges is actually when you were doing something that's
+
+345
+00:37:05,960 --> 00:37:12,520
+this flexible, make sure that you have all of the pieces for robustness built right into it.
+
+346
+00:37:13,080 --> 00:37:18,120
+This is one of the things that we've seen has been our biggest challenge because
+
+347
+00:37:19,000 --> 00:37:25,320
+we've grown significantly from three years ago and today there are portions of the system
+
+348
+00:37:25,320 --> 00:37:29,640
+that we redesign for robustness. Make sure that you're thinking about that up front.
+
+349
+00:37:30,280 --> 00:37:33,800
+That's the one piece of advice that I'll give anybody who's starting down this path.
+
+350
+00:37:33,800 --> 00:37:41,800
+So building for robustness and thinking about those kinds of issues from the very beginning.
+
+351
+00:37:41,800 --> 00:37:45,720
+Yeah, definitely. Any other thoughts in terms of challenges?
+
+352
+00:37:45,720 --> 00:37:49,640
+I think talk to your customers. If you're an enterprise application,
+
+353
+00:37:49,640 --> 00:37:55,080
+you typically are typically people who are going to be talking, who are going to be using your system.
+
+354
+00:37:55,720 --> 00:38:02,280
+One of the challenges that we've had is that we've created a mechanism for people to use and
+
+355
+00:38:02,280 --> 00:38:05,240
+then we realized that we had become the bottleneck for that mechanism.
+
+356
+00:38:05,240 --> 00:38:08,920
+So we have to constantly reinvent ourselves and disrupt ourselves.
+
+357
+00:38:08,920 --> 00:38:12,920
+So in the best way for us that we found to do that is to actually talk to our customers a lot
+
+358
+00:38:12,920 --> 00:38:18,120
+more often. Is there a specific example of that kind of reinvention or disruption that comes to mind?
+
+359
+00:38:18,920 --> 00:38:26,680
+So one of the biggest things is that people tend to use Excel sheets. I know I keep coming back to
+
+360
+00:38:26,680 --> 00:38:33,880
+that, but to use Excel sheet for end documents a lot. And as teams grow larger, they're paradigm changes.
+
+361
+00:38:35,320 --> 00:38:41,160
+When you're a single engineer who's working on one particular problem, you have all of the
+
+362
+00:38:41,160 --> 00:38:47,080
+context in your head. But when you go to a team, that becomes a hugely different proposition.
+
+363
+00:38:47,800 --> 00:38:54,600
+And we actually noticed that when as teams got larger, they had different interaction mechanisms.
+
+364
+00:38:54,600 --> 00:38:59,560
+So now we ended up having to talk to them saying, okay, how are you actually using this system?
+
+365
+00:38:59,560 --> 00:39:04,120
+And why are you using Excel sheets to be able to keep track of everything? Why are you sharing it?
+
+366
+00:39:04,760 --> 00:39:11,240
+This is where the experiment management actually comes in. I tend to think of our job as
+
+367
+00:39:11,240 --> 00:39:16,760
+making ML engineers more productive. And in order to do that, sometimes it's about robustness and
+
+368
+00:39:16,760 --> 00:39:24,680
+scale, but sometimes it's about their workflow, how they use the system. And that's exactly what we
+
+369
+00:39:25,480 --> 00:39:33,880
+should and will be focusing on. Fantastic. Any other final thoughts or words of wisdom for folks that
+
+370
+00:39:33,880 --> 00:39:40,040
+are thinking about these types of platforms? I think platforms in general are as useful as
+
+371
+00:39:40,040 --> 00:39:48,680
+the customers, as how the customers use them. So keep track of that. And this is a growing field.
+
+372
+00:39:48,680 --> 00:39:53,640
+Be ready to be disrupted and to disrupt yourselves. That's the only thing that I would say.
+
+373
+00:39:54,360 --> 00:40:01,320
+Fantastic. Well, I did you. Thank you so much for taking the time to share with us a bit of what
+
+374
+00:40:01,320 --> 00:40:05,640
+you're up to there. It's a really interesting stuff. Thank you so much. Thank you for having me.
+
+375
+00:40:05,640 --> 00:40:14,600
+All right, everyone, that's our show for today. For more information on Editia or any of the topics
+
+376
+00:40:14,600 --> 00:40:22,680
+covered in this episode, visit twimmalai.com slash talk slash 197. To learn more about our AI
+
+377
+00:40:22,680 --> 00:40:30,600
+platform series or to download our ebooks, visit twimmalai.com slash AI platforms. As always,
+
+378
+00:40:30,600 --> 00:40:38,840
+thanks so much for listening and catch you next time.
+

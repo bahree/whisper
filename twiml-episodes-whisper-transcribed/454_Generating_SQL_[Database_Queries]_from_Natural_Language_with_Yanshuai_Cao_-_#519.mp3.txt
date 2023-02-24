@@ -1,0 +1,373 @@
+Alright everyone, I am here with Yenshwai Tsau. Yenshwai is a senior research team lead at
+Borealis AI. Yenshwai, welcome to the Twomol AI podcast.
+Thank you for having me, Sam.
+Awesome. I am really looking forward to digging into our conversation. We'll be talking
+about Turing, which is a recent project that you've been working on that does text to
+SQL. But to get us started, I'd love to have you share a little bit about your background
+and how you came to work in machine learning.
+Alright, so I did my undergrad at the University of Toronto in Computer Science and Math and
+stats and I took a number of AI courses during undergrad and that gave me the opportunity
+to work in the computer vision lab run by David Fleet at U of T. And so I did two summer
+research projects there and afterward went down to do my PhD with David, close device
+by her husband and did my PhD in actually in Gaussian processes, not in computer vision.
+And so Gaussian processes is this class of Bayesian and parametric models that learn
+very quickly from small number of data points and my work was focusing on scaling the
+compute aspect of GP. And on the side, I also worked a little bit on adversarial robustness
+of models. So this was the time when people just found out that you can actually apply
+this imperceptible perturbation to images and then change the class labels. So we thought
+that a, you know, can you change more than just a class label, can actually change the
+features to make the features like, you know, another image completely, not just a change
+label. And surprisingly, in terms of actually, you can, you can actually take a picture
+of me and then apply a perturbation change the feature of me to look like a feature of
+a car, for example, not just any car, but a particular car of particular color in that
+pose, et cetera. And so that was very surprising at the time, but without, you know, this
+adversarial robustness issue is going to be solved very quickly, but turns out to help
+me more further from truth, things still consult the problem.
+Do you still follow that space?
+Not super closely, but it still motivates a lot of things that I do, especially later,
+after I joined Borealas, you know, I look at that literature and people found out that
+not only can do this on vision, you can do this on an LP as well. And obviously, there
+the perturbation is not imperceptible, you know, change to pixels, but you add some extra
+text. And also, you can do this in the physical world, apply some patches to images that
+are not, you know, changing pixels, but some patterns that people don't pay attention
+to. And so, and they're actually very hard to get rid of. So, so what that tells is this
+old, you know, theoretical approach of studying and understanding this adversarial tax, we're
+not actually capturing what really under the hood, like these people were considering
+adversarial tax with like some sort of perturbation with in a ball centered at the image and then
+look at the robustness model that way, but that clearly doesn't capture all the other
+ones. And fundamentally what it looks like is what the model, how the model represent the
+data, represent the word is different from human, you know, from people's representation
+and they're not aligned. And it looks like their models are picking up on sort of a short
+cause or a speed of correlations or other type of, you know, associations that, you know,
+we don't use. And fundamentally, it looks like that's the problem. And, and it looks like,
+you know, one has to really, you know, go beyond pattern matching to really, to be able
+to get to the root of this problem. So, to look at, you know, model that can reason that
+can try to discover the, you know, the type of relationship that people use in recognizing
+understanding and reasoning. So, that was, that was my thought at the time. And I think
+it was also, you know, thinking share by, you know, lots of people in the field. And so
+that led me to work on an LP, because an LP is a lot closer to reasoning, I felt, because
+language is already a model of the word. And, yeah, also because, for us, it's part of
+a robot Canada. There's a lot of potential application of text of an LP inside a bank.
+Tell us a little bit about touring and the motivation for it. How did the project get
+started?
+Right. So, touring is, is this natural language database interface? It's a demo of a natural
+language database interface that we built. And it's really just putting a lot of our work
+on semantic parsing this space together in this academic demo. So, natural language database
+interface, the, from an application perspective, the, the potential users to allow non-technical
+users to interact with structured data set, because there's a lot of insight in there.
+And, you know, we want to give it opportunity for non-technical users to get those insights.
+And, from a research perspective, it's a very challenging natural language processing
+problem, because the underlying problem is you have to parse, question us in English
+or any other natural language and, and convert to SQL. And, we all know natural language
+is ambiguous. Machine language is all ambiguous. So, you have to resolve all the ambiguity
+in order to parse correctly. Furthermore, what's different from something like convert to
+Python or other program language is the mapping from patterns to SQL is underspecified if
+you don't know the schema. It really depends on, you know, what is the structure of schema.
+And so, so model has to really learn how to reason using it, and in order to resolve
+all the ambiguity and correctly predict the SQL. And lastly, you know, this, you train
+the model on some domain, you don't want to just work on this domain, you want to work
+on domains and databases that you've never seen before. So, that's the cross domain,
+cross database part of it. And that is a very, very challenging, because it's a completely
+different distribution once you move to a different domain.
+So we're talking about touring, you know, shortly after the release of OpenAI's Codex.
+And so I imagine as you're talking to people about it now, that's a correlation that
+folks make, because that project is also focused on code generation. I'm curious, you know,
+if you might compare and contrast the different projects and, you know, maybe the complexity
+of the challenge or, you know, different aspects that would help us understand how they,
+you know, might be similar or not.
+Right. So, first of all, Codex, I saw the demos, and the demos are really amazing and
+impressive. I think if you look at the where it's applied, it's focusing on product language,
+like Python, JavaScript, and all this language where you can find a lot of public, available
+training data, like, you know, on GitHub and other sources. I think there are training
+on code from GitHub. And so, the availability of data is a one major difference. When you
+try to do SQL, as I said earlier, you really have to know the schema, right? There's not
+a lot of training data for SQL, public, available, like, people don't post their schema online
+generally. So, the amount of data is very, very small that can be used for, you know, even
+for, like, modeling will SQL, you can't find a ton of it for training purpose. And so,
+so that is, I would say, like, one major difference. So, that's also why Turing is a academic
+demo that we built, where it's Codex, obviously, with the, you know, all more data, the model
+is, it is, you know, fairly good, and you can build a product of it.
+Okay. You mentioned earlier that one of the elements of this project is kind of reasoning
+and reasoning on text, and that that's a fundamental aspect that allows you to transform
+natural language to SQL. Can you talk a little bit more about the role of reasoning in
+this problem? Right. So, so one of the aspects is what I mentioned earlier, like, it's
+underspecified. And it's underspecified due to, you know, you have to, you know, really
+leverage schema. And the other part is you have to really have common sense. A lot of times,
+for example, if I say, you know, which cities have the most number of employees under 30,
+under 30 that refers to age of employee. I assume that I have a scheme, a table with
+age column. It's never mentioned explicitly. But, you know, the model has to learn to,
+that under 30 refers to age and have to make that association. So, that's common sense.
+And learning, you know, reasoning using schema, an example is, if there's textual evidence
+for two of the tables, but these two tables are, you know, unrelated to each other, and
+there's no foreign key links. And the model really has to look at how the schemas link
+together, you know, the relationship of elements in order to infer that, hey, maybe there's
+a third table that I need to bring in in order to produce the correct SQL. So, all of
+this is an example where something is missing, causing it to be ambiguous. And the reasoning
+feeling in this missing information allow the model to deconfond the relationship. Otherwise,
+you know, if the information is not there, and the model can just pick up, you know, on
+spherical correlations, shortcuts that makes learning possible during training, which
+of course doesn't generalize, especially on a task like this, where you try to generalize
+to a new domain, a new schema, and with very small amount of data.
+And how is reasoning implemented in the model? Is it, it is something that's primarily
+done at training time, and at inference time, it's a single step, a single step inference,
+or is it more something that's done at inference time, where you're, you know, going through
+multiple steps to try to reason about a particular query?
+Right. So, there's few elements in the model that can, you know, that express some structural
+prior about the problem that performs some form of reasoning. One is, you know, it's
+overall, it's encoder decoder type of architecture, architecture on the decoder side. The decoder
+actually knows the grammar of C-pole, and it's baked into the, you know, the decoder
+knows has some sort of knowledge that we designed into the, into the model, and it leveraged
+the grammar of C-pole to, to figure out at this step, what are the legal things that can
+be produced, and that allows us to prune search space during inference, and during training
+and, and it learns what are the things that are likely. And on the encoder side, it's,
+the model is, is basically a transformer, but, you know, a special type of transformer,
+uh, called a relational way of transformers, and can consider the different religions
+of schema elements, and, uh, as well as, you know, association between the, the question
+tokens with, with, with the, um, elements in the schema, like a table name, column name,
+and you can give something, uh, prior knowledge about this, uh, foreign key relationship,
+and, uh, some initial evidence about, uh, which token, the question is likely to be linked
+to which column, uh, and, and then during training, uh, the model learns to basically clean
+up the sort of relationship, and in, uh, during inference, it can basically, uh, starting
+from an initial guess, and then try to refine, uh, the potential link, and then, uh, remove
+some ambiguities. It's, uh, it's still some, I'll say it's still, um, rough form of, uh,
+reasoning, it's, uh, obviously it doesn't capture all the different type of things that
+we wanted to, to continue to do, but, uh, it already, uh, make a big, big difference.
+Okay. Um, you, you talked about how you're part of what makes the model work, is that
+you're providing information to the transformer during training. Can you talk about how
+the, the data is prepared and generated to train the model? Uh, right. So, um, during training,
+um, basically the model considers both questions and schema, and, uh, so, uh, the, uh, the, uh,
+the model is actually a, uh, consists of a pre-trained, uh, deep transformer, like a Roberta,
+and on top of it, it has some extra fresh layer of, uh, relational wear transformer
+layers, and, uh, the relational wear transformer layers encode, uh, some prior knowledge, um,
+between elements of, uh, you know, columns, relations, and, uh, words, and, you know, uh,
+words in the questions, and, uh, words in the, uh, the column, uh, in the table, for
+example, if, for instance, if we see a column, uh, in the questions, um, if we see a mention
+of, uh, you know, a column of the, uh, name in the questions, it, it provides some initial
+evidence, and so it has a link there, and, uh, during training, um, basically the model
+tried to maximize the, uh, the, the correct, uh, prediction, and, uh, during that process,
+it can learn to adjust the weight and, uh, uh, remove some of the, the noisy, initial
+links. Um, so, so the relational layers aren't trained, those are, um, you know, built,
+as priors, and then added to the transformer. Uh, the, they, they are trained. So everything
+is okay. Okay. And, uh, the relational layers, um, they are able to take, um, so maybe
+let me take a step back. But are they trained separately from the rest of the transformer?
+Okay. Everything is trained together into end. Um, so maybe let me take a step back. So,
+the transformer is generally like, they can encode, uh, basically, they encode the fully
+connected graph, right? It, it looks, uh, if we ignore the position in bedding, it looks
+like it considers the full sentence as, uh, as a fully connected graph, it's every word,
+it's, it's, it's every word. And if you take a schema and, uh, say that you flatten the
+schema, uh, into, like, uh, just a long stream, like, uh, question and put it together with
+the, uh, with, with the, uh, with the, with the question and it looks, consider everything
+as a fully connected graph. Um, what relational wear transformer does is, it, uh, as, you know,
+some additional prior information saying that beside this, uh, fully connected, uh, knowledge
+about, you know, everything could potentially be related to everything else. Uh, you know,
+we have this knowledge of special links, like foreign, foreign key relations. And, uh, if
+we see, you know, mention of, uh, car in the passion and, uh, there's a column, uh, called
+a car type, uh, it's more likely that these two are related. So it, uh, makes this, uh,
+as this additional inducted bias into the model. And later on during training, it can
+refine what, uh, the initial given, uh, evidence into, uh, the, you know, try to infer what
+is truly there. Okay. Uh, I think that, I think that's consistent with what I thought,
+but I'm still not clear on the, you know, where does the initial inductive bias come from?
+Is that trained, you know, separately or is that, uh, you know, baked in as kind of an engineering
+process? Um, so the foreign key relations that's known from the schema and the initial, uh, link
+that's, uh, given by some heuristics. So, so that there's some, uh, a little bit of engineering
+there. Okay. But even if the schema link can miss some of the initial relations, it's able
+to, uh, to, to, to, uh, pick those up and training. Yeah. Okay. Okay. Um, interesting. And so
+then the, the entire model is kind of trained and to end, uh, you know, starting with those
+biases and what are, and the training data, the training data set consists of, uh, set of
+questions that are, um, appended, can catnated with schema information? Uh, yes. Uh, in a way,
+there's more information, uh, like there's, uh, information about, uh, the, the, uh, the, uh,
+the type of, uh, columns, uh, that can be used in there. Um, but, uh, uh, conceptually,
+you can think of this as just a graph that, uh, the model looks at. So there's, uh, essentially
+question, uh, natural language queries, plus, um, some features related to the, the database
+essentially. Yeah. Is that right? Um, and the, um, um, there's a, uh, kind of a label that
+is the query that you want returned. Is it the query, is it the query that you want to execute
+or the results of the query, uh, against the database? It's the, uh, query that you want to ask
+you. Okay. Okay. Um, there's, uh, so, so, um, uh, this system, we, we trended on this, uh,
+public benchmark dataset called spider. Uh, it's, it's a very, uh, small dataset, uh, you know,
+for, uh, from deep learning, you know, standpoint, it, uh, but because collecting data for this
+generally is pretty hard. Spider is the de facto, you know, uh, benchmark dataset for this problem.
+Mm-hmm. It has, uh, uh, 200 different databases, but overall, just, uh, a little bit over 5,000
+queries. So it's, uh, it's a very small, uh, data problem. Uh, yet you have to learn to
+generalize to complete new, uh, developments. Mm-hmm. And would it be practical? Would you think to train,
+not on the query that you want, but on the resulting data so that, you know, you can get the same
+data with many different queries and the database, some will be more optimal than others. Um, you know,
+there's, you might want to let the network figure that out. Yeah. So, so there are other works, um,
+uh, in this base that actually looks at, uh, use execution result. Okay. So, uh, it's, it's possible,
+though you have to, um, either change how your model works. So, so your model still has to produce
+these discrete objects that, uh, execute. Uh, and so you either have to change that to, to some sort
+of, uh, differentiable structure, uh, or you have to, you know, use, uh, reinforcement learning or
+other related, uh, uh, techniques to be able to do credit assignments through that. Um, um, so,
+yeah, so, so it's possible other people have explored, um, on this problem, um, it doesn't, uh,
+work super well, um, generally, um, but we are, we, we have explored, uh, combining with our
+techniques and the denotation, the execution result to help, uh, perform data augmentation
+afterward and that improves performance. So, in a way, yes, we are, uh, we have additional step that,
+that, uh, can leverage the execution results. Okay. You mentioned, uh, a couple of things, one,
+that the, the data set is, you know, fundamentally a small data set, uh, you just mentioned data
+augmentation is one possible way to address that. Are there other things that you have done, uh, in,
+in this project to kind of optimize the transformer model around the small data set problem?
+Yeah. So, so, um, actually one of the, the key, um, difference that, uh, in our approach, uh,
+so a lot of things that I mentioned, uh, previously was techniques that were already invented in,
+in the field. So, so, relational wear transformer, we didn't invite, invent that, um, but we're,
+you know, we, we found out is, uh, if you put a very deep relational transformer, um, you can train
+it very well. Um, the models, uh, you know, even if it has ability to perform sounds or,
+form of reasoning, if you can train it, then it's no use. So, so we found a way to, uh,
+train deep transformers, uh, in the very small data set in the stable fashion. And, uh, so,
+this is, um, very, um, you know, counter to what people used to believe, like, uh, you have,
+you know, you, you, you train deep transformers, you have to have large data set,
+um, yeah. With, with this technique that we, we came out, it's published that ACR this year,
+uh, it's possible to train it in a stable fashion or small data set.
+And so, what are the key elements of doing that? Right. So, um, it's, uh, in the nutshell,
+it's, uh, it's a better way to initialize these models. Okay. And, uh, it also builds on
+prior works that, uh, looks at, you know, initializing deep transformers models. And, uh, we're,
+we're, you know, we make a big difference here is, uh, we make it possible to actually add
+these layers on top of pre-trend and then train everything together. So, previous techniques that,
+uh, improve stability of this transformers, they were only considering training from scratch.
+But when you print on, on a small data set, you want to leverage pre-trend. You don't want to train
+transformer, you know, a fresh transformer from scratch completely. But the previous techniques
+just doesn't work when you have, you know, put the new layers on top of a, uh, pre-trend bird or
+Roberta. And, uh, in, in, in the nutshell, well, you know, the, how this works is, um, it turns out
+the problem with deep transformer, with transformer training generally is the layer norm, uh, layer.
+And, uh, previous work have found out that, you know, if, if you can remove that somehow and, uh,
+still make training stable, the performance is much better. And training transformer generally
+require you to, like, have layer norm large batch size and learning rate warm up. It turns out
+you want to remove layer norm, uh, don't do warm up. And here, you know, on small data set,
+you have to use small batch size. So we make all, you know, these three possible.
+And when you say you make all those three possible, how do you, how do you do that?
+Right. So, um, the, um, basically in the nutshell, the idea is, um, you want to, there are
+certain parameters that are, uh, in the transformer, either read vanilla transformer or relational
+wire transformers, uh, you want to, during initialization, you want to scale them by a factor that's
+proportional to the depth. And in the paper, we have, uh, some derivation show exactly what that
+scale factor is. Uh, in turns out, when you do this on top of a pre-trained model, that scale
+factor, uh, needs to be data dependent. And so, so our matter is called the DT fix up,
+um, data dependent transformer fixed update initialization. So when you do that, uh, the,
+the, the, the model is initialized to, uh, basically, uh, in a stable regime, uh, for
+optimization with, uh, Adam, and, uh, it doesn't also lead, which is the typical problem with, uh,
+that learning rate, warm up, and later on, try to fix, but, uh, uh, fail set, uh, doing. So,
+when you do all of this together, uh, you know, training is stable since the beginning, and you can
+train your deep transformer, uh, we can, you know, the maximum we train was 48 layers on this small
+dataset, um, with very small batch size. Uh, the overall dataset is, is just, uh, you know,
+5,000 less than, you know, for training is less than 5,000 queries. So you can't use large,
+very large batch size. So instead of the learning rate warm up and the layer norm and the large
+batch size, you kind of substitute that with, uh, data aware initialization that sounds like it
+does a pass on the data and then scales the parameters and set your initial weights and then
+you get a stable result from the, uh, your training. Yeah. And, um, what's amazing is, um, once you
+are able to train, uh, this in a stable fashion, the transformer plus relational wear transformer
+can already perform a lot of the, you know, the, the reasoning it, the improvement on this hard cases
+is, it's, uh, it's huge. So it turns out, it's, so, so what's, uh, the learning here is,
+it's already, you know, this model can already do, uh, some form of reasoning like this,
+it's just we're not able to trend them, uh, on this, uh, in a stable fashion.
+Mm-hmm. And with the initialization approach, uh, and its data dependencies, is it, um,
+did you find that it was broadly applicable to, uh, a variety of data sets or is it very specific
+to the, you know, the benchmark data sets that you use or, you know, other, um, characteristics
+of the data set? Right. So we, uh, we also tried this, um, a completely different, uh, problem,
+but that also requires, uh, uh, reasoning. So, so a problem for logical reading comprehension.
+Mm-hmm. So, so we actually did this after, you know, we made all this working, uh, on, on the
+semantic parsing problem and we took that data set and, uh, it's also very small and very hard
+problem and we just, uh, applied the technique and got, uh, very, very good results like, uh,
+without any special engineering on the, on that task, we thought, uh, near state of art on that
+problem as well. So generally, yeah, it, uh, it looks like it's, um, uh, obviously if, if your
+data set is already huge and then you can use large batch size and, uh, that, that, that makes training,
+you know, much more stable, but when you have small data set, you can't, you can't do that.
+And we're the, uh, the data sets, the, the benchmark data set that you use, was that, um,
+was that a multilingual data set or is it monolingual and, um, you know, what kind of support for
+multilingual do you have? Uh, these, these problems are, are just, uh, English like the reading comprehension
+and, uh, semantic parsing. But, but, uh, yeah, that, um, there, yeah, we, for, for semantic parsing,
+there is, uh, another data set, but, but there, um, but, but there's no, uh, cross language.
+At least in the, the, the popular ones for cross database and semantic parsing, there's not
+simultaneous cross database and cross language. Mm-hmm. Is multilingual something that you're
+looking at or interested in? Uh, yeah, I think it's, it's very challenging problem.
+Um, uh, at the moment, we're not studying this, this problem, uh, is there, there are other like,
+unresolved, uh, calendars.
+Uh, let's talk a little bit about those. What are the kind of the big challenges are next steps
+with this work? Right. So, so generally, um, you know, data, if you want to continue to improve
+the accuracy, um, data is a problem. How to perform data augmentation in this space. Um, I think
+that's, uh, that's a fundamental, uh, blocker. And we are looking at, uh, how to, uh, how to do that.
+In fact, it sounds like you did a bit of data augmentation already, right? Uh, yes. Um, actually,
+we, we, um, so for the non, uh, academic research part of this project, we actually done a lot of
+data augmentation to make something like this work. Um, but it's, it's challenging. Um, so other people
+who have done this, their, their technique is, um, to basically engineer some sort of a grammar
+that can simultaneously produce, uh, seagull query and, uh, natural language, natural language.
+But it's, it's very, very tedious hard task to do. And we, we actually also tried it. And that
+was also, uh, our first intuition when it comes to do data augmentation in this, um, but to actually
+engineer this grammar to produce questions that are very natural. It's, uh, it's very, very tough.
+So, so how to do data augmentation without, uh, you know, going through
+and engineer a, a generative model for this, basically. It's, uh, yeah. It's something that we're
+looking into. And we have some working progress. It's not yet released that, uh, that allows us to
+leverage, um, uh, you know, knowledge from pre-trained model to actually improve, uh, the,
+effect, effectiveness of data augmentation. Um, and before we go to the, the next challenge, um,
+the, the data augmentation conversation kind of sparked a question around the complexity of
+the questions and the queries. Can you, uh, can you kind of speak to that and characterize the,
+the level of complexity that the, that turns able to, um, to deal with?
+Yeah. So, so in terms of query that can produce, it can produce, um, you know, queries that involve
+joints, uh, multiple joints, uh, subperies. Um, so sometimes you have questions that are,
+in English, very benign, very simple, like, um, this is not an example that our own shell spider,
+but, but, you know, say, like, what's the average return of all the stocks that performed above
+market average? So, so there's compositionality there. And, uh, market average referred to, like,
+you know, actually, well, depending on the structural schema, well, will require you to first compute
+that number by doing some sort of, uh, averaging, abbreviation, and the plug it into, you know,
+the, the top level query. And, uh, turning is able to, to do things like, like this. And, uh,
+also, obviously, it's also able to handle some of the other extreme, like, if you write questions in,
+you know, very verbosely, you know, with lots of different conditions, uh, and, uh, you know,
+it can, you know, handle a lot of that as well. Um, now, obviously, you know, it will have,
+you know, mistakes, uh, it definitely is not, uh, yet a system that, uh, is quite a level of accuracy,
+it's, you know, useful, uh, directly as, uh, you know, if you want to just trust the result,
+extreme result, 100%, it, it's not quite there yet. That, that's also why, like, for the Turing
+demo, uh, we built in some, you know, system, uh, in presenting the end result, we help user, um,
+you know, really makes sense of the result and try to judge for themselves whether it's what they want.
+So, so what do we do is, um, uh, Turing is able to produce multiple hypotheses,
+uh, during its generation, and we explain the hypotheses back to the user in natural language,
+um, and we highlight the difference across the different hypotheses, and then they can see for
+themselves, okay, the difference between these three is, you know, instead of this column,
+we mentioned that column, and here instead of this value, it's using some other value,
+or maybe the overall just structure law is completely different, and, uh, then they can see
+for themselves, which one corresponds to their, uh, intention originally, and can choose that.
+Now that, that explainability model sounds like its own research project. Is that something you
+worked on internally, or is that kind of an off-the-shelf technique that you're able to go by?
+It's, uh, our, our own work. Okay. So, so that part is, um, so, so we had a number of different
+publications at ACL this year, um, so the work on optimizing deeper transformers, that's one, uh,
+paper, and the Turing demo paper actually consists of the core semantic parser, the component that,
+you know, uh, tries to fill in the value after you get to the SQL sketch, and as well as the
+explanation module, and the explanation module here, um, it's kind of different from normal
+natural language generation, where you, you know, for, at least for research, there's a lot of, uh,
+neural language generation. Here we actually don't, explicitly don't want neural language generation,
+because we want, uh, you know, the difference across the hypothesis to be only due to the hypothesis
+themselves, not that the natural language generation part. So we have a, a, a, a very, you know,
+computer linguistics type of, uh, grammar-based model that can take the SQL and compositionally
+produce the, the natural language explanation step by step, and the only difference there is due
+to the difference in the SQL. Mm-hmm. And just to make sure I understand that, so you're the,
+um, the, um, the explainer is explaining the result, not the process for obtaining the result.
+All right. That interesting nuance. Um, um, it, uh, it doesn't sound quite like, you know,
+not wanting to do generation, but it, it, it sounds like I'm wondering if, you know, there's
+something, you know, missing in not trying to explain the process that won't capture, you know,
+for the end user, what the model may have done to get to the result. But I don't, you know,
+does it even matter? Uh, well, we think it doesn't, we think, because, um, normally, you know,
+user just care about the final answer, right? So you, you can think of SQL as just some sort of,
+uh, um, some sort of, uh, intermediate representation. Um, but this is an intermediate
+representation that actually, you know, could potentially be aligned with how humans think about
+the problem. This goes back to what I mentioned, you know, at the beginning, like, uh, you know,
+the machines representation of the data of the domain of the world, how can we make that
+align with people's representation? So there's a lot of intricacy of about how the neural net maps
+the questions and the reason and maps to the final. But, uh, that details might not be interesting
+to end user. Sort of like when you and I, we speak, I don't know, everything that goes on inside
+the neurons of your brain, like you don't have shared language. And that description allows us to,
+to have a shared understanding. Yeah. Maybe another way to put it, the, the problem that you're
+trying to solve is that the machine is going to spit out SQL that the, the, the user didn't write.
+And so the user may have some difficulty understanding what's actually happening. If you can explain
+to the user what the SQL is doing, they can more easily determine if it's what they expected or
+what they need. And it doesn't really matter what the network did to, uh, it's, that's not the
+explainability problem that you're trying to solve. You're just trying to explain the end result.
+Yeah. Yeah. Yeah. The intermediate result, not really the end result. Yeah. Yeah. Okay. Um,
+and you mentioned to some other challenges that you're looking forward to solving?
+Uh, yeah. So, um, in terms of, uh, you know, how to, um, just, uh, so, so there's some,
+some problems that, uh, in the field that people identify like, uh, you know, the cross-domain
+generalization. So, despite our benchmark, uh, looks at, uh, cross-domain generalization already,
+but it turns out when you're, uh, if you try to generalize to a different data set that are
+collected different, under a different, um, policy like, uh, for data collection,
+um, uh, the accuracy drop is, is pretty big as we all expect from engineering systems. Yeah.
+Like, um, so, so how to, you know, um, you know, make a model more robust, you know, not, uh,
+just, uh, across-domain, across, uh, database that are, you know, sort of more or less collect
+under the same data collection protocol, but to, you know, things that are very different, uh,
+in the wild, uh, that's still a big open problem. Mm-hmm. Possibly relating back to the data
+augmentation problem as well, right? Yeah. Uh, yeah, that's, that's definitely a big part of it.
+Awesome. Awesome. Well, Yenshwai, uh, thanks so much for taking the time to share a bit about
+what you've been working on. It's very full-stop. Take our exercise and we're having it. Thank you.

@@ -1,0 +1,1589 @@
+WEBVTT
+
+00:00.000 --> 00:16.320
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+
+00:16.320 --> 00:21.480
+people, doing interesting things in machine learning and artificial intelligence.
+
+00:21.480 --> 00:34.720
+I'm your host Sam Charrington and this episode we're joined by Pat Ruong, principal engineer
+
+00:34.720 --> 00:38.920
+and the applied machine intelligence group at the Home Depot.
+
+00:38.920 --> 00:43.000
+We discuss a project that Pat recently presented at the Google Cloud Next Conference which
+
+00:43.000 --> 00:47.400
+used machine learning to predict shelf-out scenarios within stores.
+
+00:47.400 --> 00:51.800
+We dig into the motivation for this system and how the team went about building it, including
+
+00:51.800 --> 00:56.440
+what types of models ended up working best, how they collected their data, their use of
+
+00:56.440 --> 01:00.920
+Kubernetes to support future growth in the platform and much more.
+
+01:00.920 --> 01:01.920
+Enjoy.
+
+01:01.920 --> 01:05.680
+All right everyone, I am on the line with Pat Ruong.
+
+01:05.680 --> 01:10.840
+Pat is a principal engineer in the applied machine intelligence group at the Home Depot.
+
+01:10.840 --> 01:13.920
+Pat, welcome to this week in machine learning and AI.
+
+01:13.920 --> 01:16.960
+Thank you for having me Sam, it's a pleasure being here.
+
+01:16.960 --> 01:21.400
+So why don't we get started by having you tell us a little bit about the applied machine
+
+01:21.400 --> 01:24.200
+intelligence group and what your focus is there?
+
+01:24.200 --> 01:25.480
+Sure, of course.
+
+01:25.480 --> 01:30.760
+So the applied machine intelligence group at Home Depot is kind of like a newly formed
+
+01:30.760 --> 01:31.760
+team.
+
+01:31.760 --> 01:39.640
+We've been around for about a year with the current team members that are on the team and
+
+01:39.640 --> 01:46.600
+our primary focus is to operationalize machine learning.
+
+01:46.600 --> 01:50.240
+So what that means is for, I'm sure like all the people that are listening to this
+
+01:50.240 --> 01:55.720
+probably know what that means, but for those of you that don't, it's basically taking
+
+01:55.720 --> 02:01.240
+machine learning models that don't just generate reports, reporting type things.
+
+02:01.240 --> 02:06.840
+It's things that interact with the real world, things that you can actually have an effect
+
+02:06.840 --> 02:10.360
+on in real life.
+
+02:10.360 --> 02:15.000
+And it's taking stuff from conceptualization all the way to production.
+
+02:15.000 --> 02:20.560
+So we do everything from the discovery work to building the models, data pipe binding,
+
+02:20.560 --> 02:27.200
+even app development and putting that into production for business teams.
+
+02:27.200 --> 02:35.680
+And do you have a established platform for productionalizing these types of projects
+
+02:35.680 --> 02:41.320
+or do you tend to build out infrastructure on a case by case basis, depending on what
+
+02:41.320 --> 02:43.000
+a specific application needs?
+
+02:43.000 --> 02:44.560
+That's a good question.
+
+02:44.560 --> 02:53.880
+So typically I think a lot of productionalization of ML models follows the same kind of pattern.
+
+02:53.880 --> 02:59.840
+It's data pipe binding, step one, and then feeding the pipeline or the tables that you have
+
+02:59.840 --> 03:04.200
+or whatever data you have into the model, step two, and then three doing something with
+
+03:04.200 --> 03:06.280
+that information afterwards.
+
+03:06.280 --> 03:11.800
+And then potentially feeding that information back into the model for it to learn off of
+
+03:11.800 --> 03:15.440
+if you have like an active learning model or something like that.
+
+03:15.440 --> 03:22.200
+And what we did with this very first project that we presented at Google, we basically built
+
+03:22.200 --> 03:25.160
+out a bunch of infrastructure that didn't exist.
+
+03:25.160 --> 03:26.800
+We built it all in Google Cloud.
+
+03:26.800 --> 03:32.120
+So if you, for those of you that don't know about Home Depot's transition to Google Cloud,
+
+03:32.120 --> 03:38.240
+we recently have begun a huge, I wouldn't say recently, maybe like two years ago, we started
+
+03:38.240 --> 03:43.560
+this massive journey to move all of our enterprise data warehousing into Google Cloud.
+
+03:43.560 --> 03:48.720
+And it has been a huge success for us as a company because we are now able to do all of these
+
+03:48.720 --> 03:54.280
+things and experimentation in the Cloud without having to buy more servers to put them in
+
+03:54.280 --> 04:00.360
+the data center, stand up hardware, we can just request new, we can request resources
+
+04:00.360 --> 04:06.080
+on demand and we can try things out without having to spend a lot of man hours to get that
+
+04:06.080 --> 04:08.840
+infrastructure stood up in our own data center.
+
+04:08.840 --> 04:15.560
+So the specific project that you presented on was one focused on minimizing shelf-outs
+
+04:15.560 --> 04:17.720
+at Home Depot stores.
+
+04:17.720 --> 04:22.960
+Can you talk about the context and origin of that particular project?
+
+04:22.960 --> 04:28.560
+Yeah, it's really interesting how this project came about actually one of the data scientists
+
+04:28.560 --> 04:30.680
+that's on my team.
+
+04:30.680 --> 04:36.040
+He was part of the supply chain organization within Home Depot and he had this idea
+
+04:36.040 --> 04:45.840
+to, and his name is Sashi Gandhavarpu, and he had this idea to use signals from within
+
+04:45.840 --> 04:49.800
+the store to kind of predict whether stuff would be on the shelf.
+
+04:49.800 --> 04:56.600
+So the reason this is, it was kind of like a really important idea is that within any
+
+04:56.600 --> 05:03.440
+type of retail space, unless you have cameras or sensors or some kind of thing within
+
+05:03.440 --> 05:08.880
+the store to track products, once it enters the store, you almost have no idea where it
+
+05:08.880 --> 05:13.880
+is until it leaves this, leaves the store either through the register or shrink or something
+
+05:13.880 --> 05:14.880
+like that.
+
+05:14.880 --> 05:22.520
+So we had this, he had this idea to use data from, from the sales or there, we can get
+
+05:22.520 --> 05:29.400
+into like the features in a second, but essentially using data to drive the shelf-out prediction.
+
+05:29.400 --> 05:35.560
+So what a shelf-out is, is something is in the store, but not on the shelf.
+
+05:35.560 --> 05:39.160
+And that's not the same thing as it being out of stock, which is obviously if it's out
+
+05:39.160 --> 05:45.160
+of stock, then our supply chain will react to the out of stock, the out of stock levels
+
+05:45.160 --> 05:49.120
+and it'll be triggered through supply chain and it'll obviously come back through to the
+
+05:49.120 --> 05:52.800
+store for someone to put back on the shelf, but this is for stuff that gets either someone
+
+05:52.800 --> 05:57.840
+picks it up off the shelf and you don't know where it goes, like maybe they try to buy
+
+05:57.840 --> 06:00.560
+it, but they will like, okay, well, I don't want this anymore and they get to the checkout
+
+06:00.560 --> 06:08.560
+line and they don't want any more or maybe someone takes the item or steals it or, or maybe
+
+06:08.560 --> 06:11.520
+it's just so on top of the shelves and those reacts.
+
+06:11.520 --> 06:16.280
+We probably all had this experience where we go online, it says there are 20 in the store,
+
+06:16.280 --> 06:21.600
+you go to the shelf and there is just a big hole and you got to find someone and they climb
+
+06:21.600 --> 06:25.120
+up on the big ladder and sort through those boxes.
+
+06:25.120 --> 06:30.960
+Yeah, and I actually mentioned that in the talk and the Google talk is about the Home
+
+06:30.960 --> 06:33.960
+Depot is kind of like a working warehouse, so there's no back room.
+
+06:33.960 --> 06:39.560
+So if it says there's four in the store, they're probably in the store somewhere, but we
+
+06:39.560 --> 06:43.880
+probably don't know where they are and it usually takes quite a long time.
+
+06:43.880 --> 06:49.200
+If it's not on the shelf and it's not directly in the overhead right above that item, then
+
+06:49.200 --> 06:51.200
+it'll take hours to find it.
+
+06:51.200 --> 06:57.360
+One of the things that I appreciated about the presentation you did or the way you
+
+06:57.360 --> 07:04.240
+approached this project is that you didn't just assume that this would be a good idea.
+
+07:04.240 --> 07:10.560
+You actually manually brute-forced it, as you said, by having people manually stock the
+
+07:10.560 --> 07:17.040
+shelves and then you measure the revenue lift from actually having the products on the
+
+07:17.040 --> 07:18.040
+shelves.
+
+07:18.040 --> 07:23.160
+That's something that I think Home Depot is very – that we do quite often with a lot
+
+07:23.160 --> 07:24.160
+of these tests.
+
+07:24.160 --> 07:28.960
+So before we're allowed to go past like a POC stage or even before we go to POC stage,
+
+07:28.960 --> 07:34.320
+we have to determine the ROI for the project that we're about to do to convince people to
+
+07:34.320 --> 07:35.920
+give us money to do the project.
+
+07:35.920 --> 07:42.040
+So in order to do that, we said, okay, well, if we had a system that could continuously
+
+07:42.040 --> 07:48.520
+keep stuff in stock and on the shelf, what would that look like and how much money would
+
+07:48.520 --> 07:49.680
+that actually generate?
+
+07:49.680 --> 07:51.680
+So you add labor into the store.
+
+07:51.680 --> 07:58.000
+Obviously, it's not scalable to the entire company to add labor that just does pack downs
+
+07:58.000 --> 08:01.280
+the entire time, what pack downs like moving stuff into the shelves.
+
+08:01.280 --> 08:07.800
+But it essentially simulates what our project ended up doing.
+
+08:07.800 --> 08:12.400
+And from that, we were able to determine the sales lift from doing some like that and
+
+08:12.400 --> 08:15.760
+the ROI for developing this kind of technology.
+
+08:15.760 --> 08:21.960
+In fact, you saw that just by increasing shelf availability by a single percent, you were
+
+08:21.960 --> 08:27.080
+able to justify kind of continuing on with this project.
+
+08:27.080 --> 08:33.280
+How did you approach the next step, which is kind of the modeling step?
+
+08:33.280 --> 08:39.800
+Yeah, so what we did was we built some ETL pipelines to pull data in from the various
+
+08:39.800 --> 08:49.480
+different sources that we were going to use, supply chain, sales, space planning.
+
+08:49.480 --> 08:51.120
+There's so many different data sources.
+
+08:51.120 --> 08:53.680
+I can't even list all of them.
+
+08:53.680 --> 08:58.560
+I think some of the features that we generated were in the deck somewhere.
+
+08:58.560 --> 09:00.480
+But anyway, so what we...
+
+09:00.480 --> 09:03.440
+Can you give us some examples of those?
+
+09:03.440 --> 09:04.680
+Sure, of course.
+
+09:04.680 --> 09:07.720
+So this is an interesting one.
+
+09:07.720 --> 09:13.760
+So Sashi actually likes using this example and it's a very good example of a really interesting
+
+09:13.760 --> 09:25.080
+feature is when something comes into receiving in Home Depot, sometimes there's this notion
+
+09:25.080 --> 09:26.880
+of something called shelf capacity.
+
+09:26.880 --> 09:31.960
+And shelf capacity is how many things you can put on the shelf at one given time.
+
+09:31.960 --> 09:37.320
+Sometimes what ends up happening is you receive a pack of something and the ratio of that
+
+09:37.320 --> 09:43.600
+pack to how many things you can actually put on the shelf is not an even number.
+
+09:43.600 --> 09:46.840
+What I mean by that is like there's a remainder, obviously.
+
+09:46.840 --> 09:50.280
+So let's say you put seven in the pack and then four on the shelf.
+
+09:50.280 --> 09:53.760
+So you end up with three back in the overhead.
+
+09:53.760 --> 09:59.680
+And to an associate, they're going to say, okay, well, is there more things to be put back
+
+09:59.680 --> 10:04.000
+on the shelf or is that shelf actually out of stock?
+
+10:04.000 --> 10:06.200
+And that thing for some...
+
+10:06.200 --> 10:10.600
+Or that trigger for someone to go look for those other three things doesn't happen all
+
+10:10.600 --> 10:11.600
+the time.
+
+10:11.600 --> 10:15.520
+So sometimes things get lost in the overhead until someone actually goes and loads and finds
+
+10:15.520 --> 10:18.520
+and says, oh, there's three of these things, I better go put it on.
+
+10:18.520 --> 10:23.160
+But when people change shifts, they don't know exactly where the other person who did
+
+10:23.160 --> 10:27.840
+the stocking before put that thing.
+
+10:27.840 --> 10:29.680
+So it gets lost.
+
+10:29.680 --> 10:32.280
+And that leads to shelf outs.
+
+10:32.280 --> 10:39.280
+So that ratio of pack size to shelf capacity is an interesting feature that comes from
+
+10:39.280 --> 10:40.280
+different things.
+
+10:40.280 --> 10:48.480
+So it comes from the planogrammed size of the actual thing that you're trying to put
+
+10:48.480 --> 10:49.480
+on there.
+
+10:49.480 --> 10:50.480
+So how much shelf capacity is.
+
+10:50.480 --> 10:54.000
+Also, when was the last time it was received from the pack size from supply chain?
+
+10:54.000 --> 10:56.080
+And that can vary actually between stores.
+
+10:56.080 --> 10:59.840
+So sometimes some stores get more in a single pack size and sometimes...
+
+10:59.840 --> 11:03.000
+Yeah, so that's an interesting thing.
+
+11:03.000 --> 11:08.000
+Obviously sales is a huge indicator of a shelf out.
+
+11:08.000 --> 11:14.840
+The forecast, what we expect to sell, what its price was, the on hands that we have.
+
+11:14.840 --> 11:21.240
+So let's say we had three of them yesterday and then four of them the day before and
+
+11:21.240 --> 11:25.440
+then eight of them the day before, three days before.
+
+11:25.440 --> 11:31.440
+So that slope of something decreasing over time is also another thing that we use as
+
+11:31.440 --> 11:32.440
+a feature.
+
+11:32.440 --> 11:33.440
+Interesting.
+
+11:33.440 --> 11:39.600
+And you mentioned that the data that ultimately comes to feed the model came from a bunch
+
+11:39.600 --> 11:49.040
+of different sources, is there a way to characterize the number of sources or the level of effort
+
+11:49.040 --> 11:51.320
+and just building out that data pipeline?
+
+11:51.320 --> 11:58.280
+Yeah, it was a pretty monumental effort, I think, because it was a very cross-functional
+
+11:58.280 --> 12:00.600
+effort to get all of this information.
+
+12:00.600 --> 12:06.720
+And Home Depot is such a big company and there's different teams that are responsible for
+
+12:06.720 --> 12:08.600
+different data sources.
+
+12:08.600 --> 12:12.240
+So getting all of the teams to help with their...
+
+12:12.240 --> 12:16.400
+We use a lot of them as advisory roles as well because we weren't able to think of every
+
+12:16.400 --> 12:19.280
+single feature that went into this model.
+
+12:19.280 --> 12:20.880
+They came up with some ideas for us.
+
+12:20.880 --> 12:25.940
+So we met with a lot of these teams over the course of several months and they kind of
+
+12:25.940 --> 12:28.880
+helped build out this feature set.
+
+12:28.880 --> 12:35.760
+Some of them, including obviously space planning, finance, supply chain, inventory planning
+
+12:35.760 --> 12:41.040
+and replenishment, store operations, there's a lot.
+
+12:41.040 --> 12:45.280
+You kind of talked about this data pipeline and all this data that you need to receive from
+
+12:45.280 --> 12:47.400
+different places.
+
+12:47.400 --> 12:53.680
+How much of that came before the modeling process, like in the exploratory phase and how
+
+12:53.680 --> 12:59.320
+much of that effort was, you know, one you're trying to productionalize.
+
+12:59.320 --> 13:00.320
+Like did you...
+
+13:00.320 --> 13:03.960
+I'm imagining in the modeling phase, you're doing samples, but even those samples might
+
+13:03.960 --> 13:05.280
+have had to have been fairly large.
+
+13:05.280 --> 13:07.000
+Like how did you approach that?
+
+13:07.000 --> 13:08.000
+Yeah.
+
+13:08.000 --> 13:12.400
+So some of the features that, or some of the data sources that we used weren't even in
+
+13:12.400 --> 13:14.640
+the cloud when we started building this model.
+
+13:14.640 --> 13:19.160
+So we actually had to develop the ETL pipelines that would put this data into the cloud from
+
+13:19.160 --> 13:23.120
+the operational databases that took a little while.
+
+13:23.120 --> 13:25.600
+There were several of those that we had to do.
+
+13:25.600 --> 13:30.840
+So when we were gathering all of this data, it took, I would say, like, six months to
+
+13:30.840 --> 13:35.840
+get everything in a stable state before we could actually, I mean, I guess the modeling
+
+13:35.840 --> 13:40.280
+happened simultaneously, but as we were trying to, like, so we had samples of this as we were
+
+13:40.280 --> 13:41.280
+going along.
+
+13:41.280 --> 13:44.920
+Like you said, and we were able to build these models off of, like, old data, but in
+
+13:44.920 --> 13:51.680
+order to get it to a state where we could run the training process on a weekly basis,
+
+13:51.680 --> 13:56.160
+took quite a long time.
+
+13:56.160 --> 13:59.560
+And like we're trying to remember, like, all the details of how, of, like, all the things
+
+13:59.560 --> 14:03.880
+that we did, and there's just, there's just so many of them.
+
+14:03.880 --> 14:06.000
+And we had help along the way, right?
+
+14:06.000 --> 14:10.200
+It wasn't just our team, like, there were other teams that are cross functional teams
+
+14:10.200 --> 14:13.680
+that were telling us where stuff was, because it was very difficult to find database.
+
+14:13.680 --> 14:18.880
+You can imagine, like, how many databases Home Depot has for every team that exists there.
+
+14:18.880 --> 14:23.520
+And various different teams within Home Depot are in different stages of their cloud journey
+
+14:23.520 --> 14:24.520
+too.
+
+14:24.520 --> 14:29.160
+So sometimes we'd work with some teams that would know how Google Cloud worked.
+
+14:29.160 --> 14:33.160
+And the Lingo and all the different types of technologies that are available in there,
+
+14:33.160 --> 14:36.920
+and that some had no idea, because they hadn't really started that journey yet.
+
+14:36.920 --> 14:41.400
+So it was definitely an interesting challenge doing that.
+
+14:41.400 --> 14:49.440
+What did you end up with in terms of a model, either the details or some sense of the complexity
+
+14:49.440 --> 14:50.440
+there?
+
+14:50.440 --> 14:52.160
+Yeah, that model was actually pretty simple.
+
+14:52.160 --> 14:58.160
+So the original model that we built was a random forest model.
+
+14:58.160 --> 15:02.160
+I think we used Scikit for the initial one, and then we switched to XG booths, so gradient
+
+15:02.160 --> 15:05.280
+booths to trees.
+
+15:05.280 --> 15:09.520
+And it actually performed really, really well for our purposes.
+
+15:09.520 --> 15:17.160
+And we felt like it was good enough, and we didn't need to explore anything any further
+
+15:17.160 --> 15:18.880
+than that.
+
+15:18.880 --> 15:26.600
+But we do, so when we also engaged Google professional services about halfway through our journey, and
+
+15:26.600 --> 15:32.560
+they helped us build a TensorFlow model using Dataflow or Apache Beam.
+
+15:32.560 --> 15:37.800
+And it ended up, I think, the performance was about the same as our XG booths model.
+
+15:37.800 --> 15:44.000
+So we went with a more simple model just for trying to get it out there.
+
+15:44.000 --> 15:47.200
+So we were kind of like on the clock to deliver some results.
+
+15:47.200 --> 15:52.200
+So we wanted to show our business partners like, hey, this thing is going to work.
+
+15:52.200 --> 15:56.560
+And there was a lot of, I don't want to say skepticism, but there was a lot of like
+
+15:56.560 --> 16:01.400
+I would say, you know, you kind of like have to convince people how ML is going to add
+
+16:01.400 --> 16:02.400
+value.
+
+16:02.400 --> 16:07.560
+And we really wanted to show that it was going to add value because we saw the results
+
+16:07.560 --> 16:09.080
+through our paper validations, right?
+
+16:09.080 --> 16:15.400
+So in the, after the initial model was built, went to the stores and validated, did some
+
+16:15.400 --> 16:19.480
+like paper validations, they're like, okay, wow, this is actually going to work.
+
+16:19.480 --> 16:25.240
+So let's get this to a production status fast so we could possibly can, and as fast as
+
+16:25.240 --> 16:28.960
+we possibly could wasn't really, in my, I don't think it was fast enough.
+
+16:28.960 --> 16:35.280
+We were kind of, we, we had a lot of technical challenges to get it there.
+
+16:35.280 --> 16:38.280
+But obviously, this was the first one that all of us did together.
+
+16:38.280 --> 16:40.560
+So we learned a lot along the way.
+
+16:40.560 --> 16:44.480
+Well, I want to dive into some of those technical challenges further.
+
+16:44.480 --> 16:52.120
+But before we do that, I'm curious, what would you say accounted for most of the skepticism
+
+16:52.120 --> 16:55.120
+on the part of your business partners?
+
+16:55.120 --> 17:02.040
+You showed them that if you increased shelf availability, you can generate a ton of incremental
+
+17:02.040 --> 17:03.040
+revenue.
+
+17:03.040 --> 17:05.200
+So I imagine they bought into that.
+
+17:05.200 --> 17:10.640
+Was it specifically, they didn't think you'd be able to predict shelf-outs given the data
+
+17:10.640 --> 17:13.960
+that you had available in the stores?
+
+17:13.960 --> 17:18.880
+I think there's just kind of like a misconception about what machine learning does and how it
+
+17:18.880 --> 17:24.040
+can add value because I think a lot of people currently think it's like a, it's like one
+
+17:24.040 --> 17:25.720
+of those hype technologies, right?
+
+17:25.720 --> 17:31.360
+Like everybody thinks that it needs to, that they need it for whatever problem.
+
+17:31.360 --> 17:36.880
+And I don't think like it was their focus at the time to adopt this into their stack yet.
+
+17:36.880 --> 17:40.200
+Because you know, we were a new team.
+
+17:40.200 --> 17:43.800
+And like the way that our team is positioned within the company isn't that we're not like
+
+17:43.800 --> 17:47.880
+part of the team that we're building this for.
+
+17:47.880 --> 17:55.320
+So in essence, we were kind of like a consultants within Home Depot, if you will, and we kind
+
+17:55.320 --> 17:57.600
+of like build these things out.
+
+17:57.600 --> 18:03.000
+I guess we were more seen of like as a POC team versus like getting something all the
+
+18:03.000 --> 18:08.520
+way somewhere or developing something all the way to its production-wise state even
+
+18:08.520 --> 18:09.840
+that we could.
+
+18:09.840 --> 18:13.840
+And we were kind of like trying to prove our worth if you know what I mean.
+
+18:13.840 --> 18:22.440
+Sure. So you started building out these data pipelines in parallel with the modeling step.
+
+18:22.440 --> 18:28.400
+At some point in time, you had the data pipelines and the models in place.
+
+18:28.400 --> 18:29.880
+What was next?
+
+18:29.880 --> 18:36.040
+And if I skipped something and kind of setting that up, Devon, no, no, no, no, that's perfect.
+
+18:36.040 --> 18:43.160
+So yeah, after we had the model, we knew it was producing valid results, actionable results.
+
+18:43.160 --> 18:52.240
+We had to build some service layers to be able to send the model predictions to the stores.
+
+18:52.240 --> 18:53.720
+So that took a little bit of time.
+
+18:53.720 --> 18:58.840
+So we ended up integrating with an existing application that's already in the Home Depot
+
+18:58.840 --> 19:02.920
+that associates are they're familiar with using.
+
+19:02.920 --> 19:06.760
+And this was at this few level that we wanted to send predictions at.
+
+19:06.760 --> 19:10.760
+So it ended up being like a perfect app for us to use.
+
+19:10.760 --> 19:16.680
+We used this app and we made like a few one slight modification, which enabled us to get
+
+19:16.680 --> 19:19.280
+solicit feedback from the users.
+
+19:19.280 --> 19:22.600
+The thing that we added was a shelf out yes or no on this on the screen where they're
+
+19:22.600 --> 19:24.840
+actually going to check these items.
+
+19:24.840 --> 19:30.520
+So they can see if the so we can see if the things that we're sending are actually accurate
+
+19:30.520 --> 19:32.480
+versus just blindly sending them out.
+
+19:32.480 --> 19:36.640
+So then we that was like the next biggest thing.
+
+19:36.640 --> 19:42.000
+And that kind of we probably I think I think we should have probably done that a little
+
+19:42.000 --> 19:43.480
+bit sooner.
+
+19:43.480 --> 19:48.440
+That development step really took a lot of time and it was basically like we were working
+
+19:48.440 --> 19:52.120
+on that the entire time before being able to get any further.
+
+19:52.120 --> 19:56.000
+So it was kind of like a roadblock for us at the time.
+
+19:56.000 --> 19:59.920
+So specifically this was hooking into the existing app.
+
+19:59.920 --> 20:06.600
+And I think it was an app that is on these little mobile devices at the store associates.
+
+20:06.600 --> 20:14.040
+And are you are you hooking into an existing notification process that is targeted to specific
+
+20:14.040 --> 20:19.360
+associates or does it go into a queue, but it's basically like a pick list or checklist
+
+20:19.360 --> 20:24.320
+of items that you need to check on their stock out status and or restock if necessary.
+
+20:24.320 --> 20:26.400
+Oh, not stock, but shelf out.
+
+20:26.400 --> 20:27.960
+Yeah, that's exactly what it is.
+
+20:27.960 --> 20:33.480
+So that application is it's called a smart list and what we what it was traditionally
+
+20:33.480 --> 20:40.840
+used for was to have associates go and check the stock levels of things that that we thought
+
+20:40.840 --> 20:43.160
+were not at the right levels.
+
+20:43.160 --> 20:46.840
+So we were like, okay, well, this is like the perfect app to be able to stick this into
+
+20:46.840 --> 20:50.320
+because instead of them having to go and check the stock levels, we can check if they're
+
+20:50.320 --> 20:51.680
+on the shelf too.
+
+20:51.680 --> 20:55.040
+So we added this button to allow that to happen.
+
+20:55.040 --> 20:58.840
+And now we're getting data from the stores that were live in about the stock levels
+
+20:58.840 --> 21:06.720
+and if they're shelfed out or not when they go and check them for the purposes of the
+
+21:06.720 --> 21:12.880
+development with this app, you weren't asking them to count the number of items on the
+
+21:12.880 --> 21:14.400
+shelf like a shelf inventory.
+
+21:14.400 --> 21:16.880
+It was just on the shelf or not.
+
+21:16.880 --> 21:19.080
+No, actually, they they still do that.
+
+21:19.080 --> 21:25.800
+So we we tried to make it as we tried to make it as minimal in terms of having to retrain
+
+21:25.800 --> 21:31.120
+people as possible so we didn't want to introduce like a new workflow to them at the time.
+
+21:31.120 --> 21:34.680
+We we kept the app exactly the same pretty much and we didn't do anything except for adding
+
+21:34.680 --> 21:40.000
+this one button that they had to do during their normal inventory checking process.
+
+21:40.000 --> 21:44.920
+So it made it so that it's it's kind of like more intuitive so that no one really had
+
+21:44.920 --> 21:49.600
+to know what was going on behind the scenes like to them, the the tasks were identical.
+
+21:49.600 --> 21:53.680
+No one really knows like if the tasks are coming from the original task generation system
+
+21:53.680 --> 22:01.680
+or from us. And so if I could ask the rude slash ignorant question, when you look at
+
+22:01.680 --> 22:05.280
+the picture of this button, it's like on shelf, yes, no.
+
+22:05.280 --> 22:09.400
+But yet you said it was really complicated and took a long time.
+
+22:09.400 --> 22:15.160
+Where is the hitting complexity in that button that seemed so easy?
+
+22:15.160 --> 22:22.200
+It's yeah, I'm without saying like anything like like too bad.
+
+22:22.200 --> 22:26.600
+It's like the framework that was used on it, I wasn't very familiar with it.
+
+22:26.600 --> 22:29.720
+So I had to learn how the deployment process was set up.
+
+22:29.720 --> 22:32.520
+So this is this is where all the complexity came in.
+
+22:32.520 --> 22:37.880
+I had to learn how all of that was set up, how their deployments work, how to deploy
+
+22:37.880 --> 22:40.960
+their code to the stores, which takes a long time.
+
+22:40.960 --> 22:47.480
+So home people obviously we're very we don't like deploying, breaking potentially breaking
+
+22:47.480 --> 22:49.600
+changes to the store environment.
+
+22:49.600 --> 22:54.000
+So there's a lot of checks in place to make sure that what you're actually deploying
+
+22:54.000 --> 22:59.040
+is not going to break anything and all of those processes that are there are the things
+
+22:59.040 --> 23:00.280
+that make it complicated.
+
+23:00.280 --> 23:04.840
+So the actual app changing the app actually wasn't that hard once I was able to figure
+
+23:04.840 --> 23:10.800
+out what to change and then building the services that were on prem that hooked into that.
+
+23:10.800 --> 23:17.480
+So home depot stores are kind of like they they have their own kind of data centers inside
+
+23:17.480 --> 23:25.240
+of them and they don't they don't feed off of a centralized location per say.
+
+23:25.240 --> 23:29.840
+So we you have to there's a really really long complicated deployment process.
+
+23:29.840 --> 23:34.440
+So that's where a lot of the complexity comes in makes sense makes sense.
+
+23:34.440 --> 23:40.200
+So you've got this capability now deployed out into the stores via this app.
+
+23:40.200 --> 23:44.080
+How do you tie that all together with the model?
+
+23:44.080 --> 23:48.960
+Perfect so the model runs every day at six o'clock in the morning.
+
+23:48.960 --> 23:55.840
+The predict the predictions part and we we generate all of the the tasks that so that
+
+23:55.840 --> 23:59.560
+are supposed to get sent to the store for that day and we're not sending.
+
+23:59.560 --> 24:04.000
+I think we send them over like a certain confidence thresholds like I think it fits.
+
+24:04.000 --> 24:08.880
+If we think it's I don't remember exactly the percentage that it that it's set at.
+
+24:08.880 --> 24:14.160
+But what if they're over a certain confidence level we send the tests to the stores and we
+
+24:14.160 --> 24:15.920
+only do.
+
+24:15.920 --> 24:22.520
+I think we send maybe like 150 or something like that per day to each store for to have them
+
+24:22.520 --> 24:27.480
+go fix which isn't really that much in terms of how many there are.
+
+24:27.480 --> 24:34.040
+So there's like 33,000 skews in in a in any particular home depot store but we're only
+
+24:34.040 --> 24:39.360
+really trying to fix about 150 of them per day which ends up adding over time.
+
+24:39.360 --> 24:45.920
+So hopefully like those 150 you fix it one day will be a that it'll kind of like have
+
+24:45.920 --> 24:51.480
+a cascading effect over time and you sort it by confidence or you sorting by profitability
+
+24:51.480 --> 24:53.400
+or some business metric.
+
+24:53.400 --> 24:58.920
+So there we haven't actually started doing the profitability the business metrics yet.
+
+24:58.920 --> 25:04.480
+So we exclude some of them obviously there's departments like lumber where it's very unlikely
+
+25:04.480 --> 25:09.040
+that if the even if there was a shelf out that you could fix it because if the lover is
+
+25:09.040 --> 25:14.200
+not there then you can't get any more yeah.
+
+25:14.200 --> 25:16.320
+And there's there's other categories that are like that.
+
+25:16.320 --> 25:22.760
+So as we were as we were pushing this up in the in our pilot stage we found a lot of interesting
+
+25:22.760 --> 25:28.040
+things that we didn't really know about the store landscape and the like the the overall
+
+25:28.040 --> 25:30.680
+shelf out rate of it individual department.
+
+25:30.680 --> 25:37.920
+So obviously like your high your high your high selling things like your like power tools
+
+25:37.920 --> 25:43.560
+and stuff they there's a lot of people buying those all the time but stuff like the blind
+
+25:43.560 --> 25:49.560
+section wasn't as as so like we were sending a shelf out prediction to them that weren't
+
+25:49.560 --> 25:50.840
+accurate in the blind section.
+
+25:50.840 --> 25:55.120
+So we ended up just not sending those ones at all either there's a couple other there's
+
+25:55.120 --> 26:01.080
+a couple other categories that were like that those ones stand out the most but it was
+
+26:01.080 --> 26:06.240
+interesting seeing that that data come back that obviously like we didn't know before
+
+26:06.240 --> 26:09.840
+that those those things would happen.
+
+26:09.840 --> 26:14.320
+Another interesting thing that that happened as we were deploying this out was because
+
+26:14.320 --> 26:19.680
+we have that six o'clock I guess our SLA for sending these things out is eight o'clock
+
+26:19.680 --> 26:24.920
+in the morning but we start running the pipeline at six with up to eight o'clock being
+
+26:24.920 --> 26:30.400
+the last the the last time that these tasks can go out the reason being is we want to make
+
+26:30.400 --> 26:34.360
+sure that the tasks that are going out to the stores have not been affected by people
+
+26:34.360 --> 26:39.680
+doing things in the stores because the data that we have right now it's not coming in
+
+26:39.680 --> 26:44.840
+in an hourly cadence so we can't really do predictions at on an hourly level yet because
+
+26:44.840 --> 26:46.760
+of our data sources.
+
+26:46.760 --> 26:50.800
+So we need to make sure that when we're sending these tasks out to the stores that the
+
+26:50.800 --> 26:56.760
+tasks get to the phone before anyone has done anything to change the store but that's
+
+26:56.760 --> 27:02.120
+why we that's why we set our SLA to eight o'clock in the morning and if it if it doesn't
+
+27:02.120 --> 27:08.440
+meet that SLA then we don't send anything out because it would it would affect our accuracy.
+
+27:08.440 --> 27:14.440
+It sounds like we've kind of closed the loop on this process and how the predictions
+
+27:14.440 --> 27:22.200
+are being made at least you run your pipeline daily are you also doing periodic retrains?
+
+27:22.200 --> 27:27.600
+Yes we are so we're retraining weekly at the moment so that's actually another interesting
+
+27:27.600 --> 27:33.560
+that we found is that the model would become stale after about after like two weeks our
+
+27:33.560 --> 27:40.320
+accuracy started dropping and we were like okay well is that mean that it's not good
+
+27:40.320 --> 27:44.800
+anymore or what's what was going on this is when we were only alive in one store and
+
+27:44.800 --> 27:50.520
+we hadn't set up automatic retraining it so we were trained the model off of the latest
+
+27:50.520 --> 27:55.960
+data that we were getting back from the shelf out data and we saw the accuracy jump back
+
+27:55.960 --> 28:01.680
+up and we're like okay well there's got to be some kind of thing that something that's
+
+28:01.680 --> 28:09.000
+going on that causes that to happen and I think it's a it's a combination of the things
+
+28:09.000 --> 28:13.160
+that are being sold in the store are very seasonal so Home Depot obviously and it gets a
+
+28:13.160 --> 28:17.240
+lot of other retailers and maybe Home Depot specifically has a lot of seasonality so
+
+28:17.240 --> 28:22.320
+like things that are being sold in the spring usually don't get sold in the summer especially
+
+28:22.320 --> 28:25.960
+things that don't get sold in the winter don't get sold in the summer like snow blowers
+
+28:25.960 --> 28:32.040
+and things like that's a good example grills get sold a lot in the summer but yeah so
+
+28:32.040 --> 28:38.040
+like incorporating that last week of data into the training really improve the accuracy
+
+28:38.040 --> 28:46.400
+of it and we we tried to we we assumed or maybe not assume but we we hypothesized that training
+
+28:46.400 --> 28:54.240
+on a year's worth of data would capture that seasonality but it didn't so we still have
+
+28:54.240 --> 28:58.360
+a little bit of digging to figure out what that what's going on there really maybe getting
+
+28:58.360 --> 29:08.600
+back to the kind of the infrastructure elements of this system on the you know starting out
+
+29:08.600 --> 29:16.200
+with the ETL pipelines how did you implement those so yeah we did all of the ETL pipelines
+
+29:16.200 --> 29:25.040
+in BigQuery it was relatively easy to get all of those data sources in there you know I really
+
+29:25.040 --> 29:28.560
+feel like it wouldn't have been possible to get all of these different cross functional
+
+29:28.560 --> 29:34.960
+teams data in an easily consumable way if we hadn't done a cloud migration yet so that was
+
+29:34.960 --> 29:41.600
+kind of like a key key component or key thing that had to happen for us to be able to do a project
+
+29:41.600 --> 29:46.080
+like this and I think I said this when I was at Google or doing the next presentations that
+
+29:47.120 --> 29:52.640
+but that yeah this this is a huge initiative that allowed projects like this to even happen
+
+29:52.640 --> 29:57.200
+because we couldn't have even imagined tackling a project like this before without having that
+
+29:57.200 --> 30:03.200
+that amount of data in one place for us to to get it so yeah the ETL pipelines they're all done
+
+30:03.200 --> 30:11.600
+in in BigQuery we feed that into Google Cloud store or we extract that into Google Cloud storage
+
+30:11.600 --> 30:17.520
+and then we feed that into our model that our model writes something back into BigQuery and then we
+
+30:17.520 --> 30:23.680
+have a service that picks those inferences out of BigQuery and pushes them to the phone can you
+
+30:23.680 --> 30:33.360
+elaborate on the this loop BigQuery to storage to back to BigQuery sure so the home Home Depot has a
+
+30:34.080 --> 30:39.520
+and this is something that a previous team that I was on bill we have a thing that automates all
+
+30:39.520 --> 30:48.320
+of our ETL process our extraction from on prem to the to Google Cloud and we use that same tool
+
+30:48.320 --> 30:55.840
+to help us automate a lot of our running processes so our model it runs on a Kubernetes cluster
+
+30:55.840 --> 31:02.320
+so we send the model code off to the cluster to run but in order to chain all of these things
+
+31:02.320 --> 31:09.120
+together we have a bunch of SQL that runs in the beginning and then SQL being BigQuery
+
+31:09.120 --> 31:14.640
+SQL and then after the SQL data prep steps I think there's like there's probably like 15
+
+31:15.200 --> 31:23.040
+data data aggregation steps before maybe maybe even more there's probably like 20 if you count
+
+31:23.040 --> 31:30.080
+all of the ingest pieces so that I'd say about like 15 to 20 SQL steps and then after that the
+
+31:31.600 --> 31:37.520
+resulting features table is exported to Google Cloud storage for the model to consume and then
+
+31:37.520 --> 31:45.840
+the model reads it all into itself because it's an XGBoost library that we're using and XGBoost is
+
+31:45.840 --> 31:51.840
+fed in with pandas so we just read read it in with pandas put it into XGBoost and then let it do
+
+31:51.840 --> 31:58.720
+it let it do its thing and then afterwards the the model then writes all of its results back into
+
+31:58.720 --> 32:06.320
+BigQuery so that's kind of like the circle of how that works and then there's yeah and then there's
+
+32:06.320 --> 32:12.000
+a little bit um there's some there's some other steps that do the sending of the task right so we
+
+32:12.000 --> 32:18.400
+have to obviously send this out every day at six or by 8 a.m so we have another process that picks
+
+32:18.400 --> 32:27.040
+all of those tasks up and sends them to the individual store servers and then obviously when whenever
+
+32:27.040 --> 32:32.480
+the associate's come in and they work the tasks they hit the yes or no button on the app and then
+
+32:32.480 --> 32:38.320
+we get our feedback and we can find out how well we're doing and then that goes into another cycle
+
+32:39.280 --> 32:45.280
+we although I will say one caveat we have not started retraining our model off of
+
+32:46.160 --> 32:50.240
+off of the data that's been coming back from smart list yet the reason being is that we
+
+32:50.240 --> 32:58.240
+didn't have enough of a sample to be able to do that with yet so the the the model is our project
+
+32:58.240 --> 33:03.520
+is live in around 50 stores at the moment but it's not a large enough sample size of that's like
+
+33:03.520 --> 33:08.400
+representative of the entire company to be able to build a model off of it yet so we're waiting
+
+33:08.400 --> 33:16.480
+until we get past our 50 stage or 50 store um current stage and then once we get to like maybe
+
+33:17.440 --> 33:22.080
+I don't know I think probably we'll probably start building out that pretty soon but
+
+33:22.080 --> 33:29.120
+I'm not really sure when at what level we're going to consider putting that back into our new model
+
+33:29.680 --> 33:36.000
+when you talk about that feature are you thinking about that in the sense of like an active learning
+
+33:36.000 --> 33:40.720
+where you're dynamically updating your model or just using that information for additional feature?
+
+33:41.840 --> 33:48.080
+um I think we're probably going to go with an active learning type of situation where it will
+
+33:48.080 --> 33:53.200
+it might update the the model as it is I mean ultimately what we really want to do
+
+33:53.200 --> 33:59.920
+is have this uh work on an hourly basis so it can react very very quickly to these types of
+
+33:59.920 --> 34:05.520
+situations versus having to wait an entire day um I think we're like maybe we're pretty far away
+
+34:05.520 --> 34:11.440
+from being able to do that but I think the that's like the that's the dream is being able to get
+
+34:11.440 --> 34:17.040
+it to that level um and I think active learning would definitely be the thing that we would
+
+34:17.040 --> 34:24.480
+want to go to so you mentioned you've got a Kubernetes cluster is that where the model's running?
+
+34:24.480 --> 34:31.120
+yeah you've got containerized scikit-learn or python uh somewhere that is you're kicking off
+
+34:31.120 --> 34:36.480
+these containers and they're just as part of their launch they're pulling data and running the
+
+34:36.480 --> 34:43.760
+model yeah that's correct how many instances or pods or containers what's the best way to to
+
+34:43.760 --> 34:52.080
+measure that the kind of scale of yeah it's um it's not really that big so I think we run on
+
+34:53.280 --> 34:58.320
+I think we're using like CPU training right now actually which is um it's it actually serves
+
+34:58.320 --> 35:03.040
+our purposes for now because we haven't had to change anything but it's like a I think it's like
+
+35:03.040 --> 35:14.880
+15 V CPUs and 50 gigabytes of RAM um per pod um and we have a uh um I mean the nice thing about
+
+35:14.880 --> 35:20.800
+Kubernetes obviously is like when you're not using it it scales down to zero so um it uh so
+
+35:20.800 --> 35:25.440
+whenever we launch jobs uh I guess the that's for like the training part of it um
+
+35:25.440 --> 35:33.440
+um is uh we use like 50 gigabytes of RAM and um 15 CPUs uh the data size is around 66
+
+35:33.440 --> 35:39.040
+million skews so you just take the number of skews per store times the number of stores that we
+
+35:39.040 --> 35:43.920
+have so it's like six around 66 million per store so that's around the data volume that we're
+
+35:43.920 --> 35:50.080
+doing it's not anything like super huge in terms of what you would use uh I take that back sorry
+
+35:50.080 --> 35:54.720
+that's like the maximum amount that we use for for uh in our inference pipeline so that's that's
+
+35:54.720 --> 35:59.680
+like the the biggest that it'll ever get really for our inference pipeline for our training dataset
+
+36:00.880 --> 36:08.560
+before any of the uh data preparation happens um like the our sales table is massive every transaction
+
+36:08.560 --> 36:14.720
+that's happened at home depot for the past seven years so there's yeah it's it's pretty big it's
+
+36:14.720 --> 36:21.040
+like several terabytes um the supply chain data is even is it's crazy or it's uh
+
+36:21.040 --> 36:27.360
+though that's like you know you can imagine like a supply chain right so it's every time something
+
+36:27.920 --> 36:35.520
+gets touched in a supply chain has essentially has a row in in a table um and it and it has all
+
+36:35.520 --> 36:40.000
+of its history maintained too so that one's even that one's even bigger but the I think the
+
+36:40.000 --> 36:48.800
+training set that we end up end up with is um trying trying to think I think it's it's definitely
+
+36:48.800 --> 36:58.800
+less than 50 gigabytes it's not very big okay and so these these 15 uh vcps with Kubernetes
+
+36:58.800 --> 37:07.840
+is there how many actual nodes is that is that 15 or using uh it's a yeah it's just a single node
+
+37:07.840 --> 37:16.640
+with um with the with that turned up for now single node single worker or multiple workers uh
+
+37:16.640 --> 37:24.320
+a single node single worker okay got it um and so you've got uh this single node single worker set
+
+37:24.320 --> 37:31.360
+up and even in that kind of scenario you're still taking on the overhead of Kubernetes because of
+
+37:31.360 --> 37:37.120
+what just kind of ease of deploy and uh replicate containers and stuff like that yeah that's a good
+
+37:37.120 --> 37:42.160
+question so initially when we're building this out we wanted to have something where we could run
+
+37:42.160 --> 37:47.840
+other projects in so we didn't want to be limited by um we wanted to be able to submit jobs to this
+
+37:47.840 --> 37:54.400
+cluster um on a uh for when we wanted to start other projects essentially being able to do this
+
+37:54.400 --> 37:59.840
+thing and take on more projects take on more work and do more types of exploratory work throughout
+
+37:59.840 --> 38:05.280
+the company so that was our intent of building this thing out the way that we did and it sounds
+
+38:05.280 --> 38:14.400
+like you're running it on uh GCE as opposed to GKE uh we're running on GKE uh okay yeah I guess
+
+38:14.400 --> 38:21.600
+I was thinking you don't think about the VCPUs and GKE yeah yeah I mean yeah you you can you can
+
+38:21.600 --> 38:27.840
+set the um set the node size or in the node pool settings um on GKE if you or I guess you can
+
+38:28.480 --> 38:32.960
+the way that we have our setup is we have one cluster that does our training and predictions
+
+38:32.960 --> 38:39.840
+so um they're different node pools and and each node pool has different size of um size of nodes
+
+38:39.840 --> 38:45.760
+that that it can pull from and then when we request the CPU from it from the um from the job
+
+38:45.760 --> 38:50.800
+configuration like the training job obviously it has its affinity set to the training uh node pool
+
+38:50.800 --> 39:00.800
+and then vice versa for the predict if I remember correctly at next google announce a bunch of
+
+39:00.800 --> 39:07.680
+extensions to BigQuery I BigQuery ML I think was what they called the machine learning extension
+
+39:07.680 --> 39:14.560
+is that something that you see as playing a role in this type of system uh I have yeah I think
+
+39:14.560 --> 39:20.480
+BigQuery ML has a really is it's actually really really cool tools so I've played with it a little
+
+39:20.480 --> 39:28.080
+bit um not like not a lot but I think from a trying to like do some discovery work and seeing
+
+39:28.080 --> 39:32.240
+what kinds of things are there it's an amazing tool because you don't have to build anything
+
+39:32.240 --> 39:37.200
+to try it out um it's it's literally just using whatever the semantics that they put in there
+
+39:37.200 --> 39:41.520
+to to be able to run a model on top of it and I I'm sure they're coming out with tons of other
+
+39:41.520 --> 39:47.040
+models that you can run inside of it and um just based off that alone like it definitely
+
+39:47.040 --> 39:51.600
+be worth us trying to see how well it does compared to our current system we just haven't had time
+
+39:51.600 --> 39:58.880
+to do it yet so maybe to kind of wrap things up where do you see this progressing from here both
+
+39:58.880 --> 40:06.400
+in terms of the shelf out project we've talked a little bit about future directions there but also
+
+40:07.280 --> 40:14.400
+additional projects kind of in this vein at Home Depot yeah so um that's that's something that
+
+40:14.400 --> 40:19.120
+our team is kind of like trying to do is uh kind of you know democratized ML throughout the
+
+40:19.120 --> 40:25.600
+company make it easy for other teams to do stuff like this um with with shelf out specifically
+
+40:25.600 --> 40:31.680
+we want to we obviously want to see it deployed to all the all the stores which we're pretty sure
+
+40:31.680 --> 40:38.160
+is going to happen eventually um we're not sure when but it'll happen um and then and then also
+
+40:38.160 --> 40:42.160
+implementing the active learning piece so using the data that we're getting back from the first
+
+40:42.160 --> 40:48.400
+phone from this uh from smart list to be able to do our next wave of training and I think I didn't
+
+40:48.400 --> 40:54.400
+mention this earlier but if um you haven't seen the presentation there's a part about where we
+
+40:54.400 --> 40:59.280
+gather training data so at the moment the training data that we're being gathered is coming from
+
+40:59.280 --> 41:05.360
+that we're gathering is coming from another initiative in Home Depot that that um this team called
+
+41:05.360 --> 41:10.000
+the Met team is actually scanning outs within a store they're not doing it across the entire
+
+41:10.000 --> 41:14.960
+company but they're doing it across a subset of them and um that's where we're building our
+
+41:14.960 --> 41:19.040
+training data off of right now so we want to switch the training data to use the data from smart
+
+41:19.040 --> 41:23.440
+list versus using that and obviously it's like additional labor that's in the stores and whatnot
+
+41:23.440 --> 41:28.720
+so um ultimately it would be better if you didn't have to do that because all they're doing is
+
+41:28.720 --> 41:34.720
+scanning stuff that's not on the shelf it's kind of boring so um another thing that we want to
+
+41:34.720 --> 41:39.520
+see happen I guess like all a lot of the infrastructure that we built out again is for taking on new
+
+41:39.520 --> 41:45.040
+projects so um hopefully there will be some other interesting things that we get that are coming down
+
+41:45.040 --> 41:50.560
+the pipe and um we're really looking forward to all the other teams that we're going to get to work
+
+41:50.560 --> 41:57.840
+within the coming years a quick question on the this platform idea you know it's is clear how
+
+41:58.960 --> 42:05.680
+in the case of the training framework building it on Kubernetes you're building a little bit ahead
+
+42:05.680 --> 42:12.800
+of the requirement for this specific project so that you can easily have infrastructure for future
+
+42:12.800 --> 42:21.680
+projects does that same principle apply on the data pipeline side are there specific abstractions
+
+42:21.680 --> 42:28.640
+that you built to or generalize tools that you built out that you are looking to being able to
+
+42:28.640 --> 42:35.120
+replicate across different projects so we have a um I guess we have a beam pipeline that we're
+
+42:35.120 --> 42:41.680
+not currently using that could be used for the streaming use case so like if data eventually gets
+
+42:41.680 --> 42:48.720
+streamed in we would we would adopt like a data data flow or batchy beam type of model for
+
+42:48.720 --> 42:54.240
+ingesting that data um that's a component that we're not currently using that we could reuse
+
+42:54.240 --> 42:59.440
+later um another thing is that we have a um people don't really think about running I guess you could
+
+42:59.440 --> 43:09.120
+say production type workloads for feeding applications off of an analytics type of database
+
+43:09.120 --> 43:14.080
+so people don't really use think of BigQuery or any type of like enterprise data warehouse as uh
+
+43:14.960 --> 43:20.320
+as a database that they would use to feed an app so a lot of the data sources they obviously
+
+43:20.320 --> 43:24.880
+they come from other teams yada yada yada and they they come at different time so we built a system
+
+43:24.880 --> 43:31.040
+to wait for all of these different jobs to finish um and for tables to update properly so that
+
+43:31.040 --> 43:35.760
+as soon as everything is completely done our job kicks off automatically so kind those kinds of
+
+43:35.760 --> 43:40.240
+tooling things that we built are definitely going to be useful for us in the future kind of like a
+
+43:41.840 --> 43:47.120
+dependency checker for data resources yeah exactly that's what that's pretty much what it is
+
+43:47.120 --> 43:53.440
+and it's actually been working very very well for us I mean um our our rollout to the 50 stores
+
+43:53.440 --> 43:58.880
+that we're at so before we went to next we were in five stores and the day that next started
+
+43:58.880 --> 44:05.120
+we rolled out to 50 stores and we weren't even at um even out the home base to do it we just hit a
+
+44:05.120 --> 44:13.840
+button and it worked sort of awesome yeah yeah I mean it was major uh yeah yeah yeah exactly it was
+
+44:13.840 --> 44:19.120
+very it was very very minimal to to get it up and running from remotely without without
+
+44:19.120 --> 44:27.120
+all hands on deck kind of thing so it was it was nice seeing that happen all right everyone
+
+44:27.120 --> 44:33.040
+that's our show for today for more information on pet or any of the topics covered in this show
+
+44:33.040 --> 44:41.360
+visit twimmel ai.com slash talk slash 175 if you're a fan of the podcast please pop open your apple
+
+44:41.360 --> 44:47.520
+or google podcast app and leave us a five star rating and review your reviews are a great way
+
+44:47.520 --> 44:53.920
+to help new listeners find the show as always thanks so much for listening and catch you next time
+

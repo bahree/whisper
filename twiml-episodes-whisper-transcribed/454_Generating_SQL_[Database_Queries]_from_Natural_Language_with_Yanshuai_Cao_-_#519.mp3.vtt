@@ -1,0 +1,1121 @@
+WEBVTT
+
+00:00.000 --> 00:15.440
+Alright everyone, I am here with Yenshwai Tsau. Yenshwai is a senior research team lead at
+
+00:15.440 --> 00:21.240
+Borealis AI. Yenshwai, welcome to the Twomol AI podcast.
+
+00:21.240 --> 00:23.560
+Thank you for having me, Sam.
+
+00:23.560 --> 00:27.760
+Awesome. I am really looking forward to digging into our conversation. We'll be talking
+
+00:27.760 --> 00:33.280
+about Turing, which is a recent project that you've been working on that does text to
+
+00:33.280 --> 00:38.920
+SQL. But to get us started, I'd love to have you share a little bit about your background
+
+00:38.920 --> 00:41.960
+and how you came to work in machine learning.
+
+00:41.960 --> 00:50.200
+Alright, so I did my undergrad at the University of Toronto in Computer Science and Math and
+
+00:50.200 --> 00:57.480
+stats and I took a number of AI courses during undergrad and that gave me the opportunity
+
+00:57.480 --> 01:06.720
+to work in the computer vision lab run by David Fleet at U of T. And so I did two summer
+
+01:06.720 --> 01:12.840
+research projects there and afterward went down to do my PhD with David, close device
+
+01:12.840 --> 01:21.160
+by her husband and did my PhD in actually in Gaussian processes, not in computer vision.
+
+01:21.160 --> 01:27.480
+And so Gaussian processes is this class of Bayesian and parametric models that learn
+
+01:27.480 --> 01:34.920
+very quickly from small number of data points and my work was focusing on scaling the
+
+01:34.920 --> 01:43.160
+compute aspect of GP. And on the side, I also worked a little bit on adversarial robustness
+
+01:43.160 --> 01:49.440
+of models. So this was the time when people just found out that you can actually apply
+
+01:49.440 --> 01:55.880
+this imperceptible perturbation to images and then change the class labels. So we thought
+
+01:55.880 --> 02:01.040
+that a, you know, can you change more than just a class label, can actually change the
+
+02:01.040 --> 02:07.000
+features to make the features like, you know, another image completely, not just a change
+
+02:07.000 --> 02:13.720
+label. And surprisingly, in terms of actually, you can, you can actually take a picture
+
+02:13.720 --> 02:21.280
+of me and then apply a perturbation change the feature of me to look like a feature of
+
+02:21.280 --> 02:27.240
+a car, for example, not just any car, but a particular car of particular color in that
+
+02:27.240 --> 02:35.560
+pose, et cetera. And so that was very surprising at the time, but without, you know, this
+
+02:35.560 --> 02:43.160
+adversarial robustness issue is going to be solved very quickly, but turns out to help
+
+02:43.160 --> 02:47.960
+me more further from truth, things still consult the problem.
+
+02:47.960 --> 02:51.160
+Do you still follow that space?
+
+02:51.160 --> 03:02.120
+Not super closely, but it still motivates a lot of things that I do, especially later,
+
+03:02.120 --> 03:07.720
+after I joined Borealas, you know, I look at that literature and people found out that
+
+03:07.720 --> 03:12.520
+not only can do this on vision, you can do this on an LP as well. And obviously, there
+
+03:12.520 --> 03:17.960
+the perturbation is not imperceptible, you know, change to pixels, but you add some extra
+
+03:17.960 --> 03:23.720
+text. And also, you can do this in the physical world, apply some patches to images that
+
+03:23.720 --> 03:27.720
+are not, you know, changing pixels, but some patterns that people don't pay attention
+
+03:27.720 --> 03:36.080
+to. And so, and they're actually very hard to get rid of. So, so what that tells is this
+
+03:36.080 --> 03:42.080
+old, you know, theoretical approach of studying and understanding this adversarial tax, we're
+
+03:42.080 --> 03:47.200
+not actually capturing what really under the hood, like these people were considering
+
+03:47.200 --> 03:54.760
+adversarial tax with like some sort of perturbation with in a ball centered at the image and then
+
+03:54.760 --> 03:58.960
+look at the robustness model that way, but that clearly doesn't capture all the other
+
+03:58.960 --> 04:07.680
+ones. And fundamentally what it looks like is what the model, how the model represent the
+
+04:07.680 --> 04:14.480
+data, represent the word is different from human, you know, from people's representation
+
+04:14.480 --> 04:20.360
+and they're not aligned. And it looks like their models are picking up on sort of a short
+
+04:20.360 --> 04:26.640
+cause or a speed of correlations or other type of, you know, associations that, you know,
+
+04:26.640 --> 04:34.840
+we don't use. And fundamentally, it looks like that's the problem. And, and it looks like,
+
+04:34.840 --> 04:44.840
+you know, one has to really, you know, go beyond pattern matching to really, to be able
+
+04:44.840 --> 04:50.040
+to get to the root of this problem. So, to look at, you know, model that can reason that
+
+04:50.040 --> 05:00.040
+can try to discover the, you know, the type of relationship that people use in recognizing
+
+05:00.040 --> 05:06.280
+understanding and reasoning. So, that was, that was my thought at the time. And I think
+
+05:06.280 --> 05:13.200
+it was also, you know, thinking share by, you know, lots of people in the field. And so
+
+05:13.200 --> 05:19.920
+that led me to work on an LP, because an LP is a lot closer to reasoning, I felt, because
+
+05:19.920 --> 05:25.880
+language is already a model of the word. And, yeah, also because, for us, it's part of
+
+05:25.880 --> 05:37.240
+a robot Canada. There's a lot of potential application of text of an LP inside a bank.
+
+05:37.240 --> 05:42.520
+Tell us a little bit about touring and the motivation for it. How did the project get
+
+05:42.520 --> 05:43.520
+started?
+
+05:43.520 --> 05:51.480
+Right. So, touring is, is this natural language database interface? It's a demo of a natural
+
+05:51.480 --> 05:59.480
+language database interface that we built. And it's really just putting a lot of our work
+
+05:59.480 --> 06:07.600
+on semantic parsing this space together in this academic demo. So, natural language database
+
+06:07.600 --> 06:14.040
+interface, the, from an application perspective, the, the potential users to allow non-technical
+
+06:14.040 --> 06:19.080
+users to interact with structured data set, because there's a lot of insight in there.
+
+06:19.080 --> 06:26.080
+And, you know, we want to give it opportunity for non-technical users to get those insights.
+
+06:26.080 --> 06:34.840
+And, from a research perspective, it's a very challenging natural language processing
+
+06:34.840 --> 06:43.640
+problem, because the underlying problem is you have to parse, question us in English
+
+06:43.640 --> 06:50.200
+or any other natural language and, and convert to SQL. And, we all know natural language
+
+06:50.200 --> 06:56.680
+is ambiguous. Machine language is all ambiguous. So, you have to resolve all the ambiguity
+
+06:56.680 --> 07:03.080
+in order to parse correctly. Furthermore, what's different from something like convert to
+
+07:03.080 --> 07:09.560
+Python or other program language is the mapping from patterns to SQL is underspecified if
+
+07:09.560 --> 07:15.600
+you don't know the schema. It really depends on, you know, what is the structure of schema.
+
+07:15.600 --> 07:21.800
+And so, so model has to really learn how to reason using it, and in order to resolve
+
+07:21.800 --> 07:30.040
+all the ambiguity and correctly predict the SQL. And lastly, you know, this, you train
+
+07:30.040 --> 07:33.960
+the model on some domain, you don't want to just work on this domain, you want to work
+
+07:33.960 --> 07:38.800
+on domains and databases that you've never seen before. So, that's the cross domain,
+
+07:38.800 --> 07:44.840
+cross database part of it. And that is a very, very challenging, because it's a completely
+
+07:44.840 --> 07:49.360
+different distribution once you move to a different domain.
+
+07:49.360 --> 07:58.480
+So we're talking about touring, you know, shortly after the release of OpenAI's Codex.
+
+07:58.480 --> 08:03.160
+And so I imagine as you're talking to people about it now, that's a correlation that
+
+08:03.160 --> 08:11.160
+folks make, because that project is also focused on code generation. I'm curious, you know,
+
+08:11.160 --> 08:18.080
+if you might compare and contrast the different projects and, you know, maybe the complexity
+
+08:18.080 --> 08:24.400
+of the challenge or, you know, different aspects that would help us understand how they,
+
+08:24.400 --> 08:27.760
+you know, might be similar or not.
+
+08:27.760 --> 08:34.920
+Right. So, first of all, Codex, I saw the demos, and the demos are really amazing and
+
+08:34.920 --> 08:42.760
+impressive. I think if you look at the where it's applied, it's focusing on product language,
+
+08:42.760 --> 08:49.960
+like Python, JavaScript, and all this language where you can find a lot of public, available
+
+08:49.960 --> 08:55.360
+training data, like, you know, on GitHub and other sources. I think there are training
+
+08:55.360 --> 09:04.720
+on code from GitHub. And so, the availability of data is a one major difference. When you
+
+09:04.720 --> 09:11.120
+try to do SQL, as I said earlier, you really have to know the schema, right? There's not
+
+09:11.120 --> 09:17.560
+a lot of training data for SQL, public, available, like, people don't post their schema online
+
+09:17.560 --> 09:25.480
+generally. So, the amount of data is very, very small that can be used for, you know, even
+
+09:25.480 --> 09:31.560
+for, like, modeling will SQL, you can't find a ton of it for training purpose. And so,
+
+09:31.560 --> 09:38.600
+so that is, I would say, like, one major difference. So, that's also why Turing is a academic
+
+09:38.600 --> 09:44.320
+demo that we built, where it's Codex, obviously, with the, you know, all more data, the model
+
+09:44.320 --> 09:49.320
+is, it is, you know, fairly good, and you can build a product of it.
+
+09:49.320 --> 10:00.640
+Okay. You mentioned earlier that one of the elements of this project is kind of reasoning
+
+10:00.640 --> 10:07.720
+and reasoning on text, and that that's a fundamental aspect that allows you to transform
+
+10:07.720 --> 10:12.480
+natural language to SQL. Can you talk a little bit more about the role of reasoning in
+
+10:12.480 --> 10:20.240
+this problem? Right. So, so one of the aspects is what I mentioned earlier, like, it's
+
+10:20.240 --> 10:26.480
+underspecified. And it's underspecified due to, you know, you have to, you know, really
+
+10:26.480 --> 10:34.240
+leverage schema. And the other part is you have to really have common sense. A lot of times,
+
+10:34.240 --> 10:43.080
+for example, if I say, you know, which cities have the most number of employees under 30,
+
+10:43.080 --> 10:48.000
+under 30 that refers to age of employee. I assume that I have a scheme, a table with
+
+10:48.000 --> 10:55.240
+age column. It's never mentioned explicitly. But, you know, the model has to learn to,
+
+10:55.240 --> 11:00.040
+that under 30 refers to age and have to make that association. So, that's common sense.
+
+11:00.040 --> 11:08.040
+And learning, you know, reasoning using schema, an example is, if there's textual evidence
+
+11:08.040 --> 11:13.680
+for two of the tables, but these two tables are, you know, unrelated to each other, and
+
+11:13.680 --> 11:20.560
+there's no foreign key links. And the model really has to look at how the schemas link
+
+11:20.560 --> 11:26.360
+together, you know, the relationship of elements in order to infer that, hey, maybe there's
+
+11:26.360 --> 11:33.680
+a third table that I need to bring in in order to produce the correct SQL. So, all of
+
+11:33.680 --> 11:43.320
+this is an example where something is missing, causing it to be ambiguous. And the reasoning
+
+11:43.320 --> 11:50.120
+feeling in this missing information allow the model to deconfond the relationship. Otherwise,
+
+11:50.120 --> 11:55.480
+you know, if the information is not there, and the model can just pick up, you know, on
+
+11:55.480 --> 12:01.120
+spherical correlations, shortcuts that makes learning possible during training, which
+
+12:01.120 --> 12:06.000
+of course doesn't generalize, especially on a task like this, where you try to generalize
+
+12:06.000 --> 12:13.480
+to a new domain, a new schema, and with very small amount of data.
+
+12:13.480 --> 12:22.360
+And how is reasoning implemented in the model? Is it, it is something that's primarily
+
+12:22.360 --> 12:30.600
+done at training time, and at inference time, it's a single step, a single step inference,
+
+12:30.600 --> 12:35.560
+or is it more something that's done at inference time, where you're, you know, going through
+
+12:35.560 --> 12:40.200
+multiple steps to try to reason about a particular query?
+
+12:40.200 --> 12:49.600
+Right. So, there's few elements in the model that can, you know, that express some structural
+
+12:49.600 --> 12:57.080
+prior about the problem that performs some form of reasoning. One is, you know, it's
+
+12:57.080 --> 13:04.880
+overall, it's encoder decoder type of architecture, architecture on the decoder side. The decoder
+
+13:04.880 --> 13:14.120
+actually knows the grammar of C-pole, and it's baked into the, you know, the decoder
+
+13:14.120 --> 13:20.360
+knows has some sort of knowledge that we designed into the, into the model, and it leveraged
+
+13:20.360 --> 13:26.440
+the grammar of C-pole to, to figure out at this step, what are the legal things that can
+
+13:26.440 --> 13:33.200
+be produced, and that allows us to prune search space during inference, and during training
+
+13:33.200 --> 13:42.240
+and, and it learns what are the things that are likely. And on the encoder side, it's,
+
+13:42.240 --> 13:48.280
+the model is, is basically a transformer, but, you know, a special type of transformer,
+
+13:48.280 --> 13:53.040
+uh, called a relational way of transformers, and can consider the different religions
+
+13:53.040 --> 14:01.080
+of schema elements, and, uh, as well as, you know, association between the, the question
+
+14:01.080 --> 14:08.480
+tokens with, with, with the, um, elements in the schema, like a table name, column name,
+
+14:08.480 --> 14:14.680
+and you can give something, uh, prior knowledge about this, uh, foreign key relationship,
+
+14:14.680 --> 14:19.960
+and, uh, some initial evidence about, uh, which token, the question is likely to be linked
+
+14:19.960 --> 14:26.600
+to which column, uh, and, and then during training, uh, the model learns to basically clean
+
+14:26.600 --> 14:31.680
+up the sort of relationship, and in, uh, during inference, it can basically, uh, starting
+
+14:31.680 --> 14:38.680
+from an initial guess, and then try to refine, uh, the potential link, and then, uh, remove
+
+14:38.680 --> 14:47.040
+some ambiguities. It's, uh, it's still some, I'll say it's still, um, rough form of, uh,
+
+14:47.040 --> 14:50.840
+reasoning, it's, uh, obviously it doesn't capture all the different type of things that
+
+14:50.840 --> 14:56.480
+we wanted to, to continue to do, but, uh, it already, uh, make a big, big difference.
+
+14:56.480 --> 15:02.880
+Okay. Um, you, you talked about how you're part of what makes the model work, is that
+
+15:02.880 --> 15:09.080
+you're providing information to the transformer during training. Can you talk about how
+
+15:09.080 --> 15:17.920
+the, the data is prepared and generated to train the model? Uh, right. So, um, during training,
+
+15:17.920 --> 15:26.680
+um, basically the model considers both questions and schema, and, uh, so, uh, the, uh, the, uh,
+
+15:26.680 --> 15:33.280
+the model is actually a, uh, consists of a pre-trained, uh, deep transformer, like a Roberta,
+
+15:33.280 --> 15:38.520
+and on top of it, it has some extra fresh layer of, uh, relational wear transformer
+
+15:38.520 --> 15:45.640
+layers, and, uh, the relational wear transformer layers encode, uh, some prior knowledge, um,
+
+15:45.640 --> 15:52.400
+between elements of, uh, you know, columns, relations, and, uh, words, and, you know, uh,
+
+15:52.400 --> 15:57.360
+words in the questions, and, uh, words in the, uh, the column, uh, in the table, for
+
+15:57.360 --> 16:05.400
+example, if, for instance, if we see a column, uh, in the questions, um, if we see a mention
+
+16:05.400 --> 16:11.960
+of, uh, you know, a column of the, uh, name in the questions, it, it provides some initial
+
+16:11.960 --> 16:18.040
+evidence, and so it has a link there, and, uh, during training, um, basically the model
+
+16:18.040 --> 16:24.480
+tried to maximize the, uh, the, the correct, uh, prediction, and, uh, during that process,
+
+16:24.480 --> 16:30.080
+it can learn to adjust the weight and, uh, uh, remove some of the, the noisy, initial
+
+16:30.080 --> 16:40.080
+links. Um, so, so the relational layers aren't trained, those are, um, you know, built,
+
+16:40.080 --> 16:47.560
+as priors, and then added to the transformer. Uh, the, they, they are trained. So everything
+
+16:47.560 --> 16:55.000
+is okay. Okay. And, uh, the relational layers, um, they are able to take, um, so maybe
+
+16:55.000 --> 16:59.560
+let me take a step back. But are they trained separately from the rest of the transformer?
+
+16:59.560 --> 17:04.880
+Okay. Everything is trained together into end. Um, so maybe let me take a step back. So,
+
+17:04.880 --> 17:10.600
+the transformer is generally like, they can encode, uh, basically, they encode the fully
+
+17:10.600 --> 17:15.320
+connected graph, right? It, it looks, uh, if we ignore the position in bedding, it looks
+
+17:15.320 --> 17:20.480
+like it considers the full sentence as, uh, as a fully connected graph, it's every word,
+
+17:20.480 --> 17:26.040
+it's, it's, it's every word. And if you take a schema and, uh, say that you flatten the
+
+17:26.040 --> 17:31.680
+schema, uh, into, like, uh, just a long stream, like, uh, question and put it together with
+
+17:31.680 --> 17:38.480
+the, uh, with, with the, uh, with the, with the question and it looks, consider everything
+
+17:38.480 --> 17:45.600
+as a fully connected graph. Um, what relational wear transformer does is, it, uh, as, you know,
+
+17:45.600 --> 17:50.880
+some additional prior information saying that beside this, uh, fully connected, uh, knowledge
+
+17:50.880 --> 17:55.840
+about, you know, everything could potentially be related to everything else. Uh, you know,
+
+17:55.840 --> 18:01.640
+we have this knowledge of special links, like foreign, foreign key relations. And, uh, if
+
+18:01.640 --> 18:07.360
+we see, you know, mention of, uh, car in the passion and, uh, there's a column, uh, called
+
+18:07.360 --> 18:12.880
+a car type, uh, it's more likely that these two are related. So it, uh, makes this, uh,
+
+18:12.880 --> 18:17.920
+as this additional inducted bias into the model. And later on during training, it can
+
+18:17.920 --> 18:24.520
+refine what, uh, the initial given, uh, evidence into, uh, the, you know, try to infer what
+
+18:24.520 --> 18:31.640
+is truly there. Okay. Uh, I think that, I think that's consistent with what I thought,
+
+18:31.640 --> 18:36.600
+but I'm still not clear on the, you know, where does the initial inductive bias come from?
+
+18:36.600 --> 18:42.760
+Is that trained, you know, separately or is that, uh, you know, baked in as kind of an engineering
+
+18:42.760 --> 18:51.400
+process? Um, so the foreign key relations that's known from the schema and the initial, uh, link
+
+18:51.400 --> 18:57.320
+that's, uh, given by some heuristics. So, so that there's some, uh, a little bit of engineering
+
+18:57.320 --> 19:03.080
+there. Okay. But even if the schema link can miss some of the initial relations, it's able
+
+19:03.080 --> 19:12.040
+to, uh, to, to, to, uh, pick those up and training. Yeah. Okay. Okay. Um, interesting. And so
+
+19:12.040 --> 19:18.680
+then the, the entire model is kind of trained and to end, uh, you know, starting with those
+
+19:18.680 --> 19:25.960
+biases and what are, and the training data, the training data set consists of, uh, set of
+
+19:26.680 --> 19:35.880
+questions that are, um, appended, can catnated with schema information? Uh, yes. Uh, in a way,
+
+19:35.880 --> 19:42.760
+there's more information, uh, like there's, uh, information about, uh, the, the, uh, the, uh,
+
+19:42.760 --> 19:49.880
+the type of, uh, columns, uh, that can be used in there. Um, but, uh, uh, conceptually,
+
+19:49.880 --> 19:55.640
+you can think of this as just a graph that, uh, the model looks at. So there's, uh, essentially
+
+19:55.640 --> 20:04.120
+question, uh, natural language queries, plus, um, some features related to the, the database
+
+20:04.120 --> 20:15.560
+essentially. Yeah. Is that right? Um, and the, um, um, there's a, uh, kind of a label that
+
+20:15.560 --> 20:23.000
+is the query that you want returned. Is it the query, is it the query that you want to execute
+
+20:23.000 --> 20:28.440
+or the results of the query, uh, against the database? It's the, uh, query that you want to ask
+
+20:28.440 --> 20:39.400
+you. Okay. Okay. Um, there's, uh, so, so, um, uh, this system, we, we trended on this, uh,
+
+20:39.400 --> 20:45.720
+public benchmark dataset called spider. Uh, it's, it's a very, uh, small dataset, uh, you know,
+
+20:45.720 --> 20:51.480
+for, uh, from deep learning, you know, standpoint, it, uh, but because collecting data for this
+
+20:51.480 --> 20:57.080
+generally is pretty hard. Spider is the de facto, you know, uh, benchmark dataset for this problem.
+
+20:57.080 --> 21:05.160
+Mm-hmm. It has, uh, uh, 200 different databases, but overall, just, uh, a little bit over 5,000
+
+21:05.160 --> 21:11.400
+queries. So it's, uh, it's a very small, uh, data problem. Uh, yet you have to learn to
+
+21:11.400 --> 21:20.440
+generalize to complete new, uh, developments. Mm-hmm. And would it be practical? Would you think to train,
+
+21:20.440 --> 21:25.880
+not on the query that you want, but on the resulting data so that, you know, you can get the same
+
+21:25.880 --> 21:31.960
+data with many different queries and the database, some will be more optimal than others. Um, you know,
+
+21:31.960 --> 21:38.200
+there's, you might want to let the network figure that out. Yeah. So, so there are other works, um,
+
+21:39.160 --> 21:46.440
+uh, in this base that actually looks at, uh, use execution result. Okay. So, uh, it's, it's possible,
+
+21:46.440 --> 21:53.720
+though you have to, um, either change how your model works. So, so your model still has to produce
+
+21:53.720 --> 22:00.920
+these discrete objects that, uh, execute. Uh, and so you either have to change that to, to some sort
+
+22:00.920 --> 22:06.680
+of, uh, differentiable structure, uh, or you have to, you know, use, uh, reinforcement learning or
+
+22:06.680 --> 22:12.280
+other related, uh, uh, techniques to be able to do credit assignments through that. Um, um, so,
+
+22:12.280 --> 22:19.560
+yeah, so, so it's possible other people have explored, um, on this problem, um, it doesn't, uh,
+
+22:19.560 --> 22:28.200
+work super well, um, generally, um, but we are, we, we have explored, uh, combining with our
+
+22:28.200 --> 22:35.000
+techniques and the denotation, the execution result to help, uh, perform data augmentation
+
+22:35.000 --> 22:40.520
+afterward and that improves performance. So, in a way, yes, we are, uh, we have additional step that,
+
+22:40.520 --> 22:47.640
+that, uh, can leverage the execution results. Okay. You mentioned, uh, a couple of things, one,
+
+22:47.640 --> 22:54.520
+that the, the data set is, you know, fundamentally a small data set, uh, you just mentioned data
+
+22:54.520 --> 23:02.600
+augmentation is one possible way to address that. Are there other things that you have done, uh, in,
+
+23:02.600 --> 23:07.400
+in this project to kind of optimize the transformer model around the small data set problem?
+
+23:08.040 --> 23:16.200
+Yeah. So, so, um, actually one of the, the key, um, difference that, uh, in our approach, uh,
+
+23:16.200 --> 23:22.280
+so a lot of things that I mentioned, uh, previously was techniques that were already invented in,
+
+23:22.280 --> 23:28.680
+in the field. So, so, relational wear transformer, we didn't invite, invent that, um, but we're,
+
+23:28.680 --> 23:36.280
+you know, we, we found out is, uh, if you put a very deep relational transformer, um, you can train
+
+23:36.280 --> 23:43.320
+it very well. Um, the models, uh, you know, even if it has ability to perform sounds or,
+
+23:43.320 --> 23:49.880
+form of reasoning, if you can train it, then it's no use. So, so we found a way to, uh,
+
+23:49.880 --> 23:57.240
+train deep transformers, uh, in the very small data set in the stable fashion. And, uh, so,
+
+23:57.240 --> 24:04.280
+this is, um, very, um, you know, counter to what people used to believe, like, uh, you have,
+
+24:04.280 --> 24:08.920
+you know, you, you, you train deep transformers, you have to have large data set,
+
+24:08.920 --> 24:14.440
+um, yeah. With, with this technique that we, we came out, it's published that ACR this year,
+
+24:15.160 --> 24:19.000
+uh, it's possible to train it in a stable fashion or small data set.
+
+24:19.960 --> 24:26.920
+And so, what are the key elements of doing that? Right. So, um, it's, uh, in the nutshell,
+
+24:26.920 --> 24:33.640
+it's, uh, it's a better way to initialize these models. Okay. And, uh, it also builds on
+
+24:33.640 --> 24:41.800
+prior works that, uh, looks at, you know, initializing deep transformers models. And, uh, we're,
+
+24:41.800 --> 24:48.200
+we're, you know, we make a big difference here is, uh, we make it possible to actually add
+
+24:48.200 --> 24:53.400
+these layers on top of pre-trend and then train everything together. So, previous techniques that,
+
+24:54.280 --> 24:59.320
+uh, improve stability of this transformers, they were only considering training from scratch.
+
+24:59.320 --> 25:04.760
+But when you print on, on a small data set, you want to leverage pre-trend. You don't want to train
+
+25:04.760 --> 25:11.000
+transformer, you know, a fresh transformer from scratch completely. But the previous techniques
+
+25:11.000 --> 25:17.480
+just doesn't work when you have, you know, put the new layers on top of a, uh, pre-trend bird or
+
+25:17.480 --> 25:25.240
+Roberta. And, uh, in, in, in the nutshell, well, you know, the, how this works is, um, it turns out
+
+25:25.240 --> 25:31.960
+the problem with deep transformer, with transformer training generally is the layer norm, uh, layer.
+
+25:31.960 --> 25:39.480
+And, uh, previous work have found out that, you know, if, if you can remove that somehow and, uh,
+
+25:39.480 --> 25:45.480
+still make training stable, the performance is much better. And training transformer generally
+
+25:45.480 --> 25:51.000
+require you to, like, have layer norm large batch size and learning rate warm up. It turns out
+
+25:51.000 --> 25:57.480
+you want to remove layer norm, uh, don't do warm up. And here, you know, on small data set,
+
+25:57.480 --> 26:02.120
+you have to use small batch size. So we make all, you know, these three possible.
+
+26:03.800 --> 26:10.120
+And when you say you make all those three possible, how do you, how do you do that?
+
+26:10.920 --> 26:19.160
+Right. So, um, the, um, basically in the nutshell, the idea is, um, you want to, there are
+
+26:19.160 --> 26:25.560
+certain parameters that are, uh, in the transformer, either read vanilla transformer or relational
+
+26:25.560 --> 26:32.120
+wire transformers, uh, you want to, during initialization, you want to scale them by a factor that's
+
+26:32.120 --> 26:37.800
+proportional to the depth. And in the paper, we have, uh, some derivation show exactly what that
+
+26:37.800 --> 26:44.440
+scale factor is. Uh, in turns out, when you do this on top of a pre-trained model, that scale
+
+26:44.440 --> 26:51.080
+factor, uh, needs to be data dependent. And so, so our matter is called the DT fix up,
+
+26:51.080 --> 27:00.680
+um, data dependent transformer fixed update initialization. So when you do that, uh, the,
+
+27:00.680 --> 27:08.360
+the, the, the model is initialized to, uh, basically, uh, in a stable regime, uh, for
+
+27:08.360 --> 27:14.600
+optimization with, uh, Adam, and, uh, it doesn't also lead, which is the typical problem with, uh,
+
+27:14.600 --> 27:20.520
+that learning rate, warm up, and later on, try to fix, but, uh, uh, fail set, uh, doing. So,
+
+27:20.520 --> 27:26.040
+when you do all of this together, uh, you know, training is stable since the beginning, and you can
+
+27:26.040 --> 27:32.840
+train your deep transformer, uh, we can, you know, the maximum we train was 48 layers on this small
+
+27:32.840 --> 27:41.160
+dataset, um, with very small batch size. Uh, the overall dataset is, is just, uh, you know,
+
+27:41.960 --> 27:47.160
+5,000 less than, you know, for training is less than 5,000 queries. So you can't use large,
+
+27:47.160 --> 27:53.800
+very large batch size. So instead of the learning rate warm up and the layer norm and the large
+
+27:53.800 --> 28:02.040
+batch size, you kind of substitute that with, uh, data aware initialization that sounds like it
+
+28:02.040 --> 28:07.960
+does a pass on the data and then scales the parameters and set your initial weights and then
+
+28:07.960 --> 28:15.640
+you get a stable result from the, uh, your training. Yeah. And, um, what's amazing is, um, once you
+
+28:15.640 --> 28:21.480
+are able to train, uh, this in a stable fashion, the transformer plus relational wear transformer
+
+28:22.120 --> 28:29.160
+can already perform a lot of the, you know, the, the reasoning it, the improvement on this hard cases
+
+28:29.160 --> 28:38.040
+is, it's, uh, it's huge. So it turns out, it's, so, so what's, uh, the learning here is,
+
+28:38.040 --> 28:42.680
+it's already, you know, this model can already do, uh, some form of reasoning like this,
+
+28:42.680 --> 28:48.760
+it's just we're not able to trend them, uh, on this, uh, in a stable fashion.
+
+28:48.760 --> 28:58.760
+Mm-hmm. And with the initialization approach, uh, and its data dependencies, is it, um,
+
+28:58.760 --> 29:05.640
+did you find that it was broadly applicable to, uh, a variety of data sets or is it very specific
+
+29:05.640 --> 29:12.440
+to the, you know, the benchmark data sets that you use or, you know, other, um, characteristics
+
+29:12.440 --> 29:20.120
+of the data set? Right. So we, uh, we also tried this, um, a completely different, uh, problem,
+
+29:20.120 --> 29:26.120
+but that also requires, uh, uh, reasoning. So, so a problem for logical reading comprehension.
+
+29:26.120 --> 29:33.000
+Mm-hmm. So, so we actually did this after, you know, we made all this working, uh, on, on the
+
+29:33.000 --> 29:38.120
+semantic parsing problem and we took that data set and, uh, it's also very small and very hard
+
+29:38.120 --> 29:44.120
+problem and we just, uh, applied the technique and got, uh, very, very good results like, uh,
+
+29:44.120 --> 29:49.560
+without any special engineering on the, on that task, we thought, uh, near state of art on that
+
+29:49.560 --> 29:57.560
+problem as well. So generally, yeah, it, uh, it looks like it's, um, uh, obviously if, if your
+
+29:57.560 --> 30:03.640
+data set is already huge and then you can use large batch size and, uh, that, that, that makes training,
+
+30:03.640 --> 30:08.040
+you know, much more stable, but when you have small data set, you can't, you can't do that.
+
+30:09.880 --> 30:18.600
+And we're the, uh, the data sets, the, the benchmark data set that you use, was that, um,
+
+30:18.600 --> 30:24.440
+was that a multilingual data set or is it monolingual and, um, you know, what kind of support for
+
+30:24.440 --> 30:31.000
+multilingual do you have? Uh, these, these problems are, are just, uh, English like the reading comprehension
+
+30:31.000 --> 30:40.360
+and, uh, semantic parsing. But, but, uh, yeah, that, um, there, yeah, we, for, for semantic parsing,
+
+30:40.360 --> 30:48.760
+there is, uh, another data set, but, but there, um, but, but there's no, uh, cross language.
+
+30:51.480 --> 30:55.800
+At least in the, the, the popular ones for cross database and semantic parsing, there's not
+
+30:55.800 --> 31:01.080
+simultaneous cross database and cross language. Mm-hmm. Is multilingual something that you're
+
+31:01.080 --> 31:07.160
+looking at or interested in? Uh, yeah, I think it's, it's very challenging problem.
+
+31:07.160 --> 31:13.960
+Um, uh, at the moment, we're not studying this, this problem, uh, is there, there are other like,
+
+31:15.080 --> 31:17.080
+unresolved, uh, calendars.
+
+31:18.920 --> 31:23.080
+Uh, let's talk a little bit about those. What are the kind of the big challenges are next steps
+
+31:23.080 --> 31:31.080
+with this work? Right. So, so generally, um, you know, data, if you want to continue to improve
+
+31:31.080 --> 31:38.680
+the accuracy, um, data is a problem. How to perform data augmentation in this space. Um, I think
+
+31:38.680 --> 31:45.960
+that's, uh, that's a fundamental, uh, blocker. And we are looking at, uh, how to, uh, how to do that.
+
+31:45.960 --> 31:52.680
+In fact, it sounds like you did a bit of data augmentation already, right? Uh, yes. Um, actually,
+
+31:52.680 --> 31:58.760
+we, we, um, so for the non, uh, academic research part of this project, we actually done a lot of
+
+31:58.760 --> 32:06.920
+data augmentation to make something like this work. Um, but it's, it's challenging. Um, so other people
+
+32:06.920 --> 32:12.760
+who have done this, their, their technique is, um, to basically engineer some sort of a grammar
+
+32:12.760 --> 32:18.920
+that can simultaneously produce, uh, seagull query and, uh, natural language, natural language.
+
+32:20.440 --> 32:25.480
+But it's, it's very, very tedious hard task to do. And we, we actually also tried it. And that
+
+32:25.480 --> 32:31.880
+was also, uh, our first intuition when it comes to do data augmentation in this, um, but to actually
+
+32:31.880 --> 32:36.760
+engineer this grammar to produce questions that are very natural. It's, uh, it's very, very tough.
+
+32:37.480 --> 32:42.600
+So, so how to do data augmentation without, uh, you know, going through
+
+32:43.400 --> 32:50.840
+and engineer a, a generative model for this, basically. It's, uh, yeah. It's something that we're
+
+32:50.840 --> 32:57.480
+looking into. And we have some working progress. It's not yet released that, uh, that allows us to
+
+32:57.480 --> 33:04.920
+leverage, um, uh, you know, knowledge from pre-trained model to actually improve, uh, the,
+
+33:04.920 --> 33:12.520
+effect, effectiveness of data augmentation. Um, and before we go to the, the next challenge, um,
+
+33:13.320 --> 33:20.120
+the, the data augmentation conversation kind of sparked a question around the complexity of
+
+33:20.120 --> 33:27.160
+the questions and the queries. Can you, uh, can you kind of speak to that and characterize the,
+
+33:27.160 --> 33:32.040
+the level of complexity that the, that turns able to, um, to deal with?
+
+33:32.680 --> 33:39.560
+Yeah. So, so in terms of query that can produce, it can produce, um, you know, queries that involve
+
+33:39.560 --> 33:47.800
+joints, uh, multiple joints, uh, subperies. Um, so sometimes you have questions that are,
+
+33:47.800 --> 33:53.800
+in English, very benign, very simple, like, um, this is not an example that our own shell spider,
+
+33:53.800 --> 33:59.160
+but, but, you know, say, like, what's the average return of all the stocks that performed above
+
+33:59.160 --> 34:05.640
+market average? So, so there's compositionality there. And, uh, market average referred to, like,
+
+34:06.360 --> 34:11.560
+you know, actually, well, depending on the structural schema, well, will require you to first compute
+
+34:11.560 --> 34:18.040
+that number by doing some sort of, uh, averaging, abbreviation, and the plug it into, you know,
+
+34:18.040 --> 34:26.120
+the, the top level query. And, uh, turning is able to, to do things like, like this. And, uh,
+
+34:27.320 --> 34:33.400
+also, obviously, it's also able to handle some of the other extreme, like, if you write questions in,
+
+34:33.400 --> 34:39.400
+you know, very verbosely, you know, with lots of different conditions, uh, and, uh, you know,
+
+34:39.400 --> 34:48.120
+it can, you know, handle a lot of that as well. Um, now, obviously, you know, it will have,
+
+34:48.120 --> 34:57.080
+you know, mistakes, uh, it definitely is not, uh, yet a system that, uh, is quite a level of accuracy,
+
+34:57.080 --> 35:04.360
+it's, you know, useful, uh, directly as, uh, you know, if you want to just trust the result,
+
+35:04.360 --> 35:12.040
+extreme result, 100%, it, it's not quite there yet. That, that's also why, like, for the Turing
+
+35:12.040 --> 35:20.280
+demo, uh, we built in some, you know, system, uh, in presenting the end result, we help user, um,
+
+35:20.280 --> 35:25.160
+you know, really makes sense of the result and try to judge for themselves whether it's what they want.
+
+35:25.720 --> 35:30.680
+So, so what do we do is, um, uh, Turing is able to produce multiple hypotheses,
+
+35:30.680 --> 35:36.760
+uh, during its generation, and we explain the hypotheses back to the user in natural language,
+
+35:37.560 --> 35:43.080
+um, and we highlight the difference across the different hypotheses, and then they can see for
+
+35:43.080 --> 35:48.520
+themselves, okay, the difference between these three is, you know, instead of this column,
+
+35:48.520 --> 35:52.520
+we mentioned that column, and here instead of this value, it's using some other value,
+
+35:52.520 --> 35:57.480
+or maybe the overall just structure law is completely different, and, uh, then they can see
+
+35:57.480 --> 36:03.640
+for themselves, which one corresponds to their, uh, intention originally, and can choose that.
+
+36:05.000 --> 36:10.840
+Now that, that explainability model sounds like its own research project. Is that something you
+
+36:10.840 --> 36:15.160
+worked on internally, or is that kind of an off-the-shelf technique that you're able to go by?
+
+36:15.160 --> 36:21.960
+It's, uh, our, our own work. Okay. So, so that part is, um, so, so we had a number of different
+
+36:21.960 --> 36:28.840
+publications at ACL this year, um, so the work on optimizing deeper transformers, that's one, uh,
+
+36:28.840 --> 36:35.960
+paper, and the Turing demo paper actually consists of the core semantic parser, the component that,
+
+36:35.960 --> 36:42.040
+you know, uh, tries to fill in the value after you get to the SQL sketch, and as well as the
+
+36:42.040 --> 36:48.680
+explanation module, and the explanation module here, um, it's kind of different from normal
+
+36:48.680 --> 36:54.600
+natural language generation, where you, you know, for, at least for research, there's a lot of, uh,
+
+36:54.600 --> 37:00.520
+neural language generation. Here we actually don't, explicitly don't want neural language generation,
+
+37:00.520 --> 37:07.160
+because we want, uh, you know, the difference across the hypothesis to be only due to the hypothesis
+
+37:07.160 --> 37:14.040
+themselves, not that the natural language generation part. So we have a, a, a, a very, you know,
+
+37:14.040 --> 37:19.960
+computer linguistics type of, uh, grammar-based model that can take the SQL and compositionally
+
+37:19.960 --> 37:26.280
+produce the, the natural language explanation step by step, and the only difference there is due
+
+37:26.280 --> 37:34.440
+to the difference in the SQL. Mm-hmm. And just to make sure I understand that, so you're the,
+
+37:34.440 --> 37:46.920
+um, the, um, the explainer is explaining the result, not the process for obtaining the result.
+
+37:47.640 --> 37:56.120
+All right. That interesting nuance. Um, um, it, uh, it doesn't sound quite like, you know,
+
+37:56.120 --> 38:02.840
+not wanting to do generation, but it, it, it sounds like I'm wondering if, you know, there's
+
+38:02.840 --> 38:08.760
+something, you know, missing in not trying to explain the process that won't capture, you know,
+
+38:08.760 --> 38:14.360
+for the end user, what the model may have done to get to the result. But I don't, you know,
+
+38:14.360 --> 38:23.400
+does it even matter? Uh, well, we think it doesn't, we think, because, um, normally, you know,
+
+38:23.400 --> 38:28.200
+user just care about the final answer, right? So you, you can think of SQL as just some sort of,
+
+38:28.200 --> 38:35.560
+uh, um, some sort of, uh, intermediate representation. Um, but this is an intermediate
+
+38:35.560 --> 38:41.720
+representation that actually, you know, could potentially be aligned with how humans think about
+
+38:41.720 --> 38:46.920
+the problem. This goes back to what I mentioned, you know, at the beginning, like, uh, you know,
+
+38:46.920 --> 38:52.600
+the machines representation of the data of the domain of the world, how can we make that
+
+38:52.600 --> 38:58.440
+align with people's representation? So there's a lot of intricacy of about how the neural net maps
+
+38:58.440 --> 39:04.680
+the questions and the reason and maps to the final. But, uh, that details might not be interesting
+
+39:04.680 --> 39:10.120
+to end user. Sort of like when you and I, we speak, I don't know, everything that goes on inside
+
+39:10.120 --> 39:17.720
+the neurons of your brain, like you don't have shared language. And that description allows us to,
+
+39:17.720 --> 39:23.560
+to have a shared understanding. Yeah. Maybe another way to put it, the, the problem that you're
+
+39:23.560 --> 39:31.240
+trying to solve is that the machine is going to spit out SQL that the, the, the user didn't write.
+
+39:31.240 --> 39:35.880
+And so the user may have some difficulty understanding what's actually happening. If you can explain
+
+39:35.880 --> 39:41.560
+to the user what the SQL is doing, they can more easily determine if it's what they expected or
+
+39:41.560 --> 39:46.680
+what they need. And it doesn't really matter what the network did to, uh, it's, that's not the
+
+39:46.680 --> 39:52.040
+explainability problem that you're trying to solve. You're just trying to explain the end result.
+
+39:52.040 --> 39:58.520
+Yeah. Yeah. Yeah. The intermediate result, not really the end result. Yeah. Yeah. Okay. Um,
+
+39:58.520 --> 40:02.840
+and you mentioned to some other challenges that you're looking forward to solving?
+
+40:03.960 --> 40:14.200
+Uh, yeah. So, um, in terms of, uh, you know, how to, um, just, uh, so, so there's some,
+
+40:14.200 --> 40:19.320
+some problems that, uh, in the field that people identify like, uh, you know, the cross-domain
+
+40:19.320 --> 40:25.000
+generalization. So, despite our benchmark, uh, looks at, uh, cross-domain generalization already,
+
+40:26.040 --> 40:33.000
+but it turns out when you're, uh, if you try to generalize to a different data set that are
+
+40:33.000 --> 40:37.720
+collected different, under a different, um, policy like, uh, for data collection,
+
+40:37.720 --> 40:44.600
+um, uh, the accuracy drop is, is pretty big as we all expect from engineering systems. Yeah.
+
+40:44.600 --> 40:53.240
+Like, um, so, so how to, you know, um, you know, make a model more robust, you know, not, uh,
+
+40:53.240 --> 40:59.080
+just, uh, across-domain, across, uh, database that are, you know, sort of more or less collect
+
+40:59.080 --> 41:06.280
+under the same data collection protocol, but to, you know, things that are very different, uh,
+
+41:06.280 --> 41:14.440
+in the wild, uh, that's still a big open problem. Mm-hmm. Possibly relating back to the data
+
+41:14.440 --> 41:21.960
+augmentation problem as well, right? Yeah. Uh, yeah, that's, that's definitely a big part of it.
+
+41:22.840 --> 41:29.800
+Awesome. Awesome. Well, Yenshwai, uh, thanks so much for taking the time to share a bit about
+
+41:29.800 --> 41:38.120
+what you've been working on. It's very full-stop. Take our exercise and we're having it. Thank you.
+

@@ -1,0 +1,360 @@
+Hey everybody, Sam here. We've got some great news to share, and also a favorite
+to ask. We're in the running for this year's People's Choice Podcast Awards, in both the
+People's Choice and Technology categories, and we would really appreciate your support.
+To nominate us, you'll just head over to twimlai.com slash nominate, where we've linked to and
+embedded the nomination form from the award site. There, you'll need to input your information
+and create a listener nomination account. Once you get to the ballot, just find and select
+this week in machine learning and AI on the nomination list for both the Adam Curry People's
+Choice Award and the this week in tech technology category. As you know, we really, really appreciate
+each listener and would love to share in this accomplishment with you. Remember that url is
+twimlai.com slash nominate. Feel free to hit pause and take a moment to nominate us now.
+Hello and welcome to another episode of Twimletalk, the podcast why interview interesting people,
+doing interesting things in machine learning and artificial intelligence. I'm your host Sam
+Charrington. If you follow us on Twitter, you might have seen this announcement, but as of last week,
+the pod is available on both the new Google Podcast app and wait for it, Spotify. If you've
+been waiting on that update, make sure you give us a quick search and subscribe on either or both
+of these platforms. Spotify in particular was a long time in the works and ultimately required
+a big shift in the way the podcast is published, so you may notice other changes as well. Let us know
+if something seems amiss. In this episode, I'm joined by Ajibuso Zhang, PhD student in the Department
+of Statistics at Columbia University. In this interview, Ajie and I discuss two of her recent papers,
+the first and accepted paper from this year's ICML conference titled Noison, Unbiased Regularization
+for Recurrent Neural Networks, which as the name implies, presents a new way to regularize RNNs
+using noise injection. The second paper, an ICLR submission from last year titled Topic RNN,
+a recurrent neural network with long-range semantic dependency. They've used an RNN-based
+language model designed to capture the global semantic meaning relating words and a document
+via latent topics. We dive into the details behind both of these papers and I learn a ton
+along the way. Enjoy.
+All right, everyone. I am on the line with Ajibuso Zhang. Ajie is a PhD student in the Department
+of Statistics at Columbia University. Ajie, welcome to this weekend machine learning in AI.
+Hi, thanks for having me. Absolutely. So Ajie and I are actually catching up for the second time.
+We did have a chance to chat back in December at NIPS, but wanted to get caught up on all of her
+latest work, including a paper that she's got accepted to the ICML conference. So Ajie, before
+we dive in all that, why don't you talk a little bit about your background and how you got involved
+in machine learning research from a statistical perspective?
+Yeah. So I started with machine learning pretty early. I did my undergrad in France at Telecom
+Paritek, where I specialize in statistical learning theory. They call it a theoretical
+advantage statistic. So my background is in a mix of math and CS. After my second year at Telecom,
+I had the opportunity to go to Cornell for an exchange program, which I did and worked more
+on the staff side there. And after Cornell, I decided that I wanted to find a meaningful
+application of statistics. So I went to the World Bank and worked on building models for assessing
+market and counterparty risk, with the vision that if I do my job well, then the World Bank is
+going to keep it stripper a rating and poor countries will be able to get loans at very low rate
+because they don't have access to the market. So I did that for a bit more than a year. And then
+I started my PhD at Columbia around 2014, August 2014 to be more precise. And yeah, I've been
+working on the 36th department ever since. Okay. Can you talk a little bit more about that work
+at the World Bank and the types of models that you were building there?
+Yes, there's different ways we were using stats to assess risk. There's models for value
+at risk. There's model for potential future exposure. All these models basically tell the World Bank
+what are the risk if they enter in a financial agreement with a counterparty. Those counterparty
+are, for example, the ones in the financial market. And if they are able to assess the risk in
+entering into that financial transaction, then they'll be able to not incur any defaults from
+their counterparties. And they will be able to keep their triple a rating, which they are being
+evaluated on. I believe every year by standard imports and other like fish and more,
+there are different shops that assess rating for these types of institutions. And keeping the
+triple a rating is key because then they can get these rates at, they can get these money from the
+market at very low rates and also lend money to poor countries at even low rates. So they are
+acting like an intermediary between poor countries and the financial market. Okay. So my work was to
+assess value at risk and potential future exposure for the World Bank.
+What were some of the data sources upon which you were building those types of models?
+Those were internal internal data sets. Okay. So yeah, there is a repository where they store every
+every transaction they have, either with the poor countries that they lend money to and also to
+the transactions they have with the financial market institutions. Okay. Yeah. Interesting. Interesting.
+And so then you went over into your PhD program and what's the defining thread that is guiding
+your research on the PhD? I like working with probabilistic graphical models and I like also working
+with neural networks because I think they are very flexible. And I like applications involving
+sequential data because I think there's a lot of challenges in modeling sequential data. You need to
+account for the fact that they can be high dimensional. You need to account for all the dependencies
+in the data. And I find that interesting from a scientific point of view. So that's mainly what's
+guiding my research right now, finding ways to improve learning with sequential data.
+And I've looked at things like context representation, regularization, and scalable learning with
+variational inference. Okay. And the paper that you have accepted at ICML is focused on one of those
+areas regularization in particular. Maybe we can start by having you talk a little bit about
+regularization generally and different techniques for doing it and kind of what kind of results you've
+seen applying traditional regularization to RNNs. And then we can talk a little bit about this
+new technique. Yeah. So, recreational networks are the main family of models for sequential data.
+And they tend to be very flexible. They tend to have high capacity because when you have, for
+example, texts, you have the recreational network that represent text as using a hidden state.
+And basically you project each word in your data into that low dimensional space. And that low
+dimensional phase, you also use it to do prediction for the next word that you're going to observe.
+And those parameters, those weight matrices that you use to do these projections used to be
+very high dimensional. And so you end up easily with models that are that have very high capacity
+and that tend to memorize data. And so it becomes important to find ways to regularize those models.
+And the paper that I'm going to present at ICML lies in the line of work that used noise injection
+as a way to regularize these models. Dropout is one one very famous noise injection
+regularization technique. And what we are proposing with noisy is an alternative to dropout that
+does the noise injection in a different way. So maybe talk through how dropout works as a
+baseline for starting to think about this problem. So in dropout for recreational networks,
+you would let's take the LSTN. You would multiply, let's say you have your current observation,
+your current word, XT. You would have to multiply that observation with some Bernoulli noise.
+And you would also have to multiply your hidden state with some Bernoulli noise. And you will
+condition on that noise observation and noise hidden state to compute your new hidden state
+before predicting the next word. And then practically what that means is that you're
+essentially forgetting or not using some of the weights or zeroing out some of the weights,
+is that right? Yes, it's equivalent to basically, like you say, zeroing out some of the weights.
+So you are reducing the capacity of the network in doing that, which is essentially what regularization
+is. And so what's different about the approach you're proposing in the noise in paper?
+In the noise in paper, the motivation was that we want to do regularization while still keeping
+the properties of the model we are regularizing intact. In the sense that we want to regularize
+an LSTM while not altering the LSTM's properties. And we define that in with the term unbiased
+noise injection. And so the way unbiasedness works is that if you take the conditional expectation
+of any hidden state in your sequence, in your sequential representation, then you recover
+the hidden state of the underlying R and then you are regularizing. And you don't get that
+with dropout. And so what way does dropout in what way is it biased or does it not preserve this
+unbiased property? It's because of the way you are injecting the noise. So in noise in we compute
+the hidden state before doing prediction as usual, but we multiply the finite hidden state with noise.
+In dropout, you would multiply the noise with the data and the previous hidden state and you
+condition on those to compute your new hidden state, which uses some nonlinearities. So if you do
+expectation of that hidden state, you wouldn't recover the previous underlying hidden state because
+of the nonlinearities. Whereas in noise in we compute everything, we condition on the previous
+observation and the previous hidden state and compute the new hidden state. And before we use
+that hidden state for prediction, we multiply it or add some noise to it such that when you take
+its expectation, you recover the underlying hidden state. And we found that to be very useful
+in regularizing these LSTMs. Is it fair to simplify this as saying that dropout adds a noise
+before calculating the hidden state and noise and adds a noise after calculating the hidden state
+and doing that, it doesn't bias the network? Yes, that's a good summary of what the difference is.
+You talk about in your paper some performance improvements. I'm curious in your use of the term,
+you know, biased. Have you identified like more qualitative differences between the way these two
+regularization methods perform beyond just the performance? Are there observations you can make
+about the way dropout affects the results of a network? Yes, we have not we have not looked at
+the qualitative differences. But one thing that was interesting in that paper was that given
+under the unbiased noise injection definition, we can consider actually an LSTM that's
+regularized with dropout as a new model, as defining a new model class for sequential data.
+And we apply the noise in regularization on top of that. And we also found improvements.
+We didn't, we didn't unfortunately do any qualitative comparison between dropout and noise
+and I think that would be an interesting thing that I should look at next. Could you elaborate on
+that last comment you made though? On dropout as defining a model class? It sounds like what you're
+saying is that and you hinted at this earlier that dropout and maybe this is comes directly from
+changing the expectation of this hidden state, but you can think of LSTM with dropout as almost
+its own class of model where as noise in applied to an LSTM, it sounds like you're saying preserve
+some fundamental LSTMness or some fundamental thing? Yes, in the sense that the expectation of
+your noisy hidden state is the same as the hidden state of the thing you're regularizing
+under strong and biasness. Are there other things that you learned about applying regularization
+to LSTMs and RNNs in the process of exploring this noise and approach? Yeah, interesting.
+Usually when you want to regularize a model, you will have to basically use less parameters.
+So one way of doing that in iron and has been to tie the weights of your inputs,
+the embedding matrix from the input and the embedding matrix from the output right before you do
+prediction. That's an effective way of doing it, but another way is in using noise,
+but using noise wouldn't reduce the number of parameters. It would reduce the capacity of your
+network, not by reducing the number of parameters, but by reducing the amount that it encodes in the
+data using noise. So you have this network that has a very high capacity while also being regularized
+because you are injecting noise in the procedures such that the network doesn't try to memorize the
+data. No, I'm following you. So one question that occurs to me then is are there implications
+on the computational complexity here in applying a noise-based approach as opposed to tying your
+inputs and outputs in terms of the training time specifically? I'm responding primarily to the
+you saying that you have access to more parameters when you're using a noise-based approach
+than with the other approach you described. Yes, what I mean is that you don't have to reduce your
+number of parameters. All you have to do is use noise such that your weights will memorize less
+of the data than usual. So in terms of training time of course if you have if I give you two
+equivalent networks where they both have the same number of parameters but where one uses noise
+injection and the other one uses weight time but they both have the same number of parameters then
+the training time will will be comparable. Okay. Yeah, the only slight difference will be in the time
+you take to multiply a noise with the hidden state. Right. Yeah. No, it's not particularly significant.
+Yeah, yeah, yeah, exactly. To test this you tested it against a couple of benchmark data sets. Can
+you describe your evaluation process? Yes, we wanted to because it's a regularization method and
+because we applied it to language we used two benchmark data sets. In the literature we used
+the pantry bank and the week it takes two from Salesforce and so we wanted to assess the method
+as being a regularization method. So we compared it to the deterministic unregularized LSTM
+and which we so obviously that adding noise helps in regularizing so you get a better performance
+as defined by a perplexity but we also compared it to an LSTM regularized with dropout to assess the
+importance of having this unbiasedness and we found also that it does better when you ensure that
+your regularization method is unbiased and we also built on this unbiasedness notion that
+since dropout is biased we can consider it as a new model class for sequences and we also
+compared to an LSTM regularized with dropout only as the new model and an LSTM regularized with
+dropout augmented with this noise in regularization and we also found that that helps too.
+And so just to back up on the testing with these two data sets you basically created an RNN
+or trained an RNN on these data sets using these various regularization methods and then
+were you giving it a word and asking it to predict the next word and using that to
+you know that was your basis for evaluation or is it something else?
+Yes, next word prediction.
+Next word prediction.
+Okay, and then you get the perplexity as a measure of how good your language model is doing.
+In the paper you talk about you mentioned earlier Bernoulli noise but you tested this with
+a bunch of different noise distributions. Can you talk a little bit about what you saw there?
+Yes, what we wanted to assess there was let's not only restrict ourselves to Bernoulli and see
+what the effect is when you use any type of noise distributions because there are many and they
+all have different properties, some have heavy details and others some are more skewed and others
+and things like that so we wanted to assess how that would impact the effectiveness of noise in
+but what we found was that the only thing that matters from the noise distribution is its second
+moment so the variance and that you can use any noise distribution as long as you use the same
+variance you will get the same performance and we show that also theoretically in the paper
+by deriving the actual objective function and we found that it depends on yeah the second
+moment of the noise. Did you come to any conclusions as to specific either problems or properties
+of data sets or other characteristics where you know this performs better than you know say drop
+out or some other method or is it does it appear to be broadly applicable to you know whenever
+you're using an RNN? Yes actually yes it would be we only looked at text data but it's applicable
+to any that's a sequence data and I'm working on extending it on that I'm also working on
+extending it to other architectures because ultimately it's not only useful for RNNs because the
+procedure is applicable to any type of neural networks so you can use this with convolutional
+neural networks or also feed forward neural networks. Okay and how far have you gotten with that?
+How how easily does it apply to for example a CNN? There's actually there's actually work on
+at nips 2017 the past nips that had something similar to what we were doing in the feed forward
+context but there what they were using was this importance waiting procedure and they optimize
+the low bound we are not using any of that and and when I say no it is applicable to any type of
+neural network it's because what the only thing that it requires is that if you give me a hidden
+state which is a low dimensional representation of your data from any neural network then I can
+regularize this neural network by just multiplying that hidden state with noise before using it
+to do prediction so in CNNs it would be yes do your usual CNN hidden state computation and then
+once you hand me that I will regularize with noise in by just multiplying it with noise or adding
+it with noise so additive or multiplicative noise injection. Are there any challenges to applying
+this approach to any to RNNs in particular or to to any other extending it to other types of
+networks? No it's actually very it's actually very simple and we we didn't one thing is that you
+have to choose the variance of your noise distribution that's the only thing that it requires and so
+you will need to do grid search on that because it depends on that parameter you need to tune the
+variance of your distribution according to the data you want to fit and so yes that's what the
+one one disadvantage might be that you will need to do grid search on that parameter.
+Yeah okay one thing that I also wanted to mention is that it has a an ensemble interpretation
+like dropout dropout is usually interpreted as getting predictions from an infinite number of
+neural networks we also found that interpretation is the method. Can you explain that elaborate on
+that interpretation? Basically when you inject noise and you want to maximize the likelihood you
+are basically marginalizing out all the noise you've injected into the network and that marginalization
+you can look at it as averaging the prediction of many neural network and that's basically what
+ensemble is and it's been known traditionally to actually have regularization effect which is
+another explanation explanation for why noise injection does regularization. Right we also talked
+about another paper this one you presented at ICLR last year on topic RNNs what was that one about?
+It was about combining recurrent networks and topic models for better sequence model in the sense
+that you are able to get the right context at each time step when doing prediction. The motivation
+for that work was that we found that RNNs and topic models were very complimentary RNNs are very
+good at encoding the local dependencies in the sequence so in language that would be syntax so RNNs
+are very good at detecting syntax and modeling syntax but they have a problem when you go further
+back in the sequence they have problems with long term dependencies because of the usual
+vanishing exploding gradients and what we noticed was that actually we don't need to have an RNN
+with many time steps because as you go further the dependencies in text are not sequential dependencies
+they are semantic dependencies and these words in the document are related semantically with
+because they belong to the same team and topic models are known as these probabilistic
+probabilistic models that can detect teams in data and so it made sense to use topic models
+to get the teams and then condition on those when doing prediction with the RNN.
+And so when you say topic models are you referring to things like embedding spaces and word
+to veck and the like or something else? I'm referring to something else. So what is a topic model?
+A topic model is like a family of graphical model that takes a bunch of documents and tells you
+the teams that they discuss. It tells you each document which topics they discuss in which
+proportion and it tells you what these topics are. So a topic in the topic model literature is
+defined as a distribution of a word of a word and each document is expressed as a distribution
+over those topics. And so what you end up with is a distribution of a word that's your topic matrix
+at least of distribution of a word and you also end up with a distribution of a topic for each
+document. Is your distribution of words is this I guess what comes to mind is LDA is this
+something that you might use in LDA to do exactly what it is? There's LDA and there's approximations
+to LDA using neural networks. So these are neural topic models and use that version in the topic
+ironing paper. We use the neural topic model where you basically represent your document as a
+bag of word as in LDA and project that high dimensional bag of word representation using an MLP
+to get a distribution to get a document distribution. Now what I do in topic ironing is I represent that
+document distribution with a Gaussian and I condition on that in the softmax as an additional
+by-ster depending on whether I need to predict the word that needs this topic content or a word
+that does not need the topic content. And how do you determine for a given word whether you need
+to use the topic content or not? I let the iron and because they are highly flexible I let the
+iron and tell me whether the next word should be a quote-unquote stop words. Those are words that
+don't need any that don't have any semantic meaning. Okay so based on stop words. Yes. Okay.
+So the iron and will tell me whether that the next word needs the topic content or not. Yeah binary
+classification. Got it. So this is interesting to me and that it seems like a an NLP type of
+application of the idea of I guess this theme that I've seen in other places where hey we've got
+these RNN or we've got these neural networks they're great for you know basically approximating
+any relationship if we throw enough data at them but you know hey there are also these more
+traditionally determined relationships that we've figured out. So for example it strikes me as
+analogous to in robotics you know using a strict neural network approach to go from visual input
+to motor output you know or an approach that combines the neural network with traditional
+like control system modeling or something like that. It seems like it's very much thematically
+uh in those kind of along those lines and that's exactly what it is there's this line of work of
+planning to combine privacy grabs for modeling and neural networks and and I think that's an
+interesting line of work which I'm working on because they're very complimentary like when we are
+using ease of these frameworks we are trying to learn from high dimension of data and neural networks
+give you a way to design these highly flexible likelihood whereas graphical models allow you to
+basically represent the hidden structure you want to learn from data in an interpretable way
+so you can combine the two together to benefit from the best of both worlds. Right right and uh
+that approach is always um I always find that uh compelling you know but then I I've also talked
+to folks that you know we might describe as deep learning purists that say you know it's ultimately
+a waste of time the neural networks configure everything out if you throw enough data and compute
+at them and I'm just curious how like if you thought about it like that and how you might respond to
+that. There are still there's that might be true in some context if you have too much compute and you
+have too much data but that's not the case for many people and and there are times where you
+actually care about uh these latent variables there are times where you want to look at them
+and say oh this uh this is how these things depend together and most of the time when you say
+I can just use a neural net and throw compute and data at it and it will give me what I want that's
+when you only care about performance about getting the state of the art number but there are times
+where you actually use this model to better understand the data you're dealing with to
+encode uncertainty to make help people in decision-making understand better their data and
+everything and they're just using a neural network to get better performance wouldn't mean much.
+So for you the the two counter arguments are limited resource scenarios and
+you know broadly speaking explainability and insight that you're able to get from this train
+system. Yes exactly. Continuing on in the topic RNN work was there any interesting insights in
+the way that you combine the topic models and the RNNs where there are different ways that you
+could have done that but you you know went down a specific path or yes there are different ways
+you can combine that. Actually the topic RNN worked you can look at it in a more general way and
+say that what we are trying to do is at the end of the two model sequence data you need to have
+a model to capture the local dependencies so that's that will be your syntactic model and then you
+will have a model that will capture the global dependencies and that would be your semantic model
+and you have also to decide on how you want to combine them so you have three degrees of freedom
+with it you have how to decide on the same tactic how to decide on the semantic how you decide
+on combining them. In topic RNN the idea was so cool and motivating to me that I tried
+in for any of those three things I tried the simplest thing so for the syntactic model I tried
+an RNN which was the main thing that was used for sequences and for the topic model I used the
+neural topic model version because those are efficient to learn ways you just project a bag of
+what representation for a neural network to get a latent representation of the document distribution
+and in combining them I just said let me use the usual software max but add this topic information
+as an additional biester but you can actually use all these three things in different ways
+and that's what's cool about it because it somehow defines a new class of models for dealing with
+these sequences. Did you train these simultaneously or did you train your semantic model and your
+syntactic model separately? Yes the cool thing is that you want to define all these three things
+in the way you combine them in such a way that you can afford joint training. I always prefer
+joint training because then you are letting your model also the ability to decide what
+what it want to use from each component so we did joint training from the topic model and the
+RNN we trained the two things together because the whole pipeline is fully differentiable.
+And how did you evaluate the performance of this approach? The first thing we tried it as a
+language model so we say let's see how it improves on existing language models so we did for next
+word prediction where we got good results but we also said let's see this as a feature extractor
+and we applied it to document classification more specifically we applied it to sentiment analysis
+so we use the IMDB dataset which is a bunch of reviews and labels of those reviews whether they
+are negative or positive and we use topic RNN to extract features from the reviews and use
+those features in a binary classification model and we achieved a very nice results not only
+in terms of classification error rate but also in how it managed to discover the features for
+the negative reviews and the positive reviews so we had this nice clustering of the features from
+the topic RNN of the negative reviews and the positive reviews and that was very exciting.
+Interesting and the features in this context would be words like you know stinks horrible
+that kind of thing or something else. The features we learned was that we use the because
+topic RNN is a generative model for tech for for any sequence data we use the reviews alone
+and trained that as a language model as usual and we derived the features by taking the last hidden
+state of the RNN component of topic RNN and the document distribution output by the topic model
+component of topic RNN and we concatenated them together to say this represents the future for
+this document. The last hidden state of the topic model RNN and the so you're trying to get the kind
+of your latent state of both your semantic and syntactic models and kind of smush them together
+to represent some feature. Yes exactly. Okay. Yeah. Interesting. That turned out to be effective at
+telling you where the negative reviews and the positive reviews lie in this data manifold.
+I don't know if if this makes sense given like dimensionality and stuff like that but
+qualitatively what did those features look like? Did they look like in terms of visualization?
+Visualization or like is it a one hot encoded you know an encoded vector of like where negative
+words were identified for negative features and positive words were identified for positive
+features or something like that or is it something totally different? It's something it's at the
+document level not at the word level. Okay. Yeah. It's at the document level when you concatenate
+these two things and project them in two dimension then you will see a nice clustering of negative
+documents and positive documents together. We don't go at the word level. One thing that's
+interesting is that the IMDB has a lot of sarcasm on it so it's actually it's actually very hard
+to capture the sentiment just using the review because of that. So this was this was a cool encouraging
+result. And so why do you think that this worked better for presumably it did capture some of
+that sarcasm? I think the way we use the features, the way we we said let's combine the document
+distributions as given by the neural topic model and the final hidden state of the RNN. That final
+hidden state usually captures you know how when you when you write a review say oh this movie was
+was the actors were great then and then but it sucked because of it. Right. So the whole sentiment is
+actually captured in that last part. Okay. So I am guessing that's why it did well because
+because you exploit that sarcasm when you actually just look at the most recent information. How do
+you see this work being applied? I think it can be used for any we looked on their sentiment
+classification. The word prediction thing is not a real task. We were just using it to evaluate
+it as a language model. But I think it can be used for any document classification task in
+there are many applications to that. Not only sentiment analysis but yeah any document classification
+you can use Topikarin and to get to get features it proved to be very effective in the case of
+sentiment but you can use it for any document classification task. Say you wanted to classify
+documents or like tag documents based on content. Would you have to come up with your own feature
+representation or would you use this concatenation that you've described but then do something else
+to get at the last mile of how you want to classify? Where does the customization have to take
+place in order to apply this to another type of classification problem? The general thing is that
+you will have to use both the global representation and the local representation you need both.
+And from the local representation side you can decide to use the last hidden state but you can do
+anything you want there. You can use an averaging of the different hidden state or you can use a
+I don't know like attention. It depends on what you can do. You can build a classifier on top
+of Topikarin and I did that actually for medical data and we found again there a nice clustering
+of patients according to their diseases. And so yes the customization is in how you use the
+hidden state of the RNN part. Okay. Yeah. Well you're working on some really interesting things and
+I appreciate you taking the time to share some of them with us. Are there any other things you
+wanted to touch on? That would be it. Thank you for taking the time. Thank you for having me.
+All right everyone that's our show for today. For more information on Ajay or any of the topics
+covered in this episode head on over to twomlai.com slash talk slash 160. If you didn't hit pause
+and nominate us for the podcast people's choice awards at the beginning of the show I'd like to
+encourage you to jump over to twomlai.com slash nominate right now and send us your love and your vote.
+So as always thanks so much for listening and catch you next time.

@@ -1,0 +1,573 @@
+Hello and welcome to another episode of Twimble Talk, the podcast where I interview interesting
+people doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington.
+We are back with our second show this week, episode 2 of our Autonomous Vehicle Series.
+This time around, we're joined by Jinsheng Shao of AutoX, a company building computer
+vision-centric solutions for autonomous vehicles.
+Jinsheng, a PhD graduate of MIT's CSEL lab, joins me to discuss the different layers of the
+Autonomous Vehicle Stack and the models for machine perception currently used in self-driving
+cars.
+If you're new to the Autonomous Vehicle space, I am confident that you'll learn a ton.
+And even if you know the space in general, you'll get a really interesting glimpse into
+why Jinsheng thinks AutoX's direct perception approach is superior to end-to-end processing
+or mediated perception.
+Our Autonomous Vehicle Series is sponsored by Mighty AI, and I'd like to take a moment
+now to thank them for their support.
+Mighty AI delivers training and validation data to companies building computer vision
+models for autonomous vehicles.
+Their platform combines guaranteed accuracy, with scale and expertise, thanks to their
+full stack of annotation software, consulting and managed services, proprietary machine
+learning, and a global community of pre-qualified annotators.
+If you haven't caught my interview with their CEO, Darren Nakuda, in the last show,
+we'll talk number 57, please make sure to check it out.
+And of course, be sure to visit them at www.mty.ai to learn more, and follow them at at Mighty
+underscore AI on Twitter.
+Before we jump in, if you're in New York City next week, we hope you'll join us at
+the NYU Future Labs AI Summit.
+As you may remember, we attended the inaugural Summit back in April, had a great time and
+shared some great interviews, which we'll link to in the show notes for your listening pleasure.
+This year's event features more great speakers, including Karina Cortez, head of research at
+Google New York, David Venturelli, Science Operations Manager at NASA Ames Quantum AI Lab,
+and Dennis Mortensen, CEO and founder of startup x.ai.
+For the event homepage, visit aiSummit2017.futurelabs.nyc, and for 25% off of all tickets,
+use code twimmold25.
+We'll be at the summit happy hour on Monday the 30th, and the summit itself on Tuesday the
+31st, and we look forward to meeting you there.
+And now on to the show.
+All right, everyone, I am on the line with Jensheng Shou.
+Jensheng is the founder and CEO of AutoX, a company that is doing some interesting things
+in the autonomous vehicle space.
+Jensheng, welcome to this week in machine learning and AI.
+Thank you, everyone.
+Great.
+Why don't we get started by having you introduce yourself and tell us a little bit about your
+background and how you got interested in autonomous vehicles and ML and AI more generally.
+Yeah, sure, sounds great.
+I got my PhD from MIT.
+I spent four years at MIT in the computer science and artificial intelligence trying to
+get my PhD.
+My research area is in computer vision and robotics.
+So I have been working in this space for quite a while.
+So after I graduated from MIT, I went to Princeton University as a professor.
+I was the founding director of the computer vision and robotics at Princeton University
+at the Department of Computer Science.
+OK.
+Our research is about trying to make computer sees, enable them to interact with the physical
+world.
+For example, these days we have images like from camera or from other sensors, this kind
+of sensor input, and then we try to pass what's going on in order to make it get an understanding
+of the physical world about the traffic situation, about people working around in order to make
+sense of the world.
+And after that, we can interact with the physical world, we can design robots.
+So in our way, we were designing all kinds of robots, including, of course, like my big
+self-driving cars, as well as a smaller robot working around, moving around inside an indoor
+space and have robot hands to grab objects and so on.
+So that, for example, I will participate in the Amazon Picking Challenge last year with
+a robot arm together with a team of experts from MIT.
+We have a joint team together and we get pretty good score in the final competition for
+robot picking challenge as well.
+Oh, wow.
+Is this the first time you've participated in the Picking Challenge?
+It was the first time, yeah, but also the last time.
+So after that, I started this company, AutoX, working on self-driving car and we focused
+on, we are being very focused.
+So right now, we focus on trying to make the self-driving car technology really good
+enough for practical usage.
+Uh-huh.
+What I've learned about the company, just from some of my background, reading is that
+you are really focused on trying to enable self-driving cars based strictly on vision-based
+technologies as opposed to LiDAR and some of the other sensors that, you know, we think
+of when we think of like the Google self-driving car, is that the case?
+Kyle, it's not exactly like that, but we are, our solution, I would say is camera-first
+solution.
+So we are not against any other sensor, we are very open to use any sensor.
+But at the same time, we primarily focus on using camera as our primary sensor.
+One of the reason is that, that's two reason, one is the cost factor.
+Camera displays the battery go cost, but other sensors, such as high resolution LiDAR,
+they are very expensive.
+Right.
+So if we are to make a product that can really be used by every citizen, by everyone, it has
+to be go cost enough so that financial actually makes sense to have the self-driving car.
+Because if a self-driving car is way more expensive than a car plus a few full-time driver,
+then it doesn't really make any sense, particularly.
+Right.
+So for us, we are camera-first solution, that's one thing.
+The other thing is also technicality, it's not just the cost.
+Technically, typical camera has very high resolution, but even a very high-end LiDAR, for
+example, a very expensive 80,000 US dollar LiDAR, is still have only 64-bing vertically.
+The resolution of a high-end LiDAR is simply too low so that it cannot be used for many
+situations, such as, like, CT, in CT downtown, variable 5 urban driving, it has to be able
+to recognize those subtle details, small objects, complications in order to be able to drive
+safety.
+But high-end LiDAR simply doesn't really have the inner resolution compared to a camera
+to do this task.
+And you said that LiDAR with the 16, did you say 16 by 16 resolution, or what, how did
+you?
+LiDAR, a lot of LiDAR these days, they are springing LiDAR, so they have 360 degree coverage
+horizontally.
+But vertically, they have a fixed number of bings.
+The LiDAR was deferring to, it's the highest and LiDAR, it's 64, 64.
+64.
+Got it.
+And you said that was, how much do those units cost?
+Those units cost 80,000 US dollar now.
+80,000, wow.
+Yeah, 80.
+Yeah.
+And actually, it's not.
+The other problem is, it's not automatic grid.
+That means if you keep using the LiDAR in high temperature, in low temperature, it's
+going to break in a few months.
+Like for any hardware that can be installed on the vehicle, actually, people are spouting
+it has a lifetime of like 15 years.
+Okay.
+And also on your website, you talk about your goal being to try to enable self-driving
+cars with just $50 worth of cameras.
+And in fact, you, you've got off the shelf webcams in a picture mounted on the hood of
+a car.
+I think they're the same one that I have, the Logitech C920.
+Yes.
+Of course, that's not for final production, but yes, of course, the initial experiment
+we're actually using those Logitech webcams, they're very old cars.
+But to moving towards production, now we're upgrading our camera with the other camera
+that is not webcams, but they're actually a similar price level, they are not much more
+expensive.
+Okay.
+Maybe we can dig into, you know, what are some of the things that you're doing or the
+ways that you're thinking about the problem that enables you to take this camera first
+approach?
+Yeah.
+That's a very good question.
+Yeah.
+A one thing that we try to emphasize is camera actually have a lot of potential.
+Like for example, a lot of people say that then can your camera be system dry at night?
+Actually, yes.
+Because a lot of camera displays the feature is actually much better than human eyes.
+The way it's actually missing for the camera-based solution is really a very good software.
+It's very sophisticated, very advanced AI algorithm.
+That's what is missing to make the camera-based solution desirable.
+That's for example, human use the guide on our two eyes.
+We don't have a spinning ride out on top of our head shooting leaders, but we can still
+drive very safely.
+So that's why it's missing really about the software.
+This is where our key innovation comes in.
+In our company, most of us are software engineers, all researchers were working in this space
+trying to develop a very advanced perception system as well as a very robust printing system
+and decision-making system in order to work together side by side to have a robust solution.
+So maybe I can start with the general pipeline of the architecture first.
+So that three major-style autonomous driving, in the autonomous driving software step.
+One is the perception, the other one is the printing and decision-making, and the third
+one is the control.
+Perception is deferring to the part that will take the image and other sensors as input.
+Trying to make capture what is going on in the physical world, get the traffic situation,
+and trying to have the software to understand, okay, this is an object.
+This object is moving, and this is a traffic sign, and this is a traffic light, and get
+a sense of the world.
+And that's the perception part.
+And then after that, that's the decision-making part.
+It's like, even now the computer can understand what's going on in the physical world.
+Now the computer needs to make this decision.
+Should the car stop or should the car go, how fast it should go, how much it should turn,
+or all these are the decision-making and printing part.
+And after it made a plan, now finally, we need to execute the plan.
+That's the control part.
+We need to control the vehicle, actually going to execute the plan and behave accordingly.
+That's the control part.
+So these are the three major building blocks, three major steps, you know, full-step software
+for autonomous driving.
+Okay, perception, planning, and control.
+Exactly.
+And the different schools, how to do this, there's one approach that is more traditional
+Google based approach, or we know now, based approach is try to do every step separately,
+complete separately.
+So the perception part will focus on making a very good understanding of the physical
+world, make sure everyone everything is perfect.
+In particular, you're trying to get, I would say, a point cloud variable or pixel-wise
+level, like for each image, or each pixel in the image, they try to make a perfect understanding
+of what the object is, like is this pixel beyond to a car, or is this pixel beyond to a
+road surface to help pixel-wise understanding.
+And then, given this pixel-wise understanding, they try to have a 3D understanding of the
+physical world in order to support that decision-making and printing.
+That's one typical approach, which we call mediated perception.
+Mediated perception?
+Yes.
+Okay.
+So that's another approach that is recently populated by a media, is trying to do end-to-end,
+everything end-to-end together.
+Remember, we are talking with a 3-step, that perception, that's printing, that's control.
+The immediate approach is trying to fuse everything together.
+They no longer use a modularized approach.
+They just put everything together into a huge gigantic neural network, so they take the
+sensor, such as the image at the input, and the neural network just output directly the
+control.
+How much break you should apply?
+How much stealing talk we should apply to the stealing world?
+So that's the end-to-end approach from the media.
+Okay.
+But both approach have a lot of problems, I would say, at least some problem.
+Maybe we're talking about end-to-end first.
+The end-to-end first, the problem is everything is working like a black box, it's very difficult
+to provide input.
+That, for example, if a computer drives a car to an intersection, now you can turn left.
+Now you can also turn right.
+But it's actually very difficult to tell the computer to turn right.
+Because the computer will look at this intersection, and it will make up its mind, because it's
+a black box.
+I then automatically tell you, okay, I'm going to turn right, I'm going to just turn
+right.
+So it's very difficult to control what's going on inside, everything is just a black box.
+That's one major job out there, end-to-end approach.
+If I can jump in, that's an issue I've never really thought much about is when you're building
+systems that are controlled by neural networks, the ability to, for example, override the system
+or provide user direction, is that a software engineering challenge, like you have systems
+that take the neural network input and take the user input and just prioritize the user
+input, or is that a neural network challenge where you're providing the neural network input
+in, and you have to train the system to prefer it.
+I'll say it depends on the detail.
+For this cloud end-to-end approach, if everything is completely end-to-end, then that is not
+just a software engineering problem, it's really a more research-generated neural network
+problem.
+Because the neural network will decide everything for you, you don't really have a choice.
+Whatever the computer, the neural network decides, that's the result.
+But if you are able to use the neural network in a more modularized approach, use the neural
+network to do certain tasks and the other part to do, another neural network to do certain
+tasks, and then eventually you have some way to combine it together.
+In that way, the user actually can have more input.
+So that's actually, that's a very good question, that point of the one job of the completely
+end-to-end approach.
+It's like now the computer decides where you are going to go, where you are going to
+stop.
+That's obviously not usable for us.
+And another problem for the end-to-end approach is the amount of data required to have this
+system up and running.
+You can imagine that to cover the space, to change a good neural network, we will need
+to cover pretty much all the use case, all the potential traffic scenarios in the changing
+data in order to change the neural network to behave smartly.
+But this kind of approach is very difficult because you can imagine that even in the same
+role, in the same role intersection, for example, or in the same highway merging point, there
+could be many different kind of traffic, that could be different numbers of cars, those
+cars could be a different position, each car can have different size, each car could
+have different color, each car can have different speed, each car can have different reaction
+tongue, all these are different, now we need to cover the whole space, we need to have
+enough changing data to put forth all the space, and this is still assuming at the same traffic
+merging point, if you have different role, different role condition, different language,
+different, that makes the number of changing data requirement is so big that probably
+even like the whole human society catch a data for thousands of years, we may not still
+have enough data to change a good neural network to cover all the space.
+That's another typical job of the N2N approach, is the amount of data you require is really
+gigantic.
+I mean, just as maybe a counterpoint, the impression I'm getting from folks that are doing
+things that are more like the end-to-end approach in video and Google is that they're making
+a lot of progress, right?
+I'm not getting the impression that they think it's going to take thousands of years to train
+you know, these systems to be operable.
+That's not really true because the Google approach, they are not end-to-end, we're talking
+about.
+Yeah, the Google approach is the second, the next approach I'm going to describe is the
+mediatic perception approach, they are the operative end-to-end, they cut the end-to-end
+into many, many different small steps, into so many steps, basically, and each step,
+they will do something very, just very, very small step.
+The mediatic perception approach typically is that, take the sensor input that I remember,
+the end-to-end is about merging the perception, training, control, all into one single step.
+Now, the mediatic perception is different, they're not only separate them into different
+steps, even each step they separate into many sub-steps.
+For example, when Google's approach, in this kind of approach, they take the image as
+the input, and then they try to get a pixel-wise recognition of each pixel in the image, and
+that's not useful for driving, so that's the first step, and then after that, they convert
+this pixel-wise segmentation into a more 3D understanding of the world.
+For example, they will get a 3D building box, a box to contain each card, each vehicle
+will have a box to contain the card.
+So sound, meaning you've got from your LiDAR sensor, you've got a point cloud, and you've
+got from your image a two-dimensional view that identified that some two-dimensional set
+of contiguous pixels as a car, they would fuse those two to determine a 3D bounding
+box for the vehicle based on both the point cloud and the image data.
+Yes, that's right, but you can see about this, there's a lot of information in this process
+that we're trying so hard to get, they're not particularly useful, that for example,
+the height of the vehicle, we don't really care, no matter how tall the vehicle is, we
+don't want to hit them.
+So that a lot of information is...
+But you want to know how tall the clearance is for a bridge that you're trying to cross
+under, or an overpass?
+Yes, that is.
+So that certain information that is useful, that certain information that are not useful
+for us to try, so that's the point exactly we're making.
+In Google's approach is the optical end to end, they try to get everything, no matter
+it's useful or it's not useful, they all get it out, and whether it's going to be
+useful or not.
+I would say this approach is safer, but it's overkill, it's a lot of redundancy that
+we can squeeze out.
+Because every big of information we shred, that's always a cost, that's a cost of computation
+on board, if you extract a lot of information that's not useful, it weighs a lot of computation.
+Secondly, it's also a lot of engineering and research time, because if we spend so many
+engineering efforts to get those information and actually they're not being used, there
+is a waste of time as well.
+And certainly it's a waste of changing data, because then you'll get a lot of changing
+data with a lot of heavy annotation in order to get something that's not really useful.
+So that's another problem.
+Auto-X will count in between.
+We feel that mediatic perception have some advantage, but it may be overkill.
+We see the different problem of end-to-end perception, an end-to-end approach that is
+completely end-to-end, that's a lot of problem, but the good thing is it's more simple and
+more elegant.
+So we design something called the Degrad perception, which is flowing between, is that we're
+trying to only get those information that are useful for driving, and we're not getting
+those that are used these for driving.
+A lot of information that in the mediatic perception approach, they get out is useful
+for other tasks, that if I'm a bird, I'm flying around, definitely I need to know how
+high is the car.
+So it's a lot of useful information for other applications, but not for autonomous driving.
+So for our approach, we're trying to identify the needs of information that are useful
+for autonomous driving, and we ignore those that are used these for autonomous driving, and we only
+focus on spending the computation power, spending the engineering effort, spending money
+on gathering training data for those useful information, and we call those useful information
+for those indicators, for example, I can give you a example, this is terminology that
+is dedicated for robotic audit, for example, if I give you a mark that you can do water,
+a mark, whether the mark you can have a handle, typical mark have a handle, the handle
+will afford you to grab the handle so that you can raise the mark.
+So a fordance means the environment or the object allows you to support you to do certain
+action, intelligent agents to do certain action.
+So that's what we call a fordance, and in the autonomous driving scenario is the same,
+is that is the current traffic situation for you to do certain tasks, that for example,
+is the traffic, now it's a traffic jam, that means the fordance of this current traffic
+situation cannot afford you to speed up your car into a 60 miles per hour.
+So the autonomous driving, what we actually need is, we need to get the affordance, can
+the current traffic situation, can the current road condition, can the current physical condition
+allow you, can afford the autonomous driving car to perform certain action.
+So this is the list of essential things that we really need for autonomous driving.
+I guess one question that comes to mind for me is that affordance as a key metric seems,
+it's alright what to say this, it strikes me as it's like a, it's a planning metric.
+Like if I have a route that I'm trying to pursue and I want to plan, you know, my next
+step, whether it's change lane or turn or something like that, does the current situation
+allow me to do what I want to do.
+But there's also a requirement that these vehicles be, you know, reactionary to things
+that happen.
+And I'm wondering, you know, when I think just the way affordance sounds like it doesn't,
+it's not necessarily as applicable in those types of scenarios, is that the case?
+In the now sense, maybe yes, but you know, the general sense, because when we say affordance,
+it's not static, it's a dynamic signal, but for example, in the more computer sounds
+language, the computer is making a decision 30 for a second.
+That means every second the computer is making 30 decisions.
+That means the computer is changing that my quickly, very quickly, point five thing to
+me.
+So if you, so if the car cuts me off, then, you know, I'm still, I still need to figure
+out if I can afford to go straight, for example, and that's happening at 30 frames per second.
+Yeah, so then suddenly the affordance becomes very reacting, because if the situation
+changes a little bit, the affordance changes and then it's basically being very reacting.
+So in the general sense, the affordance is deferring to all these reacting behavior
+as well.
+Okay.
+Thanks.
+Yeah.
+So what we do is we take the existing auto driving approach and we squeeze out and we
+see which part is really essential, which part is, which affordance is very necessary
+for auto driving and we are focusing our energy on making those very reliable so that we
+can have very robust auto driving solution.
+That's basically the unique part of our technology.
+It sounds like then in the mediated perception world, they are, are they ultimately trying
+to get to affordances as well, but they're, they haven't pruned the, the universes of affordances
+that they care about or is there not really the concept of affordance there?
+I believe that's a concept of affordance there is just like when they designed this system,
+it probably, it was like that a girl, this kind of system, at that time they didn't seem
+too much about this, they spent a lot of time probably focusing on other aspects.
+So the system design was a little bit no longer the greatest way, no longer the most
+arrogant way to do the technology.
+So I also believe that maybe in the future when they were also mixing about this, people
+passed them out, they're also impressed as well.
+When we're talking about affordances and this direct perception, trying to focus on
+only the most relevant affordances, is there an enumeration of those, is there, you
+know, are there a 10, are there a 20, are there hundreds, does that question make sense
+or is it more like, you know, is that more, is it less a high level concept and more
+something that's implemented, you know, in the software that's like some vector of,
+you know, affordances that's determined on the fly?
+Yeah, that's made sense.
+It does, if you numerally at least, it's probably less than 200, it's 100 something.
+Of course, a different traffic situation is not like you have the whole 100, it always
+does only a subset that makes sense.
+So we'll classify the traffic scenario into different subset, and then each subset, we
+will derive a smaller number of perception indicator, the affordance indicator in order
+to try the car and to have the car behave appropriately.
+Okay, and so since you call this direct perception, does that mean that the planning and the
+control layers of the stack remain the same and they're just getting inputs from this
+different kind of perception, or did those also change to accommodate direct perception
+and affordances?
+Yes, and yes, in the sense that if we just focus on talking about the repossession, but
+mediatic perception, yes, this part of the difference only on the perception, but there's
+another dimension of technology that is different from other companies that we mentioned at
+the beginning of the conversation is we are focused on using camera instead of radar.
+The mediatic perception, the repossession, they can both apply to radar and camera, but
+if we are talking about camera, that's another way of difficulty, because for camera, because
+it's not an active sensor, it's not shooting up laser, the distance measurement is usually
+more noisy, so there will be more noise in the distance measurement.
+So we have to model the uncertainty of the object distance, object speed, and so on.
+And that means the decision making planning and control path have to be more robust as
+well.
+Therefore, in a sort of way that the decision making and the planning path will also spend
+a lot of time making it to take the uncertainty from the perception needle into account as well
+in order to have a battery or bus auto-redriving system.
+And so when I think of a system that is looking at images, trying to calculate distances
+of from the car to objects in those images, and then applying another layer of uncertainty,
+that calls to mind some type of Bayesian type of system, is that what you're doing underneath?
+It's not exactly Bayesian, but Bayesian is one of the many ways to encode uncertainty,
+but in our environment, it's a lot of other ways to encode uncertainty as well.
+It's not necessarily a fully Bayesian framework, because technically Bayesian framework
+will have some technical requirements of being Bayesian, but at least will still cut it
+into the uncertainty into account.
+As for a lot of other systems for traditional auto-redriving systems, they actually don't
+get into uncertainty into account, that planning and decision making is completely decisive.
+But if this is going to happen, then what will happen is a pure if-else statement only.
+But for our solution, it's much more robust because we consider the uncertainty of the perception
+needle, we take uncertainty into account, assuming the perception needle is not perfect
+and we are able to make use of the uncertainty estimation in order to make a plan that is
+doable even if that something is going to happen.
+So when you talk about the if-else kinds of constructors, is that that's specific
+to mediated perception, like end to end, there would just be a neural network that's doing
+something that doesn't involve if-else.
+But with a mediated perception, you've got some control system that is taking in perception
+inputs and the planning is based on if-else or I guess I don't think of these systems
+as very if-then-else, very traditionally rules-based as opposed to based on train networks.
+Yes, if I do, I say if-else statement is referring mostly to mediated perception system.
+The reason why it's that is because I was saying 99% of the companies working in this space
+are still using mediated perception.
+The end train approach is mostly on the research side, still very difficult to be practically
+used.
+Okay.
+Yeah.
+And so at what layer of the stack do you find the if-else, you know, the rules-based parts
+of the system and a mediated perception approach?
+It's usually on the decision-making, like after the perception and big for the control,
+the planning and decision-making, usually people have to manually write down all the rules,
+it's hundreds of thousands of rules.
+For example, if a car is kind of encroaching on my lane, you know, from the left then,
+you know, turn right.
+And what's the granularity of these rules, I guess, is what I'm trying to wrap my head
+around?
+Can you give me examples there?
+This granularity of the rule is valid detail, it's not just so general.
+It's more like if the car is approaching you from the left then, you need to estimate
+the size of the car, the distance of the car, and the speed of the car and the acceleration
+of the car in order for you to decide what to do accordingly.
+So depends on different speed, different size, different rows, structures, are we turning,
+we have turning right or is on the street or is on the curvy or they are all different.
+So you have to encode all this information and they have many different combinations
+in order to encode all these rules.
+That's why there are so many rules has to have to be returned out.
+Right, right.
+So it strikes me that, I mean, you, I'm trying to put together these three approaches that
+you've mentioned end to end pixel wise direct perception.
+It strikes me that you can have a system that is, you know, there are still more degrees
+of, you know, the flexibility of kind of inserting machine learning into different layers
+of this.
+For example, you know, with mediated perception, a company could start with a mediated perception
+system and swap out the planning decision making, you know, with the train neural net,
+you know, for example, without changing the way the perception works.
+Is that, where does that fall apart?
+Why aren't people doing that?
+It's possible.
+That's possible, but just particularly very difficult to make work that right now the
+neural network is still performed very well, mostly on the perceptions that for the other
+like decision making and so on, it's very difficult to still have the neural network working.
+That has been some research, for example, using the enforcement learning, some tiny by
+similar to AlphaGo, to purchase, to do design tasks, but it's not at the level of maturity
+that most people are willing to use for production here.
+So it's still mostly in the research stage, it's not ready for the work product.
+And even non deep learning machine learning models, I guess the, what I'm trying to wrap
+my head around is intuitively, you know, after you've gone through the perception step,
+you've got, you know, a set of, you know, a set of features that represent what you've learned
+about, you know, 3D space around the vehicle, the vehicle dynamics and all that.
+Is it that the, you know, the dimensionality of that is too high for either traditional
+machine learning models or deep learning, or is it something else that is really the
+main challenge?
+The difficulty is not about the dimension or the size of the data.
+The difficulty is about the space is not fixed mapping.
+Let's put it this way.
+For neural network, a lot of traditional machine learning such as the very famous support
+vector machine, what they are trying to learn is a function.
+You give me some input.
+I have a mapping tool to output, so it's a function.
+You give me, you change your input, my output change, and so on.
+But when we talk about robotics, when we talk about autonomous driving specifically,
+it's very regarding what's going to happen in the next step, depends on what I do now.
+If I speed up my car, suddenly the car you found me making scare, me speed up as well.
+And since I'm not predictable, it's not just me changing, it's not fixed mapping.
+Is everything going to happen in the future depends on what's happening now.
+So there's a sequential causality in between.
+That makes it a fixed mapping, that mapping function f, mapping x, f to get y, that's very
+not very, not degraded applicable to this kind of application.
+So that's why people have to imagine something new, more fancy stuff, try to do this.
+Okay.
+So tell me a little bit about the progress you've made, is how far along are you?
+Yeah, we are a young company, we get started 13 months ago, just a little bit over a year.
+Sparkling in the past year, we already made a lot of progress.
+So people from our website, autox.ai, you may see that our car already shows an initial
+prototype driving on the street, doing a lot of demos, can drive safety, using camera
+to achieve almost all the driving behavior that will require.
+So we are moving very fast, our plan is to in a very near future, we can really have
+a product, made the technology so perfect, good enough to have a little product out to
+the market very soon.
+And we are working with a lot of partners, several major partners, such as car manufacturers
+or just companies, try to commercialize our product as soon as possible.
+And it doesn't sound like the model is one, like I think what Kama is trying to do, that
+to have like an aftermarket kit that you can just deploy on your vehicle.
+Yeah, we are not interested in aftermarket at all, because aftermarket, in some sense,
+it's almost not doable, there are two aspects that may not be doable.
+The first is the, because we need to set up the camera, we need to set up a computer,
+the modification of the car is a lot, quite a lot, and most people simply do not have
+the skillset, or they just don't want that car to look really ugly with the things dangling
+around.
+It's just not very safe as well.
+What happens if the camera falls to the ground and then while you auto-drive it, it's
+just simply very not very easy to do that.
+And there's also a even more fundamental problem that nobody point out is that most vehicle
+available today on the market already get bought by the customers, they do not support
+drive by while.
+That means the steering wheel, the brake, the throttle, the acceleration, they all have to
+control manually mechanically.
+There's no way, no adequate way, no easy way that you can have a computer to control
+that for you.
+If that's the case, most people, and they have this aftermarket kid, they still cannot
+control that car.
+But for example, if you look at Commodore AI's modification of the car, if you read the details,
+it actually cannot control the car under battery or speed.
+It can only take over the control of the car, for example, about 20 or 25 miles per hour.
+If you are driving at 10 miles per hour, the computer cannot control it.
+So there's always some certain limitation for those cars, for aftermarket retro 15.
+So that's why we're focusing on our company, we put safety as the primary goal for deployment
+or any autonomous driving technology.
+So we're not only the software have to be smart enough to be safe, but the hardware,
+it has to be good enough to provide redundancy as well as provide very solid hardware that
+can run at least a few years, I would say, for autonomous driving.
+Instead of a drive for three days and a camera for on the ground, then what happens now?
+Yeah.
+Right.
+Right.
+Okay, great, great.
+Well, I really enjoyed this discussion and learned a ton about the autonomous vehicle space
+in general, not to mention what AutoX is doing.
+Is there anything else that you'd like to share with us?
+Yeah, sure.
+Like I mentioned, we're a very young company and we're still quickly growing, but right
+now we have a member of 30 and we're trying to go to at least a hundred in a year.
+So we're actively recruiting, so if the audience are interested in exploring or also working
+together, the cutting edge research to really make a difference to the world, please come
+to the virus.
+You can visit our website, www.autox.ai to learn more about our opening.
+Thank you very much.
+Awesome.
+Thanks, Jen Shaw.
+I really appreciate it and it was great chatting with you.
+Okay, great.
+That was.
+Thank you very much.
+All right, everyone.
+That's our show for today.
+Thanks so much for listening and for your continued feedback and support.
+For more information on Jen Shaw or any of the topics covered in this episode, head on
+over to twimlai.com slash talk slash 58.
+To follow along with the Autonomous Vehicle Series, visit twimlai.com slash AB 2017.
+Of course, please, please, please send us any questions or comments you may have.
+For us or our guests, be a Twitter at twimlai or directly to me at Sam Charrington or leave
+a comment on the show notes page.
+Also, be sure to check out our last show, twimletalk number 57, with Mighty AI, co-founder
+and CEO Darren Nakuda at twimlai.com slash talk slash 57.
+And check out some of the interesting things they're working on at www.mty.ai.
+Thanks again for listening and catch you next time.

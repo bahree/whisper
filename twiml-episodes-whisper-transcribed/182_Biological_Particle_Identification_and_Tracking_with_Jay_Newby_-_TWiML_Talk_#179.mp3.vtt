@@ -1,0 +1,1556 @@
+WEBVTT
+
+00:00.000 --> 00:16.320
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+
+00:16.320 --> 00:21.480
+people, doing interesting things in machine learning and artificial intelligence.
+
+00:21.480 --> 00:31.600
+I'm your host Sam Charrington.
+
+00:31.600 --> 00:35.680
+In today's episode we're joined by Jay Newby, assistant professor in the Department of
+
+00:35.680 --> 00:40.920
+Mathematical and Statistical Sciences at the University of Alberta.
+
+00:40.920 --> 00:45.920
+Jay joins us to discuss his work applying deep learning to biology, including his paper,
+
+00:45.920 --> 00:50.960
+deep neural networks, automate detection for tracking of sub-micron scale particles
+
+00:50.960 --> 00:53.320
+in 2D and 3D.
+
+00:53.320 --> 00:58.440
+In our conversation, Jay gives us an overview of particle tracking and a look at how he combines
+
+00:58.440 --> 01:02.600
+neural networks with physics-based particle filter models.
+
+01:02.600 --> 01:07.320
+We also touch on some of the unique challenges to working at the micron level in biology,
+
+01:07.320 --> 01:12.000
+how we evaluated the success of his experiments, and the next steps for his research.
+
+01:12.000 --> 01:15.840
+A couple of quick meet-up related updates for you.
+
+01:15.840 --> 01:20.800
+Our next Twimble online meet-up is coming up on September 19th and will feature David
+
+01:20.800 --> 01:26.600
+Clement presenting the paper DeepMimic, example guided deep reinforcement learning of physics-based
+
+01:26.600 --> 01:28.560
+character skills.
+
+01:28.560 --> 01:32.000
+This should be a fun one and I encourage you to join us.
+
+01:32.000 --> 01:36.520
+Next up, our second session of the fast.ai study group is starting soon.
+
+01:36.520 --> 01:40.720
+If you've got some coding experience and would like to learn state of the art deep learning,
+
+01:40.720 --> 01:43.000
+this is a great way to do it.
+
+01:43.000 --> 01:48.520
+To join either of these programs, please sign up for the meet-up at twimbleai.com slash
+
+01:48.520 --> 01:49.520
+meet-up.
+
+01:49.520 --> 01:50.520
+All right.
+
+01:50.520 --> 01:51.520
+On to the show.
+
+01:51.520 --> 01:52.520
+All right, everyone.
+
+01:52.520 --> 01:56.680
+I am on the line with Jay Noobie.
+
+01:56.680 --> 02:02.040
+Jay is an assistant professor in the Department of Mathematical and Statistical Sciences at
+
+02:02.040 --> 02:04.000
+the University of Alberta.
+
+02:04.000 --> 02:06.880
+Jay, welcome to this weekend machine learning and AI.
+
+02:06.880 --> 02:07.880
+Thanks, Sam.
+
+02:07.880 --> 02:09.480
+I'm happy to be here.
+
+02:09.480 --> 02:10.480
+Awesome.
+
+02:10.480 --> 02:16.560
+Well, let's get started by having you tell us a little bit about your background and
+
+02:16.560 --> 02:18.800
+your research focus.
+
+02:18.800 --> 02:19.800
+Thanks.
+
+02:19.800 --> 02:27.960
+My background is applied math, specifically modeling, biological phenomena.
+
+02:27.960 --> 02:34.560
+I study small things that move in small spaces, so small things can be pathogens like virus
+
+02:34.560 --> 02:38.080
+or bacteria, they can be biomolecules.
+
+02:38.080 --> 02:44.320
+For the most part, I study things that are moving around inside of cells, but I also study
+
+02:44.320 --> 02:46.800
+extra cellular spaces too.
+
+02:46.800 --> 02:52.680
+These tend to be spaces that are on the scale of a micron, and the objects can be anywhere
+
+02:52.680 --> 02:57.480
+from a few nanometers on up to several microns.
+
+02:57.480 --> 03:03.720
+One of the hallmarks of motion at this scale is that objects when they're in a fluid
+
+03:03.720 --> 03:10.980
+like inside of a cell, they move randomly, and so my area of mathematical focus is
+
+03:10.980 --> 03:18.720
+stochastic processes, and these are dynamical systems that have random elements, so something
+
+03:18.720 --> 03:27.960
+that's changing randomly through time, and that describes the motion of molecules and
+
+03:27.960 --> 03:31.800
+small objects in living systems.
+
+03:31.800 --> 03:37.320
+My PhD thesis was on modeling molecular motor transport.
+
+03:37.320 --> 03:43.320
+Molecular motors are, they are molecular machines that move things literally.
+
+03:43.320 --> 03:51.720
+They burn energy, fuel to move objects, cellular resources, large distances.
+
+03:51.720 --> 03:57.480
+We studied that in neurons, neurons are unique among cells because they have to cast this
+
+03:57.480 --> 04:05.160
+very wide net, they have to cover so much space to construct neural networks, and that
+
+04:05.160 --> 04:10.800
+requires actively moving cellular resources around, and we studied the role of molecular
+
+04:10.800 --> 04:18.400
+motor transport in learning and memory, and that's what led me to study particle tracking.
+
+04:18.400 --> 04:24.200
+When you say particle tracking, what specifically are you referring to, or is there a specific
+
+04:24.200 --> 04:27.920
+type of particle that you're interested in in this research?
+
+04:27.920 --> 04:34.800
+Particle tracking really refers to taking images with the microscope of these small objects
+
+04:34.800 --> 04:42.960
+and small spaces, so this can be the cells, to virus, to many different things.
+
+04:42.960 --> 04:49.520
+We take videos of these objects moving, and then we localize the center of the object
+
+04:49.520 --> 04:54.040
+through time and track its motion.
+
+04:54.040 --> 05:02.320
+From that, we can learn many things about hidden factors, things we can't see about, for
+
+05:02.320 --> 05:10.400
+instance, the fluid of a cell or of a mucosal barrier, mucosal barriers, by the way, they
+
+05:10.400 --> 05:18.640
+defend us against infections and, among many other things, so we can learn things about
+
+05:18.640 --> 05:25.400
+stuff we can see by analyzing the random motion of these particles, but we also learn things
+
+05:25.400 --> 05:27.880
+about the objects themselves.
+
+05:27.880 --> 05:34.840
+For instance, we might be interested in how bacteria move around in mucosal barriers, because
+
+05:34.840 --> 05:41.040
+as we know, there's this very rich ecosystem that we're becoming aware of, that live in
+
+05:41.040 --> 05:50.560
+our GI tract, our lungs, and they play this very symbiotic role in our physiology.
+
+05:50.560 --> 05:58.280
+Really, this task of particle tracking has many different applications in biology.
+
+05:58.280 --> 06:04.880
+Your research is using images and neural networks to do this tracking.
+
+06:04.880 --> 06:08.640
+Can you talk a little bit about the origins of that work?
+
+06:08.640 --> 06:12.360
+Have you been using images and neural nets for a while?
+
+06:12.360 --> 06:13.680
+Sure.
+
+06:13.680 --> 06:20.320
+My background, as I said, isn't in image analysis or machine learning.
+
+06:20.320 --> 06:29.200
+When I started a post-doc at UNC Chapel Hill with Greg Forest, I was working on many different
+
+06:29.200 --> 06:36.000
+projects, and at the root of all of these projects, the data source, it was all particle
+
+06:36.000 --> 06:37.280
+tracking data.
+
+06:37.280 --> 06:43.040
+We would take this particle tracking, which consisted of what we call position time series,
+
+06:43.040 --> 06:49.480
+so X, Y, Z, T, basically, for a list of different particles, and then we would apply stochastic
+
+06:49.480 --> 06:52.840
+modeling to try and learn things.
+
+06:52.840 --> 07:01.000
+It became apparent to me that I needed to really study how this was being done, because
+
+07:01.000 --> 07:11.320
+it's this mixture of software-assisted tools based on traditional image analysis and
+
+07:11.320 --> 07:20.080
+really, really heavy human interaction, so it's a very labor-intensive process.
+
+07:20.080 --> 07:26.640
+As I learn more about how particle tracking software worked, I started to think about
+
+07:26.640 --> 07:29.120
+ways to automate it.
+
+07:29.120 --> 07:35.720
+That's what led me down the road to learning about convolutional neural networks.
+
+07:35.720 --> 07:38.280
+It's kind of a weird road.
+
+07:38.280 --> 07:46.920
+My PhD advisor had done a lot of research on modeling visual cortex, specifically explaining
+
+07:46.920 --> 07:55.480
+how visual hallucination patterns form through various perturbations, like drugs or injury,
+
+07:55.480 --> 07:58.200
+and how those form in the visual cortex.
+
+07:58.200 --> 08:08.840
+It's vaguely aware of how neural networks in the visual system worked and are organized.
+
+08:08.840 --> 08:18.560
+I found it was one of the most amazing things reading how these things were actually trained,
+
+08:18.560 --> 08:29.480
+that these feature, the sequential layered pattern matching was spontaneously emerging from
+
+08:29.480 --> 08:32.800
+the training procedure.
+
+08:32.800 --> 08:42.840
+I tried to apply that technology to the particle tracking task, because what is very time-consuming
+
+08:42.840 --> 08:49.800
+about particle tracking is a very mundane task that humans are really good at doing over
+
+08:49.800 --> 08:56.120
+short periods of time, and that is just staring at a screen at a fixed image and pointing
+
+08:56.120 --> 08:58.120
+out bright blobs.
+
+08:58.120 --> 09:08.360
+I mean, it's a very tedious job, and it's usually left to students and lab technicians,
+
+09:08.360 --> 09:10.560
+and it's very time-consuming.
+
+09:10.560 --> 09:17.840
+The patterns, the way these show up in a microscope image, well, I should back up.
+
+09:17.840 --> 09:25.640
+First of all, for virus, typically are around 10 nanometers to several hundred nanometers
+
+09:25.640 --> 09:31.160
+in diameter, and almost all of them are below what we call the diffraction limit, meaning
+
+09:31.160 --> 09:36.480
+that we can't resolve them with ordinary light microscopes.
+
+09:36.480 --> 09:42.960
+They show up as blurry blobs, sometimes with these diffraction, like these wavy patterns,
+
+09:42.960 --> 09:50.480
+so picture a, dropping a pebble in a pond, and then freezing that, you know, the ripples,
+
+09:50.480 --> 09:52.800
+and then putting them around the bright blob.
+
+09:52.800 --> 09:53.800
+That's kind of what it looks like.
+
+09:53.800 --> 09:56.040
+It's called an airy disc, right?
+
+09:56.040 --> 10:03.400
+So you get these super-imposed particles with little waves around them, and then you
+
+10:03.400 --> 10:10.880
+have to find the center of those patterns, right, where the particle center is.
+
+10:10.880 --> 10:16.560
+And when the wave-like patterns intersect, sometimes, that can really throw off a particle
+
+10:16.560 --> 10:21.240
+tracking software and generate lots of false positives.
+
+10:21.240 --> 10:29.040
+So the patterns are relatively simple, however, a microscope images do present some unique
+
+10:29.040 --> 10:30.600
+challenges.
+
+10:30.600 --> 10:36.800
+So first of all, we're talking about biological fluorophores that emit light that we are
+
+10:36.800 --> 10:41.520
+trying to detect with the microscope, and they emit very small amounts of light.
+
+10:41.520 --> 10:47.920
+We have to have very sensitive cameras that detect, and they're getting very, very good,
+
+10:47.920 --> 10:55.720
+they can detect upwards of 98% of the photons that they're being exposed to.
+
+10:55.720 --> 11:02.520
+But that comes with the price, and that is very low, what we call signal-to-noise ratio.
+
+11:02.520 --> 11:05.880
+That's a common term, I think, that people understand.
+
+11:05.880 --> 11:08.960
+So these images are very noisy.
+
+11:08.960 --> 11:13.680
+So the patterns might be simple, but the conditions are very harsh.
+
+11:13.680 --> 11:22.200
+So I did an interview not too long ago with a guy named David Van Veilin, who's doing
+
+11:22.200 --> 11:27.200
+something very similar at the cellular level.
+
+11:27.200 --> 11:32.440
+He was using, I think, kind of the annotation software that he was using before he started
+
+11:32.440 --> 11:37.240
+looking at applying CNNs was something called Atlas Toolkit.
+
+11:37.240 --> 11:38.240
+Have you heard of that?
+
+11:38.240 --> 11:39.240
+Or do you use something similar?
+
+11:39.240 --> 11:42.480
+I've heard of the Atlas Toolkit, I haven't used that.
+
+11:42.480 --> 11:45.840
+I'm aware of David's work.
+
+11:45.840 --> 11:54.240
+I tried before encountering his paper to do a similar, the very similar thing, and that
+
+11:54.240 --> 11:56.040
+is a cell segmentation.
+
+11:56.040 --> 12:02.160
+It's a very similar idea to track cells as it is to track particles.
+
+12:02.160 --> 12:08.760
+It's very difficult to do the segmentation part of that to distinguish one cell from
+
+12:08.760 --> 12:13.840
+another as individual entities when they're very close together.
+
+12:13.840 --> 12:16.680
+That's a big challenge.
+
+12:16.680 --> 12:22.920
+I just started my group here at the University of Alberta, and that's one of the directions
+
+12:22.920 --> 12:24.560
+that I would like to go.
+
+12:24.560 --> 12:30.920
+There are many, many people I've talked to that are very interested in being able to
+
+12:30.920 --> 12:33.400
+do cell tracking.
+
+12:33.400 --> 12:37.040
+So there's a lot of opportunity, I think.
+
+12:37.040 --> 12:43.440
+I think this is a great playground for people more broadly interested in object tracking,
+
+12:43.440 --> 12:48.880
+because the patterns are very simple, so it's a great way to do a lot of experimentation
+
+12:48.880 --> 12:53.640
+and to also have an impact on the scientific community.
+
+12:53.640 --> 13:01.280
+So with your work at the particle level, I imagine that segmentation comes into play
+
+13:01.280 --> 13:08.400
+in addition to, it sounds like you're trying to maybe relate some particles between frames
+
+13:08.400 --> 13:14.960
+and maybe determine motion vectors and things like that from one frame to the next.
+
+13:14.960 --> 13:15.960
+That's right.
+
+13:15.960 --> 13:16.960
+Yes.
+
+13:16.960 --> 13:24.280
+We try to do that in a way that is as robust and widely applicable as we can.
+
+13:24.280 --> 13:29.360
+But we also have the option to bring in physical models.
+
+13:29.360 --> 13:35.640
+This is where my background is as stochastic processes, in stochastic processes comes
+
+13:35.640 --> 13:37.640
+in.
+
+13:37.640 --> 13:45.680
+It's hard to write down a really physics-based model for the motion of a person, for example.
+
+13:45.680 --> 13:51.040
+But we can write down very good models for the motion of a molecule that's undergoing
+
+13:51.040 --> 13:55.840
+brownie and motion, the classic example of a stochastic process.
+
+13:55.840 --> 13:57.480
+It's the drunkards walk.
+
+13:57.480 --> 14:05.280
+You imagine that at every time point, you roll the dice, the proverbial dice, to figure
+
+14:05.280 --> 14:12.520
+out where you're going to step in the next instant, and how far you're going to step.
+
+14:12.520 --> 14:17.160
+And you assume that you're not going, you don't have a bias or a preference to go in any
+
+14:17.160 --> 14:23.120
+particular direction, and so you will just wander about aimlessly.
+
+14:23.120 --> 14:28.240
+And that is what we see particles doing in these videos.
+
+14:28.240 --> 14:36.840
+So it's a very concrete and direct and invaluable mathematical model.
+
+14:36.840 --> 14:42.960
+We can do this for even more exotic, say, for example, molecular motors, which sort of
+
+14:42.960 --> 14:48.040
+processively move in a particular direction and other things as well.
+
+14:48.040 --> 14:55.040
+So the tracking through time has its own unique challenges, but of course, the main principles
+
+14:55.040 --> 15:02.680
+are very similar to tracking of sort of the macro human scale objects as well.
+
+15:02.680 --> 15:10.440
+One of the recurring themes that I've explored on the podcast is this idea of combining
+
+15:10.440 --> 15:19.120
+neural networks deep learning with physics-based models, and it can be challenging.
+
+15:19.120 --> 15:22.360
+Can you talk a little bit about how you went about that?
+
+15:22.360 --> 15:28.240
+Well right now, we can apply methods separately.
+
+15:28.240 --> 15:35.680
+So we do like a first we'll run the CNN and do object recognition, find the centroid
+
+15:35.680 --> 15:40.200
+of all the particles, and then we kind of have this separate tracking step.
+
+15:40.200 --> 15:46.960
+Now the tracking step can also employ machine learning methods like hidden Markov models,
+
+15:46.960 --> 15:55.600
+easy and networks, basically particle filters, and that's an unfortunate name conflict, right?
+
+15:55.600 --> 15:59.520
+The particle and particle filters is not the same as particles and particle tracking,
+
+15:59.520 --> 16:01.840
+but those ideas are the same.
+
+16:01.840 --> 16:08.960
+So those physical models port directly, these stochastic models of the motion port directly
+
+16:08.960 --> 16:13.040
+into those methods, then everything is an optimization.
+
+16:13.040 --> 16:20.360
+And we can even infer things that are hidden things that we don't see, such as the hidden
+
+16:20.360 --> 16:31.760
+state of a bacteria which uses a flagella like a motor to move around actively, and they
+
+16:31.760 --> 16:35.680
+spread out much more quickly this way.
+
+16:35.680 --> 16:44.200
+And so we can determine if a bacteria say is using its flagella in a certain way, or
+
+16:44.200 --> 16:50.640
+if it's just passively sitting around, and it makes a very powerful tool.
+
+16:50.640 --> 16:54.560
+And what's great about it is all the physical assumptions, right?
+
+16:54.560 --> 16:57.320
+These are very important when you're writing a scientific paper.
+
+16:57.320 --> 17:04.400
+You want to explicitly say all these assumptions that you make in your analysis pipeline, and
+
+17:04.400 --> 17:09.400
+when you use a method like this, they're all in the model, all in this physical model,
+
+17:09.400 --> 17:10.400
+right?
+
+17:10.400 --> 17:16.320
+And then everything is an optimization, just using standard basing statistical tools, everything
+
+17:16.320 --> 17:21.440
+is an optimization, finding the best parameters, the best fit for that model.
+
+17:21.440 --> 17:26.480
+You mentioned particle filters, can you explain what those are?
+
+17:26.480 --> 17:36.200
+Physical filters, they're basically a way of taking observations and inferring hidden
+
+17:36.200 --> 17:42.200
+factors that are, so you might assume that you have, I think the classic example is
+
+17:42.200 --> 17:49.720
+a GPS detector in a truck, and so you would like to be able to get an inference of the
+
+17:49.720 --> 17:55.600
+truck's position based on the noisy GPS recordings.
+
+17:55.600 --> 18:02.360
+So you have some sort of model that relates the GPS recording to the truck's actual position,
+
+18:02.360 --> 18:09.360
+but also where the truck has been in the past influences the inference of where it is
+
+18:09.360 --> 18:13.280
+in the next sort of like time step.
+
+18:13.280 --> 18:21.120
+And so you have an observation model, an emotion model, and you build these all in together.
+
+18:21.120 --> 18:27.560
+So from the neural network perspective, I think the closest analogy maybe is the recurrent
+
+18:27.560 --> 18:35.320
+neural networks, which use kind of like information about the past, the most recent past to make
+
+18:35.320 --> 18:38.520
+inferences about the future.
+
+18:38.520 --> 18:46.760
+And so given your familiarity with David's work and some of the audience's familiarity
+
+18:46.760 --> 18:53.200
+with that work, I'm wondering if there are specific unique challenges that you encounter
+
+18:53.200 --> 18:57.960
+here working at the micron level?
+
+18:57.960 --> 19:02.000
+Yeah, there are many challenges.
+
+19:02.000 --> 19:09.960
+One being that the microscopy sort of developed alongside in the computer age, regular
+
+19:09.960 --> 19:14.040
+photography, I guess you could say, or video compression.
+
+19:14.040 --> 19:19.480
+So all the formats and everything are, there's a million of them and they're all different.
+
+19:19.480 --> 19:24.640
+So it's difficult to work with the data most of the time, everything is uncompressed so
+
+19:24.640 --> 19:27.960
+the data says can be quite large.
+
+19:27.960 --> 19:38.320
+And add to that the difficulties of imaging biological entities that are very dim in
+
+19:38.320 --> 19:41.760
+their emitting very low levels of light.
+
+19:41.760 --> 19:47.680
+And so you also have to deal with very low signal noise ratios.
+
+19:47.680 --> 19:53.640
+So we actually also do 3D video microscopy.
+
+19:53.640 --> 19:55.880
+And that is another unique challenge here.
+
+19:55.880 --> 20:05.440
+And so how do you apply this convolutional neural networks to 3D videos and to also extract
+
+20:05.440 --> 20:06.960
+useful information there?
+
+20:06.960 --> 20:14.600
+So this 3D video sets, of course, are much larger than their 2D counterparts.
+
+20:14.600 --> 20:19.880
+So we have to actually build up special tools to be able to work with those.
+
+20:19.880 --> 20:28.040
+And in the case of 3D, it's using stereo microscopes, is that where the 3D models come
+
+20:28.040 --> 20:32.760
+from or are they generated in a different way?
+
+20:32.760 --> 20:37.720
+So one of the projects that we're really excited about now is doing particle tracking inside
+
+20:37.720 --> 20:39.240
+living cells.
+
+20:39.240 --> 20:47.360
+And so we do 3D particles, we collect 3D videos, so we try to image the entire cytoplasm
+
+20:47.360 --> 20:48.360
+of the cell.
+
+20:48.360 --> 20:53.120
+And the cytoplasm is just the fluid on the inside of the cell.
+
+20:53.120 --> 20:59.280
+So the way this works is that the microscope has a stage, what's called a piezoelectric
+
+20:59.280 --> 21:07.440
+stage, which just has a motor that can move really fast and very accurate small movements.
+
+21:07.440 --> 21:11.040
+And so it moves that stage up and down.
+
+21:11.040 --> 21:14.120
+And then the camera just takes the images sequentially.
+
+21:14.120 --> 21:19.840
+So you kind of one layer at a time, you build up a 3D volume.
+
+21:19.840 --> 21:26.080
+And then it's like a typewriter, you collect one volume and then you restart the beginning
+
+21:26.080 --> 21:28.440
+again and collect the next volume.
+
+21:28.440 --> 21:37.360
+So and in that way, you get this time sequence of volumes that comprise a 3D video.
+
+21:37.360 --> 21:43.240
+One of the things that struck me in looking at some of the images of these particles is
+
+21:43.240 --> 21:46.680
+that they're very dense.
+
+21:46.680 --> 21:52.360
+And so there's a lot of occlusion, there's a lot of overlapping.
+
+21:52.360 --> 21:57.120
+How did you have to do anything special to deal with that?
+
+21:57.120 --> 22:00.320
+Well, the answer is yes and no.
+
+22:00.320 --> 22:06.160
+So that is a very difficult problem that you identified.
+
+22:06.160 --> 22:10.600
+So not only that, but the particles are appearing and disappearing.
+
+22:10.600 --> 22:16.240
+They're overlapping, including, but then they leave, they're too dim, they basically
+
+22:16.240 --> 22:22.720
+leave what we call the focal depth that we're actually imaging.
+
+22:22.720 --> 22:25.920
+And then of course, since they're moving randomly, they can come back in.
+
+22:25.920 --> 22:31.120
+So we have to be able to track them only while they're there and decide when they're
+
+22:31.120 --> 22:33.120
+gone.
+
+22:33.120 --> 22:40.120
+And the way the neural network does this, it sort of, it makes automatically does a couple
+
+22:40.120 --> 22:49.280
+of things that allows us to at least have a first start that doesn't generate any errors.
+
+22:49.280 --> 22:50.440
+Not perfect.
+
+22:50.440 --> 22:56.760
+So for example, when two particles overlap each other in 2D microscopy, what the neural
+
+22:56.760 --> 23:04.000
+network will do is just localize a single particle in that position, leading up to that or
+
+23:04.000 --> 23:10.280
+just after they overlap, one of the particles is typically dimmer or smaller, and the neural
+
+23:10.280 --> 23:13.480
+network will pick up only on the stronger signal.
+
+23:13.480 --> 23:21.080
+So what typically happens is we just stop tracking an object once two particles get close
+
+23:21.080 --> 23:22.400
+enough.
+
+23:22.400 --> 23:29.080
+And so it does chop short that particular particle track, and we might pick it up again later,
+
+23:29.080 --> 23:33.040
+but this is preferable to making errors and mistakes.
+
+23:33.040 --> 23:42.200
+So we can actually do things to correct for this on the linking stage where we assemble
+
+23:42.200 --> 23:46.920
+these centroids into tracks.
+
+23:46.920 --> 23:52.960
+And there's been probably 10 to 20 years of work on this problem, actually, some really
+
+23:52.960 --> 23:54.480
+great methods out there for this.
+
+23:54.480 --> 24:02.280
+So we're in the process of kind of building up this tool box to correct for these little
+
+24:02.280 --> 24:05.800
+things that we see.
+
+24:05.800 --> 24:11.240
+And one of the, so one of the other things I mentioned was the particles appear and disappear.
+
+24:11.240 --> 24:15.080
+So the neural network always outputs a confidence, right?
+
+24:15.080 --> 24:18.640
+It's not just a yes or no answer.
+
+24:18.640 --> 24:21.840
+It tells you how confident it is about a classification.
+
+24:21.840 --> 24:28.120
+We do, you know, foreground versus background, so it's just a binary classification.
+
+24:28.120 --> 24:32.680
+But when particles are dimmer and they're about to leave the field of focus, that confidence
+
+24:32.680 --> 24:38.240
+goes down, and so we can actually take that information into account when we're deciding
+
+24:38.240 --> 24:44.560
+how to link a particle in one frame with an observation in one frame with an observation
+
+24:44.560 --> 24:46.240
+in the next frame.
+
+24:46.240 --> 24:51.680
+And so you, you're using CNNs to do this.
+
+24:51.680 --> 24:57.120
+Does that mean that someone went through and manually annotated some number of frames
+
+24:57.120 --> 25:00.440
+in order to give you training data?
+
+25:00.440 --> 25:01.280
+Great question.
+
+25:01.280 --> 25:03.560
+So yes, somebody did do that.
+
+25:03.560 --> 25:08.680
+Somebody is, well, one of three people was me, and that was not the funnest thing I've
+
+25:08.680 --> 25:11.840
+ever done.
+
+25:11.840 --> 25:18.600
+But the funny thing is we actually didn't up using the hand annotated data.
+
+25:18.600 --> 25:24.960
+So in the lead up to this, as I was learning, frankly, learning about this technology, CNNs,
+
+25:24.960 --> 25:32.480
+how they work, experimenting around with them, I just built up synthetic data, just simulated
+
+25:32.480 --> 25:36.840
+the way that these videos looked.
+
+25:36.840 --> 25:43.240
+And over time that built up to be good enough that we were, when we trained the neural network
+
+25:43.240 --> 25:49.760
+with the synthetic data, I was never able to get anywhere close to the accuracy when
+
+25:49.760 --> 25:55.720
+I replaced that synthetic data with, with manually segmented data.
+
+25:55.720 --> 26:00.520
+So I don't know why, I don't know what the reason for that is.
+
+26:00.520 --> 26:06.840
+I think my guess is that it's because the ground truth was so absolute in the synthetic
+
+26:06.840 --> 26:15.760
+data set, and we were able to randomize the appearance and get the appearance accurate
+
+26:15.760 --> 26:23.440
+enough that we were able to get a robust neural network out of it.
+
+26:23.440 --> 26:28.240
+This is basically impossible, right, to do with human scale images.
+
+26:28.240 --> 26:32.480
+How to use synthetically create an image of a cat, I mean, that's a very hard problem
+
+26:32.480 --> 26:33.480
+in itself.
+
+26:33.480 --> 26:40.440
+But for the scale we were working on, because these objects tend to be below the diffraction
+
+26:40.440 --> 26:47.200
+limit, like I explained, these blurry, wavy patterns, they're relatively simple to create
+
+26:47.200 --> 26:48.200
+synthetically.
+
+26:48.200 --> 26:49.200
+Huh.
+
+26:49.200 --> 26:51.440
+Oh, that's really interesting.
+
+26:51.440 --> 27:00.760
+So what types of, you mentioned that you applied, presumably some kind of noise or filters
+
+27:00.760 --> 27:09.640
+to augment your data, or at least tune it to get as realistic as possible.
+
+27:09.640 --> 27:13.640
+What, can you elaborate on some of those things that you did?
+
+27:13.640 --> 27:18.840
+Yes, I, I, I randomized everything.
+
+27:18.840 --> 27:23.560
+So every sort of parameter I could think of, like how particle size details about the
+
+27:23.560 --> 27:31.600
+shape, I put random background patterns, random amounts of background noise, I tried
+
+27:31.600 --> 27:42.040
+to, to shotgun as wide a field of, of conditions as I possibly could so that, so that we could,
+
+27:42.040 --> 27:49.120
+we could in turn, you know, use this on, on, the idea is to automate this and, and what
+
+27:49.120 --> 27:56.800
+we found in, and extensively testing it in, for over about the last two years now, on
+
+27:56.800 --> 28:05.400
+data from dozens of labs, that it is a surprisingly robust to different conditions, the conditions
+
+28:05.400 --> 28:08.200
+that were outside of what we ever trained it on.
+
+28:08.200 --> 28:09.200
+For example,
+
+28:09.200 --> 28:16.600
+and just a point of clarification, are you saying that the training data that you developed
+
+28:16.600 --> 28:20.600
+is robust, and other people could build models against it, or the models that you built
+
+28:20.600 --> 28:25.360
+are robust, and they work with other people's images.
+
+28:25.360 --> 28:34.040
+The second, right, we saw, we've seen that the, the, the tracker is capable of accurately
+
+28:34.040 --> 28:42.080
+tracking conditions that we've received from labs that were beyond what we actually included
+
+28:42.080 --> 28:45.680
+in the training data, the synthetic training data.
+
+28:45.680 --> 28:49.560
+One example is tracking salmonella.
+
+28:49.560 --> 28:55.160
+These are about one to two microns in size, so they're above the diffraction limit, barely,
+
+28:55.160 --> 29:01.120
+and which means that we can actually resolve the shape, and they're rod shaped.
+
+29:01.120 --> 29:06.720
+So there, we trained everything to recognize, sort of like these, rotationally symmetric
+
+29:06.720 --> 29:16.000
+blurry shapes with the waves, and, and so as we, as we get images that have perturbations
+
+29:16.000 --> 29:22.920
+from that, from that rotationally symmetric pattern, we, we still get recognition.
+
+29:22.920 --> 29:30.140
+So we can track rod shaped, we've, we've tracked comet shaped objects, lots of different
+
+29:30.140 --> 29:37.080
+kinds of background, so we never trained it to ignore large, bright spots, these, these
+
+29:37.080 --> 29:44.240
+show up all the time, though, in experimental videos, but the neural network tracker evades
+
+29:44.240 --> 29:47.840
+those, it ignores those.
+
+29:47.840 --> 29:53.640
+So it's been surprisingly robust, and that's, that's really the key here of what we see
+
+29:53.640 --> 29:58.160
+this, this technology is enabling for us, it's automation.
+
+29:58.160 --> 30:04.600
+Do you think that the advantage of your synthetic data over the manual, you know, granted you
+
+30:04.600 --> 30:09.960
+said you're not really sure why, why it worked the way it did, but did you have just a lot
+
+30:09.960 --> 30:10.960
+more of it?
+
+30:10.960 --> 30:15.680
+Could it be explained by volume alone, do you think, or did you compare comparable training
+
+30:15.680 --> 30:23.920
+data set sizes, synthetic versus real?
+
+30:23.920 --> 30:30.560
+I, I don't think it was the size of the data set, we had a fairly large set of, of hand
+
+30:30.560 --> 30:37.760
+segmented data, it gets so, and this is part of the problem, it's very subjective, there
+
+30:37.760 --> 30:42.720
+are certain really bright particles that show up and, and there's no ambiguity, there's
+
+30:42.720 --> 30:49.280
+no mistaking what they are, but you start getting so particularly when the, when the particles
+
+30:49.280 --> 30:55.560
+get dimmer, they're about to leave the field of focus and reappear, it's a very subjective
+
+30:55.560 --> 31:00.560
+call, whether or not to label them as particles or not.
+
+31:00.560 --> 31:08.600
+So I think that that probably has more to do with it, the synthetic set is very consistent.
+
+31:08.600 --> 31:19.440
+So we, I tried layering in the, the hand segmented data with the synthetic data, with varying proportions
+
+31:19.440 --> 31:27.960
+and, and the performance always went down sharply with the amount of, of the hand segmented
+
+31:27.960 --> 31:29.960
+data that we used for training.
+
+31:29.960 --> 31:33.400
+I can't give a definitive reason why that's true.
+
+31:33.400 --> 31:40.840
+Huh, it's, it's very surprising relative to the way we usually think about this manually
+
+31:40.840 --> 31:42.880
+produced ground truth data.
+
+31:42.880 --> 31:50.040
+And, and also the, the degree to which the CNN models are, you know, they can be very
+
+31:50.040 --> 31:57.000
+sensitive to undesirable characteristics of the, your actual data, and so the simulated
+
+31:57.000 --> 32:02.600
+data that you think might be, looks great, you know, and close, totally confounds these
+
+32:02.600 --> 32:09.960
+models because it's missing some, you know, undesirable or very subtle nuance that is
+
+32:09.960 --> 32:13.680
+in the real data, so it's very interesting result.
+
+32:13.680 --> 32:14.680
+I completely agree.
+
+32:14.680 --> 32:18.680
+I was, I was very surprised when I learned about this technology, everything that I was
+
+32:18.680 --> 32:27.960
+learning, that, that real data was absolutely essential, just turned out, surprisingly
+
+32:27.960 --> 32:30.280
+not to be the case here.
+
+32:30.280 --> 32:39.520
+And so you developed the, the model, how do you, how did you combine the model with the
+
+32:39.520 --> 32:41.520
+tracking element?
+
+32:41.520 --> 32:48.560
+Oh, so how do I combine the, the output of the, of the convolutional neural net with the
+
+32:48.560 --> 32:49.560
+path linking?
+
+32:49.560 --> 32:50.560
+Yes.
+
+32:50.560 --> 32:51.560
+Right.
+
+32:51.560 --> 32:52.560
+Right.
+
+32:52.560 --> 32:56.080
+So right now they're, they're actually quite separated.
+
+32:56.080 --> 33:01.880
+So the first stage is, is processing with the neural net and then, and then we, we segment
+
+33:01.880 --> 33:07.840
+and what we call localized, which means just estimate the centroid of, of the spots.
+
+33:07.840 --> 33:11.520
+And that's all basically done with the output of the neural network.
+
+33:11.520 --> 33:18.560
+And then we take, you know, this disorganizer, a, a, un sequenced collection of particle
+
+33:18.560 --> 33:22.160
+locations at each frame and then we link them together.
+
+33:22.160 --> 33:30.640
+And that is, is, is done, the most robust and most widely applicable method is just to
+
+33:30.640 --> 33:35.480
+use something called the Munkres algorithm, which just says, I'm going to take two sets
+
+33:35.480 --> 33:41.520
+of objects and find the best match between all of those objects that sort of minimizes
+
+33:41.520 --> 33:45.240
+some, some cost in this case distance.
+
+33:45.240 --> 33:52.520
+So that's a, that's a classic tool and object tracking and, and we, we use an, an adaptive
+
+33:52.520 --> 33:53.520
+method.
+
+33:53.520 --> 33:59.120
+Again, we also have to decide when to stop tracking or when to start tracking a new object
+
+33:59.120 --> 34:03.960
+that's appeared and we do that with the confidence from the neural network output.
+
+34:03.960 --> 34:08.680
+But there are a lot of possibilities, I think, that are very exciting in, in machine learning
+
+34:08.680 --> 34:16.560
+or unifying both of these parts together and really taking the linking side and maybe
+
+34:16.560 --> 34:22.240
+using a stochastic model that's physically based or not, but using machine learning
+
+34:22.240 --> 34:29.520
+and training end to end, not just end to end in the CNN, but end to end between the,
+
+34:29.520 --> 34:33.600
+the object recognition and the object tracking side.
+
+34:33.600 --> 34:39.080
+How did you evaluate the ultimate performance of the experiment?
+
+34:39.080 --> 34:42.760
+What were your, the key metrics that you were tracking?
+
+34:42.760 --> 34:51.840
+So we, we looked primarily at the, the success of object recognition in, in, in, in our
+
+34:51.840 --> 34:54.280
+first paper.
+
+34:54.280 --> 35:00.320
+And so there was an assessment of, basically, false positives, false negatives, right?
+
+35:00.320 --> 35:07.080
+But also how accurately it, we detected the center of the particle, the centroid, which
+
+35:07.080 --> 35:09.360
+is important a lot of applications.
+
+35:09.360 --> 35:17.200
+So we, we did a combination of synthetic videos that randomized across a lot of different
+
+35:17.200 --> 35:21.840
+conditions so that we could sort of assess the robustness.
+
+35:21.840 --> 35:27.840
+And this was mostly to compare it to existing software that's, that's already out there
+
+35:27.840 --> 35:34.240
+to emphasize the software that, the currently existing software really requires manually
+
+35:34.240 --> 35:39.240
+tuning parameters on a per video basis.
+
+35:39.240 --> 35:41.520
+So we wanted to emphasize the automation part.
+
+35:41.520 --> 35:44.440
+So that's on synthetic training data.
+
+35:44.440 --> 35:49.360
+But we also of course tested it on experimental videos as well.
+
+35:49.360 --> 35:56.320
+And those were generated in samly's lab where we were tracking synthetic nanoparticles,
+
+35:56.320 --> 36:05.360
+virus, bacteria, and, and then assessing again, the, the, the object accuracy.
+
+36:05.360 --> 36:13.000
+Since then, we have a number of collaborations in, in over, around the last two years where
+
+36:13.000 --> 36:16.600
+we've applied this technique.
+
+36:16.600 --> 36:21.640
+And so we've, I guess, field tested it pretty extensively as well.
+
+36:21.640 --> 36:31.720
+You mentioned that when you incorporated the real data, your performance, dropped significantly.
+
+36:31.720 --> 36:36.600
+How would you characterize the performance differences between just applying the model
+
+36:36.600 --> 36:39.080
+to synthetic data versus real data?
+
+36:39.080 --> 36:41.040
+It's a great question.
+
+36:41.040 --> 36:48.600
+So, of course, the synthetic videos that we used to test it were minor alterations of
+
+36:48.600 --> 36:52.400
+the synthetic videos that we used to train it.
+
+36:52.400 --> 36:56.520
+So of course, it's going to perform very well on those, even though all the conditions
+
+36:56.520 --> 36:59.200
+are sort of randomized.
+
+36:59.200 --> 37:05.480
+The real data, there, there have been some surprises, little things where the neural network
+
+37:05.480 --> 37:06.480
+has failed.
+
+37:06.480 --> 37:13.920
+And so that's given us the opportunity to, to tweak things over time and improve things.
+
+37:13.920 --> 37:23.800
+For example, we noticed that sometimes there is this mixture of, of intensities, pixel intensity.
+
+37:23.800 --> 37:25.400
+So how bright the objects show up.
+
+37:25.400 --> 37:30.480
+So there might be some particles of type A and type B, for example, some that are very
+
+37:30.480 --> 37:33.920
+dim and some that are very, very bright.
+
+37:33.920 --> 37:36.920
+And the neural network would only track the bright ones.
+
+37:36.920 --> 37:43.880
+So that's something we had to go back and, and we built that into our synthetic video generation.
+
+37:43.880 --> 37:49.040
+So the workflow has been that we noticed something that the neural network doesn't quite
+
+37:49.040 --> 37:53.720
+do correctly, and then we go back and build that into this synthetic video generation
+
+37:53.720 --> 37:54.720
+and retrain.
+
+37:54.720 --> 37:58.400
+And that's worked really well for us.
+
+37:58.400 --> 38:05.880
+What are some of the next steps for your research group and in this research direction in general?
+
+38:05.880 --> 38:11.600
+Well, I mentioned before that we're, we're very excited about doing particle tracking
+
+38:11.600 --> 38:13.560
+inside living cells.
+
+38:13.560 --> 38:21.440
+This gives us a, a spatial temporal measurement of, of the, the entire cytoplasm of a cell.
+
+38:21.440 --> 38:25.760
+So we can measure things like crowding, confinement, viscosity.
+
+38:25.760 --> 38:30.600
+You have to remember that all of the chemical reactions, a chemical reaction is just molecule
+
+38:30.600 --> 38:35.680
+A molecule B coming together and they, they come together by random motion, by brownie
+
+38:35.680 --> 38:37.920
+motion usually.
+
+38:37.920 --> 38:44.040
+So they're moving through this fluid and in all of these things like crowding and, and confinement
+
+38:44.040 --> 38:48.200
+and viscosity, they influence the chemical reactions, all of them that are happening inside
+
+38:48.200 --> 38:49.200
+the cells.
+
+38:49.200 --> 38:54.600
+So this, everything that's going on inside physiologically of a cell is, it depends on
+
+38:54.600 --> 38:55.600
+this.
+
+38:55.600 --> 39:03.840
+And so this gives us a quantitative measurement of window into that, and to these conditions.
+
+39:03.840 --> 39:11.520
+Like I mentioned before, we're, we're doing 3D, we're collecting 3D videos for this.
+
+39:11.520 --> 39:16.160
+And one of the real challenges there has been to deal with these large data sets.
+
+39:16.160 --> 39:24.120
+So on a 2D experiment usually generates around 1 to 50 gigabytes of video data, where a
+
+39:24.120 --> 39:29.480
+3D experiment is, it's going to be roughly 10 to 20 times larger than that.
+
+39:29.480 --> 39:35.880
+So we're easily, a single experiment can generate, you know, terabyte or more of data.
+
+39:35.880 --> 39:41.240
+So we needed, so the, and 3D videos themselves are very large files.
+
+39:41.240 --> 39:47.760
+So we needed a way of implementing the neural network, right, that could handle these, these
+
+39:47.760 --> 39:48.760
+large videos.
+
+39:48.760 --> 39:54.560
+And we did this in, with cloud computing resources, we've been using Google Cloud, which has been
+
+39:54.560 --> 40:01.160
+extremely generous in supporting our commercial and our research projects.
+
+40:01.160 --> 40:08.920
+And we've been using Apache Beam to basically implement a map-reduced style processing
+
+40:08.920 --> 40:15.760
+pipeline to, to break up these videos and, and press them, process them once a piece of
+
+40:15.760 --> 40:16.760
+time.
+
+40:16.760 --> 40:22.400
+The great thing about Apache Beam and Google's data flow is that it dynamically manages
+
+40:22.400 --> 40:23.600
+the hardware.
+
+40:23.600 --> 40:28.600
+So if I have a, a small set, maybe I only need 20 CPUs.
+
+40:28.600 --> 40:34.560
+If I have a terabyte, you know, maybe I need a thousand CPUs over hours, and, and, and,
+
+40:34.560 --> 40:40.160
+dynamically instantiates those, those virtual machines and then shuts them down when they're
+
+40:40.160 --> 40:43.440
+no longer needed.
+
+40:43.440 --> 40:50.440
+We're also very interested in delivering this as a commercial web app that people can
+
+40:50.440 --> 40:51.440
+use.
+
+40:51.440 --> 40:59.040
+We want to, we want to empower biologists working in labs that typically don't have a technical
+
+40:59.040 --> 41:04.280
+computer science background with programming skills.
+
+41:04.280 --> 41:11.040
+So we needed, we needed to build something that's very easy to use, platform independent,
+
+41:11.040 --> 41:13.640
+could handle large sets of data.
+
+41:13.640 --> 41:18.960
+And so a cloud-based web app seemed like the best option for us.
+
+41:18.960 --> 41:22.000
+Early on in the discussion, you mentioned a couple of application areas.
+
+41:22.000 --> 41:29.120
+One was looking at neurons and the other was looking at some of these micromotors or
+
+41:29.120 --> 41:31.320
+cellular motors.
+
+41:31.320 --> 41:37.320
+Have you, did you learn anything through the development of the particle tracking system
+
+41:37.320 --> 41:41.160
+about the systems that you ultimately care about?
+
+41:41.160 --> 41:42.160
+Absolutely.
+
+41:42.160 --> 41:48.120
+That's ultimately what we're most excited about doing is learning, learning new things
+
+41:48.120 --> 41:51.600
+biologically speaking.
+
+41:51.600 --> 42:03.240
+So we have applied this to tracking these small fluorescent molecules, we call them gems.
+
+42:03.240 --> 42:06.080
+They are, they're actually synthesized by the cell.
+
+42:06.080 --> 42:16.400
+They're about 30 nanometers in diameter and we're looking at how cells basically programmed
+
+42:16.400 --> 42:23.520
+the cytoplasm, the fluid, that everything moves around inside in these fungal cells.
+
+42:23.520 --> 42:30.800
+They're called aspia, this is in collaboration with Amy Gladfelter's lab at UNC Chapel Hill.
+
+42:30.800 --> 42:36.720
+And what's special about these cells is that lots of different nuclei, many multiple
+
+42:36.720 --> 42:40.000
+nuclei share the same cytoplasmic space.
+
+42:40.000 --> 42:42.560
+They're called syncycia.
+
+42:42.560 --> 42:47.120
+Our typical picture of a cell is one nucleus with DNA, right?
+
+42:47.120 --> 42:50.280
+But syncycia actually are not that uncommon.
+
+42:50.280 --> 42:53.800
+We have them in our own bodies, muscle cells, for example.
+
+42:53.800 --> 43:00.640
+So it's an interesting question to understand how multiple nuclei coexist.
+
+43:00.640 --> 43:05.800
+They all have to undergo division like a cell with, there's a cell cycle and all those
+
+43:05.800 --> 43:10.920
+cell cycles conflict with each other if the nuclei are too close.
+
+43:10.920 --> 43:17.800
+So we are using particle trafficking to try and measure how the cytoplasm is regulated
+
+43:17.800 --> 43:25.600
+programmed in order to isolate these nuclei or maybe they cooperate, maybe they compete.
+
+43:25.600 --> 43:29.520
+We don't, we, there's a lot of questions that we are interested in answering.
+
+43:29.520 --> 43:33.240
+So this is an ongoing project right now.
+
+43:33.240 --> 43:36.360
+And we also study mucosal immunology.
+
+43:36.360 --> 43:44.680
+So we are interested in how virus and bacteria can penetrate a mucosal barrier which could
+
+43:44.680 --> 43:47.240
+potentially lead to an infection.
+
+43:47.240 --> 43:55.080
+So we discovered, this is with SAMLI's lab at UNC Chapel Hill in the School of Pharmacy.
+
+43:55.080 --> 44:05.000
+We discovered that these mucosal barriers actually trap virus by using antibodies, which
+
+44:05.000 --> 44:16.760
+is a potentially therapeutically exploitable avenue of protecting against infection.
+
+44:16.760 --> 44:26.360
+Do you already have some areas of further application of machine learning to your work?
+
+44:26.360 --> 44:28.280
+Absolutely.
+
+44:28.280 --> 44:35.280
+So one of the things I would really like to do is, is move to more of the human scale tracking
+
+44:35.280 --> 44:36.280
+world.
+
+44:36.280 --> 44:42.800
+And to keep going with object tracking, apply it to scientific problems, but to, to track
+
+44:42.800 --> 44:50.280
+say, fish or fruit flies or orbs in controlled laboratory settings where you want three
+
+44:50.280 --> 44:57.520
+dimensional information possibly from two or three different observation points.
+
+44:57.520 --> 45:04.760
+And there, I would like to be able to, to use mobile hardware to, to process this in
+
+45:04.760 --> 45:07.920
+real time, to process and track images in real time.
+
+45:07.920 --> 45:09.280
+Oh, really interesting.
+
+45:09.280 --> 45:14.440
+Well, Jay, thanks so much for taking the time to chat with us about what you're working
+
+45:14.440 --> 45:15.440
+on.
+
+45:15.440 --> 45:17.800
+I appreciate you walking us through it.
+
+45:17.800 --> 45:23.720
+No problem, thanks for having me.
+
+45:23.720 --> 45:28.920
+All right, everyone, that's our show for today for more information on Jay or any of the
+
+45:28.920 --> 45:35.040
+topics covered in this episode, visit twimmelai.com slash talk slash 179.
+
+45:35.040 --> 45:39.680
+If you're a fan of the podcast, we'd like to encourage you to head to your Apple or
+
+45:39.680 --> 45:44.040
+Google podcast app and leave us a five star rating and review.
+
+45:44.040 --> 45:48.720
+Your reviews help inspire us to create more and better content and they help new listeners
+
+45:48.720 --> 45:50.440
+find the show.
+
+45:50.440 --> 45:53.880
+As always, thanks so much for listening and catch you next time.
+

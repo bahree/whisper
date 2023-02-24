@@ -1,0 +1,1277 @@
+WEBVTT
+
+00:00.000 --> 00:15.920
+Hello and welcome to another episode of Twimble Talk, the podcast where I interview interesting
+
+00:15.920 --> 00:20.880
+people doing interesting things in machine learning and artificial intelligence.
+
+00:20.880 --> 00:23.480
+I'm your host Sam Charrington.
+
+00:23.480 --> 00:28.040
+A quick thanks to everyone who participated in last week's Twimble Online Meetup.
+
+00:28.040 --> 00:29.960
+It was another great one.
+
+00:29.960 --> 00:35.480
+If you missed it, the recording will be posted to the Meetup page at twimbleai.com slash
+
+00:35.480 --> 00:36.480
+meetup.
+
+00:36.480 --> 00:37.880
+Definitely check it out.
+
+00:37.880 --> 00:43.680
+I never cease to be amazed by the generosity and creativity of the Twimble community.
+
+00:43.680 --> 00:48.480
+And I'd like to send a special shout out to listener Sharon Glander for her exceptional
+
+00:48.480 --> 00:50.200
+sketch notes.
+
+00:50.200 --> 00:55.120
+Sharon has been creating beautiful hand sketch notes of her favorite Twimble episodes
+
+00:55.120 --> 00:57.160
+and sharing them with the community.
+
+00:57.160 --> 01:00.400
+Sharon, we truly love and appreciate what you're doing with those.
+
+01:00.400 --> 01:02.920
+So please keep up the great work.
+
+01:02.920 --> 01:06.040
+We'll link to her sketch notes in the show notes for this episode.
+
+01:06.040 --> 01:11.440
+And you should definitely follow her on Twitter at sharingglander for more.
+
+01:11.440 --> 01:15.840
+This is your last chance to register for the rework, deep learning and AI assistant
+
+01:15.840 --> 01:22.200
+summits in San Francisco, which are this Thursday and Friday, January 25th and 26th.
+
+01:22.200 --> 01:26.600
+These events feature leading researchers and technologists like the ones you heard in
+
+01:26.600 --> 01:29.720
+our Deep Learning Summit series last week.
+
+01:29.720 --> 01:34.680
+The San Francisco event is headlined by Ian Goodfellow of Google Brain, Daphne Kohler
+
+01:34.680 --> 01:37.560
+of Calico Labs and more.
+
+01:37.560 --> 01:43.040
+Definitely check it out and use the code Twimbleai for 20% off of registration.
+
+01:43.040 --> 01:45.880
+Now, a bit about today's show.
+
+01:45.880 --> 01:51.080
+In this episode, I speak with Thomas Sanholm, Carnegie Mellon University professor and
+
+01:51.080 --> 01:56.720
+founder and CEO of startups optimized markets and strategic machine.
+
+01:56.720 --> 02:03.800
+Thomas, along with his PhD student, Noam Brown, won a 2017 NIPPS Best Paper Award for their
+
+02:03.800 --> 02:09.680
+paper, Safe and Nested Subgames Solving for Imperfect Information Games.
+
+02:09.680 --> 02:14.200
+Thomas and I dig into the significance of the paper, including a breakdown of perfect
+
+02:14.200 --> 02:19.880
+versus imperfect information games, the role of abstractions in game solving, and how
+
+02:19.880 --> 02:23.280
+the concept of safety applies to gameplay.
+
+02:23.280 --> 02:27.680
+We discuss how all these elements and techniques are applied to poker, and how the algorithm
+
+02:27.680 --> 02:33.200
+described in this paper was used by Noam and Thomas to create LeBrotus, the first AI
+
+02:33.200 --> 02:39.720
+to beat top human pros and no limit Texas Holdum, a particularly difficult game to beat
+
+02:39.720 --> 02:42.280
+due to its large state space.
+
+02:42.280 --> 02:54.280
+This was a fascinating interview that I'm really excited to share with you.
+
+02:54.280 --> 03:01.240
+Alright everyone, after a busy week at NIPPS, I am back home, and on the line with
+
+03:01.240 --> 03:07.600
+Tuomas Sanholm, Tuomas is a professor in the computer science department at Carnegie
+
+03:07.600 --> 03:13.680
+Mellon University, as well as founder and CEO of two start-ups, Strategic Machine, and
+
+03:13.680 --> 03:21.720
+Optimize Markets, as well as an author of the Best Paper Award winning Safe and Nested
+
+03:21.720 --> 03:26.560
+Subgames Solving for Imperfect Information Games at this year's NIPPS.
+
+03:26.560 --> 03:28.840
+Tuomas, welcome to the podcast.
+
+03:28.840 --> 03:30.240
+Thank you for having me.
+
+03:30.240 --> 03:31.240
+Absolutely.
+
+03:31.240 --> 03:35.480
+It's a little bit of a tradition here to have our guests get started by telling us a
+
+03:35.480 --> 03:40.240
+little bit about their backgrounds and how they got involved in machine learning, and
+
+03:40.240 --> 03:45.720
+you sound like quite a busy guy, who with your two start-ups and posts at CMU, so feel
+
+03:45.720 --> 03:49.680
+free to take some time and let us know how all that fits together.
+
+03:49.680 --> 03:51.280
+Yeah, happy to.
+
+03:51.280 --> 03:59.000
+So I've been working on AI as in around 1989, and in my lab at CMU there are maybe 25
+
+03:59.000 --> 04:02.920
+different research trends, maybe six of them active at any one time.
+
+04:02.920 --> 04:09.600
+We're probably best known for combinatorial auctions and kidney exchange, so we run the
+
+04:09.600 --> 04:15.680
+nation what kidney exchange for units with our algorithms and game solving.
+
+04:15.680 --> 04:21.600
+So solving these large imperfect information games where we actually reach superhuman level
+
+04:21.600 --> 04:27.760
+at strategic reasoning, this January by beating the top players in Heads Up No Limit
+
+04:27.760 --> 04:29.320
+Texas Holder.
+
+04:29.320 --> 04:34.520
+And my two start-ups, well, the first one of my current ones, I'm also a serial entrepreneur
+
+04:34.520 --> 04:39.640
+with successful start-ups in the past, but the first one, Optimized Markets, is really
+
+04:39.640 --> 04:46.280
+like a combinatorial sales support system for advertising campaigns, cross media.
+
+04:46.280 --> 04:55.480
+So in TV, both linear TV and non-linear, streaming, both TV and radio and display advertising
+
+04:55.480 --> 05:00.440
+and so forth, and where we're optimizing the allocation of inventory to campaigns and
+
+05:00.440 --> 05:03.480
+pricing and scheduling and so forth.
+
+05:03.480 --> 05:08.720
+And the newer start-up, which is really brand new, is called strategic machine, where we
+
+05:08.720 --> 05:13.920
+have taken this strategic reasoning technology that we have developed in my lab here at Carnegie
+
+05:13.920 --> 05:21.160
+Milan over the last 14 years, and we are commercializing it across a wide range of applications, ranging
+
+05:21.160 --> 05:28.560
+from, of course, recreational games like poker to business applications and automated negotiation,
+
+05:28.560 --> 05:34.720
+strategic pricing, product portfolio construction, auctions and so on, all the way to military
+
+05:34.720 --> 05:41.160
+applications like cyber security, physical security, physical military, and even in steering
+
+05:41.160 --> 05:44.720
+biological evolution and adaptation for treatment planning.
+
+05:44.720 --> 05:46.840
+Well, that's a pretty broad set of applications.
+
+05:46.840 --> 05:51.120
+Yeah, when you're doing the early stages of our start-up with a platform technology like
+
+05:51.120 --> 05:56.120
+this, really the first challenge and the first order to do after the technology is ready,
+
+05:56.120 --> 06:01.200
+is to really prioritize our markets and pick and choose where it makes the most benefit
+
+06:01.200 --> 06:05.840
+and where you can penetrate the fastest and doing that prioritization.
+
+06:05.840 --> 06:08.440
+And we're actually in that process right now.
+
+06:08.440 --> 06:12.840
+So the paper that we want to talk about is safe and nested sub-game, solving for information
+
+06:12.840 --> 06:18.200
+in perfect games and it sounds like the big distinction there between what you're working
+
+06:18.200 --> 06:23.680
+on and some of the other things we've seen in the kind of machine learning apply to game
+
+06:23.680 --> 06:27.040
+arena is in that imperfect information part.
+
+06:27.040 --> 06:29.600
+Can you tell us a little bit about that and why that's important?
+
+06:29.600 --> 06:31.480
+Yeah, that's exactly right.
+
+06:31.480 --> 06:39.320
+So when you talk about games like checkers, chess or go where AI has seen a lot of success,
+
+06:39.320 --> 06:42.320
+they are what's called perfect information games.
+
+06:42.320 --> 06:47.200
+So when it is a player's turn to move, the player knows the exact state of the world.
+
+06:47.200 --> 06:52.880
+In contrast, in most real world applications where you have more than one party acting,
+
+06:52.880 --> 06:58.280
+they're what's called imperfect information games where when it's your turn to move,
+
+06:58.280 --> 07:01.880
+you don't really know the state of the world exactly.
+
+07:01.880 --> 07:07.600
+So there's hidden information and that can come from us not observing what chance has
+
+07:07.600 --> 07:13.640
+done so far, as in let's say pomity peas, but there's an additional element that there
+
+07:13.640 --> 07:19.360
+are other players, at least one other player and you may not even observe what the other
+
+07:19.360 --> 07:23.480
+player has done in the game so far.
+
+07:23.480 --> 07:27.800
+And also the other player may have observed different things about what chance has done
+
+07:27.800 --> 07:29.640
+so far than you have.
+
+07:29.640 --> 07:34.760
+So now you have private information, you know things that your opponent or opponents don't
+
+07:34.760 --> 07:38.200
+know and vice versa, they know things that you don't know.
+
+07:38.200 --> 07:43.720
+So now it becomes much harder to solve, because you have to think about issues not present
+
+07:43.720 --> 07:45.720
+in perfect information games.
+
+07:45.720 --> 07:50.400
+Like how do my actions signal to my opponent about my private information?
+
+07:50.400 --> 07:56.640
+And conversely how do my opponent's actions, how should they signal to me about the opponent's
+
+07:56.640 --> 07:57.640
+private information?
+
+07:57.640 --> 08:02.080
+And so the approaches that you need to take to solve these games are these two different
+
+08:02.080 --> 08:04.040
+classes of games are very different than?
+
+08:04.040 --> 08:09.160
+They are exactly very, very different and one difference at an intuitive level is that
+
+08:09.160 --> 08:14.240
+in a complete perfect information game, which is also called a complete information game,
+
+08:14.240 --> 08:19.440
+you can actually solve a sub game over the game tree with information from that sub tree
+
+08:19.440 --> 08:20.440
+only.
+
+08:20.440 --> 08:24.080
+That is not true in imperfect information games.
+
+08:24.080 --> 08:29.080
+In perfect information games you have to balance your strategies across the different
+
+08:29.080 --> 08:34.720
+sub games and that ties the whole game together so it doesn't decompose.
+
+08:34.720 --> 08:40.480
+The idea being that you've got a given player only has access to private information, but
+
+08:40.480 --> 08:45.120
+there's some other broader set of information that the other player has that you can't
+
+08:45.120 --> 08:47.320
+use in solving the sub tree.
+
+08:47.320 --> 08:48.320
+Yes, that's right.
+
+08:48.320 --> 08:52.960
+And conversely there's information you have that the other player or players don't have.
+
+08:52.960 --> 08:57.560
+And so you've applied this with pretty great success to poker.
+
+08:57.560 --> 09:03.120
+Can you talk a little bit about the poker as a field of application for these types of
+
+09:03.120 --> 09:07.920
+approaches and what some of the past approaches have been to solving it?
+
+09:07.920 --> 09:09.320
+Yeah, happy to.
+
+09:09.320 --> 09:12.360
+So to me, poker is not really an application.
+
+09:12.360 --> 09:18.480
+To me, poker is the benchmark and in particular heads up no limit Texas Holden has become the
+
+09:18.480 --> 09:25.160
+leading benchmark in the AI community for testing these application independent algorithms
+
+09:25.160 --> 09:27.960
+for solving imperfect information games.
+
+09:27.960 --> 09:28.960
+Okay.
+
+09:28.960 --> 09:32.320
+And poker actually goes way back in the history of your game theory.
+
+09:32.320 --> 09:39.360
+So if you think about early pioneers like for Neumann, Morgan Stern, Nash and so on,
+
+09:39.360 --> 09:45.160
+they actually were working on poker as perhaps the lead application of game theory.
+
+09:45.160 --> 09:49.480
+And they were working on small, very small variants of poker that could be solved by hand
+
+09:49.480 --> 09:51.480
+like what's called corn poker.
+
+09:51.480 --> 09:56.120
+But now we're able to solve these much larger games where you have a full deck and you have
+
+09:56.120 --> 09:59.680
+the full complexity of let's say no limit Texas Holden.
+
+09:59.680 --> 10:05.320
+If I can interrupt briefly, one of the distinctions you make in the paper is that with is between
+
+10:05.320 --> 10:11.120
+limit Texas Holden and no limit Texas Holden and I am not a poker aficionado, but what
+
+10:11.120 --> 10:17.800
+you specifically call out that the former that limit Texas Holden has 10 to the 13 decision
+
+10:17.800 --> 10:24.800
+points, whereas no limit creates a much bigger game of 10 to 161 decision points.
+
+10:24.800 --> 10:25.800
+What does all that mean?
+
+10:25.800 --> 10:30.200
+And what's different about the games that makes them so different in terms of the number
+
+10:30.200 --> 10:31.200
+of possibilities?
+
+10:31.200 --> 10:32.200
+Yeah.
+
+10:32.200 --> 10:33.200
+That's right.
+
+10:33.200 --> 10:34.200
+Those numbers are exactly right.
+
+10:34.200 --> 10:38.400
+So we can talk about the size of the game based on the number of different situations
+
+10:38.400 --> 10:40.640
+that the player can face.
+
+10:40.640 --> 10:46.920
+And in limit, it's 10 to the 13 in no limit, it's 10 to the 161.
+
+10:46.920 --> 10:51.800
+So fundamentally different and what makes it different is that in limit Texas Holden,
+
+10:51.800 --> 10:56.920
+whenever it is your turn to bet or raise, there's only one size that you can make.
+
+10:56.920 --> 11:01.080
+So the branching factor in your actions is like two or three.
+
+11:01.080 --> 11:07.360
+In contrast, in no limit, you can bet any number of your chips up to all of your chips.
+
+11:07.360 --> 11:10.560
+So the branching factor is much larger.
+
+11:10.560 --> 11:15.080
+And so based on the different kind of sizes and scopes of these games with the smaller
+
+11:15.080 --> 11:19.280
+games, one way to solve it is to just solve the whole game.
+
+11:19.280 --> 11:20.280
+Is that right?
+
+11:20.280 --> 11:21.480
+Yes, that's exactly right.
+
+11:21.480 --> 11:28.800
+So like in 2005, my student Andrew Gilpin and I, we solved exactly in previous AI challenge
+
+11:28.800 --> 11:31.640
+problem called Rhode Island Holden.
+
+11:31.640 --> 11:36.480
+And that has 10 to the power of nine different situations.
+
+11:36.480 --> 11:41.160
+And we solved it as a whole using first technique called lossless abstraction.
+
+11:41.160 --> 11:45.880
+And then the remaining game, which was about 10 to the 7 or 10 to the 8, that we could
+
+11:45.880 --> 11:47.960
+solve holistically.
+
+11:47.960 --> 11:53.400
+And similarly, Michael Bowling's research group from Alberta, near optimally, solved
+
+11:53.400 --> 11:59.920
+the two player limit Texas Holden by first doing the lossless abstraction and then having
+
+11:59.920 --> 12:05.480
+a custom algorithm for holistically solving the whole game near optimally.
+
+12:05.480 --> 12:09.440
+And what does it mean to do abstraction as a solution for a game like this?
+
+12:09.440 --> 12:16.200
+Yeah, abstraction means that you are generating a smaller but strategically similar game.
+
+12:16.200 --> 12:22.520
+And then you are solving that smaller but similar game using a Nash equilibrium finding
+
+12:22.520 --> 12:23.760
+algorithm.
+
+12:23.760 --> 12:27.560
+And the first work on abstraction really in games was manual.
+
+12:27.560 --> 12:33.920
+So people did the abstraction phase manually and equilibrium finding phase computationally.
+
+12:33.920 --> 12:37.920
+And they started around really over 15 years ago.
+
+12:37.920 --> 12:46.800
+And nowadays for the last I would say 12 years or 13 years, both phases had been done computationally.
+
+12:46.800 --> 12:52.640
+So there are abstraction algorithms that will find just from the rules of the game, find
+
+12:52.640 --> 12:59.000
+a strategically similar but small enough game to solve or almost exactly solve using
+
+12:59.000 --> 13:01.160
+equilibrium finding algorithms.
+
+13:01.160 --> 13:06.080
+Is there a simple example of abstraction applied to poker that you can give?
+
+13:06.080 --> 13:09.120
+Yes, let me give you two kinds of examples.
+
+13:09.120 --> 13:16.320
+So one kind of example is information abstraction or abstracting the actions of chance.
+
+13:16.320 --> 13:22.240
+So I might say that in poker, you are dealt ace ace or you dealt king king.
+
+13:22.240 --> 13:25.600
+Those are different situations but they're really very similar.
+
+13:25.600 --> 13:29.520
+So I could say that, okay, I'm going to treat them as if they were the same.
+
+13:29.520 --> 13:36.840
+And the other form also known as action abstraction is abstracting out the players actions.
+
+13:36.840 --> 13:42.520
+So for example, I might say that if you bet 200 chips, it's almost the same as if you
+
+13:42.520 --> 13:44.280
+bet 201 chips.
+
+13:44.280 --> 13:46.480
+So I'm going to treat them as if they were the same.
+
+13:46.480 --> 13:47.480
+Okay.
+
+13:47.480 --> 13:52.600
+And so does that tend to manifest itself like some kind of binning or quantization type
+
+13:52.600 --> 13:53.600
+of approach?
+
+13:53.600 --> 13:58.240
+You could call it that but the abstraction techniques are really much more sophisticated
+
+13:58.240 --> 13:59.840
+than just clustering.
+
+13:59.840 --> 14:03.120
+You have to think about their downstream effects and all of that.
+
+14:03.120 --> 14:08.600
+So for example, if I have the ace of spades and ace of hearts and king of spades and king
+
+14:08.600 --> 14:12.760
+of hearts, those might seem very similar in the beginning.
+
+14:12.760 --> 14:17.560
+But depending on whether they end up in a flush later, they might look very different.
+
+14:17.560 --> 14:21.880
+I mean, depending on whether they end up in a flush or a straight and so on, well,
+
+14:21.880 --> 14:26.040
+the other hand that was original is similar might actually be very different later.
+
+14:26.040 --> 14:32.760
+And so the abstraction is, it sounds like a key piece in solving these types of games,
+
+14:32.760 --> 14:36.160
+but not something that scales for the very large games.
+
+14:36.160 --> 14:41.880
+No, I would say almost opposite is that for the very large games, you need to do some
+
+14:41.880 --> 14:47.560
+form of abstraction because you cannot holistically solve these very large games.
+
+14:47.560 --> 14:51.800
+So this information abstraction, we talked about an action abstraction and then there's
+
+14:51.800 --> 14:57.080
+also a third approach, which is what has traditionally been called phase-based abstraction,
+
+14:57.080 --> 15:02.160
+where you solve some head of the game and have some sort of approximation for the rest
+
+15:02.160 --> 15:04.560
+of it instead of solving the rest of it exactly.
+
+15:04.560 --> 15:06.560
+And then you keep doing it over and over.
+
+15:06.560 --> 15:07.560
+I got it.
+
+15:07.560 --> 15:13.480
+And so the approach that you describe in the paper that uses abstraction as a way, as
+
+15:13.480 --> 15:17.280
+kind of a framework for getting to the solution.
+
+15:17.280 --> 15:22.960
+It can, it can, although just to be clear, abstraction algorithms were not the contribution
+
+15:22.960 --> 15:25.360
+of this particular paper.
+
+15:25.360 --> 15:32.840
+Abstraction in perfect information game solving and poker goes way back at least to 2001,
+
+15:32.840 --> 15:34.080
+if not earlier.
+
+15:34.080 --> 15:37.360
+So the new contribution in this paper was a little different.
+
+15:37.360 --> 15:42.240
+So why don't you tell us a little bit about what this paper contributes to this broader
+
+15:42.240 --> 15:46.200
+problem and with the example application and poker?
+
+15:46.200 --> 15:47.200
+Say yeah.
+
+15:47.200 --> 15:51.920
+So all of these algorithms are game independent, so they're not specific to poker, but we have
+
+15:51.920 --> 15:55.360
+a lot of experiments in poker in the paper.
+
+15:55.360 --> 16:01.600
+So what the new techniques are in this paper, they are what we call safe and nested sub-game
+
+16:01.600 --> 16:03.080
+solving techniques.
+
+16:03.080 --> 16:05.920
+So let me try to unpack that a little bit here.
+
+16:05.920 --> 16:14.640
+So safe means that we can guarantee that as we refine our solution, so again, they start
+
+16:14.640 --> 16:20.360
+by computing a core solution or what we call a blueprint solution for the whole game and
+
+16:20.360 --> 16:26.480
+then you start refining your strategy to make it better in sub-games that you reach during
+
+16:26.480 --> 16:27.480
+play.
+
+16:27.480 --> 16:32.120
+So offline you compute the blueprint and then online when you're playing, you refine
+
+16:32.120 --> 16:36.120
+the strategy in those parts of the search space that you actually reach.
+
+16:36.120 --> 16:41.880
+And you can afford to do that because there's less game tree lift than in the whole game.
+
+16:41.880 --> 16:47.240
+And you can also afford to do it in a finer and finer model or finer and finer abstraction,
+
+16:47.240 --> 16:49.480
+the closer to the end of the game you are.
+
+16:49.480 --> 16:54.880
+But the problem is, as we talked about earlier in the podcast, in that these imperfect information
+
+16:54.880 --> 16:59.320
+games, the sub-games don't separate out, they don't decompose.
+
+16:59.320 --> 17:04.400
+So how I should play in this current sub-game depends on how I should play in other sub-games,
+
+17:04.400 --> 17:07.040
+so I can't really reason about them independently.
+
+17:07.040 --> 17:12.200
+And here what we're doing, we're taking the blueprint strategy that gives values for different
+
+17:12.200 --> 17:16.640
+alternatives that the opponent could have taken to get here.
+
+17:16.640 --> 17:22.600
+And we use that type of reasoning to enable sub-game solving that has guarantees.
+
+17:22.600 --> 17:28.200
+So it guarantees that the solution quality is no worse than that of the blueprint strategy.
+
+17:28.200 --> 17:33.840
+So even our worst case Nemesis couldn't take us for more than it could take the blueprint.
+
+17:33.840 --> 17:40.440
+And similarly, if the values from the blueprint are off by a little bit compared to what ideal
+
+17:40.440 --> 17:45.480
+play would give for different states, we can guarantee that the answers that come out
+
+17:45.480 --> 17:51.600
+of the end-game solver or sub-game solver also are off by only a little bit.
+
+17:51.600 --> 17:56.400
+So that's a safe part, then there are two other innovations in the paper.
+
+17:56.400 --> 18:02.600
+One is that we can do much better than prior safe end-game solving techniques by taking
+
+18:02.600 --> 18:07.000
+into account the fact that actually there's several techniques there to do so, but one
+
+18:07.000 --> 18:12.800
+of them I'd like to highlight here, which is what we call taking into account the gifts
+
+18:12.800 --> 18:15.560
+that the opponent has given us so far.
+
+18:15.560 --> 18:20.600
+So if the opponent has made a mistake in the game so far, we can afford to give back
+
+18:20.600 --> 18:27.320
+to the opponent as much payoff as the expected mistake cost our opponent so far.
+
+18:27.320 --> 18:30.080
+And you might say, why do we want to give anything back?
+
+18:30.080 --> 18:35.440
+Now that allows us to have a bigger space of safe strategies to optimize over and we can
+
+18:35.440 --> 18:42.280
+do better against other hands or other private information in general that the opponent might
+
+18:42.280 --> 18:43.280
+have.
+
+18:43.280 --> 18:47.880
+So that gives us more opportunity to worry about hands that the opponent is really actually
+
+18:47.880 --> 18:53.520
+likely to have and do even better against those hands when we can, for some unlikely hands
+
+18:53.520 --> 18:58.360
+that the opponent is going to have, which would have been mistakes to play into this situation,
+
+18:58.360 --> 19:00.040
+we can afford to give some money back.
+
+19:00.040 --> 19:03.880
+If I'm understanding this piece, it's a bit counterintuitive.
+
+19:03.880 --> 19:08.040
+Can you provide some intuition or example of how this plays out in a game?
+
+19:08.040 --> 19:09.360
+Yeah, absolutely.
+
+19:09.360 --> 19:15.120
+So if you're a poker player, you know that that 2-7 offsuit is the worst starting hand
+
+19:15.120 --> 19:16.640
+in Texas holder.
+
+19:16.640 --> 19:18.680
+And that should be folded right away.
+
+19:18.680 --> 19:25.080
+But let's say we get later into the game and there are 2-7s and a 2 on the board.
+
+19:25.080 --> 19:29.280
+Now if you're there with a 2-7, that's a great hand because you have a full house.
+
+19:29.280 --> 19:33.400
+But if I think about it, I don't know your cards, but I can pretty much figure out that
+
+19:33.400 --> 19:38.200
+you don't have the full house because if you had 2-7 in your hand, you would have already
+
+19:38.200 --> 19:39.520
+folded.
+
+19:39.520 --> 19:44.360
+So let's say at the mistake of getting to this current situation with 2-7 would have
+
+19:44.360 --> 19:49.680
+been $100 for you, then I can afford to give you $100 back just in case in that scenario
+
+19:49.680 --> 19:51.640
+where you have that full house.
+
+19:51.640 --> 19:57.240
+In other words, I have to not be as defensive against that 2-7 hand and because I don't
+
+19:57.240 --> 20:02.520
+have to be as defensive there, I can use the flexibility of balancing my strategies to
+
+20:02.520 --> 20:06.880
+play better against you, against other hands you are more likely to have, like for example
+
+20:06.880 --> 20:09.000
+a pair of aces or a pair of kings.
+
+20:09.000 --> 20:10.000
+Right.
+
+20:10.000 --> 20:11.000
+Got it.
+
+20:11.000 --> 20:15.120
+And then the final piece in this paper, final conceptual piece is this nested end game
+
+20:15.120 --> 20:20.600
+solving or nested sub-game solving where we are not just taking the traditional approach
+
+20:20.600 --> 20:24.680
+of solving the end game, a new and then playing it out.
+
+20:24.680 --> 20:29.960
+But we are actually resolving it over and over every time the opponent has made a move.
+
+20:29.960 --> 20:35.040
+So as we get closer and closer to the end of the game, we can actually add the opponent's
+
+20:35.040 --> 20:40.080
+moves into our model if the opponent has played actions that were not in our model in the
+
+20:40.080 --> 20:41.240
+first place.
+
+20:41.240 --> 20:45.680
+So that way we don't get confused as to what the opponent has exactly done and how much
+
+20:45.680 --> 20:48.240
+money is in the pot and so forth.
+
+20:48.240 --> 20:52.200
+And we can still do this in a way that is probably safe.
+
+20:52.200 --> 20:57.520
+And a lot of the paper is concerned with this formal guarantees.
+
+20:57.520 --> 20:59.560
+How does this method perform?
+
+20:59.560 --> 21:01.920
+Oh, it performs very well.
+
+21:01.920 --> 21:06.920
+So we actually reach superhuman level with this technique.
+
+21:06.920 --> 21:12.840
+And just to be clear, we reach superhuman level by playing our AI called Liberatus against
+
+21:12.840 --> 21:18.360
+four of the top 10 human players at Hedge-Up No Limit Texas Holden in January in this huge
+
+21:18.360 --> 21:21.760
+120,000-hand 20-day event.
+
+21:21.760 --> 21:27.200
+And we beat them with high statistical significance and by a big margin.
+
+21:27.200 --> 21:32.880
+And this end game solving technique was one of the three new algorithms that we had in
+
+21:32.880 --> 21:36.080
+the three different modules of Liberatus.
+
+21:36.080 --> 21:37.080
+Okay.
+
+21:37.080 --> 21:43.600
+And this algorithm, does the paper give someone what they would need to implement the algorithm?
+
+21:43.600 --> 21:44.600
+Yes.
+
+21:44.600 --> 21:48.880
+Well, actually, let me go back on your previous question also in addition to humans, we have
+
+21:48.880 --> 21:55.240
+shown that Liberatus beats the best prior AI, which was called Baby Targaryen 8, which
+
+21:55.240 --> 21:59.160
+won the annual computer poker competition in 2016.
+
+21:59.160 --> 22:04.720
+So Liberatus actually beats Baby Targaryen 8 by a huge margin of 63 millibig blinds per
+
+22:04.720 --> 22:05.720
+hand.
+
+22:05.720 --> 22:10.240
+So just to clarify, we're not just able to beat the best humans, we're also able to beat
+
+22:10.240 --> 22:11.440
+the best prior AI.
+
+22:11.440 --> 22:12.440
+Got it.
+
+22:12.440 --> 22:14.040
+And what was that unit 63?
+
+22:14.040 --> 22:15.040
+Yeah, good.
+
+22:15.040 --> 22:16.040
+Good question.
+
+22:16.040 --> 22:18.840
+63 millibig blinds per game.
+
+22:18.840 --> 22:24.360
+And that's a big blind is a measure of the size of the ante in poker.
+
+22:24.360 --> 22:28.440
+And millibig blind is 1,000th of that.
+
+22:28.440 --> 22:32.760
+And if you're a poker player and you don't like to use millibig blinds per game as we
+
+22:32.760 --> 22:37.960
+do in AI, it's called 6.3 big blinds per 100.
+
+22:37.960 --> 22:40.680
+That's just another way of saying the same thing.
+
+22:40.680 --> 22:42.720
+That's a big margin of victory.
+
+22:42.720 --> 22:47.640
+So typically when the AIs play each other in the annual computer poker competition, the
+
+22:47.640 --> 22:53.000
+top two AIs are separated maybe by 10 or 20 millibig blinds per hand.
+
+22:53.000 --> 22:59.960
+But Liberatus beats Baby Targaryen 8, which was the best prior AI by 63 millibig blinds
+
+22:59.960 --> 23:00.960
+per hand.
+
+23:00.960 --> 23:07.240
+And so you were about to describe how someone might go about implementing this for poker
+
+23:07.240 --> 23:08.480
+or another game.
+
+23:08.480 --> 23:14.760
+Yeah, so we do lay out the algorithms in the paper and we prove their safety.
+
+23:14.760 --> 23:19.160
+Of course these are fairly complex algorithms to be honest, especially if you run them on
+
+23:19.160 --> 23:20.160
+a super computer.
+
+23:20.160 --> 23:24.920
+So it's not that easy to implement, but we try to make it do our best to explain how
+
+23:24.920 --> 23:25.920
+they're done.
+
+23:25.920 --> 23:29.880
+And are they, is that the typical way that you'd run them on a super computer?
+
+23:29.880 --> 23:31.360
+Depends on the game.
+
+23:31.360 --> 23:36.480
+So most games you probably could run on a laptop, but when we get into these very large
+
+23:36.480 --> 23:41.440
+games, you can still run them on a laptop, but then you're not in doing as well as you
+
+23:41.440 --> 23:43.680
+would on a super computer.
+
+23:43.680 --> 23:46.600
+And for the competition, were you running them on a super computer?
+
+23:46.600 --> 23:47.600
+Yes, that's right.
+
+23:47.600 --> 23:52.760
+We were running on bridges, which is the newly super computer at the Pittsburgh Super
+
+23:52.760 --> 23:54.240
+Computing Center.
+
+23:54.240 --> 23:55.240
+Okay.
+
+23:55.240 --> 23:57.960
+And, you know, this is an evolving game with humans.
+
+23:57.960 --> 24:03.360
+So each of the moves was then input into the, you know, the super computer and it would
+
+24:03.360 --> 24:09.760
+run what's the typical response time between, you know, after entering the humans' latest
+
+24:09.760 --> 24:13.840
+move to getting back what the machines next move should be.
+
+24:13.840 --> 24:19.080
+Yeah, just to be clear, so the humans played through a browser-based UI.
+
+24:19.080 --> 24:23.640
+So there was no human actually entering the moves into the super computer, like there
+
+24:23.640 --> 24:26.160
+was with deep lose, a playing chess.
+
+24:26.160 --> 24:27.320
+So it goes quite quickly.
+
+24:27.320 --> 24:32.840
+The entry of data back and forth goes very quickly because it's all automated.
+
+24:32.840 --> 24:37.360
+And the thinking time, well, in the first two betting rounds, the AI doesn't think at
+
+24:37.360 --> 24:38.360
+all.
+
+24:38.360 --> 24:40.320
+It has pre-computed its strategy.
+
+24:40.320 --> 24:44.480
+And then when it, or as you say, typically, it doesn't think at all.
+
+24:44.480 --> 24:50.080
+And then it typically starts thinking on the first move of the third betting round.
+
+24:50.080 --> 24:52.520
+And that's where it thinks the longest.
+
+24:52.520 --> 24:56.400
+Overall, if you think about a game of heads up, no limit, Texas hold them.
+
+24:56.400 --> 25:01.480
+These top humans were playing on average at 20 seconds per game.
+
+25:01.480 --> 25:04.080
+So not per move, 20 seconds per game.
+
+25:04.080 --> 25:05.760
+And there's a big difference between the humans.
+
+25:05.760 --> 25:10.280
+Some of them may have been going at like 17 seconds, others may have taken 25 seconds
+
+25:10.280 --> 25:14.240
+by on average, but pretty much 20 or 21 seconds on average.
+
+25:14.240 --> 25:18.320
+Liberators played at 13 seconds per average, a per per game.
+
+25:18.320 --> 25:23.280
+So we were playing a little bit faster than the top humans, but by and large at the same
+
+25:23.280 --> 25:24.680
+speed on average.
+
+25:24.680 --> 25:27.960
+But it's interesting, the thinking pattern is very different.
+
+25:27.960 --> 25:33.280
+So humans think also on the first two betting rounds while we don't typically, or sometimes
+
+25:33.280 --> 25:37.360
+in certain situations, the AI will think there too, but typically not.
+
+25:37.360 --> 25:42.760
+And the funny part, in my opinion, is that humans typically think the longest when there's
+
+25:42.760 --> 25:46.160
+a lot of money in the pot, because that is a big decision.
+
+25:46.160 --> 25:48.560
+In contrast, the AI does the opposite.
+
+25:48.560 --> 25:52.760
+The AI thinks longer if there's less money in the pot, because that's when there is
+
+25:52.760 --> 25:54.480
+more game tree left.
+
+25:54.480 --> 25:56.880
+So there's more to be thinking about.
+
+25:56.880 --> 26:00.760
+So it can be quite frustrating for humans when they're used to playing other humans who
+
+26:00.760 --> 26:05.520
+think a lot on the big pots and go fast on the small pots when the AI does the opposite.
+
+26:05.520 --> 26:08.560
+It makes big decisions instantaneously almost.
+
+26:08.560 --> 26:11.800
+And then on the tiny decisions, it can take a long time to think.
+
+26:11.800 --> 26:19.040
+And so this is one of three modules that the Bratis used in this, this most recent match
+
+26:19.040 --> 26:21.880
+are the other two published, or are there plans to publish them?
+
+26:21.880 --> 26:23.200
+We have talked about them.
+
+26:23.200 --> 26:28.920
+So for example, in my keynote talk at the International Joint Conference on Artificial Intelligence,
+
+26:28.920 --> 26:34.080
+in August, I talked about all three modules, so you can find that on YouTube.
+
+26:34.080 --> 26:36.880
+And we are about to publish the whole thing.
+
+26:36.880 --> 26:39.040
+It's currently still under review.
+
+26:39.040 --> 26:40.040
+Okay.
+
+26:40.040 --> 26:44.560
+And going back to you mentioning this running on a super computer, what language or other
+
+26:44.560 --> 26:45.880
+tools does it use?
+
+26:45.880 --> 26:49.520
+Is it written in something like a Python or something totally different?
+
+26:49.520 --> 26:51.200
+Python would be a way too slow for this.
+
+26:51.200 --> 26:52.760
+So we wrote it in C++.
+
+26:52.760 --> 26:53.760
+Okay.
+
+26:53.760 --> 26:59.080
+And does it use like an MPI for interprocess communications or something like that?
+
+26:59.080 --> 27:00.080
+Okay.
+
+27:00.080 --> 27:01.080
+Interesting.
+
+27:01.080 --> 27:02.080
+Interesting.
+
+27:02.080 --> 27:06.600
+And do you are there any plans to publish source code for this and the other algorithms?
+
+27:06.600 --> 27:08.000
+No, not really.
+
+27:08.000 --> 27:09.920
+And it wouldn't be usually that helpful.
+
+27:09.920 --> 27:12.960
+The super computing codes, they're very, very complex.
+
+27:12.960 --> 27:14.960
+We don't really have any plans to do that.
+
+27:14.960 --> 27:19.240
+But with some other students in my lab, we're writing a game solving framework that's kind
+
+27:19.240 --> 27:23.880
+of easier to understand, wouldn't be as scalable as this.
+
+27:23.880 --> 27:27.520
+But we might open source something like that so people can use it for teaching.
+
+27:27.520 --> 27:33.080
+And like I use in my AI courses, when I teach AI, we do some amount of imperfect information
+
+27:33.080 --> 27:35.680
+game solving there as well for small games.
+
+27:35.680 --> 27:39.800
+And there we do provide source code so that the students can start from that.
+
+27:39.800 --> 27:42.680
+Yeah, I would think folks would be very interested in that.
+
+27:42.680 --> 27:46.080
+Where can folks learn more about your lab and your work?
+
+27:46.080 --> 27:50.880
+I would say at the best spot to start, would be my homepage.
+
+27:50.880 --> 27:57.440
+So www.cs.cmu.edu slash till the suned column.
+
+27:57.440 --> 28:01.640
+So S-A-N-D-H-O-L-M.
+
+28:01.640 --> 28:08.440
+And if you go into the section on equilibrium finding and abstraction in games on my homepage,
+
+28:08.440 --> 28:11.000
+that's where you can find our papers on this topic.
+
+28:11.000 --> 28:15.240
+But there's a section for all the different strands of research going on in my lab so you
+
+28:15.240 --> 28:18.080
+can find papers on all of the different topics.
+
+28:18.080 --> 28:19.080
+Awesome.
+
+28:19.080 --> 28:23.160
+Well, to all of us, thank you so much for taking some time to chat with us about your
+
+28:23.160 --> 28:25.240
+paper and congratulations on the award.
+
+28:25.240 --> 28:26.240
+My pleasure.
+
+28:26.240 --> 28:27.240
+Thank you very much.
+
+28:27.240 --> 28:28.240
+Thanks.
+
+28:28.240 --> 28:35.200
+Alright, everyone, that's our show for today.
+
+28:35.200 --> 28:40.360
+Thanks so much for listening and for your continued feedback and support.
+
+28:40.360 --> 28:44.760
+For more information on to all of us or any of the topics covered in this episode, head
+
+28:44.760 --> 28:49.440
+on over to twomolei.com slash talk slash 99.
+
+28:49.440 --> 28:54.600
+Of course, we'd be delighted to hear from you, either via comment on the show notes page
+
+28:54.600 --> 29:01.240
+or via Twitter directly to me at At Sam Charrington or to the show at At Twomolei.
+
+29:01.240 --> 29:21.200
+Thanks once again for listening and catch you next time.
+

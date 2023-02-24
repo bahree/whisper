@@ -1,0 +1,1523 @@
+WEBVTT
+
+00:00.000 --> 00:17.040
+All right, everyone. I am here with Tim Rockteschel. Tim is a research scientist at Facebook AI
+
+00:17.040 --> 00:24.000
+research and associate professor in the Department of Computer Science at University College London.
+
+00:24.000 --> 00:28.320
+Tim, welcome to the Twomol AI podcast. Thanks so much for having me. It's great to be.
+
+00:28.320 --> 00:34.240
+I am really looking forward to digging into our conversation. We'll be talking about one of my
+
+00:34.240 --> 00:41.520
+favorite topics, which is reinforcement learning. But before we do, I would love to have you share a
+
+00:41.520 --> 00:47.680
+little bit about your background and how you came to work in the field. Sure. Yeah, so I started a
+
+00:47.680 --> 00:54.640
+PhD actually in natural language processing at University College London in 2013. I got interested
+
+00:54.640 --> 01:00.160
+in generally knowledge representations and knowledge graphs and how we can reason, you know,
+
+01:00.160 --> 01:05.920
+about knowledge and for new facts from these knowledge graphs. I also did some work on
+
+01:05.920 --> 01:11.360
+textual entailment and other NLP problems. But I got more and more excited about reinforcement
+
+01:11.360 --> 01:16.880
+learning. I felt in NLP, lots of the data sets back then, they were static and it was mostly,
+
+01:16.880 --> 01:23.600
+you know, chasing scores on leaderboards. And I was very intrigued, I guess, by work that came
+
+01:23.600 --> 01:28.640
+out of, you know, top AI labs like DeepMind and OpenAI at the time. So I, you know, went over to
+
+01:28.640 --> 01:33.600
+Oxford to the postdoc with a human white son's reinforcement learning group there. And then after
+
+01:33.600 --> 01:38.240
+the postdoc, I joined UCL as a lecturer back then and also Facebook research in London.
+
+01:39.200 --> 01:43.280
+Awesome. Awesome. And when you think about your kind of research,
+
+01:44.800 --> 01:50.320
+agenda at the university and the work that you focus on at Facebook, how do you characterize it?
+
+01:50.320 --> 01:56.240
+What are the bounds of your interests? So the thing that we care most about at this point are
+
+01:56.880 --> 02:02.000
+being able to train agents that can somewhat generalize to novel situations. So we strongly
+
+02:02.000 --> 02:07.680
+believe that over the last decade, quite a bit of the research in the field has unfortunately
+
+02:07.680 --> 02:13.680
+focused on very limited environments. So, you know, games like Atari Games come to mind. This
+
+02:13.680 --> 02:19.840
+has been obviously really fantastic for advancing the field, but it can only go so far in that,
+
+02:19.840 --> 02:26.320
+you know, Atari Games are deterministic. There's only so much kind of novel situations that you
+
+02:26.320 --> 02:30.800
+encounter in these kind of games. And we are really far away from being able to apply these
+
+02:30.800 --> 02:35.840
+reinforcement learning techniques to lots of the real world problems that we would care about.
+
+02:35.840 --> 02:42.160
+So really, my work focuses on how we can move closer towards these kind of real world problems.
+
+02:42.160 --> 02:46.720
+How can we drop some of these kind of simplified assumptions that are baked into some of the,
+
+02:46.720 --> 02:50.880
+you know, environment simulators that we've been used for driving reinforcement learning research?
+
+02:50.880 --> 02:58.560
+And from there, basically, it's a slippery slope into procedally generated games and, you know,
+
+02:58.560 --> 03:03.760
+training agents that are intrinsically motivated and curious, even training agents that can design
+
+03:03.760 --> 03:08.400
+their own kind of problems in these simulated worlds to then hopefully get agents that can generalize
+
+03:08.400 --> 03:13.920
+better to new tasks and new situations. And when you talk about kind of these constrained
+
+03:13.920 --> 03:20.960
+environments versus unconstrained environments is a unconstrained environment, something like,
+
+03:20.960 --> 03:25.040
+you know, what we might be familiar with with OpenAI Jim or Mojoku or something like that,
+
+03:25.040 --> 03:29.120
+where you have these figures or humanoids or do you think about that differently?
+
+03:29.120 --> 03:35.840
+So it's a bit different. So OpenAI Jim is a really fantastic interface that allowed us researchers
+
+03:35.840 --> 03:39.840
+right to basically speak the same language in terms of how to interact with environments.
+
+03:39.840 --> 03:43.840
+But it's really just an interface, right? And then there are lots of different
+
+03:43.840 --> 03:49.840
+and actual environments that connect to that interface. For example, Atari games are, you know,
+
+03:49.840 --> 03:54.400
+connected to this OpenAI Jim interface. So if you, as a researcher, want to create a model
+
+03:54.400 --> 03:58.640
+on new, you know, our agent that should, you know, do something sensible in these environments,
+
+03:58.640 --> 04:03.200
+you can just follow that interface and other researchers kind of can, you know, write other models,
+
+04:03.200 --> 04:07.920
+and they're all kind of compatible in terms of interacting with that environment. Same goes with Mojoku.
+
+04:07.920 --> 04:16.800
+So the problem with things like Mojoku or, you know, other environments that we've been using for
+
+04:16.800 --> 04:22.000
+a long time is that they are somewhat limited, right? Each of these environments make or have
+
+04:22.000 --> 04:28.320
+baked in certain simplifying assumptions that unfortunately mean that when, you know, cohort
+
+04:28.320 --> 04:34.240
+of researchers over a long time, the research on it eventually they find ways to basically
+
+04:34.240 --> 04:40.240
+exploit these simplifying assumptions. Now, I'm not saying that, you know, we can directly jump
+
+04:40.240 --> 04:45.120
+into completely unconstrained environments. The only such environment that comes to my mind is
+
+04:45.120 --> 04:49.440
+the real world, right? We would have to, that would be make a jump towards training, you know,
+
+04:49.440 --> 04:54.880
+real robots in the real world. And that's for many reasons, I think, very challenging, right? It's
+
+04:54.880 --> 04:59.680
+it's slow because you can't, you know, speed up time. You have all kinds of engineering
+
+04:59.680 --> 05:03.920
+challenges with robots falling apart and whatnot. So I'm saying we still find to use
+
+05:03.920 --> 05:08.800
+simulated environments that are somewhat constrained, but we need to be very explicit about the
+
+05:08.800 --> 05:12.560
+simplifying assumptions that are built into these environments. And we need to gradually remove
+
+05:12.560 --> 05:17.680
+them to be able to then develop methods that are somewhat of a general nature so that we have the
+
+05:17.680 --> 05:22.400
+hope at some point to learn something generally about training agents that can do things for real world
+
+05:22.400 --> 05:30.320
+tasks. We've talked a lot about in the context of, for example, computer vision, how
+
+05:30.320 --> 05:39.840
+deep learning models are so good at picking up patterns. They, you know, will pick up a pattern
+
+05:39.840 --> 05:45.840
+that is correlated with the result that you want, the label that you want, but not really the
+
+05:45.840 --> 05:51.280
+one that you want them to pick up. An example that comes to mind from a recent conversation was
+
+05:51.280 --> 06:01.120
+the, you know, a pen mark that happened to be used on a radiology image to, you know,
+
+06:01.120 --> 06:05.760
+that's correlated with whether there's cancer in the actual specimen. You said something that
+
+06:05.760 --> 06:13.040
+kind of suggested that, you know, in the RL setting, the models will, you know, pick up on these kind
+
+06:13.040 --> 06:22.400
+of tangential constraints of the environment and that impacts the way that they, the way that
+
+06:22.400 --> 06:28.080
+they're trained, et cetera, is that is the, you know, there's similar effects in that way or
+
+06:28.880 --> 06:34.080
+it's actually worse. It's, you know, that problem we also have, right? So the moment you use deep
+
+06:34.080 --> 06:39.360
+function approximators like deep neural networks that get any input as data, they might, as you
+
+06:39.360 --> 06:43.920
+said, they might just latch on to certain spurious correlations in the data. That is true for
+
+06:43.920 --> 06:48.240
+natural language processing, computer vision. It's also true for reinforcement learning environments,
+
+06:48.240 --> 06:54.240
+right? If you happen to have, for example, a certain, you know, visually rich reinforcement
+
+06:54.240 --> 06:58.880
+environment where the agent is supposed to do a certain task, maybe there's a certain queue
+
+06:58.880 --> 07:04.640
+in the training episodes that allows the agent to, you know, do well there, but then once you
+
+07:04.640 --> 07:08.320
+change something slightly, you change the background, you change some of the textures in that,
+
+07:08.320 --> 07:12.560
+in that environment, the agent will most likely break down and not do anything sensible. So that's,
+
+07:12.560 --> 07:17.440
+that's, that problem is there too. What I'm talking about is I think of somewhat a worse problem
+
+07:17.440 --> 07:24.640
+in that and we as researchers, right? We oftentimes design in RL, we design our own kind of
+
+07:24.640 --> 07:32.480
+environments to do the research, right? We create, you know, our own kind of games or we use
+
+07:32.480 --> 07:40.480
+games like the Atari games. And that works for some time, but if you are then not careful,
+
+07:40.480 --> 07:45.600
+right? You as a researcher over years and years as a, as a research cohort, right? You start to
+
+07:45.600 --> 07:49.920
+actually exploit that simulator. You say, okay, now we have an agent that can, you know,
+
+07:49.920 --> 07:54.240
+solve some of the hardest exploration problems in Atari, but then really what does that tell us
+
+07:54.240 --> 07:58.800
+for the real world? Right? What does it tell us for real world problems when let's say all your
+
+07:58.800 --> 08:03.760
+agent is doing is kind of memorizing over time, what are the right steps to do? If you change
+
+08:03.760 --> 08:08.720
+anything in that game, you know, this agent would be screwed, right? So how do you, how do you learn
+
+08:08.720 --> 08:14.640
+something general about AI agents that you want to deploy at some point to solve, you know, actual
+
+08:14.640 --> 08:19.680
+real world problems? That's the, that's the challenge. Got it. So going back to the comparison with
+
+08:19.680 --> 08:26.400
+computer versions, kind of the overfitting on image net problem. Yep. Yeah, exactly. And so how do
+
+08:26.400 --> 08:31.440
+you propose to address this problem? What are, what are some of the things that you've done in this
+
+08:31.440 --> 08:36.640
+area? So, I mean, to be honest, I think one can step back a bit and say, actually, there were
+
+08:36.640 --> 08:42.080
+multiple researchers that recognized that problem some, some time ago. So a few years ago, people
+
+08:42.080 --> 08:48.080
+started to use what's called procedurally generated environments for training and testing our
+
+08:48.080 --> 08:53.040
+agents. And what that means is that you actually have a generative process that given the start of
+
+08:53.040 --> 08:58.000
+an episode can generate a new, all your world basically, right? A whole new kind of problem,
+
+08:58.000 --> 09:03.920
+right? A new maze or a new new game with new dynamics. Or yeah, if you think about, for example,
+
+09:03.920 --> 09:09.200
+Minecraft, right, really a new kind of landscape where whatever you, I mean, whatever you learned
+
+09:09.200 --> 09:13.280
+before in terms of the topology of the world, you find yourself in, it's going to be different now,
+
+09:13.280 --> 09:18.560
+right? Certain things stay the same. The environment and dynamics stay the same, right? So the way
+
+09:18.560 --> 09:24.400
+how certain items work and what certain, you know, enemies do to you, right? That stays the same,
+
+09:24.400 --> 09:31.280
+but at least in terms of the, the kind of visual inputs and the topology of the map, right? Things
+
+09:31.280 --> 09:37.680
+change dramatically. And there were multiple researchers who've been taking that approach, right?
+
+09:37.680 --> 09:42.800
+Starting to create procedurally generated environments to test the generalization capabilities of
+
+09:42.800 --> 09:47.760
+our agents. Some prominent examples are actually indeed Minecraft. So that has been used for
+
+09:47.760 --> 09:52.480
+reinforcement learning research, although it's a somewhat a slow simulator. There was the obstacle
+
+09:52.480 --> 09:58.000
+tower challenge where you have a basically 3D jump and run problem environment. Again,
+
+09:58.000 --> 10:02.480
+wherever you episode, the blocks that you have to jump over and doors and keys that you have to,
+
+10:03.440 --> 10:08.560
+you know, interact with the position of these change. So that was quite exciting. And then
+
+10:09.360 --> 10:15.280
+more recently, opening, I released this project and benchmark. So these are 16 games that look
+
+10:15.280 --> 10:19.040
+a bit like Atari games, but that are actually procedurally generated. That means in every
+
+10:19.040 --> 10:25.200
+episode, for example, again, the mace structure changes or the textures even off the game assets
+
+10:25.200 --> 10:29.680
+change. So your agents really have to systematically generalize with respect to certain factors of
+
+10:29.680 --> 10:37.360
+variation. And, and that is interesting, right? Because now we are talking about a regime that's
+
+10:37.360 --> 10:40.960
+closer to actually what people do in computer vision and natural language processing where they
+
+10:40.960 --> 10:46.000
+have a training set. And then I have a held out test set and they actually test for generalization,
+
+10:46.000 --> 10:50.800
+right? They can see how much actually overfitting is happening. So now we can do that. And yeah,
+
+10:50.800 --> 10:56.560
+that's what what other people did in the space back then. And we looked at that and honestly,
+
+10:56.560 --> 11:02.080
+we were really, you know, really excited about this. It's to me, research is really not a zero
+
+11:02.080 --> 11:07.680
+sum game. It's great to see what other people are doing. But one of the gaps that we identified
+
+11:07.680 --> 11:12.560
+back then, and as is roughly two, three years ago, is that these environments, these procedurally
+
+11:12.560 --> 11:16.480
+generated environments, they're either quite rich, like Minecraft, right? They're where there's
+
+11:16.480 --> 11:23.040
+really lots of things to do, lots of, you know, entities to interact with. But they're really slow
+
+11:23.040 --> 11:28.240
+to simulate. So that's not great news for like contemporary reinforcement learning approaches. So
+
+11:28.240 --> 11:33.200
+you can't really do like good research with it unless you have really tremendous computational
+
+11:33.200 --> 11:39.360
+resources, and even then it's it's problematic. Or these are procedurally generated environments,
+
+11:39.360 --> 11:44.400
+but they're actually relatively limited in terms of the richness, right? In terms of interacting
+
+11:44.400 --> 11:49.840
+with different entities and agents having to acquire certain skills, they actually more like,
+
+11:49.840 --> 11:53.680
+okay, I have to move around, maybe get a key open the door, but then that's mostly it. Whereas
+
+11:53.680 --> 11:59.520
+what we would want, ideally, is something that is really rich and complex, but at the same time,
+
+11:59.520 --> 12:03.360
+very fast to simulate, so that we can still make progress with like, currency of the art
+
+12:03.360 --> 12:07.600
+reinforcement learning methods. So that's the kind of gap that we identified two, three years ago,
+
+12:07.600 --> 12:14.000
+and then basically that lead led to looking into a very interesting class of games,
+
+12:14.560 --> 12:23.280
+called Rooklikes. So these are dungeon crawl games, and they have a very long tradition.
+
+12:23.280 --> 12:29.120
+So Rook, I think itself was implemented in the in the early eighties, and then there's
+
+12:29.120 --> 12:34.320
+another much richer game called NetHack, which we then settled on in terms of turning it into
+
+12:34.320 --> 12:39.760
+reinforcement learning environment. NetHack is I think was developed in 1987. It's played
+
+12:39.760 --> 12:45.280
+entirely in the terminal. So every thing that you observe is actually ASCII characters in a terminal,
+
+12:45.280 --> 12:50.880
+and that makes it really, really fast to simulate, but it's extremely rich and complex at the same time,
+
+12:50.880 --> 12:57.520
+as well. It has hundreds of items, hundreds of monsters that all behave differently, so you have to
+
+12:57.520 --> 13:04.080
+learn over time how to avoid them or fight them. It's, as I mentioned, procedurally generated,
+
+13:04.080 --> 13:09.040
+so every time you played, it's different. The moment you die, the game is over, you have to start
+
+13:09.040 --> 13:13.120
+from the very beginning of the game, and again, it's procedurally generated, so you can't really
+
+13:13.120 --> 13:22.480
+memorize anything about certain landmarks or positions in the previous game. It's very long
+
+13:22.480 --> 13:28.240
+as well. It takes an average player, something like 50,000 steps to complete the game. It's very
+
+13:28.240 --> 13:33.120
+different to some of the grand challenges that have been used in the past for AI. If you think
+
+13:33.120 --> 13:39.040
+about StarCraft 2, for example, that game takes something like 15 minutes, and depending on how many
+
+13:39.040 --> 13:43.600
+actions you allow the agent to do per second, it means something like 2,000 steps for an episode,
+
+13:43.600 --> 13:49.600
+whereas here we're talking about, as I mentioned, 50,000. NETAC is open source, so then we decided to
+
+13:49.600 --> 13:54.320
+say, look, we're going to turn it into an RL benchmark, and we're going to see how, well,
+
+13:54.320 --> 13:58.480
+vanilla, deep brain, phospholining approaches do. That's what we did.
+
+14:00.480 --> 14:05.680
+What does completing the game mean for NETAC? Is it kind of finding your way through a world?
+
+14:05.680 --> 14:10.800
+In overcoming the various challenges that you mentioned, fighting with monsters, and finding
+
+14:10.800 --> 14:17.680
+treasures, and that kind of thing? Yeah, so it's fantasy dungeon crawl game, so basically,
+
+14:18.640 --> 14:23.440
+you get thrown into a dungeon with rooms and corridors connecting these rooms. You have to
+
+14:23.440 --> 14:28.480
+explore in there because the environment itself is partial observable. You only see kind of what's
+
+14:28.480 --> 14:31.920
+in the current room. The moment you go out, there can be things happening in there that you don't
+
+14:31.920 --> 14:38.160
+see. That itself is challenging for RL already. It's stochastic, so in the moment you attack a monster,
+
+14:38.160 --> 14:42.800
+there's a die roll in the back, like in dungeons and dragons, right? And your outcomes of the
+
+14:42.800 --> 14:47.840
+actions are uncertain. That's, again, a really major challenge for, like, a current state of the art
+
+14:47.840 --> 14:52.800
+or other approaches. But yeah, yeah, as a player, you would basically try to fight your way down.
+
+14:52.800 --> 14:57.600
+There's their cases down. You get to the next level, next level. They're over 50
+
+14:57.600 --> 15:04.560
+procedurally generated levels that become more and more difficult. At the bottom of that dungeon,
+
+15:04.560 --> 15:08.480
+that is, without hopefully spoiling too many people, is an amulet that you need to retrieve,
+
+15:08.480 --> 15:13.600
+and then you need to make your entire way up again. And then there's five more really challenging
+
+15:14.400 --> 15:20.560
+elemental planes. And then at the end of it, you need to offer the amulet to a in-game deity,
+
+15:20.560 --> 15:29.600
+and then you ascend to demigothood on your one-game. It's extremely challenging. Was it a game
+
+15:29.600 --> 15:35.680
+that you played before you started doing the research in this area? I did, yeah. So I did play
+
+15:35.680 --> 15:40.960
+a much simpler kind of clone of it that you can play easily on the smartphone, which is called
+
+15:40.960 --> 15:46.080
+Pixel Dungeon, which I enjoyed a lot. But then it was at a time, actually, when I was commuting
+
+15:46.080 --> 15:50.960
+between Oxford and London, so that's kind of a two-hour commute door-to-door where you take a train,
+
+15:50.960 --> 15:56.320
+and on that train, at least in evenings after a full day of work, yeah, I did then start to play
+
+15:56.320 --> 16:02.080
+Nethack. Specifically, when we started to get serious about this project, it took me two years
+
+16:02.080 --> 16:08.400
+to win in this game for the first time. So it is really, really challenging, but also very funny.
+
+16:08.400 --> 16:16.240
+Nice, nice. When you talk about it being procedurally generated, how many parameters
+
+16:16.240 --> 16:21.440
+are, you know, do you have a control over when you're generating a game? Is it, you know,
+
+16:21.440 --> 16:28.480
+you give it a seed and that kind of creates everything? Or do you have more fine-grained control over,
+
+16:28.480 --> 16:31.600
+you know, number of levels or difficulty or other things?
+
+16:31.600 --> 16:40.400
+So, yeah, basically, if you just take Nethack as it is, you define a seed and then the dungeon
+
+16:40.400 --> 16:45.520
+is created, it's very subtle, actually. It's very tricky, in the sense that actually there's a
+
+16:45.520 --> 16:51.120
+random number generated in the background, obviously, that is only advanced when you do an action that
+
+16:51.120 --> 16:57.360
+would lead to a stochastic outcome. So depending on the kind of, even if you set the same seed
+
+16:57.360 --> 17:00.640
+in the beginning, depending on the kind of interactions you have on the first level,
+
+17:00.640 --> 17:06.000
+the moment you go down to the next level and depending on how far that random number generator
+
+17:06.000 --> 17:09.760
+has been already advanced, the next level is going to look differently. So one thing you
+
+17:09.760 --> 17:14.640
+alter, even by fixing the seed, you won't get the entire dungeon the same way, just get the first
+
+17:14.640 --> 17:19.760
+level the same way. And that is been true for like contents in kind of containers like, you know,
+
+17:19.760 --> 17:25.520
+boxes. So it's, it's a bit like basically at disk qualifies many of the, you know, approaches that
+
+17:25.520 --> 17:30.160
+have been proposed that would, you know, make use of the fact that the simulator is deterministic,
+
+17:30.160 --> 17:32.880
+even if we try to make an hacked deterministic, it's a bit challenging.
+
+17:34.000 --> 17:42.720
+And so in publishing the, the, the environment and the challenge to you, have you also attempted
+
+17:42.720 --> 17:49.760
+to solve it? And what have you learned? What do you run into when you set RL agents loose in this
+
+17:49.760 --> 17:55.920
+kind of environment? When we released the, the network learning environment last year and presented
+
+17:55.920 --> 18:03.520
+it at NURBS, we have in that paper results of a distributed deep reinforcement learning approach,
+
+18:03.520 --> 18:10.480
+a pretty much kind of vanilla model. And we originally thought that this won't work at all,
+
+18:10.480 --> 18:15.920
+basically. It's way too hard, even for such a kind of state of the art approach to learn any
+
+18:15.920 --> 18:22.000
+meaningful behavior. We were actually surprised that our agents do learn some sensible behavior.
+
+18:22.000 --> 18:26.240
+I mean, they're not really getting very far in that game. They're not anywhere close to winning that
+
+18:26.240 --> 18:32.080
+game, but they learn like certain things like, you know, exploring the dungeons, even looking for
+
+18:32.080 --> 18:36.320
+secret doors, which can be quite tricky, kicking in locked doors, which I found a very interesting
+
+18:36.320 --> 18:40.320
+behavior because it's a pretty difficult thing to explore. Like when you're actually kicking and
+
+18:40.320 --> 18:45.840
+you're kicking against walls, you take damage and you might die. So it's interesting to see that
+
+18:45.840 --> 18:49.840
+over time, if you give it enough kind of interactions with the environment, it learns actually
+
+18:49.840 --> 18:55.360
+these kind of basic behaviors and skills. It learns to go deeper and deeper into the dungeon.
+
+18:56.400 --> 19:04.400
+It learns to avoid certain very powerful monsters. It learns to eat, which is very important in
+
+19:04.400 --> 19:11.280
+the game to actually not starve to death. But, you know, they get to like, you know, average dungeon
+
+19:11.280 --> 19:17.440
+level five or six, some lucky agents get to dungeon level 10 or 15, even. We saw that too, but
+
+19:17.440 --> 19:24.240
+that's all like very basic, basic behavior. It's not on the level of like a human when they start
+
+19:24.240 --> 19:28.800
+learning to play Natagon, they've never played it before. If they play for a week and they get to
+
+19:28.800 --> 19:34.880
+the same kind of level of skills, I think they're quite good. But then, you know, afterwards humans
+
+19:34.880 --> 19:42.640
+just are much, much better at kind of nailing this over time. And is there a score associated with
+
+19:42.640 --> 19:48.720
+the game or what is the like the fundamental driving signal that you're giving your agents to give
+
+19:48.720 --> 19:55.600
+it success, some kind of success notion? Yeah, that's a fantastic question. There is an in-game score.
+
+19:55.600 --> 20:01.120
+That score captures things like, you know, how deep did you go down in the dungeon? How many
+
+20:01.120 --> 20:06.480
+monsters did you kill? And it's a really terrible metric to try to optimize for in terms of actually
+
+20:06.480 --> 20:11.600
+winning the game. But that's basically what we did, right? We started simple and say, okay,
+
+20:11.600 --> 20:17.200
+let's use any kind of metric that we can think of. We tried the score and what happens is basically
+
+20:17.200 --> 20:21.760
+what you expect. Like, if you get reward for going down a dungeon level and killing stuff,
+
+20:21.760 --> 20:26.320
+you get an agent that just, you know, goes completely berserk, tries to kill everything in their
+
+20:26.320 --> 20:30.560
+path, more or less, and just tries to run down the dungeon level as quickly as possible without
+
+20:30.560 --> 20:36.080
+caring about actually, you know, finding items, equipping them in order to get stronger the long run.
+
+20:36.080 --> 20:40.400
+So it's a very tricky challenge, right? How do we, what's even the right reward function?
+
+20:40.400 --> 20:45.120
+So that we can guide an agent towards winning the game. And to be very honest, I think humans
+
+20:45.120 --> 20:48.160
+don't care about score when they learn to play this game. They don't even care about winning
+
+20:48.160 --> 20:53.040
+because it takes them hundreds or maybe even thousands of games before they win for the first time.
+
+20:53.040 --> 20:57.200
+For humans, something different happens, right? They get just excited about exploring
+
+20:57.200 --> 21:01.280
+and they are intrinsically motivated to learn about how this game works and what kind of
+
+21:01.280 --> 21:06.800
+funny things you can do with it, isn't it? So that's an interesting, interesting angle to it.
+
+21:06.800 --> 21:11.840
+We have to, I guess, you know, find ways to intrinsically motivate these kind of agents to explore.
+
+21:12.720 --> 21:19.440
+Yeah, and so that that sounds a lot like curiosity and leads to ideas about kind of the
+
+21:19.440 --> 21:26.640
+explore exploit knob. Is that something that, you know, what do you see when you kind of play
+
+21:26.640 --> 21:33.040
+with a knob like that with an agent in this environment? Yeah, so we, we provided another
+
+21:33.040 --> 21:38.320
+baseline in that, in that Europe's paper, which is indeed, like, such an intrinsic reward mechanism.
+
+21:38.320 --> 21:44.640
+It's called random network distillation. It's a very robust method. And it does give you small gains
+
+21:45.680 --> 21:50.400
+and significant, but small gains. I think we have to, more long term, I think we have to think
+
+21:50.400 --> 21:55.440
+about more fundamentally different ways of encouraging agents to explore things that are not
+
+21:55.440 --> 22:00.560
+directly based, for example, on counting. That really doesn't work here, right? Because every game
+
+22:00.560 --> 22:04.560
+looks different, so you can't really count the observations because most of them you only see once.
+
+22:06.320 --> 22:14.560
+You could try to come up with intrinsic motivations derived from how much you can predict the future,
+
+22:14.560 --> 22:18.000
+but even that is really difficult in a stochastic environment that's
+
+22:18.000 --> 22:21.840
+procedally generated where you go around a corner and you can't really know what's going to
+
+22:21.840 --> 22:25.040
+be around the corner or in the next angel level because it hasn't been generated yet.
+
+22:25.040 --> 22:30.720
+I think ultimately where we had to get to, and now this is, I kind of, I guess, full circle to
+
+22:30.720 --> 22:36.400
+what I've been doing my PhD on, like, a few years ago, is actually encouraging agents to
+
+22:36.400 --> 22:40.400
+expand their knowledge about the environment dynamics. You as a human, you basically become
+
+22:40.400 --> 22:44.160
+a scientist within this environment. You want to understand, okay, if I take this potion and put
+
+22:44.160 --> 22:50.240
+it together with that potion, what happens, right? Or if I'm, if I'm, you know, if I find this
+
+22:50.240 --> 22:56.480
+wand of digging, can I, you know, maybe dig downwards and fall just through the dungeon levels and
+
+22:56.480 --> 23:00.640
+things like that, like getting almost like a causal understanding of what's going on in this
+
+23:00.640 --> 23:04.720
+environment. So ideally, I think we at some point have agents that just reward themselves by
+
+23:04.720 --> 23:08.560
+discovering something new about the environment dynamics, not so much about actually what happens
+
+23:08.560 --> 23:16.320
+in a specific episode. And going back to what you worked on in your PhD is the implication that
+
+23:16.320 --> 23:22.240
+you think that some kind of knowledge graph is the way you might represent what the agent is learning.
+
+23:23.040 --> 23:28.000
+Yeah, I think, I mean, we're not, like, working on that explicitly right now, but one of the things
+
+23:28.000 --> 23:34.480
+that are, I think, exciting is the environment itself is symbolic. So you don't actually observe
+
+23:34.480 --> 23:38.240
+the pixel, you don't have observed pixels. I mean, you can do that, but you don't have to,
+
+23:38.240 --> 23:42.720
+right? You can actually just take the characters that are on the screen, the ASCII characters,
+
+23:42.720 --> 23:48.080
+and try to represent each symbol, right, using a vector. And then you could, you could basically
+
+23:48.080 --> 23:53.520
+build relatively structured models, neuro symbolic models for that. We haven't done that, but
+
+23:53.520 --> 23:58.000
+but that is an option. Another thing that's interesting about that direction is the fact that there's
+
+23:58.000 --> 24:05.760
+also what's called the Nehag Wiki. This is a basically 3000 document domain-specific Wikipedia
+
+24:05.760 --> 24:11.840
+for the game of Nehag, where humans over decades have been basically collecting all kinds of advice.
+
+24:11.840 --> 24:15.920
+And it's very interesting because it's not like a step-by-step walkthrough that you would normally
+
+24:15.920 --> 24:20.960
+see in some of the kind of video games that people play, right? It's not like a step-by-step that
+
+24:20.960 --> 24:25.520
+tells you, okay, here you have to go left, here you have to collect that item to then be able to do
+
+24:25.520 --> 24:29.920
+this or that. It can't be, right? Because the game is presumably generated, it can only be very
+
+24:29.920 --> 24:36.480
+high-level strategic advice. So how to utilize that for kind of, you know, imbuing agents with a
+
+24:36.480 --> 24:41.200
+lot of prior knowledge in terms of how to explore, or what to do in certain situations, I think,
+
+24:41.200 --> 24:46.000
+is a very interesting direction. Partly also because that Nehag Wiki itself has lots of structure,
+
+24:46.000 --> 24:51.680
+so lots of, you know, names and entities that are linked to each other that you could use in some
+
+24:51.680 --> 24:59.120
+way. And have there been attempts to do that? Not that I know of. So we have this approach that we
+
+24:59.120 --> 25:04.800
+really like sharing these kind of environments and the baselines and our research publicly and openly,
+
+25:04.800 --> 25:10.480
+so we've open sourced on of that people are invited to compete on that environment. We've even
+
+25:10.480 --> 25:18.960
+for this year, organized a Nehag Challenge where we got sponsorship from Facebook, I research in
+
+25:18.960 --> 25:23.600
+and deep mind as well, where we invited both deep reinforcement researches as well as actually
+
+25:23.600 --> 25:30.800
+bot makers. So people try to hand craft solutions for this environment. And we really want to see
+
+25:30.800 --> 25:35.120
+what people come up with. Obviously, we have our own kind of research directions as well, but
+
+25:35.120 --> 25:44.240
+often we use Nehag more for kind of inspiring, you know, problems that we want to work on rather
+
+25:44.240 --> 25:49.040
+than trying to say, okay, we're going to do anything we can do just to beat that game, right? We're
+
+25:49.040 --> 25:55.840
+going to use, you know, hundreds or hundreds of thousands of GPUs to just like try to work for
+
+25:55.840 --> 26:00.400
+our way. We really see it as a generator for kind of problems that are interesting for reinforcement
+
+26:00.400 --> 26:08.960
+research. And we started this conversation talking about trying to provide an alternative platform
+
+26:08.960 --> 26:16.000
+for our research that was less compute intensive than some of the previous things, but it sounds
+
+26:16.000 --> 26:22.320
+like it still can be computationally intense to, you know, set an agent up it to navigate this
+
+26:22.320 --> 26:28.000
+environment. Can you characterize the, you know, is it, you know, hundreds or thousands of GPUs
+
+26:28.000 --> 26:35.760
+required or GPU hours or like what's typically required to train an agent for this environment?
+
+26:36.480 --> 26:42.080
+Yeah. So the environment itself is not the bottleneck. So we can, if you have an extremely
+
+26:42.080 --> 26:47.520
+fast model, you could run this environment for tens of thousands of steps per second with a
+
+26:48.240 --> 26:56.800
+relatively basic, the deep neural network agent, we get to something like 14,000 steps a second
+
+26:56.800 --> 27:02.880
+with the monster we released for nerves. We now have versions of that that run roughly 20,000
+
+27:02.880 --> 27:08.240
+steps a second, 30,000 steps a second. So basically it means with a relatively basic,
+
+27:09.440 --> 27:14.640
+you know, deep RL agent, you can train in this environment for something like one to three
+
+27:14.640 --> 27:20.000
+billion steps a day. That's a lot of interactions. That's basically more interactions than humans
+
+27:20.000 --> 27:25.920
+had with this game, human kind had with this game per day almost. So the environment is really not
+
+27:25.920 --> 27:32.080
+the bottleneck, but once you start creating, you know, bigger and bigger, you know, deep learning
+
+27:32.080 --> 27:36.560
+models, then at some point those become basically the bottleneck. So you basically, you then just have
+
+27:36.560 --> 27:40.560
+to live with the fact that your model itself might require let's say a GPUs, right? And then if you
+
+27:40.560 --> 27:47.760
+want to, if you want to do a hyper parameter sweep or you have multiple, you know, ablations that
+
+27:47.760 --> 27:52.000
+you want to run, then you find yourself, well, n times that, right? But for researcher, I mean,
+
+27:52.000 --> 27:56.240
+you can, I think you can do really exciting research with that environment with just one GPU. That
+
+27:56.240 --> 28:04.960
+was the plan from the, from the get go. You mentioned that the goal of the project isn't so much
+
+28:04.960 --> 28:11.840
+for your team to solve it, but to inspire other research directions or advances. What are some
+
+28:11.840 --> 28:19.040
+examples of those? So, well, one example, we already mentioned right that this is, you know,
+
+28:19.040 --> 28:24.800
+how do we imbue agents with intrinsic motivation to learn to explore and such an environment in a
+
+28:24.800 --> 28:28.560
+somewhat open-ended way, right? I mean, there's so many things to explore. There's so many,
+
+28:28.560 --> 28:33.840
+as I mentioned, hundreds of items and entities to learn to attack with. Another direction is
+
+28:33.840 --> 28:39.200
+learning from demonstrations. So humans have been playing this game for a long time for like three
+
+28:39.200 --> 28:45.520
+decades. And as of, I think two decades ago, they're kind of online web pages where you can play
+
+28:45.520 --> 28:51.360
+the game by SSHing into a server, and you can actually record your game because it's so incredibly
+
+28:51.360 --> 28:56.480
+hard to play that game. Basically, people were interested in getting proof that they actually
+
+28:56.480 --> 29:02.400
+won this game with fair means, right? So, that's part of, of that story. And actually means there are
+
+29:02.400 --> 29:06.880
+five million online recorded games that everyone can have access to. They're hosted on Art.org.
+
+29:07.440 --> 29:12.720
+And an open question is, how can we learn from these kind of human demonstrations? It's very
+
+29:12.720 --> 29:17.760
+tricky because these human demonstrations don't record the actions. So usually in learning from
+
+29:17.760 --> 29:22.960
+demonstrations, we see the states and actions, and then we can do things like behavioral cloning.
+
+29:22.960 --> 29:27.760
+So directly trying to, you know, just mimic basically human policies using supervised learning
+
+29:27.760 --> 29:32.640
+techniques. Here, you can't do that because you only see the observations, not the actions,
+
+29:32.640 --> 29:37.040
+but that's again very interesting, right? It kind of exemplifies a real world problem,
+
+29:37.040 --> 29:43.280
+namely, you observing a third person doing something. And we humans, we can still kind of infer
+
+29:43.280 --> 29:48.240
+from that how we should maybe act, right? With FOA agents that can be relatively tricky. So that's
+
+29:48.240 --> 30:00.880
+another direction. Yet another direction is how can we potentially try to step back out of a
+
+30:00.880 --> 30:07.520
+specific episode and put the agent into a situation where it can experiment with the environment,
+
+30:07.520 --> 30:12.720
+right? Where I give it, you know, think of like something like a holodeck where no, the agent can
+
+30:12.720 --> 30:19.200
+experiment. We, you know, can put certain objects or certain things into that kind of contained,
+
+30:20.000 --> 30:26.560
+you know, simple space. But the agent over time learns to pose itself more and more challenging
+
+30:26.560 --> 30:31.280
+situations. And then ultimately might be able to transfer its knowledge about the environment
+
+30:31.280 --> 30:37.600
+dynamics over to the full game, the actual task, curriculum learning type of direction.
+
+30:37.600 --> 30:48.080
+Yeah, exactly. And so NetHack, this project ultimately led to another project called MiniHack.
+
+30:48.800 --> 30:54.720
+What's that about? Yeah. So MiniHack is going into the direction that I just mentioned.
+
+30:54.720 --> 31:02.240
+The problem with NetHack is you can basically put out a really challenging environment and people
+
+31:02.240 --> 31:07.840
+can start to experiment with it. But the problem becomes that in research, what we often like to do
+
+31:07.840 --> 31:14.480
+is what we like to actually have a specific research question that we want to tackle, which might
+
+31:14.480 --> 31:20.640
+isolate a specific problem of an RL agent, right? In NetHack, you have multiple problems all
+
+31:20.640 --> 31:25.520
+appearing at the same time. I've been touched upon them quite a bit already. What if you now say,
+
+31:25.520 --> 31:30.000
+okay, really, I want to, well, I want to do research on this, but I want to start simple, right?
+
+31:30.000 --> 31:35.200
+I want to have maybe only kind of a few things like I don't want to have even monsters, I don't
+
+31:35.200 --> 31:38.320
+want to have any items. I just want to navigate me as a example, right? Yeah.
+
+31:38.320 --> 31:45.040
+And so that's a common, common, I guess, pattern in AI research. We start really simple,
+
+31:45.040 --> 31:52.400
+get to a proof of concept result, then we start to crank up complexity, right? So how do we smoothly
+
+31:52.400 --> 31:58.400
+move on this kind of spectrum of NetHack super complex and difficult or like, let's say,
+
+31:58.400 --> 32:02.400
+really simple kind of grid world where we have full control over what's going on, right?
+
+32:02.400 --> 32:10.080
+And that led to MiniHack. MiniHack is basically leveraging NetHack to create a sandbox in which
+
+32:10.080 --> 32:17.440
+you can very easily create problems of varying difficulty by tapping into the richness
+
+32:17.440 --> 32:22.800
+of NetHack. The way this works is that NetHack itself has so-called description files.
+
+32:22.800 --> 32:30.080
+So to procedurally generate the game, there are basically, there's a specific language that people
+
+32:30.080 --> 32:37.600
+can use to, you know, create, you know, random rooms and random corridors connecting these rooms.
+
+32:37.600 --> 32:44.080
+They can even, with certain probabilities, specify that certain items or monsters appear somewhere,
+
+32:44.080 --> 32:50.400
+they can sample even, you know, entities from a distribution of monsters or our items.
+
+32:51.040 --> 32:57.680
+They can even draw in ASCII like a level. You can actually sit down and basically type a maze,
+
+32:57.680 --> 33:03.200
+and then you can kind of compile it into NetHack and you get an actual kind of maze to traverse.
+
+33:03.200 --> 33:08.320
+So this kind of domain-specific language is what enabled MiniHack. So it's basically a way
+
+33:08.320 --> 33:14.800
+to create, um, create lots and lots of interesting wheat fostering environments that are more
+
+33:14.800 --> 33:20.720
+contained, but also very easy to extend using that domain-specific language. It's a whole environment
+
+33:20.720 --> 33:25.760
+zoo basically. So when I asked earlier, how many degrees of freedom do you have when you're
+
+33:25.760 --> 33:30.560
+spawning one of these procedurally generated environments? In NetHack, you have your seed,
+
+33:30.560 --> 33:36.720
+but here you basically have an unlimited number of possibilities for creating the environments.
+
+33:39.280 --> 33:43.520
+Can you talk a little bit about, you know, maybe stepping back more broadly, the,
+
+33:44.560 --> 33:50.800
+you know, we talked about curriculum learning earlier. You know, the suggestion with NetHack is,
+
+33:50.800 --> 33:57.120
+you know, maybe you want to train agents to, I guess similar to curriculum learning to focus
+
+33:57.120 --> 34:03.840
+on particular areas and maybe see if those skills generalize other ways. What's the, you know,
+
+34:03.840 --> 34:08.240
+kind of current state or thinking or frontier of curriculum learning and transfer learning
+
+34:09.040 --> 34:15.200
+in the realm of RL? I guess we have, I mean, there's some work that we are focusing on,
+
+34:15.200 --> 34:21.840
+but I think more generally, I guess there's just a question around even what kind of
+
+34:21.840 --> 34:27.520
+generalization we want to see, right? Do we assume we have, you know, a fixed number of tasks
+
+34:27.520 --> 34:33.280
+and we have to, you know, we can sample problems for each of these tasks and we learn over time
+
+34:33.280 --> 34:38.080
+basically to identify when we are on an episode which kind of tasks we're in and then do well.
+
+34:40.000 --> 34:45.520
+The same agent, you know, do we, is the goal for the same agent to play breakout in
+
+34:45.520 --> 34:50.240
+Montezuma's revenge in NetHack? You know, the tasks we're talking about, for example.
+
+34:50.240 --> 34:54.560
+Yeah, that could be, that could be the task, right? You might have all the over 50 games in
+
+34:54.560 --> 34:59.360
+in Atari and you might say clearly there's something to be transferred from learning how to play
+
+34:59.360 --> 35:05.920
+one game over to learning to play a different game and maybe you want to figure out in which kind
+
+35:05.920 --> 35:12.560
+of order you should be presenting these kind of games to a learning agent. But yeah, I think, I mean,
+
+35:13.200 --> 35:19.680
+this, this, it's really tricky, right? Like how do we, how do we test for the kind of generalization
+
+35:19.680 --> 35:24.640
+that we want to test? What are the kind of assumptions that we bake into the kind of curriculum
+
+35:24.640 --> 35:31.680
+method that we that we're developing? In our case, we started off with the assumption that there's
+
+35:31.680 --> 35:39.120
+actually a seat that generates the same kind of world every time we, you know, use that seat.
+
+35:39.120 --> 35:43.920
+I already mentioned in NetHack itself, that's already not possible, but in somewhat more simplified
+
+35:43.920 --> 35:49.440
+environments, for example, open-eye proxjans, benchmark with these 16 different proceed-generated
+
+35:49.440 --> 35:53.120
+games. For each of these games, you can specify a seat and then you're going to have the same kind of,
+
+35:53.120 --> 36:00.800
+let's say, maze or the same kind of, you know, jump and run kind of level. And what we then were
+
+36:00.800 --> 36:06.400
+interested in is can we learn? Because if you sample from these seats, right? You will sometimes
+
+36:06.400 --> 36:11.200
+get really easy levels, things where, you know, the agent has to just step left and has already
+
+36:11.200 --> 36:16.800
+won, right? We'll finish the level. And then there are really, really challenging levels that you
+
+36:16.800 --> 36:21.920
+could, you know, happen to sample. And then there's everything in between, right? So the normal
+
+36:21.920 --> 36:27.840
+approach in our L is to just uniformly sample from these kind of levels, right? Or you could also
+
+36:27.840 --> 36:31.600
+call them tasks, actually, it doesn't really matter at this point. So that's the normal approach.
+
+36:32.480 --> 36:39.760
+What we were interested in is can we learn how to, how to sample these kind of levels in the way
+
+36:39.760 --> 36:44.480
+that we start with the easier ones so that the agent can start to learn certain skills and then
+
+36:44.480 --> 36:50.240
+gradually move over to more and more challenging levels. And this is, this is interesting because
+
+36:50.240 --> 36:54.400
+you basically always want to be at the frontier of what the agent can currently do, right? You don't
+
+36:54.400 --> 36:59.840
+want to present levels that are too easy and not levels that are too hard. You always want to be
+
+36:59.840 --> 37:03.440
+somewhere where the agent doesn't really show whether it's going to do well or not. And we actually
+
+37:03.440 --> 37:11.120
+exploit exactly that property. So in many current early agents, we are using what's called a value
+
+37:11.120 --> 37:16.240
+function to stabilize training. So basically, the agent at every step tries to predict how well it's
+
+37:16.240 --> 37:20.960
+going to do in the remainder of the episode and actually turns out we can use that value function
+
+37:20.960 --> 37:26.320
+to estimate a value error. So basically, that's a discrepancy between what the agent thought,
+
+37:26.320 --> 37:29.840
+how well it's going to do and then how well it actually did. And now if you think about it, right?
+
+37:29.840 --> 37:34.400
+That for kind of setups, there's you think you're doing really poorly and you'll do really
+
+37:34.400 --> 37:37.840
+poorly. So that's not interesting because you basically just realize you're in a really tough
+
+37:37.840 --> 37:41.520
+situation. You think you're going to do really well and you're actually doing really well. Again,
+
+37:41.520 --> 37:45.200
+that's not very interesting because that's way too easily. But the other two are interesting. So
+
+37:45.200 --> 37:48.560
+you think you're going to do really well and you did really poorly or you think you're going to do
+
+37:48.560 --> 37:53.440
+really poorly and you actually did really well. So these are the kind of levels or configurations
+
+37:53.440 --> 37:58.080
+that help you if you were to replay the level in the future again and try to learn from it,
+
+37:58.080 --> 38:02.400
+that actually helps you to actually learn something. And this is this approach is called
+
+38:02.400 --> 38:06.960
+practice. Every play we it has level in the name, but actually it's more general in that any kind
+
+38:06.960 --> 38:11.440
+of environment where you have a configuration that you can reset to, you can apply that approach.
+
+38:11.440 --> 38:15.600
+So if you think about, for example, a robot simulator where you have certain blocks that need
+
+38:15.600 --> 38:21.200
+to be stacked and they blocks are arranged in front of the robot, right? That kind of arrangement
+
+38:21.200 --> 38:24.960
+is a configuration you could specify that by a seed and you could apply that approach.
+
+38:24.960 --> 38:29.440
+It's analogous to an active learning kind of scenario where you're trying to provide some signal
+
+38:29.440 --> 38:34.560
+into the training process for where you have the opportunity to gain most new information.
+
+38:34.560 --> 38:42.640
+Yeah, exactly. Okay. And going further now, this is a paper that we just got accepted at NUREPS,
+
+38:42.640 --> 38:48.640
+we can actually turn that into a approach for what's called uncivilized environment design.
+
+38:48.640 --> 38:54.160
+So an uncivilized environment design, you basically separate your agent into kind of two agents,
+
+38:54.160 --> 38:59.920
+one that's the student that learns basically to do an episode and the basically agent you
+
+38:59.920 --> 39:04.160
+at the end of the day care about because that's the agent you're going to use to then test whether
+
+39:04.160 --> 39:09.680
+it's any good. And another agent, a teacher agent, and that teacher agent is basically trying to
+
+39:09.680 --> 39:16.320
+generate problems. It's generating actual, you know, levels or environments. And it turns out,
+
+39:16.320 --> 39:21.600
+if you actually not really treat that as an agent, but you just randomly sample from your
+
+39:21.600 --> 39:27.040
+procedurally generated kind of environment design space, you just randomly sample seats.
+
+39:28.640 --> 39:34.240
+And you rank them or you basically filter them by the learning potential for the current
+
+39:34.240 --> 39:39.360
+student's policy, then over time, the levels that you keep, the levels that you actually use for
+
+39:39.360 --> 39:44.000
+training student, they will gradually become more difficult and more difficult and more difficult.
+
+39:44.000 --> 39:49.280
+And basically through that kind of complexity increase, you see very interesting problems,
+
+39:49.280 --> 39:55.360
+you know, emerging through that process, as well as you see a student that's actually very strong
+
+39:55.360 --> 40:01.520
+at at the end of the day, generalizing to held out handcrafted problems. So what we call it,
+
+40:01.520 --> 40:05.600
+we call that usually zero shot generalization. So taking taking that agent into a complete new
+
+40:05.600 --> 40:15.120
+situation, see how it does. And can you or how can you predict the learning potential for a given seed
+
+40:15.120 --> 40:20.800
+before the agent has attempted the seed? We talked about it previously. It was the difference
+
+40:20.800 --> 40:25.600
+between their results. They're expected outcome and their actual outcome. Yeah. So you can't.
+
+40:25.600 --> 40:31.200
+So you have to play at once. And then when you've done it once, you basically have a score for
+
+40:31.200 --> 40:35.360
+that kind of level in terms of the learning potential for presenting it again in the future.
+
+40:35.360 --> 40:39.440
+And you keep that in the buffer now. Basically, at every time step, the student agent,
+
+40:39.440 --> 40:45.040
+and either sample, it's basically completely new level, right, from just your seed, or samples,
+
+40:45.040 --> 40:50.480
+one of the levels from the buffer and uses that to train. Okay. And then
+
+40:52.400 --> 40:58.720
+ultimately, you're trying to drive with this adversarial approach by greater training
+
+40:58.720 --> 41:05.840
+efficiency and converging on successful agents more quickly. Yeah. And what kind of results have
+
+41:05.840 --> 41:12.480
+you seen in applying the technique? So the, the things that we did was we started again,
+
+41:12.480 --> 41:15.760
+very simple, right? I mean, again, I mentioned this comes back from our focus. You can say,
+
+41:15.760 --> 41:20.720
+here's a super complex environment. And here are like more kind of toyish grid worlds.
+
+41:20.720 --> 41:25.280
+We started with the grid worlds and we trained agents to basically generate
+
+41:25.280 --> 41:29.760
+mazes and then student ages to navigate these mazes. That itself is not a super interesting problem
+
+41:29.760 --> 41:35.520
+because you could just code up a symbolic agent that is really good at traversing mazes.
+
+41:35.520 --> 41:38.640
+But it presents an interesting challenge for reinforcement learning because you only get
+
+41:38.640 --> 41:41.920
+the what when you finish the maze, right? And depending on how big your maze becomes,
+
+41:41.920 --> 41:48.720
+this is very, very tricky. And so now we have this kind of process, you know, that's generating,
+
+41:48.720 --> 41:53.040
+the teacher generating or crew rating. Basically, that's how we call it crew rating levels for
+
+41:53.040 --> 41:58.880
+student to learn. And then you actually see over time, the kind of levels that are kept to train
+
+41:58.880 --> 42:05.280
+the student agent, they become quite complex. They have quite interesting structure that resembles
+
+42:05.280 --> 42:10.560
+to some extent actual mazes. So now the student learns in that and then we take it out of that kind
+
+42:10.560 --> 42:16.880
+of space and actually presented with handcrafted quite tricky mazes and we see how well the student
+
+42:16.880 --> 42:21.840
+doesn't these. And actually, we do see quite quite strong zero shot generalization to these kind
+
+42:21.840 --> 42:26.640
+of held out problems. So just to be very clear, this is really kind of out of domain generalization
+
+42:26.640 --> 42:32.400
+in that these kind of handcrafted levels were not within the distribution of the levels that
+
+42:32.400 --> 42:35.840
+you would normally see during training, right? So that's that's a kind of interesting bit. And then
+
+42:35.840 --> 42:39.120
+we thought, okay, if that works for mazes, maybe we can also do this in a continuous control
+
+42:39.120 --> 42:46.400
+environment. So we actually moved over to to the car racing and we let the teacher to basically
+
+42:46.400 --> 42:51.280
+over time generate formula one tracks. I mean, non actual formula one tracks, but basically
+
+42:51.280 --> 42:55.600
+racetracks. And we have this student kind of trying to get through this as quickly as possible.
+
+42:55.600 --> 43:00.720
+And then we again have held out handcrafted racetracks, namely actual formula one tracks
+
+43:00.720 --> 43:05.440
+and see how well the student can generalize to these kind of unseen tracks. So in both cases,
+
+43:05.440 --> 43:12.560
+we see a strong generalization performance. Got it, got it. And when you say the the handcrafted
+
+43:13.280 --> 43:18.800
+maps are out of distribution, how far out of distribution or are they out of distribution in any
+
+43:18.800 --> 43:24.480
+particular ways? Are they more complex? Are they do they have different features?
+
+43:24.480 --> 43:32.960
+Oh, yeah. So they have more blocks. They have more structure in the kind of, you know, levels you
+
+43:32.960 --> 43:39.360
+get by just randomly sampling basically blocks on a on a on a map, right? You you're not necessarily
+
+43:39.360 --> 43:44.000
+getting a lot of really complicated structure. But we have like mazes where you have a labyrinth
+
+43:44.000 --> 43:48.080
+for example, or you have mazes where you have lots of different kind of corridors and you have to
+
+43:48.080 --> 43:51.040
+basically check each of them and you have to backtrack what you have to memorize where you already
+
+43:51.040 --> 43:56.320
+been. And and these were the kind of held out mazes. I don't have a quantification of how much
+
+43:56.320 --> 44:00.480
+out of distribution they are, but basically on you look at the paper and you you eyeball basically
+
+44:00.480 --> 44:05.200
+up here are the randomly generated ones. Here the handcrafted ones should see a very notable
+
+44:05.200 --> 44:13.760
+difference. Got it, got it. And then what's next? What what what research directions? You know,
+
+44:13.760 --> 44:20.960
+we've talked about several potential directions. What are you most excited about in terms of building
+
+44:20.960 --> 44:26.240
+on this foundation? So one of the things I'm very excited about is this this space of unsupervised
+
+44:26.240 --> 44:31.360
+environment design. I think we as a field only started to scratch the service of that. And then
+
+44:31.360 --> 44:36.560
+you know, ideal world in the next kind of few years we have, I think, very interesting AI
+
+44:36.560 --> 44:43.840
+systems that really can create very complex rich, you know, interesting, you know, whole worlds,
+
+44:43.840 --> 44:50.080
+right? I mean, not just like 2D mazes, but you know, imagine kind of, you know, 3D Minecraft
+
+44:50.080 --> 44:55.040
+environments, right? And we had then have also students student agents that learn to do very
+
+44:55.040 --> 44:58.720
+interesting complex stuff in these environments. I think that would be something that would be very
+
+44:58.720 --> 45:04.640
+exciting, but I think it requires a lot of additional work in that you need to basically,
+
+45:04.640 --> 45:09.920
+I think, overtime compound complexity, right? If you were to design a level for me, I don't think
+
+45:09.920 --> 45:16.240
+you would just randomly or like just with one kind of stroke sketch one, right? You would actually
+
+45:16.240 --> 45:21.360
+start somewhere and then develop it slowly over time. You would test it out, right? See what
+
+45:21.360 --> 45:25.440
+actually a student now does in the level. And then depending on whether it does really well or
+
+45:25.440 --> 45:30.000
+poorly, you would start to, I guess, refine it a bit. So I think there's lots of stuff to be
+
+45:30.000 --> 45:33.280
+to be done in that space. And there's some, one of the things I'm very excited about.
+
+45:34.960 --> 45:39.520
+The other thing I'm excited about is I guess more ways to intrinsically motivate agents as we
+
+45:39.520 --> 45:45.920
+discussed earlier, right? How do we make sure agents just get excited about expanding and knowledge
+
+45:45.920 --> 45:51.440
+about certain dynamics in the environment? Really some kind of open-ended process that just
+
+45:51.440 --> 45:56.160
+allows the agent to explore all kinds of things in the environment, becoming basically a scientist
+
+45:56.160 --> 45:59.680
+within such a simulated environment. That's something that's also very exciting to me.
+
+46:01.200 --> 46:08.000
+And then I think also just looking more for applications in other domains and environments.
+
+46:08.000 --> 46:12.560
+I think one of the things that we really want to, I guess, be able to do is develop
+
+46:12.560 --> 46:17.600
+methods that are of somewhat general nature, right? That's where we care about, can we start in
+
+46:17.600 --> 46:22.240
+a grid world with discrete actions, but does it also work in a continuous control environment,
+
+46:22.240 --> 46:26.560
+right? So this is, I think, very, very important. Likewise, I think it's very important for us as a
+
+46:26.560 --> 46:32.160
+field to be very explicit about the kind of simplifying assumptions that are baked into some of the
+
+46:32.160 --> 46:35.840
+environments that we use for research. And I think mapping that out in a bit more structured way
+
+46:35.840 --> 46:41.040
+would be very useful as well. Awesome. Also, sorry, just on the environmental line aspect, I mean,
+
+46:41.040 --> 46:44.960
+we talked about how it's useful to train like student agents that then generalize.
+
+46:44.960 --> 46:49.120
+I think that's also something interesting, maybe going forward, where we also make sure that these
+
+46:49.120 --> 46:52.880
+kind of levels might be interesting to a human, right? I'm not really sure how do we quantify that,
+
+46:52.880 --> 46:58.640
+but that could be a nice side effect, right? How do we create more and more engaging content
+
+46:58.640 --> 47:04.400
+for human players in some of these kind of environments? Right. Right. Awesome. Awesome.
+
+47:04.880 --> 47:08.880
+Well, Tim, thanks so much for joining us and sharing a bit about what you're working on.
+
+47:08.880 --> 47:13.200
+Yeah, thanks so much. I really was really excited in the discussion. Thanks. Thank you.
+

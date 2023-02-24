@@ -1,0 +1,2054 @@
+WEBVTT
+
+00:00.000 --> 00:16.320
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+
+00:16.320 --> 00:21.480
+people, doing interesting things in machine learning and artificial intelligence.
+
+00:21.480 --> 00:31.720
+I'm your host Sam Charrington.
+
+00:31.720 --> 00:36.200
+Tomorrow, May 15, the Twimble online meetup is back.
+
+00:36.200 --> 00:43.140
+Our main event will be a presentation by Santosh GSK on the paper Yolo 9000, Better Faster
+
+00:43.140 --> 00:48.560
+Stronger, which was written by Joseph Redman and Ali Farhadi.
+
+00:48.560 --> 00:54.880
+Yolo, or you only look once, is a very popular image object detection system and will thoroughly
+
+00:54.880 --> 00:59.640
+review it, along with the broader object detection landscape, the current state of detection
+
+00:59.640 --> 01:03.240
+algorithms, and the various challenges ahead.
+
+01:03.240 --> 01:09.280
+If you aren't already signed up, head over to twimbleai.com slash meetup to register.
+
+01:09.280 --> 01:11.600
+See you there.
+
+01:11.600 --> 01:17.240
+In this episode, I'm joined by Rachel Thomas, founder and researcher at Fast AI.
+
+01:17.240 --> 01:22.320
+If you're not familiar with Fast AI, the company offers a series of courses including practical
+
+01:22.320 --> 01:27.940
+deep learning for coders, cutting edge deep learning for coders, and Rachel's computational
+
+01:27.940 --> 01:31.280
+linear algebra course, and they're all free.
+
+01:31.280 --> 01:35.240
+The courses are designed to make deep learning more accessible to those without the extensive
+
+01:35.240 --> 01:39.160
+math backgrounds that some other courses assume.
+
+01:39.160 --> 01:43.400
+Rachel and I cover a lot of ground in this conversation, starting with the philosophy and
+
+01:43.400 --> 01:46.240
+goals behind the Fast AI courses.
+
+01:46.240 --> 01:51.920
+We also cover Fast AI's recent decision to switch their courses from TensorFlow to PyTorch,
+
+01:51.920 --> 01:56.200
+the reasons for this, and the lessons they've learned in the process.
+
+01:56.200 --> 02:00.520
+We chat about the role of the Fast AI deep learning in library as well, and how it was
+
+02:00.520 --> 02:06.200
+recently used to help their team achieve top results on a popular industry benchmark of
+
+02:06.200 --> 02:10.560
+training time and training cost by a factor of more than 10.
+
+02:10.560 --> 02:14.920
+I also announce on this show that I'll be working through the Fast AI practical deep learning
+
+02:14.920 --> 02:20.120
+for coders course starting in June, and I'm organizing a study and support group via
+
+02:20.120 --> 02:22.400
+the Twimble Online Meetup.
+
+02:22.400 --> 02:26.040
+So if you're like me, and taking this course has been on your list for a while, but you've
+
+02:26.040 --> 02:28.720
+put it off, let's knock it out together.
+
+02:28.720 --> 02:33.680
+You can join in by registering for the meetup at twimlai.com slash meetup, and letting
+
+02:33.680 --> 02:38.360
+us know that you're in on the Fast AI channel that I've created there.
+
+02:38.360 --> 02:45.800
+And now on to the interview.
+
+02:45.800 --> 02:46.800
+All right, everyone.
+
+02:46.800 --> 02:49.200
+I am on the line with Rachel Thomas.
+
+02:49.200 --> 02:56.240
+Rachel is founder and researcher at Fast AI and an assistant professor with a data institute
+
+02:56.240 --> 02:58.720
+at the University of San Francisco.
+
+02:58.720 --> 03:01.400
+Rachel, welcome to this weekend machine learning in AI.
+
+03:01.400 --> 03:02.400
+Oh, thank you.
+
+03:02.400 --> 03:03.920
+Thanks for having me.
+
+03:03.920 --> 03:09.200
+Why don't we get started by having you tell us about your background and how you made
+
+03:09.200 --> 03:12.760
+your way into machine learning in AI?
+
+03:12.760 --> 03:13.760
+Sure.
+
+03:13.760 --> 03:14.760
+Yeah.
+
+03:14.760 --> 03:20.480
+So I studied math and computer science in college, but I was really focused on kind of stuff
+
+03:20.480 --> 03:23.360
+that was as theoretical as possible.
+
+03:23.360 --> 03:27.880
+I did a PhD in math planning, planning to become a professor, and then kind of changing
+
+03:27.880 --> 03:34.000
+my mind towards the end, and stumbled into working into finance as a quant.
+
+03:34.000 --> 03:38.080
+And that's where I first kind of started working with data a lot, and really enjoyed
+
+03:38.080 --> 03:39.080
+it.
+
+03:39.080 --> 03:43.360
+And so I read about data science being kind of this new field and tech.
+
+03:43.360 --> 03:46.720
+And yeah, I moved to San Francisco and started working for tech startups.
+
+03:46.720 --> 03:53.720
+I was an early engineer and data scientist at Uber, and then I returned to teaching.
+
+03:53.720 --> 03:58.360
+So I love teaching always, I think, come back to it in some form and taught full-stacks
+
+03:58.360 --> 04:01.240
+offer development to women at Hackbright.
+
+04:01.240 --> 04:06.760
+And then two years ago, Jeremy Howard and I started, fast, AI with the goal of making
+
+04:06.760 --> 04:09.800
+deep learning more accessible and easier to use.
+
+04:09.800 --> 04:16.040
+This kind of brings together my enjoyment of machine learning as well as, yeah, trying
+
+04:16.040 --> 04:23.040
+to create a more inclusive field, yeah, and really make the field more accessible.
+
+04:23.040 --> 04:27.200
+And at Fast Day, I would do a mix of research and education.
+
+04:27.200 --> 04:32.200
+So our goal is we teach a course, practical deep learning for coders that's available
+
+04:32.200 --> 04:36.800
+for free online, and we want every time we teach it to be able to teach it to an even
+
+04:36.800 --> 04:41.600
+broader audience and have even better, faster results.
+
+04:41.600 --> 04:45.640
+And so part of that is building the libraries and tools we need to make that possible.
+
+04:45.640 --> 04:46.640
+Okay.
+
+04:46.640 --> 04:47.640
+Awesome.
+
+04:47.640 --> 04:49.000
+Well, we'll dig into all of that.
+
+04:49.000 --> 04:53.240
+Before we do, I will fess up to not having gone through the course yet.
+
+04:53.240 --> 04:55.840
+It has been on my list.
+
+04:55.840 --> 04:57.720
+And I do plan to do it.
+
+04:57.720 --> 04:59.360
+And in fact, I'll throw this out there.
+
+04:59.360 --> 05:08.840
+If anyone in the listening audience wants to do a kind of a support group or a group for
+
+05:08.840 --> 05:12.880
+going through the course, I will commit to doing it in June.
+
+05:12.880 --> 05:15.280
+So we can start in June 1st.
+
+05:15.280 --> 05:16.480
+On June 1st, I should say.
+
+05:16.480 --> 05:22.120
+We've got a in our meetup, we've got a slight channel, and I think I've already created
+
+05:22.120 --> 05:25.080
+a channel for doing the course because I'd hope to do it sooner.
+
+05:25.080 --> 05:29.720
+But if anyone wants to join me in getting started with it in June, I think it'd be great
+
+05:29.720 --> 05:31.480
+to do it as a group.
+
+05:31.480 --> 05:32.480
+Yeah, that's great.
+
+05:32.480 --> 05:38.560
+I was going to say we have, when we have forums, forums.fast.ai, so definitely check those
+
+05:38.560 --> 05:40.960
+out for asking questions and getting help.
+
+05:40.960 --> 05:45.440
+But yeah, we really encourage people to find groups to do it with because I know a lot
+
+05:45.440 --> 05:51.040
+of people, it really helps to have that accountability and people to talk with as they're working
+
+05:51.040 --> 05:52.040
+through the course.
+
+05:52.040 --> 05:55.040
+And I know a few different companies where groups have worked through the course together
+
+05:55.040 --> 05:58.680
+and you know, like have lunch once a week to discuss how they're doing.
+
+05:58.680 --> 06:00.440
+Oh, yeah, that sounds great.
+
+06:00.440 --> 06:06.160
+Yeah, there's also this program, AI Saturdays, that we only found out about this after a
+
+06:06.160 --> 06:07.160
+while.
+
+06:07.160 --> 06:10.360
+But I think they're in like 60 countries and it's like people get together on Saturdays
+
+06:10.360 --> 06:12.720
+and in the morning, they work through the course together.
+
+06:12.720 --> 06:13.720
+Oh, wow.
+
+06:13.720 --> 06:14.720
+Oh, very cool.
+
+06:14.720 --> 06:15.720
+Yeah, yeah.
+
+06:15.720 --> 06:16.720
+So that's AI Saturdays.
+
+06:16.720 --> 06:17.720
+Very cool.
+
+06:17.720 --> 06:24.480
+Well, why don't we start by having you talk a little bit about the course and go a little
+
+06:24.480 --> 06:30.240
+bit deeper into the motivation behind the course, what makes it unique, relative to all
+
+06:30.240 --> 06:37.960
+of the other courses that are out there and kind of how you see the education landscape
+
+06:37.960 --> 06:39.200
+around deep learning.
+
+06:39.200 --> 06:40.200
+Sure.
+
+06:40.200 --> 06:41.200
+Yeah.
+
+06:41.200 --> 06:45.200
+This is the course that I wish had existed five years ago when I was first getting interested
+
+06:45.200 --> 06:46.200
+in deep learning.
+
+06:46.200 --> 06:47.200
+Mm-hmm.
+
+06:47.200 --> 06:52.080
+And it kind of came with, I think, a lot of me and Jeremy's frustrations at the time with
+
+06:52.080 --> 06:54.640
+a kind of existing materials.
+
+06:54.640 --> 07:00.320
+But a lot of resources for deep learning are either they're very theoretical.
+
+07:00.320 --> 07:05.440
+And so, you know, they're not too accessible to people that don't have a graduate math background.
+
+07:05.440 --> 07:09.520
+And even as someone that did have a graduate math background, it was not that helpful for
+
+07:09.520 --> 07:10.520
+coding.
+
+07:10.520 --> 07:14.000
+It was like, I want to build kind of like practical applications using this.
+
+07:14.000 --> 07:17.800
+And yeah, reading the theory wasn't that helpful to me.
+
+07:17.800 --> 07:23.280
+We're starting to see, I think, a lot more practical courses and tutorials out there.
+
+07:23.280 --> 07:28.600
+But many of them kind of settle for these, you know, they work on toy problems and have
+
+07:28.600 --> 07:29.920
+like, okay, results.
+
+07:29.920 --> 07:33.160
+But we really wanted something that would get you to the state of the art and that you
+
+07:33.160 --> 07:38.440
+could use in the workplace and have state of the art results, but have it be super practical.
+
+07:38.440 --> 07:42.680
+So our course is distinctive and that there are no math prerequisites.
+
+07:42.680 --> 07:46.440
+The only prerequisite is one year of coding experience.
+
+07:46.440 --> 07:49.000
+And it gets you to the state of the art.
+
+07:49.000 --> 07:54.400
+Something else that's pretty unusual about it is we use a stop down teaching approach.
+
+07:54.400 --> 07:59.000
+So most technical education is, we call it bottom up, but it's where you have to learn
+
+07:59.000 --> 08:03.120
+each individual like underlying component that you'll be using.
+
+08:03.120 --> 08:06.480
+And then, you know, eventually you can put them together to do something interesting.
+
+08:06.480 --> 08:08.480
+And this is how math is taught as well.
+
+08:08.480 --> 08:11.680
+And so it's like, for years, students are kind of like, what's the big picture?
+
+08:11.680 --> 08:14.080
+Why am I learning, you know, like all these little components?
+
+08:14.080 --> 08:18.160
+And you can do really awesome stuff later, but so many people lose the motivation when
+
+08:18.160 --> 08:20.080
+they don't have that big picture.
+
+08:20.080 --> 08:26.320
+And so our goal with the course is to get you training and training a model right away,
+
+08:26.320 --> 08:28.160
+like in three lines of code.
+
+08:28.160 --> 08:31.360
+And then as time goes on, we get into these underlying details.
+
+08:31.360 --> 08:36.160
+And so this is a lot more similar to how they sports or music are taught, where, you
+
+08:36.160 --> 08:40.360
+know, kids can be playing baseball, even if they don't know the formal rules, they might
+
+08:40.360 --> 08:44.040
+not have, you know, a full team or a full nine innings.
+
+08:44.040 --> 08:46.400
+And as they get older, they learn more rules.
+
+08:46.400 --> 08:48.800
+And so that's kind of what we're doing with people learning is like, show you how to
+
+08:48.800 --> 08:49.800
+use it.
+
+08:49.800 --> 08:51.840
+And then we explain how it works later.
+
+08:51.840 --> 08:55.520
+And that's kind of the opposite approach for many, many courses.
+
+08:55.520 --> 09:01.960
+And there are two courses or at least two parts to the second version of the course.
+
+09:01.960 --> 09:05.160
+How are the two parts differentiated?
+
+09:05.160 --> 09:06.160
+Sure.
+
+09:06.160 --> 09:07.160
+Yeah.
+
+09:07.160 --> 09:12.200
+So part one, we call practical deep learning for coders, and that kind of goes over a lot
+
+09:12.200 --> 09:18.880
+of, I guess, like core areas of, you know, like using convolutional neural networks for
+
+09:18.880 --> 09:19.880
+image classification.
+
+09:19.880 --> 09:23.400
+We do a little bit of language with RNNs.
+
+09:23.400 --> 09:30.400
+We also do, we cover how to work on tabular data, collaborative filtering, so for, you
+
+09:30.400 --> 09:35.360
+know, making predictions of, you know, like movie recommendations, so that's all in part
+
+09:35.360 --> 09:36.360
+one.
+
+09:36.360 --> 09:39.600
+Just kind of really to get you using the tools proficiently.
+
+09:39.600 --> 09:43.360
+And then part two is cutting edge, cutting edge deep learning.
+
+09:43.360 --> 09:47.440
+And so that's a lot more, which you had to start reading and implementing papers.
+
+09:47.440 --> 09:48.440
+Oh, nice.
+
+09:48.440 --> 09:52.120
+And it's, yeah, it's exciting to see because we've had a lot of students are like, oh,
+
+09:52.120 --> 09:53.440
+my gosh, this is so intimidating.
+
+09:53.440 --> 09:57.040
+You know, I did not think I would be able to like read one of these papers and implement
+
+09:57.040 --> 09:59.240
+it to have them have them doing that now.
+
+09:59.240 --> 10:00.240
+Oh, fantastic.
+
+10:00.240 --> 10:03.720
+Well, I'll plan on hitting part two as well this summer.
+
+10:03.720 --> 10:04.720
+Yeah.
+
+10:04.720 --> 10:05.720
+Yeah.
+
+10:05.720 --> 10:07.960
+We'll be releasing the updated version of that in the next month or two.
+
+10:07.960 --> 10:10.320
+So we just wrapped up the in person version.
+
+10:10.320 --> 10:14.080
+So we kind of teach it in person and then we really sit online.
+
+10:14.080 --> 10:19.200
+But that includes stuff like bounding boxes and gans.
+
+10:19.200 --> 10:24.560
+We did some really neat stuff with language as we're using transfer learning to kind of
+
+10:24.560 --> 10:30.320
+use a language model for then text classification problems, style, transfer.
+
+10:30.320 --> 10:33.040
+Oh, very cool.
+
+10:33.040 --> 10:37.040
+And the course is offered both online and in person.
+
+10:37.040 --> 10:42.040
+What's the motivation behind doing the in person course given that you can reach so many
+
+10:42.040 --> 10:43.800
+people doing it online?
+
+10:43.800 --> 10:49.360
+So I think with the in person course, it's really helpful to have that kind of energy
+
+10:49.360 --> 10:51.120
+and feedback.
+
+10:51.120 --> 10:56.320
+I think it's hard to record a course just in an empty room, but to be getting student
+
+10:56.320 --> 10:57.320
+questions.
+
+10:57.320 --> 11:00.920
+And we have to really get to know a lot of the students taking the in person course.
+
+11:00.920 --> 11:03.680
+There's been a pretty good community around it.
+
+11:03.680 --> 11:08.320
+The in person course, I should say it meets one evening a week in San Francisco.
+
+11:08.320 --> 11:13.680
+So most people taking the course are working full-time, most of them work in tech.
+
+11:13.680 --> 11:17.040
+As part of the in person course, we've also had two programs.
+
+11:17.040 --> 11:22.080
+We have diversity fellows, and so this is to encourage more women, people of color and
+
+11:22.080 --> 11:27.120
+LGBTQ people to take the course, and that's really, I think, helped us get a more diverse
+
+11:27.120 --> 11:30.200
+audience, which is great.
+
+11:30.200 --> 11:34.440
+And then we also have an international fellows program, and that's people that are remote
+
+11:34.440 --> 11:39.560
+from all over the world, but they are participating in the course in real time.
+
+11:39.560 --> 11:45.080
+And so I think that those have been really important components of the in person course.
+
+11:45.080 --> 11:52.400
+One of the things that I noticed not too long ago was there were some announcements
+
+11:52.400 --> 11:59.120
+about the course shifting from, actually, I forget the framework that it was using before.
+
+11:59.120 --> 12:05.440
+So version one part one was in caros, and then version one part two was a blend of caros
+
+12:05.440 --> 12:06.440
+and tensorflow.
+
+12:06.440 --> 12:11.640
+I should say, yeah, we were using caros on top of the ono for the original version, and
+
+12:11.640 --> 12:17.080
+then we introduced some tensorflow, but then kind of last summer when we started working
+
+12:17.080 --> 12:19.960
+on version two, we switched to pie torch.
+
+12:19.960 --> 12:24.320
+And I guess, actually now that I think about it, we had used some pie torch in version
+
+12:24.320 --> 12:29.320
+one part two, because we found there were some stuff that was just almost impossible for
+
+12:29.320 --> 12:33.360
+us to do in tensorflow, and so we had started using pie torches, it was pretty soon after
+
+12:33.360 --> 12:38.200
+it released, and it was just such a fun language to use, and made a lot of things feel so much
+
+12:38.200 --> 12:43.360
+more intuitive and easier, so this year, yeah, the course was entirely in pie torch, as
+
+12:43.360 --> 12:48.480
+well as a high level API that we've written in our own library, fast AI that sits on top
+
+12:48.480 --> 12:49.680
+of pie torch.
+
+12:49.680 --> 12:54.640
+What were some of the things that were impossible to do in tensorflow that you were able to do
+
+12:54.640 --> 12:55.640
+in pie torch?
+
+12:55.640 --> 13:03.000
+So I remember we were having a lot of trouble with teacher forcing, so this is in natural
+
+13:03.000 --> 13:10.080
+language processing, where for text model, we're trying to predict what the next word
+
+13:10.080 --> 13:16.400
+in a sentence will be, you initially, as you're training it, you want to give it the right
+
+13:16.400 --> 13:22.480
+answer initially, and then kind of with a probability, you want to be reducing the chance,
+
+13:22.480 --> 13:29.680
+so since this is an RNN, you're predicting one word and then the next, and then the next,
+
+13:29.680 --> 13:35.280
+if you always give it what the actual next word is, the network is going to make kind of
+
+13:35.280 --> 13:40.000
+be more willing to make wild predictions, because it's not going to like hurt it long-term,
+
+13:40.000 --> 13:44.760
+but if you never give it, you can kind of get too off, and so that was something to be
+
+13:44.760 --> 13:49.920
+able to kind of have this probabilistic change happening while you're training that we found
+
+13:49.920 --> 13:50.920
+pretty difficult.
+
+13:50.920 --> 13:56.480
+Is that something that teacher forcing, is that an issue around initialization, or is
+
+13:56.480 --> 14:01.280
+it an issue around labels, or neither?
+
+14:01.280 --> 14:07.360
+It's more, it's more an issue on kind of how you're training, although actually I don't
+
+14:07.360 --> 14:11.480
+want to focus too much on that, I should say kind of like high level, like the big reasons
+
+14:11.480 --> 14:18.200
+we changed were one, I think a key thing for me is pie torch is easier to debug, and
+
+14:18.200 --> 14:24.640
+I think in any sort of coding, just being able to debug easily is really important.
+
+14:24.640 --> 14:31.720
+So with TensorFlow, and so this TensorFlow has now released a dynamic version, but for the
+
+14:31.720 --> 14:37.280
+first few years of its life, TensorFlow was just a new construct, it's called a static
+
+14:37.280 --> 14:42.600
+computation graph, and so you're kind of constructing the graph, and then you execute
+
+14:42.600 --> 14:47.040
+stuff on it, and so by the time you get an error, it can feel very removed from the line
+
+14:47.040 --> 14:53.720
+of code that actually caused that error, whereas pie torch is a dynamic graph, and so when
+
+14:53.720 --> 14:57.480
+you get an error, it's right at the line of code that caused it, and so I think that feels
+
+14:57.480 --> 14:59.160
+much easier to debug.
+
+14:59.160 --> 15:05.720
+I should note that TensorFlow has released an early execution mode that does this and
+
+15:05.720 --> 15:10.680
+is more like pie torch, and this is something I think that TensorFlow is having to play
+
+15:10.680 --> 15:15.480
+ketchup to pie torch, I think they kind of saw how successful pie torch was with the
+
+15:15.480 --> 15:20.560
+dynamic graph, and so I think TensorFlow is still behind in this area, and it's tough
+
+15:20.560 --> 15:25.720
+because TensorFlow has such a huge code base that I think it's harder for them to be nimble
+
+15:25.720 --> 15:26.920
+when they make changes.
+
+15:26.920 --> 15:27.920
+Right.
+
+15:27.920 --> 15:33.680
+So that's one area, something else that's great about pie torch is it's written in kind
+
+15:33.680 --> 15:40.280
+of this very standard Python object-oriented paradigm, and so I think for people that
+
+15:40.280 --> 15:44.520
+have done other Python programming or either other object-oriented programming in different
+
+15:44.520 --> 15:50.200
+languages, I think it feels a lot more natural and intuitive, just kind of how it's how
+
+15:50.200 --> 15:56.360
+it's structured, whereas TensorFlow has, it has a lot of TensorFlow specific conventions
+
+15:56.360 --> 16:01.800
+that you have to learn around sessions and scope, but don't, yeah, just kind of aren't
+
+16:01.800 --> 16:05.720
+as commonly used in other programming languages.
+
+16:05.720 --> 16:08.800
+And so do you see pie torch?
+
+16:08.800 --> 16:14.480
+And I also, I'll say one more thing about the makes pie torch great is, so TensorFlow
+
+16:14.480 --> 16:19.920
+is a much larger library, and that can be difficult because it's like, I don't know, they're
+
+16:19.920 --> 16:25.680
+both four ways to do anything you want to do, whereas pie torch is kind of a much smaller
+
+16:25.680 --> 16:29.040
+set of features, but they were designed to be super flexible.
+
+16:29.040 --> 16:33.320
+And so it's very easy to kind of build, build what you want because you have these very
+
+16:33.320 --> 16:36.000
+flexible pieces that you can combine well.
+
+16:36.000 --> 16:37.000
+Okay.
+
+16:37.000 --> 16:44.280
+And so do you think all of those have made pie torch a better choice for education, but
+
+16:44.280 --> 16:50.880
+maybe not a strong that choice for production use cases, or do you think it's a solid
+
+16:50.880 --> 16:52.880
+choice for production as well?
+
+16:52.880 --> 16:57.000
+I think it's a solid choice for production as well.
+
+16:57.000 --> 17:04.080
+I think something to remember is in a lot of pieces, you don't need to be training in
+
+17:04.080 --> 17:09.800
+production, and so you can train a model and then kind of have your, really, you can
+
+17:09.800 --> 17:14.040
+just take your predictions and put them on like an end point for, you know, if you have
+
+17:14.040 --> 17:18.680
+like a flask app or, you know, any other sort of app, like you don't necessarily kind of
+
+17:18.680 --> 17:25.720
+need this machine learning component in production when you're making your inferences,
+
+17:25.720 --> 17:30.280
+like you can just kind of like have that function, yeah, attach to something else.
+
+17:30.280 --> 17:35.920
+I think that yeah, TensorFlow, like if you, I mean, if you need to be doing deep learning
+
+17:35.920 --> 17:41.480
+on an edge device, yeah, TensorFlow is definitely way more developed for that.
+
+17:41.480 --> 17:47.120
+And if you're doing something at Google scale, where you do want to be using, yeah, which
+
+17:47.120 --> 17:50.560
+I think very few people other than Google are.
+
+17:50.560 --> 17:55.680
+So I think I think that PyTorch can, yeah, can be good for production for most people.
+
+17:55.680 --> 18:02.640
+And to what degree has the relative lack of, you know, library, community contributed
+
+18:02.640 --> 18:06.440
+components and that kind of thing, you know, to what degree do you think that holds back
+
+18:06.440 --> 18:07.440
+PyTorch?
+
+18:07.440 --> 18:11.720
+I mean, I think, I think some of their members, PyTorch, it's just, I mean, it's crazy
+
+18:11.720 --> 18:17.400
+to think it's really, I was like January or February 2017 that it came out.
+
+18:17.400 --> 18:19.480
+So it's really just a little bit more than a year.
+
+18:19.480 --> 18:22.160
+And so I think that they've made great progress in that time.
+
+18:22.160 --> 18:24.720
+It is still, yeah, this kind of very young project.
+
+18:24.720 --> 18:33.240
+And I remember when, you know, there was this point in time, I forget how long ago it was,
+
+18:33.240 --> 18:40.560
+but I remember this point in time where, you know, prior to, prior to, you know, the general
+
+18:40.560 --> 18:47.640
+sense was that TensorFlow had pretty much locked things up in terms of deep learning frameworks
+
+18:47.640 --> 18:50.240
+and all of a sudden, PyTorch came out of nowhere.
+
+18:50.240 --> 18:51.240
+Yeah.
+
+18:51.240 --> 18:56.000
+And then I think you, yeah, you all piled on soon after that.
+
+18:56.000 --> 19:02.800
+I really, like, Google has just spent so much on marketing TensorFlow that it's hard,
+
+19:02.800 --> 19:06.560
+like, and they just have really, really marketed TensorFlow because I feel like I talked to
+
+19:06.560 --> 19:11.200
+so many people that, like, don't do deep learning, have never used TensorFlow, but they've heard
+
+19:11.200 --> 19:12.200
+about it.
+
+19:12.200 --> 19:15.680
+And I think it's great because they, but it, like, what they've heard sounds like mostly
+
+19:15.680 --> 19:17.120
+kind of like marketing from Google.
+
+19:17.120 --> 19:24.880
+So I think that that has, that has really impacted or kind of skewed, skewed things towards
+
+19:24.880 --> 19:29.240
+making TensorFlow seem more popular for, I mean, this is also hard to remember, you know,
+
+19:29.240 --> 19:33.200
+across, you know, it's been incorporated into core TensorFlow now, but that was not originally
+
+19:33.200 --> 19:34.920
+a part of TensorFlow.
+
+19:34.920 --> 19:39.240
+And so, yeah, like part very first version of our course, like we were using caros on top
+
+19:39.240 --> 19:44.480
+with the ono, although yeah, the ono has now been, been deprecated.
+
+19:44.480 --> 19:46.720
+The space is changing so quickly.
+
+19:46.720 --> 19:47.720
+It is.
+
+19:47.720 --> 19:48.720
+Yeah.
+
+19:48.720 --> 19:55.720
+Do you feel like it's, it's stabilized or do you think it could change any day?
+
+19:55.720 --> 20:00.080
+Yeah, I think it'll continue changing, tear me actually wrote in our blog post last year
+
+20:00.080 --> 20:03.760
+when we announced we were switching to PyTorch that basically everyone working in the
+
+20:03.760 --> 20:08.400
+field should assume we'll have to switch languages and frameworks a few more times because
+
+20:08.400 --> 20:11.160
+it's just, it's just going to keep changing possibly.
+
+20:11.160 --> 20:15.800
+That sounds really scary for, you know, putting on my enterprise hat, someone that wants
+
+20:15.800 --> 20:22.720
+to start, you know, really building, you know, real stuff and, and, you know, business
+
+20:22.720 --> 20:27.360
+critical functionality of the fluidity.
+
+20:27.360 --> 20:32.520
+What do you think about efforts like Onyx and some of these other things that are trying
+
+20:32.520 --> 20:40.120
+to create, you know, either portability between frameworks or cross compilation to, you
+
+20:40.120 --> 20:41.120
+know, different frameworks.
+
+20:41.120 --> 20:42.120
+Yeah.
+
+20:42.120 --> 20:46.520
+I'm not as familiar with those, but from what I know, I think that's a great idea.
+
+20:46.520 --> 20:50.400
+Yeah, and I meant to bring up Onyx earlier as another potential solution to someone that's
+
+20:50.400 --> 20:53.720
+working in PyTorch and wants to deploy to production.
+
+20:53.720 --> 20:56.720
+Yeah, I know, I think those are good efforts.
+
+20:56.720 --> 20:59.120
+And yeah, I know, I said that it's changing a lot.
+
+20:59.120 --> 21:03.360
+I mean, I think that they're, you know, if you want to be doing this stuff in production,
+
+21:03.360 --> 21:08.080
+like you absolutely can and should be right now, I don't feel like it's, everything's
+
+21:08.080 --> 21:10.280
+going to change tomorrow.
+
+21:10.280 --> 21:16.960
+But I think, I think there's something exciting about being in a relatively young field that
+
+21:16.960 --> 21:22.400
+is, is so dynamic and where, you know, a lot of the changes we're seeing are, you know,
+
+21:22.400 --> 21:24.800
+are these huge improvements?
+
+21:24.800 --> 21:25.800
+Mm-hmm.
+
+21:25.800 --> 21:33.840
+So you mentioned that in addition to the course, there's also a fast AI library that you
+
+21:33.840 --> 21:36.400
+distribute and use in the course.
+
+21:36.400 --> 21:41.600
+And I've recently seen you publish some benchmarks that I think have something to do with that
+
+21:41.600 --> 21:42.600
+library.
+
+21:42.600 --> 21:45.920
+Can you talk about the library and its purpose and the benchmarks?
+
+21:45.920 --> 21:46.920
+Yeah.
+
+21:46.920 --> 21:51.840
+And so the library, the goal of it, and I should also put the disclaimer, we need to release
+
+21:51.840 --> 21:55.920
+more documentation about around it and that's the thing that we're working on right now,
+
+21:55.920 --> 22:00.160
+and we'll be, we'll be coming out this summer.
+
+22:00.160 --> 22:07.880
+But the goal of the library was to kind of give a high level API and code, and also to
+
+22:07.880 --> 22:12.600
+encode kind of a lot of best practices and smart defaults.
+
+22:12.600 --> 22:17.320
+Like I think something that can be overwhelming, like when you're first learning, deep learning
+
+22:17.320 --> 22:20.280
+and the kind of the impression that you get from it, some places are, you know, there
+
+22:20.280 --> 22:23.560
+are just so many hyper parameters, and it's like, oh my gosh, I've got all these hyper
+
+22:23.560 --> 22:24.560
+parameters.
+
+22:24.560 --> 22:25.560
+What do I choose?
+
+22:25.560 --> 22:26.560
+And how do I tune those?
+
+22:26.560 --> 22:32.160
+And so we really just kind of wanted to make it easier and give you good defaults.
+
+22:32.160 --> 22:36.120
+And so if you want, you can have to really just think about like one hyper parameter.
+
+22:36.120 --> 22:39.040
+And then, you know, later on, if there's more stuff you want to change, that's easy to
+
+22:39.040 --> 22:40.880
+do as well.
+
+22:40.880 --> 22:45.240
+And to kind of have nice high level abstractions.
+
+22:45.240 --> 22:46.920
+So that was the goal of the library.
+
+22:46.920 --> 22:52.360
+And so it's a great teaching tool, but I think it's also a good thing to use in practice.
+
+22:52.360 --> 22:55.480
+And you mentioned our benchmarks.
+
+22:55.480 --> 23:01.720
+And so this was part of Stanford, the Stanford Dawn lab hosted a competition called Stanford
+
+23:01.720 --> 23:02.720
+Dawn bench.
+
+23:02.720 --> 23:07.920
+And so this was for, there are two categories, ImageNet and CIFAR 10, which are these
+
+23:07.920 --> 23:11.600
+classic, image classification problems.
+
+23:11.600 --> 23:17.040
+However, typically, you know, like the ImageNet competition was about being most accurate.
+
+23:17.040 --> 23:19.680
+This was about being fastest and cheapest.
+
+23:19.680 --> 23:21.600
+And, you know, there was a baseline.
+
+23:21.600 --> 23:27.200
+You had to be at least 93% accurate, but past that point, yeah, what was fastest and
+
+23:27.200 --> 23:28.200
+cheapest?
+
+23:28.200 --> 23:34.240
+Sounds a lot like a TPC benchmarks, if you're familiar with those.
+
+23:34.240 --> 23:35.240
+I am not.
+
+23:35.240 --> 23:36.920
+I think it's not TPS.
+
+23:36.920 --> 23:39.080
+That's the office-based thing.
+
+23:39.080 --> 23:41.880
+It's a transaction processing council.
+
+23:41.880 --> 23:49.280
+It's like they do a transaction per second benchmarks across, like, you know, big iron.
+
+23:49.280 --> 23:54.520
+And there was a point in time where commodity computers, clusters of commodity compute
+
+23:54.520 --> 24:00.760
+started to supplant the, you know, the big expensive monolithic hardware boxes.
+
+24:00.760 --> 24:05.680
+And it sounds like from just kind of casually seeing some of the tweets and stuff about
+
+24:05.680 --> 24:10.120
+your benchmarks, that that's kind of what you, you know, what some of your results were
+
+24:10.120 --> 24:11.120
+about.
+
+24:11.120 --> 24:16.760
+Well, so what we found, so for the CIFAR 10, which is a smaller data set, although I think
+
+24:16.760 --> 24:23.360
+it's a size that's more, it's like 160 megabytes, that is representative of what a lot of
+
+24:23.360 --> 24:25.440
+businesses and companies have.
+
+24:25.440 --> 24:30.840
+We won both sections, fastest and cheapest.
+
+24:30.840 --> 24:36.120
+For the image net, these are larger data set, it's like 160 gigabytes.
+
+24:36.120 --> 24:42.040
+We were the fastest on publicly available infrastructure, fastest on GPUs, fastest on
+
+24:42.040 --> 24:45.640
+a single machine, and lowest actual cost.
+
+24:45.640 --> 24:50.520
+And I should say this was, this was Jeremy working with a group of our fast-day-eye students
+
+24:50.520 --> 24:53.840
+who kind of have this in-person study group that's been meeting every day.
+
+24:53.840 --> 25:02.680
+But I think it was really exciting to prove that the fast-day-eye library, you know, was
+
+25:02.680 --> 25:03.680
+super helpful to this.
+
+25:03.680 --> 25:06.840
+And so I mean, this was, you know, it's like fast-day-eye library, which is built on top
+
+25:06.840 --> 25:07.840
+of a pie torch.
+
+25:07.840 --> 25:14.920
+We're using Nvidia GPUs on AWS and AWS spot instances.
+
+25:14.920 --> 25:20.080
+But a lot of, so like Google and Intel, like their general strategy in this competition
+
+25:20.080 --> 25:24.840
+was kind of just having way more hardware.
+
+25:24.840 --> 25:29.360
+And we really tried to approach it as kind of using more algorithmic creativity because
+
+25:29.360 --> 25:33.720
+kind of a core, I think, part of our mission and like the thesis we're trying to prove
+
+25:33.720 --> 25:40.600
+with fast-day-eye is that deep learning can be accessible to people from all backgrounds
+
+25:40.600 --> 25:45.600
+and that you don't have to, you know, be able to afford like these very, very expensive
+
+25:45.600 --> 25:49.880
+clusters of machines and that you don't, you know, you don't need to have a PhD from
+
+25:49.880 --> 25:51.040
+Stanford.
+
+25:51.040 --> 25:56.920
+And so here, you know, this was a group of like part-time students and we're trying to
+
+25:56.920 --> 25:58.720
+try to do things cheaply.
+
+25:58.720 --> 26:00.440
+Her David and Goliath story.
+
+26:00.440 --> 26:01.440
+Yes.
+
+26:01.440 --> 26:02.440
+Yes, exactly.
+
+26:02.440 --> 26:09.120
+Yeah, our, we had an entry on a single machine that was faster than Intel's entry on a cluster
+
+26:09.120 --> 26:10.120
+of 128 machines.
+
+26:10.120 --> 26:11.120
+Oh, wow.
+
+26:11.120 --> 26:17.560
+And so, and so what we were doing here was just, yeah, kind of being creative with our algorithms
+
+26:17.560 --> 26:21.640
+and also using, I don't know, in the deep learning community, there's some results that
+
+26:21.640 --> 26:27.120
+have really kind of been neglected because they're not from, there's a lot of attention
+
+26:27.120 --> 26:29.440
+in the community to, you know, like what is Stanford doing?
+
+26:29.440 --> 26:31.320
+What is OpenAI doing?
+
+26:31.320 --> 26:34.480
+And, you know, these people that kind of have this name, Cache, or recognition.
+
+26:34.480 --> 26:38.040
+And so part of what we were doing was kind of implementing results from other people
+
+26:38.040 --> 26:43.280
+that are at these, you know, less famous or less prestigious institutions and showing
+
+26:43.280 --> 26:49.000
+like, hey, you know, we can, we can use this to, to get, to get faster results.
+
+26:49.000 --> 26:55.040
+How would you attribute the benefits, the performance, the ability to, to run at low
+
+26:55.040 --> 26:59.720
+cost between the fast AI library and pie torch?
+
+26:59.720 --> 27:03.720
+In other words, were you competing against other pie torch based entrants?
+
+27:03.720 --> 27:06.320
+Oh, now we have a shoe who gets, yeah.
+
+27:06.320 --> 27:09.120
+So I know the Google team was definitely using TensorFlow.
+
+27:09.120 --> 27:13.560
+And I am pretty sure Intel was using TensorFlow as well.
+
+27:13.560 --> 27:15.480
+Or even what about the structure?
+
+27:15.480 --> 27:22.360
+Tell us about the structure of the task and the, some of the, the key things, and it's
+
+27:22.360 --> 27:27.600
+interesting, the stuff we were implementing, they're actually not that complicated as ideas.
+
+27:27.600 --> 27:33.080
+So one of them is this idea of super convergence, and this is something that Leslie Smith,
+
+27:33.080 --> 27:38.240
+who works at the Naval, Naval Research Laboratory found, but it's the idea that you can
+
+27:38.240 --> 27:44.480
+use way higher learning rates if you lower your momentum.
+
+27:44.480 --> 27:50.680
+And momentum is kind of a factor used in, in optimization of, you know, they're all
+
+27:50.680 --> 27:54.040
+these variants on stochastic gradient is that, dissented.
+
+27:54.040 --> 27:57.080
+So momentum is kind of a commonly used part of that.
+
+27:57.080 --> 28:03.320
+And I don't know if anybody else is lowering though the, the momentum part, the, dynamically
+
+28:03.320 --> 28:05.040
+as training happens.
+
+28:05.040 --> 28:07.920
+So backing off momentum as you're converging?
+
+28:07.920 --> 28:13.200
+Well, as, well, actually, it's, it's backing off momentum as you're increasing your
+
+28:13.200 --> 28:18.440
+learning rates, these high rates, and then you decrease your learning rate again and increase
+
+28:18.440 --> 28:19.440
+your momentum.
+
+28:19.440 --> 28:24.640
+So kind of keeping, you kind of have this triangle shape with both, and they're like inversely
+
+28:24.640 --> 28:25.640
+related.
+
+28:25.640 --> 28:26.640
+Interesting.
+
+28:26.640 --> 28:27.640
+Yeah.
+
+28:27.640 --> 28:31.200
+So it's like, and you can check that we have a blog post where it kind of writes more details
+
+28:31.200 --> 28:32.200
+about what we were doing.
+
+28:32.200 --> 28:36.240
+But yeah, it was like learning rates, increasing, all the momentum's decreasing, and then
+
+28:36.240 --> 28:39.560
+learning rate decreases, well, momentum increases.
+
+28:39.560 --> 28:43.200
+But that, yeah, allows for much faster training.
+
+28:43.200 --> 28:48.120
+And so here, you know, this is something that, these are things that, the combination
+
+28:48.120 --> 28:52.480
+of fast AI and high torch made very easy to implement.
+
+28:52.480 --> 28:57.080
+And having, you know, having that kind of dynamic change as you're learning is something
+
+28:57.080 --> 29:01.480
+that is typically harder to do in TensorFlow.
+
+29:01.480 --> 29:05.960
+So this was, yeah, I mean, I think it's kind of hard to talk about fast AI.
+
+29:05.960 --> 29:10.920
+And, you know, it's the flexibility of high torch that may make fast AI possible.
+
+29:10.920 --> 29:16.120
+And, you know, fast AI is fairly flexible as well, since it's written on high torch.
+
+29:16.120 --> 29:18.360
+So that was one component.
+
+29:18.360 --> 29:24.240
+And then there was this other idea of progressive resizing where you start out training your
+
+29:24.240 --> 29:28.960
+network on small versions of your images, which makes sense.
+
+29:28.960 --> 29:35.920
+It's kind of just trying to learn, you know, like, very, very rough things, and then as
+
+29:35.920 --> 29:40.560
+training happens, you're using kind of larger and larger versions of the images.
+
+29:40.560 --> 29:47.200
+And so again, yeah, high torch is great to kind of have that dynamic nature.
+
+29:47.200 --> 29:49.440
+Oh, that sounds really interesting as well.
+
+29:49.440 --> 29:53.920
+And this is also something I think it's exciting, because it's like the ideas on their own
+
+29:53.920 --> 29:59.480
+like are not, you know, it's not like this, I don't know, like complicated thing of math
+
+29:59.480 --> 30:03.120
+equations, you know, it's, you know, it's like, hey, this makes sense, you know, intuitively
+
+30:03.120 --> 30:06.680
+of like, start training on small images and then train on larger ones.
+
+30:06.680 --> 30:10.480
+And, you know, it's also like that way your network kind of has information about images
+
+30:10.480 --> 30:11.720
+of different sizes.
+
+30:11.720 --> 30:17.120
+And so those are, you know, a lot of, a lot of the breakthroughs and Jeremy points
+
+30:17.120 --> 30:20.280
+this out in the blog post, a lot of these breakthroughs that have really helped us in
+
+30:20.280 --> 30:27.720
+deep learning, you know, things like using rectified linear units for activations and drop
+
+30:27.720 --> 30:33.520
+out where you kind of randomly drop a lot of, a lot of your weights to avoid overfitting
+
+30:33.520 --> 30:38.080
+each time or batch normalization, they're actually fairly simple ideas.
+
+30:38.080 --> 30:43.760
+And they need things in some ways like easier to understand while at the same time really
+
+30:43.760 --> 30:47.160
+improving the performance of neural networks.
+
+30:47.160 --> 30:52.240
+So that we really think a lot of the breakthroughs are going to come by kind of, you know, these
+
+30:52.240 --> 30:57.480
+new insight where you can like do something differently and not just from getting bigger
+
+30:57.480 --> 31:00.880
+and bigger clusters of computers.
+
+31:00.880 --> 31:01.880
+Interesting.
+
+31:01.880 --> 31:11.000
+And to what extent do you think the techniques that were used in the benchmark are, you
+
+31:11.000 --> 31:12.520
+know, practical techniques?
+
+31:12.520 --> 31:18.400
+In other words, are they kind of not gaming the benchmark with a negative connotation,
+
+31:18.400 --> 31:22.520
+but were they kind of designed to, you know, compete well in the benchmark, but not something
+
+31:22.520 --> 31:27.000
+that you would necessarily do in practice or, you know, they're very, very practical.
+
+31:27.000 --> 31:28.000
+Yeah.
+
+31:28.000 --> 31:30.360
+So there are all things you could do in practice.
+
+31:30.360 --> 31:34.640
+And some of them do still kind of raise issues, it's a one issue that we ran into and
+
+31:34.640 --> 31:40.640
+I think it's a kind of understudied issue in the field is that how to best use multiple
+
+31:40.640 --> 31:46.760
+GPUs, I think often people, they kind of release with new GPUs, you know, like how many calculations
+
+31:46.760 --> 31:52.000
+can be done on them, how quickly, but that doesn't take into account that like training
+
+31:52.000 --> 31:56.520
+your network really changes when you go from one GPU to many GPUs.
+
+31:56.520 --> 32:00.320
+And so you don't necessarily, well, you don't get the speed up of, you know, going from
+
+32:00.320 --> 32:05.200
+one GPU to a GPU is does not mean you're going to do stuff eight times faster.
+
+32:05.200 --> 32:08.320
+And so this is an area where I think that definitely needs to be more researched on on kind
+
+32:08.320 --> 32:14.400
+of how do you get the, get the most out of going from, yeah, one GPU to multi GPUs.
+
+32:14.400 --> 32:19.400
+Did you do anything with, with low precision in this, in this particular benchmark?
+
+32:19.400 --> 32:20.400
+We did.
+
+32:20.400 --> 32:21.400
+Yes.
+
+32:21.400 --> 32:27.280
+And so, and this is key to Nvidia's new bolt to architecture with key to this because
+
+32:27.280 --> 32:31.400
+it gives you half precision floating point data.
+
+32:31.400 --> 32:36.960
+And this was something that, I guess Nvidia had provided an open source demonstration
+
+32:36.960 --> 32:41.040
+and then we had a student that worked on this to incorporate the ideas into fast AI.
+
+32:41.040 --> 32:43.080
+And this is Andrew Shaw.
+
+32:43.080 --> 32:49.240
+But the kind of issue is that so half precision, you know, is kind of letting you do stuff
+
+32:49.240 --> 32:55.200
+using less space, but you do need to convert to full precision for some of the steps.
+
+32:55.200 --> 32:59.720
+So like when you multiply by your learning rate, but so that's something we've got, we've
+
+32:59.720 --> 33:00.720
+got implemented now.
+
+33:00.720 --> 33:06.840
+Yeah, that's something that I have the sense gets glossed over a bit and Nvidia's presentations
+
+33:06.840 --> 33:07.840
+about this.
+
+33:07.840 --> 33:11.400
+It's not like flipping a half, you know, a low precision switch and everything gets
+
+33:11.400 --> 33:12.400
+faster.
+
+33:12.400 --> 33:13.400
+Yeah.
+
+33:13.400 --> 33:14.400
+You have to really dig into it.
+
+33:14.400 --> 33:16.640
+Yeah, because you have to think about where, you know, where is it useful and not going
+
+33:16.640 --> 33:17.640
+to hurt you?
+
+33:17.640 --> 33:20.640
+Yeah, versus, okay, like where the places where you need full precision.
+
+33:20.640 --> 33:25.080
+And I think, I mean, I think that happens in a lot of kind of talking about hardware
+
+33:25.080 --> 33:28.640
+specs, of course, you know, because you're just like, you know, focused on this piece.
+
+33:28.640 --> 33:32.400
+And, you know, deep learning is this, you know, system that's got so many components
+
+33:32.400 --> 33:34.840
+and thinking about how is it work as a whole.
+
+33:34.840 --> 33:39.040
+Mm-hmm. And so where do you see the library going?
+
+33:39.040 --> 33:41.200
+Is it still evolving quickly?
+
+33:41.200 --> 33:42.200
+Is it?
+
+33:42.200 --> 33:43.200
+Yeah.
+
+33:43.200 --> 33:44.200
+Yes.
+
+33:44.200 --> 33:45.200
+Still evolving quickly.
+
+33:45.200 --> 33:47.480
+And I think we definitely still, like even coming from the competition, have a few
+
+33:47.480 --> 33:50.400
+more things we need to get incorporated.
+
+33:50.400 --> 33:54.920
+And then we also, we really want to work on documentation and usability in terms of
+
+33:54.920 --> 33:55.920
+for new users.
+
+33:55.920 --> 33:59.240
+I think if you're, you know, working through the course, that really gives you a lot
+
+33:59.240 --> 34:04.720
+of a lot of information and context of kind of seeing how things are built that we
+
+34:04.720 --> 34:08.560
+want to, yeah, kind of make it even more, more user friendly beyond that.
+
+34:08.560 --> 34:13.920
+And we'll continue, you know, as we, as we teach the course and as new papers come out,
+
+34:13.920 --> 34:17.960
+I think, and as we're doing more research, you know, that gives us kind of more ideas
+
+34:17.960 --> 34:20.120
+of things to implement.
+
+34:20.120 --> 34:27.560
+And do you see it primarily as an educational tool or something that someone would use?
+
+34:27.560 --> 34:28.560
+Yes.
+
+34:28.560 --> 34:31.000
+We see it as something that would be useful in the workplace.
+
+34:31.000 --> 34:32.840
+Okay.
+
+34:32.840 --> 34:36.640
+And is the, to what extent, I mean, you kind of addressed this in introducing it, but,
+
+34:36.640 --> 34:46.920
+you know, when I think of higher level abstractions, I certainly get the notion of, you know,
+
+34:46.920 --> 34:52.640
+saving folks that are new to the field from a lot of the details, but that saving, you
+
+34:52.640 --> 34:58.240
+know, usually comes from hiding, which can be a bit of an impediment to education and
+
+34:58.240 --> 34:59.240
+understanding.
+
+34:59.240 --> 35:00.880
+How do you balance those two?
+
+35:00.880 --> 35:02.880
+Yeah, that's a good question.
+
+35:02.880 --> 35:06.920
+So I mean, some of it is this, you know, this top down teaching approach I described earlier
+
+35:06.920 --> 35:12.280
+of like, yeah, like initially we are hiding a lot of things, but I think having the code
+
+35:12.280 --> 35:18.080
+written in such a way that it, like, we definitely then get into the details later on, and it
+
+35:18.080 --> 35:24.120
+is written in a way that, like, makes it easy for people to customize and if they need
+
+35:24.120 --> 35:28.440
+to modify things on a, on a lower level, they can do so.
+
+35:28.440 --> 35:32.120
+And so, like, our goal with the library is to kind of be providing both of those.
+
+35:32.120 --> 35:36.240
+And this is also, I mean, I think this is something that PyTorch is good at as well, but
+
+35:36.240 --> 35:40.280
+that if, yeah, if you want to, you know, add something to the library or change how it's
+
+35:40.280 --> 35:46.720
+doing something like there are places to add custom hooks and to use, I think the library
+
+35:46.720 --> 35:49.520
+is constructed to make that easy and reasonable.
+
+35:49.520 --> 35:56.400
+And is the idea that you would, you know, maybe use the library as a wrapper to some things
+
+35:56.400 --> 36:01.040
+that you don't want to, you know, mess with the details about, but then, you know, when
+
+36:01.040 --> 36:06.120
+you want to dig into those details, you would not use the library and go straight to PyTorch
+
+36:06.120 --> 36:07.120
+or is there a-
+
+36:07.120 --> 36:10.480
+I mean, I think it's, I think you would continue to use the library, it would more just
+
+36:10.480 --> 36:14.600
+be if you needed to change some, I don't know, if you're running some experiments, you
+
+36:14.600 --> 36:19.200
+know, your researcher kind of doing your own thing, you can, or you're, you know, you're
+
+36:19.200 --> 36:24.440
+trying out a new architecture that maybe then you would need to dip into changing some
+
+36:24.440 --> 36:29.400
+of the details, but I think that our goal is to have it, you know, I think part of what
+
+36:29.400 --> 36:34.160
+this competition showed is that the library itself is achieving state-of-the-art results.
+
+36:34.160 --> 36:38.280
+And so it's not that it's been a hurt your performance or something to be using this high
+
+36:38.280 --> 36:39.280
+level library.
+
+36:39.280 --> 36:40.280
+Right.
+
+36:40.280 --> 36:48.280
+So the performance and cost objectives of this benchmark are clearly important, particularly
+
+36:48.280 --> 36:53.560
+as folks are running these types of workloads, not just on machines that are sitting on
+
+36:53.560 --> 37:00.400
+their desk, but in the cloud where they're paying for them by the minute or hour.
+
+37:00.400 --> 37:10.280
+But another key often maybe overlooked benchmark or metric is around productivity and the ability
+
+37:10.280 --> 37:12.400
+to iterate, innovate quickly.
+
+37:12.400 --> 37:14.640
+Is anyone, are there any benchmarks for that?
+
+37:14.640 --> 37:15.640
+It's harder to do.
+
+37:15.640 --> 37:18.160
+Yeah, I don't know how you would benchmark that.
+
+37:18.160 --> 37:23.040
+I mean, I would say like, it's almost a bit of a meme on Twitter of a lot of people saying
+
+37:23.040 --> 37:28.040
+that like they have to, they use TensorFlow for their jobs, but they use PyTorch for their
+
+37:28.040 --> 37:29.040
+experimentation.
+
+37:29.040 --> 37:32.640
+I feel like that's what they're doing in the evenings.
+
+37:32.640 --> 37:36.440
+And I mean, there are plenty of companies using PyTorch as well, but just that I think
+
+37:36.440 --> 37:42.480
+that's part of the reason people love PyTorch is it's so easy to iterate and kind of
+
+37:42.480 --> 37:46.440
+experiment the way you're talking about, because I think, you know, there are people that
+
+37:46.440 --> 37:50.960
+will say like, oh, you know, competition graphs, like theoretically, that's letting the
+
+37:50.960 --> 37:56.000
+compiler optimize more, so you should get better performance with a, or sorry, with a static
+
+37:56.000 --> 38:00.240
+competition graph and with dynamic, but it's just that's not what people have found in
+
+38:00.240 --> 38:01.240
+practice.
+
+38:01.240 --> 38:05.360
+And I think part of that is with, with the dynamic framework, you're able to iterate
+
+38:05.360 --> 38:06.360
+so much quicker.
+
+38:06.360 --> 38:10.760
+So you do end up kind of getting better performance, but yeah, I don't, I don't know if any benchmarks
+
+38:10.760 --> 38:14.160
+that are formally, formally studying the distinction.
+
+38:14.160 --> 38:15.160
+Okay.
+
+38:15.160 --> 38:23.480
+So one of the often cited barriers to folks getting into this field is the level of math
+
+38:23.480 --> 38:28.880
+that's required and one of the things that you've done personally to try to address
+
+38:28.880 --> 38:36.320
+this is develop a class on linear algebra, computational linear algebra in particular.
+
+38:36.320 --> 38:38.160
+Can you talk a little bit about that?
+
+38:38.160 --> 38:39.160
+Sure.
+
+38:39.160 --> 38:40.160
+Yeah.
+
+38:40.160 --> 38:41.160
+So computational linear algebra.
+
+38:41.160 --> 38:46.680
+So this is a course I teach in the master's program at USF, but I've released all the
+
+38:46.680 --> 38:49.400
+videos and notebooks online.
+
+38:49.400 --> 38:55.680
+So it's a study of getting matrix, or so you're getting computers to do matrix calculations
+
+38:55.680 --> 38:59.360
+with acceptable speed and acceptable accuracy.
+
+38:59.360 --> 39:05.680
+And so I would say whether or not you have taken or liked kind of traditional linear algebra,
+
+39:05.680 --> 39:10.000
+this is a very different field because a traditional linear algebra course is typically,
+
+39:10.000 --> 39:13.800
+you know, having students kind of do these matrix computations by hand, which is just
+
+39:13.800 --> 39:17.600
+like a whole different set of considerations from when you're getting a computer to do
+
+39:17.600 --> 39:18.600
+them.
+
+39:18.600 --> 39:25.320
+But one of the kind of key themes of the course is the idea of decomposing matrices.
+
+39:25.320 --> 39:30.480
+As you can think of this, it's kind of analogous to, you know, like you can factor a number
+
+39:30.480 --> 39:36.240
+into primes and that's useful, you know, because primes have the special property, the
+
+39:36.240 --> 39:41.520
+same idea with matrices, you can kind of factor them into component matrices that have special
+
+39:41.520 --> 39:42.520
+properties.
+
+39:42.520 --> 39:48.760
+And so the course is, it's similar teaching philosophy to the deep learning course and
+
+39:48.760 --> 39:51.640
+that it's all, it's very code based.
+
+39:51.640 --> 39:55.880
+It's all in Jupyter notebooks and it's all centered around applications and so applications
+
+39:55.880 --> 40:02.480
+we look at are removing the background from a surveillance video of, you know, identifying
+
+40:02.480 --> 40:08.200
+what's foreground and background, topic modeling for a corpus of documents, kind of digging
+
+40:08.200 --> 40:14.440
+into, you know, Google's PageRank algorithm, because that's actually a matrix decomposition.
+
+40:14.440 --> 40:21.400
+And so kind of going, singular value decomposition, which is used for compressing data.
+
+40:21.400 --> 40:24.760
+It's also used for, you can remove errors.
+
+40:24.760 --> 40:30.520
+There's a really, really neat example of kind of a highly corrupted data set where there's
+
+40:30.520 --> 40:34.200
+just all these errors in the picture and you can actually remove it and kind of find what
+
+40:34.200 --> 40:38.680
+the underlying picture probably was of, this is of people's faces.
+
+40:38.680 --> 40:42.640
+So yeah, the course is very kind of application focused, but yeah, computational linear algebra
+
+40:42.640 --> 40:48.400
+includes a lot of things like approximate algorithms or randomized algorithms, you know,
+
+40:48.400 --> 40:52.280
+like often you, you know, like what are the cases where you don't need to be super precise
+
+40:52.280 --> 40:55.800
+or even, you know, often your data only has so much precision, so it doesn't make sense
+
+40:55.800 --> 40:59.400
+to, you know, try to get an algorithm that's going to give you something accurate to the
+
+40:59.400 --> 41:02.440
+10th decimal place.
+
+41:02.440 --> 41:07.560
+It also looks at, you know, issues around a machine epsilon and the kind of errors that
+
+41:07.560 --> 41:11.240
+can get introduced through through computer calculations.
+
+41:11.240 --> 41:13.400
+And what's machine epsilon?
+
+41:13.400 --> 41:19.480
+And so that's just, so the way, you know, it's like numbers are infinite and continuous
+
+41:19.480 --> 41:23.200
+and it's like computers are, you know, finite and limited.
+
+41:23.200 --> 41:25.200
+So floating point representation noise.
+
+41:25.200 --> 41:27.040
+Yeah, floating point representation, exactly.
+
+41:27.040 --> 41:28.040
+Okay.
+
+41:28.040 --> 41:30.040
+Well, that sounds like a really interesting class, too.
+
+41:30.040 --> 41:35.040
+This is how my classes to take lists gets really long.
+
+41:35.040 --> 41:36.040
+Right.
+
+41:36.040 --> 41:38.040
+Right.
+
+41:38.040 --> 41:43.600
+And so this one is in a structured class, but you've published all the materials online.
+
+41:43.600 --> 41:45.080
+Yeah, all the materials online.
+
+41:45.080 --> 41:49.400
+So yeah, on GitHub or all the Jupyter notebooks and then all the videos are on YouTube.
+
+41:49.400 --> 41:51.080
+Oh, that sounds very cool.
+
+41:51.080 --> 41:56.760
+Yeah, I feel like I've been talking a lot about like why I like pi torch more than TensorFlow.
+
+41:56.760 --> 42:00.880
+But I did want to bring up that I think TensorFlow has some really neat developments happening.
+
+42:00.880 --> 42:06.040
+And so I'm definitely still keeping my eye on TensorFlow.
+
+42:06.040 --> 42:12.200
+I think they, so they Chris Lattner announced at the TensorFlow Dev Summit two months ago
+
+42:12.200 --> 42:18.160
+that they're going to be releasing its Swift for TensorFlow.
+
+42:18.160 --> 42:22.680
+And so, you know, Swift is the language that Chris Lattner invented for iOS development.
+
+42:22.680 --> 42:28.600
+And I see I spent several months, I guess, in 2015 kind of like learning Swift and learning
+
+42:28.600 --> 42:30.600
+how to build mobile apps.
+
+42:30.600 --> 42:36.400
+And it is a really neat language that they're going to be kind of having a version of that.
+
+42:36.400 --> 42:42.440
+So it's like a whole nother language that would be, it would not be just for iOS.
+
+42:42.440 --> 42:47.160
+And it's, you know, specifically for neural networks, this Swift for TensorFlow version.
+
+42:47.160 --> 42:49.680
+That's something that really interests me.
+
+42:49.680 --> 42:54.680
+And then it was kind of exciting to hear some of the new releases.
+
+42:54.680 --> 43:01.680
+Like they now have a TensorFlow JavaScript version of TensorFlow, which is I think really great.
+
+43:01.680 --> 43:09.680
+They have released these Google Colab notebooks where you can kind of like basically launch these interactive examples.
+
+43:09.680 --> 43:16.680
+So I felt bad that I was perhaps criticizing TensorFlow earlier when I do think that there are some interesting developments happening there.
+
+43:16.680 --> 43:21.680
+Yeah, I think there's no question that Google's making some tremendous contributions with TensorFlow
+
+43:21.680 --> 43:24.680
+and that broader ecosystem.
+
+43:24.680 --> 43:27.680
+Yeah, and like, I mean, right now we're using PyTorch for the course.
+
+43:27.680 --> 43:31.680
+And you know, there are things I love about PyTorch, but I'm definitely not.
+
+43:31.680 --> 43:36.680
+And in general, I'm not until like, you know, saying like, hey, this is the language I'm always going to use.
+
+43:36.680 --> 43:38.680
+I hate other languages or anything.
+
+43:38.680 --> 43:43.680
+You know, it's you want to recognize kind of what each language is contributing and be flexible.
+
+43:43.680 --> 43:51.680
+So should we move on to them versus Emax now?
+
+43:51.680 --> 43:54.680
+I am Twitter and Twitter recently.
+
+43:54.680 --> 43:59.680
+I just did this poll about what would you call this type of data?
+
+43:59.680 --> 44:08.680
+It got more comments and engagement than like I think anything else I've ever tweeted.
+
+44:08.680 --> 44:11.680
+I was like asking asking programmers to name something as a.
+
+44:11.680 --> 44:13.680
+Tabs and spaces, anyone?
+
+44:13.680 --> 44:14.680
+Yeah.
+
+44:14.680 --> 44:17.680
+It's underrated a lot of debate.
+
+44:17.680 --> 44:18.680
+Nice, nice.
+
+44:18.680 --> 44:19.680
+Awesome.
+
+44:19.680 --> 44:25.680
+Is there anything else that you'd like to touch on or any final parting words for the audience?
+
+44:25.680 --> 44:28.680
+Definitely. I just want to encourage people to check out the deep learning course.
+
+44:28.680 --> 44:31.680
+That's a course dot fast dot AI.
+
+44:31.680 --> 44:38.680
+Absolutely. And if if anyone who's listening wants to join me in going through the course,
+
+44:38.680 --> 44:47.680
+starting the beginning of June, either hit me up on Twitter or via the twomla.com website
+
+44:47.680 --> 44:53.680
+or just go ahead and join our meetup and you'll get an invitation to our Slack channel.
+
+44:53.680 --> 44:57.680
+And just chime in there and we will we will get it going.
+
+44:57.680 --> 44:58.680
+Great.
+
+44:58.680 --> 44:59.680
+No, I think it's awesome.
+
+44:59.680 --> 45:00.680
+You're doing that.
+
+45:00.680 --> 45:02.680
+Awesome. Well, thanks so much, Rachel.
+
+45:02.680 --> 45:04.680
+Thank you, Sam.
+
+45:04.680 --> 45:10.680
+All right, everyone. That's our show for today.
+
+45:10.680 --> 45:15.680
+For more information on Rachel or any of the topics covered in this episode,
+
+45:15.680 --> 45:20.680
+head on over to twomla.com slash talk slash 138.
+
+45:20.680 --> 45:25.680
+Remember, the twomla online meetup is tomorrow and starting in June,
+
+45:25.680 --> 45:30.680
+we'll be organizing a group to take the fast AI practical deep learning course.
+
+45:30.680 --> 45:36.680
+Don't miss either and sign up for both at twomla.com slash meetup.
+
+45:36.680 --> 46:03.680
+Okay, thanks so much for listening and catch you next time.
+

@@ -1,0 +1,665 @@
+Welcome to the Twimal AI Podcast.
+I'm your host Sam Charrington.
+Hey, what is up, good Twimal people?
+As many, if not most of us past the 100 day mark of shelter in place, work from home
+and other quarantine measures, I want to both extend to you my best wishes for your health
+and happiness and also to remind you to not let your guard down.
+COVID-19 is serious business and you don't want to get it or give it.
+Be sure to wear that mask when you'll be around other people, avoid indoor crowds and
+limit your exposure by minimizing the time and maximizing the distance when you're
+in contact with others.
+Before we jump into today's show from our CVPR series, I'd like to share a few quick details
+about the next great event in our continuing live discussion series.
+Join us on Wednesday, July 1st for the great machine learning language undubate as we explore
+the strengths, weaknesses and approaches of both popular and emerging programming languages
+for machine learning.
+We'll have great speakers representing Python, R, Swift, Closure, Scala, Julia and more.
+The session kicks off at 11 a.m. Pacific time on the first and you won't want to miss
+it, so head over to twimalai.com slash languages to get registered.
+At this point, I'd like to send a huge thank you to our friends at Qualcomm for their support
+of this podcast and their sponsorship of our CVPR series.
+Qualcomm AI research is dedicated to advancing AI to make its core capabilities, perception,
+reasoning and action ubiquitous across devices.
+Their work makes it possible for billions of users around the world to have AI enhanced
+experiences on Qualcomm technology's powered devices.
+To learn more about Qualcomm and what they're up to on the AI research front, visit twimalai.com
+slash Qualcomm.
+And now onto the show.
+All right, everyone.
+I am here with Pavan Taraga.
+Pavan is jointly appointed in the schools of electrical engineering and arts media and
+engineering at Arizona State University.
+Pavan, welcome to the Twimal AI podcast.
+Thank you, Sam.
+It's a pleasure and an honor to be here.
+Thank you.
+It's my pleasure to host you here.
+I'm looking forward to digging into your paper that will be presented at CVPR, revisiting
+invariance with geometry and deep learning.
+But before we do that, I'd love for you to share a little bit about your background and
+how you came to work in computer vision and ML sounds great.
+So my beginnings in this area started as, you know, as a senior in my undergraduate years.
+I was looking at problems like face recognition, face tracking from video, trying to do a senior
+design project really.
+And as I started digging more, this was in the early or, yeah, early 2000s.
+And it was a very exciting time to be in the field of computer vision, because the problem
+statement in those days would be presented as giving a computer the ability to see and
+that felt like, wow, that's a frontier topic, right?
+But I said, you know, looks like I'm sufficiently invested in this, looks like it intersects with
+things like neuroscience, perception that is interesting mathematics, that is interesting
+computing happening, very highly interdisciplinary.
+And it felt like there was much work to be done.
+So I decided to go to school in 2000, I mean, grad school in 2004 to the University of
+Maryland, studying with Professor Ramachalappa, who is a pioneer in this field and very well
+known for face recognition techniques and a lot of interesting things in vision at the
+time.
+And as I started my work in the lab, I brought in from just face recognition to other things
+like understanding video, understanding time series, understanding the role of light,
+you know, geometry, elimination, reflectance, all these physics based concepts and how
+the interface with pattern recognition methods or machine learning methods and as I went deeper
+and deeper into it, I felt like there was a big disconnect between the methods of physics
+of image formation and the methods that are used in machine learning, where it's just
+purely a driven and statistical techniques and I was trying to find some middle ground
+where I could inject physical knowledge into certain structures that could blend well
+with machine learning techniques and one thing led to another, I started getting interested
+in this area of mathematics called a Romanian geometry and then topology as a means to express
+these intuitions and these constraints from physics and interface them with machine learning
+in before deep learning.
+So that's the theme of my work over the past decade, which is try to understand basic phenomena
+whether it's, you know, images or video or human activity and in recent years, we've also
+brought in our investigation beyond computer vision to include things like wearable devices
+and physiological monitoring where the phenomenon under study is basic human movement and other
+things, try to understand it from first principles and try to express that knowledge in a way
+that constrains conditions machine learning, so that's the general intersection of topics
+I've been looking at.
+Okay, and I mentioned in introducing you that one of your appointments is with a school
+that has arts in the title, are you, you know, how does that come up in your work and
+research?
+So, particularly, you know, connected to that particular piece of that school.
+So that's a whole story by itself and I can go very organically about how it all began
+or I can go in hindsight, this is how it went organically, this is how it began, you
+know, our school was founded in 2009 and, you know, I graduated from grad school in 2009,
+but then that was 2009, very similar to 2020, Wall Street collapsing and getting loose.
+So I stayed back when I posed out for a couple years and when I went interviewing in 2011,
+this position opened up in this school under the title of Assistant Professor in Human
+Activity Analysis, it was very intriguing and I have been doing human activity analysis
+as far as, you know, understanding video-based gate analysis.
+Okay, so I'm like fitness trackers and quantified self and all that kind of stuff.
+Right, so this was a little before all that stuff happened in particular.
+And I came in and I visited and there was, there was a mind-boggling sense of interdisciplinary
+that I saw in the school people in music looking at stuff like that, right, accelerometers,
+variables, driving, interactive performance with it.
+There was a group doing a stroke rehabilitation where you attract human movement through
+motion capture and sonify the qualities of your movement.
+So smoothness or jerkiness would be converted to sound and you can hear yourself and that
+provided additional feedback for you to correct your movements.
+Oh wow.
+It was, yeah, it was a very mind-boggling experience and even now people find it very
+interviewing when I mentioned these things.
+So the human activity analysis component was a way for the school to address, you know,
+slightly more formal ways to think about human movement, whether it's sense from a camera,
+whether it's sense from a variable device, whether it's motion capture, try to come up
+with techniques to represent human movement and then do machine learning on it or feed
+into these other applications.
+And it seemed like I was the right fit at the time and I got a job and I've been here
+for eight years and it has led me into very interesting collaborations with media artists
+and health scientists who are interested in the intersection of computing, art and things
+like health promotion.
+So that's the other side.
+You mentioned that one of the big themes of your work is been integrating physical, physics
+space principles and computer vision.
+Can you maybe talk a little bit about that in the broader context of the computer vision
+landscape?
+We've talked about this quite a bit on the podcast and I kind of describe it as a pendulum
+that's kind of swung from physics-based models to statistical and kind of is settling
+somewhere in the middle now.
+But it sounds like you've been working at this for a while, I'm curious how you think
+of it.
+Yes.
+I mean, you're absolutely right.
+It's been a pendulum that keeps swinging and I don't think it settles anywhere.
+I mean, that's the interesting problem about computer vision.
+Every time someone thinks it settles, right?
+Everybody thinks it's settled now and then soon it ships.
+So I mean, yes, it's been going on and off this idea about, I mean, I'd like to think
+of it as model-based vision versus purely data-driven methods of thinking of vision.
+The way the pendulum swings in my opinion is not that the problems are changing.
+It's just the language that goes into talking about it and the tools that go into addressing
+it.
+Those keep shifting, but the problems have remained mostly the same and the problems
+are the following in my opinion.
+So vision is a very unique, some people think of it as an application of machine learning,
+which is a reductionistic way to think about it.
+Sure, everything is data and everything is fed into a model and outcomes of decision.
+But vision and any perceptual field of inquiry, that can include vision, sound, haptics,
+any of these things which have to do with perception, I feel are fundamentally different
+than any other application of data analysis.
+The way we perceive the world is not the way, let's say, back transactions are processed
+by a machine learning computer, machine learning technique.
+There is a huge amount of variability is the way I'd call it, that exhibits in the
+natural world, which is somehow either discarded or properly passed out by whatever is happening
+in our brains and the sources of variability are physics based to a large extent.
+The same picture under a different lighting condition looks different, the same picture
+under a different slightly changed viewpoint looks different.
+So that looking different part is what gives rise to statistical variability.
+The statistical ways of thinking are, well, let's just fill up the observation space
+with more data points and we'll figure out what the shape of the distribution is from
+data, which is okay in, as intense to infinity, I guess that's fine, but when data augmentation
+approaches and domain adaptation and that kind of thing, yeah, yeah.
+But under and not tend to infinity, if you only have a few data samples, you are better
+off trying to understand how the physics around you affects the observed imagery.
+And that's where I think the methods have shifted.
+So in the keynote that I have at CBPR, you know, at the workshop called differential geometry
+and computer vision, I go through some of these historical trends.
+And one of the core themes that brings it all together, the word that I use is called
+invariance, which is when you look around and try to classify objects, we are able to
+do this in a way that is invariant to a lot of nuisance variables.
+That is light, you know, shading viewpoint and all sorts of interesting effects that are
+hard to describe.
+When you say invariance, there's two ways to think about it.
+The physics-based ways to think about it are, let's say I am looking at this scene, I
+know everything about this scene, including its 3D geometry, including how the paint reflects
+off light, including the wavelengths in the incoming radiation.
+If I have full knowledge of all of this, then I can re-render a scene, let's say.
+I can, just like how it happens in graphics, I can create so many different versions of
+the same picture.
+If I had full knowledge of everything, simply through a forward rendering process and
+construct variability, the data-driven ways of thinking about it say if you don't have
+access to everything that you need to understand the phenomena, what is the minimal set, what
+is the minimal piece of information that is needed to get a job done.
+And that's the dichotomy in the physics-based ways of thinking and the statistical ways
+of thinking.
+So when you use this term, invariant is the invariant referring to, say we're talking
+about a scene with an object in it that might render differently in different lighting
+conditions, etc.
+Is the invariant that object that is definitively in the scene and then we've got all these
+other effects, or does the invariant refer to something else, maybe something more on
+the mathematical from a mathematical perspective?
+I mean, the word invariant, of course, will depend upon what the end task is.
+If it is object recognition, yes, something intrinsic to the object is the invariant.
+It is not always as simple as saying the invariant is the color of the object because that changes.
+It is often not same as saying the invariant is the edge map of the object or certain corners
+of the object because they go in and out of view.
+So there's not easy ways of describing what that invariant actually physically means.
+So it becomes mathematical at some level.
+There is no linguistic equivalent that I can come up with.
+But if you look at this rendering ways of thinking, if you can render this object that you
+are interested to recognize, in all possible wing conditions, all possible lighting conditions,
+and you have this huge set of pictures, that huge set of pictures could be called, you
+know, the word sometimes that gets used is equivalent class or sometimes they call it an
+orbit.
+So this object that you're trying to recognize manifests itself in all this different ways.
+If you have a handle on that set, you are in good shape.
+If you have a different object, and you place it in the same scene, and you render it in
+all these different variations, and you have its own different set, then the invariant
+that separates these two is some measure of difference between these two sets of pictures.
+And sometimes that set of pictures can have a nice structure, which can allow you to
+compute it in closed form, and sometimes not.
+So the way we have been trying to express, you know, sometimes illumination is complicated.
+And if in the most general case, we don't know how to describe this full set of pictures.
+And some simplifying assumptions, which is rooted in some old work from the 90s, Bell
+Humor and Krigman wrote a very famous paper, and they said, what is the set of all faces
+under any given illumination condition?
+And they made some simplifying assumptions of what a face is.
+I mean, if I ask you define a face, it's probably defined a face, right?
+So how do you even think?
+And this is why we've tended towards, you know, deep learning and statistic methods over
+the past few years, because we don't know how to define these things.
+So exactly.
+But here is what they found.
+They said, if you define it in some sub linguistic ways, let's say it's a convex object, and
+let's say it's an object which has reflectance defined by some lambershine properties, then
+you can actually write down what the set looks like.
+Now comes deep learning.
+It says, I can't define these things, give me data.
+And the more data you have, the better it is.
+But no one knows how much data is enough, right?
+I mean, the more is better is the answer, but how much is enough is never known.
+And we have been positioning ourselves at that intersection, where we still look.
+If I know that I'm looking at faces, I'm going to weaken the structure a little bit.
+I'm going to say that, yeah, these objects that we're looking at have some characterization
+under these assumptions of simplicity, but then comes deep learning, which allows me
+to fit those other degrees, which I'm not able to specify analytically.
+So we're trying to reduce the need for larger and larger training sets by restricting the
+deep net layer somehow that are motivated by the knowledge of that physics of image
+formation.
+Sure, we don't know how much data we need to get the full specification, but we're saying
+this will reduce the need for more and more data.
+And all things being the same with the same amount of training sets, the same complexity
+of the deep architecture, adding these constraints known from the physics of image formation
+improves performance.
+And it also stabilizes performance against degradation of inputs.
+You know, typically if you blur a picture, if you surrender a picture in slightly different
+ways, performance drops pretty dramatically, we are able to avoid that.
+It's a middle ground, I'd say.
+We are not being super specific about defining objects, nor are we saying more data is good.
+We are saying something in the middle that is we are trying to come up with some description
+of that equivalence class under simplifying assumptions and then let data fill in the
+rest.
+So that's the way we're trying to marry the two things.
+And is the result a mathematical analysis in closed form, or is it experimental results
+on data sets?
+It both.
+Okay.
+So, I mean, most of the things we do is we end up having constraints, which are closed
+for mathematical equations.
+Maybe one layer in the deep net is expected to be orthonormal because the physics of image
+formation says that certain variables under certain lighting conditions will have an
+orthonormal structure.
+Okay, that's the way we impose the constraint that certain layers might have an orthonormal
+constraint put in.
+But then the network itself has to be learned end to end with data sets.
+And the performance has to be validated empirically on data sets.
+One of the interesting things we found is this concept of orthonormality, which seems
+to have some very special power.
+What we're finding is whether, you know, think of it.
+So we played with this idea in a paper for BMVC last year, where we took some classic,
+you know, disentangling autoencoder kind of networks.
+And we had good reason to impose an orthonormality constraint on the latent blocks of these disentangling
+autoencoders.
+Why orthonormality?
+We had to write up a whole, you know, theory around we expect these factors to represent
+either movement or lighting conditions or deformations and under appropriate relaxations.
+They all become orthogonal to each other and they all have this spherical structures.
+So looking at all of this, it looks like orthonormality is a trade-off, which is coming close
+to what the physics is telling us to do and but also being sensitive to the idea that
+it has to be implemented easily.
+We don't want to over complicate things and we want our constraints to be differentiable.
+So it's a design process.
+So we threw in these orthonormality constraints on disentangling autoencoders and boom, the
+numbers of disentangling quality just went up quite significantly.
+And so in the case of an autoencoder or in the layer of a deep network, what does it
+mean to impose that kind of constraint?
+Is it architectural and does it mean that you're diverging from kind of your CNN, resonant
+kind of tried-and-true architectures or is it loss function based or something totally
+different?
+How do you impose those constraints?
+There's two or three ways in which it's happened.
+One is we stick with architectures as is, don't mess with architectures, but add-and-loss
+functions.
+That works when the constraints are actually expressable as a closed form equation like
+spherical losses or, you know, orthonormality, those can be written on as a closed form equation.
+Sometimes the constraints we arrive at do not have an equation, but they have what is
+called a manifold structure.
+And why manifolds arise is very closely related to invariance.
+Here is an example, you know, if I say, so the idea of invariance is this, right, I mean
+you have a feature space.
+Let's say the feature space is something.
+You have this feature space in Rn and it's more specific than something, so it's easier
+to follow.
+So, let's say it's the latent space of AlexNet, okay, some features from the latent
+space of AlexNet, which is embedded in Rn, right, so it's a vector in Rn.
+And then we come in and we say, look, I want to impose a slight equivalence here, which
+is if I rotate my picture, looks like the features are also changing somehow.
+I mean, the features are not always invariant to physical variables like this, right?
+But if you're able to say that this feature, this feature, this feature in Rn actually
+represent the same picture, just that they're rotated.
+We are trying to basically paste the features and thereby the underlying space into something
+else to express that concept of equivalence.
+And sometimes when that ways of expressing these equivalences is well defined, what happens
+is the space gets crumpled, you hope that the neural net learns to crumple the space
+all of its own.
+That is one of the overarching hopes in deep learning that as you go through the layers
+of deep learning, the deep learning is learning to squish and crumple the original feature space
+into interesting ways to get a job done.
+But what it's doing is it's not always getting the job done the right way because you never
+have enough data.
+But if I explicitly tell it that here is how rotation affects the features.
+And here is how you paste them together through whatever mathematics that's needed.
+Then we get some manifold structures, you know, this crumpling can sometimes be expressed
+as a manifold.
+If you want to say in the concept of, you know, in the paradigm of loss functions, how
+do you express a manifold as a loss function?
+Sometimes you cannot.
+What you can do instead is, you know, manifolds are basically crumpled spaces and they have
+ideas associated with them, which are analogous to how we think of maps.
+And you know, the earth itself is composed of the earth is a manifold, but then it's also
+a sphere approximately.
+So if you forget the idea that it's a sphere, but if it were a general weirdly shaped blob,
+you would represent it by a series of charts and you would explain how the charts connect.
+And that's the way you specify a manifold through things called charts.
+And charts are also sometimes, you know, they have a thing, which is similar, called tangent
+spaces.
+So you sort of flatten the manifold in local coordinate charts and you can express that
+tangent space as a vector space.
+So once in a while, we have run into these conditions where we have a constraint, which was
+expressed as a manifold, which could not be written down as an equation, but whose tangent
+space could be written down.
+So we were able to enforce conditions of that tangency and said, I want this layer in
+my deep net to represent coordinates of a manifold on a specific tangent space.
+And the mapping from that back to the manifold could be written down in closed form.
+So it depends.
+Let me see if I can upload this anywhere close to what you just said.
+The way I'm kind of hearing this is that you've got some problem, you know, say you've
+got some object and you apply some simple transformation to that object, maybe you rotate
+it.
+If you've got a deep neural network that is trying to detect that object, for example,
+you know, and you've trained it, there may be some feature space or some representation
+of that object in, you know, the different layers of the neural net in a oversimplified
+world.
+You'd kind of want there to be, you know, a relationship between the rotation of the
+object itself and the rotation of the features, like maybe you could apply some simple transformation
+of the features, but the world isn't, you know, networks aren't that simple.
+But it turns out there is a relationship between the features.
+It's just more like this crumbly manifold thing.
+And you found a way to, you know, express that using the mathematical language of these
+manifolds that allow you to detect the actual invariance of the object.
+That is very correct.
+Thank you for giving me those lines.
+The only disclaimer is we have been able to do this for a few common sources of physical
+variability.
+And that includes things like rotations of objects and deformations of moving parts in
+certain cases, lighting conditions under, you know, just to be very clear.
+We haven't been able to do this across the board for every possible thing.
+Right.
+Right.
+So simple, like, you know, maybe not three point studio lighting, but a simple, you know,
+radio rotation or something like that.
+But, you know, clearly there's lots of things you can do in the physical world that aren't
+amenable to that representation.
+Absolutely.
+Yes.
+Okay.
+And so one of the things that that comes to mind in thinking about this and in your work,
+you kind of fall back on or maybe ground yourself in, you know, what you call pragmatic
+choices of deep architectures, meaning kind of the popular stuff, the way we're doing
+things today.
+I think of like Jeff Hinton's capsule networks is trying to come at some of the same ideas
+or same problems, are you familiar with that work and you compare contrast?
+I mean, we've tracked that body of work also.
+Again, you know, he's with all due respect, ACM Turing about, you know, I can't do that
+easily, but it's an over complication.
+I mean, it's ignoring, it's ignoring so much, it's ignoring the basic laws of, you know,
+rotations are not that hard if you understand how to express rotations and we're taking
+out that invariances is doable without that level of combination.
+So I'm correct that you're trying to come at some of the same problems at least.
+Right.
+Okay.
+In, it may be the case that if that enterprise succeeds, if that capsule network enterprise
+succeeds, it may be a more general solution to everything, maybe, but if you want
+to be a bit specific about, you know, understood factors of variation, I feel that's an over complication
+and there are nicer ways to do that and I think we're able to do that in a better way.
+Yeah.
+So you've kind of, you've developed this approach and you mentioned that you've got some experimental
+results as well.
+Can you talk a little bit about how you frame the question experimentally and what you've
+seen?
+Sure.
+I mean, the way we frame it is we want to keep a few things fixed.
+And the way we keep a few things fixed is we say pick an architecture first and that
+can be allocated.
+It can be, you know, we're looking at things like dense net, point net, all those year
+architectures, which are known to work well for certain databases, keep the architecture
+more or less fixed, keep the training set more or less fixed.
+And the only thing that varies is, you know, don't play too much with new fancier data
+augmentation methods.
+The only thing we are doing is adding in constraints either in some latent variables or we're adding
+in certain augmented loss functions.
+So most of the additional thing that we're doing is a mathematical expression of some kind.
+And keeping in, otherwise there is, it's hard to compare.
+I mean, if you say, let me train it for more iterations, but not add a constraint, can
+you compare it?
+So keeping mostly the computational resources fixed, we're asking if this additional mathematical
+knowledge pushes on the low.
+And we've been finding that it does.
+We have done that for image classification, we've done that for, you know, disentangling
+networks, we've done that for time series problems recently.
+And some of our compelling results are indeed from time series modeling, where, you know,
+we applied this to human activity like ignition data sets with either stick figures or variable
+devices.
+And the kind of factor that we are trying to factor out in human movement is not light
+and shape and geometry, but it's time series variability issues, which is, you know, the
+same action when performed by the same person, but at a slightly different time will give
+rise to slightly different traces, because people have intrinsic variability and how
+they move.
+And oftentimes that variability gets expressed through some time warping kinds of relationships.
+What we've done is express the time warping property as a constraint, which can be forced
+by the network to be factored out in a latent variable, if we just throw in that constraint
+in the loss function.
+And we found that it improves numbers significantly, just like that without any additional training,
+without any additional, you know, data requirements.
+So the pictures, or what I think are the pictures of this, if I'm understanding the problem
+is along the lines of, you know, start from your seat in the living room, go to the refrigerator,
+grab a drink, you know, take off the cover and drop the cover in the trash can, and you've
+got this kind of two dimensional plot of the path that the person might take in doing
+all that.
+And your argument is that the path is an invariant, because the task is the same.
+It's, you know, do X and Y, and what you're trying to do is identify, well, what is the
+fundamental?
+So you said identifying the path, is it somehow in a data set with lots of these, you
+know, traces or paths identify which ones correspond to the same actions or.
+It's close, I mean, we haven't looked at paths in that way, but we've looked at traces
+of stick figures, you know, so you have like 50 joints being tracked and you have the full
+time series of 50 joints evolving in space and in three dimensions that comes from motion
+capture say.
+Okay.
+Yes, there are actions, not really unlike what you're saying, actions in a kitchen, actions
+in a room, actions in an office, picking up objects, placing them here and there.
+And the feature that is invariant, of course, is hard to linguistically describe, but one
+of the variables that gives rise to confusion is that people sometimes take longer to do
+the same thing.
+People sometimes are fast in certain phases of the movement, slow in certain phases of
+the movement.
+Right.
+Or there is asymmetry in the body, you know, the left, the left arm swings more than the
+right arm.
+You know, there's all these interesting sources of variability which are hard to and the
+only way deep learning will be robust to that is if you augmented with all these variables,
+all these sources of variation.
+The way we think of it is that the variability here is expressible as a warping of the
+time axis, whether it's short versus long or speeding up versus slowing down.
+Or if it's one side faster than the other side or the swings are smaller than the other,
+it's all a time warp.
+Sometimes it can be constant, sometimes it can be non-constant and it can be.
+So that brings up an interesting question.
+Do you assume in your work throughout a single source of invariance or do you also conceive
+of multiple sources of invariance?
+Like, you know, there's a time invariance, but there's also the left arm swing invariance
+factor.
+Yeah.
+I mean, that is the, I mean, we are headed in that direction.
+I mean, right now our investigations have been-
+That would be the answer.
+The goal is to be able to have almost like a linear combination of known invariance
+is that, you know, you can account for, but-
+Right.
+I mean, at this time we have been playing it very carefully that let's take this one source
+of variable.
+Let's see if that can be factored out.
+Let's see if we can get invaders to that.
+And we have had success in many different applications.
+It sounds like you're further saying though that in the case of at least this motion capture
+type of a data set that the- that maybe time becomes kind of a meta-invariance that can
+account for multiple physical characteristics, am I hearing that correctly in there?
+It can.
+It's- it's hard to write that out clearly, but it does.
+Like for instance, if you had like load bearing, you know, if you were carrying a heavy
+bag on your bag, it- it will have an interest
+ing effect on the time series of your joins, which is not that easy to explain, but it
+will sort of stretch out certain phases of your movement and shrink certain phases of
+your movement.
+It does.
+So, yeah, the stretchings and shrinkings of the time axis are the key to finding what that
+invariant is for the lack.
+And so are there well established benchmark data sets for these types of tasks?
+Are you rolling your own to explore these methods?
+You know, for motion capture, there are benchmark data sets.
+There are, you know, Microsoft has a- it used to have a RGBD data set.
+I mean, they go by the RGBD activity, sort of, you know, keywords.
+And there's a few out there.
+There's a few benchmark data sets out there.
+NTU has one, MSR is one.
+And sometimes even, you know, the video data sets like HMDB have stick figures available
+through other methods like PostNet, for instance.
+So yeah, there are well-established data sets that we experiment with.
+And is the task that's posed by these data sets one of predicting the action that the-
+Right.
+Okay.
+It's activity classification prediction by and large, right?
+Yeah.
+Okay.
+Okay.
+And so what's the kind of state of the art for that kind of activity detection and how
+does your method compare to it?
+So most of the time series in the deep learning world, most time series things are either a combination
+of 1D CNNs or, you know, LSTM models.
+So depending upon the data set, the way our process goes is we say, let's find the latest,
+you know, benchmarks and we'll improve on those through these mathematical techniques.
+So a recent paper we did in CVPR 2019 used LSTMs as the benchmark data, you know, the technique.
+And the data sets were NTU 3D data set and a few others like that motion capture.
+The tunable parameter in LSTMs is oftentimes the hidden layers, how many hidden units do
+you have?
+And of course, if you scroll through it, the numbers keep going better and better.
+The way we've done it is we kept things the same.
+We say, let's say it's 16 hidden units or 32 hidden units, keep that the same.
+The only thing we'll change is add in this additional module that either disentangles the
+time work function or adds in as a constraint and numbers always go out.
+So in the way we thought about it, if my number, if my memory is right, the NTU RGB data set
+had like, you know, 80% roughly accuracy with a very fancy LSTM with 200 hidden units
+and stuff like that.
+And we were able to improve it by four or five percentage points easy without any changes
+to anything, but just this additional constraint added in.
+So if you find you need more, sure, there's more things to be squeezed out, but we were
+able to consistently improve the performance of LSTMs by easy five percentage points
+and times six, eight percentage points with no change, but a simple constraint on time
+warping.
+Yeah, so those are the kinds of results we've been finding, which is if you rethink what
+the constraints should be through understanding the phenomena first, the payoffs are actually
+quite significant without any additional requirements on data or network, architecture,
+complexity or training strategies, they can all be very basic.
+And so now we've talked about a couple of, you know, very different types of problems
+one, kind of a, you know, computer, a very visual type of task in one of this more time
+series to apply this to different settings, how much hand crafting needs to go into the
+loss functions and the, you know, the different constraints that you're applying to the network.
+That is where the big work is.
+So I think the pendulum is swinging to that level of hand crafting, you know, moving away
+from features to architectures and loss functions, right, that's where the pendulum is.
+And the amount of work that goes into hand crafting is a lot of, I would say, studying
+basically, understanding how these variables actually affect the observed data and try
+to express it in a way that is emanabled to fusion with the deep net.
+The beauty is physics is not one way, you know, light is, there is no single model for
+expressing how light and surfaces interact, there's layers and layers and layers to it.
+And you have to know all of that or at least as much as you know, as much as you can learn.
+And then the hand crafting is where in this spectrum of sophistication do I stop in a way
+that I actually have a pragmatic effect on performance without changing anything else.
+And that's where a lot of intuition is, you know, you cannot get away from this intuitive
+exercise.
+Despite all the progress of machine learning and deep learning, the networks are arguably
+both intuitive and highly unintuitive.
+I mean, some people have an insight about why a network works, but present it to someone
+else, it's mysterious.
+And the same thing is true of the last functions business.
+Sometimes we can motivate it very easily through simple things like, well, yeah, cross entropy
+means where it makes sense.
+Physics is where some of the unintuitive stuff lies.
+It's, that's where a lot of design thinking exists and we are doing that.
+So yes, that's where much of the work is understanding that when you approach the N plus 1th problem
+that's different from the ones that you've looked at previously that you're starting
+from scratch, or are there some principles that give you a foothold when trying to apply
+this method to the new area?
+And if so, what are those principles?
+The details, of course, have to be looked at from scratch, but the principles that we've
+bring to the table are ideas of geometry and, you know, this idea that look, whatever it
+is that you're observing, whatever it is, the raw space, that is not the space on which
+you want your analysis to occur.
+You want the analysis to occur in a space that is crumpled.
+And the generalizable knowledge that we bring to the table is how do we represent these
+crumpled spaces?
+And that's the mathematics of humanian geometry and topology, group theory.
+Those are all the new mathematics.
+It's not new mathematics at all.
+It's mathematics of the past two centuries, but in the realm of machine learning, that
+mathematics has not made its way in a systematic way.
+So that's the generalizable knowledge.
+We bring in group theory, geometry, differential geometry, topology.
+That's the way we think about it.
+But then the specifics, the problem specifics have to be studied from scratch, but then
+that knowledge can often be expressed in the constraints of geometry, anthropology, and
+group theory.
+And that's where we specialize.
+How do we take this domain specific knowledge and look at it through the lens of groups and
+invariance?
+And that's a different kind of generalizable knowledge.
+It's really a way of thinking about phenomena rather than thinking about data.
+Going back to your keynote, you kind of take a step back and apply this broadly to computer
+vision, machine learning, and do you kind of offer any thoughts for where this is all
+going?
+Not.
+Let's make some up.
+This is all going, pop in.
+So data constraints and scenarios, that's where this is all going.
+Machine learning with unconstrained amounts of training data is what the last 10 years
+were about.
+And we're finding that it's a nice goal, but there are no guarantees to be ever had, even
+if you train it forever with as much amount of data that you've got.
+If any mission critical deployment requires a guaranteed robustness of some kind, there
+is nothing to be given other than, yeah, this is what my numbers are on some data set.
+That's all you have.
+And now, if I can just hit pause there, you throughout our conversation, you've talked
+about constraints, you've talked about constraints on the network and you've talked about constraints
+on loss functions, you've talked about constraints on, you know, architectures and not changing
+architectures.
+And, you know, those have implications on compute constraints and that you haven't really
+explicitly talked about constraints on data.
+How does that fit into all these other stuff we've talked about?
+So I mean, the way I think about it is, if you don't have access to additional data,
+you get more bang for your buck by adding these additional constraints that we were talking
+about.
+If you have access to more data and you can collect as much as you want, you always should,
+I mean, that's, I didn't know about, but it's becoming more and more clear that that's
+not where the future is headed.
+We are not able to keep training bigger and bigger, you know, it's an unsustainable path.
+I mean, there is enough energy going in that direction anyway, whether or not we like
+it or I like it.
+But it's not a sustainable path of progress.
+It's smaller and smaller, you know, diminishing returns, but I have an increasing resources.
+So that's clear on the margins, but is part of your work trying to get at one shot, few
+shot types of problems or no?
+We are, I mean, that would be an extreme case.
+But yes, I mean, we are thinking more along the lines of, if I had to collect more data,
+can I first pause before collecting any more data and robustify what I've got with domain
+knowledge?
+That's the way I think about it.
+One shot and few shot, it's a whole different ball game.
+I mean, it's like the wide west of, you know, machine learning and I wouldn't go that
+far yet.
+Will it be applicable? I mean, sure, I don't see why not, but I wouldn't make big claims
+of getting one shot performance, but it should definitely help if not, you know, make it
+more amenable to, you know, less training sets.
+Yeah.
+Okay.
+So I interrupt that you were talking about essentially that the data collection is always
+going to be expensive and, you know, thinking about the problem space can provide, provide
+these benefits.
+I mean, unfortunately, human in the loop can't go away.
+I mean, there is neural architecture search.
+Yes, I mean, again, will this succeed?
+They will succeed at developing some representations that get a job done.
+And when you layer in questions of interpretation, explanation, which everybody is talking about,
+I have a much simpler take on it, which is if you don't have robustness to even simple
+physical variables, how will you even explain it?
+I mean, if your classification shifts simply because I rotate a picture and you're asking
+me to explain it, I think you're asking the wrong question.
+If you're at least asking me, can you be first be robust slash invariant to simple things
+and then explain it to me, that's a more well-posed question, but these are premature questions
+to ask.
+And some colleagues of mine have gone so far to say repeatability if your machine learning
+technique is not repeatable.
+And by that, things like this, yeah, if I click this picture at a slightly different time
+of day, nothing's really changed except the time of day and the decision has flipped, the
+process is not even repeatable.
+So don't even go to the extent of explaining a non-repeatable process or trying to interpret
+a non-repeatable process.
+Those are all questions that should come later.
+So if you think of repeatability, you do an experiment, you get the same result over
+and over again, as far as the big things are controlled, machine learning hasn't yet
+delivered that even.
+So we're trying to bring in that level of robustness, I call it robustness slash invariance.
+Some people have called it repeatability, simple and repeatability sounds shinier and
+it sounds like the stakes are much higher, but I'm happy to just call it invariance.
+Well, Paven, thanks so much for taking the time to share what you're up to and provide
+us some context for your CVPR keynote, very cool stuff.
+Thank you so much Sam, this has been a pleasure and you've been great, thank you so much.
+All right, everyone, that's our show for today.
+For more information on today's show, visit twomolai.com slash shows.
+As always, thanks so much for listening and catch you next time.

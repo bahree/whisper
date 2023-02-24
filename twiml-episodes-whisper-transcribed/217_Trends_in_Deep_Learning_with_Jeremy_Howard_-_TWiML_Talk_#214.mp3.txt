@@ -1,0 +1,693 @@
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+people, doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington to close out 2018 and open the new year we're excited
+to present to you our first ever AI rewind series.
+In this series I interview friends of the show for their perspectives on the key developments
+of 2018 as well as a look ahead at the year to come.
+We'll cover a few key categories this year, namely computer vision, natural language
+processing, deep learning, machine learning and reinforcement learning.
+Of course we realize that there are many more possible categories than these, that there's
+a ton of overlap between these topics and that no single interview could hope to cover
+everything important in any of these areas.
+Nonetheless we're pleased to present these talks and invite you to share your own perspectives
+by commenting on the series page at twimbleai.com slash rewind 18.
+In this episode of our AI rewind series, we're bringing back one of your favorite guests
+of the year, Jeremy Howard, founder and researcher at fast.ai to discuss trends in deep learning
+in 2018 and beyond.
+We cover many of the papers, tools and techniques that have contributed to making deep learning
+more accessible than ever to so many developers and data scientists.
+Enjoy.
+Alright everyone, I am here in Montreal with Jeremy Howard and I'm speaking with Jeremy
+as part of a special series of shows we're doing about reflection of the machine learning
+in deep learning world for 2018 and some thoughts on predictions for 2019.
+Jeremy, welcome back to the show.
+Thanks Sam, nice to be here, I'm worried I'm not nearly cool enough to be able to tell
+you much about trends and whatnot but I'll do what I can.
+I am sure we're going to have a wonderful conversation.
+So this is the first of these that I'm doing and I expect that the format will shift
+a little bit as I do them but maybe we can kind of start by just getting your off the
+top of the head kind of reflections on 2018 before we focus on some of the things in particular
+around deep learning research that you found most interesting.
+Well, I guess it's easiest for me to talk about the year and the stuff that I care about
+which is increasing accessibility of deep learning for normal people to solve normal problems.
+So I guess our main work towards that this year has been trying to make it faster and
+easier and less expensive to train neural nets across more different areas.
+So there's a lot of people who have been doing work in that area as well which I could
+touch on.
+One is that when you look at the Stanford competition called Don Bench, it kind of kicked off
+increased interest in an area which had been really underappreciated before which is
+can you train accurate, large models quickly and cheaply.
+So there's a competition to measure those two things and so before the competition it
+took a few days generally to train image net to a reasonable accuracy, particularly if
+you're using kind of commodity hardware like stuff you would rent from AWS.
+And at the end of it we had gotten to first place on the leaderboard with 18 minutes, $40
+being nothing but Amazon AWS and then there's been other related work from other researchers
+who have got it down not on AWS commodity equipment but on more specialized equipment
+down to seven minutes.
+And so the kind of stuff that's allowed that to happen has been things like fantastic work
+from Leslie Smith on achieving superconvergence so using much higher learning rates, particularly
+a approach to learning rate scheduling called one cycle scheduling which we use as the default
+all the time now and makes life much faster and easier.
+I remember in the course and I believe our last conversation talking about cyclical learning
+rates is one cycle.
+Yeah, this is the next stage.
+So last year I guess Leslie did the CLI paper, cyclical learning rates.
+One cycle is just what it sounds like which is to spend about half of your epochs gradually
+increasing the learning rate, about half gradually decreasing it.
+But there's a few really important insights you have to combine with that.
+One in Leslie's paper is that as you increase the learning rate you should decrease momentum.
+So you have these two things happening at the same time.
+So if you use the first AI library that will happen for you automatically.
+And so it means that as you get to those really high learning rates, because the momentum
+is a lot lower, you're much less likely to kind of accelerate further than the model
+can handle.
+Something not quite related to Leslie's work, but stuff from Frank Hudders lab around being
+able to handle weight decay properly when you're using dynamic learning rates.
+So the momentum and Adam, so their techniques called Adam W, turns out to be super important
+as well for this.
+Was that Adam W this year?
+I can't quite remember, in the last 12 months or not, it may be slightly more, I don't
+know.
+But the combination I guess of all these things has been very much this year.
+So, and we combine those two together along with progressive resizing.
+So basically, I don't know if we were the first to do it.
+There was a lot of people that kind of did it all about the same time, but basically this
+idea of like, why don't you do most of your training on small images and then gradually
+resize, because modern convolutional neural nets are all, don't care what size your input
+is.
+And what's the advantage of doing that?
+Well, it's just super fast, you know.
+So two things, super fast, you do most of your training at 64 by 64, so you're decreasing
+your compute by more than 10x.
+But then the nice thing is you can do the last one or two epochs at a larger size than
+most people.
+So most people do 224 by 224 the whole time.
+So we'll go through to 288 or even bigger.
+So the intuition there being that you can teach the network, the basic things that it wants
+to learn about edges and textures and stuff.
+Well, you know, what does the cat look like?
+Yeah.
+And what a cat looks like at 64 by 64 is basically the same as 288 by 288.
+So the last couple of epochs, it's really just learning a few little tweaks around
+like, okay, this breed of cat has a, you know, this color of nose and this breed of cat
+has this slightly longer hair or whatever.
+So it can do most of its learning.
+And actually, that's been a real focus for us throughout the year is like this kind of
+and same with Leslie Smith, doing a lot more stuff dynamically, changing things during
+training.
+So for example, something we're going to release next week is doing the same thing for
+the GANs. So we've now got GANs training quickly and easily and reliably for the first
+time.
+And the trick again was basically to pre-train the critic and pre-train the generator using
+kind of simpler, fast approaches and small images and then at the very end, you kind of
+GANify it.
+Okay.
+So, you know, that's kind of been a common theme, I think.
+And so that all, and so a lot of that ties in then to kind of transfer learning because
+all these things of like gradually increasing the image size is kind of just a type of
+transfer learning.
+It's kind of transfer learning you're doing within the training learning.
+Yeah.
+So for our GANs, you know, we kind of do a similar thing of this kind of transfer learning
+as part of the process of training again.
+And so in general, transfer learning lets you generalize better, lets you train faster,
+generally lets you use less data.
+So we had a particular focus, as you know, on NLP for that.
+And so we show it with NLP, you can use like 100 times less data and still get state
+at the art results, sentiment classification.
+And so that's all about transfer learning.
+And then Alec Radford, at OpenAI, you know, built on top of that, replacing our LSTM with
+a transformer, and then Google built on top of that, making some tweaks, but mainly just
+doing it for longer with more data and, you know, we're now at a point where we know,
+I guess we know kind of every time people try and do transfer learning anywhere.
+Yeah.
+It tends to either let you get way better results on small datasets than people thought
+were possible or if you use big datasets like Google did with, but you know, it's kind
+of smashed the state at the art of what people thought was possible.
+So still really underappreciated area, frankly, still most people don't know how to do it
+properly.
+Had an interesting conversation here at NURPS, someone approached me and was, we were just
+kind of exchanging thoughts on what was interesting at the conference and they said they didn't
+see a lot of transfer learning like did that go away.
+And I haven't seen any.
+I both haven't seen it, but it's also, it's kind of, you know, being baked into a lot
+of things.
+It's kind of different.
+But also like, NURPS is very tainted by its history and culture.
+So the papers here, like, very tend to over-represent either things which are very mathematically
+intensive or also things that follow certain trends.
+So NURPS every second paper is either adversarial, blah or reinforcement learning, blah, you
+know.
+So like, yeah, it's not necessarily a conference you expect to see the most practically
+impactful stuff, unless some of the workshops are a little bit different.
+But I think that's been another feature of 2018 is like, people are putting adversarial
+into everything and putting RL into everything and not generally for good reasons, especially
+adversarial.
+This is huge literature now around avoiding adversarial attacks and I've yet to find
+anybody who's, and I've asked many researchers in the field, you know, directly, can you
+show me a actual practical example of where you would need to use this thing, you know,
+whatever they built?
+Right.
+No one's managed to get.
+What about on the generative side of you as bearish on the generative, on the GANS?
+So yeah, so I spent two weeks figuring out how to train GANS properly and finally, we
+now have something in first AI where you can train them in an hour on a single GPU reliably.
+And I'm very proud that we got to that point and we have this really flexible API that
+allows researchers to plug in things in ways they couldn't before, but at the same time
+I was also researching how to avoid GANS and I've figured out the generative stuff who
+actually get GAN level performance without using GANS, so I'm not sure.
+Is this stuff that you've written about or published somewhere?
+It's coming up.
+Okay.
+So we're particularly doing some work in microscopy, in collaboration with the SOC institute
+at the moment.
+Okay.
+Through analytic or through the fast idea.
+No, no, I haven't had anything to do with endotic for years.
+Okay.
+This is through a few things, but it's particularly through a new medical and life science
+research lab that I've just helped start, and I'm now the chair of, called RAMRI, with
+low AI and medical research institute, and it's at USF University of San Francisco.
+And we basically invite medical researchers and life science folks to partner with us
+and we'll help with the deep learning stuff and they'll help with the domain specific
+stuff.
+Yeah, so through that collaboration, one of the things we've been working on is helping
+the SOC institute to get better results from their microscopy because they're world leaders
+in this area and it turns out that if you can get really high resolution microscopy,
+then you can literally learn they have been publishing papers showing breakthrough understanding
+of how proteins fold and how they actually impact cells and stuff like that.
+So yeah, so initially we were kind of looking at GANs and getting pretty good results and
+particularly one of our previous students, Jason Antich, has created this awesome thing
+called de-oldify, which takes old black and white low resolution photos and turns them
+into beautiful color pictures.
+And so he's been helping us with some of this work of like getting GANs to work reliably
+because he does better practical work with GANs than anybody else that's seen.
+And how would GANs plan to this SOC institute use case?
+Well, you've got these microscopy results, you want to get the highest resolution outputs
+you can from whatever input comes out of your microscope.
+And so there's actually been some very high impact work in microscopy recently on using
+super res for that purpose, but it turns out not surprisingly that that research was not
+at all using kind of modern, deep learning methods, so it's clear we can do a lot better.
+But then, you know, as I say, then it turns out we've kind of realized that there are certain
+loss functions we can use which avoid the need for GANs entirely.
+So I'm now wondering if I wasted all that time.
+But I'm very interested in generative models, you know, and to see the stuff that's happening
+in the world of life sciences, you know, through better using whatever signal they can get
+from their microscopes, it's really exciting, you know.
+And you really need domain specialists and deep learning specialists working very closely
+together because like there's all these cool things that they can do that I wouldn't
+have otherwise known about in vice versa.
+So for example, they can like, while they're kind of taking the picture, they can like
+change the wavelength of light they're using, they can change the focal length they're using,
+they can change the angle that they're using kind of then they can kind of end up with
+this like long exposure almost like a video, and so we can then get this whole extra dimension
+and this is kind of sub-pixel resolution embedded in that.
+I mean this is what, this is exactly what we hope for, honestly, when we start a trust
+AI is that kind of domain experts would be able to use deep learning to do a better job
+of whatever it is they're doing, so it's nice to see that really happening.
+Have you seen any applications of GANs outside of the image domain, I kind of wonder
+conceptually you should be able to apply this to text and maybe do some of the things
+that people are using RNNs and LSTMs to do?
+Yeah, well like I say I feel like people are putting adversarial in everything and I'm
+not convinced it's helpful, I think often it's a bit of a lazy shortcut to like actually
+thinking about what your loss function should be.
+Yeah, I mean you mentioned text, it's a good question, there's, I think the more general
+question in text is what kind of like augmentation and stuff can we do in text to be able to use
+less data and get better results and I've kind of seen some sign of trying to use adversarial
+approaches there which I don't think is necessary, like there was a recent paper in the last
+few weeks which was basically, I don't know if you're familiar with the cutout paper,
+so you've got dropout which I think everybody knows which is like removing activations
+around them and then the cutout paper in vision specifically removed a whole contiguous
+sections of an image so kind of cut squares out of it and use that as regularization and
+then there's been a more recent paper in the last couple of weeks which is kind of basically
+done cut out at every layer of the neural net so it's basically dropout but instead of
+removing activations at random, you remove activations at the next to each other, stuff
+like that almost certainly will work equally well in text and don't require any of this
+kind of adversarial stuff.
+So yeah so I think my view is probably cans are a little overhyped and adversarial attacks
+are a little overhyped and it's certainly a great way to get published in Europe and you
+feel the same way about RL, have you also experimented with RL?
+Well, kind of I spent 10 years kind of studying optimization more generally and I never felt
+like these standard differentiation based approaches when you've got this kind of long-term
+credit assignment issue necessarily make a lot of sense and I still feel like there's
+a lot of the optimization literature that's being ignored by the RL community.
+You've seen a little bit of like evolutionary algorithms get touched on here and there
+like I think everybody's in work there but when I think back to like all the stuff that
+was going on in the early 90s, people just started to rediscover some of it.
+So for example, in the early 90s combining evolutionary algorithms together with kind
+of gradient-based methods was really common and I just saw a paper literally reinventing
+it like two weeks ago.
+The problem RL is trying to solve is great which is like hey let's not just try to predict
+things but let's actually try to figure out what action to take but I feel like currently
+the RL community is not quite treating it as enough as differently enough as it should
+be.
+When I spent a long time on optimization it became clear over time that it's a good idea
+to kind of recognize the differences between prediction tasks and more general optimization
+tasks.
+This is interesting because I had a chance to chat with Sergei Levine last night and
+we were talking about generally what he's found interesting over the past year in RL in
+particular.
+This was informal.
+But one of the things that he mentioned was a paper, TD3 paper, Twin Delay, Deterministic
+Policy Gradient which sounded like just the kind of hack that you would love.
+Like it's a tweak to the way they do the policy that he didn't even go into the details
+because it was such a knit but it gave him two X better training times.
+So if fast AI was doing RL it would be just the kind of thing that you bake into the library.
+Yeah, but I mean we only work on stuff which clearly works in practice for the kinds of
+problems most people have and Levine's one of the very few people who's using RL in
+very appropriate and useful ways at the moment.
+So for stuff involving robotics there's a lot more you can do with RL because any time
+you've got some physical system that you can actually model with physics pretty accurately
+you can kind of pull it apart and add appropriate constraints and an appropriate kind of
+auxiliary losses and there's a lot more that you can do.
+So I think the stuff he's doing is interesting and useful but a lot of people are using
+RL for stuff I don't know.
+I just went to the start of the health workshop here in Europe and there's all these people
+tackling various medical problems using RL which just seemed like slightly ridiculous
+in my opinion.
+Interesting, interesting.
+So there's been, we were chatting before we got started and you mentioned some of the
+work that's been happening to try to better understand the way some of our tweaks we've
+been doing like batch norm and other things are working.
+Can you elaborate on some of that work?
+Oh yeah, I'd love to.
+I feel like that's something where there's been some great progress this year and particularly
+in the last couple of months.
+There's a fantastic poster here at Europe that's been an archive for a while called Visualizing
+the Lost Landscape of Neural Nets and what they basically showed is it's something I've
+been talking about for ages but never actually did anything about it which is this idea that
+you can have this idea of sharp parts of the lost surface where if you're in a sharp
+part of the lost surface then the idea is it probably won't generalize very well because
+if you change anything a little bit now you're not in that kind of nice low area anymore
+and it's kind of overreaction to what I thought was a kind of obvious and kind of mathematical
+issue which is how you can like reparameterize the weights to make anything arbitrarily sharp
+which to me like if any time you read can reparameterize something why don't you just normalize
+out that reparameterization.
+So this Visualizing the Lost Landscape actually did that so they actually did the normalization
+and then they did this you know they built some beautiful software and some beautiful visualizations
+to show what happens and they found some really interesting things.
+One of the most interesting was they found that when you look at the actual trajectory
+as you train your own app for example if you take the PCA space of the weights there's basically
+only two dimensions you can basically that plot the entire or they said 40 to 90% of the variation
+in the direction of the gradient updates lies in just two PCA directions independent of the
+dimensionality of your well this was on image net so I mean this is obviously super high-dimensional
+so yeah over a hundred million weights and so you know that and you know one of the nice things
+that means is you can kind of plot exactly what pretty close to exactly what's going on which
+they did and you can also plot the Lance Lost Landscape that's being navigated and so one thing
+that they found was if you as soon as you add skip connections so Resnets versus the exact same net
+without the identity shortcuts Resnets basically make the whole surface incredibly smooth
+and dense nets make it even smoother by the way so when you see their pictures it just
+immediately makes you realize like okay you know this is why we've been loving Resnets so much
+and so you can kind of see similar stuff with normalization so one of the really interesting papers
+to come out in the last couple of months so there's been two papers coming out very similar times
+which both both both basically said hey you know how batch norm was meant to help with covariate
+shift where it turns out it doesn't help with covariate shift and it's got nothing to do with
+covariate shift and actually what it does is it makes the loss surface smoother which actually
+if you think about it makes perfect sense you know if your if your current activation is scaled
+really poorly then if you don't have batch norm the only way to fix that is to modify all of your
+weights on that layer where else if you do have batch norm you only have to modify the batch norm
+weights to fix the scaling so just makes the loss surface a lot smoother so then there's been other
+very nice kind of follow-ups to that well exactly follow-ups coming out at similar times to that
+saying hey here are some different ways of doing normalization which don't focus on the covariate
+shift but focus on the scaling so spectral norm and weight norm in particular which are now both
+built into pie torch and when you create a conflare in fast AI you can literally
+pick from an enum of what norm type you want and yeah they they they help a lot actually with
+against stabilizing training so yeah all these all these kind of insights into what's going on
+and so the neural network is helping lead to better ways to train the neural networks which means
+less hyper parameters less you know more resilient higher learning rates it's all making life
+easier in practice which is great so last year the big controversy at least one of them was
+Ali Rahimi's kind of call for greater rigor do you feel like a lot of this work is a response to
+that or no I never quite figured out what Ali meant and even though I had quite a few private
+chats with him I never quite figured out what he meant I tried to dig into it I think yeah so
+so I you know since I don't quite know what he was saying and haven't figured it out I can't quite
+I mean he's a great speaker and so a lot of people would like I really speak to that talk
+when I ask them like what exactly did he mean by rigor and exactly what are you going to do about it
+no one had a good answer to that question so for me you know as a kind of an experimentalist I think
+rigor is about ablation studies you know so if you look at the your LEMFIT paper that Sebastian and I
+did we spend a lot of time doing ablation studies so we said like what if you did this with more
+data versus less data what if you removed this training thing from this training thing from this
+training thing what if you tried this versus that data set and so we just had lots of tables and
+pictures saying here's you know here's the thing showing you which bits help and how much they help
+and what they help with so to me that's you know when when people don't have that I don't find
+their papers terribly useful because I don't know what's what's actually helping and often the
+things they thought were helping weren't helping even worse for me is when people don't use a
+strong baseline so they'll have some really crappy model and they'll say like oh look at our technique
+X improves that crappy model but when you look at it it's you know their technique X is just a
+crappy way of doing what the normal baselines would have done anyway so I think like to me in terms
+of experimental work strong baselines and good ablation studies is is what it's about but you know
+for the New York's crowd rigor often means great letters you know they want to see like
+you know convexity proofs and error bound proofs and all this stuff which I've just
+never seen useful like the only thing I've seen those kind of proofs do is to totally mislead people
+so like we had what I call the SDS pretty strong it's true we that what I call the SVM winter for
+like 15 20 years which is basically you know that Nick did this really to some people compelling
+papers it's just kind of like hey all you need is SVMs here's the mathematical proof and
+it you know when you actually look at it it's it's it's it's the the things that people took out
+of that are rubbish like it's the difference between like in theory here's what ought to work
+versus in practice here's what actually it works so it's it's it's nice this year
+leonbertos I can't remember the co-author but leonbertos work won a test of time award his 22 2007
+paper which basically I mean it's it's it's ridiculous that it was necessary for this paper to
+even happen but he basically said look or you people who were spending all this time on like
+fancy optimizers for SVMs actually SGD works better and and and like and then here's all the
+Greek symbols you need you know like here's all the proof and math and whatever else so like
+there's already plenty of experimental evidence to say like it works better which
+most of the community ignored and so it really took somebody to come along and like say it in
+their own words and to like prove it so to me I'm kind of like I don't like similar thing with
+like going back further minskie right minskie like proving that neural nets are a waste of time
+because they can't like solve the x-all problem and so the thing is all these mathematical proofs
+they're always of oversimplified versions of the problems we're actually trying to solve because
+the problems we're actually trying to solve are not amenable to that kind of analytic approach
+so you know took 20 years really for somebody to come along and say well we're not just using
+one layer you know we actually have a hidden layer if you have a hidden layer then we can solve
+any arbitrary problem to arbitrarily close given enough parameters so again like these kind of AI
+winters we had were really kicked off by people taking theoretical results far further than they
+should have ever been taken and ignoring all of the empirical evidence of like I don't know like
+guys like Jan LeCouin who's like saying like hey I've actually written this thing on that five
+that actually reads numbers you know it works it's this thing called a convolutional neural network
+and you know people like that just weren't getting published because you know because the theory
+had already proven that we should be using these other approaches so yeah I think that's um
+that's a concern I have about our field in general it also is a real problem for diversity
+and inclusion because there's lots more people in the world who know how to code or you don't know
+how to do some engineering but won't know how to prove error bounds on something or whatever
+and also like we'll be much more focused on like hey I want to actually solve this problem in
+in medicine or in you know disaster resilience or whatever and so they'll want to be
+publishing papers saying his thing A that works for thing B and the current focus in our field is
+yeah very unfriendly to that kind of stuff interesting yeah yeah um I'm curious having launched the new
+fast.ai course this year the deep learning course any you know specific 2018 learnings
+about deep learning education or what's required you know what's you know what's needed to kind
+of broaden the fold of folks that can do deep learning. I think I've been surprised by how far
+people have gone on the back of the fast.ai course like a lot of presenters at nureps have come up
+to me and said they got into deep learning through fast.ai and if you would ask me three years ago
+if our students are going to go on to be researchers presenting at nureps I would have been like
+that sounds like me I feel like we're just trying to get people to be reasonable practitioners so I
+think I think that's been a pleasant surprise um it's also been I must have been a bit surprised
+at how quickly the software has taken off um like for me that's kind of my focus now is like I would
+love for software to be as standalone as possible and not really require people to do the course
+because there's a lot of investment in time to do the course and yeah I'm increasingly running
+into particularly researchers now who have come from backgrounds in TensorFlow or pure pie
+torch or China or whatever and kind of saying like oh I started using the software and
+my research is going faster than it was before so that's been nice um but I think overall
+you know it's we've kept on finding the same things we've found in previous years it's just
+accelerating like I went to the black and ii dinner last night and the black and ii workshop which
+I saw you there as well um and uh yeah I mean it's just so great how many people came up to me and
+said like you know hey I'm from the ivory coast or I'm from Tanzania or whatever and
+I had no way to learn deep learning until your course came along and now I've done it and now
+I'm here at nureps presenting at this workshop and uh and they're always like kind of inspiring
+stories because often that you know they're telling me last night about the steps they had to go
+through to get a visa often having to go to other countries and contacting the console general or
+you know like as they're they're forging paths no one's ever forged before and now they're
+finding communities so like um it's so cool the way like three years ago and we did our first
+course we had one student from legos and he was like asking on the forum like hey anybody else
+from legos here anybody else from africa here you know tonight you're like can we have a community
+no nothing you know and and now uh legos is a second biggest faster your community
+long outside of the u.s so a bungalow is still the biggest bangalow that legos is huge so like
+it's been really cool to see how just a little bit of um and I know it's certainly not all
+thanks to fast ai there's lots of people doing great work here but I know like plenty of the people
+involved have got there thanks to fast ai so for example one of the um people presenting at the
+black and ai dinner last night uh judy jichoya she's a um a radiologist who got into deep learning
+through fast ai and now she's like a incredibly kick ass leader both in the radiology world and
+in the deep learning world in the black and ai world so um yeah I feel like there's now enough
+momentum going on that these uh underrepresented groups are not going to be underrepresented
+too much longer mm-hmm mm-hmm yeah I thought the I forget his full name but one of the presentations
+was kareem karen those an interesting uh slide where one of the speakers uh from tenizha
+kind of asserted that ai is both this incredible both uh existential threat for africa in some ways
+and and an awesome opportunity and kind of uh you know for for him it was a rallying cry to
+you know get more people engaged in the process i thought those were really interesting yeah
+I mean that's kind of why Rachel and I started this or it's exactly why Rachel and I started
+this is we both thought like this has the potential to massively increase inequality that's that
+is exactly what will happen if there's just a status quo right because all the people you know
+before we started fast ai all the people pretty much studying and working in deep learning were
+you know western white men who very very few of whom had any kind of domain expertise background
+so they were using deep learning to solve kind of bullshit problems um so we thought okay if
+nothing changes that's going to get worse and worse because those people keep getting money thrown
+at them and and they keep hiring more of the same people and investing education in the same
+places and but at the same time you know um it's deep learning is not at heart and it can be used
+to help so many areas with so many problems so if we could get kind of get this the the skills out
+there um then maybe uh people who otherwise would not be able to will be able to like make a big
+impact so i mean jute is a good example i think she's from Kenya uh and uh you know uh i'm
+sure she would have been a great radiologist regardless right but i feel like now you know we have
+somebody in the kind of senior thought leader community amongst radiologists who is black and who
+is a woman and who is you know both bringing ai to radiology and radiology to ai you know it's
+exactly the kind of perspective which yeah hope you know i think can create opportunities but
+they didn't exist before um let's talk a little bit about the the tools landscape obviously one
+of the big developments in 2018 was the launch of the 1.0 versions of both the fast that ai library
+and and uh pie torch is it too early to to talk about kind of momentum from the pie torch launch
+or it's not too early because one of the really interesting things is paying to see TensorFlow's
+reaction which is they've really got off their ass and doing good stuff you know they made some
+tough choices like getting rid of tf.contrib making tfo a much more community given exercise i think
+they realized that you know the the direction you know you talk to almost any Google TensorFlow
+engineer off the record at least and they'll tell you they all hate that code based you know it's
+full of technical debt and it's just not well put together um and it's not focused on the kind
+of the developer experience um it's really focused on using as many tp users possible so so tf2 is
+looking like a huge step forward in terms of the developer experience and um you know uh just
+kind of a piece of software that people will enjoy using breath of the news because they have to
+so and i really think that's been i mean i know it's been very heavily a reaction to pie torch
+which is not to say pie torch invented this approach uh it's i mean China certainly did it before
+pie torch and i don't quite know the history before that but um i think yeah realizing that
+the the tools need to be written for developers uh is just a really important insight so i think
+that's been so i think the impact on the on the TensorFlow gorilla has been important and interesting
+but then um yeah people just using pie torch uh particularly in the research community
+you're definitely seeing things you know more innovation as a result you're seeing faster innovation
+and then yeah you know the impact of fast ai is probably a little early to really know but um
+we're seeing that for a whole nother level for the you know quite a few researchers who are picked up
+fast ai um and you know fast ai kind of has two different user groups in mind there's the
+you know very much the research user group so that's all about the kind of
+lower level of abstractions where so for example with our gans you know we've made it so you can
+easily do research around like if you want some dynamic approach to switching between training
+the critic and the generator you know you you can just plug in your own gans which are class or if
+you want to pre-train a different kind of critic you can plug in a different pre-train critic class
+whatever and then of course there's the user group of people who just want to um get something
+working at their company so for example one person who came up to me at europe's last night said
+oh my company has three million documents um it's a pretty big international company and we've
+been using faster ai and urlm fit to basically tag all three million documents and they have a
+full-time taxonomist who sits there and classifies documents and then that gets fed off to urlm fit
+through fast ai and then they put the results and find you in the model and um so they're not
+doing research level customization or whatever they're just getting stuff done so I think yeah I
+think both of those groups so uh you know I think previously they would have been using
+keras if you wanted to do something like that but keras just doesn't really give you easy
+supportive things like nlp and things like that so um I think that yeah maybe that's one of the main
+impacts of fast ai in that area is easy deep learning isn't just in computer vision anymore
+it's also nlp and tabular and collaborative filtering
+any other interesting things on the tool side that you've that have caught your eye
+um yeah there's plenty of stuff going on I wish I had more time to dig into them than I did
+I mean you know in the pie-torch community well I mean obviously one big thing in pie-torch
+version one release which just came out yesterday is the just in time compiler so you can add a
+jet decorated to your code and get you know fused you know fast inference version of it so
+um it's quite a bit of that stuff going on there's another much less known library for pie-torch
+which is the galsion processes library and um so me it's not so much interesting because of the
+galsion processes but be interesting because they have to encode a lazy tensor which kind of
+takes the jet to a whole nother level which is you can as you basically say these are all the
+mathematical operations I want to do on my tensor it it's just storing the computation graph it's
+not doing the actual calculation at all until later on when you just say you know compute and then
+it compiles a kind of a fused version and then much faster handles kind of stuff like sparsity
+and stuff much better and they also have some kind of nice linear algebra identities which they
+use to you know just use arithmeticly much better choices when they know that you know you had
+these different shape matrices and you did these particular operations to them and you know
+this linear algebra identities so therefore we can replace that set of operations with this
+single faster one um at least with the lazy tensor is this an example of kind of pie-torch moving
+towards tensor flow while tensor flow is moving towards pie-torch I think so um I think so yeah exactly
+so the kind of the the the jet in pie-torch is starting to feel a bit like XLA I guess in tensor
+flow but with less technical depth yeah and they're kind of a lazy tensor stuff is starting to
+look a bit like the um uh kind of static graph approach but without all the horrible boilerplate
+the tensor flow so um I mean what we're I'm really excited though is what TNG chain is doing with
+TVM like hopefully that stuff with TVM where there you'll have right on that what's TVM
+our TVM is is something that's basically at a lot of level which is that you um take a it's
+basically a compiler for tensor expressions that will create an an optimized version of your
+tensor expression and um because at the moment one of the things I hate I as I hate it when I say
+to a student like okay let's dig into this code which calls this which calls this which calls this
+and let's understand all the stuff that's going on and they get to a point where it's like oh and
+this calls n videos kudian and library so at that point okay after that it's magic um so one of
+the cool things TVM does is it um kind of lets you see you know um it doesn't suddenly stop at
+kudian and it's now here's the TVM code you know okay and then um TVM ends up believe it or not
+faster than kudian and even although TVM is automatically creating that optimized kuda kernel
+so is it replacement or is it compiling down to kuda or something i mean it still has to
+compile down to what i'm not necessarily kuda but maybe ptx um so it's still you know so it's not
+business not just for Nvidia it can also target you know um or you know um various mobile devices
+or cpu um so i'm kind of like excited about this because i think it might mean that um particularly
+for stuff like swift for TensorFlow which is a project i'm really excited about you know
+you know hopefully we can see things where we can write everything we're doing in our kind of
+host language and um i was gonna ask are you excited about that because you're excited about
+Swift the language or because you want to see deep learning accessible via all the languages
+um there's a number of reasons i'm excited about it one is that i hate Python so great to you know
+get rid of it um it's just it's just incredibly frustrating to have to write in a language which
+has so many klachi things like with global interpreter lock and just so incredibly slow every
+time you actually do something in python and um so you know it's it's very very frustrating to
+to to work with it's fine if you're doing a web app or something but for numerical programming
+you spend all of your time trying to figure out how to have everything not being done in python
+you know you're basically always calling to see your kuda or whatever libraries um partly it's
+because Chris Latina everything he touches is awesome so it's just nice when somebody like that
+comes into your field and um i just can't you know i just love seeing what he's doing
+partly because Swift is just you know it's a good language um it's uh you know there's a few good
+languages in the world like i think f-sharp and julia and swift uh all examples of just good
+languages um but the thing about Swift uh and julia and f-sharp is they can all um you can write
+fast code in them and so like and so Chris's approach with with the swift potential flow team is
+that you'll be able to write all of your kuda kernels and stuff in swift you know and so be
+you know and and because like he's the llvm guy you know you know he's got the compiler chops to
+make sure that those swift kernels are not going to be any slower than the c kernels for me
+so also from a teaching point of view it'll be really nice to be able to show people every layer
+and from a research point of view it'll be really nice because we're we're able to
+swap out this lstm cell with our own lstm cell and not have to yeah worry about
+you know switching into c++ and comparing an extension and then dealing with a whole different
+debugging framework and all that how far along is it um not terribly far along um yeah it's not
+some of our students have tried to kind of play with it and it's not really usable yeah
+but i'm sure it'll get there okay and similar stuff going on in julia by the way julia also
+has similarly exciting stuff going on around writing kernels in julia and all that okay
+uh so maybe switching gears to 2019 and things you're excited about uh opportunities
+what what do you what are you looking forward to um well what do you think is going to happen if
+i don't know if you're one for kind of dusting off of crystal ball but
+no i don't know what i'm doing i'm doing another people i mean we're just keep doing what we're
+doing i guess um so i'm going to be doing a deep dive into um speech recognition kind of next year
+we're going to write a book about faster i and patorch kind of the book version of the course
+i guess early in the year with uh silvenko gogo who has been helping us with pretty much
+everything this year um you know i i hopefully will keep lowering the bar around um and we hopefully
+will start getting to the point sometime soon i don't know if it'll be in the next year where we can
+do useful stuff without any code that's that's really the the main bar that i want to get to is
+doing useful stuff without any code what does that mean for you so this is a startup i'm involved
+in called platform ai where we're trying to do exactly this for one particular sub domain which
+is image classification so you can uh don't even need labels you can import some some photos and we
+try and provide a uh kind of intuitive representation of what the model is learning to help a domain
+expert interact with it in an entirely visual way um so for me it's all about like people using
+stuff like that to solve scientific problems or to optimize their logistics or whatever it is
+they're trying to do you know like um it's all about recognizing that machine learning is
+computers learning from examples and so that should be all about getting rid of code we shouldn't
+need for loops and conditionals and stuff you should just be able to say here are my examples
+and the computer said here is what i'm learning and then you should say well here is some
+feedback about which ones are right and wrong so that's where we want to get to so yeah so we've
+uh already got the startup doing that for computer vision and i hope to do similar things in speech
+and nlp as well um as long as we rely on people knowing how to code we're missing out on something like
+99.9% of local population right right so maybe you know not kind of being so strict about
+2019 just you know looking ahead to the near future what um you know where you think the
+opportunities for us uh liar or are there specific um ideas you know or even some of the ideas
+that we've talked about in terms of you know better understanding of the way some of the training
+techniques are working or so the the big opportunity right now is nlp so um you know this year
+we and others showed that transfer for learning for nlp works specifically it works with that
+requiring an email labeling um um other than your target task and even then doesn't require
+much labels um we're gonna see i'm pretty sure similar things being shown for um generative models
+for text um so unfortunately that means one of the big opportunities will be that um spammers
+and trolls and people interested in disinformation will be able to use this technology to
+cause much more mayhem than they've been able to cause before um so i would say that's probably
+gonna happen in the next 12 months so i would not be surprised to see massive scale
+bots of generative text which are both appropriate enough to the thing it's responding to to seem
+reasonable and kind of reasonably believable stylistically that large numbers of people will
+be fooled by them large amounts of the time and they will not be easily automatically blocked or
+even analyzed to know the scope of them the way that things are now so i think the technology
+to fight that is harder than the technology to create it or is it just a will no it's much harder
+okay i i i i feel very confident that i you know if i had the reason or motivation to build such a
+bot now i feel very confident i could create one at scale which would you know be devastating to
+any social media platform uh and i think lots of people i mean not lots lots but you know
+anybody involved in the modern nlp kind of uh transfer learning stuff could um i would have
+know if somebody said to me like hey Jeremy Sebastian Root has just become an evil genius so this
+has written a twitter bot to spread russian disinformation can you go and help block it that'd be
+like no probably not you know i don't know that sounds really really really hard uh and that's
+often been the problem in these kind of areas is it's normally easier to create mayhem than to
+block it um and also when you're trying to block it you're always kind of being reactive
+particularly where we're not using more heuristic approaches to do the generative modeling but
+using kind of smarter approaches so yeah i think that's going to be a really big problem and one of
+the challenges is that the best way to fight that would would be to write your own generative
+text bots and you know use them to fight the disinformation but the kinds of people that would
+want to fix the problem would be much less likely to be the kinds of people who would be prepared to
+launch their own generative text box so i think that'll be difficult um but i then i think you
+know there's a lot of opportunities to uh you know in industry for for companies to be able to use
+text as a valuable resource i think it can certainly happen in medicine as well um like
+one of the challenges and radiology is that the the labels are all buried in radiology reports
+right and when you look at stuff like the data sets that the NIH should have provided for medical
+imaging the labels they've created have been using classic rules based NLP approaches and they're
+just terrible so having um that labeling done with these kind of modern transfer learning
+approaches will be awesome so yeah i think that's hopefully going to be one of the big at least
+the positive side of it will be one of the big things in 2019 um i think we're going to see
+these different approaches to normalization um probably start to take over from batch norm um i mean
+it's kind of unfortunate that we don't have a real image net competition anymore because like
+image net you know has plenty of flaws so i'm not saying we need image netback but the fact that
+there was our competition that quite a few of the more serious researchers decided to invest
+significant time in meant that each year you would see you know this year we've got
+measured three by three comms this year we've got resonance this year we've got you know
+Andrew Howard's data augmentation methods like they were like it made people who would otherwise
+be focusing on mathematically pure whatever's like actually focus on solving a problem properly
+mm-hmm so i i do worry that you know and also those solutions got published not just as papers but
+as you know um pre-trained models so we can download so i do worry a bit that we might continue
+to use pre-trained image net models with older architectures and older normalization approaches
+and stuff just because we don't quite have an image net competition anymore so i don't know
+what the fix to that is i mean there is like tf hub and now there's a torch hub which trans you
+know actually provide pre-trained models but people need to start realizing i think yeah that
+the image net models are increasingly out of date and then you know skip connections
+are still interesting the the unit paper is now the most highly cited mick i medical
+image and conference paper of all time resinat obviously is still kind of all powerful
+so two really important skip connection stuff so i think hopefully people will keep finding ways
+to better utilize skip connections mm-hmm and those two things skip connections and normalization
+yeah really help make models easier to train quickly and accurately mm-hmm
+the i think the rate at which new data sets are coming online is uh been uh increasing there
+have been a ton of these and like various domains in 2018 any do you think we see um or need for
+that matter like a kind of a better image net or a monster you know kind of the image data set
+to and all image data sets or do you think the domain specific direction is more that one better
+yeah yeah you know um so google to their credit just yesterday maybe it's this morning released a
+much more diverse version of open images um and that's really fantastic because the the previously
+the open images and image net data sets were incredibly biased in terms of they're basically all
+came from white western countries and so on that very very difficult to train models that could
+recognize Hindu weddings versus Christian weddings for example um so yeah i think we have a great
+photo object classification data sets um but we don't have great
+my cross-copy you know histopathology data sets we don't have great radiology data sets
+um on the text side and lp side uh on both yeah um particularly thinking of vision um yeah on the
+text side i mean it's ridiculous the it's there are almost no publicly available label text data sets
+that normal people can use as they wish um most of them are locked behind this thing called the
+linguistic data consortium which is part of you pen and um i'm sure originally when it was
+created it had every good plan to help research whatever but today it's basically this um
+thing that is increasing the exclusivity of the field so like it's my students can't replicate
+results in papers because so many of the data sets in an lp are locked behind all kinds of
+licensing agreements and like under the most popular ones the voters corpus you have to like
+download print sign with your organizational affiliation of form and send it to the to the
+government for approval you know you can't have a hundred thousand fast day ice students doing
+that so i can't use those data sets because they just aren't the like they were created in a time
+when people just didn't occur to them that like maybe there's more than just this like little
+research community of people who go to my little workshop but there's actually a there's a
+whole world of people out there who are wanting to do work right you know so that's a huge problem
+so i think um you know i think something else i would really like to see is in areas like
+medical imaging where data sharing is difficult um i want to see more model sharing
+so like there's lots of pre-trained image net models like more than we need
+so where's all the pre-trained histopathology models and the pre-trained
+CT models and the pre-trained MRI models like those are actually much more useful because you know
+if stanford releases their pre-trained prostate MRI model and then Boston picks it up and fine
+tunes it a bit and publishes those weights and then Harvard picks it up and fine tunes out a bit
+and then publishes those weights and then stanford can come back and fine tune that back in the
+circle right end up something better than they started with like it's actually it's been shown
+that you end up with just as good a model as you would have if you actually shared the data
+hmm but more you actually have to do is share weights so i would love to see people
+releasing pre-trained domain specific networks so another thing we saw quite a bit of this
+year was proposals for data sheets for data sets model cards you know different
+representations of the idea that we need to document the biases and and lineage in some cases
+of data sets and models do you see that stuff taking off? I don't see it taking off no I mean
+I think it's really cool the work that Jim Nick Gepparoo and all those folks did with the data
+data sheets for data sets work and it's a really interesting examples of other industries where
+that's happened so I've done some work with electronics and certainly I'm used to as they
+describe in the paper that every electronics component comes with a data sheet and a fairly
+consistent format and you rely on it having said that we're still suffering in the deep learning
+world from people not publishing the data at all or not publishing their code at all so I also
+worry about like if we say like well you can't publish your data set unless you create this data
+sheet maybe there'll be even less people publishing their data I do think that all the conferences
+need to say if you have experiments you need to publish the code and the data okay people claim
+that we have this great peer review system but when you actually look at it it doesn't really work
+like reviewers don't recreate the papers right the code to recreate the papers ever on the other
+hand where people put stuff up an archive there'll be many of our students all at the same time
+trying to replicate it and if they can they'll get up on GitHub and post issues and say what's
+going on which has happened just a couple of weeks ago it turned out that a widely cited paper
+as students went to replicate it and found they couldn't and discovered that the researchers
+had accidentally used the test the test set as part of the training data you know so like I don't
+at all agree with this idea that we have to keep this pure exclusive peer review system what we
+instead need is to be able to publish their code and publish their data and then get it out there
+so that the rest of us can can try it out and I think the academic community still doesn't realize
+how many of us do do that replication like every single algorithm that fast AI teaches or
+implements in our software we always re-implement from scratch and test from scratch for example and
+we're definitely not the only ones so I think like people are lots of people going to start
+publishing the data sheets for data sets let's first of all have the published data sets at all
+it would be great if they you know and I guess it's up to the kind of conference and venues
+and journals and stuff to start saying you know first yes you have to publish your code and data
+and then maybe once that's happening okay you actually have to also publish a data sheet to go
+with it we could at least encourage through the review process in the meantime to like if you've
+got a new data set to kind of say like can you you know reviewers could ask for information about
+how it was collected and you know what the diversity of people involved in was and stuff like that
+it certainly does seem like a good bar in a time when you've got 4,000 submissions to
+nerfs and a thousand papers being published to require that folks that are doing experimental work
+publish the code as well it does yeah well Jeremy it's been so great to chat with you once again
+great to see you here and thanks for taking the time thank you Sam
+all right everyone that's our show for today for more information on Jeremy or any of the topics
+covering in this episode visit twimmalei.com slash talk slash 214 you can also follow along with
+our AI rewind 2018 series at twimmalei.com slash rewind 18 as always thanks so much for listening
+and catch you next time happy holidays

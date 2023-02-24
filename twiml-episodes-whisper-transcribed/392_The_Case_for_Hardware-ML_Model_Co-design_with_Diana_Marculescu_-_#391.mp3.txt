@@ -1,0 +1,606 @@
+Welcome to the Twimal AI Podcast.
+I'm your host, Sam Charrington.
+Alright everyone, I am on the line with Deanna, Marcalescu.
+Deanna is department chair and professor of electrical and computer engineering at the
+University of Texas at Austin.
+Deanna, welcome to the Twimal AI Podcast.
+Thank you for having me, Sam.
+I'm happy to be here.
+I am super excited to have you on the show, especially since just before we started recording
+you mentioned that you're a long time listener.
+And I always love talking to listeners on the show and having the opportunity to host
+them on the show.
+So thank you for that.
+Being a long time listener you know the routine, I'm going to ask you to share a little bit
+about your background and how you came to work in machine learning.
+Sure.
+I'm happy to do so.
+Yeah, actually I'd be listening to the podcast for quite some time, especially on my
+trips to conferences and more than likely currently we're not traveling that much.
+However, we try to do our best to stay up to date by listening to podcasts, especially
+in this domain.
+My trajectory to working in this field is a little bit less traditional, I come from
+the computer hardware systems area.
+I've worked for more than 20 years on making computer hardware systems more efficient,
+especially more power efficient.
+And the way I got to work in machine learning in particular came from the applications side.
+So we've used machine learning to make or to perform power management for multicore systems
+in the last decade or so.
+But more recently in the last three to four years my students and I decided to turn it
+around and instead of using machine learning as an application to make computer systems
+more efficient, instead we turned our focus to making machine learning models more efficient
+such that they run better on existing computer systems or trying to find ways to build computer
+systems that are more amenable to running machine learning models and applications.
+So that's where the whole idea of the code design of both the machine learning model
+and the computer hardware system came into play.
+So our first publication in the field was three years ago and ever since we continue
+to work in in this field.
+Great, great.
+And you recently had an opportunity to share some of what you're doing in the field at
+the efficient deep learning in computer vision workshop at the recent CVPR conference
+where you gave a keynote and working in this field and talking about issues like the
+efficiency of machine learning models, often questions about the edge versus cloud come
+up.
+Did your research focus on one or the other of these settings?
+Sure, actually both are really important.
+So thinking about where we are now, much of the machine learning applications actually
+do run in the cloud.
+So for both training, we train them in the cloud, much of the inference also happens in
+the cloud if you're trying to run a speech recognition, simple app on your phone or smart
+watch, if it's not connected to the network, it's not going to be able to accomplish its
+task because everything does happen in the cloud.
+On the other hand, our work tries to democratize access to machine learning as an application
+such that it's pushing both inference as well as training to edge devices.
+So this is where the idea of making machine learning models in particular neural networks
+more efficient and more amenable to be run on tiny devices where constraints are really
+important.
+So yeah, our focus is mostly on edge devices, although looking at the entire continuum
+from edge all the way to the cloud is just as important.
+So your keynote at the workshop is titled putting the machine back in machine learning,
+the case for hardware, ML model co-design.
+And it sounds like co-design is a key idea in your research.
+What it can know for me is that often we hold either one, the machine or the algorithm
+as fixed and try to optimize the other, you know, with the constraint of the thing that
+we hold as fixed.
+And what I'm guessing here or imagining is that you're treating both of these as things
+that we can kind of co-optimize together.
+Is that the general idea of your research?
+That's correct.
+And actually the co-design idea has been used for quite some time in embedded systems.
+For a long time, the idea that you want to customize a hardware that runs the embedded
+software has been at the forefront for the last 15 to 20 years in the field of embedded
+system design.
+So it's not a new concept.
+What's new is actually putting the focus on the machine in the machine learning domain.
+And machine has never left to be honest, the machine learning space, but we're just trying
+to put the focus back on the hardware because a lot of the focus that has been happening
+recently has been on the performance of machine learning applications, meaning accuracy or
+classification error, or things that actually tell us whether it does its job in the proper
+way.
+Putting things in a historical perspective, machine learning and in particular neural network
+research has been going on for quite some time, but it did not get at the level as we see
+today without the progress that we've seen in hardware design and everything we've seen
+from the single core to multi-core to GPU progress.
+So it's important to understand that the reason why machine learning applications have received
+so much attention and widespread usage is because of the hardware.
+But we're not going to be able to write that wave of dissemination without support from
+the hardware.
+So our focus is to put the machine specifics and machine hardware metrics into the design
+process for neural networks.
+And when you do that, you have one half of the problem you mentioned, right?
+When you think about code design, you have to add the other half of the problem.
+It's not just that the neural network has to be designed with a hardware in mind, but
+at the same time, we need to design the hardware with the application in mind in this particular
+case machine learning.
+So yes, code design is the end goal and we are, we are not quite there yet.
+There's quite a few researchers working in this field, but there are a few components
+that are needed before we get to true code design.
+And one is understanding what are the hardware metrics we need to look at?
+How do we expose them to the machine learning design process?
+And then how do we design neural network models that take that into account such that they
+fit the hardware that we might be able to have or we might be able to design for them?
+So it's actually a true cycle, iterative cycle of optimization.
+You say that we need to focus on hardware and putting the hardware back into the process.
+And maybe I'm asking the same question again, or maybe I'm just going to provide the
+answer, but my sense is that, you know, there has been a lot of focus on hardware in
+the fields, you know, clearly, you know, different types of accelerators.
+What you're saying here is we've focused on hardware for optimizing hardware for a specific
+class of problems.
+This is going to be an accelerator that works well at, you know, deep neural networks,
+as opposed to what I'm seeing in your research is a specific neural network architecture.
+We're going to kind of design the hardware for that, kind of design the neural network
+to work well with that hardware.
+Do all of this at the same time.
+And overall, we're going to end up with a system that, you know, performs better than
+hopefully the, you know, things that aren't designed, you know, so in such an integrated
+manner.
+Yes, I mean, that's exactly the point, right?
+So any or right, there has been a lot of hardware focus lately.
+Maybe it started a little bit, you know, with proxies, right?
+They weren't really hard on metrics.
+There were maybe flops, flop count, floating point operations.
+Maybe it was model size.
+Maybe it was some sort of proxy for latency.
+What we're trying to do is characterize or provide ways or methodologies to characterize neural
+networks from their latency, power, energy perspective on a given hardware.
+But at the same time, identify ways to build hardware that minimizes those metrics.
+If it makes sense, right?
+So the mentioning, you mentioning the talk I gave at the workshop at CVPR.
+So one piece that is required to make this code design process possible is the ability
+to characterize neural network architectures or perhaps components thereof in terms of
+their, the time it takes to process those things, the energy or power it takes and maybe
+come up with a joint metric that characterizes their energy efficiency or latency per correct
+inference if you want.
+In other words, come up with combined metrics that capture both hardware as well as accuracy
+in some sense.
+So providing that methodology for estimating power, energy and latency for these, it's
+actually a piece of software, right, that you write is one of the steps that allows us
+to identify the right configuration or architecture for the neural network because you can't optimize
+what you cannot model or characterize, right?
+And actually, it's easier.
+It's actually pretty easy to do that.
+We've done this for quite some time in the computer or hardware embedded system domain.
+It's much harder to have the same similar kind of model for accuracy.
+We can tell how accurate is a neural network until we actually train it.
+On the other hand, for a given architecture, we can easily tell what the power or latency
+will be for a given hardware platform once you characterize it, right?
+So it's a very low-hanging fruit that we should take advantage of.
+The idea there is expressed in some research that you've done called neural power.
+Is that the one and you're, you know, we've previously talked about, you know, characterizing
+neural networks in terms of, you know, things like depth and parameters and layers, and we
+talk about hardware in this totally different language, which is flops and power and things
+like that.
+And you're trying to kind of unify the way that we're able to talk about this.
+And you're doing it using a neural network.
+Is that right?
+Actually, we use machine learning for that.
+So we build models for latency and power that we fit using data that we collect from a
+lot of synthetically generating neural networks and constructs, right?
+Because we look at different types of convolutional layers, fully connected layers, pulling layers,
+things that you typically find in neural networks, deep neural networks.
+So we try to build a power and a latency model and, of course, also an energy model that
+captures all those components.
+And then in a composable fashion, you're able to say, once you've done this characterization
+and you fit the model once, you can tell just by looking at the configuration of the network,
+the latency and to end for an inference will be this much and the power consumption will
+be this much.
+You don't even have to run it, right?
+So you collect the data, you fit the model once, and then you use it over and over again.
+And the good thing about this is that you can use it in the optimization process when you
+do say architecture search.
+Architecture search is very time consuming.
+But the fact that you can characterize every single component or block of this architecture
+space in a zero cost of one kind of complexity, it's really appealing because it allows you
+to put it in this iterative optimization process.
+So that's where we took this expertise in characterizing hardware metrics and used it
+to identify neural architectures that satisfy hardware constraints.
+So this is the second part of the talk that I had that talked about neural architecture
+search using a single path approach.
+And inside that iterative optimization loop, we did have this kind of latency model.
+In that particular case, we were looking at the latency on a very specific hardware platform
+Pixel 1.
+And so is the idea that if you're applying neural architecture search without the metrics
+that you have available via neural power, you would have to run as long an expensive process
+and come up with a bunch of candidate models that after the fact you have to see if they
+satisfy your hardware constraints, but here you're able to integrate it in and in doing
+so it's kind of cut off some dead ends that your search process might need to run through.
+Yes, that's right.
+So you can prune the search process by removing candidates that do not meet maybe your latency
+constraints.
+You want to have each inference take less than a few tens of milliseconds, right?
+By having this characterization done once and reuse it over and over, you can prune the
+search process.
+You can also, the way we did it, we actually incorporated in our loss function a term that
+captures the cost in terms of latency.
+And by doing so, we're able to basically make the neural architecture search process hardware
+of aware.
+And there are other components to the approach that we've had because it relies on the concept
+of a super network that actually shares, it shares its weights across multiple different
+types of structures.
+But I mean, that's one component, but the reason why it's actually pretty powerful is because
+it identifies networks that satisfy these hardware constraints in this case latency while
+at the same time doing this in a very efficient fashion.
+So like you said, instead of identifying a bunch of candidates that satisfy accuracy,
+and then we check does it satisfy latency constraints, we're able to do this through just a single
+process.
+So it's more efficient.
+There's some property of the search space that tells you that if you are looking at
+a particular model and it doesn't meet your power constraints, some evolution of that,
+not to assume that you're using evolutionary models in here, won't then be better than
+the thing that you're looking at, like a convexity property or something like that.
+Is that an assumption or is that something that is just kind of demonstrably true about
+these search bases for some set of models?
+Yeah.
+Well, I think it's an excellent question.
+We just started to scratch the surface on that our particular approach is a differentiable
+search approach, meaning we cast the problem as a differentiable function and then you
+just use anything that works on that, like a typically stochastic gradient is and will
+make convexity assumptions, although they might not be, they might hold in reality, but
+it works pretty well in practice.
+And in our case, you're absolutely right, the efficiency of architecture search comes
+from two components.
+One is the search space.
+So what are the components that we actually allow to be the building blocks for our neural
+networks?
+So that's one.
+And the second is how do we do the search and you did allude to say evolutionary algorithms.
+There's also reinforcement learning that you can use.
+We use a differentiable approach in which all the choices that we make in terms of the
+architecture, although they are discrete choices, we perform a transformation that allows
+us to do a differentiable search on them.
+So apply optimization algorithms that typically are used on those kinds of objective functions.
+So the closest or the earliest work that is in the same kind of vein as us is darts,
+which does differentiable architecture search for neural networks.
+The difference for in our case is the search space.
+So the basic components that we consider is broader.
+But at the same time, the way we identify the different selections that take us to the
+final architecture is done such that we share much of the, for example, for a three by three
+five by five seven by seven convolutional kernel, we basically share all the weights.
+So the only thing we need to know for a five by five is that we use a three by three plus
+the outer layer that takes us to five by five.
+So in some sense, it's less for us to identify, you get, it puts more constraints on the
+search process, but it's more efficient in the kinds of things that you can't find out.
+So, and it is able, so our word that was published last at the ECML PKDD conference last September
+in Germany, and we extended it for for a journal paper this year.
+It allows us this more efficient search process allowed us to find a more accurate neural
+architecture than in the case where you would have more freedom to search.
+So I guess it's a fine balance between the exploitation and exploration.
+And we were able to find that somehow at the same time satisfying this hardware constraints
+in terms of latency.
+And interestingly, at the time when we did our comparisons, we were able to be better in
+terms of accuracy compared to the manuals.
+So to speak designs like mobile net V2, V3 that, I mean, their manual, their zero cost
+so to speak, but there was a lot of engineering time, a lot of hours spent by engineers behind
+those efforts.
+So I don't, I wouldn't want to call them zero time search costs, but, you know, their
+manual, single designs, and then, you know, we did even better in terms of the search
+cost and accuracy compared to other types of neural architecture approaches.
+So because of that, we were able to, because of the efficient search space and the way
+we searched, so the two components put together, we were able to push the search time to hours
+as opposed to days.
+So I think that's where the strength came in only a few epochs.
+We were able to find this kind of architecture.
+So those are the two strengths are one ability to characterize hardware metrics inside the
+optimization process as well as the second component, which is the more efficient search
+process overall.
+Is the resulting architecture that you are comparing to whatever your baseline is, the
+output of the single path network architecture search process, or do you also, you know, apply
+other processes to that like quantization or pruning or, you know, compression, other
+compression techniques?
+Sure.
+I mean, single path NASS does just that, the former.
+So whatever you said, it identifies the architecture, but of course, on top of that, you can perform
+other things like quantization, compression.
+There's an interesting question as to whether doing this equationally.
+So first, identifying the architecture and then performing compression and or quantization
+leads us to a better result rather than doing it together.
+I think there's a very interesting, there's some emerging work in that space.
+We're also looking at ways to identify how quantization or precision might play a role
+in this architecture search process.
+But to answer your question, you can do this.
+So once you identify a neural architecture, you can apply quantization.
+You can apply model compression or pruning, right?
+Those are techniques that exist, you know, going back to the presentation I had at the
+CFPR workshop, we did present some of the ideas that we had in that space, especially
+as they relate to quantization as well as to pruning, channel pruning.
+And so in the quantization space, the idea, I mean, there's been quite a bit of work, you
+know, ranging from binarized neural networks all the way to using limited precision, fixed
+point, limiting the number of bits for representation.
+Our idea was actually pretty simple, so that we published first on this in 2017 and then
+ever since we refined that further, we wanted to limit the number of bits representing
+weights to a fixed number.
+And it turned out that in practice, using just one or two bits is sufficient to get the
+best in terms of efficiency, but still not miss much in terms of accuracy.
+So the idea is that for each weight, we identify the, say, the combination of two powers of
+two that, when stochastically rounded, give you the best accuracy.
+So we have a few examples in the original paper where we show how using stochastic rounding
+actually on average will give you, you know, in theory, will give you the same accuracy
+as the original, unquantized neural network.
+So we call this light an N, so light weight neural networks.
+And light an NK uses K bits to represent the weights.
+We still maintain the activations in the original precision.
+And it turns out that you can get to up to two orders of magnitude, reduction in the
+either power, memory, storage, and still maintain the original accuracy.
+So this is pretty powerful.
+This was for Cypher 10 data set and then we extended it for ImageNet.
+Of course, the downside for using a quantized model is that to actually get these benefits
+you will need to build an accelerator that relies on replacing every multiply, accumulate,
+or MAC operation with these logic operators, operators that just do shifts and adds, right?
+And GPUs are not readily doing that.
+You could program CPUs to do that, but might take some effort.
+So I think the, what is out there right now is that if you're going to use this type of
+quantization, you will need to build a specialized piece of hardware to do it.
+So there will be true accelerators, but I think the results are pretty encouraging for
+us to continue to do so because it does achieve quite a bit of energy and hardware efficiency
+in general for not much of a loss in accuracy.
+From the other perspective, you could also do pruning, right?
+So you could consider how you want to prune the network.
+You don't want to lose much in the accuracy, but you want to simplify the model even further.
+So our work in that space, and actually that work was just published in the conference
+in CVPR as an oral presentation.
+The idea is, so the name we used is ledger.
+Basically is using a layer-based global ranking to identify where do we want to do pruning?
+So we do pruning based on importance.
+So we don't want to prune uniformly across the board.
+We want to prune only where accuracy is not going to suffer the most.
+And by doing so, you're able to achieve additional efficiency on the model site.
+And of course, that translates into hardware efficiency as well.
+So was the name of that paper ledger and intentional head fake to get people excited about
+some Bitcoin quantization approach?
+Hopefully.
+I think we need to ask my student why he chose that.
+I like the name.
+Going back to NeuroPower and this model for the metrics.
+You touched on the data source, but can you elaborate on that a little bit?
+Did you run a bunch of simulations?
+Did you pull power data off of actual hardware running some suite of models?
+That sounds very expensive and hard.
+How did you collect data to fit a model?
+Yeah.
+So that's an excellent question.
+We actually did a lot of profiling.
+So we started with one GPU platform and that we added more GPU platforms.
+And like I said, we as machine learning to build the power and latency models.
+So we needed a lot of data to train those models.
+So we relied on profiling on several GPU platforms.
+We profiled power.
+We profile latency.
+We profiled also memory usage, although we did not use it explicitly, except for a component
+in one of our models.
+And also at the same time, we had to profile a lot of these synthetic neural networks that
+exhibited different types of combinations of convolutional and fully connected and pulling
+layers.
+So we took a lot of effort.
+That's true.
+The idea though is if you are using any of those platforms, you can use data that we
+collected.
+But of course, if you want to use your own platform, you can use our methodology.
+So our code is available.
+You can use your own platform, perform the same type of profiling and then fit your own
+power and if latency model.
+So it's a methodology that allows us and others allows everyone to apply on different types
+of platforms.
+But it is data intensive.
+As you collect the data, though, it's just a one time kind of thing.
+Great.
+And you did that for, is it a handful of GPU architectures or, I guess, how specific
+is a particular model that you develop to a hardware platform?
+Is it kind of the architecture family or is it a specific model or generation of a platform?
+How what is it generalized as the hardware evolves?
+Right.
+I think that's an excellent question.
+So a methodology is as good as its potential use, right?
+So and I always get this question.
+So okay, neural power is good, but if I can't use it for my own platform, if I can't
+generalize to other types of computer hardware platforms that don't even exist, how is this
+going to be used or how is it going to be usable?
+And the answer is, I think this is where the co-design comes into the picture, right?
+So we've done, we've built this methodology on an existing platform.
+However, if you are in the business of building specialized computer hardware for machine
+learning applications, you have an idea, you have a blank canvas that you can start
+from, maybe not as blank, maybe you start from some components that you want to use.
+So the idea is that you can decide how you put together this architecture.
+And there are a lot of interesting ways to characterize a platform in terms of latency
+and power before it's even built, right?
+This is what we've done for many years before, I mean, we haven't started, you know, we
+don't build computer systems by building one and then measuring power in latency.
+We know what those numbers will be at design time, right?
+So the same approach can be used in this case.
+I really think computer hardware designers, as well as machine learning model developers
+have to work together because that's where the strength comes from and that's where the
+generalizability comes from, you're going to be able to get the expertise from both
+and come up with ways to do the actual true co-design.
+So it's a hard problem because the search space will be, you know, the cross product of
+the two, but we've done a lot of progress on the computer hardware side, right?
+So a lot of them, especially on the edge device embedded systems, this is automated quite
+a bit.
+So we can use all the expertise that exists there and then incorporate some of those things
+in the machine learning design process and the co-design as well.
+So when you combine all these things, neuropath, single path, architecture search, the light
+neural networks, can you talk a little bit about the results you've seen, you know,
+what were the baselines, what did you, were you able to demonstrate, et cetera?
+Right.
+So in terms of, I mean, our models once built the power and latency models once built,
+they are just zero cost or constant cost, you know, you just plug in the parameters where
+the architecture configuration and you get the numbers, right?
+So that's, you know, you do maybe a lot of work in the beginning, but then it, it amortizes
+across multiple uses.
+The neural architecture search approach basically reduced the search time by three orders of
+money to them more.
+So we took it from days all the way to ours.
+And there are many reasons why that was possible.
+One was the way the search space was defined.
+The second was how we did the search and of course the fact that we shared these structures,
+parameters across different configurations helped quite a bit as well.
+So three orders of magnitude in the search, meaning training time.
+And then in the inference efficiency, if you look at the impact of quantization or pruning,
+you can get maybe two orders of magnitude efficiency, especially from quantization.
+So that's quite significant.
+We're actually looking now at custom hardware that, you know, post synthesis, post layout,
+how much of that will translate into the actual hardware.
+There's still going to be at least 40 to 50% savings that still translates because the
+tourism I need to that I mentioned looks only at the computation.
+There's also quite a bit in terms of storage that we need to capture.
+So I think there's quite a lot of good news.
+So overall, on the training search side, several orders of magnitude on the inference side,
+a lot of efficiency from quantization.
+On the training search side, do you look at like ablations, you mentioned several different
+characteristics or several different properties that go into producing your, you know, several
+order of magnitude, advantages and in train time.
+Is that all or nothing?
+Is there something magical about this combination?
+Or, you know, have you looked at the individual tricks that you've tried to apply and, you
+know, there's an individual, one of those gets you 80% of the way there.
+How did the different techniques come together?
+Right.
+So I actually think it's the combination thereof because there are other differentiable
+neural architecture search approaches like Dart's inspired.
+Once you do that explicit representation, unless you do this super network kind of approach,
+you're not going to get the savings.
+But at the same time, the ability to consider this specific building blocks allowed us to
+perform this comparison with mobile net V2 and V3, right?
+So I guess you could design your search space differently to make other types of comparisons.
+The results might be different.
+But I think the fact that we limit the search space and we also share these parameters across
+configurations made it for the fast search time.
+And so what is ahead in this general line of research for you and your research group?
+Yes.
+So we are actually, we have not completed the co-design dream yet, right?
+So because we do have the power, latency characterization, we have the, you know, neural network search.
+We put in the hardware metrics, but do we have a push button solution that we say, okay,
+my task is this robotic vision application or this ARVR application, and these are my constraints
+in hardware.
+And these are my specifications for accuracy for the machine learning model.
+Just build for me something that does that.
+We did not get there yet.
+What I think is needed right now is to actually, even your hardware constraints are relatively
+coarse, right, the power latency, things like that on a typical, an actual chip CPU, for
+example, you can get tons of metrics and capabilities from the chip itself about, you know, that
+may impact the way your search operates.
+That's absolutely right.
+And, you know, everything we've done looks at one machine learning model running on this
+piece of hardware, and that's never the case.
+There are many more things, even more machine learning tasks running.
+What maybe one does, speech recognition, one does image recognition, one does object detection.
+Maybe there's some sort of multimodal fusion that happens.
+That's a huge space that we're looking at, right?
+So, I think the, I guess the goal would be to, the ability to say, okay, these are, this
+is what I would like to run, and it's not just one machine learning model.
+Maybe it's multiple ones.
+Maybe it's multiple modalities.
+Maybe it's different tasks, maybe it's the same task with different inputs.
+How do I run this most efficiently for this particular application?
+And by application, I mean something that is not a platform is, like I said, it could
+be robotic or an AR, VR application.
+So you have the ability to define or design what the platform will be, or will look like.
+So Truco design will happen when we're able to close the loop, right?
+So we're able to say, okay, this is an initial version of the hardware I think might work.
+Based on this, I think your network or networks should look like this.
+However, when I do it again, it looks like the hardware needs to be tweaked.
+So it's going to be an iterative continuous process until you get to the right configuration.
+The question then stands, well, I'm going to build this.
+But what if I want to run an additional task on this piece of hardware?
+Will I be able to do so?
+So one is the ability to reach this code design.
+But the second one is programmability and flexibility.
+And that's where, you know, there's a balance that you need to, I mean, do you want your
+system to be able to run these new applications, or maybe it's the same task, but the data
+set is different, right?
+You need to retrain it.
+Does that affect the way your hardware looks like?
+So I think these are all interesting questions that we're still looking at.
+And it sounds like this vein of work is primarily operating under kind of traditional
+GPU-like assumptions, and there are all manner of other proposed directions that one might
+go with hardware, you know, from kind of graph-native implementations and other things.
+Do you think these ideas apply similarly to some of those other types of constructs?
+Yes.
+I think that's a nice one question.
+I think we're pretty much, I mean, if you look at the classic machine learning research
+papers, they do run on typical GPU platforms, right?
+This is where much of the training happens.
+This is where inference, I mean, maybe inference can be done on, or they provide results on
+other types of platforms.
+But I really think, so one is, okay, what are the other options for us to go to in terms
+of the hardware that we're looking at?
+So that's where accelerators come into the picture.
+And there's quite a bit of work on that end.
+On the other hand, what is beyond neural networks?
+I mean, neural networks, I think, are, I mean, it's just deep learning has become, I don't
+know that it's because it's on more understandable, I don't think it's that.
+I think it's because it offers quite a rich field of questions that are still unanswered.
+But there's quite a bit of other types of machine learning models or modalities that
+we have to look at, right?
+Is there any computational impact?
+Of course there is on those other ones.
+Is there a role that hardware, computer hardware designers or developers should play in
+that space?
+Of course they do.
+But I think right now, much of the, if you look at 90% of the work, I think it's just
+deep learning, especially vision and, you know, deep neural networks, neural architectures,
+research, things that are really well-defined and quite a bit of work happens there.
+I believe there's still quite a bit of unsolved and interesting questions that have yet to
+be answered in other types of machine learning that perhaps have not received that much attention
+because they're not as amenable to be run on GPUs, right?
+Maybe this is why, I mean, there's a chicken and egg.
+Those made deep learning, you know, on the visible end of our attention, but all the others
+are probably not receiving the attention because they don't really run well on GPUs which
+all of us have access to.
+So I think we can elevate those kinds of machine learning applications by looking at ways
+to make them more efficient and increase the size and their applicability and dissemination.
+So I think there's quite a bit of impetus in this field.
+It's really hard to say, I'm not going to look in the crystal ball and say, okay, in ten
+years, everything on the DNN or deep learning side will be solved and then we're going to
+look at, I don't know, probabilistic graphical models or something.
+I don't know what that might be.
+I was going to ask, right?
+Yes.
+Right.
+Well, my students asked me all the time, should I still work in this because I don't
+know.
+When I graduate, we'll also be able to find a job.
+Definitely.
+I mean, this is definitely going to be a hot space for high tech.
+Though I think this conversation is standing out as one of a couple in the past, a couple
+of weeks where there was this undercurrent or suggestion of us being a peak deep learning
+which has not really been much of a thing in my conversations.
+It's a little bit, you know, that's a lot to extrapolate off of two comments.
+Sure.
+But interesting that you're saying that and so probabilistic graphical models is one
+of the things that you think about as a, if not a contender, a co-existing thing, are
+there others that come to mind as, you know, you're worth?
+I mean, yeah, well, closer to neural networks, I mean, you have RNNs that can benefit from
+much of the things that we've talked about.
+But I think makes DNNs and actually RNNs as well or anything that has a deep learning
+component in it like, you know, when you look at deep reinforcement learning, it does rely
+on using or encoded the state action using deep neural networks.
+So I think the appeal of that is that it's a very well structured way to look at a problem,
+right?
+Because you understand or we think we understand where the components are, we don't
+really understand how they work.
+But we understand what the components do.
+So I think it's, people are still going to stain that space quite a bit.
+What I think needs to happen for others, and I just mentioned probabilistic graphical models
+because it's really different, right?
+It's not as structured.
+And you know, when people think of AI, there's many other things that, you know, are not
+quantizable as how many MAC operations can you do in parallel or efficiently, right?
+So there's more on the decision making side.
+And that's what makes it a true AI, right?
+So I think the gap between where we are now and where we could be is quite, quite wide.
+I think to get to see more interesting things happen in other types of machine learning applications
+is a need for those things to happen more efficiently.
+And maybe that need is not there yet because we can still perform those tasks using
+existing approaches.
+Another way to see an impetus in that space would be to have hardware that supports it.
+But maybe not because of them, because of some other type of application that is really
+requiring that.
+So I think machine learning was the lucky winner of the GPU revolution.
+GPUs were built in mind with, you know, parallelism.
+And we switched from the single core to multi-core, but then multi-core were not enough and
+then GPU came into the picture.
+So can we envision a trajectory like this for other machine learning applications absolutely?
+I just don't know.
+I mean, there's many other things that people are looking at from the hardware side.
+I know there's quite a bit of interest in removing the memory wall bottleneck, which has
+been there for quite a bit of time.
+But to be able to do that, to do processing in memory, or to do other kinds of advances
+in that field, you need help from the technology.
+So I think maybe the progress in that space might be slowed down because we don't really
+have a replacement for our current technology, although it's still working quite fine so
+far.
+So talking about exponential trends, I mean, Moore's law was supposed to double performance,
+you name it, transistor density, pick your favorite every couple of years or every year
+and a half.
+And it stopped, but it doesn't mean we stopped in making things more, you know, better and
+better and more efficient.
+So there's always something that we can do, and I'm really hopeful that's going to be
+the case in machine learning as well.
+Awesome.
+Awesome.
+Well, Deanna, thanks so much for taking the time to chat with us.
+It's great to learn a bit about what you're up to.
+Thank you.
+Thank you for having me.
+All right, everyone, that's our show for today.
+For more information on today's show, visit twomolai.com slash shows.
+As always, thanks so much for listening and catch you next time.

@@ -1,0 +1,2117 @@
+WEBVTT
+
+00:00.000 --> 00:16.320
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+
+00:16.320 --> 00:21.480
+people, doing interesting things in machine learning and artificial intelligence.
+
+00:21.480 --> 00:32.040
+I'm your host Sam Charrington.
+
+00:32.040 --> 00:37.240
+Today we're joined by Tim Yurka, head of Feed AI at LinkedIn.
+
+00:37.240 --> 00:42.040
+As you can imagine, Feed AI is responsible for curating all the content you see daily
+
+00:42.040 --> 00:43.960
+on the LinkedIn site.
+
+00:43.960 --> 00:48.080
+What's less apparent though to those that don't work on this type of product is the wide
+
+00:48.080 --> 00:53.160
+variety of opposing factors that need to be considered in organizing and optimizing the
+
+00:53.160 --> 00:54.640
+feed.
+
+00:54.640 --> 00:59.760
+As you learn in our conversation, this challenge is what Tim calls the holistic optimization
+
+00:59.760 --> 01:04.280
+of the feed and we discuss some of the really interesting technical and business issues
+
+01:04.280 --> 01:07.120
+associated with trying to do this.
+
+01:07.120 --> 01:11.280
+In particular, we talk through some of the specific techniques used at LinkedIn like multi-arm
+
+01:11.280 --> 01:15.600
+bandits and content embeddings and we also jump into a really interesting discussion
+
+01:15.600 --> 01:19.680
+about how to organize for machine learning at scale.
+
+01:19.680 --> 01:24.240
+Before we get going, I'd like to send a huge thanks to LinkedIn for sponsoring today's
+
+01:24.240 --> 01:25.240
+show.
+
+01:25.240 --> 01:29.840
+LinkedIn Engineering solves complex challenges at scale to create economic opportunity for
+
+01:29.840 --> 01:31.880
+every member of the global workforce.
+
+01:31.880 --> 01:37.640
+AI and ML are integral aspects of almost every product the company builds for its members
+
+01:37.640 --> 01:39.680
+and customers.
+
+01:39.680 --> 01:44.120
+LinkedIn's highly structured data set gives their data scientists and researchers the ability
+
+01:44.120 --> 01:48.480
+to conduct applied research to improve member experiences.
+
+01:48.480 --> 01:55.200
+To learn more about the work of LinkedIn Engineering, visit engineering.linkden.com slash blog.
+
+01:55.200 --> 01:57.960
+And now on to the show.
+
+01:57.960 --> 02:00.360
+All right, everyone.
+
+02:00.360 --> 02:04.400
+I am here with Tim Yurka, head of feed AI at LinkedIn.
+
+02:04.400 --> 02:06.760
+Tim, welcome to this week in machine learning and AI.
+
+02:06.760 --> 02:07.760
+Thanks for having me.
+
+02:07.760 --> 02:11.000
+I've listened to a lot of your episodes, so it's great to be here on the show.
+
+02:11.000 --> 02:12.000
+Fantastic.
+
+02:12.000 --> 02:17.440
+I'm really looking forward to diving into some of the ways that you use AI to optimize
+
+02:17.440 --> 02:18.640
+the LinkedIn feed.
+
+02:18.640 --> 02:23.960
+But before we do that, how did you get started working in AI?
+
+02:23.960 --> 02:27.160
+Via a pretty circuitous route, I think.
+
+02:27.160 --> 02:31.040
+So that's less surprising than you may think, maybe.
+
+02:31.040 --> 02:36.600
+So my undergraduate, actually, I started in political science and I could really not
+
+02:36.600 --> 02:40.120
+decide between political science and computer science.
+
+02:40.120 --> 02:46.440
+And I was very fortunate to stumble upon a research assistantship halfway through undergrad
+
+02:46.440 --> 02:52.040
+with a professor at Davis, Amber Boydston, who was doing a lot of computational social
+
+02:52.040 --> 02:54.040
+science.
+
+02:54.040 --> 02:57.440
+And to that credit, political scientists have basically been aggregating news for the
+
+02:57.440 --> 03:02.560
+last several decades and annotating it manually with research assistants.
+
+03:02.560 --> 03:08.280
+So they had these massive code books, massive quantities of data that were all manually annotated.
+
+03:08.280 --> 03:10.520
+You know, this is about the Warner Rack.
+
+03:10.520 --> 03:14.240
+This is about like the economy, on and on and on.
+
+03:14.240 --> 03:16.920
+And it seems like a perfect solution for machine learning, right?
+
+03:16.920 --> 03:20.360
+This is like you have the data there.
+
+03:20.360 --> 03:21.840
+And so we started working together.
+
+03:21.840 --> 03:29.840
+We wrote some tools in R to start doing text classification and basically classifying millions
+
+03:29.840 --> 03:34.320
+of news articles over the course of the last 60 years into all these categories.
+
+03:34.320 --> 03:40.080
+But the goal being, can we start looking at how the American electorates issue priorities
+
+03:40.080 --> 03:41.560
+have changed over time?
+
+03:41.560 --> 03:44.960
+So this is kind of like a dynamic trend over time, you know, what do people care about?
+
+03:44.960 --> 03:48.240
+And how does the media influence what they care about in American politics?
+
+03:48.240 --> 03:52.520
+So it's a really interesting intersection of, I think, computational social science or political
+
+03:52.520 --> 03:57.480
+science and computer science that really turned me on to machine learning and AI.
+
+03:57.480 --> 04:02.280
+And I actually continued, I started doing my PhD in political science also with Amber at
+
+04:02.280 --> 04:04.000
+UC Davis.
+
+04:04.000 --> 04:09.000
+And that kind of continued for a few years until some personal family circumstances caused
+
+04:09.000 --> 04:10.840
+me to leave the program.
+
+04:10.840 --> 04:13.360
+And I had to find a job to pay the bills.
+
+04:13.360 --> 04:17.760
+And I stumbled across a startup called Pulse, which was an RSS aggregator.
+
+04:17.760 --> 04:21.960
+And it was, it was really just a perfect fit.
+
+04:21.960 --> 04:26.920
+When Aakshai, the CEO of Pulse, talked to me and asked me to join the, as their first
+
+04:26.920 --> 04:29.600
+machine learning engineer, he was like, we're an RSS aggregator.
+
+04:29.600 --> 04:33.040
+We're aggregating millions of articles, like every single day.
+
+04:33.040 --> 04:37.360
+And we want you to basically classify these into categories and start personalizing people's
+
+04:37.360 --> 04:39.160
+news reading experience.
+
+04:39.160 --> 04:42.920
+And so it was like the perfect fit of what I had been doing already in graduate school
+
+04:42.920 --> 04:44.640
+within the industry.
+
+04:44.640 --> 04:49.120
+So while at Pulse, we built up the first recommendation system.
+
+04:49.120 --> 04:50.720
+And I did not spend much time there.
+
+04:50.720 --> 04:53.560
+Within four months, we had been acquired by LinkedIn.
+
+04:53.560 --> 04:55.920
+And that's how I entered LinkedIn.
+
+04:55.920 --> 05:01.560
+So that's quite secure to sort out to actually make my way into LinkedIn and into AI.
+
+05:01.560 --> 05:04.920
+Once here, we started redesigning the Pulse app.
+
+05:04.920 --> 05:10.240
+And the really cool thing I think about LinkedIn data was the fact that we could use the
+
+05:10.240 --> 05:14.160
+news content that we were ingesting and the economic graph data.
+
+05:14.160 --> 05:15.840
+And we could start generating insights.
+
+05:15.840 --> 05:18.640
+And so these insights, you actually see them today in the LinkedIn feed because they
+
+05:18.640 --> 05:21.760
+eventually made their way out of the Pulse app into the main LinkedIn feed.
+
+05:21.760 --> 05:24.600
+But you can say, hey, here's stuff that's trending in your industry.
+
+05:24.600 --> 05:27.760
+These are, these are news insights you will not get on other social networks because we
+
+05:27.760 --> 05:32.520
+have that kind of standardized data about where are people working? What are their skills?
+
+05:32.520 --> 05:38.040
+So we introduced a bunch of these kind of what we call intelligent insights into the feed,
+
+05:38.040 --> 05:40.120
+trending in your industry, trending at your company.
+
+05:40.120 --> 05:44.280
+Like what are people reading in aggregate and what might you be missing?
+
+05:44.280 --> 05:46.880
+So that's how I started working on the LinkedIn feed.
+
+05:46.880 --> 05:54.120
+Yeah, I think that most folks are probably familiar with the feed from a user perspective.
+
+05:54.120 --> 05:59.160
+One of the things that you and I were chatting about before we got started was this kind
+
+05:59.160 --> 06:04.400
+of broader challenge of what you called holistic optimization of the feed, which seems
+
+06:04.400 --> 06:08.680
+like an interesting place to kind of jump in talking about some of the challenges that
+
+06:08.680 --> 06:09.680
+you're working with.
+
+06:09.680 --> 06:12.720
+When you say holistic optimization of the feed, what does that mean?
+
+06:12.720 --> 06:18.200
+Yeah, so I use the term holistic because whenever I go to a conference or like I'm presenting
+
+06:18.200 --> 06:23.880
+our work, a lot of the people that are in this space, like building recommender systems,
+
+06:23.880 --> 06:27.720
+are still thinking about the like nation stages of their problem.
+
+06:27.720 --> 06:32.880
+And so they're saying like, hey, let's like sort by CTR or some like a simple metric,
+
+06:32.880 --> 06:33.880
+right?
+
+06:33.880 --> 06:36.920
+Like let's just show the most likely stuff that somebody's got to click on at the top
+
+06:36.920 --> 06:42.320
+of whatever they're building at the feed, like an ad, whatever it might be.
+
+06:42.320 --> 06:48.080
+And I think the feed definitely started there, but we started identifying a lot of different
+
+06:48.080 --> 06:49.080
+actors.
+
+06:49.080 --> 06:52.280
+There's so many different reasons that people come to the feed, right?
+
+06:52.280 --> 06:54.320
+You may be coming to look for a job.
+
+06:54.320 --> 06:57.920
+You may be coming to learn a LinkedIn learning skill.
+
+06:57.920 --> 07:01.680
+You may be coming to read content or build an audience.
+
+07:01.680 --> 07:06.360
+And all these all these actors in the feed have a different different intent.
+
+07:06.360 --> 07:10.840
+And when we talk about holistic optimization, it's really understanding those individual
+
+07:10.840 --> 07:13.240
+intents and making them work together.
+
+07:13.240 --> 07:17.520
+So in addition to, for example, sorting the feed for engagement and showing the most
+
+07:17.520 --> 07:21.800
+engaging content at the top, we may also want to say, you know, what incentivizes a creator
+
+07:21.800 --> 07:22.800
+on LinkedIn?
+
+07:22.800 --> 07:23.800
+Why are they visiting?
+
+07:23.800 --> 07:28.040
+And they're likely visiting to connect to an active community, to connect to an audience
+
+07:28.040 --> 07:30.000
+and build their brand.
+
+07:30.000 --> 07:35.080
+And if they post, like if you came to LinkedIn right now and you shared a link and explained
+
+07:35.080 --> 07:40.720
+the latest twimmel podcast episode topic and nobody engaged with that, that would not feel
+
+07:40.720 --> 07:41.720
+great.
+
+07:41.720 --> 07:44.680
+And it probably wouldn't be a really good incentive for you to come back to LinkedIn.
+
+07:44.680 --> 07:49.360
+And so we want to incentivize, we don't necessarily want to just incentivize the hyperviral
+
+07:49.360 --> 07:53.200
+actors on LinkedIn that get, you know, a lot, they have a lot of influence already.
+
+07:53.200 --> 07:57.280
+We also want to incentivize new creators on the platform and encourage them to come back
+
+07:57.280 --> 08:00.280
+again and again.
+
+08:00.280 --> 08:04.600
+When I say holistic optimization, these things are sometimes in contradiction with each
+
+08:04.600 --> 08:09.320
+other, optimizing for engagement and optimizing for like creator side value, sometimes work
+
+08:09.320 --> 08:11.880
+in contrast to each other.
+
+08:11.880 --> 08:16.880
+Because sometimes you will sacrifice some engagement to give a creator a bit more attention.
+
+08:16.880 --> 08:20.640
+With the intent that longer term, they will want to come back and connect with that audience
+
+08:20.640 --> 08:22.760
+that they've discovered on LinkedIn.
+
+08:22.760 --> 08:26.080
+And so these kinds of problems, there's several of them within the LinkedIn feed.
+
+08:26.080 --> 08:30.600
+The creator kind of consumer side is one form of holistic optimization.
+
+08:30.600 --> 08:35.320
+I think the other one is what happens after you have engaged with your feed or created
+
+08:35.320 --> 08:37.360
+a conversation in the feed.
+
+08:37.360 --> 08:40.120
+So somebody created something you may have left a comment.
+
+08:40.120 --> 08:41.800
+How did that impact your downstream network?
+
+08:41.800 --> 08:46.800
+Were you able to impact your second and third degree network to participate in that conversation?
+
+08:46.800 --> 08:52.400
+That is also like part of this holistic optimization equation.
+
+08:52.400 --> 08:57.200
+And then there's some more traditional kind of trade offs when you consider holistic optimization
+
+08:57.200 --> 09:00.840
+when it comes to things like revenue and engagement.
+
+09:00.840 --> 09:06.760
+So this is a pretty well known problem as ads are not as engaging as organic content.
+
+09:06.760 --> 09:11.160
+And if you completely optimize for revenue in the short term, you might actually be sacrificing
+
+09:11.160 --> 09:16.200
+like folks who want to come back long term if they just saw more organic engaging content.
+
+09:16.200 --> 09:20.680
+And that has much more value over the lifetime of a member using LinkedIn.
+
+09:20.680 --> 09:25.040
+And so you really can't be short-sighted when doing kind of a holistic optimization.
+
+09:25.040 --> 09:27.520
+You can't just focus on short-term revenue or short-term engagement.
+
+09:27.520 --> 09:31.920
+You really need to create these retention follows that people have built an active community.
+
+09:31.920 --> 09:36.640
+They want to come back and get insights from that community on LinkedIn and not just exploit
+
+09:36.640 --> 09:38.480
+kind of a short-term optimization.
+
+09:38.480 --> 09:42.920
+When I hear what you're saying, I think of some optimization function with a bunch of
+
+09:42.920 --> 09:44.720
+different components.
+
+09:44.720 --> 09:49.480
+But then I think of a whole different set of challenges around really understanding
+
+09:49.480 --> 09:55.240
+what those components should be and thinking about how to weight them more.
+
+09:55.240 --> 09:59.640
+Things that are closer to the business side and the vision of what you're trying to create
+
+09:59.640 --> 10:01.040
+for the service.
+
+10:01.040 --> 10:06.440
+How do you apportion or think about the relative challenge of those different aspects?
+
+10:06.440 --> 10:09.840
+It's exactly the kinds of problems that we've had to tackle over the last three years.
+
+10:09.840 --> 10:12.040
+And I think there's two solutions.
+
+10:12.040 --> 10:16.120
+There is like a technical solution, there is also kind of a product or business-based
+
+10:16.120 --> 10:19.520
+solution, as you mentioned, which is if you have strong opinions about how your business
+
+10:19.520 --> 10:23.880
+should operate, you can actually give the individual components of optimizing these different
+
+10:23.880 --> 10:28.240
+parts of the ecosystem and allow somebody who has a really good product intuition understands
+
+10:28.240 --> 10:30.280
+the business really well to weight them.
+
+10:30.280 --> 10:34.840
+That's like the simplest non-technical way to handle this.
+
+10:34.840 --> 10:42.000
+But when you actually get into the technical solutions, there are a lot of interesting
+
+10:42.000 --> 10:46.440
+techniques that can be used to balance between these different objectives.
+
+10:46.440 --> 10:50.200
+We've started with things like multi-arm bandits to start tuning between these different
+
+10:50.200 --> 10:54.680
+objectives and finding kind of a sweet spot by exploring a bunch of different arms and
+
+10:54.680 --> 10:57.280
+seeing like, you know, which one is most promising.
+
+10:57.280 --> 11:01.240
+And we still have to have some human intervention in terms of which one we finally choose.
+
+11:01.240 --> 11:04.840
+But it helps us understand the trade-off space.
+
+11:04.840 --> 11:08.240
+And that starts getting a bit more into the technical space.
+
+11:08.240 --> 11:13.280
+I think if you go even farther and it's somewhere linked and has not gotten yet, but you
+
+11:13.280 --> 11:18.400
+can start using neural nets to understand all the different players in the ecosystem and
+
+11:18.400 --> 11:22.040
+understand how to balance between those different incentives.
+
+11:22.040 --> 11:26.120
+And that's something that we're starting to look at in terms of reinforcement learning
+
+11:26.120 --> 11:28.600
+right now to solve this kind of problem of how do you balance between all these different
+
+11:28.600 --> 11:29.600
+objectives.
+
+11:29.600 --> 11:35.800
+And the multi-arm bandits side, when you're applying that kind of approach, how are you kind
+
+11:35.800 --> 11:38.120
+of structuring that problem?
+
+11:38.120 --> 11:43.480
+So it's really like, we take the traditional example of like revenue engagement trade-off,
+
+11:43.480 --> 11:45.080
+which we talked about earlier.
+
+11:45.080 --> 11:50.640
+I think there's a strong opinion that engagement is the best way to long-term bring a member
+
+11:50.640 --> 11:52.280
+back to LinkedIn, right?
+
+11:52.280 --> 11:57.160
+And so in our case, in the InfiDiS case, we're really focused on can we continue to grow
+
+11:57.160 --> 12:02.160
+the organic and kind of engagement ecosystem while keeping revenue healthy?
+
+12:02.160 --> 12:06.280
+And so you set some constraints to your multi-arm bandit to explore a space by which it's
+
+12:06.280 --> 12:11.760
+either keeping revenue flat or slightly positive while trying to maximize engagement, both
+
+12:11.760 --> 12:14.200
+short-term and long-term engagement.
+
+12:14.200 --> 12:16.160
+And so it's actually kind of a constrained problem.
+
+12:16.160 --> 12:21.680
+So you're not fully letting it go off and make a decision for you, but we're specifically
+
+12:21.680 --> 12:27.760
+applying these techniques in an individual kind of trade-off problem within the ecosystem.
+
+12:27.760 --> 12:32.080
+So we're not yet trading off between like three or four objectives with one system, right?
+
+12:32.080 --> 12:35.920
+We're making trade-offs between these pairwise objectives.
+
+12:35.920 --> 12:40.160
+So then how do you then map that to the three or four different?
+
+12:40.160 --> 12:46.160
+Is it a hierarchical type of approach where you're using the multi-arm bandit to kind of
+
+12:46.160 --> 12:52.360
+define the trade-off between engagement and revenue and then, you know, for a particular
+
+12:52.360 --> 12:58.240
+kind of value of engagement, you then have other systems or, you know, kind of hierarchically
+
+12:58.240 --> 13:04.320
+apply multi-arm bandit or, you know, some multiple components to an objective function,
+
+13:04.320 --> 13:10.280
+like determine how you trade off the underlying things that contribute to engagement or...
+
+13:10.280 --> 13:11.880
+So we're thinking about the...
+
+13:11.880 --> 13:12.880
+You are always facing the right way.
+
+13:12.880 --> 13:14.760
+You're thinking about it exactly in the right way.
+
+13:14.760 --> 13:20.560
+And it comes down to, you know, we have to set constraints that are informed by this
+
+13:20.560 --> 13:24.640
+kind of business and product opinion to the problem that's being solved by the multi-arm
+
+13:24.640 --> 13:25.640
+bandit solution, right?
+
+13:25.640 --> 13:31.080
+So we may say, let's keep revenue like flat and let's like focus a bit more on engagement.
+
+13:31.080 --> 13:32.800
+And then there's the creator side of the equation.
+
+13:32.800 --> 13:38.400
+And we'll say, we actually want to, up to some limit, we want to incentivize creators.
+
+13:38.400 --> 13:44.880
+So we give the system a kind of budget to explore solutions by which it can incentivize creators
+
+13:44.880 --> 13:48.280
+and still move engagement forward.
+
+13:48.280 --> 13:51.880
+And similarly, when we look at downstream, there's like the same kind of constraint is put
+
+13:51.880 --> 13:57.360
+in place, which is like, can you move downstream engagement without affecting a viewer's engagement
+
+13:57.360 --> 13:58.680
+within a given session?
+
+13:58.680 --> 14:03.800
+So can you still keep them engaged with their feed, but like lengthen their impact down
+
+14:03.800 --> 14:07.200
+the chain of like second and third degree connections?
+
+14:07.200 --> 14:11.000
+So it's not a purely kind of unsupervised problem here.
+
+14:11.000 --> 14:16.960
+We are definitely introducing some product thinking and opinions as to like what the constraints
+
+14:16.960 --> 14:21.720
+should be and letting the system explore solutions there, which is, that's, the exploration
+
+14:21.720 --> 14:25.680
+part is really what I think humans are not good at.
+
+14:25.680 --> 14:30.240
+Like reasoning about the various trade-offs once you've put some constraints in place.
+
+14:30.240 --> 14:34.600
+And so that's where I think these kind of techniques are super helpful in finding that balance
+
+14:34.600 --> 14:40.240
+to how do we holistically optimize across all these different objectives with some opinions
+
+14:40.240 --> 14:42.480
+on what the constraint should be in that ecosystem.
+
+14:42.480 --> 14:50.160
+And so there's a big part of making this actually usable relate to the kind of interface
+
+14:50.160 --> 14:56.920
+between the systems and the folks that are responsible for kind of managing this trade-off
+
+14:56.920 --> 14:59.680
+and the objectives and kind of what does that look like?
+
+14:59.680 --> 15:06.240
+Yeah, so I mean there's a very kind of tight coupling between the AI team, the infrastructure
+
+15:06.240 --> 15:11.400
+teams, the product teams that build all this, our entire feed product team is very familiar
+
+15:11.400 --> 15:16.520
+with AI techniques and how they think about the role AI plays in the products and how
+
+15:16.520 --> 15:18.920
+to trade off between different objectives.
+
+15:18.920 --> 15:23.720
+I think we don't have to change the balance very frequently, right?
+
+15:23.720 --> 15:28.040
+We set forth a strategy in terms of what we want the ecosystem to look like and we really
+
+15:28.040 --> 15:31.600
+design our system around like can you optimize given the strategy and given the constraints
+
+15:31.600 --> 15:37.840
+that, you know, our product partners have laid out and that does not change very frequently.
+
+15:37.840 --> 15:41.560
+Of course the system has to constantly adapt because the models change and so it has to
+
+15:41.560 --> 15:46.160
+constantly recalibrate kind of how much weight you're giving to each model.
+
+15:46.160 --> 15:51.000
+But the actual underlying strategy will mainly remain in place, you know, over time.
+
+15:51.000 --> 15:54.800
+So you don't have to adapt that.
+
+15:54.800 --> 16:01.160
+The approach that we're talking about where you're using multi-arm bandit to balance
+
+16:01.160 --> 16:10.520
+between a couple of metrics and then within that space kind of optimize, even as I'm talking
+
+16:10.520 --> 16:11.520
+about is still fuzzy.
+
+16:11.520 --> 16:15.720
+Like how do we get to the next level of detail here and make it a little bit more concrete?
+
+16:15.720 --> 16:22.480
+Yeah, so I think it's good to think about it in terms of we have a lot of different objective
+
+16:22.480 --> 16:28.280
+functions with trade-off parameters in the broader optimization, right?
+
+16:28.280 --> 16:34.520
+So the broader optimization function can be, for example, we have your viewer-side engagement,
+
+16:34.520 --> 16:39.240
+we have the creator-side value and we have some trade-off between those two.
+
+16:39.240 --> 16:45.360
+We have the revenue component, we have a trade-off for that component and downstream impact.
+
+16:45.360 --> 16:48.960
+All of these have different tunable parameters in terms of how much weight we give each of
+
+16:48.960 --> 16:51.280
+these objectives.
+
+16:51.280 --> 16:56.600
+And so what's really difficult is finding the right balance across, say, those four objectives
+
+16:56.600 --> 17:00.920
+while meeting the constraints that we've laid out in terms of, you know, we don't want
+
+17:00.920 --> 17:01.920
+to drop revenue.
+
+17:01.920 --> 17:05.480
+We want to continue to provide creator value within some realm.
+
+17:05.480 --> 17:10.480
+And so what the multi-arm bandit really helps is it can explore all the different kind
+
+17:10.480 --> 17:14.360
+of trade-off variations for these four different objectives.
+
+17:14.360 --> 17:19.920
+And then propose a few that actually will meet the constraints and the criteria that
+
+17:19.920 --> 17:23.080
+we've laid out in accordance with the strategy.
+
+17:23.080 --> 17:29.040
+So really what it comes down to is can we explore space and identify a set of, let's say,
+
+17:29.040 --> 17:34.240
+four trade-off parameters that meet all the constraints that we've identified?
+
+17:34.240 --> 17:39.040
+And so that requires essentially setting up a system that for different parts of the
+
+17:39.040 --> 17:42.120
+population on LinkedIn is trying different variations of the parameter and seeing what
+
+17:42.120 --> 17:45.120
+the outcome is, like, how is this impacting the revenue metric?
+
+17:45.120 --> 17:48.680
+How is this impacting the engagement metric or downstream metric?
+
+17:48.680 --> 17:53.960
+And then getting a readout and a gradient across like a bunch of different parameters.
+
+17:53.960 --> 18:00.240
+You may have just answered my next question, which is, is this, are you applying the multi-arm
+
+18:00.240 --> 18:07.840
+bandit as a way to explore on kind of live interactions or are you doing it in simulation
+
+18:07.840 --> 18:13.240
+and using that to determine model parameters that you deploy out to prod?
+
+18:13.240 --> 18:15.160
+There's two ways we do this, right?
+
+18:15.160 --> 18:20.640
+So for individual objectives, some of them are actually quite predictable offline, right?
+
+18:20.640 --> 18:26.920
+We can predict whether our models are doing a better job of, say, starting a conversation,
+
+18:26.920 --> 18:32.280
+purely via offline simulation because when we train our models, we basically will compare
+
+18:32.280 --> 18:40.880
+it to a randomized list of updates that a member has seen via unbiased data collection.
+
+18:40.880 --> 18:43.800
+And we'll basically see, does this new model actually lift items that they've clicked
+
+18:43.800 --> 18:45.360
+on like higher up?
+
+18:45.360 --> 18:50.680
+And so via offline simulation, we can basically tell, replaying on old data, hey, this
+
+18:50.680 --> 18:53.840
+model is actually more likely to start conversations.
+
+18:53.840 --> 18:58.440
+When it comes to things like revenue, it's much more difficult to simulate offline because
+
+18:58.440 --> 19:04.680
+you have so many moving parts around like seasonality around like supply and demand of
+
+19:04.680 --> 19:06.280
+the ads ecosystem.
+
+19:06.280 --> 19:10.000
+And so those are really things that you have to adapt live online once you've kind of
+
+19:10.000 --> 19:12.720
+shipped the model to production.
+
+19:12.720 --> 19:17.520
+And so it's a dual answer, right, offline for the objectives where we can actually replay
+
+19:17.520 --> 19:21.360
+on historical data where there isn't a lot of these confounding factors.
+
+19:21.360 --> 19:22.880
+We will ship those models online.
+
+19:22.880 --> 19:26.680
+And then for those that we can't, we will tune via the multi-arm bandit system between
+
+19:26.680 --> 19:32.400
+the different objectives because our primary goal is like, can we get people to form active
+
+19:32.400 --> 19:35.440
+communities and start conversations?
+
+19:35.440 --> 19:38.480
+That is the primary objective that we can simulate offline.
+
+19:38.480 --> 19:43.480
+And it's like what we base a lot of our like ship decisions on like, have we enabled
+
+19:43.480 --> 19:47.240
+people to start more conversations, does a small do a better job at that?
+
+19:47.240 --> 19:48.480
+If so, bring it online.
+
+19:48.480 --> 19:52.360
+And then let's find how to tune for the other constraints that we've imposed on the ecosystem
+
+19:52.360 --> 19:56.360
+rather than trying to solve all the problems all at once offline.
+
+19:56.360 --> 20:01.640
+So engagement is really like starting conversations and incentivizing creators.
+
+20:01.640 --> 20:05.240
+That's really the seed of where we start kind of the optimization.
+
+20:05.240 --> 20:10.040
+You mentioned reinforcement learning as a potential feature direction in this area.
+
+20:10.040 --> 20:12.440
+What's, how would you see it applied here?
+
+20:12.440 --> 20:16.600
+So I think it's still super early days, so I don't know how much detail I would go in
+
+20:16.600 --> 20:17.600
+here.
+
+20:17.600 --> 20:24.920
+But if you can define kind of the action space and the different actors in the ecosystem,
+
+20:24.920 --> 20:31.200
+you could potentially set up a problem that can be more holistically optimized in terms
+
+20:31.200 --> 20:36.080
+of rather than manually training each objective individually.
+
+20:36.080 --> 20:39.680
+You can actually optimize for all the objectives simultaneously.
+
+20:39.680 --> 20:42.120
+So again, it's super early days.
+
+20:42.120 --> 20:49.480
+I probably would not go into a lot of detail here, but you are kind of optimizing this kind
+
+20:49.480 --> 20:58.240
+of holistic optimization of the elements that you're showing in the feed.
+
+20:58.240 --> 21:06.960
+To what degree are we also applying AI to understand individual elements that pop up in the feed?
+
+21:06.960 --> 21:12.920
+And what are some of the pieces that come into that like I'm envisioning, like applying
+
+21:12.920 --> 21:18.960
+models to images to understand which images are more engaging, applying NLP to headings
+
+21:18.960 --> 21:23.320
+and to try to understand which of those are more engaging, are you, do you think about
+
+21:23.320 --> 21:24.320
+it at all like that?
+
+21:24.320 --> 21:29.480
+Like Macro and Micro type of, yeah, I mean, to kind of like, we've spent most of our time
+
+21:29.480 --> 21:34.160
+thus far like talking about like how we frame the optimization of like the overarching feed
+
+21:34.160 --> 21:37.880
+ecosystem, which is like a really tricky problem because of all these actors, then you have
+
+21:37.880 --> 21:42.480
+all the kind of like understanding that goes into the different features of the content.
+
+21:42.480 --> 21:45.680
+These are actually like features that are then put into that model to like help us do
+
+21:45.680 --> 21:49.640
+a better job actually predicting whatever target we're trying to predict.
+
+21:49.640 --> 21:55.080
+And so there's a lot of things we do on this front for like text and image-based content.
+
+21:55.080 --> 22:02.360
+We have, you know, we generate content embeddings to understand let's say like a text update
+
+22:02.360 --> 22:08.960
+and like how text updates relate to themselves relate to each other and mapping that to like
+
+22:08.960 --> 22:09.960
+members interests.
+
+22:09.960 --> 22:11.360
+Like what have you read in the past?
+
+22:11.360 --> 22:12.560
+What is your, what is on your profile?
+
+22:12.560 --> 22:13.560
+Where have you worked?
+
+22:13.560 --> 22:16.200
+How does this content relate to your interests?
+
+22:16.200 --> 22:21.120
+So we definitely use like neural net-based techniques to generate embeddings there.
+
+22:21.120 --> 22:23.400
+Can we drill into that for a second?
+
+22:23.400 --> 22:31.000
+So we've talked quite a bit on the podcast in general about embeddings and the idea that
+
+22:31.000 --> 22:36.680
+you can kind of map the set of, you know, content into some embedding space and then use
+
+22:36.680 --> 22:41.680
+that to determine, you know, where a new piece of content, what it's like and kind of related
+
+22:41.680 --> 22:47.520
+to the attributes of other content that you've already seen.
+
+22:47.520 --> 22:52.520
+But then when you're, you are, you mentioned relating that to the user.
+
+22:52.520 --> 22:55.960
+Like how do you create the connection between this content embedding space and different
+
+22:55.960 --> 22:57.720
+users and user contexts?
+
+22:57.720 --> 22:58.720
+Yeah.
+
+22:58.720 --> 23:03.600
+So let's talk mostly about just like the text-based problem because I think it's a good example
+
+23:03.600 --> 23:06.040
+to start like any text-based update.
+
+23:06.040 --> 23:11.280
+So there's a lot of articles and posts that go into the link to infeed that have text.
+
+23:11.280 --> 23:14.520
+Every member profile is also heavily text-based.
+
+23:14.520 --> 23:19.480
+We have like the past work history, we have a job summary, we have a list of skills that
+
+23:19.480 --> 23:21.760
+a member has.
+
+23:21.760 --> 23:29.400
+You can actually essentially create a joint embedding space for both members and articles
+
+23:29.400 --> 23:37.000
+where you are understanding a particular token and it's been trained on top of both
+
+23:37.000 --> 23:40.280
+of these data sets, right, like my profiles and articles.
+
+23:40.280 --> 23:45.160
+So abstracting away from what the individual token represents, whether it's a piece of
+
+23:45.160 --> 23:55.440
+content or user or some entity in the economic graph to more, you know, it's some, something
+
+23:55.440 --> 24:00.080
+that has a relationship with text in this broader context in this data set.
+
+24:00.080 --> 24:06.440
+And so that's like at the token level, right, the document then becomes the document that
+
+24:06.440 --> 24:10.520
+shows up in the feed, whether it be the article or whatever, or the member profile.
+
+24:10.520 --> 24:15.080
+And so you end up essentially creating like vector representations of say like a member
+
+24:15.080 --> 24:20.440
+profile or vector representations of whatever update type in the feed.
+
+24:20.440 --> 24:23.400
+And you can actually look at the similarity of these and say like, you know, how much
+
+24:23.400 --> 24:26.000
+does this member care about this particular update?
+
+24:26.000 --> 24:29.400
+Is it relevant to their work history at all and like will it actually advance their
+
+24:29.400 --> 24:35.200
+professional career via providing this information or is it very tangential to their interests?
+
+24:35.200 --> 24:40.800
+So that's kind of, that's like the deep learned like white and deep nets used to like,
+
+24:40.800 --> 24:43.120
+you know, understand content.
+
+24:43.120 --> 24:48.520
+And we also go a much more like human in the loop route.
+
+24:48.520 --> 24:51.280
+So we have a content understanding team in Dublin.
+
+24:51.280 --> 24:56.680
+And that team is composed of linguists and engineers and the linguists actually created
+
+24:56.680 --> 25:03.280
+what we call like the interest graph, which is an ontology of interests, professional interests.
+
+25:03.280 --> 25:07.920
+And there you actually have hierarchical relationships that are curated by linguists and
+
+25:07.920 --> 25:12.640
+taxonomists in terms of like, how do these concepts relate to each other?
+
+25:12.640 --> 25:16.480
+And this is particularly helpful when you have applications where you actually want to
+
+25:16.480 --> 25:20.680
+expose to the user like why you're seeing this, you know, like you're seeing this because
+
+25:20.680 --> 25:23.640
+you are interested in this particular topic.
+
+25:23.640 --> 25:27.200
+And we want to display that it's much more difficult to like reverse engineer an embedding
+
+25:27.200 --> 25:30.040
+and explain like, you know, this is why you're seeing this.
+
+25:30.040 --> 25:35.080
+But with that ontology, it not only lets you kind of explain to the user why we're showing
+
+25:35.080 --> 25:39.040
+them, but it also because of the hierarchical nature, it introduces a lot of interesting
+
+25:39.040 --> 25:40.040
+applications, right?
+
+25:40.040 --> 25:43.560
+Like you can, you can back off to like more generality if you're getting like too specific,
+
+25:43.560 --> 25:47.280
+like if you're tagging it with, you know, reinforcement learning, but you actually want
+
+25:47.280 --> 25:50.440
+to back off to just let's say like machine learning or artificial intelligence, you can
+
+25:50.440 --> 25:52.920
+do that up to the ontology.
+
+25:52.920 --> 25:57.960
+And also when you go, when you go into problems like candidate selection and like what kinds
+
+25:57.960 --> 26:02.360
+of content you want to show members, if you do not have enough liquidity under a very
+
+26:02.360 --> 26:08.040
+granular node in this interest graph, you can back off and, you know, go to broader topics
+
+26:08.040 --> 26:12.840
+that are still related, but may have more inventory, meaning people are writing more about
+
+26:12.840 --> 26:14.040
+that topic on LinkedIn.
+
+26:14.040 --> 26:19.080
+And so both those techniques in tandem are actually super helpful in understanding the
+
+26:19.080 --> 26:21.840
+content and then explaining to members, you know, why are we showing this to you in your
+
+26:21.840 --> 26:22.840
+feed?
+
+26:22.840 --> 26:29.480
+So when you say both of them in tandem are there use cases where you use the ontology and
+
+26:29.480 --> 26:37.560
+use cases where you use the embeddings or are there ways that you confuse them for specific,
+
+26:37.560 --> 26:40.040
+you know, category of problems where that makes sense?
+
+26:40.040 --> 26:44.800
+So we started with actually treating these individualists like separate features, right?
+
+26:44.800 --> 26:50.240
+So and they both showed that they provide unique value in terms of predicting whether
+
+26:50.240 --> 26:56.280
+members will participate in conversations, but as our kind of thinking evolved, these
+
+26:56.280 --> 27:00.680
+interest-based features can actually directly be incorporated into the embedding.
+
+27:00.680 --> 27:05.880
+And you can introduce even more like non-linearity that maybe the humans have created a very strict
+
+27:05.880 --> 27:11.480
+structure to this ontology and actually putting it directly in the embedding can actually uncover
+
+27:11.480 --> 27:14.720
+even more relationships between these different interest nodes that we were not able to uncover
+
+27:14.720 --> 27:17.720
+just, you know, through curation.
+
+27:17.720 --> 27:20.040
+So it's an evolution, right?
+
+27:20.040 --> 27:24.280
+You start kind of proving the value of both independently as like individual feature
+
+27:24.280 --> 27:27.000
+sets within your broader model.
+
+27:27.000 --> 27:31.520
+And then you find ways to actually like have one help the other, for example, like putting
+
+27:31.520 --> 27:34.720
+the interest graph-based features into the embedding.
+
+27:34.720 --> 27:38.640
+And then they actually start complementing each other and start fusing into one broader
+
+27:38.640 --> 27:40.040
+content understanding feature.
+
+27:40.040 --> 27:44.400
+So I guess what I'm hearing you say is, you know, we're just talking about text, you take
+
+27:44.400 --> 27:49.960
+a piece of text and you map that to the interest graph and then you stick that in the embedding
+
+27:49.960 --> 27:57.960
+as opposed to, I guess what I was thinking through was it's natural for me to take a text
+
+27:57.960 --> 28:01.480
+piece of content and map it to like a topic that it's related to.
+
+28:01.480 --> 28:05.040
+It's less natural for me to map a person to a topic.
+
+28:05.040 --> 28:09.760
+But if the person is just kind of a bag of text, then you can do that.
+
+28:09.760 --> 28:15.520
+You can also look at like what has the member engaged within the past, right?
+
+28:15.520 --> 28:18.240
+And you have the label data from the interest graph.
+
+28:18.240 --> 28:23.080
+And so you actually create this like a vector representation, but not learned via like
+
+28:23.080 --> 28:29.520
+a neural net of like what interests in the interest graph does the member care about.
+
+28:29.520 --> 28:34.240
+And that's super helpful because it's actually much more understandable to the member like
+
+28:34.240 --> 28:37.320
+they understand like, okay, this is what you think my interests are.
+
+28:37.320 --> 28:40.160
+That's why you're recommending this piece of content to me.
+
+28:40.160 --> 28:44.760
+So it's less about taking like their profile and mapping it to the interest graph and
+
+28:44.760 --> 28:48.960
+more about like looking at their historical behavior, what have they read on LinkedIn and
+
+28:48.960 --> 28:49.960
+using the interest graph.
+
+28:49.960 --> 28:56.000
+So I think that's where like the more the ontology based technique, the manual curation differs
+
+28:56.000 --> 29:00.080
+slightly from the the deep learning embeddings where we can actually take the members profile
+
+29:00.080 --> 29:03.320
+directly and project it into the embedding space.
+
+29:03.320 --> 29:08.800
+So what are some of the other big challenges that you focus on from a feed perspective?
+
+29:08.800 --> 29:11.560
+So yeah, we've kind of covered like, you know, optimization.
+
+29:11.560 --> 29:15.600
+I think there's like a lot of different feature engineering that goes into understanding
+
+29:15.600 --> 29:18.000
+the content that's in the ecosystem.
+
+29:18.000 --> 29:23.880
+And then I think the third probably big one is foundations in terms of how you empower
+
+29:23.880 --> 29:28.040
+your team to move fast and run experiments.
+
+29:28.040 --> 29:30.760
+I know you had Beach Young Chen on like a previous podcast and you were talking about
+
+29:30.760 --> 29:32.280
+ProMail.
+
+29:32.280 --> 29:38.560
+So feed obviously like, you know, it's a really large vertical at LinkedIn and we want to
+
+29:38.560 --> 29:41.240
+experiment with a lot of different ideas.
+
+29:41.240 --> 29:48.480
+And so running, you know, hundreds of AB tests every single quarter to figure out kind
+
+29:48.480 --> 29:56.720
+of how are we going to activate members, professional communities and spark professional conversations.
+
+29:56.720 --> 30:02.560
+To do that, it's you're kind of starting to go into the realm of using AI to make like
+
+30:02.560 --> 30:04.120
+the AI team more productive, right?
+
+30:04.120 --> 30:08.760
+So it's less about AI to optimize the business end of the equation and more AI to actually
+
+30:08.760 --> 30:10.960
+optimize engineering.
+
+30:10.960 --> 30:13.200
+So what's the specific example of that?
+
+30:13.200 --> 30:20.000
+So I think starting from automation, automation automation, like just getting your models
+
+30:20.000 --> 30:24.600
+automatically deployed in production, automatically identifying which variants you want to
+
+30:24.600 --> 30:26.640
+deploy to production.
+
+30:26.640 --> 30:30.280
+And identifying, so something like feature engineering, which was like the bulk of work
+
+30:30.280 --> 30:34.840
+that I think we did in the industry, you know, 10, 15 years ago.
+
+30:34.840 --> 30:38.320
+Now a lot of that feature engineering can actually be just automatically, like that can
+
+30:38.320 --> 30:41.480
+be automatically explored via like an AI, right?
+
+30:41.480 --> 30:45.640
+And when I say AI, I mean, like you can probably like generate an embedding from a bunch
+
+30:45.640 --> 30:49.720
+of features that are available to you in a feature index and see which of those actually
+
+30:49.720 --> 30:54.000
+like make sense in an advancing your objective.
+
+30:54.000 --> 30:57.600
+That no longer requires kind of a human in the loop for a lot of those problems.
+
+30:57.600 --> 31:02.480
+And so if you can automate some of the stuff like how you deploy models, how you engineer
+
+31:02.480 --> 31:07.840
+like features or simpler features, you actually free up, you may like start automating 60%
+
+31:07.840 --> 31:11.880
+or 70% of what say an entry level engineer on the team would do.
+
+31:11.880 --> 31:16.240
+And their time is freed up to think about these harder problems around optimization of
+
+31:16.240 --> 31:17.240
+the ecosystem.
+
+31:17.240 --> 31:20.920
+And like how do they think about tradeoffs and how do they automate those tradeoff decisions
+
+31:20.920 --> 31:24.760
+that we were talking about earlier when we're thinking about holistic optimization?
+
+31:24.760 --> 31:30.080
+So automation is definitely one of one of the key aspects here.
+
+31:30.080 --> 31:35.720
+And then the other aspect is how do you make sure that you know, you're constantly monitoring
+
+31:35.720 --> 31:41.640
+your model performance once stuff is online and that you are making sure your models
+
+31:41.640 --> 31:46.280
+don't rot kind of in the way we think of code rot.
+
+31:46.280 --> 31:50.160
+So you have systems that are like automatically retraining models like on sliding windows
+
+31:50.160 --> 31:55.000
+like every day on newer data and saying like, okay, this period of data actually is like
+
+31:55.000 --> 31:59.320
+not as good because you know, something was wrong with the tracking data that was passed
+
+31:59.320 --> 32:00.320
+back to us.
+
+32:00.320 --> 32:03.360
+And then it might identify a new period and say, hey, this is actually a much better training
+
+32:03.360 --> 32:04.360
+data period.
+
+32:04.360 --> 32:07.000
+Let's actually, let's actually ramp this in production.
+
+32:07.000 --> 32:11.880
+And so the system can now automatically retrain the models on newer data and also exploit
+
+32:11.880 --> 32:15.200
+that and push out production in an automated way.
+
+32:15.200 --> 32:20.240
+These are all things that like historically engineers would all do manually.
+
+32:20.240 --> 32:24.240
+And actually like the kind of competitive advantage to being a machine learning engineer
+
+32:24.240 --> 32:26.880
+was understanding this process and to end.
+
+32:26.880 --> 32:32.440
+And now like I think a lot of what AI empowers and machine learning empowers is these kind
+
+32:32.440 --> 32:37.680
+of discovery mechanisms of like which feature should I use in the model which period of data
+
+32:37.680 --> 32:41.880
+should I retrain on like all that is abstracted away from the engineer and they focus on like
+
+32:41.880 --> 32:44.880
+the harder AI and machine learning challenges.
+
+32:44.880 --> 32:56.480
+And imagining that feed is a big customer of ProML, can you speak at all to the relationship
+
+32:56.480 --> 33:00.840
+between kind of the customer of a platform and a platform.
+
+33:00.840 --> 33:07.480
+So we recently, you may have seen the interview with Beachong was in the context of a broader
+
+33:07.480 --> 33:13.960
+AI platforms series of podcasts that we did.
+
+33:13.960 --> 33:18.440
+And that was largely with kind of the supply side, if you will, the folks that are providing
+
+33:18.440 --> 33:21.240
+those platforms.
+
+33:21.240 --> 33:30.520
+But as a customer of those platforms, you are on the other side of a whole set of decisions
+
+33:30.520 --> 33:35.040
+that they're making around the degree to which the platform is opinionated versus not
+
+33:35.040 --> 33:43.200
+the degree to which a lot of the decisions kind of blow down to that.
+
+33:43.200 --> 33:45.200
+That's your take on it from the other side.
+
+33:45.200 --> 33:46.200
+Yeah.
+
+33:46.200 --> 33:52.080
+So I mean, it's a very, it's a very symbiotic relationship in the sense that, you know,
+
+33:52.080 --> 33:57.360
+we are giving a lot of requests to like what we want as a capability to be enabled for ProML.
+
+33:57.360 --> 34:03.080
+I think if you think about ProML as like the foundation of LinkedIn AI, the first thing
+
+34:03.080 --> 34:08.200
+that ProML has to do is handle the average case like the average path of how an engineer
+
+34:08.200 --> 34:11.240
+is getting something to production really well.
+
+34:11.240 --> 34:15.720
+And so for some verticals that are starting to face unique challenges at scale, there's
+
+34:15.720 --> 34:19.720
+this relationship where we might identify a problem before another team has even identified
+
+34:19.720 --> 34:20.720
+it.
+
+34:20.720 --> 34:25.440
+And we pass that knowledge back to ProML and say, hey, you know, we're now realizing that,
+
+34:25.440 --> 34:31.320
+you know, we're having trouble, let's say, there's too many models being shipped to production
+
+34:31.320 --> 34:35.680
+and we need some way to like actually stage these in terms of how they get out there.
+
+34:35.680 --> 34:38.760
+And we need to like rebase them automatically on top of each other.
+
+34:38.760 --> 34:42.560
+So like this is something that ProML may have not seen from other verticals just yet.
+
+34:42.560 --> 34:46.600
+And then we will identify that problem, give that request back to them.
+
+34:46.600 --> 34:51.240
+And they then build that out in terms of a platform capability that everybody can use.
+
+34:51.240 --> 34:58.240
+So it's really about, I mean, ProML is essentially enabling a lot of the new directions that
+
+34:58.240 --> 35:01.520
+we want to go through building the financial infrastructure.
+
+35:01.520 --> 35:06.640
+If you want to build something like a GLM mix model and you want to start introducing
+
+35:06.640 --> 35:10.160
+like decision trees into that, maybe that's not supported today and maybe nobody has
+
+35:10.160 --> 35:12.480
+had a use case yet for that.
+
+35:12.480 --> 35:16.600
+That's where the verticals, I think, really push the kind of horizontal ProML initiative
+
+35:16.600 --> 35:19.680
+into thinking about how they shape their roadmap.
+
+35:19.680 --> 35:22.440
+So I mean, that's kind of it from a customer side.
+
+35:22.440 --> 35:28.680
+To what extent is there a tension there or is at least in the case of the way things
+
+35:28.680 --> 35:33.960
+are set up at LinkedIn, like do you end up having to make decisions when you're kind
+
+35:33.960 --> 35:39.760
+of pushing the edge and you're one of the bigger customers, whether you kind of wait
+
+35:39.760 --> 35:45.040
+for the platform to deliver something or you kind of build it yourself and do you end
+
+35:45.040 --> 35:51.200
+up with, how do you manage, like I'm imagining code that kind of situations where you invest
+
+35:51.200 --> 35:58.240
+in some kind of the ability to do things that you need, eventually the platform catches
+
+35:58.240 --> 36:03.400
+up and do you have kind of formalized thinking around this or mature thinking around this
+
+36:03.400 --> 36:06.360
+already kind of have to figure out at each time?
+
+36:06.360 --> 36:09.800
+I mean, I think we're still, I mean, like I said, a lot of things at LinkedIn are still
+
+36:09.800 --> 36:10.800
+evolving.
+
+36:10.800 --> 36:11.800
+Sure.
+
+36:11.800 --> 36:13.560
+Yeah, we covered a lot of things where we're still learning.
+
+36:13.560 --> 36:17.080
+Like I said, even like the holistic optimization started touching on reinforcement learning
+
+36:17.080 --> 36:20.040
+and I was like, you know, we haven't really matured our thinking too far there.
+
+36:20.040 --> 36:24.440
+So you have to try something to like actually know whether it's warranted to invest in it,
+
+36:24.440 --> 36:28.240
+like horizontally across all of ProML because that's going to be like building it in a scalable
+
+36:28.240 --> 36:33.560
+horizontally leverageable like abstracted way, that's a significant investment, right?
+
+36:33.560 --> 36:37.280
+You have to tailor not just to feed, but like a lot of different verticals, a lot of different
+
+36:37.280 --> 36:38.280
+use cases.
+
+36:38.280 --> 36:41.840
+And so if we're proposing, if we're like, if we're pushing the boundary of techniques
+
+36:41.840 --> 36:45.240
+at LinkedIn or trying something new, you have to try it.
+
+36:45.240 --> 36:47.840
+And so often times we won't wait for the platform, right?
+
+36:47.840 --> 36:52.160
+We will, we will test it out and maybe it's not built in a generalizable way.
+
+36:52.160 --> 36:56.600
+But we actually have to prove that there is business value to what we are doing before
+
+36:56.600 --> 37:00.720
+we ask like a horizontal team to actually make this available across the board because
+
+37:00.720 --> 37:05.240
+there are many like foundational things that we could be building that will, we know will
+
+37:05.240 --> 37:09.920
+apply, you know, across verticals and maybe the particular technology we're building actually
+
+37:09.920 --> 37:12.880
+is only useful for feed.
+
+37:12.880 --> 37:17.600
+And so or maybe it's only useful for feed for now like for the, for the next like, you
+
+37:17.600 --> 37:21.760
+know, year or two, maybe like other teams just don't need it at this stage in their lifecycle
+
+37:21.760 --> 37:25.440
+because they're evolving down a different, different path.
+
+37:25.440 --> 37:30.560
+And so we do actually within the feed AI team, we have a, a foundations team that is separate
+
+37:30.560 --> 37:36.200
+from ProML and that team is completely geared towards kind of empowering this fast iteration
+
+37:36.200 --> 37:39.120
+of like innovation, figuring out like what's working, what isn't.
+
+37:39.120 --> 37:42.520
+So we can go back to the ProML team and say like, Hey, you know, we were, we were trying
+
+37:42.520 --> 37:43.520
+to solve this problem.
+
+37:43.520 --> 37:44.520
+We found this technique that works.
+
+37:44.520 --> 37:47.880
+We built out like a prototype of the infrastructure that works for feed and this will scale.
+
+37:47.880 --> 37:50.760
+Like we think you should consider this as part of your roadmap to like rule out across
+
+37:50.760 --> 37:51.840
+all verticals.
+
+37:51.840 --> 37:57.120
+And that's what I meant when it's like a symbiotic relationship like it's not like we can,
+
+37:57.120 --> 38:00.040
+as an organization, wait for everything to be built perfectly horizontally.
+
+38:00.040 --> 38:03.640
+You have to push the boundaries and kind of like an agile and a quick way.
+
+38:03.640 --> 38:07.480
+And you're right that that sometimes will generate some code that you'll have to, you
+
+38:07.480 --> 38:10.040
+know, pay it down at some point in the future.
+
+38:10.040 --> 38:15.040
+I like I'm of the opinion that like, you know, technical debt is not tear.
+
+38:15.040 --> 38:18.440
+I think some people, some people avoid technical debt at all costs.
+
+38:18.440 --> 38:21.640
+Technical debt is there so you can take on some debt to move faster.
+
+38:21.640 --> 38:25.040
+Obviously, do not want your debt to like spiral out of control.
+
+38:25.040 --> 38:28.880
+But if you're able to manage that in a, in a sane way, then like you're actually going
+
+38:28.880 --> 38:32.760
+to be pushing for both the boundaries of your vertical, but also how fast ProML moves
+
+38:32.760 --> 38:37.320
+and discovers new opportunities that they should be making available horizontally.
+
+38:37.320 --> 38:44.440
+Are there things that come, they come to mind as a customer of a platform, you know, independent
+
+38:44.440 --> 38:49.400
+of the specifics of the relationship between the ProML team and your team that you just
+
+38:49.400 --> 38:56.480
+as a customer, I want a platform team to be, you know, doing thing XYZ or thinking thing,
+
+38:56.480 --> 39:02.560
+you know, in way XYZ, like what's your wish list for kind of that relationship, I guess?
+
+39:02.560 --> 39:07.400
+One of the unique things I think about how the AI org is organized outlinked in is that
+
+39:07.400 --> 39:09.200
+it's completely centralized, right?
+
+39:09.200 --> 39:13.200
+Like, you know, Deepak Agarwal has like all the engineers working with AI report to him.
+
+39:13.200 --> 39:16.200
+There's like, you know, 400 whatever engineers.
+
+39:16.200 --> 39:21.480
+All the requests are very centralized and all the teams work together, like in a really
+
+39:21.480 --> 39:28.120
+collaborative way, it's, it never feels like we are a client asking like some remote team
+
+39:28.120 --> 39:33.320
+or like, you know, horizontal like platform provider to support us, not definitely not
+
+39:33.320 --> 39:37.680
+in the way like you might, if you're bootstrapping a star today, you'd go to AWS, right, and
+
+39:37.680 --> 39:39.720
+might use their machine learning platform.
+
+39:39.720 --> 39:43.720
+You don't have like a direct path to ask them for like what you need.
+
+39:43.720 --> 39:48.920
+This is all within the same team within the same company outlinked in where we all kind
+
+39:48.920 --> 39:52.160
+of have a joint understanding of what our requests are.
+
+39:52.160 --> 39:59.400
+So as a consumer of ProML, like I think that there is, like I said, there's that loop
+
+39:59.400 --> 40:04.240
+of innovation where like verticals kind of push the boundaries in areas where like maybe
+
+40:04.240 --> 40:07.960
+there's a unique problem in their domain, that feeds back into the ProML platform.
+
+40:07.960 --> 40:11.760
+I don't think there's ever kind of attention in terms of how what we're asking for from
+
+40:11.760 --> 40:17.520
+the platform, which I mean, it's kind of rare, and I think we're fortunate to be in
+
+40:17.520 --> 40:18.520
+that situation.
+
+40:18.520 --> 40:24.520
+So kind of thing one on that list is just make sure to keep that collaborative loop tight
+
+40:24.520 --> 40:31.240
+and don't kind of minimize the barriers between kind of platform consumers and platform
+
+40:31.240 --> 40:32.240
+providers.
+
+40:32.240 --> 40:38.000
+And I think, I mean, you can take examples, I mean, just from my past, like, so AI at
+
+40:38.000 --> 40:42.680
+LinkedIn was not always like this centralized, so when Pulse was acquired, the Pulse relevance
+
+40:42.680 --> 40:47.920
+team was actually a separate team and a separate work, not in the relevance work.
+
+40:47.920 --> 40:51.800
+And the advantage there is that those AI engineers were embedded with like the product domain.
+
+40:51.800 --> 40:56.200
+And so like they completely understood the strategy, they were really close with all
+
+40:56.200 --> 41:00.040
+their other engineering partners had really close relationships there.
+
+41:00.040 --> 41:05.960
+The downside is that you can't tap into this like giant wealth of knowledge and momentum
+
+41:05.960 --> 41:12.480
+like a centralized AI org in terms of all the kind of research that's going on foundationally,
+
+41:12.480 --> 41:16.440
+new techniques, like you're only a team of maybe like three or four embedded engineers
+
+41:16.440 --> 41:19.480
+in a product vertical when you have the distributed model.
+
+41:19.480 --> 41:25.760
+And that makes it much more difficult to tap into like that knowledge base that we have
+
+41:25.760 --> 41:27.120
+in today's model.
+
+41:27.120 --> 41:32.000
+So it is like really important how you set up your organization to make sure you're maximizing
+
+41:32.000 --> 41:38.040
+the value and the feedback that's going to the horizontal platform.
+
+41:38.040 --> 41:45.560
+And along those lines is the AI org exclusively centralized, or do you have kind of a, you
+
+41:45.560 --> 41:49.760
+know, I'll talk to folks that embrace more of like a hub and spoke model where they'll,
+
+41:49.760 --> 41:56.160
+you know, there's a centralized org that is, you know, defining, you know, best practices
+
+41:56.160 --> 42:03.640
+if you will, building tooling and platform, you know, but also like embedding data scientists,
+
+42:03.640 --> 42:08.840
+machine learning engineers within product teams, you know, for periods of time to help
+
+42:08.840 --> 42:14.000
+them deliver features like how does that manifest itself at LinkedIn?
+
+42:14.000 --> 42:18.280
+It's definitely not exclusively centralized like I work very closely with our product feed
+
+42:18.280 --> 42:22.040
+product team work very closely with like our feed consumer engineering partners that
+
+42:22.040 --> 42:23.480
+are building like the mobile clients.
+
+42:23.480 --> 42:31.040
+I mean, you have to be and that's kind of like a virtual team that works on that particular
+
+42:31.040 --> 42:32.040
+product area.
+
+42:32.040 --> 42:36.680
+And that's usually how I guess hub and spoke model might be, might be kind of the right
+
+42:36.680 --> 42:38.720
+analogy here.
+
+42:38.720 --> 42:43.080
+But it's really, it depends on like a verticals and needs and so it differs from vertical
+
+42:43.080 --> 42:44.080
+to vertical.
+
+42:44.080 --> 42:48.840
+At the end of the day though, like, let's say you don't even have a well fleshed out
+
+42:48.840 --> 42:51.720
+like product team or product counterpart.
+
+42:51.720 --> 42:56.080
+But this kind of centralization within the AI work offers is you can actually bootstrap
+
+42:56.080 --> 42:59.680
+something using the wealth of knowledge and techniques that are like already at your
+
+42:59.680 --> 43:04.800
+fingertips from like pro mal and all these other verticals without starting from scratch
+
+43:04.800 --> 43:08.040
+embedding with like a brand new product like you would maybe a startup.
+
+43:08.040 --> 43:12.040
+And so it's not exclusively centralized in the sense that we obviously collaborate
+
+43:12.040 --> 43:16.240
+with our partners, but there is a great degree of centralization that enables collaboration
+
+43:16.240 --> 43:17.320
+across the world.
+
+43:17.320 --> 43:22.640
+Because we're kind of following this thread around, you know, organizational themes and
+
+43:22.640 --> 43:27.880
+kind of platform providers consumers like any other thoughts for folks that are maybe
+
+43:27.880 --> 43:35.480
+earlier on in this path and LinkedIn, things that have helped you be successful.
+
+43:35.480 --> 43:38.720
+There's so much kind of fragmentation in the like cloud machine learning offerings in
+
+43:38.720 --> 43:39.720
+the industry now.
+
+43:39.720 --> 43:42.800
+So like, I'm not really going to go into that in terms of how you might build like a machine
+
+43:42.800 --> 43:44.600
+learning shop from scratch.
+
+43:44.600 --> 43:48.560
+But I do think that actually like the important lesson going back to what we were talking
+
+43:48.560 --> 43:53.240
+about earlier is really understanding how you formulate your problem early on.
+
+43:53.240 --> 43:56.960
+And I think this is actually something now looking back at polls that like we may have
+
+43:56.960 --> 44:00.800
+been really short-sighted by like focusing on like, you know, this day's revenue or like
+
+44:00.800 --> 44:04.840
+this day's engagement and not focusing on the like more holistic picture of like what
+
+44:04.840 --> 44:09.880
+is your ecosystem to find your problem space and then understand both the short term and
+
+44:09.880 --> 44:13.200
+long term effects and how they trade off with each other.
+
+44:13.200 --> 44:17.440
+And I think, you know, coming from startup oftentimes you're very focused on that like
+
+44:17.440 --> 44:22.360
+short term milestone and you actually might be sacrificing a lot of long term growth and
+
+44:22.360 --> 44:28.720
+engagement by going by not taking time and saying like, let's actually think about how
+
+44:28.720 --> 44:31.440
+we're using machine learning to solve this problem.
+
+44:31.440 --> 44:34.600
+It's very easy to be a machine learning expert these days and kind of like find a tutorial
+
+44:34.600 --> 44:39.040
+to do like solve the exact problem that you're trying to solve for your startup.
+
+44:39.040 --> 44:43.320
+And I think the real like value of machine learning is when you actually give it a harder
+
+44:43.320 --> 44:47.520
+problem than those that you see like the simple problem that you've thought of like we need
+
+44:47.520 --> 44:51.720
+to solve this particular like ranking problem for like a feed.
+
+44:51.720 --> 44:54.600
+Thinking more about all the actors in your ecosystem, all the different content types, all
+
+44:54.600 --> 44:58.960
+the different intents and pushing the boundary of like what machine learning can help you
+
+44:58.960 --> 44:59.960
+do.
+
+44:59.960 --> 45:04.600
+I think that's probably the most useful insight going from a small startup to a big company
+
+45:04.600 --> 45:09.240
+where we actually have had much more time to think through those different components.
+
+45:09.240 --> 45:14.040
+And you know, in some ways it's like jumping to the end game, can you do that without like
+
+45:14.040 --> 45:20.320
+going through the steps like what's the is there an approach to getting you there or
+
+45:20.320 --> 45:25.280
+a way of thinking about it that allows you to know which of the steps you need to skip
+
+45:25.280 --> 45:28.160
+versus what you have to pass through.
+
+45:28.160 --> 45:33.920
+Yeah, your point is like spot on which is like it's easy to identify like this as something
+
+45:33.920 --> 45:38.280
+you should do when you've already like evolved to this point in terms of technical capability.
+
+45:38.280 --> 45:43.560
+But actually, I think it's always useful to evaluate kind of like how far AI has come
+
+45:43.560 --> 45:49.280
+and how easy it is now to like do a lot of really fundamental basic like things, solve
+
+45:49.280 --> 45:53.040
+a lot of like the simpler problems in AI when I was saying like, you know, automating
+
+45:53.040 --> 45:55.600
+all these kind of basic capabilities within our team.
+
+45:55.600 --> 46:01.200
+A lot of that is offered on like a lot of different like cloud platforms, et cetera.
+
+46:01.200 --> 46:05.160
+And so folks that want to use machine are actually kind of freed up now from some of those
+
+46:05.160 --> 46:09.240
+lower level logistics and you can kind of skip a few steps ahead.
+
+46:09.240 --> 46:12.440
+You know, if you go to the very beginning of LinkedIn, we were still like trying to get
+
+46:12.440 --> 46:15.040
+like logistic regression working for like a CTR based model.
+
+46:15.040 --> 46:16.680
+We had to start with like a recency based model.
+
+46:16.680 --> 46:18.400
+You don't actually have to do that anymore, right?
+
+46:18.400 --> 46:22.920
+Out the gate, you can actually start with kind of what is pretty state of the art in
+
+46:22.920 --> 46:23.920
+the industry.
+
+46:23.920 --> 46:29.680
+And I think that's why it's so important to spend that extra time thinking through your
+
+46:29.680 --> 46:32.440
+ecosystem, like what is it you're building?
+
+46:32.440 --> 46:39.040
+What are the levers you have at your disposal in your product to actually to shape the product
+
+46:39.040 --> 46:41.600
+experience you're trying to build?
+
+46:41.600 --> 46:47.320
+And so I do think that like the the advancements and ML and AI kind of over the last decade,
+
+46:47.320 --> 46:52.480
+like it's gotten easy enough to do that you're actually maybe not burdened by some of the
+
+46:52.480 --> 46:55.840
+stuff that you know, LinkedIn had to deal with or pulse had to deal with in the really
+
+46:55.840 --> 46:59.480
+early days when like the tooling was not nearly the way it is today.
+
+46:59.480 --> 47:03.100
+So the kind of technologies that were available out of the box in terms of how you use neural
+
+47:03.100 --> 47:06.880
+lots, I mean, even TensorFlow, like that's something that I think in the last really five
+
+47:06.880 --> 47:10.960
+to seven years has really blown up as like, you know, standard tooling.
+
+47:10.960 --> 47:15.600
+And that is all now available to anybody who's shopping a product out of the box.
+
+47:15.600 --> 47:17.360
+So you can skip that.
+
+47:17.360 --> 47:22.360
+You can skip that and LinkedIn did spend a lot of time in that area and you can start
+
+47:22.360 --> 47:26.520
+moving into like these problem definition type scenarios.
+
+47:26.520 --> 47:32.560
+So invest the time and energy saved and building out kind of core infrastructure and being
+
+47:32.560 --> 47:36.840
+more thoughtful about the way you approach the value you're trying to deliver to whoever
+
+47:36.840 --> 47:37.840
+the customer.
+
+47:37.840 --> 47:41.440
+I think you summarized it much more, particularly than I did, but yeah, that's a great point.
+
+47:41.440 --> 47:42.440
+It's a great point.
+
+47:42.440 --> 47:44.600
+Well, Tim, thanks so much for taking the time to shout out to me.
+
+47:44.600 --> 47:46.600
+It's a great conversation and I've enjoyed it.
+
+47:46.600 --> 47:47.600
+Thank you.
+
+47:47.600 --> 47:48.600
+Awesome.
+
+47:48.600 --> 47:49.600
+Thanks.
+
+47:49.600 --> 47:52.400
+All right, everyone.
+
+47:52.400 --> 47:57.560
+That's our show for today for more information on Tim or any of the topics covered in this
+
+47:57.560 --> 48:03.000
+episode, visit twimmelai.com slash talk slash 224.
+
+48:03.000 --> 48:05.560
+Thanks again to LinkedIn for their support of this show.
+
+48:05.560 --> 48:10.720
+Be sure to check out what their engineering team is up to at engineering.linkedin.com slash
+
+48:10.720 --> 48:12.040
+blog.
+
+48:12.040 --> 48:23.520
+As always, thanks so much for listening and catch you next time.
+

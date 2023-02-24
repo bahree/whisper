@@ -1,0 +1,1476 @@
+1
+00:00:00,000 --> 00:00:10,720
+Hey, what's up everyone? Welcome to another episode of the Twomo AI podcast. I am your host,
+
+2
+00:00:10,720 --> 00:00:17,680
+Sam Charrington, and today I'm joined by Sharred Goyle. Sharred is a professor of public policy
+
+3
+00:00:17,680 --> 00:00:23,440
+at Harvard University. He and I last spoke just over a couple of years ago about his paper,
+
+4
+00:00:23,440 --> 00:00:30,480
+The Measure and Mismeasure of Fairness, and today we'll be talking about a follow-on work that
+
+5
+00:00:30,480 --> 00:00:38,080
+recently won the ICML 2022 Outstanding Paper Award, causal conceptions of fairness and their
+
+6
+00:00:38,080 --> 00:00:44,640
+consequences. I'll say that this paper surfaced some really surprising results for me, and I'm looking
+
+7
+00:00:44,640 --> 00:00:50,960
+forward to digging into it and sharing a bit of those with you. Sharred, welcome back to the podcast.
+
+8
+00:00:50,960 --> 00:00:56,880
+Thanks, Sam. Thanks for having me back. Awesome. For those who didn't catch our last conversation,
+
+9
+00:00:57,440 --> 00:01:04,000
+how about you spend a little bit of time introducing yourself and talking about how you came to work on
+
+10
+00:01:04,960 --> 00:01:10,640
+understanding machine learning and fairness in their intersections? Yeah, so I've had a pretty
+
+11
+00:01:11,600 --> 00:01:19,360
+roundabout path towards this. I would say recovering mathematician. I did my PhD in math,
+
+12
+00:01:19,360 --> 00:01:28,080
+many years ago, and then slowly drifted towards the policy realm over the last 10, 15 years,
+
+13
+00:01:28,080 --> 00:01:34,480
+and somewhere in between started to think more seriously about discrimination and human
+
+14
+00:01:34,480 --> 00:01:41,120
+decisions, and particularly in the criminal justice system. Then all of these discussions about
+
+15
+00:01:41,120 --> 00:01:46,720
+algorithmic fairness, not just discrimination and human decisions, but how do you conceptualize
+
+16
+00:01:46,720 --> 00:01:54,080
+discrimination, fairness, and machine systems had started coming to light, and that's where
+
+17
+00:01:54,080 --> 00:02:00,960
+me and my collaborators came into this emerging area and debate about how do we conceptualize
+
+18
+00:02:00,960 --> 00:02:05,200
+discrimination, how do we measure it, how do we design more equitable systems?
+
+19
+00:02:07,200 --> 00:02:15,680
+Yeah, I think if I can maybe summarize our last conversation and how it leads into this one,
+
+20
+00:02:15,680 --> 00:02:22,240
+I think a big theme out of that last paper in conversation was that, hey, we've been spending
+
+21
+00:02:22,240 --> 00:02:30,400
+a lot of time as a community, as a field, trying to characterize fairness in mathematical terms,
+
+22
+00:02:30,400 --> 00:02:43,040
+and you found those lacking in a lot of ways. More recently, this idea of causality and causal
+
+23
+00:02:43,040 --> 00:02:48,880
+approaches has been presented as, in some ways, almost sounded like a silver bullet, like,
+
+24
+00:02:48,880 --> 00:02:54,320
+hey, we didn't get it before, but we just sprinkle causality dust on everything, and that's
+
+25
+00:02:54,320 --> 00:02:59,280
+going to fix all of our problems, and I think this paper saying not so fast.
+
+26
+00:02:59,280 --> 00:03:09,040
+Yeah, causality dust is nice often, I think it definitely brings nuance and often it's important
+
+27
+00:03:09,040 --> 00:03:13,840
+nuance to add, and so I'm glad that people are thinking about causality in these discussions,
+
+28
+00:03:14,640 --> 00:03:20,560
+but I think you said it well that there's still this idea that the solution to designing
+
+29
+00:03:20,560 --> 00:03:26,480
+equitable algorithms is to just come up with a better mathematician of fairness.
+
+30
+00:03:28,000 --> 00:03:33,520
+That, again, I don't want to make a too strong claim, but I would say what we're finding is at least
+
+31
+00:03:33,520 --> 00:03:39,120
+for the existing definitions, causal or non-causal, those definitions, when you use them as design
+
+32
+00:03:39,120 --> 00:03:45,360
+principles to help you create algorithms, those can end up in many cases causing more problems
+
+33
+00:03:45,360 --> 00:03:51,200
+than they solve, and so I don't think this closes the door on that approach, but it definitely
+
+34
+00:03:51,200 --> 00:03:56,560
+should give people pause on pursuing this formalization of fairness.
+
+35
+00:03:56,560 --> 00:04:04,640
+And it sounds like embarking on this endeavor, a big part of the challenge you ran into is
+
+36
+00:04:04,640 --> 00:04:11,920
+just understanding what it means to apply causality to this idea of fairness in machine learning
+
+37
+00:04:11,920 --> 00:04:18,400
+or algorithmic fairness. Yeah, I mean, you're exactly right. I mean, this is this kind of subfield
+
+38
+00:04:18,400 --> 00:04:24,720
+has been progressing at a breakneck pace. There's lots of papers out there, people quite
+
+39
+00:04:24,720 --> 00:04:29,520
+understandably are using different terms, different ways of describing the same phenomenon or
+
+40
+00:04:29,520 --> 00:04:35,920
+the same ideas, and so a large part of this project was to go through that literature and make
+
+41
+00:04:35,920 --> 00:04:41,040
+sense of it for ourselves. And in the process, what we hope to do is help other people who are new
+
+42
+00:04:41,040 --> 00:04:47,520
+to this area understand it themselves. And at the end of the day, I think we ended up finding a
+
+43
+00:04:47,520 --> 00:04:54,960
+reasonably concise way of describing this area of causal fairness. And I would say roughly,
+
+44
+00:04:55,360 --> 00:05:00,960
+there are two classes of definition, there are two classes of approaches to causal fairness,
+
+45
+00:05:00,960 --> 00:05:04,880
+and that's kind of the shorthand that I'm using to describe this subfield. So the first is
+
+46
+00:05:06,160 --> 00:05:14,080
+the idea that that we want to eliminate or reduce the effect of legally protected traits,
+
+47
+00:05:14,080 --> 00:05:22,480
+like race or gender on our decisions. It's a very natural idea that we don't want race, for example,
+
+48
+00:05:22,480 --> 00:05:29,760
+if we're in some sort of hiring context, we don't want race to affect our decisions. That's
+
+49
+00:05:29,760 --> 00:05:34,960
+again, one big class of definitions, either directly or indirectly. And so maybe race indirectly
+
+50
+00:05:34,960 --> 00:05:40,400
+affects our decisions through opportunities that are afforded to folks, and then that changes
+
+51
+00:05:40,400 --> 00:05:46,000
+the amount of experience that people have. So even if some sense hiring decisions are based
+
+52
+00:05:46,000 --> 00:05:50,800
+on Leon, quote unquote, experience, race still might enter the equation through these indirect
+
+53
+00:05:50,800 --> 00:05:57,040
+paths. And so there's a sense that we want to reduce those types of direct or indirect effects.
+
+54
+00:05:57,040 --> 00:06:03,360
+And in the second, big class of causal fairness definitions aims to reduce what we call counterfactual
+
+55
+00:06:03,360 --> 00:06:10,320
+disparities. And so in a world where different decisions were made, what would these different,
+
+56
+00:06:11,600 --> 00:06:17,360
+what would the effect of those decisions be, for example, on error rates? And so that's another
+
+57
+00:06:17,360 --> 00:06:22,240
+kind of big class of definition. So these are the two ways that we've conceptualized
+
+58
+00:06:22,240 --> 00:06:30,400
+this subfield of causal fairness. Can you characterize the things that you saw in the literature,
+
+59
+00:06:30,400 --> 00:06:36,160
+like the ways in which they differed underneath these two broad classes of intent?
+
+60
+00:06:36,160 --> 00:06:46,320
+Yeah. So even saying what does it mean to limit the effect, the direct or indirect effect of race
+
+61
+00:06:46,320 --> 00:06:52,480
+on a decision, that statement is very, very hard to make precise. And so there are many reasons for
+
+62
+00:06:52,480 --> 00:06:58,640
+that. I mean, one is this kind of mantra of no causation without manipulation. This kind of famous
+
+63
+00:06:58,640 --> 00:07:04,720
+statistical mantra. And the idea there is this kind of point to this fact of, if I can't manipulate
+
+64
+00:07:04,720 --> 00:07:11,680
+something, what do I even mean when I say the cause of this thing on something else? And so in our
+
+65
+00:07:11,680 --> 00:07:18,240
+setting, what does it even mean to say the cause of the effect of race on some decision? How do we
+
+66
+00:07:18,240 --> 00:07:25,440
+manipulate race? And that is not a thing that we can easily manipulate. And so even saying what,
+
+67
+00:07:25,440 --> 00:07:30,480
+you know, what are we talking about when we're talking about the effect of race? That's kind of a
+
+68
+00:07:30,480 --> 00:07:35,760
+big open question. Now, even if we were to say, okay, but let's pretend we understand what that
+
+69
+00:07:35,760 --> 00:07:39,760
+means. And we might pretend we understand what that means by saying there's these kind of famous
+
+70
+00:07:39,760 --> 00:07:45,120
+audit studies that say, well, the way we're going to manipulate it is by changing somebody's name.
+
+71
+00:07:45,120 --> 00:07:51,200
+We're going to imagine an employer or someone who's screening CVs. And we can say we're going
+
+72
+00:07:51,200 --> 00:07:56,800
+to change the name on a somebody's CV. The only thing that the employer gets to see is a CV.
+
+73
+00:07:56,800 --> 00:08:01,600
+And we're going to change the name to suggest to the employer's mind and the employer's mind
+
+74
+00:08:01,600 --> 00:08:06,880
+that this person is black or white, for example. And then if we see differences in decisions,
+
+75
+00:08:06,880 --> 00:08:14,480
+we're going to say that, well, this is what the effective race means. It's really the effect
+
+76
+00:08:15,200 --> 00:08:20,480
+a name change on the perception of race, which again induces this change in the decision. But
+
+77
+00:08:20,480 --> 00:08:26,960
+that's at least one way of narrowly describing what we mean there. Okay, so there are ways that we
+
+78
+00:08:26,960 --> 00:08:33,680
+can understand what is the effect of race, at least if we kind of suspend a little bit of disbelief
+
+79
+00:08:33,680 --> 00:08:39,840
+and kind of go down the sort of accept these proxies. So there's that. But now what do we mean when we
+
+80
+00:08:39,840 --> 00:08:49,200
+say, let's limit the indirect effect of race through certain paths. So now this is an even more
+
+81
+00:08:49,200 --> 00:08:56,080
+nuanced idea of what exactly doesn't mean to say, well, race could have affected where
+
+82
+00:08:57,040 --> 00:09:02,720
+what opportunities you had in high school, which affected what colleges you went to, which affected,
+
+83
+00:09:02,720 --> 00:09:08,160
+which test scores you got, which affected all this other stuff. And so now we might want to say
+
+84
+00:09:08,160 --> 00:09:15,200
+what we don't want race to affect decisions through some of these pathways. But we are going to
+
+85
+00:09:15,200 --> 00:09:20,480
+allow race to affect decisions through other pathways. So for example, we might allow, again,
+
+86
+00:09:20,480 --> 00:09:26,160
+let's go back to this hypothetical of college admissions. We might say, well, we're going to allow
+
+87
+00:09:26,160 --> 00:09:32,240
+for affirmative action. So we're going to allow race to directly be taken account into account
+
+88
+00:09:32,240 --> 00:09:40,000
+by admissions officers when deciding whom to enact. But we're not going to allow race to affect
+
+89
+00:09:40,000 --> 00:09:46,560
+decisions through these quote unquote unfair pathways. And now we have to define exactly what those
+
+90
+00:09:46,560 --> 00:09:52,000
+unfair pathways are. For example, reduced opportunity resources, which means potentially
+
+91
+00:09:52,000 --> 00:09:58,400
+lower test scores or whatever those other other potential pathways are that we want to block.
+
+92
+00:10:00,480 --> 00:10:07,200
+And so that was a lot for us. We had to kind of really unpack all of these formal ways of
+
+93
+00:10:07,200 --> 00:10:12,080
+making those statements precise. And then in our paper, we tried to convey those to people.
+
+94
+00:10:12,080 --> 00:10:16,480
+We don't want to kind of read through all of that literature, but you know, what the two-page
+
+95
+00:10:16,480 --> 00:10:23,520
+summary of how you might do this. Are you saying that all of the definitions that are out there
+
+96
+00:10:24,640 --> 00:10:32,240
+boil down to two definitions or are there two broad classes of ways that people are defining
+
+97
+00:10:32,240 --> 00:10:39,600
+or treating the topic? Yeah, so I would say they're really two broad classes. There are many,
+
+98
+00:10:39,600 --> 00:10:46,880
+many, there are dozens of sub definitions in each of these categories. But at the end of the day,
+
+99
+00:10:46,880 --> 00:10:53,120
+I think the kind of statistical structural properties really depends on which of these two classes
+
+100
+00:10:53,120 --> 00:10:58,960
+you're talking about. But I would say there really are. If you were to enumerate them,
+
+101
+00:10:58,960 --> 00:11:04,960
+you would get to dozens pretty quickly. And a part of what you are doing is presenting
+
+102
+00:11:05,680 --> 00:11:12,960
+mathematical formulations for these definitions or these formulations that were generally present
+
+103
+00:11:12,960 --> 00:11:18,640
+in the literature that you were reviewing or were they where they, you know, scenarios that were
+
+104
+00:11:18,640 --> 00:11:24,080
+proposed less rigorously and you're trying to bring some of that rigor to them.
+
+105
+00:11:24,080 --> 00:11:29,120
+I would say a little bit about that. I would say maybe 80% there were already out there in various,
+
+106
+00:11:29,120 --> 00:11:35,520
+you know, using various notation and kind of various setups. And so we definitely tried to consolidate
+
+107
+00:11:35,520 --> 00:11:41,600
+these, put them on a common footing and then present them all coherently. And in the process,
+
+108
+00:11:41,600 --> 00:11:47,440
+we, I would say we did clarify some of some of these definitions and hopefully make them a
+
+109
+00:11:47,440 --> 00:11:54,480
+little bit more rigorous. But I'd say by and large, that part of the paper was bringing in these ideas
+
+110
+00:11:54,480 --> 00:11:59,280
+that other people had had put out there. And so, you know, these could be extended in various ways,
+
+111
+00:11:59,280 --> 00:12:03,440
+but we were really trying to represent what other people had already said rather than
+
+112
+00:12:03,440 --> 00:12:09,520
+introduce our new conceptualizations of these ideas. Got it, got it. And were there particularly notable
+
+113
+00:12:09,520 --> 00:12:17,360
+areas where you kind of added to definitions or clarified or extended definitions?
+
+114
+00:12:18,000 --> 00:12:24,160
+Yeah. So again, I mean, I think much of this was already out there. And in many of the authors
+
+115
+00:12:24,160 --> 00:12:28,640
+of the papers that we cite, you know, probably for various reasons, including space, didn't give
+
+116
+00:12:28,640 --> 00:12:34,640
+all the details. And so we tried to give many of the details. But I would say especially these kind
+
+117
+00:12:34,640 --> 00:12:42,240
+of past specific notions of fairness where I'm trying to say, here is I want, I want to limit
+
+118
+00:12:42,240 --> 00:12:50,320
+the effective race along certain causal paths. That is a definition, a style of definition,
+
+119
+00:12:50,320 --> 00:12:56,800
+which we found to be quite hard to make rigorous. Once you write it all down, it's pretty compact.
+
+120
+00:12:56,800 --> 00:13:02,880
+You can say it in a page, but actually getting all that machinery and writing it down and saying
+
+121
+00:13:02,880 --> 00:13:08,400
+this is exactly what we mean by this definition, that certainly took us a fair amount of time.
+
+122
+00:13:08,400 --> 00:13:12,960
+And while we were figuring out, hopefully, we were able to communicate that to others.
+
+123
+00:13:12,960 --> 00:13:23,200
+And so there's on the one hand, there's defining these particular problems in terms of
+
+124
+00:13:23,200 --> 00:13:33,920
+in kind of using the machinery of causality. There's also defining policies that, you know,
+
+125
+00:13:33,920 --> 00:13:40,640
+that act on those problems using the same causal machinery. Were you also looking to kind of
+
+126
+00:13:40,640 --> 00:13:46,240
+clarify and define the policies or are you promoting or discussing, you're not really proposing
+
+127
+00:13:46,240 --> 00:13:51,120
+new policies. This is also kind of a surveying aspect of the paper, is that right?
+
+128
+00:13:51,120 --> 00:13:56,720
+So I think this is a really good distinction that you're raising. I mean, there's the use of
+
+129
+00:13:56,720 --> 00:14:02,640
+causality to define very mathematical notions of fairness. And then there's this way of using
+
+130
+00:14:02,640 --> 00:14:08,880
+causality that is core to how we are thinking of this project, of saying, you a policy maker
+
+131
+00:14:08,880 --> 00:14:17,840
+need to do something. And now, the way I think about that is you're asking, what is the causal
+
+132
+00:14:17,840 --> 00:14:24,480
+effect of implementing a certain policy on the world? And so again, using this kind of idea of
+
+133
+00:14:24,480 --> 00:14:30,000
+admissions, college admissions, we can say, if I were to admit students according to this policy,
+
+134
+00:14:31,200 --> 00:14:35,600
+what would happen? What would the demographic composition of my class look like?
+
+135
+00:14:35,600 --> 00:14:40,400
+You know, what would the graduation rate look like? You know, what would the world very broadly
+
+136
+00:14:40,400 --> 00:14:51,680
+look like? And that, I would say, is there a notion of a causal policy or is it rather a causal
+
+137
+00:14:51,680 --> 00:14:57,760
+approach to analyzing the impacts of a policy? Yeah, I would say the latter. And so I would say
+
+138
+00:14:57,760 --> 00:15:06,000
+here, it's what is the causal effect of implementing a policy? And here, this is a very different
+
+139
+00:15:06,000 --> 00:15:12,320
+style of reasoning than one that we regularly see in computer science. It's very kind of, I would say,
+
+140
+00:15:12,320 --> 00:15:19,280
+an economic style or a policy style or reasoning where, you know, you have a menu of options,
+
+141
+00:15:19,280 --> 00:15:23,280
+and we can say we can do A, B, or C, what is the world going to look like? Or what do we think the
+
+142
+00:15:23,280 --> 00:15:29,280
+world will look like under each of these potential policies that we could implement? And that's very
+
+143
+00:15:29,280 --> 00:15:38,880
+different from, I would say, the style of causality or the use of causality in creating these
+
+144
+00:15:38,880 --> 00:15:45,120
+these algorithmic definitions of fairness. And you mentioned this distinction between the way
+
+145
+00:15:45,920 --> 00:15:53,760
+causalities treated in economic and statistical context and kind of computer science and algorithmic
+
+146
+00:15:53,760 --> 00:16:05,040
+context. Did your, your review kind of focus on or find more of one or the other? Yeah, I mean,
+
+147
+00:16:05,040 --> 00:16:10,720
+I would say we, you know, our perspective was was really coming from the policymaker
+
+148
+00:16:10,720 --> 00:16:16,880
+of saying we would like to design a more equitable world, you know, whatever that means,
+
+149
+00:16:16,880 --> 00:16:23,120
+it's a hard amorphous concept, but that is what we are going for. And so the person a question
+
+150
+00:16:23,120 --> 00:16:30,240
+to a policymaker to a set of stakeholders is what do we do? Now, that is our kind of overarching
+
+151
+00:16:30,240 --> 00:16:36,240
+perspective when you're coming to this problem. I would say the use of causality in the formal
+
+152
+00:16:36,240 --> 00:16:43,200
+definitions that we're reviewing are not asking about the consequences of implementing certain things.
+
+153
+00:16:43,200 --> 00:16:53,440
+They're really saying we want to procedurally reduce the impact of race on certain decisions.
+
+154
+00:16:53,440 --> 00:16:58,560
+You know, that's kind of roughly what that style of computer science, algorithmic fairness
+
+155
+00:16:58,560 --> 00:17:04,240
+is doing at least one broad class of things that's happening there. And the key distinction is that
+
+156
+00:17:04,240 --> 00:17:10,160
+one is procedural. This is the computer science notion of it. And, you know, if you want to be
+
+157
+00:17:10,160 --> 00:17:14,640
+philosophical about this, you know, sometimes it's called a dantological perspective of saying these
+
+158
+00:17:14,640 --> 00:17:19,920
+are rules. There are certain things that we think of as being good or bad. And we might say that
+
+159
+00:17:19,920 --> 00:17:28,800
+it is it is bad to allow race to affect decisions through certain pathways. And then there's this
+
+160
+00:17:28,800 --> 00:17:37,680
+alternative consequentialist perspective of saying the procedure is really only important to
+
+161
+00:17:37,680 --> 00:17:43,760
+the extent that it brings about good outcomes. And that's where we were really coming from. And
+
+162
+00:17:43,760 --> 00:17:48,800
+we're saying we want to create this. We care about certain outcomes being equitable.
+
+163
+00:17:49,920 --> 00:17:56,560
+And what we found though is quite surprising is that by constraining yourself procedurally
+
+164
+00:17:57,440 --> 00:18:04,000
+to certain kind of definitions of fairness, even though on the surface, they might seem quite
+
+165
+00:18:04,000 --> 00:18:12,160
+reasonable. In fact, those constraints are so strong that almost always in a kind of rigorous sense,
+
+166
+00:18:12,800 --> 00:18:21,280
+they would lead to bad outcomes. And so there's this this dark tension between process fairness
+
+167
+00:18:21,280 --> 00:18:26,720
+and outcome fairness. And in general, I think, you know, in the criminal legal system,
+
+168
+00:18:26,720 --> 00:18:31,360
+this is something that often comes up. And I think there's a lot of nuance and whether or not you
+
+169
+00:18:31,360 --> 00:18:38,880
+want to favor a quote unquote fair process or a quote unquote fair outcomes. Here, the process
+
+170
+00:18:38,880 --> 00:18:47,600
+in my mind, at least, was was an unintuitive enough that I would prefer having better outcomes
+
+171
+00:18:47,600 --> 00:18:52,240
+rather than saying, let's equalize error rates or something like that. So where it's unclear to
+
+172
+00:18:52,240 --> 00:18:58,400
+me, why do you want that thing? Like, you know, presumably you want that thing because precisely,
+
+173
+00:18:58,400 --> 00:19:02,640
+it leads to these better outcomes. And to the extent that it doesn't lead to these better outcomes,
+
+174
+00:19:02,640 --> 00:19:08,560
+maybe we should revisit those definitions, those rules that we bound ourselves to at the beginning.
+
+175
+00:19:08,560 --> 00:19:15,680
+Yeah, and this was a big result in the paper. Can you talk a little bit more about how you
+
+176
+00:19:15,680 --> 00:19:24,560
+demonstrated that? And it sounds like you did so both the experimentation as well as kind of
+
+177
+00:19:24,560 --> 00:19:31,840
+mathematically that, you know, these these process definitions were insufficient relative to
+
+178
+00:19:32,720 --> 00:19:37,840
+the outcome definitions. So the way we did that is that that we kind of use this idea of
+
+179
+00:19:38,880 --> 00:19:45,040
+pre-dodominance, which is popular in the economics literature. And roughly, this is saying, you
+
+180
+00:19:45,040 --> 00:19:52,240
+imagine you have a set of stakeholders. And you know, to ground everything, let's let's go back
+
+181
+00:19:52,240 --> 00:19:56,640
+to our kind of college admissions example. All of what we wrote in the paper is quite general,
+
+182
+00:19:56,640 --> 00:20:01,040
+but I think it's helpful to keep things grounded with this one example. And so imagine we have an
+
+183
+00:20:01,040 --> 00:20:08,160
+admissions committee and they all have different preferences, but they agree on two things. So they
+
+184
+00:20:08,160 --> 00:20:14,560
+agree that they want to have, they want to admit students who are likely to succeed in their
+
+185
+00:20:14,560 --> 00:20:19,120
+program. And so you might operationalize this by saying that you that they that they have a
+
+186
+00:20:19,120 --> 00:20:24,080
+preference for people graduate. That's like one way to to say that that we can operationalize
+
+187
+00:20:24,080 --> 00:20:30,960
+success. And the second thing that they agree on to some extent is a preference for diversity.
+
+188
+00:20:31,840 --> 00:20:35,680
+And, but they disagree on the extent to which they're willing to trade these two things off.
+
+189
+00:20:36,720 --> 00:20:42,640
+And so some people are saying, okay, it's like we really want to prioritize, you know, one over
+
+190
+00:20:42,640 --> 00:20:49,200
+the other and other people say, no, let's not really, let's, you know, kind of we really mostly care
+
+191
+00:20:49,200 --> 00:20:55,200
+about one and not the other. And so we have this kind of, I would say realistic scenario of stakeholders
+
+192
+00:20:55,200 --> 00:21:00,480
+who have differing opinions, but they're kind of reasonable in the sense that their preferences aren't
+
+193
+00:21:00,480 --> 00:21:05,760
+all over the place. They kind of have rough alignment on these critical dimensions. And so now,
+
+194
+00:21:05,760 --> 00:21:13,840
+what we say is that I am going to in some sense randomly draw a state of the world for you.
+
+195
+00:21:13,840 --> 00:21:19,040
+And so what does that mean? I'm going to kind of, you know, tell you the relationship between,
+
+196
+00:21:19,040 --> 00:21:24,480
+you know, demographic groups and all these covariates that are observable and everything that
+
+197
+00:21:24,480 --> 00:21:28,640
+admissions committees can make their decisions on. And there's kind of this infinite
+
+198
+00:21:28,640 --> 00:21:33,600
+dimensional space of distributions that I can consider. And we're saying just pick some of
+
+199
+00:21:33,600 --> 00:21:41,600
+these things randomly. And our result in the nutshell is saying almost always, no matter what
+
+200
+00:21:42,320 --> 00:21:47,920
+state of the world you randomly draw, if you were to limit yourself to these causal definitions
+
+201
+00:21:47,920 --> 00:21:54,320
+of fairness, the policies that will result, the only policies that satisfy your causal definition
+
+202
+00:21:54,320 --> 00:21:59,440
+of fairness will be perito-dominated, meaning that everybody on the admissions committee
+
+203
+00:21:59,440 --> 00:22:06,240
+will think it's a bad idea. And so what does that mean to be concrete? So if I give you any policy
+
+204
+00:22:06,800 --> 00:22:12,960
+that satisfies your causal definition of fairness, I can come up with another policy that has both
+
+205
+00:22:13,520 --> 00:22:21,040
+greater student body diversity and higher admissions or graduation rates. And because it has both
+
+206
+00:22:21,040 --> 00:22:26,240
+of these two things, everybody on the admissions committee will think that it's better than the
+
+207
+00:22:26,240 --> 00:22:31,600
+policy that you generated through this causal fairness mechanism. With that result in mind,
+
+208
+00:22:31,600 --> 00:22:42,560
+you're kind of suggesting here that these causal policies traded in the context of causal
+
+209
+00:22:42,560 --> 00:22:51,040
+definitions are suboptimal broadly. But we've talked about all of the work that's gone into these
+
+210
+00:22:51,040 --> 00:23:01,280
+causal policies. Certainly, those folks thought they were onto something. Like, is it, what is your
+
+211
+00:23:01,280 --> 00:23:09,280
+results, what light does your result shed on all the results that you looked at when you were
+
+212
+00:23:10,800 --> 00:23:16,880
+kind of coming up with your definitions? I completely agree that there's been a lot of effort,
+
+213
+00:23:16,880 --> 00:23:24,160
+probably thousands of hours, since thousands of hours of effort collectively going into this
+
+214
+00:23:24,160 --> 00:23:30,640
+subfield of causal fairness. And I don't think that was wasted effort in any way. I mean, I think
+
+215
+00:23:30,640 --> 00:23:39,200
+these are this is an emerging field. And we have to learn and understand what we're doing. That's
+
+216
+00:23:39,200 --> 00:23:45,680
+a messy process. And so in some sense, not at all surprising that our first stab at this is going
+
+217
+00:23:45,680 --> 00:23:55,680
+to fall short. That being said, I do think, and again, this is my own view, is that our results
+
+218
+00:23:56,640 --> 00:24:06,640
+really cast them down on the value of this approach going forward for informing policy decisions.
+
+219
+00:24:06,640 --> 00:24:12,000
+I don't think that that's not a mathematical statement. It's not a formal statement. And I
+
+220
+00:24:12,000 --> 00:24:16,160
+would encourage other people who are interested in this area, you know, to continue pursuing it
+
+221
+00:24:16,160 --> 00:24:20,640
+and to read carefully the literature, to read carefully what we've written and make up their
+
+222
+00:24:20,640 --> 00:24:29,040
+own mind. But for me personally, having gone through that process, I do think there's a real risk
+
+223
+00:24:29,680 --> 00:24:40,560
+of causing harm and particularly causing harm to groups that, ostensibly, we are trying to not
+
+224
+00:24:40,560 --> 00:24:48,720
+harm by using these definitions. If we were to go down this path of mathematicizing fairness in
+
+225
+00:24:48,720 --> 00:24:56,880
+these ways, you mentioned in the paper that you show the Pareto dominance both analytically
+
+226
+00:24:56,880 --> 00:25:04,480
+and empirically, is the are you empirical results based on simulation or yes, this is simulation.
+
+227
+00:25:04,480 --> 00:25:12,720
+So we mostly use this as is an intuition pump. And so this is how we started the mouth turns out
+
+228
+00:25:12,720 --> 00:25:19,760
+to be hard. And so this is the way that we started building a tuition for the problem is let
+
+229
+00:25:19,760 --> 00:25:26,800
+simulate things and we hope that that approach is also illuminating to other people who are coming
+
+230
+00:25:26,800 --> 00:25:31,520
+to this field. Can you talk a little bit more about how you built out the simulations?
+
+231
+00:25:31,520 --> 00:25:39,280
+Yeah, and so it's pretty straightforward. We basically formalized the setting that we've
+
+232
+00:25:39,280 --> 00:25:44,640
+been talking about about college admissions. And it's very much mirror discussion. So we just
+
+233
+00:25:44,640 --> 00:25:53,440
+imagine there's some population of people. We imagine that there are various things that
+
+234
+00:25:53,440 --> 00:25:59,840
+admissions can be considered. For example, test scores or GPA and race. And we imagine some
+
+235
+00:25:59,840 --> 00:26:05,360
+relationship between these things. And then once we write this thing down, and again, I don't
+
+236
+00:26:06,560 --> 00:26:12,720
+even pretend that this is realistic in a literal sense, but I think it captures some of the structure
+
+237
+00:26:12,720 --> 00:26:18,640
+of these problems in the real world. But once we write it down, then we can just kind of draw
+
+238
+00:26:20,080 --> 00:26:25,280
+outcomes from this generative model. We can say, given that you observe these outcomes and you
+
+239
+00:26:25,280 --> 00:26:30,080
+implement this policy that is derived through these causal fairness definitions, what would you
+
+240
+00:26:30,080 --> 00:26:35,360
+get? How would that compare to things that you could do alternatively? And like I said, you know,
+
+241
+00:26:35,360 --> 00:26:41,040
+if you, anything you do, if you restrict yourself to the class of policies that are attainable
+
+242
+00:26:41,760 --> 00:26:48,720
+through a causal fairness definition, you are guaranteed in a mathematical sense to have
+
+243
+00:26:48,720 --> 00:26:53,920
+lower student body diversity and lower graduation rates than what you can do if you don't restrict
+
+244
+00:26:53,920 --> 00:27:01,760
+yourself to that class of policies, which Toss was a kind of surprisingly strong result.
+
+245
+00:27:01,760 --> 00:27:08,960
+Yeah, yeah. I mentioned when we were chatting earlier that it was very surprising for me reading
+
+246
+00:27:08,960 --> 00:27:15,360
+the abstract you used to seeing results that are talking about how something is better.
+
+247
+00:27:15,360 --> 00:27:24,160
+And I had to read Pareto dominance, you know, though that the causally defined results were
+
+248
+00:27:24,160 --> 00:27:30,400
+Pareto dominated by other policies several times before I realized what you were saying. And hey,
+
+249
+00:27:30,400 --> 00:27:37,760
+these are always worse. They're always worse. Yeah, they're always worse. And even formalizing,
+
+250
+00:27:37,760 --> 00:27:43,280
+what does that mean that these are technically almost always worse, like going back to the
+
+251
+00:27:43,280 --> 00:27:47,840
+statement I made before it's like if you were to draw these policy, draw the state of the world
+
+252
+00:27:47,840 --> 00:27:53,680
+at random, you will almost always end up with something that is Pareto dominated, meaning it's
+
+253
+00:27:53,680 --> 00:27:59,680
+actually strongly pre-dodaminated, meaning everybody on our admissions committee and that hypothetical
+
+254
+00:27:59,680 --> 00:28:06,000
+would disfavor that policy. So what does that even mean? And this is where we had to kind of dig
+
+255
+00:28:06,000 --> 00:28:13,040
+into the decades old mathematical literature on formalizing what does that mean almost every
+
+256
+00:28:13,040 --> 00:28:19,360
+policy. And so that kind of goes down this whole rabbit hole, which again, to us at a technical
+
+257
+00:28:19,360 --> 00:28:23,920
+level was super interesting because from our previous work, we had this intuition that often
+
+258
+00:28:23,920 --> 00:28:30,080
+these things are bad. But we didn't quite have that language to say, well, what does that mean
+
+259
+00:28:30,080 --> 00:28:35,600
+often? You know, what does that mean typically? What does that mean bad? And here the insight was,
+
+260
+00:28:35,600 --> 00:28:40,560
+I mean, putting together this idea of Pareto dominance, you know, coming from the economics literature
+
+261
+00:28:40,560 --> 00:28:46,240
+and this idea of almost everywhere on these kind of infinite dimensional spaces, coming for
+
+262
+00:28:46,240 --> 00:28:52,080
+the mathematics literature, and kind of putting all these pieces together, we, you know, found a
+
+263
+00:28:52,080 --> 00:28:57,680
+this, you know, surprisingly strong result. I'm trying to think back to the previous results,
+
+264
+00:28:57,680 --> 00:29:06,160
+and if you could have said something similar, or did you need the constraint of causality to
+
+265
+00:29:06,160 --> 00:29:10,480
+provide a mathematical framework for you to even get this far? Yeah, that's a really good
+
+266
+00:29:10,480 --> 00:29:19,840
+question. And so I would say yes and no. So yes, much of what we, many of the causal, money
+
+267
+00:29:19,840 --> 00:29:24,480
+of the non-causal definitions that are out there are subject to the same critique that we're
+
+268
+00:29:24,480 --> 00:29:28,800
+offering in our current paper. And so at the time, you know, a few years ago when we were writing
+
+269
+00:29:28,800 --> 00:29:35,520
+those older papers, we just didn't understand what we now understand. And so in that sense,
+
+270
+00:29:35,520 --> 00:29:42,960
+these results translate. But in another sense, there is something about these causal definitions
+
+271
+00:29:42,960 --> 00:29:50,160
+of fairness, which is does not apply to the non-causal definitions. And so it turns out that these
+
+272
+00:29:50,160 --> 00:29:58,240
+causal definitions of fairness, at least many of them, have such strong requirements on what they
+
+273
+00:29:58,240 --> 00:30:06,080
+allow that the only policies which satisfy them end up being kind of random policies that say that
+
+274
+00:30:06,800 --> 00:30:12,640
+the only policy that will satisfy, you know, one of these particular definitions of causal fairness
+
+275
+00:30:12,640 --> 00:30:20,000
+has to admit everybody with equal probability, regardless of qualification, regardless of
+
+276
+00:30:20,000 --> 00:30:26,480
+demographics, everybody's admitted with the exact same probability. And that result was extremely
+
+277
+00:30:26,480 --> 00:30:33,760
+surprising to us. And it really stems from the fact that these definitions are implicitly
+
+278
+00:30:33,760 --> 00:30:39,200
+imposing so many constraints on your policy that you kind of have no way out because this is
+
+279
+00:30:39,200 --> 00:30:44,720
+the only thing left to do. And as far as I know, I don't know of any non-causal definitions
+
+280
+00:30:44,720 --> 00:30:49,280
+that impose so many restrictions that this is the only thing that you end up with.
+
+281
+00:30:49,280 --> 00:30:55,200
+Okay, so that kind of gets at the second question I had, which was kind of some intuition around
+
+282
+00:30:55,200 --> 00:31:05,680
+why causality or causal policies perform so poorly. And it's this idea of restriction,
+
+283
+00:31:05,680 --> 00:31:13,440
+it sounds like, can you kind of speak more directly to this? Yeah, that's exactly right,
+
+284
+00:31:13,440 --> 00:31:18,720
+that's exactly right, that this is really about constraints. And so every time you add a constraint,
+
+285
+00:31:18,720 --> 00:31:25,600
+you're restricting the space of policies that you can consider. And it turns out that especially
+
+286
+00:31:25,600 --> 00:31:31,040
+for these, you know, past specific notions of fairness, or any of these things where I say,
+
+287
+00:31:31,040 --> 00:31:36,880
+if I change your race, counterfactually, I have to see exactly the same outcomes in my decision.
+
+288
+00:31:37,440 --> 00:31:45,280
+It turns out if you unpack that definition, that really implies a huge number of constraints.
+
+289
+00:31:45,280 --> 00:31:50,080
+It sounds like one constraint, but really it's many, many, many constraints that are tied
+
+290
+00:31:50,080 --> 00:31:57,280
+into that one notion. And so when you do that and you kind of, you know, internalize that bit any
+
+291
+00:31:57,280 --> 00:32:06,560
+further, like what is it that is what's the mechanism of kind of that constraint mapping to many
+
+292
+00:32:06,560 --> 00:32:11,200
+other things? Yeah, so one way to think about it, and again, this gets a little bit technical
+
+293
+00:32:11,200 --> 00:32:18,480
+and pictures is worth a thousand words here, but I'll try to do it through audio is that you
+
+294
+00:32:18,480 --> 00:32:26,000
+can imagine a graph, a DAG, a causal DAG that says, well, we have various features, attributes,
+
+295
+00:32:26,000 --> 00:32:31,600
+and we're trying to say, you know, we're drawing arrows between everything that has an effect
+
+296
+00:32:31,600 --> 00:32:39,040
+on everything else. And now we have, you know, race is one of these nodes in this graph and race
+
+297
+00:32:39,040 --> 00:32:46,080
+affects all these other things. And now if you think about all these kind of pads that race can
+
+298
+00:32:46,080 --> 00:32:51,680
+go through to affect your decisions, if you kind of look at that graph, it turns out that this
+
+299
+00:32:51,680 --> 00:32:58,160
+definition is saying that your decisions can only depend on things that are not downstream of race.
+
+300
+00:32:59,520 --> 00:33:05,440
+But mostly when people write down these types of DAGs, everything is downstream of race.
+
+301
+00:33:05,440 --> 00:33:10,960
+And so you have to say, well, you know, it's like where you went to school and then, you know,
+
+302
+00:33:10,960 --> 00:33:16,160
+your test scores because of where you went to school. And then all these other things like the
+
+303
+00:33:16,160 --> 00:33:22,400
+neighborhood you live in, all of these things are somehow tied to race. At least this is how
+
+304
+00:33:22,400 --> 00:33:30,480
+people conceptualize it in many of these papers. And once you write that down, that is implicitly
+
+305
+00:33:30,480 --> 00:33:39,040
+constraining your policy in a way that leaves no other option. But you have to make decisions that
+
+306
+00:33:39,040 --> 00:33:44,800
+don't depend on that race or anything downstream of race, which basically doesn't leave you with much.
+
+307
+00:33:44,800 --> 00:33:53,600
+Is there a notion that makes sense of kind of rating or parameterizing,
+
+308
+00:33:53,600 --> 00:34:01,200
+now less parameterizing than rating or categorizing, I guess, these causal policies based on
+
+309
+00:34:01,200 --> 00:34:07,840
+their degree of constraint? Yeah. So definitely, this one that I've been describing right now,
+
+310
+00:34:07,840 --> 00:34:15,520
+I would say it's the most extreme and that literally the only thing you can do is make decisions
+
+311
+00:34:15,520 --> 00:34:20,000
+purely randomly, no differentiation. And so I would say that's the most extreme. There's more or
+
+312
+00:34:20,000 --> 00:34:27,200
+or less unique policy that satisfies this causal definition of fairness. For everything else that we
+
+313
+00:34:27,200 --> 00:34:32,400
+looked at, there's a little bit of wiggle room. But all of that wiggle room, all of those policies
+
+314
+00:34:32,400 --> 00:34:38,960
+that are allowable are still pre-dominated. And so they're still all, you know, quote-unquote bad
+
+315
+00:34:38,960 --> 00:34:46,080
+in some sense, but they're, I would say not as bad, they're not as, you know, there's more than one
+
+316
+00:34:46,080 --> 00:34:54,000
+choice. And you kind of touched on this earlier in saying that, you know, this work isn't necessarily
+
+317
+00:34:55,040 --> 00:35:02,400
+meant to, you know, say that there's no value in this research, but do you see, does this work
+
+318
+00:35:03,600 --> 00:35:10,560
+point you in a direct, you know, if you're interested in causal policies, do you see, you know,
+
+319
+00:35:10,560 --> 00:35:16,640
+something in this work that says, well, maybe we should be looking here, or is it more, you know,
+
+320
+00:35:16,640 --> 00:35:20,080
+is it not really providing you that that shining light, so to speak?
+
+321
+00:35:20,080 --> 00:35:23,920
+No, I mean, I think there are at least a couple things that are that are important at first,
+
+322
+00:35:23,920 --> 00:35:30,160
+just to highlight the introduction of causality into this conversation is an important one, I think.
+
+323
+00:35:30,720 --> 00:35:38,480
+And it's, it was too much about, I would say pure prediction before, without thinking about
+
+324
+00:35:38,480 --> 00:35:44,720
+the effects of interventions. And so I think that, that idea at a very high level is an important one.
+
+325
+00:35:44,720 --> 00:35:49,600
+Now, the other thing that I think is at least in some of this literature, but, you know,
+
+326
+00:35:49,600 --> 00:35:54,800
+perhaps not highlighted the extent that I would like it to be, is, is let's think about outcomes.
+
+327
+00:35:55,440 --> 00:36:00,160
+And so there are these process oriented views of fairness. And in some context, those might make
+
+328
+00:36:00,160 --> 00:36:07,200
+a lot of sense, but I think it's important to understand what we're, we're leaving on the table,
+
+329
+00:36:07,200 --> 00:36:14,640
+when we think in terms of pure process, as opposed to at least acknowledging the effects of policies
+
+330
+00:36:15,280 --> 00:36:21,760
+generated by using these design principles that are being put out there. And at the end, I think
+
+331
+00:36:21,760 --> 00:36:26,560
+a reason we're going to disagree about whether or not one should focus on processor outcomes,
+
+332
+00:36:26,560 --> 00:36:30,000
+but what I would personally like to see is more discussion, more engagement,
+
+333
+00:36:30,880 --> 00:36:35,040
+around these two different ways of thinking about these problems. But that is something I think
+
+334
+00:36:35,040 --> 00:36:39,600
+this literature at least is alluding to, even if it's also directly engaged with.
+
+335
+00:36:39,600 --> 00:36:47,280
+Is there some idea in which if you start with outcomes, then there is some role of causality as
+
+336
+00:36:47,280 --> 00:36:57,200
+a tool to taking from those outcomes to policies that aren't limited by the constraints that we've
+
+337
+00:36:57,200 --> 00:37:02,160
+talked about and are dominated in the way that we talked about. Definitely. I think it's very hard,
+
+338
+00:37:02,160 --> 00:37:09,200
+but at least in theory, you can do this. And so here, the idea is if we agree, and this is a big if,
+
+339
+00:37:09,200 --> 00:37:15,280
+if we agree what we want the world to look like, and again, different people are going to disagree
+
+340
+00:37:15,280 --> 00:37:21,120
+about that. But let's assume that we have some consensus on where we want to get to.
+
+341
+00:37:21,760 --> 00:37:27,360
+Then you can say, well, we could implement all these different interventions. How do we get to
+
+342
+00:37:27,360 --> 00:37:33,120
+this place that we agree we want to get to? Which one of these interventions is going to get us
+
+343
+00:37:33,120 --> 00:37:38,800
+closest to that place or fastest to that place? And that's a causal question. That's purely a
+
+344
+00:37:38,800 --> 00:37:46,000
+causal question. It's a hard question, but I don't think it's impossible in all scenarios to
+
+345
+00:37:46,000 --> 00:37:54,080
+answer. And some of our other work is actually directly trying to take that perspective to design
+
+346
+00:37:54,080 --> 00:38:00,320
+policy interventions. What's next for you in this line of research? Yeah, so there's a lot of
+
+347
+00:38:00,320 --> 00:38:05,920
+stuff kind of that we're actively pushing on right now. And the one thing that I'm quite excited
+
+348
+00:38:05,920 --> 00:38:13,120
+about is designing interventions that can get us to a better place. And so this is a theme of
+
+349
+00:38:13,120 --> 00:38:18,560
+much of my work. And so to give one specific example, we are working with a public defender
+
+350
+00:38:18,560 --> 00:38:24,800
+in California, the Santa Clara County Public Defender office to help their clients make it to court.
+
+351
+00:38:24,800 --> 00:38:30,320
+And so why is that? Well, we, when you miss court, all sorts of bad things happen. And so you can
+
+352
+00:38:30,320 --> 00:38:34,960
+know a bench ward is often issued. And now if you're pulled over for a minor traffic violation,
+
+353
+00:38:34,960 --> 00:38:42,160
+you could get arrested and thrown into jail. And so obviously, I would say the right solution here
+
+354
+00:38:42,160 --> 00:38:47,360
+is to not have those outcomes given the, you know, if you miss court, in my mind, I think of that
+
+355
+00:38:47,360 --> 00:38:51,840
+as like a tantamount to missing a doctor's appointment. It's not like people are trying to flee
+
+356
+00:38:51,840 --> 00:38:56,320
+the jurisdiction. They have complicated lives. They, they forget about their appointments, all
+
+357
+00:38:56,320 --> 00:39:01,520
+sorts of things happen. And I don't think it's kind of, it's, it's, it's not humane. It's not just
+
+358
+00:39:01,520 --> 00:39:06,960
+to lock somebody up for that. That's a harder policy discussion. And so the way that we're addressing
+
+359
+00:39:06,960 --> 00:39:11,040
+it is we're saying, well, given that this is the way the system works, we're not happy with it,
+
+360
+00:39:11,040 --> 00:39:16,400
+but given the way that this is the way the system works, let's try to help people make it to court.
+
+361
+00:39:16,400 --> 00:39:22,880
+And so we're doing that through two different means where we're working to send out text message
+
+362
+00:39:22,880 --> 00:39:30,800
+reminders so people can help them plan. And we're also providing free door to door ride share
+
+363
+00:39:30,800 --> 00:39:37,680
+from someone's home to court and back. And that is now, now the question is, how do you,
+
+364
+00:39:38,880 --> 00:39:43,840
+how do you allocate this limited benefit of ride? So unfortunately, we can't offer the ride
+
+365
+00:39:43,840 --> 00:39:49,600
+to everybody. And so who do we offer the rides to? And this is fundamentally a causal question.
+
+366
+00:39:49,600 --> 00:39:54,240
+It's like there are various policies that we can implement. Which ones of these policies
+
+367
+00:39:54,240 --> 00:40:00,480
+are we happier with? Which ones are going to get us closer to a world that we want to be in?
+
+368
+00:40:00,480 --> 00:40:09,040
+Awesome. Awesome. Well, Sharad, congrats again on the outstanding paper award. That's huge.
+
+369
+00:40:09,040 --> 00:40:14,720
+And it was great catching up and learning a bit about your latest work. Thanks. It's always fun chatting.
+

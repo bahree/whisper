@@ -1,0 +1,463 @@
+All right, everyone. I am here with Michael McCourt. Michael is the head of engineering at Sigopt.
+Michael, welcome to the Twomo AI podcast. Thank you, Sam. It's a great pleasure to be here today.
+I'm really looking forward to our chat. We, of course, have chatted and met multiple times in person,
+typically, but we haven't had the opportunity to get you on the show yet. That is changing now
+to get us started. I'd love to have you introduce yourself to our audience.
+Absolutely. How would your story, how'd you get started in the field?
+You know, I've been very fortunate. I'm very fortunate to be here today because when I started out,
+I was actually not doing ML at all. I was doing mathematics and I did undergrad and graduate
+degree in mathematics undergrad at the Illinois Institute of Technology in Chicago grad school
+at Cornell. And then as part of my graduate program, I actually had an opportunity to work
+at Argonne National Labs, which is where I really got started doing a lot of high performance
+computing, some heavy-duty writing software, which was a great opportunity to learn how to write
+software as part of a big project. A project that a lot of people are contributing to and most
+of it has been written before you even got there, which has been great prep for the work that I'm
+doing now. After I finished a postdoc, also still doing mathematics, a friend of mine, Scott Clark,
+who founded the company, Sigopt, reached out and said, Mike, started a company and we're working
+on the same topic that you've been doing research on for a while. Now, I didn't appreciate that
+at the time because I had just been doing in what in my mind was sort of pure mathematics or applied
+mathematics. I often referred myself as a theoretically applied mathematician in the sense that I hope
+somebody applies it, but it's not going to be me. And then I had the opportunity really to take it
+and put it to use here, as part of my time at Sigopt, where we've been using some of the kernel
+methods and Gaussian processes work that I had been working on for more of the mathematics and
+the computational statistics side. And now I'm seeing it also put to work in the ML perspective
+and having this new technology available to our customers so that they can have sort of as
+good an experience as possible. So my own journey is a sort of a weird one, but I'm so so so so
+fortunate to be here and be able to work with such amazing people and meet outstanding people in
+the ML community, such as yourself, Sam. Awesome. Awesome. So Mike, one of the conversation topics that
+I wanted to jump in with you is this broad topic of optimization. You spent a lot of time working
+on that as the Sigopt broadly. And one of the questions that maybe a place to start is,
+you know, how do you think about optimization relative to machine learning? Optimization
+is obviously a part of machine learning, but it's also a standalone technique. How do you think about
+the differences between these techniques and when and where they're applied?
+Very, very intricate there. I think there's a lot of interplay between a lot of different elements.
+At its core, I think some people might argue that machine learning is a
+branchary, segment of statistical learning theory in sort of its core genesis. I think you can
+also argue that nowadays machine learning also has obviously this very strong engineering
+element to it. We're talking about the flow of data, data structures, the ability to deal with
+not just noisy data, but somehow data which is beyond the scope of the core assumptions
+in statistical learning theory. So as a result, I think there are a variety of even different ways
+to just talk about machine learning as its own entity. And then in addition to that, you throw
+in the topic of optimization, I think on one hand, there was a famous paper, if I recall correctly,
+learning to learn by gradient descent. And that sort of was a cute play on words, but was a
+fundamental point of discussion there. A lot of the time when we talk about many of these machine
+learning methods, not all of them, but many of them, we ask ourselves, can we learn this not just
+with the model, but with gradient descent. So when we talk about learning at all, in a sense,
+what we are talking about is gradient descenting our way sometimes down to an answer. Now that's not
+necessarily required. Of course, we could look at, let's say, linear or logistic regression,
+there may be a closed form solution to that in a classical sense. I don't know if anybody would
+still use that in a very large data setting, but that definitely exists. When we talk about support
+vector machines, we might talk about quadratic programming. Quadratic programming is optimization,
+but it's not necessarily gradient descent, or maybe there's gradient descent mechanism
+for solving a quadratic program, but usually there's another mechanism for it. So there are,
+I think, a variety of ways just to talk about optimization in as much as it supports the process
+of learning. And then to push that a step further, of course, when I talk about optimization in
+the context of sigopt, that's even another step beyond mathematical programming, beyond gradient
+based optimization strategies. What we're thinking about inside sigopt, when we say the words
+optimization or sample efficient optimization, what we're talking about really are problems where
+we have no knowledge of the structure of the problem to do mathematical programming. You have to
+have a solid knowledge of the structure, maybe that it's quadratic, or that the constraints
+fit a specific format in a gradient based setting. You need that gradient information, at least
+an approximation to it. Whereas when we're thinking about optimization here, it's more of an
+aspiration. We're sort of saying, I aspire to find the optimum, but I don't actually have any
+delusions of finding the optimum in any sort of finite or reasonable amount of time.
+The goal for us when we do optimization is to try and identify as higher performing outcome as
+possible, in as rapid a fashion as possible. But without necessarily any real guarantees of
+performance. Now, there are some great articles that are talking about performance guarantees
+or regret minimization for Bayesian optimization. There's some fantastic papers. I think the ICML
+2020 test to time paper, 2021 test to time paper this year was the article talking about
+defining regret in a Bayesian optimization setting through the banded literature. So I think
+that there is an opportunity to do that, but from a practical circumstance. When we talk about
+optimization for what we are doing, we're not talking about optimization for the purposes of
+learning an ML model. What we're usually talking about is optimization, maybe for this tuning
+process. And in addition to that, optimization that uses learning itself to power the optimization
+process. I mean, internally inside of a Bayesian optimization algorithm, you probably have a Gaussian
+processes at play or maybe a neural network that you're using your modeling on. Obviously,
+these need to be learned. There's information theory, perhaps that's powering the acquisition
+function element of your Bayesian optimization. But in reality, what I sort of think of this as
+is more just an intelligent search process, an intelligent learning process learning about the
+optimum. So yeah, it definitely is doing learning. But when we talk about optimization, it is very
+different than this gradient-based optimization that I think many people in the community would think
+of when they first think of optimization. You aren't lying when you said there was an intricate
+relationship between those. We've got optimization, which is used in the context of machine learning as
+part of the process of learning. We've got optimization, which is separate from machine learning in the
+sense of we're trying to identify an optimal solution to some problem that we don't have as much
+information about as we might if we were doing applying machine learning. And then we've got
+machine learning embedded into the optimization process to try to optimize it in a sense.
+I mean, very realistically, yeah, that's what's happening. I guess it's no surprise than that it
+is a bit confusing in that at least this word optimization is overloaded in a lot of different
+ways. You mentioned in there one aspect of optimization that Seagop does spend a lot of time on
+and that's, you know, specifically, it's applied to the hyper parameters in a machine learning problem.
+But you also are increasingly doing other types of optimization like in a, you know,
+HPC style. Is that and what are those and those types of problems are I think one that I've
+talked about previously with Gustavo on your team. An example of that is like identifying the best
+materials. It was a it was a piece of glass. It was trying to come up with the right materials
+with which to additively manufacture a special type of glass. And I think it's for solar like for
+solar power. Exactly right. These these optoelectronic devices. It doesn't have to be solar. Your cell
+phone theoretically is using this as well. But yeah, you're exactly right. Got it, got it. And so,
+yeah, maybe from kind of a, you know, optimization 101 perspective when we're, you know, we've got
+you know, a problem and we can contextualize it in the context of this materials problem or if
+you've got a kind of a simpler context conceptual problem for us to start with.
+You know, how how how do folks typically start when they're thinking about an optimization problem
+and kind of what's the path of, you know, maybe increasing complexity like what's the simplest
+approach and then, you know, where do you go from there to try to do a better job? I think
+it starts with a initial formulation of what it is that's trying to be addressed. And when I say
+that, I mean that it's actually maybe two different parts of the formulation. There's the initial
+formulation, which is the the physical world, the physical manifestation, whatever it is you're
+working on, whether it is manufacturing something like a like a coffee cup or whether it is designing
+an ML algorithm that you're going to put into production to give recommendations. Both of these
+require an initial statement of what is it that we're trying to accomplish? And what is it that
+we're willing to do in order to accomplish that? If if we were willing to have some brilliant
+artisan come in and design this mug and spend hours crafting each one, that's very different
+than hey, I need to get 10 million of these manufactured in any given time. The same thing is
+true realistically of an ML algorithm as well. If you're willing to spend years and years and years
+building these up, that's very different than hey, we need this to get out in three weeks and we
+need it not just to get out, we need to be in production and be stable and be monitored and
+feel confident that we're not really hurting our business here. So I think that that's sort of
+the first side of stating this this formulation and explaining the world in which you're willing
+to live. And then the second step is the actual to some degree phrasing of the problem as an
+optimization problem. What metric or potentially metrics is that you're interested in considering
+in this situation? What domain? How is it that you can parameterize this space of decisions
+that you're willing to make? And to some degree also, what is your your budget here? When I say
+budget, it could be a financial budget, it could be a time budget, it could be a experts time budget.
+So so both of these elements are I think key to to progressing the problem forward. And once that
+initial discussion has taken place with not just the person who's being assigned or people who
+are being assigned to do the modeling, but also whoever the stakeholders are in this, whoever
+we're going to make the final decision, yeah, this can this can be a winner or no, it can't be a winner.
+They all need to agree and ideally that all kind of happens at the start because if you wait until
+the end, you might have wasted three weeks, three months, three years trying to build something that
+people actually decide isn't acceptable. And so you've got this problem formulation. And
+when I hear the way you describe that, I'm thinking like English, you know, or a natural language
+more properly and like in a document as opposed to a mathematical formulation of the problem,
+is that what you're describing? I think that's the split there between the two formulas. I think
+on one hand, you need to have an agreement and maybe formulation is honestly probably the wrong
+word, which again, I think even the optimization community sometimes uses optimization too broadly.
+I'm probably using formulation too broadly here, but yeah, on one hand, you need the English
+language document. You need a bunch of people who aren't going to be need deep in the project to
+still agree with the goals of the project and allocate the necessary resources, but then you also do
+need to some degree this rigorous mathematical formulation. You need to be able to compute things.
+If you have things you can't compute, if you have things you can't measure, it's going to be very
+hard to optimize though, not necessarily impossible. We can talk about that a little bit later, but
+I think it's an ill-defined situation if you go forward and try to not have very explicit
+statement of these are the metrics I'm studying at the very least studying. If you can't state that,
+it's going to be very hard to feel confident that you're doing things successful.
+And so in the case of the the glass or the mug, do you you've got some property that you want to
+optimize and you've got some set of parameters that influence that property. I don't imagine that
+you always have a straight line mathematical equation between those parameters and the ultimate
+property that you're trying to optimize. Very rarely, very rarely. And when you do,
+you probably have some very nice clean way to try and do the optimization.
+I'll say that there's a few different sets of circumstances that can pop up here.
+The relationship between these parameters, these choices you can make and the resulting
+metrics of interest to you is in some sense always defined by a physical outcome. I build the mug,
+I drop the mug on the ground, I watch whether it cracks or not. Much more often,
+you're going to see people using some sort of computational simulation to help accelerate the
+process because presumably running something on the computer is going to be faster than actually
+manufacturing, fabricating whatever device or tool or object that it is. Not always,
+but usually. And that's why, of course, people are buying more and more computers and moving more
+and more of their testing process into the computational world. As far as understanding this relationship
+between choices you can make and resulting metrics, it's sometimes you have a great insight
+into this as an expert, somebody's been working in the field for 20, 30 years. Sometimes you don't.
+And sometimes even if you do, you want to get beyond your intuition, because your intuition
+got you to where you are now. If you're trying to do something new, somehow you need to get beyond
+where you would initially, naturally be guided to act and the decisions you'd naturally be guided
+to make. And I think that that's a key element of what the sort of mathematical and statistical
+formulation of optimization brings to the table is you can leverage your prior beliefs, your prior
+sense of the world if you want to. But you also can drown that out. The computer doesn't have to
+have any prior beliefs about things. So the computer, the optimization algorithm, will figure out
+whatever it can figure out. And that can expose you to some new ideas, some new strategies,
+which are, I think, what everybody's really trying to go after when they're building a new model
+when they're designing a new coffee mug or the glass, for example. And really, I think one of the
+interesting things about that project was it wasn't to one metric problem. It wasn't one objective.
+We were interested in there were actually a lot of objectives of interest. And the relationship
+between the parameters and the metrics were complicated. And then the metrics themselves,
+of course, competed with each other. One of the key metrics we were interested in studying there,
+we need the glass to be low haze light has to pass through and not get scattered, which obviously
+if the light gets scattered you're not going to be able to see what's on the other side of the glass.
+So light that's coming in from the sun might not actually be as efficient in the solar panel
+or you're not going to be able to see what your phone is trying to show you. But on the other side
+of that, you want the glass to be very easy to clean, which was this term super omnipobic glass.
+We don't want oil or sand in the case of solar panels, oil in the case of your fingerprints on
+your computer screen. You don't want that stick into the glass. And if it does touch the glass,
+you want it to be wiped right off very quickly, not to need some very harshest stringent to get it
+off of the solar panels. But these things are at odds. I mean, when you think to yourself,
+what sort of thing does oil not stick to? Gee, a cooking pan. Could I make my phone out of a
+cooking pan? Teflon? No, obviously you can't do that. So when you try to maximize one metric,
+you're hurting the other metric. And that sort of balance that understanding the exploration
+of how the decisions you make demand these trade-offs in your resulting models or your resulting
+solar panels or whatever. That's a really key part of what I'd call the modern optimization
+process or maybe the modern intelligent experimentation process. So you formulated your problem
+identified the things you care about and your constraints. You've identified the
+relationship as best you can between the knobs and dials you have and the quantities
+that you care about. And then I'm imagining the next step is some type of optimization approach.
+And maybe the easiest one is like, hey, we'll just try every value of every knob and write down
+what the outputs are and see where we get, but that is quite expensive. And so then we can get
+more sophisticated approach. That's the crux of the problem. There it is. No, but I think you've
+hit the nail squarely on the head. At the end of the day, if you want to find out what works best,
+try a bunch of things, whichever works the best is the winner. And realistically, that will work.
+That absolutely will work and every day of the week people do this all the time. How do you
+pick the toothpaste you like the best? I don't know about you. I try this toothpaste. I try this
+toothpaste. I try this eventually one of them I like and I'm like, okay, I'll take that toothpaste.
+That's fine. I think that that strategy is a perfectly reasonable strategy in certain circumstances.
+But as we get to these more complicated decision spaces, as we get to a point where we're trying
+to design coffee mug. Now we're talking about not just the shape, but we're also talking about maybe
+the material. We're talking about how hot it's put into the fire for. We're talking about the color
+on the outside. You're talking about increasingly complicated space. You just can't try them all.
+You absolutely cannot try them all. So you need some intelligent strategy to search the space.
+And in particular, the way that strategy is going to be intelligent is by figuring out
+whatever relationships exist between the parameters you're studying and the metric that you're
+interested in optimizing. And that's really the difficult point. You mentioned earlier, could somebody
+go through and define this relationship? Absolutely. Maybe that is possible. But in most circumstances,
+that's not going to be possible for all sorts of reasons. Most of these objectives are very noisy.
+In most of these problems, you have some limited amount of precision with which you can set these
+parameters. In reality, the metric you're trying to optimize is probably not the metric that you
+are doing the optimization on. If I run a computer simulation for something, I'm doing pretty well
+as far as approximating the real world, but it's not the real world. When I go through to actually
+manufacture or when I go through to actually put my model in production tomorrow or the day after,
+tomorrow and the day after are going to act differently than today. So even if I have the best
+data possible, it's just not going to be possible to actually optimize the thing that I'm trying to
+study. So as a result, we're going to need to move as quickly as we can in our optimization process
+so that we can figure out the best thing for today and then retune in the future as new information
+pops up, as new strategies pop up, as I want to design something different because it turns out
+customer taste of change. All of these things are key elements in what is going to be a successful
+optimization process. And what we do internally in what many of these Bayesian optimization methods
+use is some sort of modeling strategies we talked about basically ML on the inside to come up with
+what this relationship between parameters and metrics are. The better we can understand that
+relationship, the more quickly we can point ourselves towards where the high performing outcomes are.
+I want to maybe take a digress for a second kind of returning back to the earlier
+conversation around machine learning versus optimization as approaches to solving a particular
+problem. Is optimization something that you might apply when you haven't collected as much
+historical data relative to machine learning? Or does that not have anything to do with it?
+Ultimately, when you're trying to build the mug that has the strength that you want given
+whatever your constraints, there's some parameters that you're trying to figure out that optimize
+the strength and whatever other targets you have. What is it that says that you shouldn't try to
+machine learn those parameters? Rather, you should optimize and find those parameters that way.
+It is very much this desire for sample efficiency. And you could absolutely test one design,
+the next design, the next design, the next design. You could try and do this for 4,000 times,
+8,000 times, 50,000 times. However many times it would take to learn your whatever it is,
+XGBoost model, neural network, whatever. And then, of course, once you have an XGBoost model,
+neural network, optimizing that, finding the optimal value for that, it's very, very cheap because
+evaluating an XGBoost model, neural network, support vector, and evaluating that's very cheap.
+The key here is that the cost of each piece of data is so high.
+So it's the same thing. It's the same thing. You know, as with machine learning, you need a label
+data set. Oh, very true. These are your inputs. Yes. This is your strength. You know, this is
+your whatever. Those are your out your labels. Yes. And for the types of physical world problems
+that we're talking about, primarily, you just don't have that. Exactly. Or if you do, it's very small.
+It's a very small set. And you don't have the amount of time required to make a very large data set.
+Yeah. Exactly right. Forgive me. That should have been obvious, but it wasn't falling.
+No, no, no, no, no, no. That's a great point. And let me tie that in with a small branch of
+machine, I shouldn't say a small branch, but a branch of machine learning called active learning.
+Active learning is very much a key driving force behind Bayesian optimization.
+Right. In an active learning setting, you are trying to do machine learning on this relationship
+between parameters and metrics, but you're doing it in such a way that you acquire each piece of
+data sort of in a sequential fashion or maybe in batches, but you don't have all the data at the
+start. You're trying to accumulate more data. The goal there, though, is to exactly as you're
+talking about learn this model. The goal in Bayesian optimization is to sequentially accumulate data,
+but not to learn the model only to learn about the optimum or high performing outcomes.
+Even if our internal models are very bad, it doesn't matter as long as they're pointing us
+in the right direction, as long as they're identifying high performing outcomes, the model itself
+could actually be garbage, just totally terrible, totally useless, not predictive in any fashion,
+as long as it points you in the right direction. And that's, I think, the key benefit of applying
+Bayesian optimization, as opposed to, let's say, active learning, is that you have a different
+goal. If your goal is a simpler goal, find the optimum, that's simpler than learn the whole
+function over the whole domain. And you can do it in a more sample efficient fashion because of that.
+That was super helpful. I'm remembering back to my conversation with Gustavo. I don't remember
+if it was, if this was part of the published interview or a prior pre-call. But I remember not
+really understanding the connection with active learning and thinking that it was a bit of a
+stretch, like, yeah, or just not like, is that kind of a marketing association? Or like, what's the
+relationship between optimization and active learning? But what you said just help kind of frame
+that for me with, in both cases, you're kind of doing sequential optimization, estimate, you're
+trying to go from your inputs to your outputs sequentially and evaluating how close you got to
+where you're trying to go and feeding them back to help you determine where to go next. And in
+the active learning case, your goal is to create a model that you can then take and apply independent
+of this incremental process in your optimization case. You just want the values at the end that tell
+you what to go try in the real world. Exactly right. No, you've nailed it. And these aren't,
+I think they're very closely related communities. I think the people who are doing active learning
+are very closely related to people who are doing optimization. I think there's a minor offshoot
+of active learning, this active search topic that Roman Garnett has been working on for a little
+bit, which is like optimization, except that your metric is not numerical, it's a zero one metric.
+So all you're trying to find is the highest number of successes possible. You might hear people
+talk about every once in a while active differential inference. I need to be able to understand the
+state of the world in as sample a fashion, a sample efficient fashion as possible. In particular,
+this pops up sometimes in medical diagnostics. If you're running a test on somebody,
+especially let's say a test that has some sort of radiological element to it, you want to do so
+in as sample efficient a fashion as possible. You can use these active differential inference
+methods for this. There's a field called Bayesian quadrature that's the active estimation of
+integrals through exactly the same way. Let me accumulate some data. Let me do so in a way,
+which gets me the most accurate integral, the most accurate understanding of the world as fast
+as possible. The only question is what's your goal? Is it learning? Is it optimization? Is it
+inference? Is it quadrature? Is it search? These are all parts of, in my mind, the same spoke.
+Now, could you say that this is all strongly related to sequential decision making and in particular
+the topic is sequential is going to make it maybe in the real world? I would argue, yes,
+some people in sequential decision making community may argue no reinforcement learning is a different
+thing. I think that in reality, I think that many of these things are closely related,
+but they do have practical enough differences, perhaps, that they're certainly worthy of studying
+in and of themselves. I don't think there's any need to merge all of these topics, but I do think
+that knowing about the literature in each of these fields has helped each of these fields progress
+faster than they would if they were just coistered off on their own.
+So we're starting to get to, where I hope we get to, which is kind of like the, we've defined
+optimization kind of framed it relative to machine learning and we're starting to talk about
+like what's the research frontier in optimization? What are the open questions? I mean, optimization is
+way older than machine learning, right? And so it's a much more mature field
+beyond kind of mentioning, you know, some adjacent areas like you did, is there a way for you to
+characterize like what's almost taxonomized kind of the, you know, the research frontiers of
+optimization, like how and how are folks thinking about what are the interesting open questions
+in optimization? What I'd say is I think that there is a division of the optimization community,
+and for the record, it lives also within a lot of different communities. I think that a large chunk
+of people who would say they do optimization and do research on optimization live purely within
+mathematics departments, they're thinking about what I would call sort of the classical mathematical
+optimization. And you're right, that predates machine learning, that predates statistics, that
+predates, well, they're statistics, the concept, but at least the field of statistics starting,
+let's say 1910 or something like that. So yeah, there are people who have been thinking about
+optimization since forever Newton's method is optimization. So I think that you can, you can look
+at that and say that there is a massive field, a huge bunch of literature, continuing research,
+thinking about different implications of smoothness, quasi-convexity, various different things.
+I think that you've got another branch of the community that is optimization, but thinks of it
+in terms of what's called mathematical programming. And those people may live in a math department,
+they may live in operations research groups, they many different places can be thinking about linear
+programming, dynamic programming, stochastic programming, all those. And quadratic programming,
+exactly right, mixed integer nonlinear programming. And in many cases, those people are sometimes
+addressing problems that may be very close to some of these problems that we might address with
+sample efficient methods, but the goal may be different. In the case of doing mixed integer nonlinear
+programming, the goal may be prove that I have the answer. I have the answer with a perfect guarantee
+or I have a answer which is within blank of the true answer with some guarantee or something like
+that. I think that both of those are sets of optimization. And then I think there's this topic,
+maybe that we're working on now, which is more of the the quote-unquote black box optimization
+community, which is a bunch of evolutionary algorithms. And of course, those evolutionary
+algorithms are, I think, often very poorly represented at ML communities, but are a massive
+bunch of literature and there's some outstanding work going on there right now in the evolutionary
+field. And then you've got these statistically motivated sample efficient optimization methods,
+which are probably the most common ones you'll see talked about by myself and in some of the
+context of the literature that I'm referring to. I think obviously you're still seeing a huge
+amount of gradient descent literature in the NURPS community. So that's sort of the taxonomy
+that I'd split it on. Are you doing something that's yet in this in this group here that is
+gradient descent? Are you doing mathematical programming? Are you doing something evolutionary
+or are you doing something in one of these sample efficient categories, the Bayesian optimization
+category? Got it, got it. And you mentioned NURPS, are you kind of up to date on some of the
+optimization conversations that are happening at NURPS? What does that look like?
+Yeah, and I think that in particular, I can characterize how I'm thinking about it, especially
+a lot with the workshops. See, there's a workshop that is on optimization in ML. It's literally
+the name of the workshop. They've been having it for a long time, a lot of great research going
+on there, but that is more focused on either many of these gradient descent style methods or
+elements of mathematical programming. There are some articles in there that are on more of these
+sample efficient methods. In particular, I think National University of Singapore had an article
+or someone from, I shouldn't say the University, someone from National University of Singapore
+had an article on BIO for a simulation, catlibrating simulation models. That's what it was.
+So there is some amount in there, but in reality, that workshop I definitely would say is more focused
+on the gradient, the SCASTIC gradient descent methodologies. I think that you're seeing, though,
+a widespread of workshops right now, which are trying to take AI out of AI's community and get
+it out into other segments of the community. There's the ML for physical sciences or ML and the
+physical sciences workshop. There's the one tackling climate change with machine learning, one of
+this obviously, not just three timely, but I think is a really exciting opportunity to get out of
+the AI world and immediately be helping things and have an positive impact. There's the AI for
+the sciences, or maybe it's called AI for science, workshops as well, which you said, it sounds like,
+okay, ML for physical sciences, AI for science. What's the difference? I mean, in reality,
+I think this is just a sort of embarrassment of riches here. There's so many people doing so
+much great work that we have a lot of different workshops that are on close topics. And I think
+this is giving us a chance to really encourage participation, not just by the people who have been
+doing this for a long time, but anybody wants to get in the game. Anybody wants to be taking AI and
+putting a convolutional known networks or maybe reinforcement learning and put them out in the
+world there, or people who want to be doing sample efficient stuff, the Bayesian optimization
+stuff. There's some great papers in some of these workshops on BO. I think there's one from some
+authors at Shanghai Tiao Tong at the ML and the physical sciences workshop trying to talk about
+thermal photovoltaics, I think. There was a Carrie Ann Bergen at the AI for sciences workshop.
+She's part of a panel, but I mean, she's been doing good work recently, especially trying to say,
+hey, how we're using ML to deal with earthquakes. And as somebody who lives in Hawaii, something I'm
+very concerned about. I really want to make sure that we're dealing with earthquakes. Well,
+so I just, I love to see it. It's really exciting for me. And it's exciting to see people out there
+taking advantage of ML in the sciences, but also specifically, yeah, the sample efficient
+optimization in the sciences out in the real world, making big things happen. I'm excited.
+And so a pattern, the, you know, clear pattern here is that when you're trying to apply
+machine learning in ways that kind of interface with the physical world, optimization,
+does, would you, is it too strong to say the optimization plays a bigger role or is more important
+than, you know, when you're optimizing, you know, ad revenue or something that's, you know, purely
+physical, I'm sorry, digital based. I think, I think everybody's led to have their own opinions
+about what's the most important thing, the most exciting thing. I know I personally find it
+incredibly exciting. And as I mentioned before, I didn't grow up in the ML community. I grew up
+doing theoretically applied mathematics. And what we worked on back in the day was a few different
+things in particular, some magneto hydrodynamics. And we're seeing, we're seeing even now,
+nuclear fusion trying to, trying to bubble up, trying to be a little exciting right now.
+ML is playing a little bit of a role in that. I'm excited by that because, you know, it's,
+it's a, it's a moment right now. There's a moment where ML is starting to mature and it's
+starting to see its capabilities expand beyond. Sure, yeah, let's say recommender systems.
+Now, the people working at whoever using these recommender systems, I am, I guarantee they're
+excited to make that money. They should be. That is, that is their job. I personally find it
+incredibly exciting to say, hey, let's get out there and deal with drug discovery, a place where
+sample efficient optimization, active search in particular has been really exciting so far.
+I love the idea of dealing with construction and how to make construction more environmentally
+friendly. There are versions of that problem that can be addressed with sample efficient
+optimization. And in particular, as we see more and more fields moving away from maybe the,
+the classical way of doing business where it's just an expert tells you this is what you do and
+then you do it. And saying, now let's use a data driven approach. And in particular,
+let's explore the space of possible options. We have to find the one that works the best.
+That's where sample efficient methodologies is going to play a big role. That's where things
+like basic optimization are going to play a really, really, really big role because when you're
+talking about new strategies for construction or new, new flows for a canal or how to deal with
+displacement of wildlife or any number of different things. We talked about solar panels before.
+How to best design solar panels or as energy efficient as possible. These are problems that can take,
+I mean, for some of these things, you're talking about days, weeks, months to test some of these
+hypotheses. You need to do as much as possible in the computer at first. And even those simulations,
+those numerical simulations can be on the order of hours or days to run these climate simulations
+that are being run at NCAR right now. You're talking about months for some of these simulations
+to try and predict the impact of additional rainfall in certain parts of the world or something
+like that. So you really need the sample efficient methodology. So as to help guide what is going
+to be put into production in the eventual real version world, what we're actually going to go out
+and test because you only have so many shots of that. You only, if each of those tests that you're
+going to run is going to take a year, three years, five years or something like that, you really need
+to have the right guidance to put that in play. And that's, for me, that's where the optimization,
+the Bayesian optimization, the active learning, the sample efficient methodologies are just going
+to play a massive role. And you're already seeing it at the workshops right now. You're starting
+to see it, especially in these application journals. In each of these fields, you're seeing articles
+being published, Bayesian optimization, intelligent ML, sample efficient ML, a surrogate assisted
+optimization for construction, for manufacturing, for safety for vehicles. You're seeing it all
+over the place. And it's just, it's a great time. It's a great time to be in the field. I think
+we have a chance to do some really cool stuff. And I'm lucky to be a part of a company that wants
+to be a part of that. I think I ran into that name collision overloading of optimization again
+and asking that question. What I was trying to point at is there's this application of sample
+efficiency. You've got some machine learning problem. You want to optimize that problem.
+You know, hyperparameter optimization is a way to do that. You want to do that as efficiently
+as possible. There's an element of sample efficiency there. And that's applicable whether you're
+dealing with, you know, the ad optimization problem, you know, pure digital or not. Then there's
+this other type of problem that the, again, for lack of a clearer way to articulate this,
+seems to be highly correlated with real world and expensive experimentation. And I'm thinking of
+my recent interview with Kim Branson, who's the global head of AI at GlaxoSmithCline. And he,
+you know, the thing he's most excited about them having built is this data driven experimentation
+process because they can't just run all the experiments. It's too expensive. So they have to
+use data to guide the way, you know, to guide their scientists, you know, work in the lab. And
+and that's a, it's a different, it's still sample efficiency, but it's a different kind of
+sample efficiency. It's, you know, it's kind of this, you know, intelligent experimentation is
+one way to to think about it. It's in a sense, it's, yeah, I'm wanting to like, think about it
+in terms of the relationship between, I want to think about it like on this side, maybe ML is
+the front end and optimization is the backend and here optimization is the front end and ML is
+the backend. I don't know if that is what I would say is. And in this case, maybe there is a bit
+of a backend front end relationship. Obviously, I have no idea what the outstanding researchers at
+GlaxoSmithCline are working on internally right now, but I'm going to, you know, not dissimilar
+from the materials problem. I think exactly right. I think exactly right. And I think that
+there's, there's not a, there's not a massive sort of disconnect here between how this ML model
+is being built and optimization. The question is, how is this ML model then sort of being used?
+And let's say you have some sort of ML model talking about different design methodologies or,
+and I think for many of these sort of traditional engineering fields, what you have is not an ML model,
+what you have is probably a PDE simulation, a differential equation simulation, some sort of
+computational simulation, which for them is maybe taking taking the place of this ML model that
+somebody else may have to construct in the absence of any of these abinitio principles that guide
+the development of a PDE model or some maybe some sort of stochastic simulation. So in both of those
+circumstances though, the question is how do you use that model to tell your, your people in the
+wet lab, your people out there going the construction, hey, why don't you try this next? What is the next
+best thing to try? What is the, what is the best possible thing to try? So, so you are still using
+maybe an ML model which is meant to predict how two chemicals are going to interact with each other,
+or you're using your numerical simulation to predict, hey, I've designed this airplane wing,
+this is how much turbulence it's going to generate or something like that. And you use this,
+and you, you conduct your, I think, Bayesian optimization on the outcome of these ML models to say,
+hey, here is what the, the next best thing to go out and actually build is. Here's, here's the,
+the one or three or five things to spend the next year manufacturing and testing under the hope
+that one of them is going to end up being the winner. So maybe to some degree, there's a,
+a bit of a multi-scale element here. You've got your ML model, that takes time to build,
+but then predictions from it can come quickly. Same thing with the numerical simulation,
+predictions from that can come quickly or at least faster than the actual manufacturing process.
+So you run your optimization, I think, oftentimes on the, the outcome of the ML model or on the
+outcome of your numerical simulation, and that guides you to, hey, this is what you should spend
+the next year do. Awesome, awesome. Very cool stuff. Very, very cool stuff and helped me kind of
+think through maybe, I don't know, this interview may be more than, than some others is kind of me
+trying to reconcile a lot of conversations I've had recently and I appreciate you participating
+in that with me. Sure, it's my pleasure. And, you know, I absolutely love talking about this topic
+and I especially love being able to talk with you about this topic. Hey, thanks so much.
+And I appreciate you coming on the show and sharing with us. Absolutely. Thank you.

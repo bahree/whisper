@@ -1,0 +1,1541 @@
+WEBVTT
+
+00:00.000 --> 00:16.320
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+
+00:16.320 --> 00:21.480
+people, doing interesting things in machine learning and artificial intelligence.
+
+00:21.480 --> 00:33.480
+I'm your host, Sam Charrington, you may have seen the news yesterday that MIT researcher
+
+00:33.480 --> 00:37.280
+Katie Bowman produced the first image of a black hole.
+
+00:37.280 --> 00:41.240
+What's been less reported is that the algorithm she developed to accomplish this is based
+
+00:41.240 --> 00:43.400
+on machine learning.
+
+00:43.400 --> 00:47.840
+Machine learning is having a huge impact in the fields of astronomy and astrophysics,
+
+00:47.840 --> 00:52.080
+and I'm excited to bring you interviews with some of the people innovating in this area.
+
+00:52.080 --> 00:56.840
+Today we're joined by Yasha Haseve, assistant professor at the University of Montreal,
+
+00:56.840 --> 01:02.480
+and research fellow at the Center for Computational Astrophysics at Flatiron Institute.
+
+01:02.480 --> 01:06.800
+Yasha and I caught up to discuss his work on gravitational lensing, which is the bending
+
+01:06.800 --> 01:10.760
+of light from distant sources due to the effects of gravity.
+
+01:10.760 --> 01:14.840
+In our conversation, Yasha and I discussed how machine learning can be applied to undistort
+
+01:14.840 --> 01:19.800
+images, including some of the various techniques used, and how the data is prepared to get the
+
+01:19.800 --> 01:21.440
+best results.
+
+01:21.440 --> 01:25.400
+We also discussed the intertwined roles of simulation and machine learning in generating
+
+01:25.400 --> 01:31.360
+images, incorporating other techniques such as domain transfer or GANS, and how he assesses
+
+01:31.360 --> 01:33.600
+the results of this project.
+
+01:33.600 --> 01:38.160
+For more of our astronomy and astrophysics coverage, be sure to check out the following
+
+01:38.160 --> 01:39.160
+interviews.
+
+01:39.160 --> 02:09.080
+I'd like to thank everyone who entered our AI conference and TensorFlow Edge device
+
+02:09.080 --> 02:10.080
+giveaways.
+
+02:10.080 --> 02:16.080
+Today, I'm excited to announce the winner of our AI conference giveaway, Mark T. from Indiana.
+
+02:16.080 --> 02:19.680
+Mark, I'm looking forward to seeing you in New York next week.
+
+02:19.680 --> 02:23.200
+Today's show is sponsored by our friends at Pegasystems.
+
+02:23.200 --> 02:27.720
+Pegaworld, the company's annual digital transformation conference, will be held at the
+
+02:27.720 --> 02:31.840
+MGM Grand in Las Vegas from June 2nd through 5th.
+
+02:31.840 --> 02:36.920
+I'll be attending the event as I did last year, and I'm looking forward to presenting again.
+
+02:36.920 --> 02:41.160
+In addition to hearing from me, the event is a great opportunity to learn how AI is being
+
+02:41.160 --> 02:46.280
+applied to the customer experience and real Pegasystems customers.
+
+02:46.280 --> 02:52.360
+As a Twomo listener, you can use the promo code Twomo19 at pegaworld.com for $200 off
+
+02:52.360 --> 02:53.680
+of your registration.
+
+02:53.680 --> 02:56.200
+Again, that code is Twomo19.
+
+02:56.200 --> 02:57.640
+Hope to see you there.
+
+02:57.640 --> 02:58.640
+Enjoy.
+
+02:58.640 --> 03:07.400
+All right, everyone, I am on the line with Yashar Heiseve. Yashar is an assistant professor
+
+03:07.400 --> 03:13.280
+at the University of Montreal and a research fellow at the Center for Computational Astrophysics
+
+03:13.280 --> 03:15.040
+at Flatiron Institute.
+
+03:15.040 --> 03:18.760
+Yashar, welcome to this week in Machine Learning and AI.
+
+03:18.760 --> 03:19.760
+Thanks, Ben.
+
+03:19.760 --> 03:21.840
+Thank you very much for inviting me.
+
+03:21.840 --> 03:25.760
+Let's start by talking a little bit about your background.
+
+03:25.760 --> 03:31.800
+We recently joined University of Montreal as an assistant professor, but tell us a little
+
+03:31.800 --> 03:35.280
+bit about the arc of your studies and research.
+
+03:35.280 --> 03:42.040
+Yeah, so I'm an astrophysicist, and for most of my research career, I've been primarily
+
+03:42.040 --> 03:44.320
+doing research in astrophysics.
+
+03:44.320 --> 03:49.320
+I did my undergrad in Physics and Astrophysics at the University of Victoria in Canada,
+
+03:49.320 --> 03:53.280
+and my PhD at Meal University in Montreal.
+
+03:53.280 --> 03:59.680
+I got my PhD in 2013, and I moved to Stanford as a hubbell fellow until recently.
+
+03:59.680 --> 04:02.880
+I just moved from Stanford about three months ago.
+
+04:02.880 --> 04:10.960
+And during this whole period of 10 years as a graduate student and a researcher, I've
+
+04:10.960 --> 04:19.400
+been working on specifically astrophysical data analysis, and in the past couple of years,
+
+04:19.400 --> 04:24.520
+with all the buzz about machine learning, I've kind of started to look into the application
+
+04:24.520 --> 04:28.000
+of machine learning methods to astrophysical data analysis.
+
+04:28.000 --> 04:35.840
+And so now a good fraction of my research has kind of focused on developing new machine
+
+04:35.840 --> 04:42.680
+learning methods for the analysis of astrophysical data, so like telescope data.
+
+04:42.680 --> 04:49.160
+And your particular research area is focused on strong gravitational lensing.
+
+04:49.160 --> 04:50.640
+That's that.
+
+04:50.640 --> 04:59.080
+Strong lensing is the distortion in the images of distant objects, done by the gravity
+
+04:59.080 --> 05:02.320
+of intervening object structures.
+
+05:02.320 --> 05:05.920
+So just think about it that gravity actually bends light.
+
+05:05.920 --> 05:11.240
+So here on the earth, we don't notice it because it's such a tiny effect that you don't
+
+05:11.240 --> 05:12.240
+notice it.
+
+05:12.240 --> 05:17.680
+But in reality, if you had a flashlight, the light rays instead of going straight, they
+
+05:17.680 --> 05:20.600
+would actually blend a little bit because of the gravity of the earth.
+
+05:20.600 --> 05:25.280
+It's the same reason that black holes are black because they absorb all this light because
+
+05:25.280 --> 05:28.280
+the light falls into the black hole.
+
+05:28.280 --> 05:34.520
+So at cosmological distances, you can have two galaxies, one sitting far away, say, five
+
+05:34.520 --> 05:36.120
+billion lighters from us.
+
+05:36.120 --> 05:40.880
+And second galaxy could be like much farther away, say, 12 billion lighters, but right behind
+
+05:40.880 --> 05:42.760
+this middle galaxy.
+
+05:42.760 --> 05:43.760
+So we have this scenario.
+
+05:43.760 --> 05:44.760
+It's us.
+
+05:44.760 --> 05:49.920
+We call it the middle galaxy, we call it like the foreground and the background galaxy.
+
+05:49.920 --> 05:54.240
+And so the light rays of that background galaxy as they come and they pass near the foreground
+
+05:54.240 --> 05:58.880
+galaxy, they get bent, they get deflected because of its gravity.
+
+05:58.880 --> 06:02.640
+And so they come to us from these different angles, different directions because of, you
+
+06:02.640 --> 06:04.440
+know, the spending of light.
+
+06:04.440 --> 06:08.880
+And as a result, what happens here is that here on the earth, we see these distorted images
+
+06:08.880 --> 06:14.080
+of that background galaxy that look like rings and arcs around the middle galaxy.
+
+06:14.080 --> 06:17.960
+So you can have, you know, instead of like one galaxy, it can be in front of the other
+
+06:17.960 --> 06:22.440
+one, you would see one galaxy and around it, you would see these rings and arcs, which
+
+06:22.440 --> 06:25.960
+are actually the images of the distant background galaxy.
+
+06:25.960 --> 06:33.960
+And so how does the use of machine learning play into your study of these, these lensing
+
+06:33.960 --> 06:35.360
+effects?
+
+06:35.360 --> 06:36.680
+So there are two things.
+
+06:36.680 --> 06:41.760
+So to give you an analogy about this, you know, I like to make an analogy to lensing
+
+06:41.760 --> 06:44.920
+of a candle flame with a wine glass.
+
+06:44.920 --> 06:49.040
+So think about it, you know, you have a candle sitting on the table and you have a wine
+
+06:49.040 --> 06:50.040
+glass.
+
+06:50.040 --> 06:53.280
+If you look at the candle flame through the foot of the wine glass, you can see that
+
+06:53.280 --> 06:56.920
+the image of the flame kind of wraps around the foot of the wine glass and it makes like
+
+06:56.920 --> 06:59.000
+rings around that thing.
+
+06:59.000 --> 07:03.200
+So that's why this is called gravitational lensing because it acts, you know, the middle
+
+07:03.200 --> 07:06.360
+galaxy likes acts like a lens.
+
+07:06.360 --> 07:11.880
+And so this is kind of the thing that we have and we usually have two questions in each
+
+07:11.880 --> 07:14.800
+of these observations.
+
+07:14.800 --> 07:19.960
+The first thing that we want to figure out is what is the shape of the foot of the wine
+
+07:19.960 --> 07:20.960
+glass?
+
+07:20.960 --> 07:24.280
+What is the distortion that this caused the image?
+
+07:24.280 --> 07:28.640
+And so this relates to, you know, how much matter there is in the middle galaxy.
+
+07:28.640 --> 07:34.560
+So we are trying to use these images, distortions to learn about how matter, you know, to map
+
+07:34.560 --> 07:38.280
+the distribution of matter in these lensing galaxies.
+
+07:38.280 --> 07:41.880
+And then the second question is that, so I see a distorted image of this background source,
+
+07:41.880 --> 07:43.880
+but what does it truly look like?
+
+07:43.880 --> 07:49.880
+You know, if I'm looking at this arc that is a stretched out image of the candle flame,
+
+07:49.880 --> 07:53.080
+I'm interested, you know, what does the candle flame truly look like?
+
+07:53.080 --> 07:55.760
+How could I undistort this image?
+
+07:55.760 --> 08:00.280
+And so you can see that all of this kind of relates to image analysis and image processing.
+
+08:00.280 --> 08:08.280
+So one thing that, you know, works really well for us is, you know, this development
+
+08:08.280 --> 08:15.160
+of convolutional neural networks that are specifically tailored to image analysis problems.
+
+08:15.160 --> 08:19.600
+And so we've been kind of like, you know, hijacking them and using them for this application
+
+08:19.600 --> 08:21.760
+to answer these two questions, you know.
+
+08:21.760 --> 08:27.920
+If I get a distorted image of these background things, can I predict what, you know, the
+
+08:27.920 --> 08:32.880
+distortion is that's been caused and can I undistort, can I reconstruct the true image
+
+08:32.880 --> 08:36.280
+of this background galaxy?
+
+08:36.280 --> 08:41.760
+And so what are some of the techniques that you're using to do this?
+
+08:41.760 --> 08:48.680
+So traditionally, this is done by something called, I'll just throw the name and I'll explain
+
+08:48.680 --> 08:53.280
+what it is, you know, using like maximum likelihood lens model.
+
+08:53.280 --> 08:57.600
+So the way that this works is that you say, well, let's think about this.
+
+08:57.600 --> 09:02.720
+I have this, you know, candle in the background, I'm putting a lens in front of it.
+
+09:02.720 --> 09:07.440
+So I see this distorted image, you know, magnified image of the candle.
+
+09:07.440 --> 09:11.280
+And I have an observation, so I see that image.
+
+09:11.280 --> 09:15.760
+But I need to know what that candle truly looks like.
+
+09:15.760 --> 09:19.120
+Nor do I know what is the distortion that's been added to its image, right?
+
+09:19.120 --> 09:24.560
+So, so I, if I see that the data, I cannot predict these two together, but what I can do
+
+09:24.560 --> 09:27.720
+is that I can produce a lot of simulations.
+
+09:27.720 --> 09:32.640
+So if you gave me an image of a candle and you gave me a lens, it's easy to simulate
+
+09:32.640 --> 09:35.720
+it and say, you know, because you can go from one to the other.
+
+09:35.720 --> 09:41.000
+So I can get a lens and predict what is the distortion that it causes to space.
+
+09:41.000 --> 09:44.760
+And then I can put the image of the candle and it can make a simulation.
+
+09:44.760 --> 09:49.800
+So say, you know, it lends the image, it distorted the image of the candle with look like
+
+09:49.800 --> 09:51.600
+that.
+
+09:51.600 --> 09:55.000
+It's the problem is that, you know, it's difficult to undo this.
+
+09:55.000 --> 09:58.920
+So the way to stop traditionally has been that, you know, I would just produce a lot of
+
+09:58.920 --> 10:05.200
+different simulations with like, you know, perhaps random candles and random lenses.
+
+10:05.200 --> 10:09.040
+And try to find out which one of them really looks like the data.
+
+10:09.040 --> 10:13.280
+And so if I find one simulation that really looks like the data, you know, I can kind of
+
+10:13.280 --> 10:17.640
+infer that the parameters that I assume for it, you know, the background source that I
+
+10:17.640 --> 10:22.520
+assume for it, the foreground lens that I simply should be kind of a correct description
+
+10:22.520 --> 10:26.040
+of their, you know, reality.
+
+10:26.040 --> 10:30.480
+And so this kind of like falls into this, you know, general umbrella, like, you know,
+
+10:30.480 --> 10:36.440
+inverse problems where it's easy to go from the ingredients of the model.
+
+10:36.440 --> 10:41.120
+Like if I knew the truth about the truth about the candle and the lens, I can go forward
+
+10:41.120 --> 10:44.320
+and make a simulation, but the inverse problem is difficult.
+
+10:44.320 --> 10:49.320
+If I, if you gave me the output, then I cannot figure out, you know, what was the initial
+
+10:49.320 --> 10:52.680
+ingredients that it was made from.
+
+10:52.680 --> 10:58.880
+So with machine learning, what is exciting about it is that we can construct these inverse,
+
+10:58.880 --> 11:00.280
+you know, mappings.
+
+11:00.280 --> 11:07.040
+So by using a lot of simulated data or true data, I can learn to just kind of like directly
+
+11:07.040 --> 11:11.760
+predict what these background sources or the foreground lenses look like, just directly
+
+11:11.760 --> 11:17.080
+looking at the data, we don't need to produce in a lot of simulations for every data analysis.
+
+11:17.080 --> 11:24.720
+And describing the simulation based approach, there's something kind of intuitively unsatisfying
+
+11:24.720 --> 11:25.720
+about that.
+
+11:25.720 --> 11:30.360
+The idea that you're going to just randomly generate a bunch of candles and randomly
+
+11:30.360 --> 11:32.120
+generate a bunch of lenses.
+
+11:32.120 --> 11:37.000
+And if you get something that kind of looks like, or looks very close to the result that
+
+11:37.000 --> 11:43.640
+you've got, you assume that it's that specific lens and candle configuration.
+
+11:43.640 --> 11:50.480
+Is it that the chance that you get a good match, you know, without the candle and the lens
+
+11:50.480 --> 11:59.480
+being exactly right or close so small that gives you comfort in choosing that particular
+
+11:59.480 --> 12:00.480
+configuration?
+
+12:00.480 --> 12:04.840
+Or I guess this part of me that says, you know, there could be any number of configurations
+
+12:04.840 --> 12:08.600
+of candles and lenses that that's a great question.
+
+12:08.600 --> 12:09.600
+That's a great question.
+
+12:09.600 --> 12:16.400
+So so in a statistical way, what you really do is that you would say, I'm actually going
+
+12:16.400 --> 12:21.560
+to find out every candle and every lens that will kind of produce.
+
+12:21.560 --> 12:25.400
+So there might as you said, there might be like multiple answers.
+
+12:25.400 --> 12:30.960
+And I'm going to find every one of them that will match the data within my uncertainties.
+
+12:30.960 --> 12:36.160
+And so it means that you have to have a statistical description of your data to understand what
+
+12:36.160 --> 12:40.920
+are your uncertainties, uncertainties could come from, for example, noise.
+
+12:40.920 --> 12:45.400
+And you would write a statistical model to say, well, this particular candle and this particular
+
+12:45.400 --> 12:51.320
+glass, it fits my data to some, you know, in a probabilistic way.
+
+12:51.320 --> 12:53.160
+And this other one could also match it.
+
+12:53.160 --> 12:56.120
+And that's one of the things that makes it even more difficult because the problem is
+
+12:56.120 --> 12:58.000
+not only even finding a single answer.
+
+12:58.000 --> 13:02.840
+The problem is that now you have to kind of explore all the different answers and kind
+
+13:02.840 --> 13:07.040
+of give a range of these answers that are consistent with the data.
+
+13:07.040 --> 13:08.440
+So it works well.
+
+13:08.440 --> 13:13.560
+It's just that computationally, it's very expensive because now it means that you have to try millions
+
+13:13.560 --> 13:19.080
+and millions of these simulations to give an answer for one specific data set.
+
+13:19.080 --> 13:27.960
+And what are you assuming as known in the way you've formulated the problem here?
+
+13:27.960 --> 13:33.640
+Because you kind of know what a candle looks like and you know what a lens kind of looks
+
+13:33.640 --> 13:34.640
+like.
+
+13:34.640 --> 13:40.520
+What assumptions are you making about the candle and the lens to you then now?
+
+13:40.520 --> 13:42.400
+That's a really good question.
+
+13:42.400 --> 13:48.240
+So these assumptions typically in the language of statistical analysis, you would call them
+
+13:48.240 --> 13:49.240
+priors.
+
+13:49.240 --> 13:52.960
+So these are the prior information, the prior knowledge that we have about these things.
+
+13:52.960 --> 13:57.440
+And so the way that these priors are specifically encoded in the analysis could be different
+
+13:57.440 --> 14:00.320
+from, you know, mildly different.
+
+14:00.320 --> 14:04.280
+But you can imagine that, for example, in the case of strong lensing, you want the background
+
+14:04.280 --> 14:07.880
+source to be something looking like a galaxy.
+
+14:07.880 --> 14:12.920
+So you would impose some sort of like, you know, prior knowledge, you would say, I have
+
+14:12.920 --> 14:15.720
+a prior knowledge of the background source, you know, is a galaxy.
+
+14:15.720 --> 14:20.960
+So for example, when I make images of this thing, I will, you know, kind of enforce that,
+
+14:20.960 --> 14:27.800
+for example, it is, you know, it's blobby or it's concentrated at the center or that, you
+
+14:27.800 --> 14:31.280
+know, it's peaks, you know, it's density at this, you know, it's brightness at the center.
+
+14:31.280 --> 14:35.760
+But the way that you define it could be tricky.
+
+14:35.760 --> 14:41.080
+And specifically when you were doing these, you know, the kind of like forward modern,
+
+14:41.080 --> 14:47.600
+you know, lens modeling procedures, it is difficult to actually specify these priors.
+
+14:47.600 --> 14:50.880
+One of the cool things about machine learning is that these prior information, you can
+
+14:50.880 --> 14:54.320
+actually learn them from data itself.
+
+14:54.320 --> 15:00.080
+And that's one of the really like great advantages of a machine learning approach is that if
+
+15:00.080 --> 15:05.200
+I had a large data set of these lenses or galaxies in general, if I think that the background
+
+15:05.200 --> 15:10.680
+sources a galaxy, I can get millions of images of other galaxies in the universe from, you
+
+15:10.680 --> 15:12.640
+know, all sorts of telescopes.
+
+15:12.640 --> 15:16.400
+And I can put it through a machine learning procedure and I can actually learn what are
+
+15:16.400 --> 15:20.800
+the kind of structural priors that I need to respect.
+
+15:20.800 --> 15:26.000
+And then try to kind of like find out what are the solutions within that kind of like,
+
+15:26.000 --> 15:30.280
+you know, range of, you know, possibilities that match this particular data set.
+
+15:30.280 --> 15:37.160
+And so maybe share a little bit about the data collection and preparation aspect of these
+
+15:37.160 --> 15:42.400
+types of problems, assuming the data that you're working with comes from these, you know,
+
+15:42.400 --> 15:49.400
+large radio telescopes and you're able to collect that very fairly readily, but you have
+
+15:49.400 --> 15:51.400
+to do a lot of processing to it.
+
+15:51.400 --> 15:52.400
+Yeah.
+
+15:52.400 --> 15:58.400
+So we work both with radio telescopes and and regular optical telescopes like, you know, Hubble
+
+15:58.400 --> 15:59.400
+Space Telescope.
+
+15:59.400 --> 16:04.680
+So two of the first like machine learning papers that we wrote were basically just using,
+
+16:04.680 --> 16:07.000
+you know, Hubble Space Telescope images.
+
+16:07.000 --> 16:12.800
+So these images, usually there's like a few steps of pre-processing that you need to
+
+16:12.800 --> 16:13.800
+do with it.
+
+16:13.800 --> 16:18.800
+The telescope that comes with, you know, from the image that comes from the telescope might
+
+16:18.800 --> 16:22.160
+for example have a lot of cosmic rays.
+
+16:22.160 --> 16:29.720
+These are just like particles, you know, around the earth that hit the, you know, the cameras
+
+16:29.720 --> 16:34.680
+on the telescope and they just leave these traces very high energy particles.
+
+16:34.680 --> 16:37.920
+And so, you know, you might need to remove those.
+
+16:37.920 --> 16:44.680
+You might need to, for example, subtract the light from the lensing galaxy itself because
+
+16:44.680 --> 16:49.680
+remember what we are interested in is a distortion of this background galaxy and how it's been
+
+16:49.680 --> 16:50.680
+distorted.
+
+16:50.680 --> 16:55.040
+One of the new sense things here is that the middle galaxy that is distorting also has a lot
+
+16:55.040 --> 16:56.040
+of stars.
+
+16:56.040 --> 16:58.400
+It has a lot of light that's added to this image.
+
+16:58.400 --> 17:03.360
+And so a lot of times you would try to kind of subtract this light first and then kind
+
+17:03.360 --> 17:07.360
+of like look at the remaining the arcs that come from the backgrounds or so, how do you
+
+17:07.360 --> 17:09.560
+do that?
+
+17:09.560 --> 17:12.480
+You know, you might take advantage of the fact that the background galaxy and the foreground
+
+17:12.480 --> 17:17.360
+galaxy have different colors and so use the color information from these things.
+
+17:17.360 --> 17:23.160
+You might need to estimate what is the blurring of the telescopes.
+
+17:23.160 --> 17:25.160
+So the images are never perfectly sharp.
+
+17:25.160 --> 17:27.800
+There's some amount of blurring that's your resolution.
+
+17:27.800 --> 17:34.760
+So if you have a bigger telescope that are camera on it, you're going to get sharper images.
+
+17:34.760 --> 17:38.880
+So that's kind of the blurring of the telescope or the point spread function.
+
+17:38.880 --> 17:43.120
+So you might want to estimate that for the analysis and all of these things.
+
+17:43.120 --> 17:48.520
+So when you're doing for radio data, it's kind of different things.
+
+17:48.520 --> 17:54.120
+But typically there's a lot of these like steps and pre-processing steps that you need
+
+17:54.120 --> 18:01.240
+to do before you even move on to that final stage where we're actually doing these simulations
+
+18:01.240 --> 18:02.720
+and comparing it into the data.
+
+18:02.720 --> 18:07.080
+I got the impression earlier that the simulation was kind of the way you used to do it and
+
+18:07.080 --> 18:11.080
+now you're using machine learning as an alternative.
+
+18:11.080 --> 18:13.560
+Is that, it sounds like that it's not the case.
+
+18:13.560 --> 18:18.240
+You're using the simulations and machine learning to get kind of being conjunction with
+
+18:18.240 --> 18:19.760
+one another to solve this problem.
+
+18:19.760 --> 18:20.760
+Is that right?
+
+18:20.760 --> 18:26.720
+Yeah, so their roles have kind of changed.
+
+18:26.720 --> 18:35.440
+So in a what I call maximum lens modeling, just lens modeling in a traditional way.
+
+18:35.440 --> 18:40.720
+If you gave me a specific data set, one image of a gravitational lens and I wanted to
+
+18:40.720 --> 18:47.360
+analyze it, I need to produce millions of simulations and one by one compared them to the data.
+
+18:47.360 --> 18:51.760
+And then based on that comparison, I will pick my next simulation to produce.
+
+18:51.760 --> 18:57.920
+So there is a systematic way to kind of like go through these simulations and just say,
+
+18:57.920 --> 19:00.640
+well this one is not good in this particular way.
+
+19:00.640 --> 19:05.360
+So the next simulation that I need to produce will have to be something that looks like
+
+19:05.360 --> 19:09.760
+this, it kind of looks like this or whatever, that's kind of the correct direction for
+
+19:09.760 --> 19:11.760
+me to go.
+
+19:11.760 --> 19:15.720
+So and then once you're done with that procedure, so let's say you got your answer and
+
+19:15.720 --> 19:19.880
+you say, well, these are the ranges of answers from background candles and the foreground
+
+19:19.880 --> 19:23.280
+lenses that are consistent with the data.
+
+19:23.280 --> 19:27.520
+So you move on the next that you come and you have a new example, a new data set from
+
+19:27.520 --> 19:29.920
+a new telescope and you want to get the answer.
+
+19:29.920 --> 19:32.440
+So you need to go through the whole thing one more time.
+
+19:32.440 --> 19:38.080
+So you need to produce like millions of simulations again for this specific system to analyze it.
+
+19:38.080 --> 19:42.640
+With machine learning, what we do is that we produce a lot of these simulations in one
+
+19:42.640 --> 19:47.360
+go, we train a machine learning model and then we're done forever.
+
+19:47.360 --> 19:51.640
+Because this machine learning model, from all these simulations in one go, it learned
+
+19:51.640 --> 19:56.000
+how to do that mapping, how to get, how to predict these parameters that we were interested
+
+19:56.000 --> 19:57.960
+in from the data set.
+
+19:57.960 --> 20:01.240
+And then so I can apply to this data set and then tomorrow I can apply to another data
+
+20:01.240 --> 20:05.000
+set and I never ever have to run another simulation again.
+
+20:05.000 --> 20:09.280
+So we're using the same sort of simulations to train the machine learning methods, but
+
+20:09.280 --> 20:11.640
+we only need to do it once.
+
+20:11.640 --> 20:17.440
+Learning to the machine learning models that you're using to predict the lensing, you
+
+20:17.440 --> 20:23.200
+know, one of the things that kind of immediately comes to mind when I think of imaging or processing
+
+20:23.200 --> 20:27.160
+images is deep learning and convolutional neural nets.
+
+20:27.160 --> 20:29.400
+Is that a part of the solution here?
+
+20:29.400 --> 20:30.400
+Yeah, yeah.
+
+20:30.400 --> 20:34.160
+So we're using a lot of deep learning and convolution neural nets for the analysis of
+
+20:34.160 --> 20:35.160
+these data.
+
+20:35.160 --> 20:36.160
+That's right.
+
+20:36.160 --> 20:42.720
+What we're doing is allowing you to kind of set up standard supervised learning, training
+
+20:42.720 --> 20:46.880
+of CNNs or is there, is that the right way to think of what you're doing?
+
+20:46.880 --> 20:47.880
+Yeah.
+
+20:47.880 --> 20:48.880
+Yeah, yeah.
+
+20:48.880 --> 20:49.880
+Absolutely.
+
+20:49.880 --> 20:53.880
+So what we're doing is that we're producing training sets where, so I can, I can, for
+
+20:53.880 --> 20:57.720
+example, pick, you know, a particular image of a background galaxy.
+
+20:57.720 --> 21:02.800
+And I pick, you know, a galaxy that's doing the lensing, the lensing galaxy with certain
+
+21:02.800 --> 21:08.120
+parameters, for example, it's electricity or how massive it is or, you know, where it
+
+21:08.120 --> 21:09.880
+is in the sky.
+
+21:09.880 --> 21:13.720
+And so I know the truth because this is a simulation, it's a control simulation.
+
+21:13.720 --> 21:15.840
+So I know what the truth is.
+
+21:15.840 --> 21:17.960
+And I will produce an image.
+
+21:17.960 --> 21:22.840
+And so then I will put this image as the inputs of my convolutional neural network and
+
+21:22.840 --> 21:27.880
+train me to predict the particular outputs that I have because this is, yeah, supervised
+
+21:27.880 --> 21:31.320
+training because I know what the truth is for this particular case.
+
+21:31.320 --> 21:35.400
+And so this is, you know, one of the approaches that we've done for this is exactly that,
+
+21:35.400 --> 21:42.720
+produce training sets from simulated data and train convolutional neural nets in a supervised
+
+21:42.720 --> 21:45.400
+way with these things.
+
+21:45.400 --> 21:50.360
+And the reason that we use simulations, by the way, one of the things to say is that there
+
+21:50.360 --> 21:53.280
+are two reasons why we use simulations.
+
+21:53.280 --> 21:57.600
+One is that we could produce really realistic simulations.
+
+21:57.600 --> 22:05.640
+So, and so in a really realistic look in simulation, the good thing is that the labels that we
+
+22:05.640 --> 22:10.080
+have, the truth that we have are the absolute truth because these are actually producing
+
+22:10.080 --> 22:11.840
+a, you know, control simulation.
+
+22:11.840 --> 22:15.560
+So whereas if I actually get a realistic, you know, a real data set from this side that
+
+22:15.560 --> 22:20.600
+has been analyzed, the prediction for that itself had some error in it, depending on
+
+22:20.600 --> 22:22.120
+various parameters.
+
+22:22.120 --> 22:25.920
+And the second thing is that currently we only know of a few hundred gravitational lenses
+
+22:25.920 --> 22:26.920
+altogether.
+
+22:26.920 --> 22:35.000
+So we probably know of about, like, you know, something out there, like 500 lenses, which
+
+22:35.000 --> 22:40.320
+is really, really not enough for training these, like, large deep net worth.
+
+22:40.320 --> 22:45.440
+So when we are doing simulations, we would produce like half a million of these things.
+
+22:45.440 --> 22:49.080
+And it would only take like, you know, about a day to produce this.
+
+22:49.080 --> 22:54.320
+And so that gives us, you know, a lot of data set to avoid, you know, issues like overfitting.
+
+22:54.320 --> 23:01.640
+Do you find that the models that you produce as a result of this simulation and training
+
+23:01.640 --> 23:08.920
+process apply well to real world images, or do you need to incorporate something like domain
+
+23:08.920 --> 23:11.840
+transfer or some of these other techniques?
+
+23:11.840 --> 23:13.800
+Yeah, we do.
+
+23:13.800 --> 23:18.640
+So this, the lensing simulation aspect of it itself is fine.
+
+23:18.640 --> 23:23.040
+It's just that telescopes usually have a lot of funny things happening today.
+
+23:23.040 --> 23:28.920
+So there's, you know, various forms of noise, they could be cosmic rays like what I described
+
+23:28.920 --> 23:29.920
+earlier.
+
+23:29.920 --> 23:30.920
+It could be various.
+
+23:30.920 --> 23:35.520
+So, in the first form of noise and, oh, you mentioned the cosmic rays.
+
+23:35.520 --> 23:36.520
+Yeah.
+
+23:36.520 --> 23:40.440
+So cosmic rays is another kind of like, you know, corruption that happens to the data.
+
+23:40.440 --> 23:44.800
+So the first time that we tried this on real data, that's what happened was that we trained
+
+23:44.800 --> 23:50.280
+it, you know, as CNN and then we looked at its predictions for real data for the first
+
+23:50.280 --> 23:51.280
+time.
+
+23:51.280 --> 23:54.960
+And we knew the answer for this real data set because we had modeled it before.
+
+23:54.960 --> 23:58.680
+So we had a kind of a rough comparison and we're like, it's, you know, the answer was
+
+23:58.680 --> 24:00.360
+to keep garbage.
+
+24:00.360 --> 24:04.600
+And so what we did is we took these saliency maps, which means that we took kind of like,
+
+24:04.600 --> 24:08.880
+we looked at the gradient of our predictions with respect to the data set.
+
+24:08.880 --> 24:13.920
+So anywhere in the data that is, you know, making a huge contribution to our decision for
+
+24:13.920 --> 24:18.320
+what the truth, you know, what the, what the prediction is, it would kind of like, you
+
+24:18.320 --> 24:20.000
+know, shine bright.
+
+24:20.000 --> 24:23.960
+And immediately we noticed that anywhere that there was a hint of kind of like, a low
+
+24:23.960 --> 24:28.480
+intensity kind of dotting the image, these are cosmic rays that kind of like, you know,
+
+24:28.480 --> 24:32.960
+put kind of like a dot or, you know, imprints in the images, it was shining bright.
+
+24:32.960 --> 24:37.280
+And we were like, oh, okay, like, that's kind of a sign that, you know, all these other
+
+24:37.280 --> 24:43.240
+corruptions that are in the data do really impact the decisions of the CNN.
+
+24:43.240 --> 24:50.920
+So the challenging aspect was exactly that, that domain adaptation to try to, or, you
+
+24:50.920 --> 24:55.040
+know, in this case, like really simulate, you know, realistic looking images that bring
+
+24:55.040 --> 25:02.280
+every aspect representative of the data that we were going to analyze.
+
+25:02.280 --> 25:07.880
+Another technique that comes to mind for this type of a problem, it sounds in many ways
+
+25:07.880 --> 25:15.160
+to some of the problems like, you know, correcting missing pixels or distortion and photographic
+
+25:15.160 --> 25:18.360
+images is generative models.
+
+25:18.360 --> 25:22.000
+Is that something that you've been looking at for this problem?
+
+25:22.000 --> 25:25.120
+We have been discussing this, but we haven't, we haven't done anything about it.
+
+25:25.120 --> 25:32.560
+So in terms of the generative part of this problem, there's like two parts of it that could
+
+25:32.560 --> 25:34.560
+be very interesting.
+
+25:34.560 --> 25:37.200
+So the first one is the background sources.
+
+25:37.200 --> 25:42.520
+So the background source that's being lensed is the image of an actual real galaxy.
+
+25:42.520 --> 25:46.800
+So the thing that we did so far was that we actually got a bunch of a large data set of
+
+25:46.800 --> 25:49.480
+real images of galaxies.
+
+25:49.480 --> 25:53.960
+And so these are from, you know, these are galaxies that are not strong with lens.
+
+25:53.960 --> 25:57.800
+So some of them are galaxies, you know, in the local universe, you know, we have beautiful
+
+25:57.800 --> 26:00.120
+images from the Hubble Space Telescopes.
+
+26:00.120 --> 26:03.120
+Some of them are more distant galaxies in the universe.
+
+26:03.120 --> 26:06.840
+But you know, we got like, you know, 100,000 images of galaxies and then we put those through
+
+26:06.840 --> 26:11.520
+simulations and made these arcs and, you know, lensed them.
+
+26:11.520 --> 26:15.120
+But you know, we were still limited, you know, by these data sets.
+
+26:15.120 --> 26:19.720
+So one thing is that that we've been discussing is using these generative models to produce
+
+26:19.720 --> 26:24.520
+an un-lensed image of a galaxy, just produce an image of a galaxy.
+
+26:24.520 --> 26:27.320
+And then putting that through a simulation lensed.
+
+26:27.320 --> 26:29.600
+So for the lensing aspect of it, you could also do this.
+
+26:29.600 --> 26:34.840
+You can imagine, well, I'll just train a generative model that produces a lensed image to begin
+
+26:34.840 --> 26:35.840
+with.
+
+26:35.840 --> 26:39.480
+Well, the thing about that is that the lensing aspect of things is easy, is relatively
+
+26:39.480 --> 26:40.480
+easy.
+
+26:40.480 --> 26:46.320
+You know, it just involves running something called a ray tracing simulation, which is not
+
+26:46.320 --> 26:50.640
+the most efficient thing in the universe, but it's not too bad.
+
+26:50.640 --> 26:52.680
+It's not the bottleneing.
+
+26:52.680 --> 26:57.680
+And but then the third aspect of it that could also get interesting with generative models
+
+26:57.680 --> 27:03.200
+is exactly the point that you brought up about all the other sorts of corruptions that
+
+27:03.200 --> 27:04.200
+goes into data.
+
+27:04.200 --> 27:09.480
+You know, can I produce a generative model that actually gets these simple simulations
+
+27:09.480 --> 27:15.560
+and adds the various effects of, you know, different instruments and telescopes and gives
+
+27:15.560 --> 27:20.040
+me images that are represented to flip off that so that I use it for training off the
+
+27:20.040 --> 27:23.360
+other machine learning methods like these humans.
+
+27:23.360 --> 27:29.800
+How do you kind of envision the future application of machine learning in the space?
+
+27:29.800 --> 27:34.200
+You know, obviously, we just talked about some of the generative models and the applications
+
+27:34.200 --> 27:35.200
+of those techniques.
+
+27:35.200 --> 27:40.400
+But are there other areas that you see as being interesting ones to explore here?
+
+27:40.400 --> 27:41.400
+Oh, yeah.
+
+27:41.400 --> 27:45.800
+So this is becoming, you know, kind of a popular topic in astrophysics now.
+
+27:45.800 --> 27:52.920
+There are a lot of young people looking into the application of this for different things.
+
+27:52.920 --> 27:59.720
+You know, there are so many things in astrophysics that you could kind of like use a neural network
+
+27:59.720 --> 28:06.800
+to answer the question, but it's really the question of, you know, is it particularly
+
+28:06.800 --> 28:10.400
+useful in this particular, you know, case?
+
+28:10.400 --> 28:16.760
+So one thing that really made it worth it for us was that in the next few years, we're
+
+28:16.760 --> 28:21.920
+expecting to discover about 200,000 strong rabbit nature lenses.
+
+28:21.920 --> 28:28.320
+There are a few new surveys that are planned to be operational.
+
+28:28.320 --> 28:36.200
+So like, LSSD is a huge project and Euclid telescope, you know, it's a European satellite.
+
+28:36.200 --> 28:38.920
+So these are expected to be surveys.
+
+28:38.920 --> 28:41.800
+So they will like map huge chunks of the sky.
+
+28:41.800 --> 28:46.920
+LSSD in particular will map the whole sky, the visible part of the sky every three nights.
+
+28:46.920 --> 28:50.640
+And it will produce, you know, a ridiculous amount of data.
+
+28:50.640 --> 28:54.840
+And we're expecting to discover a forward of like, you know, 200,000 lenses.
+
+28:54.840 --> 29:00.680
+Now with my traditional methods, if I wanted to go and fit a lens model to every one of
+
+29:00.680 --> 29:05.920
+these, you know, 200,000 lenses, even if it took me like, you know, two, three days to
+
+29:05.920 --> 29:10.200
+come up with the answer for one lens, which is optimistic actually.
+
+29:10.200 --> 29:15.840
+You know, it would take me like 14, you know, 100 years to do that.
+
+29:15.840 --> 29:20.640
+So for strong lensing, it really looks like, you know, it's just like, you know, it's a
+
+29:20.640 --> 29:27.040
+matter of speed and the number of lenses that we have to analyze.
+
+29:27.040 --> 29:33.040
+So in other fields, like, you know, in imaging of the cosmic microwave background, there
+
+29:33.040 --> 29:38.280
+are, you know, papers being written right now, people looking into the application of machine
+
+29:38.280 --> 29:39.280
+learning.
+
+29:39.280 --> 29:43.320
+But, you know, for example, in that field, the problem is not really speed.
+
+29:43.320 --> 29:50.320
+It's sometimes about accuracy and could you train neural networks that can be more accurate
+
+29:50.320 --> 29:54.800
+than these maximum likelihood methods, because they can deal with, you know, complex
+
+29:54.800 --> 29:57.760
+noise, for example.
+
+29:57.760 --> 30:03.880
+So, but my general feeling is that, you know, it's becoming an active field in astrophysics
+
+30:03.880 --> 30:06.600
+and more and more people are getting excited about it.
+
+30:06.600 --> 30:10.560
+Like, you know, when I started giving talks about this, like, you know, two years ago,
+
+30:10.560 --> 30:17.360
+I kind of saw, you know, some level of skepticism, primarily because, you know, people have
+
+30:17.360 --> 30:22.320
+this worry that these are black boxes and, you know, you cannot control exactly what
+
+30:22.320 --> 30:23.320
+happens.
+
+30:23.320 --> 30:26.840
+You don't understand why they're making the decisions that they're making.
+
+30:26.840 --> 30:32.600
+But as, you know, people have seen the results of, you know, the excellent performance of
+
+30:32.600 --> 30:33.600
+these methods.
+
+30:33.600 --> 30:38.320
+I think now more and more people are kind of like warming up to the idea and kind of
+
+30:38.320 --> 30:42.120
+a lot of research is going that way.
+
+30:42.120 --> 30:43.120
+Awesome.
+
+30:43.120 --> 30:49.000
+And, and maybe a quick note before we close out, you mentioned the excellent performance
+
+30:49.000 --> 30:54.080
+of these methods in your case where you're looking at gravitational lensing.
+
+30:54.080 --> 30:59.400
+How do you characterize that performance and what are the types of results you've seen?
+
+30:59.400 --> 31:07.680
+So, for us, there's been kind of like two kind of metrics of performance.
+
+31:07.680 --> 31:10.280
+And the most important one has been speed.
+
+31:10.280 --> 31:15.000
+And so when we train the neural network, you know, the training itself takes just like
+
+31:15.000 --> 31:16.440
+a couple of days.
+
+31:16.440 --> 31:21.320
+And after that, you know, for the estimation of its parameters of a single lens, you know,
+
+31:21.320 --> 31:25.000
+it would take us a hundredth of a second on a single GPU.
+
+31:25.000 --> 31:29.400
+And if you assume that the analysis of, you know, a lens of a typical complexity would
+
+31:29.400 --> 31:34.600
+take, you know, a few days, you know, often actually like experts' time that, you know,
+
+31:34.600 --> 31:37.720
+would have to sit on this and run, you know, quite a few CPUs.
+
+31:37.720 --> 31:43.640
+It's something about, you know, 10 million times improvement in analysis speed.
+
+31:43.640 --> 31:47.840
+So you know, the analysis of the LCC dataset that I discussed with you earlier.
+
+31:47.840 --> 31:53.360
+So this could be done half an hour on single lap cell, which is completely like orders
+
+31:53.360 --> 31:59.560
+of magnitude, you know, faster than whatever you could get from traditional modeling.
+
+31:59.560 --> 32:03.720
+And then in terms of the accuracy of the models it themselves, you know, we're showing
+
+32:03.720 --> 32:09.240
+that you can get accuracies that are within basically the uncertainties of the parameters.
+
+32:09.240 --> 32:12.360
+So we can get excellent accuracies on these predictions.
+
+32:12.360 --> 32:16.480
+So remember that we were actually looking at the answers that we were saying, well, I'm
+
+32:16.480 --> 32:20.040
+interested about a range of answers that match my thing.
+
+32:20.040 --> 32:26.680
+And so the precision of these models are really comfortable to the, you know, kind of the
+
+32:26.680 --> 32:31.360
+uncertainties that we get from maximum likelihood modeling anyways.
+
+32:31.360 --> 32:35.080
+And the other thing is that in there are certain cases where they can actually outperform
+
+32:35.080 --> 32:36.080
+these methods.
+
+32:36.080 --> 32:40.760
+So another direction we've gone is recently we're using recurrent neural networks.
+
+32:40.760 --> 32:46.120
+So these are networks that are typically used for, you know, speech analysis because
+
+32:46.120 --> 32:49.680
+they're good at modeling sequences of data.
+
+32:49.680 --> 32:55.200
+What we're teaching them here is actually try to model a sequence of steps in these images.
+
+32:55.200 --> 33:01.640
+So imagine, you know, imagine, so we're interested in, for example, predicting the distribution
+
+33:01.640 --> 33:03.800
+of matter in the lensing galaxies.
+
+33:03.800 --> 33:09.160
+And so we'll start from, you know, an unknown guess, something, you know, a random guess
+
+33:09.160 --> 33:11.960
+so we don't know what it is.
+
+33:11.960 --> 33:15.720
+And we'll have to take a series of steps to get closer to our answer.
+
+33:15.720 --> 33:21.480
+So maybe the first guess is going to be that this galaxy, you know, looks like something,
+
+33:21.480 --> 33:25.680
+you know, it has some electricity in some direction and some mass.
+
+33:25.680 --> 33:28.840
+And then I will refine my answer as I go.
+
+33:28.840 --> 33:32.480
+As we're putting this through a recurrent neural network that, you know, so this is
+
+33:32.480 --> 33:35.880
+a particular architecture is called the recurrent inference machine.
+
+33:35.880 --> 33:41.000
+And so the recurrent inference machine every time looks at its own prediction and then
+
+33:41.000 --> 33:47.040
+and then puts that through our simulation that uses the actually like physical model.
+
+33:47.040 --> 33:48.640
+And updates its answer.
+
+33:48.640 --> 33:52.560
+And one thing that we've been showing is that this can actually like, you know, predict
+
+33:52.560 --> 33:58.240
+background source images with the lens or the undistort the image of the background
+
+33:58.240 --> 34:04.880
+sources that are better representation of the data than these maximum likelihood models.
+
+34:04.880 --> 34:08.480
+And the reason for that is the same thing that you mentioned at the very beginning of
+
+34:08.480 --> 34:10.160
+the talk about priors.
+
+34:10.160 --> 34:13.560
+And the reason is that this network can learn the complex prior off of what a background
+
+34:13.560 --> 34:17.600
+source, what a galaxy really looks like from the training data set, whereas when you
+
+34:17.600 --> 34:23.400
+try to define that in, you know, a statistical way from, you know, just, you know, in a statistical
+
+34:23.400 --> 34:25.120
+way, it's just difficult.
+
+34:25.120 --> 34:29.880
+It's really difficult to define on a pixel per pixel basis what is a galaxy?
+
+34:29.880 --> 34:31.160
+What does a galaxy look like?
+
+34:31.160 --> 34:32.160
+Right.
+
+34:32.160 --> 34:36.240
+If I show you something that, you know, has a little bit of, you know, more fluctuations
+
+34:36.240 --> 34:42.720
+here or a little bit spread out, you know, what kind of scored you give it to say how
+
+34:42.720 --> 34:46.880
+galaxy, you know, galaxy looking like this is or this is not.
+
+34:46.880 --> 34:51.240
+The neural networks, they can learn that from the training data and perform really, really
+
+34:51.240 --> 34:52.240
+well.
+
+34:52.240 --> 34:58.440
+Well, Ashley, thanks so much for taking the time to share this with us is really interesting,
+
+34:58.440 --> 34:59.440
+really interesting work.
+
+34:59.440 --> 35:03.560
+I always love talking to folks that are working on astrophysics and cosmology in general.
+
+35:03.560 --> 35:09.280
+The use cases are so, just the scale of them is just enormous.
+
+35:09.280 --> 35:10.280
+Yeah.
+
+35:10.280 --> 35:12.080
+It's really fun talking to you.
+
+35:12.080 --> 35:15.920
+I didn't expect this to become more like kind of a high level.
+
+35:15.920 --> 35:20.240
+Yeah, I never thought, you know, about throwing the word CNN or RNN or things like that,
+
+35:20.240 --> 35:23.360
+but it was just fun for me to have more technical stuff.
+
+35:23.360 --> 35:24.360
+Yeah.
+
+35:24.360 --> 35:25.360
+Nice.
+
+35:25.360 --> 35:26.360
+Fantastic.
+
+35:26.360 --> 35:27.360
+Thanks so much, Ashur.
+
+35:27.360 --> 35:28.360
+All right.
+
+35:28.360 --> 35:29.360
+Thank you.
+
+35:29.360 --> 35:34.360
+All right, everyone, that's our show for today.
+
+35:34.360 --> 35:40.240
+For more information on Yashur or any of the topics covered in this show, visit twomolei.com
+
+35:40.240 --> 35:43.440
+slash talk slash 250.
+
+35:43.440 --> 35:49.320
+Make sure to register for Pegaworld using the code twomole19 for $200 off of registration
+
+35:49.320 --> 35:51.280
+at Pegaworld.com.
+
+35:51.280 --> 36:21.240
+As always, thanks so much for listening and catch you next time.
+

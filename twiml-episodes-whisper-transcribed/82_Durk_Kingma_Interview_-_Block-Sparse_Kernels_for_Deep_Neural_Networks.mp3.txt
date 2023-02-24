@@ -1,0 +1,683 @@
+Hello and welcome to another episode of Twimble Talk, the podcast where I interview interesting
+people, doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington, we've got a special treat for you with this show.
+This episode is actually part of the OpenAI series of shows we ran last week, but because
+it features hot off the presses research, we weren't able to release it with those shows,
+but your weight is now over.
+This episode features an interview with Dirk Kingma, a research scientist at OpenAI.
+Although Dirk is probably best known for his pioneering work on variational auto encoders,
+he joined me this time to talk through his latest project on block sparse kernels, which
+OpenAI just published this week.
+Block sparsity is a property of certain neural network representations, and OpenAI's work
+on developing block sparse kernels helps make it more computationally efficient to take
+advantage of it.
+In addition to covering block sparse kernels themselves and the background required to understand
+them, we also discuss why they're important and walk through some examples of how they
+can be used.
+I'm happy to present another fine Nerd Alert show to close out this OpenAI series and
+I know you'll enjoy it.
+Support for our OpenAI series is brought to you by our friends at Nvidia, a company which
+is also a supporter of OpenAI itself.
+If you're listening to this podcast, you already know about Nvidia and all the great things
+they're doing to support advancements in AI research and practice.
+And as you'll hear in this show, Nvidia's DGX1 deep learning supercomputer was instrumental
+to Dirk and his team's work on the block sparse kernels project.
+If you happen to be at Nips this week, be sure to check out Nvidia's booth at the Expo,
+as well as the four accepted papers being presented by their team.
+To learn more about the Nvidia presence at Nips, head on over to twomlai.com slash Nvidia.
+And now on to the show.
+All right everyone, I am on the line with Dirk Kingma. Dirk is a research scientist with
+OpenAI.
+Dirk, welcome to this week in machine learning and AI.
+Thank you very much.
+It's my pleasure.
+It's great to have you on the show.
+I am looking forward to learning a bit about your background and what you're working
+on.
+Why don't we start with the first of those and have you tell us a little bit about how
+you got involved in machine learning and AI research?
+Sure.
+So, I started, I think, my first research position when I was doing my master's degree.
+I emailed Jan Lecun out of the blue with a couple of research ideas.
+I had no clue where he was.
+He responded.
+And, you know, it was welcoming me into his lab for six months.
+So I looked up where he was and turned out to be New York.
+So I was very happy with that, of course.
+I'm happy.
+Like 2009.
+Was that for, like, a postdoc or not a postdoc, but like a research position or?
+Yeah.
+So I was very interested in AI.
+I did a master's program in Utrecht in the Netherlands and a friend of mine was studying
+in Cornell and he got me interested in a couple of topics.
+So I spent about a year, you know, reading about the various ideas in the field and quickly
+discovered, you know, the Jan Lecun had a lot of interesting research going on.
+So I applied for a position in his lab and was accepted happily.
+So this was, you know, about three years before the learning resolution started.
+And I had a great time there.
+So that was, yeah, that was, you know, 2009.
+I published a paper with him.
+I decided to do a start-up afterwards with a friend of mine in the Netherlands.
+We did that for a couple of years and then I decided to go back to research and I spent
+again about half a year in Jan Lecun's lab and applied for a PhD position with Maxwelling.
+So he's a professor in, we just started and answered them and before he was a professor
+at Irvine and my girlfriend at the time was still studying in the Netherlands.
+So I, you know, preferred to have a position there.
+So I was very lucky to get a position with Maxwelling in 2013.
+And I was his first PhD student there.
+So basically, when you start as a professor, you get like a free student as your first,
+you know, student.
+So I was his free student.
+And because of that, I was also lucky to not be bound to a particular research direction
+or topic.
+So I had, you know, relative freedom to pursue my interests from the start.
+So what I was interested in was combining probabilistic models with deep learning.
+So I thought this was a field that was sort of underappreciated, you know, the combination.
+And the first paper I published with Maxwelling was on the variational autoencoder, which
+is a paper that sort of introduces a way to combine Bayesian inference in a natural way
+with deep learning.
+And this method allows you to train generative models in a principled way and a scalable
+way.
+So it skills you have to large data sets and to large models.
+So that's for the key advantages, okay?
+And we've talked about variational autoencoders on the podcast a few times, but I'm looking
+forward to digging into that topic with you.
+What else did you work on there?
+Right, so, you know, the variational autoencoder that sparked a wave of various application
+papers and extensions also in our lab.
+So we worked on trying to get uncertainty estimation work well in deep learning models.
+So as you know, most deep learning models all you do is basically learn a single value
+of the parameters that need to, you know, good predictions on your test set and your
+training set.
+Right.
+But it doesn't necessarily give you a good sort of estimate of how certain you should be
+about your predictions given your limited data.
+And the combination with variational inference, a potential way to achieve that.
+So deep behavioral variational autoencoders introduced a trick called reprimerization trick,
+which was also applicable to estimating a posterior distribution over the parameters,
+which is basically gives you a quantitative estimate of the uncertainty over your parameters
+given your training data.
+So we did some like a paper on that.
+And yeah, so that was one extension we did.
+And also I, because of the variational autoencoder paper, there was a similar research direction
+within the lab of deep mind that happened about at the same time.
+I happened to publish my paper a bit earlier, but so they developed independently a very
+similar trick.
+And because of this coincidence, we started also collaborating on this topic.
+So I went to deep mind in 2014 and we collaborated there on applying this method to the problem
+of semi-supervised learning, which means that if you want to train a classifier from
+training data, but not all your training images are labeled, then you would want to make
+use of the unlabeled data to get better predictions than what you would get if you would solely
+train on the labeled images, right?
+Okay.
+Yeah, so we basically proposed a method using variational autoencoder.
+And the results that we got at the time were, you know, state of the art, but of course
+we're, you know, quickly eclipsed by, you know, a wave of other papers and, you know,
+that's how it happens, right?
+Yes, that's how it happens.
+But I mean, the variational autoencoder effort that come up in so many different contexts,
+it seems like, I mean, you mentioned that even in your prior lab, you know, the initial
+paper was followed up by a bunch of applications, papers that you worked on, but a lot of folks
+have worked on papers using that papers and methods, I should say.
+I think, you know, one of the first places I saw it was in the context of, like, generative
+models for texts.
+Is that a popular, am I collecting that?
+Is that a popular place to use variational autoencoders, or maybe it was, there was another
+one where someone took a, I think they took a bunch of, like, movie videos or movie clips
+or something like that and ran them through a variational autoencoder and tried to, you
+know, generate a movie clip, which was kind of interesting as well.
+Before we dive into variational autoencoders, we haven't gotten yet to open AI, have we?
+Right.
+So, in the end of, or I think somewhere in mid 2015, I was approached by Rick Rubman, who
+was assembling sort of an initial team for open AI.
+And to me, it was very intriguing because, yeah, it matched very well with sort of my own
+philosophy that I think it's good to, you know, to publish and to, you know, to write open
+source code for your experiments, but also to, you know, put emphasis on, you know, maximizing
+the probability of a positive future with AI.
+Right.
+So, yeah, there is, of course, currently a lot of concentration of talent in the field
+at a small number of places.
+And I thought it would be good to have more of, you know, to perhaps, you know, safeguard
+the, you know, the openness of the field and the collaboration.
+Right.
+So, yeah, there is, because of the inflow of talent into, you know, commercial labs,
+there is a risk that eventually, you know, a lot of these labs will, you close up and
+that, you know, the benefits of the field might not be as evenly distributed as we would
+like.
+So, that is one of the goals of open AI, you know, to make sure that the benefits are distributed
+eventually in a fair way.
+Yeah.
+Also, it was, of course, located in California, which is not a lot of bad place to live.
+Not at all.
+Not at all.
+And you've been at Open AI for how long?
+Since the start, basically, so the first few months I was still working from Amsterdam.
+Okay.
+And then I moved here in 2016.
+Okay.
+Yep.
+Awesome.
+Awesome.
+Well, one of the things that I wanted to ask you, given that we're recording this the
+week before NEPs, and I am going to NEPs, actually for the first time, is I'm assuming
+NEPs is like your home conference, so you've been there many times.
+I wanted to, you know, get a sense from you both, you know, if there's anything in particular,
+you're looking forward to about, you know, this particular conference or, you know, any
+tips on approaching NEPs as it's become, you know, quite a large conference.
+Yeah.
+So, this has indeed become an enormous conference.
+As you probably know, the field is still more or less doubling every year.
+I think the, the attendance of NEPs, you know, follows a similar trend.
+So, you know, personally, for me, it's also a big, you know, social event.
+Of course, it's probably, you know, the biggest conference in our field now.
+So, all your friends and other colleagues come all over the world, you know, assemble
+at a single place, and this is a great, you know, moment to discuss collaborations
+or to discuss the newest results, you know, have a beer together, etc.
+In terms of preparation, I would recommend people to read just, you know, through the agenda
+and make sort of a list of, you know, papers they think are most interesting before they
+go to the conference, because, you know, like whenever you're there, you're, you know,
+it is overwhelming.
+So, there, like you will have, you know, no time to, you know, to orient.
+Yeah.
+And the agendas are overwhelming, to be honest.
+Yeah.
+There's a ton of stuff going on there.
+Yeah.
+Yeah, absolutely.
+Yeah.
+And of course, one, I think the interesting thing is that a lot of the work that you
+will see is already published at archive, right?
+Right.
+So, as soon as you see a paper, you know, you can actually already read it, you know,
+long before the paper has been published on the NEPs website.
+And often, you know, you follow up work has already, you know, followed the archive.
+So, some papers are already outdated, you know, at the moment you see them at NEPs, which
+is a bit tragic.
+That's funny.
+And you're publishing some work next week as well?
+That's right.
+Yeah.
+So, with two of my colleagues, we worked on, you know, publishing a set of your kernels
+to GPU kernels, which is a software for the GPU, which allow you to train and build
+models with block sparse layers.
+So, block sparse GPU kernels.
+Maybe you talked to me before we dig into the block sparse element of this.
+Tell me a little bit more about GPU kernels and where they fit in in the kind of the software
+stack.
+I think about, you know, at the lowest level, I think about, you know, frameworks like
+TensorFlow and things like that at a much higher level, where the kernels fit in.
+Right.
+So, GPU kernels are, you can view them as sort of middleware.
+Okay.
+So, they are libraries that require you to, you know, program on the fairly low level.
+And they allow you to sort of maximize, you know, usage of, you know, GPUs, which are,
+of course, you know, it is hardware that runs very parallel.
+So, it requires you to specialize software to make full use of that.
+Basically, they are a set of middleware that is, you know, typically already implemented
+in your framework.
+Okay.
+So, you basically call in various functions that make use of, you know, office kernels
+when you build your models.
+Right.
+So, for example, when you, you know, when you implement the convolutional network in
+TensorFlow, then you typically use, you know, various pre-built layers that themselves
+call, you know, GPU kernels to efficiently evaluate, you know, the forward path and the
+backward path and the gradient computation on the GPUs.
+Are you developing the kernels in CUDA or at a lower level than that?
+Right.
+So, I did not develop the kernels myself.
+Okay.
+So, this was all done by Scott Gray, who is a GPU kernel expert.
+Okay.
+Yeah.
+So, he basically wrote all the kernels.
+So, like, all the credits go to him.
+Right.
+I guess I was more asking like, well, I guess I should have asked, does one develop kernels
+in CUDA or is this at an even lower level than something like a CUDA?
+I'm just trying to get a sense for where they fit in.
+So, these kernels were developed both at the C level and at the assembly level.
+Okay.
+So, fairly low level.
+Yeah.
+Yeah.
+And then you mentioned, brought up convolutional neural nets as an example.
+Can you give some examples of the types of kernels that, you know, a framework might implement
+is this, like, for things like tensor operations, or they add a higher level or lower level
+than that?
+Okay.
+So, your question is, like, how you can use these kernels in your models?
+No.
+So, I guess I'm still talking about GPU kernels generally, and, you know, what operations
+they tend to represent in, for example, the case of a CNN in a framework that's, you
+know, it's calling down to a bunch of lower level kernels.
+I'm just looking for examples of what those kernels might be.
+Right.
+So, in a typical CNN, you know, you have a GPU kernel for, you know, the forward convolutional
+computation, right?
+So, you have a convolutional layer in a convolutional network, which is basically a linear layer
+that applies, like, a convolution or the inputs.
+Mm-hmm.
+And the result is the output of the layer.
+So, that's where you use, you know, GPU kernels.
+And then there are, for example, GPU kernels for elements-wise operations.
+Okay.
+Yeah.
+Got it.
+And so, the kernels that you are publishing are for block sparse operations.
+What are those?
+So, block sparse operations.
+So, what we release is it is a generalization of the usual matrix multiplication and convolutional
+kernels you typically use.
+Okay.
+So, typically, what you have is when you use a convolutional layer in your model is a
+weight matrix or, like, a weight tensor, which is dense, meaning that all the entries in
+the weight, in tensor, a weight matrix, like, have a non-zero value.
+Right.
+So, there is that in, you know, as you increase the width of the network, the number of weights
+increases quadratically.
+By width.
+You mean the number of features?
+The number of features.
+Right.
+Right.
+So, there is a quadratic relationship between the number of features and the number of weights.
+Mm-hmm.
+If you use a dense, your kernel, like, a dense weight matrix, an obvious solution to this
+is to, instead of using a dense weight matrix, you use a weight matrix where not necessarily
+all blocks, you know, or all your weights in the tensor, have a non-zero value.
+So, what the block sparse kernels allow you to do is to define which of, so you basically
+define your weight matrix or your weight tensor into blocks of either 8 by 8 or 16 by 16
+or 32 by 32.
+And then you can say beforehand for each block, whether that block has the value of zero
+for every entry in the block, or actually has an actual, you know, learns, you know,
+weights value.
+Right.
+Yeah. So, basically if the weight values are zero, which is equivalent to having a block
+is, you know, all zero, then you don't, you don't have to compute, you know, that block
+because the output of the layer of the operation is not a function of that block.
+So, you can, you know, skip that computation.
+And so, you would use this in a scenario where, or maybe I should just ask you to give
+us some examples.
+Imagine that, you know, what you're essentially saying by using a block sparse matrix is
+that you don't care about the relationship between some features and some layers.
+Is that the idea?
+It gives you more flexibility in choosing how your neurons are connected between layers.
+Mm-hmm.
+Basically in all the existing architectures, you've given a particular layer, all the input
+and output features are connected.
+Right.
+But this is not necessarily, you know, the optimal way to use your parameters, right?
+So, given a particular budget of parameters, you might want to use, for example, a wider
+network that where not all features are interconnected, but only like half of them are interconnected.
+Mm-hmm.
+Or, you know, 25% of them.
+Or you might want to say that, okay, I'm going to just use, you know, connecting a half
+of the neurons with each other and I'm going to increase, you know, the depth by a factor
+two.
+So basically by introducing sparsity, given a certain parameter budget, you can have either
+much wider or much deeper networks.
+So this is one particular application that we investigated.
+But there are, you know, much more applications possible that we haven't even touched upon.
+So there's a whole, like a whole series of papers that are coming out now that show that
+after training a neural network, it is typically possible to remove, you know, 99% of the weights
+without significantly affecting performance.
+Right.
+Which is, you know, it is a curious finding, like turns out that most of the weights are
+useless, you know, for prediction.
+These kernels, they will allow you to actually make use of this redundancy.
+So after training, you could potentially just move all the ways, you know, they're useless.
+That's how you have network that is much faster to evaluate.
+So it would give you a speed up and, you know, future work would also involve, you know,
+learning the connectivity, right?
+So this is something we have not done yet, but we hope that we or others will do a future
+work.
+It's basically a bit similar to the brain, you know, the neurons should be connected,
+which, you know, should not be connected.
+So basically this is a forum of learning the structure of the model, you know, beyond
+just the value of the weights, you also, you know, you also learn where, you know, where
+you have weights.
+Right.
+Right.
+And yeah, we also have some preliminary work that we did with Ristus, so we just, an
+internet was here this summer.
+Okay.
+So right now, you are saying before training, you're specifying like where the sparsity
+blocks are.
+Yeah.
+Is that correct?
+And then.
+Yeah.
+And then you're suggesting that there's, you know, work, you're hoping to see work where
+that's learned as part of the training process as opposed to being specified up front.
+Yeah.
+So this is something where we have some preliminary work, but I think this is a very exciting
+direction that we or others can pursue in, you know, future work.
+Yeah.
+So determine where the, where the spars blocks are currently or conversely where the connections
+are.
+Is it, you know, is it essentially another kind of hyperparameter or a meta hyperparameter
+or something that you are training and evaluating, you know, with regard to some optimization
+that you're trying to make or some, you know, or the performance of your, your network
+as a whole or is there, you know, some set of heuristics or intuition that tells you,
+you know, where you should have the connections.
+Right.
+So in choosing the sparsity pattern in our published work, we took inspiration from the field of
+the small world networks.
+Small world networks.
+What are those?
+Yeah.
+So small world networks, they are a type of graph basically that you find various systems,
+including the brain.
+Okay.
+Okay.
+So you also find it in social networks, right?
+So you or any person on earth is connected to any other person on earth in a small number
+of steps.
+Right.
+Six degrees of Kevin Bacon.
+Right.
+Right.
+Right.
+So this means that even though, you know, the number of connections you have and the number
+of connections that any person, you know, in the world has is relatively low, you are still
+connected to any other person in the small number of steps.
+And you find the same property in the human brain at a functional level at least.
+So, you know, the functional modules in the brain are often mostly locally connected,
+but there are some more or less random long range connections.
+And due to these more or less, you know, long range, long term connections, you know, the
+whole brain is connected in the small number of steps, which means that information is
+spread throughout the brain relatively quickly, even though you have a huge number of neurons.
+So this is something we took inspiration from when choosing, says, you know, a disparity
+mask in our networks.
+There are very simple algorithms for generating graphs that have this property.
+So these are called small world graphs.
+They basically, they just, you know, require you to have a certain percentage of your connections
+in your random.
+And so this is indeed a hyper parameter, but we do have the guarantee that information
+mixes in the relatively small number of steps.
+So even though you introduce varsity in your network, so for example, we train, we
+have trained a big LSTM that is, you know, 98% sparse, which means that, you know, 98%
+of the connections between type cents are not there, right?
+So any neuron is only connected to about, you know, 2% of the neurons in the previous
+time step.
+So even though it's only, you know, it's only 2% in a small number of steps every neuron
+is connected with every other neuron, which means that we basically do is we introduce
+a number of internal steps in the network between external time steps that allow information
+to spread through the whole network before you process a new input.
+Can you say that last part again?
+Right.
+So because of the small world property, right?
+We basically only need to introduce a small number of intermediate steps between inputs
+to basically have a network that is fully connected.
+So after we see an input at a certain time step, you want the, you know, your brain to
+basically, you know, integrate that information across, you know, all neurons.
+And because of the small world property, you only need about, you know, 5, you know,
+steps of the internal time steps in order to make sure that the information is spread
+through your, yeah, your whole network.
+The time steps are our property of LSTMs.
+Does this apply to other types of models as well, like CNNs?
+Yes, definitely.
+So we, we applied the same technique, you know, to convolutional kernels.
+So in this case, you, you know, we, it's your sparsity in the feature dimensions,
+convolutional kernels, and we also found there that indeed helps you get better performance.
+So yeah, we've done a couple of experiments.
+So one is on, so basically what we showed is that if you take an existing architecture
+with an existing convolutional kernel, so you take in a, like a res net or, you know,
+the pixels CNN and you replace the regular convolutional kernels with locks, spars kernels
+and then you eat or widen or deepen the network, you know, while keeping a number of parameters
+the same, you get better performance in many situations.
+What's the analog to introducing additional time steps in the LSTM and the convolutional
+network?
+Right.
+So in the convolutional network, you can, for example, in a res net, what worked well is
+that we, we simply doubled the, you know, the depth of the res net.
+So a res net, you know, consists of a couple of stages and between stages, you down sample.
+So in one experiment, we took a res net for, you know, C410 and we, we doubled the depth
+of the network and we introduced 50% sparsity, the 50% of the weights are not there anymore,
+which means that, you know, the total number of parameters is approximately the same as
+before.
+Right.
+And because of the additional depth, you still have a good mixing of information.
+And so the rest of, so we kept the rest of the architecture the same, so the same
+murder rates, the same, you know, the same hyper parameters, we kept, you know, everything
+fixed and we saw that it led to an improvement of the accuracy of the model.
+The smart world model that's giving you, that's giving you an algorithm that you can apply
+to determine which 50% of the data you're basically getting rid of and which you're keeping.
+Or is it giving you a, you know, some kind of bound or guarantee that if you get rid
+of, you know, X percent of information, you'll still have the number of, you know, a given
+degrees of connectivity or convergence or something.
+What exactly is that telling you?
+So we're, we're not actually getting rid of any data, right, because the, so the state
+is still, is still dense of the model.
+So all we're doing is introducing sparsity into weights.
+So we're not, we're not, you know, removing any, any information from, from the state.
+While you're not getting rid of data, strictly speaking, you're still kind of getting rid
+of data in motion in a sense, like you're making it harder for the network to, to learn
+or to get a piece of data in a given step, right?
+You mean that the number of weights per step is, is reduced by a factor two, so the number
+of revenues is reduced by a factor two?
+Right.
+I guess, I guess what I mean is that, you know, ultimately when you do this, the network
+is still operating on less information than it had in a fully connected sense.
+Maybe before you, you know, do things like add time steps and, you know, broaden, broaden
+or deepen your network, just if you were to have a fully connected network and then you
+use zero out some of the weights, like the network is then, is it fair to say that the
+network is operating on less, less information than in the fully connected sense?
+Yeah, so it is important to note that this is something we do before training, right?
+So we actually train with the sparsity, right?
+So yeah, so before you deepen or widen, you remove half weights, then indeed you do simply
+have half the capacity, you know, to store anything in your weights, obviously, right,
+right?
+So it is, it is important, I think, to do, to keep the number of, you know, parameters
+at least equal, it's just basically you are assigning your parameters in a different
+way to the model.
+Okay.
+So the model I still, in principle, the same capacity to store information, it's just
+that the, the way it uses the parameters is a little bit different.
+Just to summarize that, you, you are indeed reducing the model's capacity to store information
+when you remove half, let's say, of the weights, but you're compensating for that by either
+increasing your breadth or your depth.
+Yeah, that's what we are indeed doing.
+Okay.
+And then in the future work, I have, you know, believed that we can figure out how to,
+you know, learn the sparsity.
+And, you know, actually, you know, during training, be able to remove a large percentage
+of the weights, you know, without getting worse performance.
+So that's division.
+How sensitive are, well, in the case where I think with the LSTM, you said you got rid
+of 98% of the weights, I would imagine that which weights you get rid of is very important
+or, you know, conversely, which weights you keep are very important.
+But do you have some way of measuring the sensitivity of a given networks performance
+to which weights you remove?
+So we choose a particular sparsity, you know, pattern before training.
+Right.
+And then we use either, you know, a wider or a deeper network, right?
+Right.
+So then we train the weights, so the model has to sort of figure out what meaning to design,
+you know, to each neuron and to each weight.
+Right.
+So we leave it up to the model to use, you know, the given sparsity pattern.
+So what we found that worked well in case of LSTM is the so, you know, so called Borevelsi
+Albert Rav, which is a type of small world network where you have a small number of neurons
+that are connected to a very large number of auto neurons.
+Mm-hmm.
+And then you have like a long tail of neurons that are very sparsely connected.
+We found that it, you know, that this worked, you know, really well for text.
+So what we did in this case is that we increased, you know, the size of the state of the LSTM,
+right?
+So you have a much wider model, which also gives you a longer memory of the past, right?
+Because you get, you know, to fit more information into the state of the LSTM than otherwise.
+And what we found is that if we trained a sentiment classifier based on that state, so we first
+train an LSTM, completely unsupervised on text, and then we train a linear classifier
+on the state of the LSTM to predict the sentiment reviews.
+And then so what we found is that we get state of the art results in predicting sentiment
+based on that model.
+So the previous state of the art was published by Alec Redford, which is also co-author of
+this paper.
+Okay.
+A couple of months ago.
+Okay.
+But now we found that if you train a much, you know, wider network to this sparse, you
+get even better results.
+This basically, you gave us a state of the art results on like five benchmarks of just
+playing sentiment in text.
+Right.
+And so this is an example of how, you know, within the same parameter budget, reconfiguring
+the way you use that parameter budget can give you much better results.
+Exactly.
+Yeah.
+And is there any intuition as to where you're likely to see that effect or where you
+would likely want to apply block sparse kernels, or is it something that, you know, will
+just have come out of experimentation?
+Yeah.
+So, you know, the space of possible architectures that you can train with these kernels is so
+huge.
+And there's just no way that, you know, we can explore it all.
+So, yeah.
+Is it what we aim, you know, with this release is to basically, you know, give it to the world
+and let everyone experiment with it because, you know, you know, we're way too small to
+explore this useful space.
+So yeah, I have, you know, some limited intuition.
+Mm-hmm.
+And what is that?
+What's your intuition telling you that where my folks want to look first or where would
+you like to see folks looking to apply this?
+Right.
+So, Scott is building in the capability now of actually having like a dynamic sparsity.
+So hopefully this will be finished before the release, you can see, meaning that varies
+during training.
+Yes.
+So, you can actually learn the sparsity mouse during training.
+Okay.
+And you could then potentially optimize it, you know, to get more performance.
+Right.
+Right.
+So, in other humans, it's, you know, we know that the way our own neurons are connected
+is also learned.
+Right.
+It's based on data.
+Right.
+Yeah.
+So, so this is, this is a way of, you know, learning the architecture of your model.
+So, personally, I think this is, this will be a very interesting area of research.
+Yeah.
+So, you know, maybe I'm kind of beating a dead horse here.
+But it sounds like there's really two things that could be accomplished here and that they're
+kind of different.
+And I'm wondering if, you know, there's some way that you think about these one is, you
+know, given a parameter budget, you know, re-architection your network using block sparsity
+to improve your results.
+But separate from that, there's this, you know, issue of this whole, you know, finding
+the right 2% of parameters that actually matter and then using block sparsity as a way
+to implement the network that, you know, just has what matters and presumably the result
+is that you're able to compute those, you know, much more quickly.
+Right.
+And I'm thinking about that the right way and are those, you know, do you think of those
+as the same problem or are they, you know, kind of, you know, two different problems,
+you know, that are enabled by this block spars kernel approach?
+I think you have right.
+Yeah.
+And these are indeed two problems that you can, you know, now tackle.
+And indeed, yeah, so either, you know, static sparsity, which is what we have done in our
+experiments or dynamic sparsity, which is sort of where you allure the sparsity pattern.
+Yeah.
+That is also an interesting application of this.
+And so it strikes me that a big part of the reason why you care about any of this at
+all is because of computational limitations.
+Is that the main idea?
+That's the main idea, but that's, that's I think the main idea of the whole field of
+computer science.
+Right.
+Too sure.
+You know, that was a little bit of a segue into in spite of the fact that, you know, we're
+getting around computational limitations here.
+You actually had access to some, you know, pretty fancy hardware to kind of try this
+out on.
+Can you talk a little bit about, you know, kind of the specific problem that you, you
+know, the problems that you were looking at to kind of push the, you know, the, the
+limit and then, you know, how the experimental results you saw on the, you know, the hardware
+that you were using?
+Absolutely.
+Absolutely.
+So one of the problems that we wanted to solve is to train a huge LSTM on a very large,
+very large data type of text and then the Amazon reviews.
+Okay.
+And we were so lucky to have access to an NVIDIA DGX1, which is hardware from NVIDIA
+that allowed us to train much larger models than we could have trained otherwise.
+So yeah, this, this was something that enabled us to basically get state of your performance
+on the Amazon reviews data set.
+And this was also instrumental to get the results I talked about on access to flying sentiment.
+What was it about the LSTM that made it huge?
+So the Amazon reviews data set is just a very large data set of reviews on Amazon obviously.
+Do you remember how many reviews, how many reviews are in that data set?
+I don't know, like Adam has, but it's, it's like a large portion of all of them.
+So basically the model that you could fit on this data is like an order of magnitude
+larger than anything we tried earlier.
+So you also need, you know, hardware to be able to fit such a model.
+And if you weren't using the DGX1, what would you have used otherwise and how did the results
+that you saw compare?
+So if you wouldn't have had a DGX1, then we would have had to use a cluster of GPUs.
+So recently it has become clear that for some problems, it is possible to, to train with
+very large mini batches or, you know, to spread out and training a close, you know, cluster.
+But then you, you will still get into problems of your number of parameters so that is not
+ideal still.
+And typically, you know, still need to, you know, fit your parameters on the single GPU.
+So even if you can, you know, split your mini batch data across multiple machines, then
+you're, you know, still bottlenecked by the memory of all of the single machines.
+Okay.
+And do you have a sense for at the end of the day, you know, well, how long did it take
+you to train your models and like how, do you ever sense for how much faster it would,
+you know, it was relative to what you would have done otherwise?
+I think it allowed us to train the model about twice as fast as otherwise.
+So it's still true, I believe, about, you know, two weeks to train the model.
+Oh, wow.
+Wow.
+It sounds like a really interesting project with some potentially broad applications that,
+you know, I'll be keeping an eye out for clearly, I'll be publishing a paper around this.
+Are you also publishing code or is it more the, the research results that are the important
+takeaway for folks that want to build on it?
+Yeah.
+So it's a second.
+So we are actually publishing the code.
+Okay.
+So we are publishing the GPU kernels.
+I think this is by far the most interesting part of what we release because this actually
+allows practitioners and researchers to do, you know, completely new things very easily.
+So it's just basically a matter of importing a new library and, you know, replacing your
+existing conclusions or matrix applications with, you know, the block sparse ones and
+they're good to go.
+So yeah, it is actual software to use for others.
+Okay.
+Do you at this point have a place that you can point folks to or do you know where folks
+will be able to find this work once it's published?
+You can find a work on OpenEI.com and you go to the blog posts there.
+You will find a blog post on this topic and a link to get up.
+Okay.
+Fantastic.
+Great.
+Great.
+I really enjoy chatting with you.
+Is there anything else that you'd like to leave the audience with?
+Yeah, I think we had a very interesting conversation.
+Thank you for inviting me to the show.
+And yeah, I encourage everyone, you know, to keep sharing results, you know, to publishing
+source code, all of your experiments and keep an eye out on the research of OpenEI.
+So that's it.
+Great.
+All right.
+Well, thanks.
+Thanks very much.
+Okay.
+All right, everyone, that's our show for today.
+Thanks so much for listening and for your continued feedback and support.
+For more information on Dirk or any of the topics covered in this episode, head on over
+to twimlai.com slash talk slash 80.
+To catch up on our OpenEI series, visit twimlai.com slash open AI.
+Of course, you can send along your feedback or questions to me via Twitter to at Sam
+Charrington or at twimlai or leave a comment right on the show notes page.
+Thanks once again to Nvidia for their support of this series.
+To learn more about Nvidia and their presence at nips, remember to head on over to twimlai.com
+slash Nvidia.
+And thank you once again for listening and catch you next time.

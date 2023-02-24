@@ -1,0 +1,1536 @@
+1
+00:00:00,000 --> 00:00:16,320
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+
+2
+00:00:16,320 --> 00:00:21,480
+people, doing interesting things in machine learning and artificial intelligence.
+
+3
+00:00:21,480 --> 00:00:31,280
+I'm your host Sam Charrington.
+
+4
+00:00:31,280 --> 00:00:36,440
+In today's episode of our strata data series, we're joined by Viviana Aquaviva, associate
+
+5
+00:00:36,440 --> 00:00:41,180
+professor at CityTech, the New York City College of Technology.
+
+6
+00:00:41,180 --> 00:00:46,120
+Viviana led a tutorial at the conference titled, Learning Machine Learning Using Astronomy
+
+7
+00:00:46,120 --> 00:00:52,120
+Data Sets. In our conversation, Viviana and I discuss an ongoing project that she's
+
+8
+00:00:52,120 --> 00:00:58,580
+a part of called the Hobby Everly Telescope Dark Energy Experiment. In this project, Viviana
+
+9
+00:00:58,580 --> 00:01:05,340
+tackles the challenge of understanding how and why the expansion of the universe is accelerating.
+
+10
+00:01:05,340 --> 00:01:10,160
+We discuss her motivation for undertaking this project, how she gets her data, the model
+
+11
+00:01:10,160 --> 00:01:17,120
+she uses and how she evaluates their performance. Before we move on, I'd like to send a big
+
+12
+00:01:17,120 --> 00:01:21,020
+shout out to our friends at Cloudera and Capital One for their continued support of this
+
+13
+00:01:21,020 --> 00:01:26,340
+show and their sponsorship of this series. Cloudera's modern platform for machine learning
+
+14
+00:01:26,340 --> 00:01:32,460
+and analytics, optimized for the cloud, lets you build and deploy AI solutions at scale,
+
+15
+00:01:32,460 --> 00:01:35,860
+efficiently and securely, anywhere you want.
+
+16
+00:01:35,860 --> 00:01:41,500
+In addition, Cloudera Fast Forward Labs' expert guidance helps you realize your AI future
+
+17
+00:01:41,500 --> 00:01:50,060
+faster. To learn more, visit Cloudera's machine learning resource center at cladera.com-slash-ml.
+
+18
+00:01:50,060 --> 00:01:55,140
+At the NIPPS conference in Montreal this December, Capital One will be co-hosting a workshop
+
+19
+00:01:55,140 --> 00:02:00,940
+focused on challenges and opportunities for AI and financial services, and the impact
+
+20
+00:02:00,940 --> 00:02:08,140
+of fairness, explainability, accuracy and privacy. A call for papers is now open through
+
+21
+00:02:08,140 --> 00:02:17,380
+October 25th. For more information or to submit a paper, visit twimlai.com-c1nIPPS.
+
+22
+00:02:17,380 --> 00:02:23,140
+That's C the number one NIPPS. If you love this show, you've got to love our sponsors
+
+23
+00:02:23,140 --> 00:02:27,620
+because they help make it possible, so please take a look at what they're up to and tell
+
+24
+00:02:27,620 --> 00:02:31,100
+them Tommel sent you. And now, onto the show.
+
+25
+00:02:31,100 --> 00:02:41,660
+Alright everyone, I am on the line with Viviana Aquaviva. Viviana is an associate professor
+
+26
+00:02:41,660 --> 00:02:47,380
+at City Tech, the technical college at the City University of New York. Viviana, welcome
+
+27
+00:02:47,380 --> 00:02:50,180
+to this week in machine learning and AI.
+
+28
+00:02:50,180 --> 00:02:52,940
+Thank you very much Sam, it's a pleasure to be here.
+
+29
+00:02:52,940 --> 00:02:58,860
+It's a pleasure to be chatting with you. You recently did a tutorial at the Stratocomference
+
+30
+00:02:58,860 --> 00:03:05,260
+in New York, where you presented on learning machine learning using astronomy data sets.
+
+31
+00:03:05,260 --> 00:03:09,460
+Before we dive into some of your work with machine learning and astronomy, can you tell
+
+32
+00:03:09,460 --> 00:03:11,420
+us a little bit about your background?
+
+33
+00:03:11,420 --> 00:03:17,980
+Yes, absolutely, so I'm an astrophysicist by training, so I did my bachelor degree
+
+34
+00:03:17,980 --> 00:03:23,940
+work actually in theoretical physics, move on to astrophysics for my PhD, and I got my
+
+35
+00:03:23,940 --> 00:03:30,740
+PhD in 2006. And I've always been fascinating with numerical techniques, so even before
+
+36
+00:03:30,740 --> 00:03:35,380
+studying working with machine learning, I was working on Bayesian techniques for parameter
+
+37
+00:03:35,380 --> 00:03:41,260
+inference. And then, just before joining the faculty at the City University of New York,
+
+38
+00:03:41,260 --> 00:03:45,780
+the year before decided, okay, I'm going to take a graduate course in computer science.
+
+39
+00:03:45,780 --> 00:03:50,140
+This may be my last chance to actually see what is about, and I took a graduate course
+
+40
+00:03:50,140 --> 00:03:54,140
+in machine learning, and I guess I was hooked at this point.
+
+41
+00:03:54,140 --> 00:03:59,340
+And so, a little by little, I started incorporating my research. I took a summer off to do some
+
+42
+00:03:59,340 --> 00:04:06,260
+Kaggle competitions, sort of to see where I stack, compared to other data scientists.
+
+43
+00:04:06,260 --> 00:04:12,020
+And now, I guess that most of my research work in astronomy actually is based on one
+
+44
+00:04:12,020 --> 00:04:17,140
+and another machine learning technique. And how did you end up stacking when you compared
+
+45
+00:04:17,140 --> 00:04:26,140
+yourself to other data scientists on Kaggle? Well, not too bad, I guess. Otherwise, it
+
+46
+00:04:26,140 --> 00:04:31,740
+would have probably stopped. But I guess I got, like, you know, a typically was I felt
+
+47
+00:04:31,740 --> 00:04:36,940
+like in the first, like I could get to the top 15, 20%, and then I think at that point,
+
+48
+00:04:36,940 --> 00:04:41,660
+it's really hard to keep climbing the leaderboard, and I wasn't too interested in becoming
+
+49
+00:04:41,660 --> 00:04:45,980
+the best. I just wanted to make sure I wasn't like a complete fool.
+
+50
+00:04:45,980 --> 00:04:53,660
+It's so funny. So, a bunch of folks in the Meetup associated with the podcast have gone
+
+51
+00:04:53,660 --> 00:05:00,740
+through the fast.ai course, and that course is taught by Jeremy Howard, who for a long
+
+52
+00:05:00,740 --> 00:05:07,220
+time was the chief strategist or chief scientist, I should say, at Kaggle. And so, competing
+
+53
+00:05:07,220 --> 00:05:14,340
+in Kaggle competitions and using Kaggle data is a big part of the methodology for this
+
+54
+00:05:14,340 --> 00:05:20,580
+course. And you're right, it is on the one hand, you know, it takes a lot of work, but
+
+55
+00:05:20,580 --> 00:05:28,260
+it's not too hard to get within that top even 10%, 15%, but to get from there to the
+
+56
+00:05:28,260 --> 00:05:32,500
+top, I guess like in anything else, like that's a lot more work.
+
+57
+00:05:32,500 --> 00:05:39,500
+Okay, the last 10% of a project is at 90% of the time, isn't it? Exactly, exactly, exactly.
+
+58
+00:05:39,500 --> 00:05:44,980
+One of the things that you mentioned in our chat prior to starting was that a lot of
+
+59
+00:05:44,980 --> 00:05:54,140
+your recent research has been focused on a large galaxy survey and trying to detect dark
+
+60
+00:05:54,140 --> 00:06:00,260
+energy. Can you tell us about this large galaxy survey, what's the data that that has
+
+61
+00:06:00,260 --> 00:06:06,700
+created and what is dark energy? Well, I can't tell you what is dark energy, unfortunately,
+
+62
+00:06:06,700 --> 00:06:11,780
+I can tell you how much we know about it. And the other thing, most of the work is with
+
+63
+00:06:11,780 --> 00:06:18,500
+a bunch of galaxy surveys. So I'll give you like a very high level, I promise, overview.
+
+64
+00:06:18,500 --> 00:06:25,180
+So what is dark energy? Let's say that like about like 20 years ago, scientists were
+
+65
+00:06:25,180 --> 00:06:31,980
+quite puzzled to discover that the expansion of the universe is accelerating. Now this may
+
+66
+00:06:31,980 --> 00:06:39,140
+not sound like much, but we are unaware of any force that could cause this to happen.
+
+67
+00:06:39,140 --> 00:06:42,820
+In fact, if anything we thought that if the expansion of the universe started with a
+
+68
+00:06:42,820 --> 00:06:48,420
+big bang that sort of provides the initial momentum, the only other force that we expected
+
+69
+00:06:48,420 --> 00:06:55,060
+matter at distances typical of galaxies, but even like planets really is gravity. And gravity
+
+70
+00:06:55,060 --> 00:07:00,460
+wants the opposite thing. It likes all things to be bench close together. And so it would
+
+71
+00:07:00,460 --> 00:07:05,580
+have the effect of slowing down the expansion, not accelerating. So when we discovered that
+
+72
+00:07:05,580 --> 00:07:10,980
+this was happening, it was a big shock. It took us about a decade to accept it. It was
+
+73
+00:07:10,980 --> 00:07:17,660
+the Nobel Prize for Physics in 2011. And then it left all of us scientists quite at
+
+74
+00:07:17,660 --> 00:07:23,420
+a loss for what to do and how to search for these mysterious components. So we called
+
+75
+00:07:23,420 --> 00:07:29,620
+whatever mechanism is responsible for that dark energy. And I guess one of the big challenges
+
+76
+00:07:29,620 --> 00:07:38,020
+of the last 10 or 15 years has been to understand how dark energy has evolved throughout cosmic
+
+77
+00:07:38,020 --> 00:07:44,500
+time. So the universe is about 14 billion years old. We have so far been able to measure
+
+78
+00:07:44,500 --> 00:07:51,020
+the fact that the expansion started as slowing down as expected and then sort of picked
+
+79
+00:07:51,020 --> 00:07:56,820
+up speed, sort of halfway throughout the life of the universe. And now what we are trying
+
+80
+00:07:56,820 --> 00:08:03,580
+to do is to understand what happened even earlier to see if this gives us a way of distinguishing
+
+81
+00:08:03,580 --> 00:08:08,500
+between different models. So this is what this big galaxy survey
+
+82
+00:08:08,500 --> 00:08:14,260
+issue mentioned is called Hectics. The Hobby Eberly Telescope dark energy experiment has set
+
+83
+00:08:14,260 --> 00:08:21,260
+out to do. And so we want to look for probes of how the universe was expanding say 10 billion
+
+84
+00:08:21,260 --> 00:08:27,980
+years ago. How can we do that? Well, we rely on the fact that I feel like it's pretty amazing
+
+85
+00:08:27,980 --> 00:08:34,740
+that when you look far away into space, you're also looking back in time. And that's because
+
+86
+00:08:34,740 --> 00:08:40,500
+light from distant objects say galaxies take a certain amount of time to come to us.
+
+87
+00:08:40,500 --> 00:08:45,180
+So if you're looking at something which is one million light years away, you're looking
+
+88
+00:08:45,180 --> 00:08:50,620
+one million years back in the past. So if we can do the same game with galaxies that
+
+89
+00:08:50,620 --> 00:08:57,380
+are say 12 billion light years away, now we're looking 12 billion years in the past. So
+
+90
+00:08:57,380 --> 00:09:02,540
+what this service is doing is I guess looking for about a million of these very, very far
+
+91
+00:09:02,540 --> 00:09:09,980
+away galaxies. And it's selecting them on the base of distance because this corresponds
+
+92
+00:09:09,980 --> 00:09:16,380
+to a selection in time back in the past. And then the distances to these galaxies tell
+
+93
+00:09:16,380 --> 00:09:23,260
+us basically how much the universe is expanding since then. So why machine learning? I guess
+
+94
+00:09:23,260 --> 00:09:30,060
+the answer there is the problem with these galaxies is that we have these observations
+
+95
+00:09:30,060 --> 00:09:35,340
+and observation just basically tell us, hey, there's a spike in luminosity at this point
+
+96
+00:09:35,340 --> 00:09:41,820
+in the sky. But you know, the sky is a two dimensional object. And so it doesn't come
+
+97
+00:09:41,820 --> 00:09:48,580
+with distances. When we observe something, we don't know a priori how far away it is.
+
+98
+00:09:48,580 --> 00:09:55,580
+So the problem is that some other galaxies that are nearby may mask as the firewall ones
+
+99
+00:09:55,580 --> 00:10:03,140
+that we want to find. And so we're using machine learning to create a learning set using
+
+100
+00:10:03,140 --> 00:10:08,700
+galaxies for which the distance are known and then to develop a method to tell us whether
+
+101
+00:10:08,700 --> 00:10:15,260
+the galaxy is the far away one that we want to keep or some sort of nearby contaminant.
+
+102
+00:10:15,260 --> 00:10:24,820
+There is so much there to dig into. Even the basic astronomy and physics of this creates
+
+103
+00:10:24,820 --> 00:10:32,780
+a lot of questions for me. So we're, when we're looking at these distant galaxies through
+
+104
+00:10:32,780 --> 00:10:41,900
+this survey data, to what degree are we able to kind of infer expansion from the galaxies
+
+105
+00:10:41,900 --> 00:10:46,500
+from a astronomical perspective is a relatively short period of time. If we're looking at this
+
+106
+00:10:46,500 --> 00:10:52,140
+over the course of earth years, can that really tell us a lot about the motion of these
+
+107
+00:10:52,140 --> 00:10:57,660
+galaxies billions of years ago? Well, no, you're absolutely right. So we don't do for every
+
+108
+00:10:57,660 --> 00:11:04,060
+galaxy, we only get one and one only snapshot. So we can't hope to detect some sort of evolution
+
+109
+00:11:04,060 --> 00:11:09,140
+because as you mentioned, earth years is basically nothing compared to the evolutionary scales
+
+110
+00:11:09,140 --> 00:11:15,580
+of these galaxies. But what we can do is to say, okay, if I can pinpoint how long ago
+
+111
+00:11:15,580 --> 00:11:24,300
+this galaxy is observed and how fast it was moving. And if I can do this for several
+
+112
+00:11:24,300 --> 00:11:32,260
+epochs of the universe, I basically get the chart of velocity of expansion versus distance.
+
+113
+00:11:32,260 --> 00:11:37,500
+And this is what the expansion history of the universe is. So for it's true that I cannot
+
+114
+00:11:37,500 --> 00:11:48,060
+observe this single galaxy more than once. But if I can get the distance at that time and
+
+115
+00:11:48,060 --> 00:11:53,700
+the velocity of the expansion at that time, then I can tell whether the expansion overall
+
+116
+00:11:53,700 --> 00:12:00,060
+was accelerating or decelerating. And so how do we get the velocity of expansion at
+
+117
+00:12:00,060 --> 00:12:05,180
+a given snapshot in time? Well, the velocity, great point, comes from something called
+
+118
+00:12:05,180 --> 00:12:14,540
+predshift. So what happens is that when we measure, say, the light emission from certain
+
+119
+00:12:14,540 --> 00:12:20,900
+atoms, for example, hydrogen, which is the most common atom in the universe, in the lab,
+
+120
+00:12:20,900 --> 00:12:26,700
+we observe some spikes corresponding to atomic transition, say, of this atom at certain
+
+121
+00:12:26,700 --> 00:12:33,420
+wavelength. However, when there is motion between source and observer, as is the case when
+
+122
+00:12:33,420 --> 00:12:39,700
+we're looking at, say, hydrogen atoms in distant galaxies that are moving away from us,
+
+123
+00:12:39,700 --> 00:12:44,980
+these same transition lines, they are observed at different wavelengths. And there is a very
+
+124
+00:12:44,980 --> 00:12:52,780
+simple relationship between these two wavelengths that gives us exactly sort of the expansion
+
+125
+00:12:52,780 --> 00:12:58,860
+factor of the universe in between or if you will, the velocity of the expansion. So
+
+126
+00:12:58,860 --> 00:13:04,340
+there's something similar to Doppler effect for sound. The fact that when we hear an ambulance
+
+127
+00:13:04,340 --> 00:13:09,580
+coming towards us, the pitch becomes higher. So this is the same thing, but for light waves
+
+128
+00:13:09,580 --> 00:13:15,940
+rather than from sound waves. And so the task is then to measure the light that we're receiving
+
+129
+00:13:15,940 --> 00:13:24,340
+from as many of these galaxies as possible. And because galaxies can be obscured by other
+
+130
+00:13:24,340 --> 00:13:31,700
+galaxies, we need techniques like machine learning to tell us. It sounds like an attribution
+
+131
+00:13:31,700 --> 00:13:35,820
+problem. We've got some light. What galaxy do we attribute it to?
+
+132
+00:13:35,820 --> 00:13:39,740
+Not quite in the sense that it's not like confusion of the sources. The point is like,
+
+133
+00:13:39,740 --> 00:13:45,340
+you know, when you look at a galaxy through a telescope, you just see a speck of light.
+
+134
+00:13:45,340 --> 00:13:51,860
+And so, you know, without a proper setup, it's difficult to understand what it is looking
+
+135
+00:13:51,860 --> 00:13:57,860
+at a spectrum with lines in a certain place. It would be different lines, for example,
+
+136
+00:13:57,860 --> 00:14:02,860
+lines from oxygen from a spectrum that is not very redshifted, meaning a galaxy that
+
+137
+00:14:02,860 --> 00:14:09,100
+is close by. Or if you're looking at a spike that looks like that is an hydrogen line coming
+
+138
+00:14:09,100 --> 00:14:13,820
+from a much further away galaxy, just they look the same.
+
+139
+00:14:13,820 --> 00:14:20,300
+So the machine learning is used to do, is it classification? Then is the underlying problem
+
+140
+00:14:20,300 --> 00:14:22,300
+of, you know, what is happening in this...
+
+141
+00:14:22,300 --> 00:14:24,300
+Supervised classification problem.
+
+142
+00:14:24,300 --> 00:14:27,300
+Supervised class of now, you're speaking my language.
+
+143
+00:14:27,300 --> 00:14:29,300
+Finally, we can go back to Earth.
+
+144
+00:14:29,300 --> 00:14:35,060
+Right, exactly. So the nature of this data set is there, you mentioned a data set that
+
+145
+00:14:35,060 --> 00:14:41,300
+is from the Hubble and another telescope. What does the data set look like?
+
+146
+00:14:41,300 --> 00:14:46,300
+Well, it's actually not the Hubble. The telescope is called the Hobby Eberli.
+
+147
+00:14:46,300 --> 00:14:56,300
+Hobby Eberli telescope, it's a spectrograph and it's mounted on a telescope and McDonald Observatory
+
+148
+00:14:56,300 --> 00:14:58,300
+in Texas.
+
+149
+00:14:58,300 --> 00:15:03,300
+And so you've got a time series of spectrograph readings?
+
+150
+00:15:03,300 --> 00:15:09,300
+Well, we got, let's see, it's not even time series, it's just sort of like combined observations,
+
+151
+00:15:09,300 --> 00:15:14,300
+let's say, you know, and for us, I guess longer exposure time usually helps.
+
+152
+00:15:14,300 --> 00:15:21,300
+But what we have is, let's say, where we detect a spike in the spectrum of the galaxy and
+
+153
+00:15:21,300 --> 00:15:26,300
+by say, where I mean, like a which wavelength? And what is the strength of the signal?
+
+154
+00:15:26,300 --> 00:15:30,300
+This is the primary data. Now, just with that, you couldn't do...
+
+155
+00:15:30,300 --> 00:15:35,300
+You couldn't set this up as a classification problem. So what we do is that we also do use
+
+156
+00:15:35,300 --> 00:15:39,300
+so-called imaging data, which are basically pictures of galaxies.
+
+157
+00:15:39,300 --> 00:15:47,300
+And these are usually data that are less deep, so they are less able to see very faint objects,
+
+158
+00:15:47,300 --> 00:15:53,300
+but they have observation in several bands or you can think of them in several colors.
+
+159
+00:15:53,300 --> 00:15:57,300
+And this is the case where, for example, it may happen that some of these objects have been observed
+
+160
+00:15:57,300 --> 00:16:04,300
+by Hubble's face telescope. And so we array had data for those or data from other surveys.
+
+161
+00:16:04,300 --> 00:16:10,300
+And so when we combine data from the spectrograph and these images,
+
+162
+00:16:10,300 --> 00:16:16,300
+now we can, on the one hand, get our learning set, get some galaxies for which we know
+
+163
+00:16:16,300 --> 00:16:18,300
+enough to tell how far away they are.
+
+164
+00:16:18,300 --> 00:16:25,300
+For this image data, when we're talking about galaxies that are 12 billion light years away,
+
+165
+00:16:25,300 --> 00:16:31,300
+what kind of resolution are we able to image these at? How many pixels across
+
+166
+00:16:31,300 --> 00:16:37,300
+to be get for a galaxy? Great question. They're tiny. They're little specks most of the time.
+
+167
+00:16:37,300 --> 00:16:42,300
+So all the shapes that you may think, when you think about a galaxy with spiral arms, these are all gone.
+
+168
+00:16:42,300 --> 00:16:44,300
+Yeah, yeah.
+
+169
+00:16:44,300 --> 00:16:50,300
+Sometimes we have a few pixel resolution. If you're looking at space telescope data,
+
+170
+00:16:50,300 --> 00:16:52,300
+sometimes we just get like one little blob.
+
+171
+00:16:52,300 --> 00:17:00,300
+And you're talking, you kind of walk folks through the application of basic machine learning techniques
+
+172
+00:17:00,300 --> 00:17:06,300
+using astronomy data sets is the implication that these data sets are available
+
+173
+00:17:06,300 --> 00:17:09,300
+for anyone who wants to experiment with them.
+
+174
+00:17:09,300 --> 00:17:12,300
+It depends. In this case, in the case of this particular service,
+
+175
+00:17:12,300 --> 00:17:17,300
+the simulations that we used and also the we scientists used up to, let's say a year ago,
+
+176
+00:17:17,300 --> 00:17:21,300
+when data started coming in are often available.
+
+177
+00:17:21,300 --> 00:17:25,300
+The data from the Hubble telescope are at the moment not public yet.
+
+178
+00:17:25,300 --> 00:17:30,300
+But I have to say that I think one great thing about astronomy is that most of the best data
+
+179
+00:17:30,300 --> 00:17:34,300
+are publicly available very shortly after having been taken.
+
+180
+00:17:34,300 --> 00:17:38,300
+For example, we present proposals to take data with the Hubble.
+
+181
+00:17:38,300 --> 00:17:43,300
+And in most cases, we have to actually sign a close, it says,
+
+182
+00:17:43,300 --> 00:17:46,300
+we only have six months or one year property period.
+
+183
+00:17:46,300 --> 00:17:53,300
+And so maybe walk us through some of the ways that you can start with this data
+
+184
+00:17:53,300 --> 00:17:58,300
+and learn things about these distant galaxies.
+
+185
+00:17:58,300 --> 00:18:02,300
+Sure, well, I guess that for us, the important thing, as you know,
+
+186
+00:18:02,300 --> 00:18:05,300
+this is a supervised learning problem.
+
+187
+00:18:05,300 --> 00:18:09,300
+And so we have, we say, okay, we have some data from the spectrograph that tells us basically,
+
+188
+00:18:09,300 --> 00:18:11,300
+okay, I'm seeing one of these lines.
+
+189
+00:18:11,300 --> 00:18:13,300
+I don't know what line it is.
+
+190
+00:18:13,300 --> 00:18:15,300
+It could be hydrogen from a distant galaxy, yay.
+
+191
+00:18:15,300 --> 00:18:20,300
+Or it could be, say, oxygen from a nearby galaxy, though.
+
+192
+00:18:20,300 --> 00:18:25,300
+So the first thing that we had to do is understand what kind of learning cell we can create
+
+193
+00:18:25,300 --> 00:18:31,300
+and to do that, we assemble ancillary data from other telescopes.
+
+194
+00:18:31,300 --> 00:18:38,300
+And in this case, in other words, we calculated for about 10% of the galaxy in our survey.
+
+195
+00:18:38,300 --> 00:18:42,300
+We had enough information to be able to give them a clear label.
+
+196
+00:18:42,300 --> 00:18:44,300
+This is a very far away galaxy.
+
+197
+00:18:44,300 --> 00:18:46,300
+This is a nearby galaxy.
+
+198
+00:18:46,300 --> 00:18:53,300
+And then we used these sets of simulations, because we didn't have the data at the point yet,
+
+199
+00:18:53,300 --> 00:18:58,300
+but still assuming that for about 10% of the objects, we would have the labels.
+
+200
+00:18:58,300 --> 00:19:03,300
+And what we did in the tutorial was actually how we started out.
+
+201
+00:19:03,300 --> 00:19:06,300
+So saying, okay, we have our features.
+
+202
+00:19:06,300 --> 00:19:11,300
+We took a look at, you know, we did a little bit of basic data visualization
+
+203
+00:19:11,300 --> 00:19:17,300
+to understand which ones were the most important ones and which ones may be redundant.
+
+204
+00:19:17,300 --> 00:19:20,300
+We got rid of our layers and things like that.
+
+205
+00:19:20,300 --> 00:19:26,300
+And then we could see that, you know, we started with things like decision trees and caneers neighbors.
+
+206
+00:19:26,300 --> 00:19:34,300
+And we could see that we could obtain accuracy scores of around 90% right away.
+
+207
+00:19:34,300 --> 00:19:39,300
+Now we moved on to more sophisticated algorithm doing parameter optimization.
+
+208
+00:19:39,300 --> 00:19:42,300
+So we took a look at support vector machines.
+
+209
+00:19:42,300 --> 00:19:48,300
+I know that these are all fashion, but they're really, I feel like I'm quite affectionate to them.
+
+210
+00:19:48,300 --> 00:19:51,300
+So then for pedagogical purposes, they agree.
+
+211
+00:19:51,300 --> 00:19:53,300
+And we also, they run on forest.
+
+212
+00:19:53,300 --> 00:20:03,300
+And you know, I felt like I had to went to go into actually boost since it's, you know, all over Kaggle competitions.
+
+213
+00:20:03,300 --> 00:20:10,300
+And I just showed them though, I feel like for me, the most important things were to show them looks in real life.
+
+214
+00:20:10,300 --> 00:20:14,300
+Picking an algorithm, even the best of them and optimizing it is never enough.
+
+215
+00:20:14,300 --> 00:20:23,300
+And actually, it doesn't have nearly as much impact as, you know, being able to tailor your algorithm to your data.
+
+216
+00:20:23,300 --> 00:20:30,300
+So for us, for example, one of the issues that we ran into was that the two populations of objects that we are looking at,
+
+217
+00:20:30,300 --> 00:20:35,300
+let's say let's call them like close and far galaxies, they're not present in equal measure.
+
+218
+00:20:35,300 --> 00:20:38,300
+This is a fairly imbalanced data set.
+
+219
+00:20:38,300 --> 00:20:43,300
+So as you know, accuracy becomes a very poor metric in that case.
+
+220
+00:20:43,300 --> 00:20:45,300
+How did you address that?
+
+221
+00:20:45,300 --> 00:20:48,300
+Well, for us, and I believe that this should be a case.
+
+222
+00:20:48,300 --> 00:20:52,300
+What we did is we defined an ad hoc metric.
+
+223
+00:20:52,300 --> 00:20:55,300
+So rather than, you know, because I mean, you can do different things.
+
+224
+00:20:55,300 --> 00:21:00,300
+You can decide, okay, I want to be as complete as possible and optimize recall.
+
+225
+00:21:00,300 --> 00:21:02,300
+These are fairly standard things, right?
+
+226
+00:21:02,300 --> 00:21:07,300
+But I think in general, what you want to do is to ask yourself, okay, what do I really care about?
+
+227
+00:21:07,300 --> 00:21:16,300
+And the metric that you probably care about for us, it was the error in the determination of distance to these galaxies.
+
+228
+00:21:16,300 --> 00:21:19,300
+And of course, this is not something that is readily available.
+
+229
+00:21:19,300 --> 00:21:25,300
+So what we did is we used computer simulation to create a fitting formula,
+
+230
+00:21:25,300 --> 00:21:29,300
+where we mapped the relationship between the error in the distance,
+
+231
+00:21:29,300 --> 00:21:33,300
+which is the thing that we wanted to keep as small as possible.
+
+232
+00:21:33,300 --> 00:21:42,300
+And you know, a complicated polynomial function with a coefficients of precision recall.
+
+233
+00:21:42,300 --> 00:21:46,300
+And then once we could fit our coefficients, we use these.
+
+234
+00:21:46,300 --> 00:21:53,300
+We introduce this metric as the evaluation metric in all of our algorithm and we optimize for that.
+
+235
+00:21:53,300 --> 00:21:58,300
+And I feel like this has a much bigger impact than choosing one algorithm over another.
+
+236
+00:21:58,300 --> 00:22:09,300
+So just to recap that, you, the fundamental problem you're faced with here is a limited amount of training data.
+
+237
+00:22:09,300 --> 00:22:17,300
+So in order to overcome that problem, you looked at other data sources that could provide labels for you.
+
+238
+00:22:17,300 --> 00:22:27,300
+You were able to collect labels on some 10% of your ultimate data set, but that wasn't enough.
+
+239
+00:22:27,300 --> 00:22:37,300
+So in order to synthesize additional labels, you fit your original labels to kind of a polynomial formula.
+
+240
+00:22:37,300 --> 00:22:40,300
+Is that am I interpreting that correctly?
+
+241
+00:22:40,300 --> 00:22:45,300
+I felt like I would just maybe want to lightly edit the last stop.
+
+242
+00:22:45,300 --> 00:22:52,300
+So well, I guess one thing that I felt quite different in academia and industry is that in industry,
+
+243
+00:22:52,300 --> 00:22:54,300
+there is such a thing as good enough.
+
+244
+00:22:54,300 --> 00:22:55,300
+Sure.
+
+245
+00:22:55,300 --> 00:22:59,300
+But for us, we are never going for good enough.
+
+246
+00:22:59,300 --> 00:23:06,300
+You know, for us, I guess that always the ultimate goal is to come up with the best possible.
+
+247
+00:23:06,300 --> 00:23:10,300
+And so in some sense, we never stop optimizing.
+
+248
+00:23:10,300 --> 00:23:15,300
+So for us, what we wanted to do was to define and had a hot evaluation metric.
+
+249
+00:23:15,300 --> 00:23:21,300
+Because we felt that the ones that say, you know, you can pick from a standard package, say, you know, we program in Python.
+
+250
+00:23:21,300 --> 00:23:23,300
+So we use scikit-learn.
+
+251
+00:23:23,300 --> 00:23:32,300
+And so you can train, you can build your models, optimizing for standard metrics, such as accuracy, precision or recall.
+
+252
+00:23:32,300 --> 00:23:40,300
+But for us, really, what we wanted to optimize was a different quantity that becomes, sorry, that depends in a non-trivial way on all of these.
+
+253
+00:23:40,300 --> 00:23:50,300
+And so we were able to write our metric as a complicated formula that involves all of these things, like precision and recall in particular.
+
+254
+00:23:50,300 --> 00:23:53,300
+And then we introduced this ad hoc metric.
+
+255
+00:23:53,300 --> 00:23:54,300
+Okay.
+
+256
+00:23:54,300 --> 00:24:02,300
+So this wasn't about data generation so much as coming out with your optimization metric.
+
+257
+00:24:02,300 --> 00:24:12,300
+And you came up with a polynomial formula for the optimization metric that was more robust than any of the simpler metrics that you could have used.
+
+258
+00:24:12,300 --> 00:24:13,300
+Right.
+
+259
+00:24:13,300 --> 00:24:17,300
+And I don't know if I would say that more robust, but just better tailored to our problem.
+
+260
+00:24:17,300 --> 00:24:20,300
+It gave us a better result in the end.
+
+261
+00:24:20,300 --> 00:24:31,300
+Did you iterate to that solution or did was it clear early on that you had to go in that direction?
+
+262
+00:24:31,300 --> 00:24:37,300
+Well, this is research, right? So this is definitely not the first thing that we tried.
+
+263
+00:24:37,300 --> 00:24:43,300
+But as I mentioned, you know, like another thing that we did was to, you know, try a whole bunch of different algorithms.
+
+264
+00:24:43,300 --> 00:24:57,300
+But then I feel like this was the key point that, you know, photos gave us a larger improvement overall compared to, you know, say picking one method over the other.
+
+265
+00:24:57,300 --> 00:25:06,300
+And so what was it in your experience up to the point that told you that this should be something that you try?
+
+266
+00:25:06,300 --> 00:25:15,300
+Great question. I don't know. I think that in general, you're looking at methods and you're saying, OK, what is the, you know, workspace for me?
+
+267
+00:25:15,300 --> 00:25:35,300
+And, you know, as if I actually, a Strada, I heard one of my favorite talks was exactly about this, about how often, you know, many businesses sort of base their projects and their plans on one single metric that may not enclose all the information that we need.
+
+268
+00:25:35,300 --> 00:25:41,300
+Because it's not one number that drives the business value of a company. And so I felt exactly the same.
+
+269
+00:25:41,300 --> 00:25:55,300
+I felt that neither of these simple numbers was actually most directly related to what we really wanted to minimize, which was the uncertainty in the measurements of our distances.
+
+270
+00:25:55,300 --> 00:26:06,300
+And so I thought, OK, I'm going to write in myself. And then I had the problem of saying, OK, my language is science. So I can tell you what I want to minimize is this quantity.
+
+271
+00:26:06,300 --> 00:26:13,300
+But the language of algorithm talks about accuracy and precision, recourse and full positive and false negatives.
+
+272
+00:26:13,300 --> 00:26:17,300
+So how can I translate my metric into their metric?
+
+273
+00:26:17,300 --> 00:26:29,300
+And so I figured out that, you know, I could write a formula and that I could, you know, use simulations to find the best coefficient to complete my mapping.
+
+274
+00:26:29,300 --> 00:26:32,300
+And then it kind of worked.
+
+275
+00:26:32,300 --> 00:26:39,300
+And so you've got this optimization metric. You've got the data. What was the next step?
+
+276
+00:26:39,300 --> 00:26:57,300
+The next step is a bit sad. It was to take more data. Well, actually, it's not sad at all. But I think what we learned from our exercise was that we were not ready yet to measure their energy at the desired accuracy point.
+
+277
+00:26:57,300 --> 00:27:11,300
+We just realized that even after trying to push all the frontiers we had, we were still not doing well enough to be able to constrain dark energy at the early times.
+
+278
+00:27:11,300 --> 00:27:23,300
+And so we sort of reversed the problem and said, OK, now that we understand how data and uncertainties are related, what addition data would we need?
+
+279
+00:27:23,300 --> 00:27:37,300
+And so we gave recommendations to our observer colleagues and say, hey, you know, in order to get to where we want to be, we need say an imaging survey that is wider, that is deeper than what we had so far.
+
+280
+00:27:37,300 --> 00:27:46,300
+And we could even recommend, OK, we should, you know, say preferably observe in the near infrared as opposed to in the optical.
+
+281
+00:27:46,300 --> 00:27:55,300
+And does that think it's an aspect of much learning and learning that I really love you can use your argument to inform the best way of collecting your data.
+
+282
+00:27:55,300 --> 00:28:07,300
+The immediate question for me is, you realize that hey, it would be great if we had this additional data set, you know, it was in infrared band.
+
+283
+00:28:07,300 --> 00:28:16,300
+You know, in astronomy, if that data is not there somewhere, right, it's very expensive to deploy a kind of collecting apparatus for that data.
+
+284
+00:28:16,300 --> 00:28:21,300
+Were you so fortunate that the data that you needed was available?
+
+285
+00:28:21,300 --> 00:28:24,300
+Oh, no, we knew already that it wasn't available.
+
+286
+00:28:24,300 --> 00:28:26,300
+And we knew that we needed it.
+
+287
+00:28:26,300 --> 00:28:28,300
+So then how do you go about getting it?
+
+288
+00:28:28,300 --> 00:28:37,300
+Oh, you write proposals. So there are, you know, a few, I would say several good observatories in the world.
+
+289
+00:28:37,300 --> 00:28:41,300
+And in general, they all work in similar manners, astronomy write proposals.
+
+290
+00:28:41,300 --> 00:28:45,300
+And they describe the project they would like to carry out.
+
+291
+00:28:45,300 --> 00:28:55,300
+And why it is important and why it is needed and what's going to be the usefulness for the larger astronomy community.
+
+292
+00:28:55,300 --> 00:28:59,300
+And you go through a peer review process is a very competitive process.
+
+293
+00:28:59,300 --> 00:29:07,300
+I mean, getting time on the Hubble Space Telescope in general is only awarded to about 10% of the all the observing proposals.
+
+294
+00:29:07,300 --> 00:29:12,300
+Some ground based telescopes are a bit easier to get time on.
+
+295
+00:29:12,300 --> 00:29:15,300
+And we actually, we are underway.
+
+296
+00:29:15,300 --> 00:29:22,300
+I would say that about 70% of the additional data that we need has already been awarded.
+
+297
+00:29:22,300 --> 00:29:25,300
+So we are carrying out the observation at the moment.
+
+298
+00:29:25,300 --> 00:29:31,300
+And then we continue this process, you know, every couple of months there is a call for proposals.
+
+299
+00:29:31,300 --> 00:29:37,300
+And every couple of months we present our problem and need for new data.
+
+300
+00:29:37,300 --> 00:29:40,300
+And we hope that the panel is understanding.
+
+301
+00:29:40,300 --> 00:29:41,300
+And that's how it works.
+
+302
+00:29:41,300 --> 00:29:48,300
+And so how do you anticipate using the new data once you get access to it?
+
+303
+00:29:48,300 --> 00:29:52,300
+I think what we are doing is introducing additional features.
+
+304
+00:29:52,300 --> 00:29:56,300
+Just a discriminatory power of the features that we have wasn't sufficient.
+
+305
+00:29:56,300 --> 00:30:06,300
+And we realized that, okay, if we can have, you know, X amount of additional time devoted to every snapshot of the sky,
+
+306
+00:30:06,300 --> 00:30:10,300
+then these additional features will take us to where we want to be.
+
+307
+00:30:10,300 --> 00:30:16,300
+This is a great example of how the real world differs from a Kaggle competition, no?
+
+308
+00:30:16,300 --> 00:30:18,300
+Absolutely.
+
+309
+00:30:18,300 --> 00:30:19,300
+Well, I don't know.
+
+310
+00:30:19,300 --> 00:30:26,300
+I always feel I'm also not quite part of the real world because hell we think of industry as the real world as academics still, you know.
+
+311
+00:30:26,300 --> 00:30:28,300
+It's in a fairy tale.
+
+312
+00:30:28,300 --> 00:30:30,300
+But yes.
+
+313
+00:30:30,300 --> 00:30:35,300
+So this was the dark energy detection project.
+
+314
+00:30:35,300 --> 00:30:44,300
+And that's one of, one of several that you've worked on that apply a machine learning to this, in this general domain of astronomy.
+
+315
+00:30:44,300 --> 00:30:49,300
+What are some other things that you've done using machine learning?
+
+316
+00:30:49,300 --> 00:30:53,300
+Cool. So I have like a project that I'm really excited about that.
+
+317
+00:30:53,300 --> 00:30:56,300
+And now we have the first paper draft is near completion.
+
+318
+00:30:56,300 --> 00:31:01,300
+It was done with a grad student called Chris Lovell from the UK.
+
+319
+00:31:01,300 --> 00:31:06,300
+He came to visit me because he wanted to do a machine learning project as part of his dissertation.
+
+320
+00:31:06,300 --> 00:31:08,300
+I said, amazing.
+
+321
+00:31:08,300 --> 00:31:14,300
+Let's, that's with something new and crazy that I don't ruin your career.
+
+322
+00:31:14,300 --> 00:31:18,300
+But he's very bright, so hopefully not a case.
+
+323
+00:31:18,300 --> 00:31:26,300
+And so what we're trying to do is to recover the so called star formation histories of galaxies using machine learning.
+
+324
+00:31:26,300 --> 00:31:30,300
+So the whole idea here is that, you know, galaxies are collections of stars.
+
+325
+00:31:30,300 --> 00:31:36,300
+But stars in galaxies, they were not all sort of born at the same time.
+
+326
+00:31:36,300 --> 00:31:41,300
+There is a process through which galaxies tend to assemble their stars.
+
+327
+00:31:41,300 --> 00:31:48,300
+And now we know that in general, you know, we start for small objects and then they keep growing.
+
+328
+00:31:48,300 --> 00:31:56,300
+And so, you know, the basic picture is that if you think about the early universe, all you have is gas, hydrogen and helium.
+
+329
+00:31:56,300 --> 00:32:02,300
+And gas is the basis for stars is the raw material for stars.
+
+330
+00:32:02,300 --> 00:32:09,300
+You need cold gas and then you need gravity and then little by little, you make single stars.
+
+331
+00:32:09,300 --> 00:32:15,300
+So, you know, the very basic picture that we had is that, okay, in the beginning, you have a lot of this gas.
+
+332
+00:32:15,300 --> 00:32:23,300
+It's still too hot. Once it cools down enough, then gravity can sort of take over form stars.
+
+333
+00:32:23,300 --> 00:32:29,300
+And so typically, galaxies will have a fairly active phase of star formation.
+
+334
+00:32:29,300 --> 00:32:34,300
+At one point, all the gases locked in stars and most stars live long lives.
+
+335
+00:32:34,300 --> 00:32:38,300
+So once a gas is locked into stars, there is no way you can get it out.
+
+336
+00:32:38,300 --> 00:32:42,300
+If the star doesn't explode or just ends its life.
+
+337
+00:32:42,300 --> 00:32:49,300
+And so, then at some point, galaxies are thought to so-called quench. Stop their star formation.
+
+338
+00:32:49,300 --> 00:32:52,300
+Now, this is a very simplistic model.
+
+339
+00:32:52,300 --> 00:33:00,300
+Because we know that there are a whole bunch of other processes that can affect this star assembly process.
+
+340
+00:33:00,300 --> 00:33:07,300
+For example, galaxies may collide with one another, they can merge with one another, they can be affected by environment.
+
+341
+00:33:07,300 --> 00:33:20,300
+And so, capturing the complexity of this process of star formation history using the traditional method of fitting models is actually quite complicated and has some biases.
+
+342
+00:33:20,300 --> 00:33:30,300
+And so we thought, well, you know what, in the last five years, because we have big data, we have big computers, we have big simulations too.
+
+343
+00:33:30,300 --> 00:33:44,300
+So we have some amazing cosmological simulations, which are basically simulation of the process of star and galaxies formation through portions of the volume of the universe that are respectable, not too small.
+
+344
+00:33:44,300 --> 00:33:55,300
+And so we thought maybe we could train some machine learning algorithms on the simulations and then apply them to data and get the star formation history of galaxies another way.
+
+345
+00:33:55,300 --> 00:34:00,300
+So this is what we're doing. Here's in mostly convolution neural networks.
+
+346
+00:34:00,300 --> 00:34:05,300
+And I have to say that it seems to work decently well.
+
+347
+00:34:05,300 --> 00:34:15,300
+Is the input data that you're receiving, is it visual in nature, or are you using CNN's on non-visual data?
+
+348
+00:34:15,300 --> 00:34:20,300
+Great question. Yes and no. So CNN traditionally are built for images, right? As you mentioned.
+
+349
+00:34:20,300 --> 00:34:26,300
+But we thought actually, well, we are fitting the CNN is sort of like a one dimensional image called a spectrum.
+
+350
+00:34:26,300 --> 00:34:44,300
+Okay. It's, you know, a very weekly line, but the wiggles mean something. And so what we actually thought is that in some way, even if we're not fitting an image, CNN should be good at picking up special correlations in our spectrum that are meaningful.
+
+351
+00:34:44,300 --> 00:35:04,300
+And we know that some of these sort of like jams and lines and wiggles are associated to signatures of active star formation. And so that's why we thought that this could be a good matter. It's not the only one that we use, but we also use one of these extremely randomized trees, which I think, you know, they're much easier to understand the CNN.
+
+352
+00:35:04,300 --> 00:35:13,300
+And so I felt like for exploratory purposes, we use that as well. But CNN's were overperforming other metals. And so this is what we stick to.
+
+353
+00:35:13,300 --> 00:35:29,300
+It's touched on this very briefly, but did you do as much like the optimization, you know, crafting the optimization function or using off the shelf, CNN's and standard optimizers.
+
+354
+00:35:29,300 --> 00:35:48,300
+So, well, we did have to put in our own evaluation metric once again. And this is just because of the nature of our problem. We are looking at basically what we, our output in this case is a whole history of star formation. This means a basically we're outputting eight numbers. I mean, this is eight is a parameter, but it's called eight.
+
+355
+00:35:48,300 --> 00:36:08,300
+And so we're saying, okay, in eight different snapshots of the history of the universe, how many stars were being formed. So, and this is because, you know, we are basically outputting a function of time. So we had to split it just so, you know, we can write in numbers. And as you can imagine, these are fairly correlated outputs.
+
+356
+00:36:08,300 --> 00:36:23,300
+And so understanding what's a good fit, not to a number, but to a series is complicated. And so in the end, you know, we wanted something that looked a little bit like percent error.
+
+357
+00:36:23,300 --> 00:36:40,300
+Sort of the average percentage error at each of these time shots, but we couldn't do percentage error because there are plenty of times in which a galaxy is not forming star at a significant rate.
+
+358
+00:36:40,300 --> 00:36:56,300
+And this make percent error becomes fairly large for no reason. And so we're using sort of a version like that is corrective or that calls made symmetric mean absolute percentage error.
+
+359
+00:36:56,300 --> 00:37:03,300
+That's also like attempts to correct for times, and which not much information is going on.
+
+360
+00:37:03,300 --> 00:37:18,300
+So, yeah, putting on our own metric was, of course, one of the steps. Now CNNs are hard to optimize just because there are so many parameters. And also, you know, the timescaling time complexity is not the most user friendly.
+
+361
+00:37:18,300 --> 00:37:29,300
+And so other than that, we just played a little bit with the number of layers and other basic parameters. And we didn't do, I feel like a full optimization.
+
+362
+00:37:29,300 --> 00:37:37,300
+And you mentioned the time scaling is difficult. What aspects of that heavy phone challenging.
+
+363
+00:37:37,300 --> 00:37:39,300
+Oh, just how long they take.
+
+364
+00:37:39,300 --> 00:37:41,300
+Ah, OK, so training time.
+
+365
+00:37:41,300 --> 00:37:55,300
+Yes, just compare the scaling. I mean, with the size of the data set and the fact that our data set, we are feeding the spectrum, which means that each input has several thousand points training times scale up fairly clean.
+
+366
+00:37:55,300 --> 00:38:02,300
+So a couple of really interesting examples of how you're applying machine learning to astronomy.
+
+367
+00:38:02,300 --> 00:38:20,300
+If I'm whenever I do a show on astronomy, I get a lot of feedback from folks who have kind of, you know, been long fascinated with, you know, the universe astronomy and are curious about how to get started, how to play with this data.
+
+368
+00:38:20,300 --> 00:38:30,300
+What practically is required to play with this kind of data? Is that something you spoke to at all during your tutorial?
+
+369
+00:38:30,300 --> 00:38:39,300
+Absolutely, because I also feel like the audience of my tutorial was, you know, mainly people as you describe, I just felt, you know, astronomy is fascinating.
+
+370
+00:38:39,300 --> 00:38:48,300
+And so many of the people who came were not just interested in learning basic machine learning or even, you know, intermediate machine learning, which you can do in many ways.
+
+371
+00:38:48,300 --> 00:39:00,300
+But specifically in, you know, how can we play with astronomy data? And so to, you know, get a glimpse on different problems in astronomy research.
+
+372
+00:39:00,300 --> 00:39:17,300
+So I don't know, I guess I don't have an answer right away. I think that it's true that I have collaborated in the past with people who have approached me at conferences, known astronomy, perhaps computer scientists, and ask, hey, you know, can I do something with you?
+
+373
+00:39:17,300 --> 00:39:26,300
+And in general, I think that it's very interesting, and I find it very useful, but there is often a little bit of a language barrier.
+
+374
+00:39:26,300 --> 00:39:46,300
+And I do think that the knowledge of the subject is quite essential. But I have advised several of the people I've seen at Stradah, who asked me a similar question, that if they do have an interest, I think they will be most welcome to email, you know, professors in different departments.
+
+375
+00:39:46,300 --> 00:40:00,300
+In their community, just in the New York area, we have so many of these institutions and say, well, I'm, you know, interested in working or volunteering some hours for an astronomy project, we have anything that is available.
+
+376
+00:40:00,300 --> 00:40:10,300
+I feel like in some cases, the answer may be no, just because, you know, when you're ready, I feel like deep enough into a project, you need to be talking about the science aspects more.
+
+377
+00:40:10,300 --> 00:40:18,300
+But I feel like a lot of sort of like exploratory problems. I feel like their help will be really welcome and perhaps fun.
+
+378
+00:40:18,300 --> 00:40:28,300
+Awesome. Well, Viviana, thanks so much for taking the time to chat with us. I was great hearing about what you're up to, and I appreciate it.
+
+379
+00:40:28,300 --> 00:40:34,300
+Thank you so much, Sam. It was a pleasure to chat with you, and have a great rest of the day.
+
+380
+00:40:34,300 --> 00:40:35,300
+You too.
+
+381
+00:40:35,300 --> 00:40:50,300
+All right, everyone, that's our show for today. For more information on Viviana or any of the topics covered in this show, visit twimmalai.com slash talk slash 184.
+
+382
+00:40:50,300 --> 00:40:59,300
+For more information on the entire strata data podcast series, visit twimmalai.com slash strata and Y 2018.
+
+383
+00:40:59,300 --> 00:41:05,300
+Thanks again to our sponsors, Cladera, and Capital One for their sponsorship of this series.
+
+384
+00:41:05,300 --> 00:41:32,300
+As always, thanks so much for listening, and catch you next time.
+

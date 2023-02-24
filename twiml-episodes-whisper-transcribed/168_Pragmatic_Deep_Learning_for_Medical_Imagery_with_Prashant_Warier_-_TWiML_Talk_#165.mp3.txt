@@ -1,0 +1,613 @@
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+people, doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington.
+I'd like to start today's show with a huge shout out for everyone who's taken the time
+to vote for us in the People's Choice Podcast Awards.
+It's been awesome to hear from those of you who have loved words of encouragement and
+we certainly appreciate all the love.
+If you're a fan of the pod and you've already voted, we'd also like to encourage you to
+head over to your Apple or Google podcast app or wherever you listen to podcasts and
+leave us a five star rating or review.
+They are super helpful as we push to grow this show and community.
+In this episode, I'm joined by Prashant Warrior, CEO and co-founder of cure.ai, a company
+building AI-powered software for radiology.
+In our conversation, Prashant and I discussed the company's work building products for
+interpreting head CT scans and chest X-rays.
+Prashant shares with us some great insights into some of the things he and his team have
+learned in bringing a commercial product to market in this space, including the gap between
+academic research papers and commercially viable software, the challenge of data acquisition
+and how to best capitalize on what data you do have access to and much more.
+We also touch on the application of transfer learning in this space and the algorithms
+and annotation pipelines, Cure has developed to support 3D scans.
+Let's get to it.
+All right, everyone.
+I am on the line with Prashant Warrior.
+Prashant is the CEO of cure.ai.
+Prashant, welcome to this week in machine learning and AI.
+Great to be here, Sam.
+Thank you so much for inviting me.
+Absolutely.
+Let's get started by having you tell the audience a little bit about your background
+and how you got involved in working in ML and AI.
+Great.
+I have been working in the applied math space for a long time.
+My undergraduate degree was in operations research.
+I got a PhD in operations research and then started working on it.
+At that time, this was not part of data science.
+There was no field like data science when I did my PhD.
+But after my PhD, which was in our research, where we were basically optimizing
+truck routes, so figuring out how shipments should be routed from origin to destination,
+how we should assign drivers to trucks, and then again, there are lots of rules around
+how many hours a driver can drive and the duty time that it has.
+So I mean incorporating all those rules to figure out how drivers should be allocated
+to trucks.
+I mean, assigned to trucks.
+So those are the kinds of problems that I was solving during my PhD, which were primarily
+integer programming problems.
+So I did a lot of work around optimization then.
+And then immediately after that, I started working on price optimization and McDonald optimization
+demand forecasting for, I started working for SAP.
+And so there, I mean, we were working on these problems in the retail space, retail and
+fashion retail space.
+So this, I mean demand forecasting, some of these problems are very much, I mean, they
+are basically your dependent variable as a sales.
+And then you have a bunch of independent variables, which are, I mean, which again depend
+upon the kind of product that you're selling.
+I mean, so a fashion product will have very different independent variables than if you
+look at, for example, products which are retail, I mean, typical retail products like a can
+of milk, for example, or fruits or vegetables, right?
+So we were sort of worked on that for a while.
+And then I mean, I was in the US at that time, came back to India and then I was, I set
+up a company, which is called Imagna, which was basically using machine learning to understand
+customer behavior from cookie data.
+So we were basically dropping cookies at, on multiple e-commerce websites and getting
+a lot of detailed information about how customers are behaving on those websites.
+So you can actually see how they buy clothing, for example, what products they looked at,
+what kind of sizes they looked at, what colors they looked at, what styles they looked
+at, and all of that, or for example, I mean, integrating, for example, what, what travel
+sites they went into, I mean, how they, where they're traveling to, what travel locations
+they've looked at, or what kind of movie shows they're watching.
+So we had a very consolidated set of data from cookies, which we were then utilized to do
+real-time bidding on ads, on basically online ads.
+And we had a built a real-time bidding platform.
+And that was then, I mean, so that was again, I mean, yeah, even I was, I was heading
+that company.
+So I was also, I mean, playing more of a commercial role in that.
+And then that got acquired by the organization that I currently work for called Tractil Analytics.
+I acquired my previous company.
+And then I joined Fractil Active Data Scientist.
+And in that role, again, I mean, Active Data Scientist, I was working on some problems.
+And then we sort of identified there is a large gap in the radiology space where we felt
+that deep learning could make a substantial impact by automating interpretation of images.
+So that's how I sort of transitioned from the Active Data Scientist role at Fractil
+into becoming the CEO of QR.AI.
+And I've been working on building this over the last two and a half years.
+And so that's, that's, that's my story.
+And Cure is currently in the process of rolling out a kind of a packet solution focused on
+chest radiology, is that right?
+So we have exactly, I mean, so one of our solutions is in chest radiology, which basically
+can automatically interpret chest X-rays.
+And a second solution is on head CD scans.
+So which is basically automatically interpreting head CD scans, those are the two main solutions
+we have built.
+I mean, there are some more solutions that we've built over the last several years.
+But we, I mean, from a commercial perspective, we focus on these two.
+And so there's been over the past few years, there've been a ton of work.
+You know, in a lot of ways, it feels like a kind of gold rush in the medical field.
+When you look at the research journals, it's, hey, we've got this new tool, CNN, let's
+apply it to radiological image type A, type B, type C. There's a, you know, a series of
+these types of papers.
+I'm curious what you've learned about the gap between what you might read in a paper
+and actually bringing a product to market.
+So that's a, that's a very good question, Sam.
+I think I think I have a very strong point of view on that.
+I figured you might.
+So I mean, there are lots of papers.
+I mean, because CNN's, I mean, can read images really well, right?
+And so people tell that, okay, I'll just take a CNN and apply it to this medical data
+that I have and I'll get good results.
+And they do get good results because they're overfitting on the data.
+So you have 2000 images.
+Let's say you have got 2000 X-rays to train your algorithm on and you sort of label them.
+You label each of those images as normal.
+Let's say these are X-rays, right?
+You label them as normal or abnormal.
+And you order on that and you will get some, I mean, you basically put some as validation
+testing and so on.
+And you get good results, but what happens is that especially with X-rays, right?
+There is a huge variety of data.
+I mean, if you go from a Philips machine to a GE machine or you go from one set into
+another, one center to another, I mean, there are different settings, different in machines.
+There is a wide variation and what, what happens typically is you take a data set, you train
+on the data set, you validate, you test, I mean, you do all the right things.
+But when you take that algorithm and you try to generalize to a new data set, it does
+not work well at all.
+And we saw this initially.
+And when we started working out, working on this problem, on the chest X-ray problem,
+we had around 25,000 scans, 25,000 X-rays along with their reports.
+So we did what we did is we took the reports, we ran NLP on those reports, some rule-based
+NLP, not machine learning base, but rule-based natural language processing, which basically
+extracted out the abnormality from the report.
+So if, for example, one of the abnormalities is called floral effusion, where it's fluid
+in the lungs.
+We said we will extract out a bunch of abnormalities, so we trained the algorithms to do that,
+to train these NLP algorithms.
+So now they've got an X-ray and the corresponding abnormality, the chest X-ray and the corresponding
+abnormality.
+And we trained our models on that.
+And then what we saw is that when we had a new data set, that was trained on 25,000
+images.
+And when we got a new data set, it did not translate at all, we were getting around
+90% accuracy on the first data set, on the second data set that we got from another hospital,
+we were somewhere in the 60s, I think.
+And so it was, I mean, substantially lower.
+And then we figured that I think, I mean, there is a lot of variation in the data, and then
+that's also, that's one challenge.
+And of course, I mean, over the last 20,500 years, we have increased our X-ray database
+from that to 25,000 number to around 1.5 plus million.
+So today, we have a huge amount of data, so it sort of has learned a wide variety of data
+patterns that it sees, I mean, acquisition data, acquisition patterns, because X-ray acquisition
+can occur, I mean, in many different ways.
+And so it has learned a lot of these acquisition patterns, learned about a lot of different machines
+that are generating those X-rays.
+So that makes it a little bit more generalizable.
+I mean, I think the more amount of data that you have, it becomes more generalized.
+You mentioned using NLP to pull information out of reports or records.
+Is this kind of data mining, the electronic medical records to produce labels for your
+data set?
+Or was there something else happening?
+It's not electronic medical records.
+So it's basically, I mean, for, I mean, you could think of it as a medical record, but
+basically for every radiology image, you will have a radiology report.
+It's part of radiology information systems.
+So you can, so you are basically just putting that radiology report.
+You're not pulling any more medical records.
+So ideally, I mean, a patient will have a lot more.
+I mean, they will have the history of why they came to the hospital, why they took strain
+the first place.
+And then maybe there is some microbiological test, which gets done afterwards, where they
+are diagnosed with some disease, right?
+A radiology report may not contain all of that.
+It will basically tell you that I found these patterns on the X-ray.
+For example, it might say that I found a fluid effusion, which is basically some fluid
+in the lungs, or that could be due to tuberculosis or other disease.
+But a radiologist will not report on that.
+They will report on what they see in the X-ray.
+So it's more visible, visible features.
+Okay.
+These radiology reports, are they coded or are they, is it just kind of natural text notes
+from the radiologists?
+They are natural text.
+I mean, sometimes, I mean, again, every hospital will have their own format template for reporting.
+There are some standard plates recommended by the radiology society of North America.
+But again, I mean, I think a lot of people don't use those templates, I mean, but so to
+answer your question, I mean, they are very varied, but they have some structure to it.
+These questions may be inspired by an image that you have on the Cure website.
+You're basically looking at a brain scan on the monitor.
+I'm wondering if setting aside machine learning and AI, are we getting to a point where radiologists
+are looking at these images digitally and creating bounding boxes and electronically
+notating these images in a way that will make it easier for future ML and AI applications
+or is it still all manual today?
+I mean, absolutely.
+I think what we are seeing is that definitely there is, I mean, a lot of work going into
+words, creating annotated data sets.
+And so a lot of hospitals are working on that.
+I mean, I think a lot of the hospitals in the US, I mean, for example, a mass general
+hospital, they have their own data science teams.
+And those teams are also working on similar problems.
+So there is definitely a lot of effort going towards creating these annotated data sets.
+So I would not say that, I mean, a lot of radiologists are working on it.
+I think focused groups in different parts of the world are working on these kinds of annotations.
+And it's not something which is completely standardized yet.
+Right.
+But it sounds like you're also saying that it's not, you know, we're not necessarily seeing
+the radiologists tool change to be more like a data annotation exercise.
+It's happening separately and it's some data science team that may be, you know, doing
+some of our things to what you were doing.
+Exactly.
+Because I mean, I'll tell you why.
+Right.
+So for example, one of the things we had to do was to when we were trying to detect bleeds
+from, I mean, bleeds from head CT scans, they had to actually go in or not as, but I
+mean, trained specialists had to go in and mark out the bleed on those scans.
+And that's a time-taking process because the CT scan of the head will somewhere between
+50 to 100 slices.
+And for each slice, there'll be either there's some, some of those slices, obviously, will
+not have a bleed.
+Or maybe all of them don't have a bleed, but some, you have a bleed, you have to actually
+mark the boundary of the bleed, which is not a continuous boundary.
+I mean, it's sort of a ragged boundary and then you have to mark through, mark all of
+that.
+That's time-consuming for radiologists.
+And so it will not be easy for somebody to sort of incorporate that into the radiology
+workflow because they want to see a scan, they want to report on it in a few minutes and
+then be done with that.
+And marking out the boundaries will take them maybe 20, 30 minutes.
+So I don't think some of these are easily incorporated into the workflow, which is why we sort
+of started doing this national language processing because we said there is a lot of data already
+available in the report because I am saying that, I mean, the radiologist is already writing
+that there is this plural effusion in this part of the lung.
+So we can extract out all that information from those reports and use that for training.
+So rather than getting them to sort of manually mark out these abnormalities.
+So you also mentioned these different acquisition patterns.
+These are related to the different types of radiology machines.
+These are radiology machines.
+The amount of exposure, I mean, amount of radiation that you produce.
+I mean, so there are, I mean, everybody will have a different setting.
+I mean, so these machines also have some settings.
+And so there are many different settings and so the, especially for X-rays, I mean, especially
+for X-rays, the data from each center is sort of slightly different.
+I mean, there is not exactly the same.
+Okay.
+It's interesting.
+I think, you know, there's a tendency to think about the, you know, CNNs or ML and AI
+in general as these, you know, maybe give them, give them more credit for being naturally
+generalized than they are.
+My daughter is doing an internship with the podcast currently where she's taking podcasts
+that we've already recorded and running them through automated transcription and looking
+at a bunch of different services and kind of rating their performance and, you know,
+over time, we've learned that some of the services do better with, you know, phone calls,
+some of them do better with podcasts, some of them do better with audio that's recorded
+in a room like the, the characteristics, the, you know, very subtle characteristics of
+the input data have a, a huge impact on the algorithm's ability to perform all and extract
+texts from them, much more so than you might think.
+And it sounds like you've, you've had very similar experiences on the, on the input side
+with these radiological images.
+So I have a very interesting story in this, I mean, so that's, when we started working
+on X-rays, this probably around two years back, so we, we were sort of still tying up
+with hospitals, we did not have any, any hospital data, any, any real data coming from our
+collaborators.
+So we were, we said, we will mine the internet for data.
+So we looked at some internet sources, we collected some 10,000 images and we said, let's,
+let's try to train a model on this and train the model on that and that was very accurate.
+I mean, it was super accurate in determining normal from abnormal.
+So it was classifying normal versus abnormal.
+And then we said, I mean, I mean, this is a very small amount of data, right?
+I mean, typically if you're looking at images, you'll look at millions, millions of images
+to train algorithms.
+Let me say it.
+Let's, let's see.
+I mean, so we look, we create an attribution algorithm.
+So we were attributing the figuring out which, I mean, if you attribute what exactly the
+algorithm is learning, you can find out boxes.
+So we can basically, for example, there is a something called occlusion, occlusion based,
+occlusion based attribution where you can black out one box, one small box within the
+whole image and then see what is the attribution of that to the prediction.
+So if you, if you black out a box because of which the algorithm is saying that that particular
+x-rays abnormal, then suddenly it becomes normal, the prediction changes from normal to abnormal.
+And you look at how each box is impacting the probability of being normal or abnormal.
+So the boxes which have the highest impact will have the highest difference between the
+normal versus abnormal probability when they are blacked out.
+So we created these attribution methods and we were trying to attribute the algorithm,
+what the algorithm was learning.
+And we found that the algorithm actually was learning to distinguish something very simple
+because what was there, these were internet images.
+So typically, all the abnormal images had a lot of text on them.
+So some typing or some written text and the normal images did not have any annotation,
+any kind of text or anything like that.
+So it was basically any to recognize typewritten letters.
+I mean, that's what it's pointing to.
+So if it sees typewritten letters, it will assume that it's abnormal.
+If it doesn't see typewritten letters, it's normal.
+So that is what it was learning.
+And so these algorithms are very, very good.
+I mean, they're very smart, but also they can learn very different things.
+I mean, then what do you expect them to learn?
+So you've learned the importance of real data and these different input patterns.
+And you've kind of learned some things about the model's ability to generalize across
+this.
+What else have you learned?
+See, other things that we have learned are also that, I mean, if you look at, when we
+look at all the research in image and all of them are 224 by 224 images, because that's
+the image net size.
+And we look at most research is about that size of image.
+And if you look at an x ray, I mean, typical chest x ray will be around 4,000 by 4,000 pixels.
+So if you are downsizing, so initially, when we started out doing research, we started
+with taking that 4,000 by 4,000 or I mean, that size image and downsizing it to, to
+2, 2, 2, 2, 2, 3, 4, 24, 24, which basically takes away a lot of the detail that you're looking
+at.
+I mean, so you cannot, I mean, obviously, if you have a lot of data, it'll, it'll
+learn.
+Well, I mean, it will be able to detect really large abnormalities, it'll not be able to detect
+subtle abnormalities.
+And so then we had to devise our own methods to sort of work with higher resolution images.
+So today, we are able to work with full resolution images.
+So we had to sort of look at patches at a time and do a lot of different techniques.
+I mean, some of these are our own IP, so we have not published it yet.
+So I cannot reveal it, but there is, there's a lot of work which we have done which sort
+of enables us to look at the full size image rather than looking at these down sampled
+images.
+And that's all the backs of what I see, I mean, out there in terms of literature.
+I mean, everybody is taking these standard sort of dense nets or resonates and then applying
+them to the down sampled images.
+And that also loses a lot of information from that original image.
+So that's, if you look at most of the literature, that's what is happening right now.
+Is there anything that you can say generally about the approach that you've taken to look
+at the large images?
+Are you like windowing across the images or any hints you can give us?
+So it's a patch based approach.
+I mean, we look at patches, we determine some patches and so that's, that's all I can
+see.
+There is definitely some very, very strong IP in there which sort of, because I don't
+think anybody right now is working on large images.
+I think everybody else is working on smaller sized images.
+And we also tried, I mean, so we also tried training these, I mean, larger sized using the
+typical dense nets, and it sort of doesn't perform as well.
+I mean, or sometimes it doesn't converge at all.
+So we saw lots of convergence problems with larger sized images.
+And do you have any intuition for why that is?
+I don't actually, I don't, I mean, we have tried that and I really don't have clue why
+why that doesn't work typically.
+I mean, so not sure.
+But there is not much testing.
+I mean, honestly, when I look at research, there is not much testing that has been done
+on larger images because most of the work, I mean, 224 by 224 is a decent size for your
+regular images.
+So that's, that's sort of, I don't, I don't see that there is a lot of work done in
+that, in that area.
+In your approach and or the literature that you've seen, does transfer learning play a lot
+or are you looking at pre-trained models or models, you know, that are pre-trained with
+image net or some other data set, or are you just training from scratch?
+So we have, we found that a pre-training with ImageNet and then using that on our data
+set running, I mean, using pre-training on image net did not improve performance on
+the on our data sets.
+But what we found is that there is opportunity to do transfer learning within the domain.
+So I could basically learn from other types of x-rays and use that learning to test x-rays.
+So there is some, some of that learning that we have been able to use.
+But again, that the transfer learning there, the impact of that is very small.
+I mean, I think it also has to do with the amount of data that we have because we have so
+much data.
+Probably, I mean, the transfer learning is not that impactful.
+But if you have a amount of data, then maybe if you transfer knowledge from other other
+domains, it might be more useful.
+What else have you learned?
+I think, I mean, some of the learnings are about the annotations also.
+I mean, so what we have learned is that we can do annotations at multiple levels and
+bring, I mean, train models which can do multi-level, so basically there are multiple types
+of classification.
+So one is that, one is to segment out the abnormality.
+So you're actually, the annotation will involve actually going into that image or that slice
+of a CD scan and then saying that this is the boundary of the abnormality.
+So clearly marking that out, a second type of annotation that we have done is looking
+at, for example, on a CD scan, slice by slice.
+So you can basically look at one slice and say whether that slice is abnormal or not,
+which is a much easier task than actually annotating and going out and marking out the
+abnormality on that.
+So that's a second type of annotation and then the third type of annotation is at a scan
+level, either at the whole CD scan level or at the extra level, using the report, we can
+extract out the abnormality on that particular scan.
+So I mean, we have models which combine all three of these.
+So we can, we have losses, I mean, losses which will take the segmentation losses and
+add the classification losses at a slice level and the classification losses at the scan
+level and combine all of that.
+So those are the models where we can actually take all the data that we have because we
+have 350,000 HD scans and we cannot expect to label all of them.
+I mean, we cannot expect to sort of, 350,000 HD scans each with, let's say, 100 slices.
+So you're talking about 35 million slices.
+So we cannot expect to sort of mark out all of them.
+So you have to mark out a subset of that and so we have marked out a subset of that.
+We have labeled at a slice level, a subset of that and then of course, for each of those
+350,000 scans, we have got a report so we have, we can extract out the abnormalities
+from those as well.
+So we have combined all of this and then the models that perform the best on our data
+are ones which combine all this knowledge, all the knowledge from all of these types
+of annotation.
+So just to clarify then, if you're, you know, when I think about a traditional, like
+a resonant type of a model, that's a model that is basically looking at a single image.
+Is the implication that you've built out an architecture that, you know, is almost,
+I'm almost thinking of it like a 3D type of architecture that is, that takes in multiple
+slices and kind of understands the relationship between these slices relative to the whole
+scan.
+Right.
+Right.
+Exactly.
+Exactly.
+Tell me a little bit about the process of defining or coming up with this model architecture.
+How did you arrive at the final architecture for doing that?
+So I think, I mean, it's, I mean, primarily trial and error.
+I mean, reading the latest papers and, I mean, we have, I mean, around 10 plus deep learning
+scientists now.
+I mean, so, I mean, each person focused on their own problem.
+And I mean, I think what, what we have basically been doing is, I mean, looking at what is
+the latest research in a physics space and trying to implement that.
+I mean, so we've implemented many different techniques from many different papers.
+Some of them work.
+Some of them don't work.
+Or a lot of them don't work.
+I mean, very few of them work.
+But so a lot of them don't translate directly.
+I mean, I think what we have seen is that there are lots of new techniques out there, lots
+of new, I mean, which show very promising results on the paper itself shows very promising
+results.
+But then when we apply it to the domain that we are working in, it doesn't really translate
+well.
+So we have seen that.
+But I mean, typically our architectures are very simple. I mean, in fact, what we have
+found is that the simpler you make it, the better it is.
+Can you give me an example of something that you tried that was more on the complex side
+that you thought would add a lot of value, but it ended up doing something simpler, worked
+out better?
+You were trying GANs at some point of time to see if we could generate abnormal and normal
+X-rays using GANs and then use that for training or use that to do a data augmentation.
+And we have tried other techniques, I mean, even some of the techniques from video action
+recognition and videos we've tried for our head CD scan technology.
+And some of these, I mean, again, some of these have not really worked out.
+I mean, I think more complex technology, we have not seen that it sort of translates
+to real.
+I mean, again, I mean, I would not say that some of the technologies that we developed have
+not been complex.
+But again, I think in general, I mean, I would not, I would say that a lot of things that
+we've tried have not worked out.
+Yeah, it sounds like you're, you know, you're describing a world in which we might think
+of as applied ML and AI, there's still a lot of research involved in your process for
+developing this product suite and bringing it to market.
+Absolutely.
+I mean, I think there is a huge amount of research, there is a huge amount of domain
+knowledge, which we have brought in, I mean, which just makes the algorithm much better.
+So I mean, simple things actually make it easier.
+I mean, so for example, if you're detecting fractures, if you see, I mean, if you just
+train a model on fractures, you'll probably see a lower accuracy.
+But if you look at what is around the fracture, I mean, if you also detect bleeds and use
+that to, I mean, prove your knowledge about the situation, you'll probably get, we actually
+get a better accuracy, better probability.
+So I mean, if you have a fracture, you most likely have a bleed in the brain also.
+So I think bringing in a lot of domain knowledge is critical in some of the areas that we're
+working on.
+I mean, for example, detecting tuberculosis, you have to look at certain types of features.
+So you have looking at certain things, I mean, on the upper lungs, I mean, so it fits
+in the lower part of the lungs, that's not going to be very relevant.
+So we have, I mean, brought in a huge amount of radiology knowledge into what the algorithms
+have developed and those actually add a lot of value.
+And of course, I mean, the research also is the, I mean, we also have to do a lot of research
+because as I mentioned earlier, most of the material out there is focused on the types of
+images that are much smaller and also two-dimensional, right?
+I mean, so you're looking at mostly two-dimensional videos, two-dimensional images.
+Only in case of videos, you're looking at something which is not too dimensional, but
+at least your sequence of images.
+And we look at a CD scan or a MRI, I mean, all of these are three-dimensional images.
+You have to sort of get knowledge from all of the slides and bring that all together
+to infer a classification there.
+So we have to, I mean, congest, I mean, sort of ingest knowledge from these sources, which
+again, there is not much literature out there on some of these topics.
+So though, of course, I mean, there are lots of people now working on this, on technologies
+in the medical space.
+But when we started, I mean, which we started around two and a half years back, there were
+very few people who were working on deep learning in the healthcare space, which is exponentially
+increased in the last couple of years.
+And out of curiosity, have you directly applied any of the work or models that originated
+in looking at videos to this CT scan problem?
+We have.
+We have.
+Did that work out or was that another dead end or?
+Well, I think that that's something that has worked out for us.
+I mean, some of these techniques have worked out for us.
+But I would not be able to go into much detail on that right now because it's still something
+that we are working on and we don't have, I mean, I, yeah, so we have not published anything
+on that yet.
+The company has been active in publishing some of his research findings.
+What are some of the recent work that you've published?
+So we have published recently.
+We published our work on head CT algorithm, which basically detects in multiple kinds
+of bleeds, fractures, midland shift, mass effect from head CT scans.
+And this, we sort of published some details of the algorithm or, I mean, this is our,
+the earlier version of our algorithm, which is probably around nine, I mean, around a year
+old.
+And we sort of did a validation study of that on on a data set where, so we, we, we had
+a data set of 350,000 of which we had basically a training set, a validation set and a testing
+set.
+But then what we did is we went out and collected an additional 500 scans, which was from
+a very different source, completely new source.
+And we had those three sort of reported or basically a radiologist had to go in and mild on
+a user interface, whether they found an interapparent primal bleed, whether they found a fracture
+and so on.
+So just a tick box.
+And we had sort of three radiologists do that on those 500 scans.
+And we also compared our accuracy against that.
+And we found that we were 95% at 0.95 plus you see on all of these, all of these detecting
+all of these abnormalities.
+Now this is, this is slightly older.
+I mean, so the technology that we have published there is maybe around a year old.
+Now it is currently, I mean, what we are looking at is around 0.97 plus 0.97 plus on abnormalities.
+So it's, it's improved a little bit since we published that work.
+Has, have you published any data sets in this space?
+Yes.
+So we also open sourced this data set of 500 scans.
+So it's actually for exactly 491, we have published that, we open sourced that data set along
+with the ground truth for that, which is basically the reading of the radiologists.
+So I mean, one of the challenges that we found is that everybody claims their own accuracy
+and there is no common data set on which people can sort of compare their accuracies.
+Like, for example, imagine it is there, you can compare accuracy and imagine it.
+There is nothing in the, in the, in most of these space.
+I mean, so head CT, we said, let's put together this data set.
+And then let's, I mean, we, we published our results for that.
+I mean, of course, we anticipate that other people can also use that to publish their results
+on that particular data set.
+And you said, how many scans in the data set?
+491.
+And is, is that that number of scans enough to really build interesting models against?
+It will be hard to get a very accurate model.
+You could start and you could build some models on that.
+It, it definitely, you could build models.
+I mean, maybe the accuracy will suffer a little bit because it's not very large.
+I mean, so basically if you, we have 491 of which, I would say around 300 or so, I mean,
+I don't remember the exact numbers, but around 300 of them are abnormal.
+And of those abnormalities, if you look at a specific kind of bleed, let's say an extra
+dual bleed, there are probably around 40, 50 scans which have got extra dual bleeds.
+So that itself may not be enough for you to determine and be able to train a model to determine,
+to identify an extra dual bleed.
+But this data set, the intention was not for people to train more, more for people to validate.
+So you can get and measure your algorithm, which you've trained on another data set.
+And you can measure your performance on this data set and you can definitely measure that
+to a very high level of accuracy.
+Okay.
+So it's four of more of a testing data set.
+Got it.
+And are the scans, these full three-dimensional scans with multiple slices each as well?
+Or are they static slices?
+They are there three-dimensional.
+So they have, I would say, anywhere from 5200 slices per scan.
+What kind of uptake have you seen on that, has anyone, have you seen other groups doing
+validation against it and publishing their results?
+I mean, I have not seen, at least, I have not looked at it in the last month or so.
+But I mean, before that, I have not seen, we released this data set in March.
+So it's not been a long time.
+But we have seen, so I don't know if other people have published, I mean, I have not seen
+anybody publish against it as far as I know.
+But I have seen, we have seen, I mean, hundreds of people download that data.
+And so hopefully we'll see some publications out of that soon enough.
+When you're building out these models, so you've looked at head CT scans, you've looked
+at chest X-rays, you've looked at skull fractures, is your objective to create a single model
+that is able to detect abnormalities in each of these different, very different scenarios
+or are you building a suite of very specialized tools that is specially trained and focused
+on one particular problem space?
+I mean, it's much more, I mean, actually, we are building very, very specialized tools.
+In fact, if you look at chest X-ray, we detect 15 different types of abnormalities.
+And for each abnormality, we have multiple models.
+And so it's an ensemble of many models.
+So the number of models that go into even detecting these abnormalities from a single
+chest X-ray, on a single chest X-ray, we run around 112 models right now to determine
+all the different things we can report on that X-ray.
+So we are building very, very specialized models.
+And I don't think, I mean, there is no, I mean, we will not, definitely, I do not anticipate
+that we will be building models, which can detect multiple kinds of abnormalities from
+different kinds of images.
+So we'll have very specialized algorithms for each.
+When you take a step back and you think about bringing these types of tools to market,
+what are some of the things that you've done with this and mine to build?
+I want to say build scale, but that's not really the right word.
+It's almost like manage technical debt to manage all of these models and to allow you to efficiently
+manage all of these models, I guess, and bring them to market.
+Is there tooling that you build or an approach that you've taken that helps you manage all
+of the complexity created by having so many very specific models?
+I mean, I would also add, there is one more complexity is that these models are improving
+at a very, very fast rate.
+I mean, so every month are models improved by a few percentage points.
+So that is also there.
+I mean, so in terms of a release cycle for our algorithms, we also have to figure that
+out.
+So there are multiple challenges, but what we are, one of the things that we are doing
+is to deploy these models as a cloud-based service.
+So that is the preferred model of deployment for us.
+So in that cloud-based service, then you can sort of, you are basically, you can host
+those models and you have a full ownership of the models.
+And if you want to sort of upgrade them, it's not too much of an effort because you are
+owning that.
+So that's sort of the model that we prefer in terms of deployment.
+Of course, I mean, some places we are working towards an on-premise deployment and then
+in those scenarios, upgrading the models, I mean, they get a static version, I mean, they
+get a current version and then upgrading them will be challenging.
+So cloud-based service allows us to, allows us to mitigate some of the problems that you
+talk about.
+Prashant, thanks so much for taking the time to chat with me.
+This has been super interesting and I've enjoyed learning from what you've learned.
+Thank you so much, Sam.
+Great talking to you as well and thank you for inviting me on this podcast.
+Great talking to you.
+Fantastic.
+Thank you.
+All right, everyone, that's our show for today.
+For more information on Prashant or any of the topics covered in this episode, head over
+to twimmalai.com slash talk slash 165.
+Don't forget to visit twimmalai.com slash nominate and cast your vote for us in the People's
+Choice Podcast Awards.
+As always, thanks so much for listening and catch you next time.

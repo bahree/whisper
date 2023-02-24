@@ -1,0 +1,602 @@
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+people, doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington.
+Today we're excited to continue the AI for the Benefit of Society series that we've
+partnered with Microsoft to bring to you.
+Today we're joined by Hannah Wallach, principal researcher at Microsoft Research.
+Hannah and I really dig into how bias and the lack of interpretability and transparency
+show up across machine learning.
+We discuss the role that human biases, even those that are inadvertent, play intaining
+data, whether deployment of fair ML algorithms can actually be achieved in practice, and
+much more.
+Along the way Hannah points us to a ton of papers and resources to further explore the topic
+of fairness in ML.
+You'll definitely want to check out the show notes page for this episode, which you'll
+find at twimbleai.com slash talk slash 232.
+Before diving in, I'd like to thank Microsoft for their support of the show and their sponsorship
+of this series.
+Microsoft is committed to ensuring the responsible development and use of AI and is empowering
+people around the world with this intelligent technology to help solve previously intractable
+societal challenges, spanning sustainability, accessibility, and humanitarian action.
+Learn more about their plan at Microsoft.ai.
+Enjoy.
+All right, everyone.
+I am on the line with Hannah Wallach.
+Hannah is a principal researcher at Microsoft Research in New York City.
+Hannah, welcome to this week in machine learning and AI.
+Thanks, Sam.
+It's really awesome to be here.
+It is a pleasure to have you on the show, and I'm really looking forward to this conversation.
+You are clearly very well known in the machine learning and AI space.
+Last year, you were the program chair at one of the largest conferences in the field
+NURPS.
+And in 2019, you'll be its general chair.
+But for those who don't know about your background, tell us a little bit about how you got involved
+and started in ML and AI.
+Sure.
+Absolutely.
+So I am a machine learning researcher by training, as you might expect.
+And I've been doing machine learning for about 17 years now.
+So since way before this stuff was even remotely fashionable or popular or cool or whatever
+it is nowadays.
+And in that time, we've really seen machine learning change a lot.
+It's sort of gone from this weirdo academic discipline, only of interest to nerds like me
+to something that's so mainstream that it's on billboards, it's in TV shows, and so on
+and so forth.
+And it's been pretty incredible to see that shift over that time.
+I got into machine learning sort of by accident.
+I think that's often what happens.
+I had taken some undergrad classes on information theory and stuff like that.
+And that to be really interesting, but thought that I was probably going to go into human
+computer interaction research.
+But through a research assistantship, during the summer between my undergrad degree and
+my master's degree, I ended up discovering machine learning and was completely blown away
+by it and realized that this is what I wanted to do.
+I've been focusing on machine learning in various different forms since then.
+My PhD was specifically on Bayesian latent variable methods, typically for analyzing text
+and documents, so topic models, that kind of thing.
+But during my PhD, I really began to realize that I'm not particularly interested in analyzing
+documents for the sake of analyzing documents.
+I'm interested in analyzing documents because humans write documents to communicate with
+one another.
+And it's really that underlying social process that I'm most interested in.
+So then during my postdoc, I started to shift direction from primarily looking at text
+and documents to thinking really about those social processes.
+So not just what are people saying, but also who's interacting with whom.
+And thinking about machine learning methods for analyzing the structure and content of social
+processes in combination.
+I then dove into this much more when I got a faculty job because I was hired as part
+of UMass Amherst's Computational Social Science Initiative.
+So at that point, I started focusing really in depth on this idea of using machine learning
+to study society.
+And I established collaborations with a number of different social scientists, focusing on
+a number of different topics.
+Over the years, I've mostly ended up working with political scientists.
+And often study questions relating to government transparency and still looking at this sort
+of whole idea of a social process consists of individuals or groups of individuals interacting
+with one another, information that might be used in or arising from these interactions.
+And then the fact that these things might change over time.
+And I often use one of these or two of these modalities, so structure, content, or dynamics,
+to learn about one or more of the other ones as well.
+Because I continued to work in this space, I started to think more not just about how
+we can use machine learning to study society, but the fact that machine learning is becoming
+much more prevalent within society.
+And about four years ago, I started really thinking more about these issues of fairness,
+accountability, transparency, and ethics.
+And it was a pretty natural fit for me to start moving in this direction.
+Not only was I already thinking about questions to do with people, but I've done a lot of
+diversity and inclusion work in my non-research life.
+So I'm one of the co-founders of the Women in Machine Learning workshop.
+I also co-founded two organizations to get more women involved in free and open-source
+software development.
+So issues related to fairness and stuff like that are really something that I tend to
+think about a lot in general.
+So I ended up making sort of this shift a little bit in my research focus, and that's
+not to say that I don't still work on things to do with core computational social science,
+but increasingly my research is focusing on the ways that machine learning impacts society.
+So fairness, accountability, transparency, and ethics.
+And we will certainly dive deep into those topics, but before we do, you've mentioned a couple
+of times the term computational social science.
+That's not a term that I've heard before, I don't believe.
+Can you, is that, I guess I'm curious how established that is as a field, or is it something
+that is specific to that institution that you are working at?
+Sure.
+So this is really a discipline that started emerging in maybe sort of 2009, 2008, that
+kind of time.
+By 2010, which is when I was hired at UMass, it really was sort of its own little emerging
+field with a bunch of different computer scientists and social scientists really committed to pushing
+this forward as a discipline.
+And the basic idea, of course, is that, you know, social scientists study society and social
+processes, and they've been doing this for decades, but often using qualitative methods.
+But of course, as more of society moves towards digitized interaction methods and online
+platforms and other kinds of things like that, we're beginning to see much more of this
+sort of digital data.
+At the same time, we've seen this massive increase, as I said, in the popularity of machine
+learning and machine learning methods that are really suitable for analyzing data about
+social processes and society.
+So computational social science is really this sort of emerging discipline at the intersection
+of computer science, the social sciences and statistics as well.
+And the real goal is to develop and use computational and statistical methods, so machine learning
+methods, for example, to understand society, social processes, and answer questions that
+are substantively interesting to social scientists.
+At this point, there are people at a number of different institutions focusing on computational
+social science.
+So yes, of course, UMass, as I mentioned before, but also Northwestern, Northeastern, University
+of Washington.
+In fact, we've been doing this for years, and of course, Microsoft Research is no exception
+in this regard.
+Part of the reason why I joined Microsoft Research was that we have a truly exceptional group
+of researchers in computational social science here, and that was really very appealing to
+me.
+Oh, awesome, awesome.
+So you talked about your transition to focusing on fairness, fairness accountability, transparency,
+and ethics in machine learning and AI.
+Can you talk a little bit about what those terms mean to you and your broader research?
+Yeah, absolutely.
+So I think the bulk of my own research in that sort of broad umbrella falls within two categories.
+So the first is fairness, and the second is what I would sort of describe as interpretability
+of machine learning.
+And so in that fairness bucket, really much of my research is focused on studying the ways
+in which machine learning can inadvertently harm or disadvantage groups of people or
+individual people in various different usually unintended ways.
+And I'm interested in understanding not only why this occurs, but what we can do to mitigate
+it, and what we can do to really develop fairer machine learning systems.
+The systems that don't inadvertently harm individuals or groups of people in the intelligibility
+bucket.
+So there, I'm really interested in how we can make machine learning methods that are
+interpretable to humans in different roles for particular purposes.
+And there's been a lot of research in this area over the past few years, focusing on oftentimes
+developing simple machine learning models that can be easily understood by humans simply
+by exposing their internals, and also on developing methods that can generate explanations
+for either entire models or the predictions of models, and those models might be potentially
+very complex.
+My own work typically focuses really more on the human side of intelligibility.
+So what is it that might make a system intelligible or interpretable to a human trying to carry
+out some particular task?
+And I do a lot of human subjects experiments to really try and understand some of those
+questions with a variety of different folks here at Microsoft Research.
+On the topic of fairness and avoiding inadvertent harm, there are a lot of examples that I think
+many of our audience would be familiar with the pro-publica work into the use of machine
+learning systems in the justice process and others are there examples that come to mind
+for you that are maybe less well-known, but that illustrate for you the importance of
+that type of work?
+Yeah.
+So when I typically think about this space, I tend to think about this in terms of the
+types of different harms that can occur.
+And I have some work with Aaron Shapiro, Solon Brocus, and Kate Crawford, on the different
+types of harms that can occur.
+And Kate Crawford actually did a fantastic job of talking about this work in her invited
+talk at the Nureps Conference in 2017.
+So to give you some concrete examples, so many of the examples that people are most familiar
+with are these scenarios, as you mentioned, where machine learning systems are being used
+to allocate or withhold resources, opportunities, or information.
+And so one example would be of the compass recidivism prediction system being used to make
+decisions about whether people should be released on bail.
+Another example would be from a new story that happened in November where Amazon revealed
+that it had abandoned a automated hiring tool because of fears that the tool would reinforce
+existing gender imbalances in the workplace.
+So there you're looking at these existing gender imbalances and seeing that this tool is
+perhaps withholding opportunities from women in the tech industry in an undesirable way.
+And there was a lot of coverage about this very sensible decision that Amazon made to
+abandon that tool.
+Some other examples would be more related to quality of service issues, even when no resources
+or opportunities are being allocated or withheld.
+So a great example there would be the work that Joy, Wall and Weenie and Timnick Gebrou
+did focusing on the ways that commercial gender classification systems might perform less
+well, so less accurate, for certain groups of people.
+As another example, you might think of let's say speech recognition systems, and you can
+imagine systems that work really well for people with certain types of accents or for
+people with voices at certain pitches, but less well for other people.
+Certainly for me, I'm British and I have a list and I know that oftentimes speech recognition
+systems don't do a great job of understanding what I'm saying.
+This is much less of an issue nowadays, but you know, five or so years ago, this was
+really frustrating for me.
+Some other examples are things like stereotyping.
+So here, the most famous example of stereotyping and machine learning is Latanya Sweeney's work
+from 2013, where she showed that advertisements that were being shown on web searches for different
+people's names would more typically be advertisements that reinforce stereotypes about
+black criminality when people searched for sort of black sounding names than when people
+searched for stereotypically white sounding names.
+So there, the issue is this sort of reinforcement of these negative stereotypes within society
+by the placement of particular ads for particular different types of searches.
+So another example of stereotyping and machine learning would be the work done by Joanna
+Brason and others at Princeton University on stereotypes and word embeddings.
+And there's also been some similar work done by my colleague Adam Kali here at Microsoft
+Research.
+And both of these groups of researchers showed that if you train word embedding methods,
+so things like word to veck that try and identify a low-dimensional embedding for word types
+based on the surrounding words that are typically used in conjunction with them in sentences,
+you end up seeing that these word embeddings reinforce existing gender stereotypes.
+For example, so the word man ends up being embedded much closer to programmer and similarly
+women women ends up being embedded much closer to homemaker than vice versa.
+So there would be another kind of example.
+And then we see other kinds of examples of unfairness at harms within machine learning
+as well.
+So for example, over an underrepresentation, so Matthew K and some others at the University
+of Washington have this really nice paper where they show that for professions with an equal
+or higher percentage of men than women, the image search results are much more heavily
+skewed towards images of men than reality.
+And so that would be another kind of example.
+And what you'll see from all of these examples that I've mentioned is that the effect
+of really wide range of systems and types of machine learning applications and the types
+of harms or unfairness that might occur are also pretty wide ranging as well, going from
+yes, sure, allocation or withholding of resources, opportunities of information, but moving
+beyond that to stereotyping and representation and so on.
+So often when thinking about fairness and bias and machine learning and the types of harm
+that can come about when unfair systems are developed, the kind of all roads lead back
+to the data itself and the biases that are inherent in that data given that machine
+learning and AI is so dependent on data and often much of the data that we have is bias.
+What can we do about that and what are the kinds of things that your research is exploring
+to help us address these issues?
+Absolutely.
+Yes.
+So you've hit on a really important point there, which is that in a lot of the sort of public
+discourse about fairness and machine learning, you have people making comments about algorithms
+being unfair or algorithms being biased and really I think this misses some of the most
+fundamental points about why this is such a challenging landscape and so I want to
+just emphasize a couple of those here in response to your question.
+So the first thing is that machine learning is all about taking data, finding patterns
+in that data and then often training systems to mimic the decisions that are represented
+within that data and of course we know that the society we live in is not fair.
+It is biased.
+There are structural disadvantages and discrimination all over the place.
+So it's pretty inevitable that if you take data from a society like that and then train
+machine learning systems to find patterns expressed in that data and to mimic the decisions
+made within that society, you will necessarily reproduce those structural disadvantages that
+bias, that discrimination and so on.
+So you're absolutely right that a lot of this does indeed come from data.
+But the other point that I want to make is that it's not just from data and it's not from
+algorithms per se, the issue is really as I see it and as my colleagues here at Microsoft
+Research see it, the issue is really about people and people's decisions at every point
+in that machine learning life cycle.
+So I've done some work on this with a number of people here at Microsoft.
+Most recently I put together actually a tutorial on machine learning and fairness in collaboration
+with my colleague, Jen Wartman Vaughn and the way we really think about this is that you
+have to prioritize fairness at every stage of that machine learning life cycle.
+You can't think about it as an afterthought.
+And the reason why is that decisions that we make at every stage can fundamentally impact
+whether or not a system treats people fairly.
+And so I think it's really important when we're thinking about fairness in machine learning
+to not just sort of make general statements about algorithms being unfair or systems being
+unfair, but really to go back to those particular points and think about how unfairness can
+kind of creep in at any one of those stages.
+And that might be as early as the task definition stage.
+So when you're sitting down to develop some machine learning system, it's really important
+to ask the question of who does this take power from and who does this give power to?
+And the answers to that question often reveal a lot about whether or not that technology
+should even be built in this first place.
+Sometimes the answer to addressing fairness in machine learning is simply no, we should
+not be building that technology.
+But there are all kinds of other decisions and assumptions at other points in that machine
+learning life cycle as well.
+So the way we typically like to think about it is that a machine learning model or method
+is effectively an abstraction of the world.
+And in making that abstraction, you necessarily have to make a bunch of assumptions about
+the world.
+And some of these assumptions will be more or less justified.
+Some of these assumptions will be better fits for the reality than others.
+But if you're not thinking really carefully about what those assumptions are when you're
+developing your machine learning system, this is one of the most obvious places that you
+can inadvertently end up introducing bias or unfairness.
+Can you give us some concrete examples there?
+Yeah, absolutely.
+One common example of this form would be stuff to do with teacher evaluation.
+So there have been a couple of sort of high profile lawsuits about this kind of thing.
+But I think it illustrates the point nicely.
+So it's common for teachers to be evaluated based on a number of different factors, but
+including their students test scores.
+And indeed, many of the methods that have been developed to analyze teacher quality using
+sort of machine learning systems have really focused predominantly on students test scores.
+But this assumes that students test scores are, in fact, an accurate predictor of teacher
+quality.
+And this isn't actually always the case.
+A good teacher should obviously do more than test prep.
+And so any system that really looks just at test scores when trying to predict teacher
+quality is going to do a bad job of capturing these other properties.
+So that would be one example.
+Another example involves predictive policing.
+So a predictive policing system might make predictions about where crimes will be committed
+based on historic arrest data.
+But an implicit assumption here is that the number of arrests in an area is an accurate
+proxy for the amount of crime.
+And it doesn't take into account the fact that policing practices can be racially biased
+or there might be historic over policing in less affluent neighborhoods.
+I'll give you another example as well.
+So many machine learning methods work by defining some objective function and then learning
+the parameters of the model so as to optimize that objective function.
+And so for example, if you define an objective function in the context of let's say a search
+engine that prioritizes user clicks, you may end up with search results that don't necessarily
+reflect what you want them to.
+And this is because users may click on certain types of search results over other search
+results.
+And that might not be reflective of what you want to be showing when you show users a
+page of search results.
+So as a concrete example, many search engines, if you search for the word boy, you see
+a bunch of pictures of male children.
+But if you search for the word girl, you see a bunch of pictures of grown ups, women.
+And these are pretty different to each other.
+And this probably comes from the fact that search engines typically optimize for clicks
+among other metrics.
+And this really shows how hard it can be to even address these kinds of fairness issues.
+Because in different circumstances, the word girl may be referring to a child or a woman
+and uses search for this term with different intentions.
+And in this particular example, as you can probably imagine, one of these intentions
+might be more prevalent than the other.
+You've identified lots of opportunities for pitfalls in the process of fielding systems
+going all the way back to just the way you define your system and state your intentions
+and formulate the problem that you're going after, beyond simply being mindful of the
+potential for bias and unfairness.
+And just saying simply, I realize that that's not simple.
+It's work to be mindful of this.
+But beyond that, what does your research offer in terms of how to overcome these kinds
+of issues?
+Yeah, this is a really good question.
+And it's a question that I get a lot from people is, what can we actually do in practice?
+And there are a number of things that can be done in practice, not all of them are easy
+things to do, as you say.
+So one of the most important things is that issues relating to fairness in machine learning
+are fundamentally sociotechnical and they're not going to be addressed by computer scientists
+or developers alone.
+It's really important to involve a range of diverse stakeholders in these conversations
+when we're developing machine learning systems so that we have a bunch of different perspectives
+represented.
+So moving beyond just involving computer scientists and developers on teams, it's really important
+that we involve social scientists, lawyers, policymakers, end users, people who are going
+to be affected or impacted by these systems down the line and so on and so forth.
+And that's one really concrete thing you can do.
+There's a project that came out of the University of Washington called the Diverse Voices Project.
+And it provides a way of getting feedback from stakeholders on tech policy documents and
+it's really good.
+They have a great how-to guide that I definitely recommend checking out.
+But many of the things that they recommend doing there, you can also think about when
+you're trying to get feedback from stakeholders on, let's say, the definition of a machine
+learning system.
+So that task definition stage, and some of these could even potentially be expanded to
+consider other stages of that machine learning pipeline as well.
+So there are a number of things that you can do at every single stage of the machine learning
+pipeline.
+And in fact, this this tutorial that I mentioned earlier that I worked on with my colleague
+Jen Warman-Von actually has guidelines for every single step of the pipeline.
+But to give you examples, here are some things for instance that you can do when you're selecting
+a data source.
+So for example, it's really important to think critically before even collecting any data.
+It's often very tempting to say, oh, there's already some data set that I can probably
+repurpose for this, but it's really important to take that step back and before immediately
+acting based on availability to actually think about whether that data source is appropriate
+for the task you want to use it for.
+And there's a number of reasons why it might not be.
+It could be to do with biases in the data source selection process.
+There might be societal biases present in the data source itself.
+It might be that the data source doesn't match the deployment context.
+That's a really important one that people really should be taking into account.
+Where are you thinking about deploying your machine learning system?
+And does the data you have availability for training and development match that context?
+Because another example is still related to data.
+It's really important to think about biases in the technology used to collect data.
+So as an example here, there was an app released in the city of Boston back in 2011.
+I think it was called Street Bump.
+And the way it worked is it used iPhone data and specifically sort of the positional movement
+of iPhones as people were driving around to gather data on where there were potholes
+that should be repaired by the city.
+But pretty quickly, the city of Boston figured out that this actually wasn't a great way to
+get that kind of data.
+Because back in 2011, the people who had iPhones were typically quite affluent and only lived
+in certain neighborhoods.
+So that would be an example of thinking carefully about the technology even used to collect data.
+It's also really important to make sure that there's sufficient representation of different
+subpopulations who might be ultimately using or affected by your machine learning system
+to make sure that you really do have good representation overall.
+Moving on to things like the model, there's a number of different things that you can do
+there, for instance, as well.
+So in the case of a model, I mentioned a bit about assumptions being really important.
+It's great to really clearly define all of your assumptions about the model, and then
+to question whether there might be any explicit or implicit biases present in those assumptions.
+That's a really important thing to do when you're thinking about choosing any particular
+model or model structure.
+You could even, in some scenarios, include some quantitative notion of parity, for instance,
+in your model objective function as well, and there've been a number of academic papers
+that take that approach in the literature over the past few years.
+Can you give an example of that last point?
+Yeah, sure.
+So imagine you have some kind of a machine learning classifier that's going to make decisions
+of the form, let's say, no loan, hire, no hire, bail, no bail, and so on.
+The way we normally develop these classifiers is to take a bunch of labeled data, so data
+points labeled with, let's say, loan, no loan, and then we train a model, a machine learning
+model, a classifier, to optimize accuracy on that training data.
+So you end up setting the parameters of that model such that it does a good job of accurately
+predicting those labels from the training data.
+So the objective function that's typically used is one that considers usually only accuracy.
+But something else you can do is define some quantitative definition of fairness, some
+quantitative fairness metric, and then try to simultaneously optimize both of these objectives,
+so classifier accuracy and whatever your chosen fairness metric is.
+And there's a number of these different quantitative metrics that have been proposed
+out there.
+They're all typically looking at sort of parity across groups of some sort.
+So I think it's really important to remember that even though these are often referred
+to as fairness metrics, they're really parity metrics, and then neglect many of the really
+important other aspects of fairness, like justice and due process and so on and so forth.
+But it is absolutely possible to take these parity metrics and to incorporate them into
+the objective function of say a classifier and then to try and prioritize satisfying and
+optimizing that fairness metric at the same time as optimizing classifier accuracy.
+There have been a number of papers that focus on this kind of approach.
+Many of them will focus on one particular type of classifier, so like SVMs or neural networks
+or something like that, and one particular fairness metric.
+And there are a bunch of standard fairness metrics that people like to look at.
+I actually have some work with some colleagues here at Microsoft where we have a slightly
+more general way of doing this that will work with many different types of classifiers
+and many different types of fairness metrics.
+So there's no reason to start again from scratch if you want to switch to a different
+classifier or a different fairness metric.
+We actually have some open source Python code available on GitHub that implements our approach.
+So you've talked about the idea that kind of people are fundamentally the root of the
+issue that these are societal issues that they're not going to be solved by technological
+advancements or processes alone.
+At the same time, there's been a ton of new research happening in this area by folks
+in your group and elsewhere.
+Does that lead to a mismatch between what's happening in academia and on the technical
+side with the way this stuff actually gets put into practice?
+That's an awesome question.
+The simple answer is yes, and this actually relates to one of my most recent research projects
+which I'm really, really excited about.
+So last summer, some of my colleagues and I, specifically Gen Warman Vaughan, Merodudeck
+and Hal Damay, along with our incredible intern Ken Holstein from CMU, conducted the first
+systematic investigation of industry practitioners' challenges and needs for support relating
+to developing fairer machine learning systems.
+And this work actually came about because we were thinking about ways of developing interfaces
+for that fair classification work that I mentioned a minute ago and through a number of conversations
+with people in different product groups here at Microsoft and people at other companies,
+we realized that these kinds of classification tasks, while they're incredibly well studied
+within the fairness in machine learning literature, are maybe less common than we had thought
+in practice within industry.
+And so that got us thinking about whether there might be actually a mismatch between the
+academic literature on fairness in machine learning and practitioner's actual needs.
+What we ended up doing was a super interesting research project.
+It was a pretty different style of research for me and for my colleagues.
+So I am a machine learning researcher, so is Gen, so is Hal and so is Merod, Ken, our
+intern is an HCI researcher.
+And what we ended up doing was this qualitative HCI work to really understand what it is that
+practitioners are facing in reality when they try and develop fairer machine learning systems.
+And to do this, we conducted semi-structured interviews with 35 people spanning 25 different
+teams in 10 different companies.
+And these people were in a number of different roles ranging from social scientists, data
+labeler, product manager, program manager to data scientist and researcher.
+And where possible we tried to interview multiple people from the same team in order
+to get a variety of perspectives on that team's challenges and needs for support.
+We then took our findings from these interviews and developed a survey which was then completed
+by another 267 industry practitioners, again in a variety of different companies and a variety
+of different roles.
+And what we found at a high level was that yes, there is a mismatch between the academic
+literature on fairness and machine learning and industry practitioners actual challenges
+and needs for support on the ground.
+So firstly, much of the machine learning literature on fairness focuses on classification
+and on supervised machine learning methods.
+In fact, what we found is that industry practitioners are grappling with fairness issues in a much
+wider range of applications beyond classification or prediction scenarios.
+And in fact, many times the systems they're dealing with involve these really rich, complex
+interactions between users and the system.
+So for example, chatbots or adaptive tutoring or personalized retail and so on and so forth.
+So as a result, they often struggle to use existing fairness research from the literature
+because the things that they're facing are much less amenable to these quantitative fairness
+metrics.
+And indeed, very few teams have fairness KPIs or automated tests that they can use within
+their domain.
+One of the other things that we found is that the machine learning literature typically
+assumes access to sensitive attributes like race or gender for the purpose of auditing
+systems for fairness.
+But in practice, many teams have no access to these kinds of attributes and certainly
+not at the level of individuals.
+So they express needs for support in detecting biases in unfairness with access only to
+coarse grained partial or indirect information.
+And this is something that we've seen much less focus on in the academic literature.
+That last point is an interesting one and one that I've brought up on the podcast previously
+and many of the places you might want to use an approach like that is forbidden from a
+regulatory perspective to use the information that you want to use in your classifier to
+achieve fairness in any part of the decisioning process.
+Exactly.
+This sets up this really difficult tension between doing the right thing in practice from
+a machine learning perspective and what is legally allowed.
+And I'm actually working on a paper at the moment with a lawyer, Zach Hanard, actually
+a law student, Zach Hanard at Stanford University, on exactly this issue, this challenge between
+what you want to do from a machine learning perspective and what you were required to do
+from a legal perspective based on humans and how humans behave and hundreds of years
+of law in that realm.
+It's really challenging and there is this complicated trade off there that we really need to
+be thinking about.
+It does make me wonder if techniques like or analogous to a differential privacy or something
+like that could be used to provide kind of a regulatory, acceptable way to access protected
+attributes so that they can be incorporated into algorithms like this.
+So there was some work on exactly this kind of topic so at the Fatem L workshop co-located
+with ICML last year.
+And this work was proposing the use of encryption and such like in order to collect and make
+available such information, but in a way that users would feel as if their privacy were
+being respected and so that people who wanted to use that information would be able to use
+it for purposes such as auditing.
+And I think that's a really promising approach, although there's obviously a bunch of non-trivial
+challenges involved in thinking about how you might make that a reality.
+It's a really complicated landscape, but definitely one that's worth thinking about.
+Was there a third area that you were about to mention?
+Yeah.
+So one of the main themes that we found in our work studying industry practitioners is
+a real mismatch between the focus on different points in the machine learning life cycle.
+So the machine learning literature typically assumes no agency over data collection.
+And this makes sense, right?
+If you're a machine learning academic, you typically work with standard data sets that
+have been collected and made available for years, you don't typically think about having
+agency over that data collection process.
+And of course, in industry, that's exactly where practitioners often do have the most
+control.
+They are in charge of that data collection or data curation process.
+And in contrast, they often have much less control over the methods or models themselves,
+which often are embedded within much bigger systems, so it's much harder to intervene
+from a perspective of fairness with the models than it is with the data.
+We found that really interesting, the sort of difference in emphasis between models versus
+data in these different groups of people.
+And of course, many practitioners voiced needs for support in figuring out how to leverage
+that sort of agency over data collection to create fairer data sets for use in developing
+their systems.
+So you mentioned the FET ML workshop.
+I'm wondering as we come to a close, if there are any resources, events, pointers, I'm sure
+there are tons of things that you'd love to point people at.
+But what are your top three or four things that you would suggest people take a look at
+as they're trying to wrap their heads around this area and how to either have an impact
+as a researcher or how to make good use of it as a practitioner?
+Yeah.
+Absolutely.
+So there are a number of different places with resources to learn more about this kind
+of stuff.
+So first, I've mentioned a couple of times this tutorial that I put together with Jen
+Wartman Vaughn, that will be available publicly online very soon.
+It is in fact being broadcast next week, so it should be up by the time this podcast
+goes live.
+So I would definitely recommend that people check that out to really get a sense of how
+we at Microsoft are thinking about fairness and machine learning.
+Then moving beyond that and thinking specifically on more of the academic literature, the FET ML
+workshop maintains a list of resources on the workshop website.
+And that's again, another really, really great place to look for things to read about
+this topic.
+The FET Star Conference is a relatively newly created conference on fairness, accountability
+and transparency, not just in machine learning, but across all of computer science and
+computational systems.
+And again, there, I recommend checking out the website to see the publications that were
+there last year, and also the publications that will be there this year.
+There's a number of really interesting papers that I haven't read yet, but I'm super excited
+to read being presented at this year's conference.
+That conference also has tutorials on a range of different subjects.
+And so it's also worth looking at the various different tutorials there.
+So at last year's conference, Ivan Narayanan presented this amazing tutorial on quantitative
+fairness metrics and why they're not a one-size-fits-all solution, why there are trade-offs between
+them, why you can't just sort of take one of these definitions, optimize for it and call
+it quits.
+And so I definitely recommend checking that out.
+Some other places that are worth looking for resources on this.
+The AINow Institute, which was co-founded by Kate Crawford, who's also here at Microsoft
+Research and Meredith Whitaker, who's also at Google, also has some incredibly awesome
+resources.
+They've put out a number of white papers and reports over the past couple of years that
+really get at the crux of why these are complicated socio-technical issues.
+And so I strongly recommend reading pretty much everything that they put out.
+I would also recommend checking out some of the material put out by Data and Society,
+which is also an organization here in New York, led by Dana Boyd.
+And they, too, have a number of really interesting things that you can read about these different
+topics.
+And then the final thing I want to emphasize is the partnership on AI, which was formed
+a couple of years ago by Microsoft and a bunch of other companies working in the space
+of AI, to really foster cross-company collaboration and moving forward in this space when thinking
+about these complicated societal issues that relate to AI and machine learning.
+And so the partnership has been really ramping up over the past couple of years.
+And they also have some good resources that are worth checking out.
+Oh, that's great.
+That is a great list that will keep us busy for a while.
+Hannah, thank you so much for taking the time to chat with us.
+It was really a great conversation and I appreciate it.
+No problem.
+Thank you for having me.
+This has been really great.
+Awesome.
+Thank you.
+All right, everyone, that's our show for today.
+For more information on Hannah or any of the topics covered in this show, visit twimmelai.com
+slash talk slash two, three, two.
+To follow along with the AI for the benefit of society series, visit twimmelai.com slash
+AI for society.
+As always, thanks so much for listening and catch you next time.

@@ -1,0 +1,677 @@
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+people, doing interesting things in machine learning and artificial intelligence.
+I'm your host Sam Charrington.
+While at last year's NERP's conference, in December, I attended the second annual black
+NAI workshop, which gathered participants from all over the world to showcase their research,
+share experiences and support one another.
+Today, we conclude our black NAI series with this interview with Sikle Lukwandazwane,
+a master student at the University of Vithwatersrand, and graduate research assistant at South
+Africa's Council for Scientific and Industrial Research, or CSIR.
+At the workshop, Sikle Lukwandaz presented on safer exploration and deep reinforcement
+learning using action priors, which explores transferring action priors between robotic
+tasks to reduce the exploration space, which in turn reduces sample complexity.
+In our conversation, we discuss what exactly safer exploration means in this sense, the
+difference between this work and other techniques like imitation learning, and how this fits
+in with the broader goal of lifelong learning.
+Enjoy.
+Alright, everyone, I am on the line with Sikle Lukwandazwane.
+He's a master student at the University of Vithwatersrand, and a graduate research assistant
+at the Council for Scientific and Industrial Research, or CSIR in South Africa.
+Sikle Lukwandazwane, welcome to this week in machine learning and AI.
+Thanks a lot, Sam.
+Thank you for having me.
+So I will just let everyone know that you were very, very gracious in practicing the pronunciation
+of your name with me, and I am still butchering it, but thank you so much.
+We had a long practice session before, and I am going to work on these, Koza, was it
+Koza?
+It's a Zulu.
+Sorry, sorry.
+Yeah, it tends to be very similar to a Kosa.
+Okay, so I am going to work on this, and the next time we have you on the show, we're
+going to get it.
+We're going to get it.
+But thanks so much for your patience with that.
+Why don't we get started by having you share a little bit about your background and how
+you got started working in machine learning and artificial intelligence?
+So I got into machine learning because of the problems that I found when back when I was
+in this interest group in 2nd year, where we were at this robotics interest group at
+VITS, and we were giving these quadcopters to fly around, and my friend and I decided
+we want to fly hours in like a rectangular shape, and we found that we couldn't do that.
+Like we had issues with things like wind and momentum.
+You could never actually get the drone to be in one particular position.
+But nonetheless, even though we did fly in some type of kite shape, like I found myself
+fascinated by the fact that I basically wrote some code, and I had to sit back and relax
+and watch my code basically fly this machine around, right?
+So actually I became interested in the field of robotics and continued my studies and tried
+to pick subjects even in honors that would basically give me a good start in my career
+as a roboticist in South Africa.
+Then I think during my honors year, one of the subjects that I picked was reinforcement
+learning, and there I learned that the big challenge in trying to get machines that can
+think and act like human beings is not so much the actual machinery and trying to create
+something that is anatomically similar to a human being.
+But the bigger challenge was trying to get these machines to perform like these complex
+behaviors, things like that we take so much for granted, something as simple as picking
+a pen or picking a cup up and putting it down is something that is still a difficult
+task when you want to achieve it with a robot, or rather the bigger challenge was this
+thing, generalization, we want to have, we want to want these machines to be able to
+perform general behaviors, if I say pick something up, you shouldn't care what the object
+looks like, your code shouldn't rely on the actual position of the hand when it does
+it, it needs to generalize to all these weird scenarios, for example, if someone has a
+bigger cup, if someone has a mug, if someone has a pen, it turns out that machine learning,
+or I found out that machine learning was one of the tools that could actually help achieve
+this goal through machine learning, we can actually learn more general behaviors to
+get more interesting robotic applications, or more useful, actually useful is the word
+I was looking for there, that is literally how I got into the field, just by wanting
+to see a robot perform some simple task, and then realizing that having the robot perform
+that task is not something that is simple to say, it wasn't trivial, one alternative
+or as a third year computer science student, I think my skill set would have probably pointed
+me towards trying to hard code, okay maybe tilt the robot hand by 45 degrees and then move
+it forward a few centimeters and then go down and then open the gripper, close the gripper
+and then pick it up and then, but you realize that you just, you created like this behavior
+is only specific to this particular scenario, like you leave your robot overnight at the
+lab and someone comes and they move the cup by a few centimeters and now your whole system
+doesn't work, so the reason why I'm interested in machine learning, or the reason why I'm
+in machine learning is to be able to learn more general behaviors, you know, more useful
+behaviors for robots and other applications, because machine learning is not only useful
+for robotics, just that, that is my, yeah, interest.
+One of the things that I can really relate to is that initial inspiration, you know, I find
+I really enjoy, I don't code a lot, but I do enjoy it, but when you're writing code
+and then that is affecting the physical world through motors and other actuators, you
+know, basically robotics, whether in like small form, you know, making light splink, all
+that kind of stuff, I find it super rewarding and so I can see how that would like it you
+kind of pulled into wanting to explore more and have more, kind of be able to build these
+more robust interactions.
+Yeah, now, yeah, that's precisely the point, right, there's so much, it is actually very
+rewarding to say something that you created actually become something physical that you
+can see.
+At the Black and AI workshop, you presented on some of your research, titled safer exploration
+and deep reinforcement learning using action priors.
+Tell us a little bit about the motivation for this project.
+Okay, the motivation is not really a straightforward thing for me.
+But motivated me to go with this particular topic is my, mainly my experience with using
+deep reinforcement learning and trying to apply it to the robotics domain, right?
+So I have access to this mobile manipulator, it's basically just a powerbot, AGV platform
+with that baritwem, seven dog robot arm on top, and we would like to basically, the dream
+is to have this platform performing complicated tasks such as making someone coffee or making
+a sandwich and things like that, but it's really hard to specify rewards and it's very
+hard to produce those kind of behaviors.
+If you are trying to manually specify what is supposed to happen, ideally, would like
+the system to actually learn to perform these behaviors on its own.
+So what I'm kind of hearing here is like you kind of started out as an undergrad, like
+trying to get robots to do things and at that stage in your experience, the natural way
+to do things was to build these big rule sets.
+And then else kind of programming and you went on to explore doing this with deep reinforcement
+learning, but then you ran it to this challenge of how do we create the reward functions to
+get a robot to grip something?
+That's historically one of the hard, you know, the hard parts about using deep reinforcement
+learning.
+Yes, that is correct.
+So I found it very hard to specify a reward function for picking something up, you know.
+My first task as a master student was, okay, I want to use deep reinforcement learning
+to perform multitask learning on this particular robot platform that we have at the CSR, right?
+Then when I'm thinking about doing that, I realize, okay, this is basically one of the
+few robots that we have and reinforcement learning is known to be random in nature, right?
+You rely on maybe executing random actions to kind of discover rewarding states and stuff
+like that and you can't really afford to be performing these random actions and these
+jerky movements when you're actually working with actual machinery or the physical platform.
+So my first task was, let me just build a simulated environment and as I was doing that, I spent
+some time trying to basically find the right meshes that would kind of correspond in shape
+and size to the actual physical platform and I was using this thing called gazebo where
+you can basically have like a physical environment, you know, with all the physics and collisions
+and things and then gazebo is a gazebo is like a physics simulator that's used quite a
+bit in robotics, is that right?
+Yes, yes, yes.
+So yeah, when I say both is that I built basically some packages for this particular platform that
+would allow me to use reinforcement learning with the actual joint configurations of the robot,
+you know, so things like I need to be able to publish actions to the robot and have it perform
+those actions and then observe some change and then have something that's going to decide
+if this was good or bad, which is basically my reward function, right?
+So yeah, but the whole thing was just I want to have this particular robot platform being
+able to perform multiple tasks and on my way there towards performing multiple tasks,
+I realized that okay, there's actually a lot of challenges with getting a standard
+dipping reinforcement learning algorithm to to work properly on, you know, like any environment
+that you have, right?
+So when I think about a deep enforcement learning, I'm going to be thinking about okay, firstly
+you have this, this exploration phase where you start with random policies, right?
+And you're going to be trying to find, I guess, would be executing random actions.
+I found out that it was really hard to specify reward functions for these complicated
+behaviors, like for example, in wanting to pick something up, right?
+You need to somehow reward the agent for what's this thing re-reaching towards the object
+and then actually picking it up, you know, which is there's actually two stages you need
+something that's going to encode moving towards the object and something that's going to encode
+basically you closing your gripper around the object and then still having the object
+and moving that your hand up and having the object remain in the hand, you know, so things
+like that.
+You presented a project called safer exploration and deep reinforcement learning using action
+priors.
+First off, when you say safer exploration, you know, what does that mean and why is that
+important?
+Yeah, so when I'm talking about safer exploration, right?
+I'm trying to improve the safety of the exploration policy in a standard deep reinforcement learning
+algorithm, right?
+So being in the robotics domain, I can't very much about the physical well-being of my
+platform, right?
+So it's very important to me that I won't be, if for example, I need to learn to perform
+some task using a deep reinforcement learning algorithm, I need some form of insurance that
+my platform won't be basically performing the worst possible thing.
+It won't hurt itself in any way.
+For example, if I have like a Rumba and basically having it sweep my roof for some reason, right?
+I need to know that this thing won't drive off the roof, you know, like things like that,
+like it should be able to learn, right?
+In this scenario or in an environment where there are still states that are deemed very
+unsafe or like very undesirable, right?
+So when I talk about safer exploration, I'm just trying to
+I guess improve the safety of your standard deep reinforcement learning algorithm, I mean.
+That paradigm is based on, so you understand the standard paradigm in reinforcement learning
+in general is that you, or one of the more popular exploration techniques is this
+epsilon greedy thing where you're going to decide, okay, I'm going to execute some random
+actions or actions from random policy, right?
+Some epsilon probability of the time and then with probability one minus epsilon, you're
+going to be basically exploiting or you're going to be executing actions that come from
+your from the policy that you're training, right?
+Which is also quite random initially, but you do this so that like you can actually discover,
+you know, like potentially useful actions to perform in any state in the state that you're
+currently occupying.
+So my work is to trying to kind of relax this very random nature, right?
+When you're exploring and what I'm saying is that instead of trying to explore randomly,
+right, or executing random actions, why don't we execute actions that were performed
+by experts in these like states that were in, you know, so you'd have maybe something
+like you tried to first build some notion of account, right, to maintain, you'd maintain
+some notion of accounts to see how many times a particular action has been performed
+in a state, right?
+And then you're going to explore according to these counts, you convert these counts to
+a probability distribution and then you sample from the from from this distribution and
+that is the action that you're going to apply, right?
+Like a more intuitive example is something like if I gave you the task of opening a door,
+right?
+The first thing, if if you're an enforcement agent and you've never opened a door in
+your life, the first thing you do when you're in front of a door is that you're going to
+try every possible action, right?
+And you're going to try a very random things.
+So now in your action space, you have the action of licking the door handle, which is,
+you know, could not lead to you opening the door, you can you can try kicking the door,
+you can try, there's so many things you can try.
+But if you have the opportunity, maybe to sit on a chair next to the door and watch how
+other people do it and then try what they're trying to do, like these people may be trying
+to do other things with the door.
+But the hope is that by trying what other expert agents have tried in this particular state,
+you know, you may be doing, you may avoid this, this, this, this, this, this random nature
+like that, that may lead you to undesirable states, like it kind of grounds your, your search
+for good actions.
+And also, you know, like because these agents that you're watching expert agents, you can
+assume that they're behaving optimally or in a way that they're not trying to harm themselves
+in any way.
+So when I hear you describe it like that, the thing that comes to mind for me is imitation
+learning.
+How was that related to what you've done here?
+So how I understand imitation learning is that you're going to be observing.
+I think you're going to have access to some expert trajectories.
+And I think the task today is to try and follow those, right?
+You're basically trying to make those trajectories more general in any way.
+You want to kind of imitate the expert, right?
+Whereas here, what we're trying to do is that we're not really performing the same task
+as the expert that we're watching, right?
+So the action process framework has the flexibility that the different experts can be performing
+different tasks, right?
+And by different tasks, I mean, tasks that have different reward functions, right?
+Meaning that it doesn't matter what the action that the experts are doing, as long as the
+action spaces are the same between the agent that is learning and these experts here, right?
+You may find some benefit in basically trying what the experts tried, like if that makes
+sense.
+You're trying to act according to this body of advice, like I think advice kind of makes
+more sense, right?
+So if I can recap what you're saying to make sure I understand when an imitation learning,
+if you've got our scenario with the robot sitting in a chair, observing an expert interacting
+with the door and imitation learning as it's classically defined, what you're really trying
+to do is have the robot, you know, look at someone performing a very specific task like
+rotating the door handle thousands of times or however many times and you're trying to
+teach it that very specific action.
+And any other actions would be noise and that kind of model, whereas in what you're doing,
+you're presenting, it's kind of not random observations, but observations of a bunch
+of different things, reaching for the door, turning the knob, opening the door.
+It's more unconstrained and you're trying to use all of these observations to kind of
+condition the exploration process.
+Yes.
+Yes.
+That's exactly what I'm trying to do.
+Okay.
+So, yeah, it's just as you put it in unconstrained, I guess, version where you're trying to,
+you have all these multiple demonstrations, you're not exactly trying to follow any particular
+trajectory, but what you're interested in is what these experts are kind of doing in any
+particular state.
+So, if you visit a state, you can always ask the question, what did experts do, right?
+And maybe there'll be some arbiter or some Oracle that will tell you, hey, 63% of experts
+took this action, maybe 23% of experts took this action and then, you know, other experts
+took this particular action and no expert took this particular action, right?
+So then I want to, in that case, basically try the actions that were more popular as opposed
+to the one that the experts didn't try because you can imagine that in a model like that,
+you're kind of implicitly representing in this case, I guess, the state space in the environment
+and maybe the experts in this particular state are not moving for, are not taking the action
+for going forward because this is a cliff, right?
+So as they were training, they found that, okay, when they went forward, this led to a
+very bad reward.
+So they decided, okay, I'm not going to take that action.
+I'm just going to do this and that.
+You know, so it's basically you treat it as this party of advice that you can, like,
+you know, kind of query at every step in your exploration process.
+One question I'm curious about is how you define the state space and if you're doing
+anything to generalize it and I realize there's a lot of loaded language there.
+What I mean is kind of going back to this example of the robot observing the expert.
+If the expert is reaching for the door handle, you could learn a lot about that action.
+But if you're only able to access what that expert has done, if the robot is in the exact,
+you know, if all of the dimensions of the robot, you know, it's all of its positions
+are in the exact same point, then you kind of miss out on a lot of advice from, you
+know, experts who were, you know, their hand was doing the same thing, but it was shifted
+over a centimeter or something like that.
+Yeah, yeah.
+That's a question of portability, right?
+So, so this in the original paper, right, the way the authors basically tackle this
+problem is by introducing a second version of the action prior framework, which was conditioned
+on observations instead of the state, right?
+So obviously, if you're trying to learn this distribution over actions given a state,
+right, basically asking, okay, what action should I take at this particular state?
+You are only going to, that model is only going to be useful, should like in an environment
+where the state space doesn't change, you know, so essentially if there's an obstacle
+here, that obstacle should not move at all, right?
+And they'll also stay the same place and stuff like that.
+But as soon as you move like an obstacle or something that was not like, for example,
+if you were training in an environment way, let's say the obstacle is in one particular
+position, right?
+And then now you take demonstrations from that setting and you try to move it into a setting
+where the agent is training, where these obstacles have been moved around now.
+What's going to happen is that that information is not going to be portable, right?
+So to try and fix that problem or to fix the problem, what the authors did, this is Benjamin
+Rosman and Subramarine Ramamothi, I think, remember correctly.
+What they did is that they conditioned the action prior distribution over observations,
+meaning that I guess if you can imagine if all the obstacles were blue and your agent
+can be like, oh, your body of advice could be something that says, okay, if I see a
+blue thing, I want to do this or this, you know, so basically whenever I see an obstacle,
+I want to do one of the following deterministic things, you know, so you can increase the
+possibility of this action prior framework by just conditioning on observations instead
+of this state.
+I guess I'm trying to visualize how you represent the state for a given problem.
+How do you figure out, is it, is the representation, like, I'm, you know, I'm imagining it's a
+vector of some sort, but is it a vector of, like, if it's a robot, like all of the stepper
+motor angles and that kind of thing, or is it something else?
+Is it more abstract?
+No, no, it's exactly that.
+So if you have a robot, like a robot arm, then it will be your joint angles and stuff
+like that.
+It's literally, so how I think of reinforcement learning in general is that you're going
+to have some target environment and then you can have a state, right?
+I defined in the framework of often a Markov decision process, you can have a state and
+then you have access to actions and the transition function and then you have a reward function
+I guess in some gamma discount factor thing, but yeah, like a state can mean anything that
+you wanted to mean as far as, as long as you have formulated the problem you're trying
+to solve as a reinforcement learning problem, like that's how I think about it.
+So in my case, so then the question that I was trying to get at in this case is let's
+say that your state vector is all of your angles and you've got this.
+You're basically able to consult the Oracle, so to speak, to see if it knows anything
+about what to do in a given state.
+I guess the question that I'm asking is like, when you consult the Oracle and you say like
+these are my, you know, angles out to the second decimal point, the second decimal place,
+will it return what it knows even if it's not exactly that, but kind of close or do
+you have to kind of generalize it around it before you consult the Oracle or will you
+only know about things that happen at the very exact places?
+Does that make sense?
+Yeah, it does.
+So that's a very good question, right, so that is precisely the challenge with trying
+to move.
+Okay, let me just first say this action prior framework was defined, the thing for it to
+work very well in the discrete setting, which is true for most deep reinforcement learning
+and reinforcement learning algorithms, right.
+And moving into a continuous setting where you don't really have any guarantee that you'll
+ever see the same state again, there's, there's a need for models that can generalize,
+you know, like in some region and say, okay, for this particular region of state space,
+this is what the action distribution looks like, you know, and stuff like that.
+And I think that is what motivated my choice in what model to use to represent the action
+prior.
+That was a Gaussian process, which has a very nice, a smoothing effect, you know, like
+as far as data is concerned.
+Okay, okay.
+Yeah, now that you've said it, all of the language that I should have been using to ask
+the question is obvious, like discrete versus continuous and so just maybe to take a step
+back to make sure I understand the question I'm curious about now is how your specific research
+fits into the broader landscape of research in this area?
+Okay, so how I thought about it, right, was basically if you want to have a robot that
+can perform multiple tasks and things like that, right, you, okay, if you want a robot
+that is going to be useful in any particular scenario, then you need to think about, I think
+the field is called lifelong learning, right, and lifelong learning is basically trying
+to get these systems that can basically learn tasks as they are presented either, you know,
+in parallel or sequentially and then retain their ability to perform those tasks and then
+somehow use the knowledge that they've gained in learning the previous tasks to what's
+a thing to improve the learning of concurrent tasks.
+And I think that's almost how humans do this learning thing, right?
+So if I then think about the challenges that you get there, the first one is just trying
+to perform successful, you know, transfer learning in my case in continuous settings,
+you know, so I would, I can imagine that the action-price framework kind of fits somewhere
+in between, in between having like a very full or rather, it's one component that you
+would need to have a lifelong learning system or a lifelong learning robot, you know.
+So for example, my whole pipeline would be something like you train some expert agents
+in some target environment, right, and then these expert agents or these tasks, right,
+you're actually trying to learn can be, you know, all basically learned by the same robot,
+so to speak.
+And then this particular robot would use or sample trajectories or like keep a data set
+of trajectories from these learned tasks, right?
+And it would fit this model, this action prior distribution over those trajectories.
+And then for every task that it wants to learn, it can basically explore according to this
+action prior distribution, and after it has learned this new policy, it can then sample
+trajectories from there augmenting its data set, and then, you know, fitting the distribution
+again, you know, and then when learning a new task, it then going to use the exploration
+policy again, and then that just keeps going on until you have this machine or the system
+that can perform, you know, multiple tasks and things like that, you know, so I like
+to think of it as, I guess, a step towards lifelong learning, and one of the problems we
+have there in lifelong learning is we need to, I guess, solve the problem of transfer,
+as well as, you know, if you're talking about deep reinforcement learning, you need to
+kind of worry, or at least dedicate some time towards how to do exploration more efficiently
+and more safely.
+Before this explanation, when we were talking about experts, I was thinking in terms of
+observations, so your system would have some set of observations and those represent
+the experts, but you just introduced this concept of training expert models.
+How is that done, and kind of how is that different from the ultimate model that you're
+trying to train with reinforcement learning?
+So you please read the question.
+So it's you asking if how different is having this whole notion of an expert model compared
+to having what?
+Reinforcement learning, like the expert model is presumably the expert model is simpler and
+more readily trainable than a DRL model, is that true, or are the experts also trained
+using reinforcement learning?
+So in this case, I think my notion of expert, or how I think of expert, of what an expert
+is, it could be a deeply enforcement learning agent that was learning a task in the same
+environment, and now I just sample trajectories from the policy that I get from there, and
+then I use those samples to train the agent that I'm going to train next on a different
+task.
+It could also, expert can also mean, you know, just some, I guess in the context of video
+games, you can find that maybe a human player can kind of demonstrate what the correct actions
+or the correct policy is by playing the game and giving the reinforcement learning agent
+this trajectory that goes to the game in some sort of optimal way.
+And yeah, so it's basically either your expert is either agents that you were training in
+the same environment, or it could be just some human demonstrations and things like that,
+you know.
+In the context of getting learning from demonstration, when you're talking about robot manipulators,
+you can have someone who's trying to teach a robot how to wave by actually performing
+the action themselves and then recording that trajectory, you know.
+So my, I think the notion of expert in this case is just a bit more general.
+You know, say we're back at the door, and is the idea that we would have separate expert
+models for reaching and turning and pulling and that kind of thing?
+Or is there one expert that knows how to open a door?
+So I want to say maybe in training and expert how to open a door, right, you'd use information
+from these other experts, right.
+So reaching a door and turning the handle could all be actually useful actions.
+Okay.
+Yeah, in that case, this task is, it feels like it's arranged in a sort of like a hierarchical
+way way, turning the door could be considered as some kind of, I guess, opening the door
+could be considered as some kind of macro action that is composed of these smaller policies,
+such as reaching for the door handle, turning the handle and then pulling, you know.
+So yeah.
+And the action priors framework I'd like to think is more primitive in the sense that it's
+not hierarchical in any sense.
+It doesn't really, although you can kind of make it hierarchical by using options and
+other stuff like that, but my particular use case is using action priors or rather the
+action priors rely on actions that are kind of primitive, you know.
+So as long as my experts have the same action space and state space, then I can be able
+to use trajectories from other expert models or trained models and use them to train one
+particular target task faster and safer.
+So in other words, if you're trying to train an agent to open the door, you don't really
+care.
+You may have access to these experts that were trained on these sub tasks, but you don't
+really care about that implicit hierarchy.
+You're just looking, you're asking the question, hey, the arm is here.
+What do people use?
+What do experts usually do when the arm is here?
+And then kind of sample from a distribution of that answers that question and use that
+to inform your next step.
+I'm trying to move or rather trying to think independent of or rather I'd like my model
+to kind of not consider the reward functions or what task was being performed by any particular
+expert.
+Right.
+Right.
+Okay.
+Because it makes sense for me to use data from an expert that was performing a very similar
+task.
+And now when I say similar task, I have to in my pipeline somewhere consider, how am I
+going to compare task similarity?
+Like how do I know that this robot is performing a task that is similar to this one before deciding
+to sample trajectories from the policy that I got from this one?
+Right.
+So it's something like if I have this library of policies that do multiple things, the
+first task is to first maybe traverse through all these trained policies, checking to see
+how similar these tasks that they're performing to my tasks to the task that I'm interested
+in.
+And then after finding the one that is most similar, then I can now perform transfer.
+But I guess what I'm trying to do here is trying to perform multi task transfer, which
+is basically you just have this library of tasks, tasks and you're trying to extract some
+common knowledge from them and then use whatever body of common knowledge to kind of speed
+up or improve the learning of some tasks that you're interested in.
+You're not looking at test similarity at all.
+You're just looking at, you know, what do we know about what these experts do when we're
+in this state?
+Yes, yes.
+So I'd like to think of transfer as like falling into two categories, right?
+And the first one would be aggregate transfer, right?
+We're trying to transfer from like I guess all the tasks that I have.
+And then the other version of transfer would be kind of more selective to say, okay, in
+this library of tasks that I've learned, these maybe three tasks are very similar to the
+task that I'm trying to learn.
+And I'm going to take these three and transfer only from those, right?
+So yeah.
+And then when transferring, we also need to be careful of things like negative transfer
+because you can imagine that not all that knowledge is going to be used for some is actually
+going to be very bad for like it's going to hurt the learning of this target task if
+you're not careful, you know, and you can imagine that's one challenge that I kind of have
+to worry about here.
+So again, taking a step back to understanding the specific focus and contribution of your
+research relative to the broader landscape, it sounds like action priors is already
+out there, epsilon greedy exploration policy, we know is already out there is what you're
+adding here, the idea of this multitask transfer from multiple action priors, or is it something
+else?
+It's essentially the extension of the framework to continuous settings, you know, okay.
+So yeah, so just trying to understand how you can still maintain a notion of account
+in a continuous setting, because if you think about having a discrete space like, for
+example, and maze with with tiles as as as states, it's easy to basically keep some table
+where you're like, okay, this particular action has been performed this many times and this
+action has been performed this many times.
+And then you build a decision over that, you sample over like from that categorical distribution
+you get an action outright, but now how do you do that for for for for the case where
+you you don't really have the ability to to to even kind of maintain account, because
+you essentially have as soon as things become continuous, you kind of have infinitely many
+states, right?
+And and the other thing is that you get this effect off of multi modality where at the
+same state, you need a model that can kind of represent these different action preferences
+like these action preferences from from this this data that that you have these trajectories
+from the experts that you have like for for example, if if we're talking about maybe
+let me see.
+So you have an action space where actions can range from minus one to one, right?
+And you can imagine that maybe in this particular setting, experts, most experts prefer an action
+of 0.2 or around they prefer an action that has a mean of 0.2 and other other experts can
+have a preference around maybe off of minus 0.7 and things like that, but then there should
+be this places where if if you were to put a mean around there like that would result
+in a very, very bad kind of policy, you know, so it's kind of like you have a one to many
+mapping, right?
+At every point in the state space, right?
+And that is not really in my experience.
+It hasn't been very trivial to kind of learn, you know, cause I think neural networks are
+kind of the more for kind of one to one type of mapping, you know, where you have like
+input and, oh, no, they call this the more for many to one type of scenarios where you
+can have multiple inputs and then you have like one kind of output in the end.
+But what happens when you have like a single input, which is like your state and then you
+have all these like possible wild values that you have to get out, you know, so my experience
+with using just like a standard neural network is that you get this averaging effect and
+you have noticed that the the average of of of expert actions in a particular state is
+not an expert action or is not an optimal action.
+Yeah.
+So in the scenario of I guess a self driving car, you can imagine that you're driving into
+like a kind of fork, right?
+And then in the middle of the fork, there's something like a tree or something like that.
+And then your experts would be going either, you know, a steering have a steering angle of
+like minus 0.5 at the decision point.
+And then other other experts have have like, I guess, 0.5.
+And then what happens in that case is that if you try to learn your guess action prior
+distribution or action preference distribution at the decision point, you might just average
+over the two and you get like a steering angle of zero and that says, you know, drive straight
+into the tree.
+And then that's not useful at all, especially if you care about your cause.
+Yeah.
+And so how does this model compensate for that?
+The framework does compensate for that.
+But I have been looking at models that try to to look at how to represent a multimodal
+policy.
+Like for example, especially since I'm talking about probability distributions or it's kind
+of like I'm working with mixed Gaussian mixture models, right?
+So I need something that will basically take in a state and then give me a mixture, a
+Gaussian mixture model of sorts over the action space.
+And recently I've been playing with things like, um, I'm playing with things like mixture
+and city networks.
+And those have been giving me promising results.
+And then there's still like some ammo of models that I have, I guess I heard about, um,
+I think it's overlapping mixtures of Gaussian processes.
+And basically it's just, um, models that have, uh, support for, uh, models that can give
+you, um, multiple outputs given a single input, you know?
+So yeah, that's kind of, uh, the challenge here.
+So is the idea that kind of referring back to your self-driving car example that you,
+you know, given your state, you know, one of these mixture models would be able to tell
+you that there are two distributions that, uh, are likely one is centered at minus 0.5
+and the other centered at 0.5 and then based on, you know, based on that information, you
+would know to choose one of those as opposed to choosing the zero or averaging out to zero.
+Yes.
+Yes.
+So that's exactly what I'm trying to do.
+And, and actually you highlighted another problem there, right?
+Which is how do you choose how many modes they are, you know, like, um, no one is going
+to tell you that, um, the good kind of behaviors here, uh, like, there's only two of them,
+meaning that you have like, uh, two kernels or two, two modes, like in, in your mixture
+model, right?
+Meaning, um, you got your goal left and then go, right?
+Um, that kind of thing can, can change, um, um, at, at different points in, in, in, in
+the state space.
+Maybe some states have got like an action preference distribution way, like experts
+are doing kind of three optimal, uh, uh, things and then like in other cases, it may kind
+of change.
+So like learning this kind of model has been, uh, a bit challenging, um, when it comes
+to, like, continuous environments.
+And I feel like this is typically, typically the case when you're moving some, I guess,
+reinforcement learning algorithm from a discrete setting, uh, towards continuous settings.
+Because I'd like to think that the real world is, is made of continuous contact, continuous
+quantities and, and, and stuff like that.
+And there should be some, um, care taken as to how, or what kind of model you're going
+to choose to, to represent that, like for, for example, going from, um, standard reinforcement
+to deep reinforcement learning, we need to care about how we represent our policy.
+So, you know, um, um, going to use maybe some, uh, deep neural network and, and this
+is going to, I guess parameterize my policy.
+I also need to represent my action prior, uh, distribution.
+It's just, there's so many, you know, things that you, you need to kind of like, uh, tweak
+and, and work with for you to have a fully working, working system.
+Maybe as a way to start to wrap up, can you give me a list of kind of the top three things
+that you've learned about doing about a, I guess, about deep reinforcement learning in
+general as applied to robotics, but with a particular emphasis on taking, uh, existing
+research results from the discrete domain into continuous environments.
+Uh, firstly, just moving from discrete environments to, to, um, for, from, from discrete environments
+to continuous environments.
+I think one challenge, uh, with doing that is, uh, just representing, uh, I think your
+policy, right?
+So, for example, uh, I think, I think the first paper that I came across, um, that kind
+of did like a good job with that was, was DDPG, it made me very interested in, in trying
+to apply, uh, reinforcement learning, um, towards, um, it, it basically, like, allowed me
+to believe that, okay, reinforcement learning will work in, in, in the robotics domain,
+right?
+Um, but then the paper again, uh, I think it's, it's, it's deep deterministic, uh, policy,
+policy gradients.
+Okay.
+Right.
+There's a, a newer version, I think D4 PG, um, not sure, but yeah, but, uh, essentially,
+um, it's like an, uh, it's a critic method and that it has all these, um, okay, let me
+just say, like, it is one of the, the first papers that, that kind of worked in, in, in,
+uh, deep, in, in robotics, right?
+So to apply DDPG reinforcement learning in, like, with continuous environments, right?
+Um, I think, I think besides trying to learn, like, a, a good policy, you need to kind
+of think of, uh, exploration, like, how you're going to handle, um, exploring this very,
+like, uh, the, your, your, your, your, your, your state space, given the fact that it's
+continuous and there's like infinitely many, uh, states that you can, uh, occupy there.
+And, um, the, the other thing is data in robotics is very, like, it's, it's, it's very,
+it's very hard to come by, like, you, um, you kind of need to, or rather, the ideal case
+is to not have a lot of, um, it's, it's, it's, it's, it's, it's to not have to train
+your, your model for a long time, right?
+You'd like to maybe train, um, your model, like, for, for a very short period of time,
+but, like, in reality, if you're using, like, these model free methods, um, you find
+yourself training for a very, very long time.
+And that makes it difficult to kind of apply, um, um, existing work in the sense that
+maybe you have, like, uh, you're working on your laptop and you can't run these models
+because it's going to take a long time to converge.
+And the other thing in reinforcement learning is that, uh, I realized it very late, um, um,
+in my master's project where, like, I realized the fact that, uh, your random seed is, is
+quite a very, it's a very important thing, you know, like, so you can, you can blame the
+model all you want to, like, you get, maybe you get, like, a very good, uh, kind of learning
+curve and you feel like, okay, this thing is working and you run it again.
+Um, and what happens now, it basically gives you, like, a very flat thing and shows you
+that it doesn't work.
+So it fluctuates a lot, there's like all these variants.
+So I learned that, okay, for you to actually, for people to be able to trust your results,
+you need to be able to kind of average them over multiple runs and multiple runs means
+that you're going to be running your, you, I guess, you'll algorithm for like a long time
+and, um, that is just more compute time.
+So like, you can't, you need like, uh, I guess compute, compute is a very important thing,
+you know, so I'm fortunate enough to have, um, access to a cluster, like, um, we have,
+I think something with, with 60 blades, like, at the university, um, and I can basically
+run multiple experiments in parallel and, um, I can get my results within, uh, two
+hours or so, you know, but the one challenge is just, you know, um, you, firstly looking
+for environments, you're looking for, um, things that won't take too long, you know, um,
+and then also, yeah, exploration has been like a very, uh, a big thing, you know, so, yeah,
+I don't know if that answers your question, but, um, yeah, those were like, in my experience,
+things that I found very difficult about trying to apply, uh, deep enforcement learning
+in, in, in the robotics domain, just data and having very accurate simulations.
+Like, for example, you start out very, very ambitious, um, for example, we have a physical
+robot, uh, in house here, um, like this mobile manipulator and I'm like, I want to apply
+deep enforcement learning, maybe learn to pick up a cup, and maybe the cup will have water
+and stuff like that.
+And as you kind of traverse through the literature, you start checking things off from this
+checklist or like from these ambitions, you know, it's like, okay, maybe there shouldn't
+be water, you know, like in the cup, and then maybe the cup should be like a ball, you
+know, something that's, I don't know, easier to, to, to, to hold.
+And then you're like, okay, maybe instead of having a ball, I'll just have, I'll be moving
+the manipulator just along like this, you know, and then you keep going and then you
+find yourself, okay, maybe you have instead of having a physical robot, I'm going to
+build a simulated version.
+And then when you're there, you're like, okay, instead of building a physical simulated
+version of the robot, I'm just going to build a simple 2D thing just to see if like these
+models work.
+And then you go all the way down to like a simple navigation domain, like a 2D thing where
+you can kind of easily prototype ideas and, you know, so it's, it's a very humbling
+experience.
+You start out very, you know, big and then like you kind of, you kind of get to narrow
+down into these like particular problems and you need something that's going to allow
+you to evaluate your ideas like quickly and, and, and, and very, you know, very efficiently
+and things like that.
+So yeah, like that has been my experience, I think with, with deep, deep RL in robotics
+and I think other applications that have been trying to use it in.
+Yeah, and I think your experience is very much in line with, with the experiences of
+others and it has, you know, that kind of experience I think has led a lot of people
+to kind of, you know, leave deep RL in frustration and move on to simpler things.
+But it's, you know, certainly a, a space that I find fascinating and thank you for kind
+of walking us through the way you're approaching it.
+Yeah, thank you.
+Thank you.
+Like I really, really relate to like that, that last part, you know, I understand people's
+frustration and understand the reasons if they end up leaving deep RL, you know, like
+I think what has helped me stay here is the, the communities that have been exposed to
+like, for example, I've met other people deep learning in Daba who are using deep RL
+for the, for the unique applications and we get to kind of, you know, talk and if you're
+having a problem, you can ask this particular person.
+Same thing is happening at Black and AI and like in some cases, you know, I guess through
+Black and AI, you get to meet the leading researchers in the field of the people who wrote
+the paper that's giving you sleepless nights and headaches and you get to ask them directly
+like, yo, what is this ex like, how did you make this work and what was, what motivated
+you, your decisions like for, I guess, choosing this particular thing.
+So yeah, I really, really understand, I guess the frustration and why people would be frustrated
+with the field, but hopefully going forward with this whole movement of trying to get people
+to release their code more like this whole thing of reproducibility, problems like that
+will tend to die out.
+Awesome.
+Awesome.
+Thank you so much for taking the time to chat with me.
+Thank you, Sam.
+And I think you're having me.
+All right, everyone.
+That's our show for today for more information on secret, or any of the topics covered in
+this episode, visit twimmelai.com slash talk slash 235.
+For more information on the black and AI series, visit twimmelai.com slash black and AI 19.
+As always, thanks so much for listening and catch you next time.

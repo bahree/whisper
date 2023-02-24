@@ -1,0 +1,1760 @@
+WEBVTT
+
+00:00.000 --> 00:16.320
+Hello and welcome to another episode of Twimble Talk, the podcast why interview interesting
+
+00:16.320 --> 00:21.480
+people, doing interesting things in machine learning and artificial intelligence.
+
+00:21.480 --> 00:32.160
+I'm your host Sam Charrington.
+
+00:32.160 --> 00:37.240
+This week on the podcast, I'm excited to present a series of interviews exploring the emerging
+
+00:37.240 --> 00:40.400
+field of differential privacy.
+
+00:40.400 --> 00:44.240
+Over the course of the week, we'll dig into some of the very exciting research and application
+
+00:44.240 --> 00:47.600
+work happening right now in this field.
+
+00:47.600 --> 00:54.000
+In this episode, I'm joined by Nicola Paparano, Google PhD Fellow in Security, and graduate
+
+00:54.000 --> 00:59.280
+student in the Department of Computer Science at Penn State University.
+
+00:59.280 --> 01:03.480
+Nicola and I continue this week's look into differential privacy and machine learning
+
+01:03.480 --> 01:09.440
+with the discussion of his recent paper, semi-supervised knowledge transfer for deep learning
+
+01:09.440 --> 01:11.680
+from private training data.
+
+01:11.680 --> 01:16.520
+In our conversation, Nicola describes the private aggregation of teacher ensembles or
+
+01:16.520 --> 01:22.480
+Patee model proposed in this paper and how it ensures differential privacy and a scalable
+
+01:22.480 --> 01:26.280
+manner that can be applied to deep neural networks.
+
+01:26.280 --> 01:30.280
+We also explore one of the interesting side effects of applying differential privacy to machine
+
+01:30.280 --> 01:37.680
+learning, namely that it inherently resists overfitting, leading to more generalized models.
+
+01:37.680 --> 01:41.200
+Thanks once again to Georgian Partners for their continued support of the podcast and
+
+01:41.200 --> 01:43.440
+for sponsoring this series.
+
+01:43.440 --> 01:47.840
+Georgian Partners is a venture capital firm that invests in growth stage, business software
+
+01:47.840 --> 01:50.400
+companies, and the US and Canada.
+
+01:50.400 --> 01:55.040
+Most investment, Georgian works closely with portfolio companies to accelerate adoption
+
+01:55.040 --> 01:59.880
+of key technologies, including machine learning and differential privacy.
+
+01:59.880 --> 02:04.600
+To help portfolio companies provide privacy guarantees to their customers, Georgian recently
+
+02:04.600 --> 02:10.040
+launched its first software product, Epsilon, which is a differentially private machine
+
+02:10.040 --> 02:11.880
+learning solution.
+
+02:11.880 --> 02:17.240
+You'll learn more about Epsilon in my interview with Georgian Chang Liu later this week.
+
+02:17.240 --> 02:21.880
+But if you find this field interesting, I'd encourage you to visit the differential privacy
+
+02:21.880 --> 02:23.240
+resource center.
+
+02:23.240 --> 02:30.360
+They've set up at gptrs.vc slash twimmelai.
+
+02:30.360 --> 02:35.160
+And now on to the show.
+
+02:35.160 --> 02:38.480
+All right everyone, I am on the line with Nicola Papreno.
+
+02:38.480 --> 02:45.680
+Nicola is a Google PhD fellow in the Department of Computer Science and Engineering at Penn
+
+02:45.680 --> 02:46.680
+State University.
+
+02:46.680 --> 02:50.080
+Nicola, welcome to this week in machine learning and AI.
+
+02:50.080 --> 02:51.080
+Thank you so much.
+
+02:51.080 --> 02:52.680
+I'm very happy to be here.
+
+02:52.680 --> 02:55.640
+I'm very happy that we have finally connected.
+
+02:55.640 --> 03:00.120
+We have been trying to get this conversation going for a while now.
+
+03:00.120 --> 03:05.320
+So I'm also really interested in digging into differential privacy, which is, I think,
+
+03:05.320 --> 03:12.520
+in an area of very interesting promise with regards to machine learning and AI in the
+
+03:12.520 --> 03:14.760
+intersection with privacy.
+
+03:14.760 --> 03:19.320
+But before we jump into that, why don't we take a few minutes and have you introduce
+
+03:19.320 --> 03:24.080
+yourself to the audience and tell us how you got involved in machine learning and AI?
+
+03:24.080 --> 03:25.080
+For sure.
+
+03:25.080 --> 03:26.080
+Yeah.
+
+03:26.080 --> 03:33.800
+So I joined Penn State about four years ago just coming in from France where I'm from.
+
+03:33.800 --> 03:39.520
+I started finishing up my undergrad and I joined this lab here at Penn State, headed
+
+03:39.520 --> 03:44.280
+by Professor Patrick McDaniel, who is a security researcher.
+
+03:44.280 --> 03:50.680
+And at that time, it had been very recently demonstrated that state-of-the-art vision
+
+03:50.680 --> 03:57.720
+models were vulnerable to small perturbations of their inputs, which researchers called
+
+03:57.720 --> 04:00.440
+adversarial examples.
+
+04:00.440 --> 04:07.440
+And so that was something very interesting to us because from the machine learning perspective
+
+04:07.440 --> 04:14.600
+adversarial examples have a lot of implications because they mean that models don't generalize
+
+04:14.600 --> 04:15.600
+as well.
+
+04:15.600 --> 04:22.680
+As we expected them, and at that point in about 2014, machine learning models were starting
+
+04:22.680 --> 04:28.920
+to get pretty good sometimes upperforming humans at some of the tasks.
+
+04:28.920 --> 04:33.800
+And so it was already a surprising fact from the machine learning perspective that models
+
+04:33.800 --> 04:36.280
+are so susceptible to these small perturbations.
+
+04:36.280 --> 04:44.320
+But for us, from the security perspective, the implications were much more serious and
+
+04:44.320 --> 04:51.400
+that sort of attracted my interest in machine learning, especially when you see applications
+
+04:51.400 --> 04:59.120
+to transportation, to the energy sector with machine learning being able to sort of optimize
+
+04:59.120 --> 05:03.400
+some of the decision-making that's traditionally done by humans.
+
+05:03.400 --> 05:10.320
+Or with healthcare, all of these domains, it is clear that machine learning is being applied
+
+05:10.320 --> 05:13.120
+more and more widely in these critical applications.
+
+05:13.120 --> 05:21.240
+And so as a security researcher, when the technology becomes so pervasive, you of course
+
+05:21.240 --> 05:28.160
+consider all the potential implications as it becomes a target for adversaries and try
+
+05:28.160 --> 05:32.160
+to envision how adversaries will try to manipulate these systems.
+
+05:32.160 --> 05:39.560
+And so adversarial examples were sort of the first thread vector that I've considered
+
+05:39.560 --> 05:42.240
+against machine learning.
+
+05:42.240 --> 05:47.520
+And from there, branched a lot of interests more widely with anything related to machine
+
+05:47.520 --> 05:53.080
+learning and including a little later a few, about two years later in differential privacy.
+
+05:53.080 --> 05:54.080
+All right.
+
+05:54.080 --> 05:55.080
+Awesome.
+
+05:55.080 --> 06:00.400
+Maybe a great place to start is for you to talk a little bit about differential privacy,
+
+06:00.400 --> 06:04.160
+what it means and what some of the objectives are.
+
+06:04.160 --> 06:13.640
+So differential privacy is essentially a framework for understanding where the privacy information
+
+06:13.640 --> 06:21.000
+may leak in algorithms and it's also a framework for preventing this information from leaking
+
+06:21.000 --> 06:24.720
+from the algorithms manipulating the data.
+
+06:24.720 --> 06:31.360
+So at a very high level, you can think of differential privacy as defining two worlds.
+
+06:31.360 --> 06:38.200
+So you have assumed that your application is collecting data about a particular population.
+
+06:38.200 --> 06:43.920
+And so you would have two worlds, one world where you would have all of the people in the
+
+06:43.920 --> 06:51.120
+population in a second world where you would have just one person missing from this population.
+
+06:51.120 --> 06:56.480
+And so what differential privacy requires is that this, the algorithm that you're going
+
+06:56.480 --> 07:03.640
+to run on the data should not have a statistically different behavior, whether you are in the
+
+07:03.640 --> 07:10.280
+first world or in the second world, and what that means for all of the users in the population
+
+07:10.280 --> 07:18.320
+that you're learning from is that the behavior of the algorithm is not going to reflect
+
+07:18.320 --> 07:25.680
+any specific information about a particular user, but whether it's going to only reflect
+
+07:25.680 --> 07:30.400
+general patterns that are found across the population.
+
+07:30.400 --> 07:36.640
+And so this is why differential privacy has become one of the gold standards in privacy
+
+07:36.640 --> 07:44.040
+and probably the most widely applied is because this definition does not make any assumptions
+
+07:44.040 --> 07:46.800
+about the adversary.
+
+07:46.800 --> 07:54.040
+So essentially that means that regardless of the knowledge that the adversary has, regardless
+
+07:54.040 --> 08:00.760
+of what attack techniques the adversary will think of, the guarantee that you have provided
+
+08:00.760 --> 08:09.000
+that the behavior of the model does not reflect a specific people in the population will
+
+08:09.000 --> 08:12.360
+stand in the future.
+
+08:12.360 --> 08:18.320
+And so differential privacy has been applied to many algorithms.
+
+08:18.320 --> 08:27.360
+For instance, it was applied to databases to answer queries for a SQL databases while
+
+08:27.360 --> 08:28.360
+protecting privacy.
+
+08:28.360 --> 08:35.640
+And more recently, it has been applied a lot to machine learning and especially deep learning
+
+08:35.640 --> 08:38.280
+in the last couple of years.
+
+08:38.280 --> 08:46.400
+And there is a really natural, I would say, synergy between machine learning and differential
+
+08:46.400 --> 08:54.040
+privacy and the way I like to think about it is that differential privacy is a way to give
+
+08:54.040 --> 09:00.920
+a cost to put a value on some of the failures that machine learning may have.
+
+09:00.920 --> 09:06.760
+So when you think about it, overfitting to a particular training point is likely to
+
+09:06.760 --> 09:08.160
+violate privacy.
+
+09:08.160 --> 09:14.720
+So if you memorize the information about a particular training point that you have in your
+
+09:14.720 --> 09:24.240
+set, then whoever contributed this training point may not be able to retain its privacy
+
+09:24.240 --> 09:32.800
+because the model's behavior will very likely be largely influenced by this specific
+
+09:32.800 --> 09:33.880
+training point.
+
+09:33.880 --> 09:40.280
+And so with differential privacy, you're essentially saying during the learning process, if you
+
+09:40.280 --> 09:46.520
+overfit to this particular point, you will have to pay this particular amount of privacy.
+
+09:46.520 --> 09:54.280
+And so you have this connection between privacy and achieving generalization, where in a way
+
+09:54.280 --> 10:02.520
+privacy is a worst case guarantee and generalization is more of a mean average case metric.
+
+10:02.520 --> 10:08.800
+But when you have privacy, you are helping the model in a way to behave better.
+
+10:08.800 --> 10:17.440
+Does it apply equally well across different types of models and algorithms, meaning traditional
+
+10:17.440 --> 10:22.640
+machine learning algorithms relative to deep learning algorithms and neural networks?
+
+10:22.640 --> 10:29.800
+Yeah, differential privacy has been applied to all sorts of machine learning models,
+
+10:29.800 --> 10:37.360
+starting with very simple things like logistic regression and all the way to deep learning
+
+10:37.360 --> 10:39.160
+more recently.
+
+10:39.160 --> 10:47.280
+What happens is that you can make most algorithms differentially private by randomizing their
+
+10:47.280 --> 10:48.280
+behavior.
+
+10:48.280 --> 10:55.360
+So for instance, if you're learning a neural network, you have several ways that you can introduce,
+
+10:55.360 --> 11:00.920
+you can guarantee that you're providing differential privacy, you can perturb the inputs.
+
+11:00.920 --> 11:07.680
+So if you have a data set, you can randomly flip some of the labels, randomly perturb some
+
+11:07.680 --> 11:10.800
+of the inputs in a way that would provide differential privacy.
+
+11:10.800 --> 11:16.880
+You can also perturb the models parameters.
+
+11:16.880 --> 11:22.560
+So that would imply, for instance, when you're applying stochastic gradient descent to
+
+11:22.560 --> 11:30.080
+learn a model, you would take the gradients of the model with respect to using the training
+
+11:30.080 --> 11:34.200
+data and you would add some noise to these gradients before applying them.
+
+11:34.200 --> 11:39.320
+And that would result in a model whose parameters provide differential privacy.
+
+11:39.320 --> 11:43.360
+And then you have a third way of achieving differential privacy, which is by perturbing
+
+11:43.360 --> 11:45.840
+the output of the model itself.
+
+11:45.840 --> 11:54.600
+And so essentially, you can adapt all learning algorithms to introduce privacy by randomizing
+
+11:54.600 --> 11:58.600
+either their input, the model itself or their output.
+
+11:58.600 --> 12:05.760
+And the question is whether you can calibrate this random behavior to be able to provide
+
+12:05.760 --> 12:12.920
+on one hand a strong privacy guarantee so that requires that you analyze in the worst-case
+
+12:12.920 --> 12:18.320
+settings how the training data will influence your predictions.
+
+12:18.320 --> 12:26.200
+And on the other hand, so if you once you have this guarantee of privacy, you also want
+
+12:26.200 --> 12:29.640
+to make sure that the model is going to perform well.
+
+12:29.640 --> 12:35.240
+So you want to calibrate the noise so that it is large enough to protect the privacy
+
+12:35.240 --> 12:41.600
+of the training data, but also small enough that it will not harm your performance.
+
+12:41.600 --> 12:47.280
+And I guess what has been very exciting in the, I would say, the last year or two is
+
+12:47.280 --> 12:53.440
+that we are seeing different scenarios where we can calibrate the noise in a way that
+
+12:53.440 --> 12:56.360
+it doesn't harm the performance.
+
+12:56.360 --> 13:03.080
+And actually, it providing privacy can allow us to also achieve at the same time very strong
+
+13:03.080 --> 13:04.080
+performance.
+
+13:04.080 --> 13:10.760
+And again, that it is because there is this synergy that you can exploit between privacy
+
+13:10.760 --> 13:12.560
+and utility.
+
+13:12.560 --> 13:19.600
+If you think about it, if a model is making a prediction that is very likely to be correct,
+
+13:19.600 --> 13:25.720
+it means that this prediction is supported by patterns found in the training data that
+
+13:25.720 --> 13:30.120
+are patterns that are widely found in this training data.
+
+13:30.120 --> 13:36.080
+And so it also means that this prediction does not depend on specific points in the
+
+13:36.080 --> 13:37.560
+training set.
+
+13:37.560 --> 13:43.200
+And as a consequence, you can provide strong privacy for that prediction.
+
+13:43.200 --> 13:47.320
+And so, yeah, this is something that I'm very excited about because that means that we
+
+13:47.320 --> 13:54.640
+would be able to switch from a setting where privacy is often presented as something that
+
+13:54.640 --> 14:03.440
+you need to trade off with utility to a setting where you can achieve privacy with very limited
+
+14:03.440 --> 14:06.680
+or no impact on performance.
+
+14:06.680 --> 14:10.800
+So I would say we're sort of in between these two right now.
+
+14:10.800 --> 14:15.480
+We're, for most algorithms, we're still in the first scenario where we have to trade
+
+14:15.480 --> 14:23.120
+off some utility to get privacy, but in some cases, we are moving to the second scenario.
+
+14:23.120 --> 14:28.120
+And that's extremely exciting for the field because it means that differential privacy
+
+14:28.120 --> 14:33.000
+would be more likely to be applied in all sorts of algorithms.
+
+14:33.000 --> 14:34.000
+Right.
+
+14:34.000 --> 14:35.000
+Right.
+
+14:35.000 --> 14:41.600
+And so just to capture that last point, the idea there is that traditionally we've got
+
+14:41.600 --> 14:49.160
+this trade off between model generalization overfitting and creating models that overfit
+
+14:49.160 --> 14:56.920
+is one of the biggest challenges in employing these models beyond the training date against
+
+14:56.920 --> 15:05.120
+real world data, but differential privacy because its goal is highly aligned with generalization,
+
+15:05.120 --> 15:09.080
+it also serves to kind of fend off overfitting.
+
+15:09.080 --> 15:16.440
+Right. So just to be clear, again, generalization and privacy are different things.
+
+15:16.440 --> 15:21.720
+So generalization is a metric that looks at the average performance and privacy is a metric
+
+15:21.720 --> 15:24.200
+that looks at the worst case performance.
+
+15:24.200 --> 15:32.120
+So you do have this direction where when you achieve privacy, you help towards generalization,
+
+15:32.120 --> 15:34.400
+but the other way around doesn't hold.
+
+15:34.400 --> 15:39.960
+So if you have generalization, that doesn't guarantee privacy because, again, privacy is
+
+15:39.960 --> 15:48.000
+a worst case setting, but it is true that providing privacy is eventually one direction
+
+15:48.000 --> 15:53.880
+for proving the generalization of learning algorithms that is definitely true.
+
+15:53.880 --> 15:54.880
+Okay.
+
+15:54.880 --> 15:59.480
+So maybe can you tell us a little bit about your specific research in this area?
+
+15:59.480 --> 16:03.320
+Do you have any recent papers on this that we can maybe talk a little bit about?
+
+16:03.320 --> 16:04.320
+Yeah.
+
+16:04.320 --> 16:11.320
+So my research in differential privacy and machine learning has focused on a particular
+
+16:11.320 --> 16:17.680
+approach, which is called Pate, so the name is French, even though it's hard to believe
+
+16:17.680 --> 16:27.560
+I did come up with the name on my own, but it stands for private aggregation of teacher
+
+16:27.560 --> 16:36.200
+on samples, so the idea for this approach is that we'd like to achieve privacy and a rigorous
+
+16:36.200 --> 16:42.240
+form of privacy, so differential privacy, but also at the same time, be able to explain
+
+16:42.240 --> 16:49.600
+why we achieve this privacy in a very intuitive way, and the idea is that rather than having
+
+16:49.600 --> 16:57.320
+this mysterious guarantee that you provide the privacy, you're able to convey an intuition
+
+16:57.320 --> 17:04.160
+why the approach protects the privacy of the training data that is very useful, because
+
+17:04.160 --> 17:09.960
+again, differential privacy often comes with its set of theorems you need to prove things
+
+17:09.960 --> 17:16.120
+in a language that's not necessarily easy to understand for a lot of people, unless they
+
+17:16.120 --> 17:18.120
+have lots of experience in that area.
+
+17:18.120 --> 17:24.560
+So basically the approach looks at the training data and begins by partitioning the training
+
+17:24.560 --> 17:25.880
+data.
+
+17:25.880 --> 17:31.960
+So if you have one set of data, you'll create end partitions from this set of data, and
+
+17:31.960 --> 17:37.320
+the only constraint is that these have to be real partitions so that there is no overlap
+
+17:37.320 --> 17:40.480
+between the subsets of data.
+
+17:40.480 --> 17:45.880
+And so from each of these subsets, what you do then is that you learn a machine learning
+
+17:45.880 --> 17:52.280
+model independently on each of these subsets, and the nice thing is that you can learn
+
+17:52.280 --> 17:56.680
+these models using any learning algorithm.
+
+17:56.680 --> 18:01.120
+So if you want to use a decision tree, if you want to use logistic regression or even
+
+18:01.120 --> 18:03.920
+deep learning, that's okay.
+
+18:03.920 --> 18:11.200
+And so at this stage, you have learned n different models on your training data in a completely
+
+18:11.200 --> 18:12.440
+independent way.
+
+18:12.440 --> 18:19.280
+So the models are looking at this trend subsets of the training data, and when they all
+
+18:19.280 --> 18:25.920
+make a prediction on a particular input, if they all agree on this prediction, you know
+
+18:25.920 --> 18:32.960
+that this prediction was made from a pattern that is general across the data, and not
+
+18:32.960 --> 18:37.320
+about a specific partition of the data.
+
+18:37.320 --> 18:44.920
+And so this is where the intuitive privacy guarantee comes from, because again, when we
+
+18:44.920 --> 18:50.240
+ask all of these models and we call these models teachers, so when we ask all of the teachers
+
+18:50.240 --> 18:57.160
+to make a prediction, if 95% of them all make the same prediction, we know that this
+
+18:57.160 --> 19:01.760
+is a prediction that results from a general pattern from the data.
+
+19:01.760 --> 19:09.880
+And so if we take as the common answer of the teachers, the prediction that is assigned
+
+19:09.880 --> 19:16.600
+the most number of votes, so the one that the majority vote among the outputs of teachers,
+
+19:16.600 --> 19:23.000
+then we have this intuitive privacy guarantee that again, this is a prediction that results
+
+19:23.000 --> 19:25.600
+from a consensus.
+
+19:25.600 --> 19:32.080
+The question now is how do we add noise to this mechanism in order to be able to prove
+
+19:32.080 --> 19:38.680
+that it provides a rigorous guarantee in a sense that it provides differential privacy.
+
+19:38.680 --> 19:46.000
+And so what happens there is that you introduce random noise at the outputs of the teachers.
+
+19:46.000 --> 19:56.080
+So you randomly perturb a subset of the labels predicted by the teachers, and then afterwards
+
+19:56.080 --> 20:00.400
+you make the aggregation.
+
+20:00.400 --> 20:05.800
+So what this means is that the aggregation is not performed on the true votes of the teachers,
+
+20:05.800 --> 20:15.160
+but on the randomized votes of the teachers, and using the noise and by calibrating this
+
+20:15.160 --> 20:20.880
+noise according to the privacy guarantee strength that we want to achieve, then we are able
+
+20:20.880 --> 20:28.320
+to guarantee that essentially every time the teachers make a prediction, this prediction
+
+20:28.320 --> 20:36.440
+is made with a certain level of privacy, and so in privacy, in differential privacy,
+
+20:36.440 --> 20:46.280
+there is a particular parameter called epsilon, which essentially measures how indistinguishable
+
+20:46.280 --> 20:49.520
+the two worlds that I mentioned earlier are.
+
+20:49.520 --> 20:55.560
+And so the smaller the value of epsilon is, the stronger the privacy guarantee is, and
+
+20:55.560 --> 21:03.320
+essentially, using this mechanism, we can provide a specific epsilon value for each of the
+
+21:03.320 --> 21:06.840
+queries that we make to the teachers.
+
+21:06.840 --> 21:13.560
+So then we have another step in the approach, because at this point, every time the teacher
+
+21:13.560 --> 21:20.520
+is respond, they are going to reveal very little private information, but over time, this
+
+21:20.520 --> 21:27.280
+private information is going to accumulate, and so you would have to bound to fix the
+
+21:27.280 --> 21:30.840
+number of queries that the teacher is answer.
+
+21:30.840 --> 21:38.640
+And so what we do is that we use the teachers to supervise the training of an additional
+
+21:38.640 --> 21:41.520
+model called the student model.
+
+21:41.520 --> 21:48.560
+And so this student model is going to learn from the teachers by sending them unlabeled
+
+21:48.560 --> 21:57.480
+inputs and training on the private label that the teachers are returning as an aggregate.
+
+21:57.480 --> 22:02.800
+And so essentially what this does is that it transfers the knowledge that the ensemble
+
+22:02.800 --> 22:10.120
+of teachers learned from the sensitive data in a privacy preserving way into the student
+
+22:10.120 --> 22:11.280
+model.
+
+22:11.280 --> 22:16.760
+And so once the student model is trained, and we only need a fixed number of labels to
+
+22:16.760 --> 22:23.160
+train the student, we can release the student as the model that makes predictions, and
+
+22:23.160 --> 22:27.840
+that student model can answer as many predictions as we want.
+
+22:27.840 --> 22:31.120
+The cost in terms of privacy is fixed.
+
+22:31.120 --> 22:39.480
+And what that means as well is that if an adversary tries to inspect the parameters of the
+
+22:39.480 --> 22:44.560
+student model or to look at the predictions of the student model, in the worst case, what
+
+22:44.560 --> 22:52.040
+it can recover is the private labels that the student learned from, that it received from
+
+22:52.040 --> 22:53.040
+the teachers.
+
+22:53.040 --> 22:59.840
+And because we provided these labels with differential privacy, we can guarantee that there
+
+22:59.840 --> 23:07.560
+will be no more private privacy leakage than what is allowed by the guarantee that we
+
+23:07.560 --> 23:11.040
+were able to prove mathematically.
+
+23:11.040 --> 23:16.440
+And so once we have this student, this is essentially the end product.
+
+23:16.440 --> 23:21.800
+This is what we want to release to deploy in our application.
+
+23:21.800 --> 23:28.080
+And then we can also simply just discard all of the teachers, all of the training data.
+
+23:28.080 --> 23:31.760
+We don't need it anymore to use the student.
+
+23:31.760 --> 23:35.240
+And so that's the approach that we've been working on.
+
+23:35.240 --> 23:44.040
+And this is where sort of the idea of having a synergy between privacy and utility came
+
+23:44.040 --> 23:51.480
+and that I was describing earlier in our conversation is that you can see here clearly that the
+
+23:51.480 --> 23:59.280
+utility of the label is reflected by the number of teachers that agree on that prediction.
+
+23:59.280 --> 24:03.680
+So when you have lots of teachers, almost all of them agree on the prediction.
+
+24:03.680 --> 24:06.240
+It's very likely to be a correct prediction.
+
+24:06.240 --> 24:11.800
+And because they all agree, that means that you can perturb their answers a lot.
+
+24:11.800 --> 24:17.400
+You can introduce lots of random notes and still provide, and that will result in a very
+
+24:17.400 --> 24:19.520
+strong privacy guarantee.
+
+24:19.520 --> 24:26.320
+And so that's how we're able to make the synergy between privacy and utility explicit
+
+24:26.320 --> 24:29.200
+with the Pate approach.
+
+24:29.200 --> 24:36.360
+And that's extremely exciting, and we've tested it on a few data sets and it really gives
+
+24:36.360 --> 24:44.520
+you some very high utility at very strong privacy guarantee.
+
+24:44.520 --> 24:51.000
+So I'm very excited to see where we can push that technique in the future.
+
+24:51.000 --> 24:57.760
+You may have just answered one of the questions that I had, but to kind of take a step back,
+
+24:57.760 --> 25:07.400
+you've got this three-step approach to creating privacy guarantees using this model, this
+
+25:07.400 --> 25:08.400
+approach.
+
+25:08.400 --> 25:14.040
+One is the first is you partition the data set and you train an ensemble of these teacher
+
+25:14.040 --> 25:21.240
+models, and these can be mixed models so they don't have to be uniform.
+
+25:21.240 --> 25:32.800
+You then use the predictions of these teacher models in kind of a consensus manner to determine
+
+25:32.800 --> 25:39.320
+an intermediate prediction, which is then used to train a student.
+
+25:39.320 --> 25:44.360
+The student model that you're creating is kind of your ultimate model that you deploy.
+
+25:44.360 --> 25:52.160
+And because of the process that you have gone through, there are some privacy guarantees
+
+25:52.160 --> 26:01.600
+that you have made around the student, and it's also impervious to long-term data leakage.
+
+26:01.600 --> 26:03.400
+Is that correct in a nutshell?
+
+26:03.400 --> 26:04.400
+Right.
+
+26:04.400 --> 26:06.400
+Before I go into my question.
+
+26:06.400 --> 26:07.400
+That's exactly it.
+
+26:07.400 --> 26:16.520
+Okay, so one question that I had was at the second step where you're perturbing the outputs
+
+26:16.520 --> 26:25.760
+of your teacher models, would you say that that perturbation increases the privacy that
+
+26:25.760 --> 26:33.720
+is attained or is it simply required to make the privacy guarantees?
+
+26:33.720 --> 26:35.440
+Does that question make sense?
+
+26:35.440 --> 26:38.120
+It makes a lot of sense.
+
+26:38.120 --> 26:42.640
+It is required that you perturb the output of the teachers.
+
+26:42.640 --> 26:50.080
+It is not possible to achieve differential privacy without introducing some randomness
+
+26:50.080 --> 26:54.840
+and the algorithm's behavior at some point.
+
+26:54.840 --> 26:59.400
+And that's because differential privacy, basically, if you don't have this randomness, you
+
+26:59.400 --> 27:05.880
+would not be able to learn anything meaningful because the definition would prevent you from
+
+27:05.880 --> 27:09.600
+learning anything from any point.
+
+27:09.600 --> 27:11.600
+And so this randomness is what a lot of it is.
+
+27:11.600 --> 27:15.440
+Can you elaborate on that, meaning the definition of differential privacy?
+
+27:15.440 --> 27:16.440
+Right.
+
+27:16.440 --> 27:25.320
+Because if you want to have this guarantee that the behavior of the algorithm is identical
+
+27:25.320 --> 27:31.880
+on the two worlds, this guarantee has to be statistical, if it were deterministic, you
+
+27:31.880 --> 27:36.200
+would not be able to learn anything because the algorithm could not learn anything from
+
+27:36.200 --> 27:38.440
+any of the training points.
+
+27:38.440 --> 27:44.760
+And so that's why you have this randomness because it introduces this ambiguity when
+
+27:44.760 --> 27:51.360
+the adversary sees the same prediction or a different prediction from the algorithm,
+
+27:51.360 --> 27:56.000
+it is not able to know whether that change in the prediction resulted from a change in
+
+27:56.000 --> 28:02.680
+the training data or a change in the outcome of the randomness that was sampled.
+
+28:02.680 --> 28:03.680
+Right.
+
+28:03.680 --> 28:10.680
+And so I'm, I guess I'm asking more is maybe like a hair splitting or semantic kind of
+
+28:10.680 --> 28:17.160
+question, but I'm really asking it as a path to truly understand what's happening here.
+
+28:17.160 --> 28:23.240
+And the, you know, the goal is, you could argue that the goal is privacy as opposed to differential
+
+28:23.240 --> 28:24.240
+privacy.
+
+28:24.240 --> 28:25.240
+Right.
+
+28:25.240 --> 28:29.960
+Differential privacy provides a guarantee of privacy, but what I ultimately want is privacy.
+
+28:29.960 --> 28:35.720
+And what I'm trying to get at is if we didn't do steps two and three, it strikes me that
+
+28:35.720 --> 28:40.440
+there's an argument that we've already, you know, created some degree of privacy just
+
+28:40.440 --> 28:49.920
+by doing the partitioning of the data and this kind of ensemble consensus approach.
+
+28:49.920 --> 28:55.440
+And I'm wondering if that is in fact the case or, you know, is it perhaps the case that
+
+28:55.440 --> 29:00.360
+no, not really we haven't even achieved any measure of privacy with doing that or it's
+
+29:00.360 --> 29:01.360
+very little.
+
+29:01.360 --> 29:05.280
+Is there anything that you can say about the degree of privacy that we've achieved
+
+29:05.280 --> 29:11.440
+just in that first step as opposed to, you know, the differential privacy specific pieces
+
+29:11.440 --> 29:13.840
+that the second and third steps add?
+
+29:13.840 --> 29:14.840
+Yeah.
+
+29:14.840 --> 29:15.840
+For sure.
+
+29:15.840 --> 29:23.840
+I mean, you're basically coming at one of the design goals of this approach is that we
+
+29:23.840 --> 29:30.080
+want to be able to provide an intuitive notion of privacy in addition to providing this rigorous
+
+29:30.080 --> 29:38.480
+definition of differential privacy. And so you are right that if we only perform the
+
+29:38.480 --> 29:45.360
+unsombling and output in the aggregate answer of this ensemble, that would provide some
+
+29:45.360 --> 29:53.720
+notion of privacy that is not differential privacy, but you could perceive it as a form
+
+29:53.720 --> 29:54.720
+of privacy.
+
+29:54.720 --> 30:00.520
+And that really drives at the fact that privacy is an extremely subjective notion.
+
+30:00.520 --> 30:06.280
+And so different people will have different expectations in terms of privacy, but it
+
+30:06.280 --> 30:11.560
+is true that the approach, even if you don't add noise or train the student, provides you
+
+30:11.560 --> 30:14.880
+with this intuitive definition of privacy.
+
+30:14.880 --> 30:22.200
+However, I want to be careful with that because I would say that our intuition when we design
+
+30:22.200 --> 30:30.600
+algorithms to provide privacy is very, very often wrong and it's hard to capture all
+
+30:30.600 --> 30:35.440
+of the ways which could result in a privacy leakage.
+
+30:35.440 --> 30:42.720
+Is there an example that comes to mind of how the ensemble approach alone doesn't create
+
+30:42.720 --> 30:44.680
+the kind of privacy that we want?
+
+30:44.680 --> 30:51.480
+Yeah, I'll give you an example of the ensemble and then with a completely different application.
+
+30:51.480 --> 30:52.480
+Okay.
+
+30:52.480 --> 31:02.520
+With the ensemble, let's assume that you're sending a query to the ensemble and exactly
+
+31:02.520 --> 31:11.720
+half of the teachers assign the label cat and half of the teachers assign the label dog.
+
+31:11.720 --> 31:22.200
+If you then change the training data of one of the teachers which the adversary could do
+
+31:22.200 --> 31:29.160
+and you run the same algorithm, so you train the teachers and answer the same prediction,
+
+31:29.160 --> 31:35.000
+then because you change the training data of one of the teachers, in the worst case, you
+
+31:35.000 --> 31:41.240
+should assume that that teacher will change its prediction.
+
+31:41.240 --> 31:49.000
+In cases where you have exactly the same number of votes for two classes, changing the predictions
+
+31:49.000 --> 31:55.280
+of one teacher might change the outcome of the aggregation because it might make one class
+
+31:55.280 --> 32:03.280
+more likely than the other or just invert the order of the classes.
+
+32:03.280 --> 32:09.840
+If you don't have this noise, the prediction of the ensemble can depend on the predictions
+
+32:09.840 --> 32:19.840
+of a single teacher and so you don't have this consensus part where you have this large
+
+32:19.840 --> 32:25.920
+overwhelming consensus among the different models which provide you this intuitive notion
+
+32:25.920 --> 32:33.280
+that you're having a very large agreement that reflects the fact that the pattern is general
+
+32:33.280 --> 32:34.840
+across the training data.
+
+32:34.840 --> 32:42.600
+So that's why the noise provides privacy because it makes these scenarios ambiguous and
+
+32:42.600 --> 32:48.000
+prevents the adversary from understanding whether the change in the prediction results from
+
+32:48.000 --> 32:50.960
+the change in the training data or from the noise.
+
+32:50.960 --> 32:57.680
+Another example to sort of motivate differential privacy is that there are lots of ways that
+
+32:57.680 --> 33:05.440
+you can achieve intuitive notions of privacy and one very common way is to anonymize the
+
+33:05.440 --> 33:06.440
+data.
+
+33:06.440 --> 33:13.880
+So to remove any part of the data that could be used to infer the identity of the people
+
+33:13.880 --> 33:17.160
+who contributed this data.
+
+33:17.160 --> 33:19.520
+And this has happened in the past.
+
+33:19.520 --> 33:27.720
+So there was a data set which was released by Netflix where they had anonymized the data
+
+33:27.720 --> 33:35.880
+which was essentially ratings for movies and ratings from a large pool of users.
+
+33:35.880 --> 33:43.040
+And so they removed all of what they thought would be something useful to infer the identity
+
+33:43.040 --> 33:47.760
+of the persons who assigned these ratings.
+
+33:47.760 --> 33:53.920
+But then some researchers found later that if they perform what is called a linkage
+
+33:53.920 --> 34:03.280
+attack so they use a second database which in this case was the IMDB database to sort
+
+34:03.280 --> 34:11.800
+of cross the records from the Netflix database with records from the IMDB database because
+
+34:11.800 --> 34:21.320
+the ratings were unique enough in both databases they were able to link the records from the
+
+34:21.320 --> 34:26.560
+Netflix database to the records from the IMDB database which is public.
+
+34:26.560 --> 34:32.840
+And so they were able to recover the identity of a lot of users in the Netflix database
+
+34:32.840 --> 34:35.800
+which was supposed to be anonymous.
+
+34:35.800 --> 34:43.640
+And so that's just an example of why providing these notions of privacy that are intuitive
+
+34:43.640 --> 34:50.440
+is a good start but it's not enough to claim success.
+
+34:50.440 --> 34:55.840
+And I'm not saying that we should not be anonymizing the data, it is a good practice to
+
+34:55.840 --> 35:04.000
+anonymize the data but we shouldn't rely on it as the ultimate way to provide privacy.
+
+35:04.000 --> 35:10.520
+And so what is nice again about different privacy is that the definition is robust to
+
+35:10.520 --> 35:16.720
+all these attacks that use auxiliary information like what's the case with the IMDB database
+
+35:16.720 --> 35:21.680
+anonymization did not take into account that the adversary would have access to this public
+
+35:21.680 --> 35:25.400
+information which helps mount the attack.
+
+35:25.400 --> 35:30.800
+And so with different privacy you don't have this problem so the adversary can have all
+
+35:30.800 --> 35:37.640
+this knowledge, it's not going to impact the strength of your guarantee.
+
+35:37.640 --> 35:42.880
+And so it makes it, it makes it, the definition is constraining in the sense that the analysis
+
+35:42.880 --> 35:47.880
+that you have to perform is extremely worst case, it's very constraining.
+
+35:47.880 --> 35:55.920
+But once you've managed to provide differential privacy you're really providing a guarantee
+
+35:55.920 --> 36:02.200
+that is robust in the face of a lot of future attacks that people may come up with.
+
+36:02.200 --> 36:08.520
+Can you elaborate on how differential privacy specifically applies in the case of this
+
+36:08.520 --> 36:10.880
+Netflix example you gave?
+
+36:10.880 --> 36:20.960
+In particular the differential privacy we've talked about thus far has to deal with a model
+
+36:20.960 --> 36:30.120
+that I've created on some training data set and the kind of result or product of this
+
+36:30.120 --> 36:37.120
+differential privacy process is a you know call it a privacy robust model.
+
+36:37.120 --> 36:45.880
+In the case of the Netflix example you described what Netflix provided that you know potentially
+
+36:45.880 --> 36:54.680
+got them in the trouble was this data set even though it was somewhat randomized.
+
+36:54.680 --> 36:59.280
+Is there a way that how does differential privacy play here could differential privacy
+
+36:59.280 --> 37:08.440
+have been used to create a better anonymized data set for them to share or is differential
+
+37:08.440 --> 37:13.920
+privacy not applicable if you need to actually share your training data?
+
+37:13.920 --> 37:20.240
+That's a very good question so as I mentioned before there are really three places where
+
+37:20.240 --> 37:27.560
+you can think of providing the privacy it's at the input of the algorithm and at the output
+
+37:27.560 --> 37:28.720
+of the algorithm.
+
+37:28.720 --> 37:37.040
+So there's several techniques to provide differential privacy at the input one of the techniques
+
+37:37.040 --> 37:46.720
+that is easiest to get an intuition for is called local differential privacy where the
+
+37:46.720 --> 37:53.480
+idea is that you're going to perturb the data itself and so one easy example to think
+
+37:53.480 --> 38:01.440
+about it is let's assume you're collecting data from a pool of users and so you're going
+
+38:01.440 --> 38:10.800
+to ask each of these users to flip a coin and depending on the outcome of that coin flip
+
+38:10.800 --> 38:19.640
+they will do if it's head state they will respond with the true answer to your question
+
+38:19.640 --> 38:25.320
+and if it's tails they'll respond with a completely random answer and so if you do this
+
+38:25.320 --> 38:33.720
+across a very large pool of users because you know with what probability people will respond
+
+38:33.720 --> 38:40.840
+with the random answer or with the correct answer you can still collect data that will
+
+38:40.840 --> 38:49.680
+be useful for you to extract statistics or to perform analysis on but each user that
+
+38:49.680 --> 38:57.560
+participated in this process can still have what is called plausible deniability that
+
+38:57.560 --> 39:02.800
+they did not provide the correct answer so if you ask any particular user they could
+
+39:02.800 --> 39:09.120
+just tell you I responded the random answer and you have no way to verify that because
+
+39:09.120 --> 39:16.960
+you don't have access to the coin flip that outcome that they had and so that's a particular
+
+39:16.960 --> 39:28.080
+way where you can collect data from users and achieve differential privacy without training
+
+39:28.080 --> 39:35.920
+the model on top of that data first meaning so netflix and providing this data set in addition
+
+39:35.920 --> 39:48.480
+to eliminating any personally identifiable information they could have also randomized some
+
+39:48.480 --> 39:55.520
+number of the labels on the data set and it sounds like doing so in such a way that
+
+39:55.520 --> 40:04.880
+didn't inherently change the statistics of the data set right and yeah so for instance
+
+40:04.880 --> 40:10.080
+the yeah they could have for each rating flip the coin and depending on that output the
+
+40:10.080 --> 40:18.000
+real rating or a random rating for just as an example and if I'm building a model using
+
+40:18.000 --> 40:24.240
+this data and I and I know that this is the case or I suspect that this is the case can
+
+40:24.240 --> 40:30.400
+I can I take advantage of that what do you mean by taking advantage of that meaning if
+
+40:30.400 --> 40:38.080
+I'm you know if I if you know this is the netflix prize and you know their netflix has published
+
+40:38.080 --> 40:43.760
+this data set and I suspect that they've done this or they've told me that they've done this
+
+40:44.480 --> 40:50.960
+can I use that knowledge to increase the chance that I'll you know win the prize but you know
+
+40:50.960 --> 40:58.560
+make my model better performing I don't think that would the having knowledge about the fact that
+
+40:58.560 --> 41:04.640
+they they collected the data in a privacy preserving way would provide you in any advantage in
+
+41:04.640 --> 41:11.280
+the competition but what what it does point on is it's a very nice property of differential privacy
+
+41:11.280 --> 41:16.800
+is that once you've achieved differential privacy and you release statistics that are
+
+41:17.440 --> 41:22.800
+resulting from this differentially private process any post processing of the data
+
+41:24.240 --> 41:28.320
+maintains the differential privacy so once you've achieved differential privacy you can
+
+41:28.320 --> 41:35.040
+analyze the data as as much as you want you can train another model on the data and the the
+
+41:35.040 --> 41:42.160
+guarantees is is still provided so it holds in the face of post processing which is
+
+41:43.360 --> 41:50.720
+another very very nice property of this definition okay and so then just to to take a step back and
+
+41:50.720 --> 42:00.320
+and be clear the this this coin flip and substituting random data is that in and of itself enough to
+
+42:00.320 --> 42:09.520
+give me a differential privacy guarantee for this data set yes so it's called local differential
+
+42:09.520 --> 42:17.680
+privacy there are some variants of event to to improve the utility of the process but yes it
+
+42:17.680 --> 42:23.280
+and in short and at a very high level that that is the idea that is sufficient to provide differential
+
+42:23.280 --> 42:32.800
+privacy ah great great okay awesome and so then the the third phase of the pate model that we
+
+42:32.800 --> 42:41.120
+talked about was training the student and the idea with the with training the student model
+
+42:41.120 --> 42:54.000
+was that it the student basically is trained on this aggregate or ensemble parent model and the
+
+42:54.000 --> 43:04.000
+ideas that it provide using the student provides you with a further a set of guarantees because the
+
+43:04.000 --> 43:12.240
+student never had any access to the underlying training data is that the right way to think about
+
+43:12.240 --> 43:19.040
+it or is there I feel like I may be missing a nuance here yeah it is mostly the right way to
+
+43:19.040 --> 43:25.440
+think about it there are two components so the one that you mentioned that it did not have access
+
+43:25.440 --> 43:36.720
+to the underlying data provides robustness to to adversaries who attempt to to inspect the
+
+43:36.720 --> 43:43.200
+parameters of the model the nice thing about training the student is is mostly that it fixes the
+
+43:43.200 --> 43:50.720
+number of questions the number of predictions that the teachers will answer so if you could in
+
+43:50.720 --> 44:00.880
+practice if you were able to guarantee that no one will be able to inspect the the teachers
+
+44:02.320 --> 44:07.840
+parameters or to to extract the teacher models you could use the the ensemble of teachers as
+
+44:07.840 --> 44:14.080
+sort of a differentially private API which would respond to user queries and it would each query
+
+44:14.080 --> 44:20.400
+would be provided with a certain privacy guarantee but again over time as you answer more and more
+
+44:20.400 --> 44:30.000
+and more queries you would accumulate a privacy budget that would become unreasonable and eventually
+
+44:30.000 --> 44:36.160
+you would not be able to provide a meaningful guarantee with respect to your training data and
+
+44:36.160 --> 44:44.560
+again if as as adversaries and we're seeing this more and more were attacks are able to extract
+
+44:44.560 --> 44:53.600
+some of the training data or some of the parameters of the model by only having access to its
+
+44:53.600 --> 44:59.440
+predictions so if that is also possible then we have to be worried that the adversary would be
+
+44:59.440 --> 45:04.080
+able to recover some information about the training data that the teachers had access to and that's
+
+45:04.080 --> 45:09.360
+why training the student is very nice because the student only has access to this
+
+45:09.360 --> 45:21.040
+limited set of labels from the teachers we're able to to guarantee first that the overall
+
+45:21.040 --> 45:27.520
+budget that we spent in terms of differential privacy is fixed so once we've trained the student
+
+45:28.080 --> 45:34.240
+we don't access the teachers anymore so we don't perform any computation that depends on
+
+45:34.240 --> 45:41.920
+the sensitive data and and again because the student was only trained on this this private data
+
+45:41.920 --> 45:47.280
+even if the adversary is very strong and able to recover the training data of the student
+
+45:47.920 --> 45:57.200
+that data is is not the sensitive data that we were protecting so so we have this this strong
+
+45:57.200 --> 46:02.720
+guarantee in this case as well okay sounds like a way to think about that is that we use the
+
+46:02.720 --> 46:14.080
+student for the same reason why your computer or your iPhone will start injecting delays if you
+
+46:14.080 --> 46:22.240
+get your password wrong for you know three times it's to prevent someone from using a large number
+
+46:22.240 --> 46:28.560
+or infinite number of brute force attacks to you know attack the model or attack the password
+
+46:28.560 --> 46:35.520
+yeah I guess that's that's that's a way to think about it is that once the adversary has access
+
+46:35.520 --> 46:42.480
+to to the system and is able to make lots and lots of queries to it so like in your example
+
+46:42.480 --> 46:49.760
+trying to enter as many passwords to eventually figure out if that is the correct password then yes
+
+46:49.760 --> 46:55.680
+as the as the adversary makes a very large number of queries eventually it is able to
+
+46:55.680 --> 47:01.440
+infer some information about the system and and so that's that's what the student protects
+
+47:01.440 --> 47:09.600
+against because it disconnects the model that is predicting from all of the teachers that were
+
+47:09.600 --> 47:17.920
+that had access to to this to the sensitive training data and and the the reason that it's
+
+47:17.920 --> 47:25.600
+it's not as easy as preventing against someone using your phone to to enter the password and
+
+47:25.600 --> 47:31.040
+eventually figuring out is so in that case you you can introduce this delay and that makes the
+
+47:31.040 --> 47:39.040
+attack much more impractical but often what happens is that machine learning models are exposed
+
+47:39.040 --> 47:48.720
+through an API through online or or or or a local network and so essentially you could envision
+
+47:48.720 --> 47:56.560
+that the adversary would distribute its queries and so that would make it very hard for the owner
+
+47:56.560 --> 48:04.960
+of the model to to know whether a particular sequence of queries is an attack trying to find
+
+48:04.960 --> 48:12.160
+information about the model or if it's just a set of legitimate users who are actually using
+
+48:12.160 --> 48:19.440
+the model as intended and so you have this point where after you hit sweet spot the the utility
+
+48:19.440 --> 48:27.120
+and the privacy of the model will will start degrading and so it's it's hard to give numbers
+
+48:27.120 --> 48:34.800
+like guidelines for dollars it's a really is a question of both the complexity of your models
+
+48:35.440 --> 48:40.960
+which sort of indicates how much data you will need to train them and also the complexity of the
+
+48:40.960 --> 48:46.800
+task how many outputs there is in the task and in our research we've we've sort of
+
+48:47.840 --> 48:56.160
+tried different applications different models with smaller smaller tasks and task with hundreds of
+
+48:56.160 --> 49:04.960
+outputs and the number of teacher will vary in our case between a hundred and five thousand so you
+
+49:04.960 --> 49:10.960
+so it really really depends if you have the data to support more teachers than that makes your
+
+49:10.960 --> 49:19.440
+life easier but but again the the nice thing is that you're able to use any machine learning
+
+49:19.440 --> 49:27.760
+model so once you have a model that works without privacy if you have a lot of data then you can
+
+49:27.760 --> 49:34.640
+sort of apply this framework quite easily by partitioning the data and just training your model
+
+49:35.200 --> 49:42.160
+several times on these on these different datasets so that's that's the nice advantage
+
+49:42.160 --> 49:51.120
+about the approach okay and I don't recall off the top of my head in the case of you know let's
+
+49:51.120 --> 49:59.440
+say the case of deep learning you know I don't recall what the you know if training time is
+
+50:00.560 --> 50:08.160
+you know linear in the you know linear sublinear super linear in the number of training examples
+
+50:08.160 --> 50:17.840
+but I'm wondering if there if you've done any work to look at like theoretical bounds on the
+
+50:17.840 --> 50:29.920
+relative training time using a partitioned model versus a model trained on the entire data set
+
+50:29.920 --> 50:35.440
+I'm sure other people have done this looking at it from you know just the scalability perspective
+
+50:35.440 --> 50:42.480
+but it seems like if there's some advantage there just from a scale perspective and now you're
+
+50:42.480 --> 50:52.240
+overlaying the privacy piece that's kind of further supports doing this yeah no that's that's
+
+50:52.240 --> 50:58.320
+very good point so and we haven't looked at the theoretical aspects of this of this trade off
+
+50:58.320 --> 51:06.000
+but in practice what we found is obviously if you have the resources you the approaches by
+
+51:06.000 --> 51:12.320
+by definition very parallelizable so you you can train all of the teachers simultaneously
+
+51:13.680 --> 51:22.000
+and so you if the resources are there you don't see an overhead on in terms of training time
+
+51:22.000 --> 51:27.600
+compared to just training one model one thing is even if you have limited resources because each
+
+51:27.600 --> 51:39.840
+model gets less data to train from it also it also trains faster in general and so the I would say
+
+51:39.840 --> 51:50.240
+the computational overhead is not a main limitation it just it's it's kind of like the rest of
+
+51:50.240 --> 51:58.720
+deep learning if you have lots of resources that makes your life easier but but in that case
+
+51:58.720 --> 52:04.800
+because you're able to sort of prototype your model without privacy and then once you're ready to
+
+52:04.800 --> 52:11.440
+once your model is properly fine-tuned then you you have all the right number of players right
+
+52:11.440 --> 52:17.280
+I prepared matters you can sort of apply the pate approach you you know what what architecture
+
+52:17.280 --> 52:23.280
+you're going to go for and so you just parallelize the training overall all of the subsets of data
+
+52:23.280 --> 52:30.080
+and so that's relatively straightforward is the implication of what you just said that in practice
+
+52:30.720 --> 52:39.280
+you're going to want to design your model by training against the entire data set as you usually
+
+52:39.280 --> 52:47.360
+would and then apply differential privacy as a kind of a step further towards production as opposed
+
+52:47.360 --> 52:55.440
+to designing you know from the beginning with differential privacy in mind and a you know such
+
+52:55.440 --> 53:03.680
+that you may never train against all of your data but always do this approach yeah so it really
+
+53:03.680 --> 53:11.920
+depends what data you're handling and how sensitive it is I'm I'm sure that in some cases it's
+
+53:11.920 --> 53:17.840
+just not possible to to train maybe for illegal reasons on the whole entire data set if you're
+
+53:17.840 --> 53:24.160
+not involved to provide privacy but what I wanted to basically to say is that if you have
+
+53:25.440 --> 53:30.640
+about the same amount of data that you would use in a partition then you can prototype your
+
+53:30.640 --> 53:37.520
+model and then replicate it over the other partitions and so that that is a very easy and practical
+
+53:37.520 --> 53:44.960
+way to to limit the overhead of implementing the privacy because you only implement privacy once
+
+53:44.960 --> 53:51.360
+you have the model that you're confident with that is a good fit for this this particular task
+
+53:52.160 --> 53:58.160
+yeah can you say that again I don't think I followed it sure so so let so let's say you're going to
+
+53:58.160 --> 54:11.280
+train on 50,000 inputs and basically once you have you you can prototype your model on a subset
+
+54:11.280 --> 54:19.360
+of the data and once you have a good model then at this point only you you have to replicate it
+
+54:19.360 --> 54:27.360
+over the different subsets of data to to train the unsolvable and then achieve the privacy but
+
+54:27.360 --> 54:33.920
+you can sort of do the prototyping for a single teacher before you train the entire ensemble I guess
+
+54:33.920 --> 54:43.360
+that that was my point okay and so the then the the data sets that you train the teachers on they
+
+54:43.360 --> 54:50.480
+don't need to be it sounds like strict partitions of your data they can be overlapping no they
+
+54:50.480 --> 54:57.840
+they have to be non overlapping okay if if they are overlapping then this changes the way that you
+
+54:57.840 --> 55:06.080
+analyze the privacy guarantees because essentially when they are non overlapping changing one point
+
+55:06.080 --> 55:13.760
+of the training data has an impact on multiple teachers right right so if you have overlaps then
+
+55:13.760 --> 55:19.360
+you have to if there is for instance a point in three partitions changing that point would change
+
+55:19.360 --> 55:24.720
+three teachers in the worst case right and so you have to take that into account in the privacy
+
+55:24.720 --> 55:34.240
+analysis so in our case we always considered non overlapping partitions and if if you wanted to
+
+55:34.240 --> 55:41.680
+use our approach and the the guarantees that come with it out of the box you would have to to
+
+55:41.680 --> 55:46.880
+use non overlapping partitions you could adapt the privacy analysis to take into account the fact
+
+55:46.880 --> 55:54.880
+that the partitions are overlapping but that would probably require more work than the benefit
+
+55:54.880 --> 56:01.680
+that you would you get from having overlapping partitions okay okay I thought that what you
+
+56:01.680 --> 56:07.920
+were saying previously implied duplicating the data that the teacher sees or overlapping in some
+
+56:07.920 --> 56:16.720
+way oh no but I guess I may have said something ambiguous what I meant is that you you you can
+
+56:16.720 --> 56:24.160
+perform sort of the parameters search of your model for only one of the teachers and then apply
+
+56:24.160 --> 56:32.320
+that search to all of the other models in the ensemble which which reduces the amount of time
+
+56:33.200 --> 56:39.040
+that you have to spend training the training the models because so in other words instead of
+
+56:39.040 --> 56:47.040
+training the 500 teachers you train one teacher and use the parameters for all 500 teachers so you
+
+56:47.040 --> 56:52.480
+use the hyper parameters like the hyper parameters right the number of layers so once you found
+
+56:53.040 --> 56:58.720
+an architecture that works well for this particular data got okay sorry about that
+
+57:00.240 --> 57:05.360
+no that's that's fine it's it's very subtle because even you you have to take into account that
+
+57:05.360 --> 57:11.360
+although every time you use the the data that is sensitive you have to take that into account
+
+57:11.360 --> 57:19.120
+if you want to provide the the guarantee of privacy of the overall approach so it can be it can be
+
+57:19.120 --> 57:26.720
+very tricky okay any parting words or thoughts on what's next for you in this line of research
+
+57:26.720 --> 57:37.680
+sure so I I'm extremely excited about this synergy between privacy and and utility again I think
+
+57:37.680 --> 57:50.160
+that's that's really a deal breaker and in terms of the next steps I think the the most compelling
+
+57:50.160 --> 57:58.880
+would be to to apply these techniques to to datasets that that I've traditionally been very hard
+
+57:58.880 --> 58:06.560
+to tackle with with privacy preserving techniques or to get good performance at to sort of show the
+
+58:06.560 --> 58:13.760
+implications of these techniques to real world applications and there is also one thing that
+
+58:13.760 --> 58:18.880
+I'm interested in before we go there what are some examples of those datasets that are
+
+58:18.880 --> 58:24.560
+traditionally difficult I mean there there's a lot of progress being made in healthcare for
+
+58:24.560 --> 58:31.840
+instance and obviously these approaches to provide different for privacy are are a good way to
+
+58:31.840 --> 58:41.840
+address some of the concerns that users contributing these datasets may have there are many many
+
+58:41.840 --> 58:54.240
+many examples even in in applications related to justice or anywhere where the data is sensitive
+
+58:54.240 --> 59:02.880
+and we're at the same time making progress with applying neural networks or other more complicated
+
+59:02.880 --> 59:12.560
+machine learning because differential privacy used to used to be limited to to more to more simple
+
+59:12.560 --> 59:17.920
+machine learning techniques like logistic regression and and so now that we are able to provide
+
+59:17.920 --> 59:24.400
+differential privacy with things like that deep neural networks that it's very exciting because
+
+59:24.400 --> 59:31.680
+that means we can look at tasks that are much more complicated to solve and that that means in
+
+59:31.680 --> 59:40.960
+term in turn that will have a very beneficial impact on on society at large. Great. Well,
+
+59:40.960 --> 59:46.560
+Nikola thank you so much for taking the time to walk us through this it is really interesting
+
+59:46.560 --> 59:53.200
+and important work and I'm looking forward to kind of tracking it as as you and others in the
+
+59:53.200 --> 01:00:00.000
+space progress it. Yes thanks thanks a lot Sam for for having me I really enjoyed our conversation
+
+01:00:00.000 --> 01:00:10.800
+around privacy. All right everyone that's our show for today for more information on Nikola or any
+
+01:00:10.800 --> 01:00:19.120
+of the topics covered in this episode head on over to twimmalei.com slash talk slash 134 thanks
+
+01:00:19.120 --> 01:00:24.240
+again to our friends at Georgian partners for sponsoring this series and be sure to visit their
+
+01:00:24.240 --> 01:00:32.480
+differential privacy resource center at gptrs.vc slash twimmalei for more information on the field
+
+01:00:32.480 --> 01:01:02.400
+and what they're up to. Thanks so much for listening and catch you next time.
+
