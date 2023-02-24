@@ -2,7 +2,7 @@
 
 I wanted to see how good (or not) Whisper is both in terms of AIQ, and easy of use. Whisper is OpenAI's newly released ASR implementation which is open-sourced. :v:	
 
-I decided to use Sam's [TiwML Podcast](https://twimlai.com/podcast/twimlai/) as the test bed. :ok_hand:
+I decided to use Sam's [TWIML AI Podcast](https://twimlai.com/podcast/twimlai/) as the test bed. :ok_hand:
 
 There are a few steps to get this going:
 
