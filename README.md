@@ -2,7 +2,7 @@
 
 I wanted to see how good (or not) Whisper is both in terms of AIQ, and easy of use. Whisper is OpenAI's newly released ASR implementation which is open-sourced. :v:	
 
-I decided to use Sam's [TiwML Podcast](https://twimlai.com/podcast/twimlai/) as the test bed. :ok_hand:
+I decided to use Sam's [TWIML AI Podcast](https://twimlai.com/podcast/twimlai/) as the test bed. :ok_hand:
 
 There are a few steps to get this going:
 
@@ -19,7 +19,7 @@ There are a few steps to get this going:
 
 If you just want the transcribed files, at the time of writing this there were 525 published episodes that I have all transcribed. These were done using the base model form Whisper and can be found in the :file_folder:	twiml-episodes-whisper-transcribed.
 
-- You can download all of the files as one zip file too -- :card_file_box: twiml-episodes-transcribed.zip
+- You can download all of the files as one zip file too -- :card_file_box: twiml-episodes-whispered-transcribed.zip
 
 ## Dependencies
 
