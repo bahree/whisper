@@ -28,4 +28,4 @@ There are a few things that are needed to get whisper deployed and running local
 
 ## How to run this
 
-:writing_hand: TODO: Code already checked-in; need to outline details here.
+:writing_hand: Code already checked-in and hopefully a lot of it is self-explanatory; but if you need details - check out the blog: https://blog.desigeek.com/post/2023/02/openai-whisper-overview/
